@@ -1,0 +1,12 @@
+logging:
+  level: INFO
+  loggers:
+    gov.cms.dpc: DEBUG
+
+server:
+  applicationConnectors:
+    - type: http
+      port: 3002
+  adminConnectors:
+    - type: http
+      port: 9900
