@@ -9,10 +9,10 @@ import javax.ws.rs.core.Response;
 
 @Path("/")
 @Produces(MediaType.TEXT_PLAIN)
-public class BaseResource {
+public class TestResource {
 
     @Inject
-    public BaseResource() {
+    public TestResource() {
         // Not used
     }
 

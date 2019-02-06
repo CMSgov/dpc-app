@@ -51,6 +51,12 @@
             <artifactId>dropwizard-guicier</artifactId>
             <version>1.3.5.1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-structures-r4 -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+            <version>3.6.0</version>
+        </dependency>
     </dependencies>
 
     <build>
