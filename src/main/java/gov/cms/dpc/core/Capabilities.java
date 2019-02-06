@@ -1,11 +1,11 @@
 package gov.cms.dpc.core;
 
-import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Capabilities {
 
@@ -16,11 +16,6 @@ public class Capabilities {
     public static CapabilityStatement buildCapabilities() {
         DateTimeType releaseDate = DateTimeType.now();
 
-        CapabilityStatement.CapabilityStatementSoftwareComponent softwareElement = new CapabilityStatement.CapabilityStatementSoftwareComponent()
-                .setName("Data @ Point of Care API")
-                .setVersion("0.0.1")
-                .setReleaseDateElement(releaseDate);
-
         CapabilityStatement capabilityStatement = new CapabilityStatement();
 
         capabilityStatement
@@ -28,9 +23,33 @@ public class Capabilities {
                 .setDateElement(releaseDate)
                 .setPublisher("Centers for Medicare and Medicaid Services")
                 .setFhirVersion("4.0.0")
-                .setSoftware(softwareElement)
+                .setSoftware(generateSoftwareComponent(releaseDate))
+                .setKind(CapabilityStatement.CapabilityStatementKind.CAPABILITY)
+                .setRest(generateRest())
                 .setFormat(Arrays.asList(new CodeType("application/json"), new CodeType("application/fhir+json")));
 
+        // Set the narrative
+        capabilityStatement.getText().setDivAsString("<div>This is a narrative</div>");
+        capabilityStatement.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+
+
         return capabilityStatement;
+    }
+
+    private static CapabilityStatement.CapabilityStatementSoftwareComponent generateSoftwareComponent(DateTimeType releaseDate) {
+        return new CapabilityStatement.CapabilityStatementSoftwareComponent()
+                .setName("Data @ Point of Care API")
+                .setVersion("0.0.1")
+                .setReleaseDateElement(releaseDate);
+    }
+
+    private static List<CapabilityStatement.CapabilityStatementRestComponent> generateRest() {
+        final CapabilityStatement.CapabilityStatementRestComponent restComponent = new CapabilityStatement.CapabilityStatementRestComponent();
+        restComponent.setMode(CapabilityStatement.RestfulCapabilityMode.SERVER);
+
+        // Create batch interaction
+        final CapabilityStatement.SystemInteractionComponent batchInteraction = new CapabilityStatement.SystemInteractionComponent(new Enumeration<>(new CapabilityStatement.SystemRestfulInteractionEnumFactory(), CapabilityStatement.SystemRestfulInteraction.BATCH));
+        restComponent.setInteraction(Collections.singletonList(batchInteraction));
+        return Collections.singletonList(restComponent);
     }
 }

@@ -64,6 +64,26 @@
             <artifactId>hapi-fhir-structures-r4</artifactId>
             <version>${hapi.fhir.version}</version>
         </dependency>
+        <!--Schema validation resources-->
+        <!-- https://mvnrepository.com/artifact/com.helger/ph-schematron -->
+        <dependency>
+            <groupId>com.helger</groupId>
+            <artifactId>ph-schematron</artifactId>
+            <version>5.0.8</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-validation-resources-r4 -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+            <version>${hapi.fhir.version}/version>
+        </dependency>
+        <!--Test resources-->
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
