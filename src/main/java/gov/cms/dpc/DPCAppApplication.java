@@ -1,5 +1,6 @@
 package gov.cms.dpc;
 
+import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
@@ -23,6 +24,7 @@ public class DPCAppApplication extends Application<DPCAppConfiguration> {
                 .build();
 
         bootstrap.addBundle(guiceBundle);
+        bootstrap.addBundle(new TypesafeConfigurationBundle());
     }
 
     @Override

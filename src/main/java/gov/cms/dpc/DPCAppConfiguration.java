@@ -1,10 +1,7 @@
 package gov.cms.dpc;
 
-import io.dropwizard.Configuration;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.*;
-import javax.validation.constraints.*;
+import ca.mestevens.java.configuration.TypesafeConfiguration;
 
-public class DPCAppConfiguration extends Configuration {
+public class DPCAppConfiguration extends TypesafeConfiguration {
     // TODO: implement service configuration
 }
