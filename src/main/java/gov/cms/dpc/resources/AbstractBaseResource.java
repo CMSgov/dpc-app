@@ -1,17 +1,14 @@
 package gov.cms.dpc.resources;
 
-import gov.cms.dpc.resources.v1.GroupResource;
-
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 @Produces("application/fhir+json")
-public abstract class AbstractApplicationRoutes {
+public abstract class AbstractBaseResource {
 
-    public AbstractApplicationRoutes() {
+    public AbstractBaseResource() {
 //        Not used
     }
 
@@ -21,8 +18,8 @@ public abstract class AbstractApplicationRoutes {
      * @return - {@link String} version number
      */
     @Path("/version")
-    @GET
     @Produces(MediaType.TEXT_PLAIN)
+    @GET
     public abstract String version();
 
     /**
@@ -35,7 +32,5 @@ public abstract class AbstractApplicationRoutes {
     public abstract String metadata();
 
     @Path("/Group")
-    public abstract GroupResource groupOperations();
-
-
+    public abstract AbstractGroupResource groupOperations();
 }

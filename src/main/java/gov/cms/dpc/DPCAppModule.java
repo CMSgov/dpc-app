@@ -6,7 +6,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.resources.TestResource;
-import gov.cms.dpc.resources.V1BaseResource;
+import gov.cms.dpc.resources.v1.BaseResource;
 import gov.cms.dpc.resources.v1.GroupResource;
 
 public class DPCAppModule extends DropwizardAwareModule<DPCAppConfiguration> {
@@ -21,7 +21,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPCAppConfiguration> {
     public void configure(Binder binder) {
         binder.bind(TestResource.class);
         // V1 Resources
-        binder.bind(V1BaseResource.class);
+        binder.bind(BaseResource.class);
         binder.bind(GroupResource.class);
 
     }
