@@ -1,9 +1,9 @@
-package gov.cms.dpc.resources.v1;
+package gov.cms.dpc.web.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
-import gov.cms.dpc.core.Capabilities;
-import gov.cms.dpc.resources.AbstractBaseResource;
-import gov.cms.dpc.resources.AbstractGroupResource;
+import gov.cms.dpc.web.core.Capabilities;
+import gov.cms.dpc.web.resources.AbstractBaseResource;
+import gov.cms.dpc.web.resources.AbstractGroupResource;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;

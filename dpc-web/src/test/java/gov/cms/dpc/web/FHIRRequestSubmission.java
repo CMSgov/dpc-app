@@ -1,8 +1,8 @@
-package gov.cms.dpc;
+package gov.cms.dpc.web;
 
 import ca.uhn.fhir.parser.IParser;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
-import gov.cms.dpc.resources.v1.GroupResource;
+import gov.cms.dpc.web.resources.v1.GroupResource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;

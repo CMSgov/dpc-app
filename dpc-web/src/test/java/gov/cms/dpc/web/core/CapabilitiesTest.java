@@ -1,4 +1,4 @@
-package gov.cms.dpc.core;
+package gov.cms.dpc.web.core;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;

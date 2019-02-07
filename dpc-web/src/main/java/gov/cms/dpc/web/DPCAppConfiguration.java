@@ -1,4 +1,4 @@
-package gov.cms.dpc;
+package gov.cms.dpc.web;
 
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 

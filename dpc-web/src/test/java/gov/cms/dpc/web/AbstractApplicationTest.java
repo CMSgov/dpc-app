@@ -1,6 +1,8 @@
-package gov.cms.dpc;
+package gov.cms.dpc.web;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.web.DPCAppApplication;
+import gov.cms.dpc.web.DPCAppConfiguration;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
