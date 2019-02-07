@@ -30,7 +30,7 @@ public class DPCAppApplication extends Application<DPCAppConfiguration> {
     @Override
     public void run(final DPCAppConfiguration configuration,
                     final Environment environment) {
+        configuration.getTestValue();
         // TODO: implement application
     }
-
 }
