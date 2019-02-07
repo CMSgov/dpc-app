@@ -1,7 +1,7 @@
-package gov.cms.dpc.resources.v1;
+package gov.cms.dpc.web.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
-import gov.cms.dpc.resources.AbstractGroupResource;
+import gov.cms.dpc.web.resources.AbstractGroupResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

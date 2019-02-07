@@ -1,13 +1,13 @@
-package gov.cms.dpc;
+package gov.cms.dpc.web;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
-import gov.cms.dpc.resources.TestResource;
-import gov.cms.dpc.resources.v1.BaseResource;
-import gov.cms.dpc.resources.v1.GroupResource;
+import gov.cms.dpc.web.resources.TestResource;
+import gov.cms.dpc.web.resources.v1.BaseResource;
+import gov.cms.dpc.web.resources.v1.GroupResource;
 
 public class DPCAppModule extends DropwizardAwareModule<DPCAppConfiguration> {
 

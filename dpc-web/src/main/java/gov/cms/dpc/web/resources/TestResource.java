@@ -1,4 +1,4 @@
-package gov.cms.dpc.resources;
+package gov.cms.dpc.web.resources;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;

@@ -1,4 +1,4 @@
-package gov.cms.dpc.core;
+package gov.cms.dpc.web.core;
 
 import org.hl7.fhir.r4.model.*;
 
