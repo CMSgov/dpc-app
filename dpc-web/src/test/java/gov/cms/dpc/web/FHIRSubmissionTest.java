@@ -22,7 +22,7 @@ import static org.mockito.Mockito.reset;
  * Verifies the a user can successfully submit a request to the Group endpoint
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class FHIRRequestSubmission {
+public class FHIRSubmissionTest {
     private static final IParser parser = mock(IParser.class);
     private ResourceExtension resource = ResourceExtension.builder().addResource(new GroupResource(parser)).build();
 

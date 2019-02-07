@@ -76,7 +76,7 @@
             <groupId>com.helger</groupId>
             <artifactId>ph-schematron</artifactId>
             <version>5.0.8</version>
-            <scope>testing</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
