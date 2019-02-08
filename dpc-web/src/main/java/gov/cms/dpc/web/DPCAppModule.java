@@ -9,7 +9,7 @@ import gov.cms.dpc.web.resources.TestResource;
 import gov.cms.dpc.web.resources.v1.BaseResource;
 import gov.cms.dpc.web.resources.v1.GroupResource;
 
-public class DPCAppModule extends DropwizardAwareModule<DPCAppConfiguration> {
+public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
 
     private final FhirContext context;
 
