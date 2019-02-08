@@ -2,6 +2,7 @@ package gov.cms.dpc.web;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
+import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -20,7 +21,7 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
     @Override
     public void initialize(final Bootstrap<DPWebConfiguration> bootstrap) {
         GuiceBundle<DPWebConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPWebConfiguration.class)
-                .modules(new DPCAppModule())
+                .modules(new DPCAppModule(), new JobQueueModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
@@ -30,7 +31,6 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
     @Override
     public void run(final DPWebConfiguration configuration,
                     final Environment environment) {
-        configuration.getTestValue();
         // TODO: implement application
     }
 }

@@ -8,6 +8,7 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.web.resources.TestResource;
 import gov.cms.dpc.web.resources.v1.BaseResource;
 import gov.cms.dpc.web.resources.v1.GroupResource;
+import gov.cms.dpc.web.resources.v1.JobResource;
 
 public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
 
@@ -23,6 +24,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
         // V1 Resources
         binder.bind(BaseResource.class);
         binder.bind(GroupResource.class);
+        binder.bind(JobResource.class);
 
     }
 

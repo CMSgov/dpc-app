@@ -33,4 +33,7 @@ public abstract class AbstractBaseResource {
 
     @Path("/Group")
     public abstract AbstractGroupResource groupOperations();
+
+    @Path("/jobs")
+    public abstract AbstractJobResource jobOperations();
 }

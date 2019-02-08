@@ -1,6 +1,7 @@
 package gov.cms.dpc.web.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
+import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +19,12 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
     private final IParser parser;
+    private final JobQueue queue;
 
     @Inject
-    public GroupResource(IParser jsonParser) {
-        // Not used
+    public GroupResource(IParser jsonParser, JobQueue queue) {
         this.parser = jsonParser;
+        this.queue = queue;
     }
 
     /**
@@ -38,7 +40,13 @@ public class GroupResource extends AbstractGroupResource {
     @GET // Need this here, since we're using a path param
     public Response export(@PathParam("providerID") String providerID) {
         logger.debug("Exporting data for provider: {}", providerID);
+
+        // Generate a job ID and submit it to the queue
+        final UUID jobID = UUID.randomUUID();
+
+        this.queue.submitJob(jobID);
+
         return Response.status(Response.Status.NO_CONTENT)
-                .contentLocation(URI.create("http://localhost:3002/jobs/" + UUID.randomUUID())).build();
+                .contentLocation(URI.create("http://localhost:3002/v1/Jobs/" + jobID)).build();
     }
 }
