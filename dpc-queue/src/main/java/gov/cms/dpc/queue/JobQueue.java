@@ -15,8 +15,11 @@ public interface JobQueue {
 
     Optional<UUID> workJob();
 
-
     void completeJob(UUID jobID, JobStatus status);
+
+    void removeJob(UUID jobID);
+
+    int queueSize();
 }
 
 
