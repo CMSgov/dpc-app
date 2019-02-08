@@ -54,6 +54,19 @@ public class MemoryQueue implements JobQueue {
     @Override
     public synchronized void completeJob(UUID jobID, JobStatus status) {
         logger.debug("Completed job {} with status: {}", jobID, status);
-        this.queue.replace(jobID, status);
+        JobStatus replaced = this.queue.replace(jobID, status);
+        if (replaced == null) {
+            throw new IllegalArgumentException(String.format("Job %s does not exist in queue", jobID));
+        }
+    }
+
+    @Override
+    public synchronized void removeJob(UUID jobID) {
+        this.queue.remove(jobID);
+    }
+
+    @Override
+    public int queueSize() {
+        return this.queue.size();
     }
 }
