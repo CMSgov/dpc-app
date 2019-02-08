@@ -7,6 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>dpc-web</module>
+        <module>dpc-queue</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>
@@ -25,7 +26,16 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>4.2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.25</version>
+            </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
@@ -36,8 +46,7 @@
     </dependencyManagement>
 
     <dependencies>
-            <!--Test resources-->
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <!--Test resources-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
