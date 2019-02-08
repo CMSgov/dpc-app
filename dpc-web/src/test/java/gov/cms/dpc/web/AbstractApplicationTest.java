@@ -1,8 +1,6 @@
 package gov.cms.dpc.web;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.web.DPCAppApplication;
-import gov.cms.dpc.web.DPCAppConfiguration;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
@@ -11,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 public class AbstractApplicationTest {
 
-    static final DropwizardTestSupport<DPCAppConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAppApplication.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "0"));
+    static final DropwizardTestSupport<DPWebConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCWebApplication.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "0"));
     static FhirContext ctx;
 
     AbstractApplicationTest() {

@@ -2,11 +2,11 @@ package gov.cms.dpc.web;
 
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 
-public class DPCAppConfiguration extends TypesafeConfiguration {
+public class DPWebConfiguration extends TypesafeConfiguration {
 
     private String testValue;
 
-    DPCAppConfiguration() {
+    DPWebConfiguration() {
 //        Not used;
     }
 
