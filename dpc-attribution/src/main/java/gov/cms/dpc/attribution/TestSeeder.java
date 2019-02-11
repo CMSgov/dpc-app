@@ -44,7 +44,6 @@ public class TestSeeder implements AttributionSeeder {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-
         logger.debug("Finished loading seeds");
     }
 }

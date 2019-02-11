@@ -1,8 +1,10 @@
 package gov.cms.dpc.aggregation;
 
 import gov.cms.dpc.attribution.AttributionEngine;
+import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public class AggregationEngine implements Runnable {
+public class AggregationEngine<T> implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
 
@@ -28,8 +30,8 @@ public class AggregationEngine implements Runnable {
     @Override
     public void run() {
 
-        while(run) {
-            final Optional<UUID> uuid = this.queue.workJob();
+        while (run) {
+            final Optional<Pair<UUID, Object>> uuid = this.queue.workJob();
             if (uuid.isEmpty()) {
                 try {
                     logger.debug("No job, waiting 2 seconds");
@@ -38,11 +40,12 @@ public class AggregationEngine implements Runnable {
                     e.printStackTrace();
                 }
             } else {
-                logger.debug("Has job {}. Working.", uuid.get());
-                final Set<String> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(uuid.toString());
+                final JobModel model = (JobModel) uuid.get().getRight();
+                logger.debug("Has job {}. Working.", uuid.get().getLeft());
+                final Set<String> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
                 logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
                 // Job is done
-                this.queue.completeJob(uuid.get(), JobStatus.COMPLETED);
+                this.queue.completeJob(uuid.get().getLeft(), JobStatus.COMPLETED);
             }
         }
         logger.info("Shutting down aggregation engine");
