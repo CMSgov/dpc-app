@@ -27,7 +27,7 @@ public class QueueTest {
         jobSet.add(UUID.randomUUID());
         jobSet.add(UUID.randomUUID());
 
-        jobSet.forEach((job) -> queue.submitJob(job));
+        jobSet.forEach((job) -> queue.submitJob(job, new TestJob("test job")));
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
 
         // Check the status of the job
@@ -38,23 +38,23 @@ public class QueueTest {
 
         // Complete the job and check its status
 
-        Optional<UUID> workJob = queue.workJob();
+        Optional<Pair<UUID, TestJob>> workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have job to work");
-        queue.completeJob(workJob.get(), JobStatus.COMPLETED);
+        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED);
         // Remove from the job set so we can track what's been done
-        jobSet.remove(workJob.get());
+        jobSet.remove(workJob.get().getLeft());
 
-        final Optional<JobStatus> updatedStatus = queue.getJobStatus(workJob.get());
+        final Optional<JobStatus> updatedStatus = queue.getJobStatus(workJob.get().getLeft());
         assertAll(() -> assertTrue(updatedStatus.isPresent(), "Should have job status"),
                 () -> assertEquals(JobStatus.COMPLETED, updatedStatus.get(), "Job should be completed"));
 
         // Fail the job and check its status
         workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have a 2nd job to work");
-        queue.completeJob(workJob.get(), JobStatus.FAILED);
-        jobSet.remove(workJob.get());
+        queue.completeJob(workJob.get().getLeft(), JobStatus.FAILED);
+        jobSet.remove(workJob.get().getLeft());
 
-        Optional<JobStatus> failedStatus = queue.getJobStatus(workJob.get());
+        Optional<JobStatus> failedStatus = queue.getJobStatus(workJob.get().getLeft());
         assertAll(() -> assertTrue(failedStatus.isPresent(), "Should have job status"),
                 () -> assertEquals(JobStatus.FAILED, failedStatus.get(), "Job should have failed"));
 
@@ -62,7 +62,7 @@ public class QueueTest {
                 () -> assertTrue(queue.workJob().isEmpty(), "Should not have another job to work"));
 
         // Remove some jobs
-        queue.removeJob(workJob.get());
+        queue.removeJob(workJob.get().getLeft());
         assertEquals(1, queue.queueSize(), "Should only have a single job");
     }
 
@@ -77,8 +77,29 @@ public class QueueTest {
         assertTrue(queue.getJobStatus(jobID).isEmpty(), "Should not be able to get missing job status");
         assertThrows(IllegalArgumentException.class, () -> queue.completeJob(jobID, JobStatus.FAILED), "Should error when completing a job which does not exist");
     }
-    
+
     private static <T> T getSetFirst(Set<T> set) {
         return set.stream().findFirst().orElseThrow(() -> new IllegalStateException("Cannot get first from empty array"));
+    }
+
+    private static class TestJob implements Statisable {
+
+        private final String data;
+        private JobStatus status;
+
+        TestJob(String data) {
+            this.data = data;
+            this.status = JobStatus.QUEUED;
+        }
+
+        @Override
+        public JobStatus getStatus() {
+            return this.status;
+        }
+
+        @Override
+        public void setStatus(JobStatus status) {
+            this.status = status;
+        }
     }
 }

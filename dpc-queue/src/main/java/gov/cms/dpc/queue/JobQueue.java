@@ -9,11 +9,11 @@ import java.util.UUID;
  */
 public interface JobQueue {
 
-    void submitJob(UUID jobID);
+    <T> void submitJob(UUID jobID, T data);
 
     Optional<JobStatus> getJobStatus(UUID jobID);
 
-    Optional<UUID> workJob();
+    <T> Optional<Pair<UUID, T>> workJob();
 
     void completeJob(UUID jobID, JobStatus status);
 
