@@ -8,6 +8,7 @@
     <modules>
         <module>dpc-web</module>
         <module>dpc-queue</module>
+        <module>dpd-attribution</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>

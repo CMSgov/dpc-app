@@ -23,7 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 
 /**
- * Verifies the a user can successfully submit a request to the Group endpoint
+ * Verifies the a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRSubmissionTest {
@@ -34,7 +34,7 @@ public class FHIRSubmissionTest {
     private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue)).build();
 
 
-    // This is required to get get Guice to load correctly.
+    // This is required for Guice to load correctly. Not entirely sure why
     // https://github.com/dropwizard/dropwizard/issues/1772
     @BeforeAll
     public static void setup() {
