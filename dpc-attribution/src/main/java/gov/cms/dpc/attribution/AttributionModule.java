@@ -1,11 +1,11 @@
 package gov.cms.dpc.attribution;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.PrivateModule;
 import com.google.inject.Scopes;
 
-public class AttributionModule extends AbstractModule {
+public class AttributionModule extends PrivateModule {
 
-    AttributionModule() {
+    public AttributionModule() {
         // Not used
     }
 
@@ -14,5 +14,11 @@ public class AttributionModule extends AbstractModule {
         bind(AttributionEngine.class)
                 .to(LocalAttributionEngine.class)
                 .in(Scopes.SINGLETON);
+
+        bind(AttributionSeeder.class)
+                .to(TestSeeder.class )
+                .in(Scopes.SINGLETON);
+
+        expose(AttributionEngine.class);
     }
 }
