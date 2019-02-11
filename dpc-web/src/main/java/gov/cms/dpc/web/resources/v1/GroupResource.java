@@ -1,6 +1,7 @@
 package gov.cms.dpc.web.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
+import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
 import org.slf4j.Logger;
@@ -44,9 +45,15 @@ public class GroupResource extends AbstractGroupResource {
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
 
-        this.queue.submitJob(jobID);
+        this.queue.submitJob(jobID, new JobModel(providerID));
 
         return Response.status(Response.Status.NO_CONTENT)
-                .contentLocation(URI.create("http://localhost:3002/v1/Jobs/" + jobID)).build();
+                .contentLocation(URI.create("http://localhost:3002/v1/jobs/" + jobID)).build();
+    }
+
+    @GET
+    @Path("/test")
+    public String getTest() {
+        return "group test";
     }
 }
