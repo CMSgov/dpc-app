@@ -1,4 +1,5 @@
 .idea/
 *.iml
 
+application.local.conf
 target/

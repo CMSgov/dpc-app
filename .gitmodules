@@ -1,0 +1,3 @@
+[submodule "external/typesafe-dropwizard-configuration"]
+	path = external/typesafe-dropwizard-configuration
+	url = https://github.com/nickrobison-usds/typesafe-dropwizard-configuration.git
