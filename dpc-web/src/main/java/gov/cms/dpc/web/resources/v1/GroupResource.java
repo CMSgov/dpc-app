@@ -48,7 +48,7 @@ public class GroupResource extends AbstractGroupResource {
         this.queue.submitJob(jobID, new JobModel(providerID));
 
         return Response.status(Response.Status.NO_CONTENT)
-                .contentLocation(URI.create("http://localhost:3002/v1/jobs/" + jobID)).build();
+                .contentLocation(URI.create("http://localhost:3002/v1/Jobs/" + jobID)).build();
     }
 
     @GET
