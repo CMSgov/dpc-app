@@ -1,5 +1,26 @@
 # Data @ The Point of Care
 
+Clone and Build Submodules
+---
+
+First-time clone:
+
+```bash
+git clone --recursive https://github.com/CMSgov/dpc-app
+```
+
+Or, to pull submodules into existing repository:
+
+```bash
+git submodule init
+git submodule update
+```
+
+Build with makefile:
+```bash
+Make
+```
+
 How to start the DPCApp application
 ---
 
