@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import static gov.cms.dpc.web.core.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -28,14 +29,13 @@ import static org.mockito.Mockito.reset;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRSubmissionTest {
     private static final IParser parser = mock(IParser.class);
-    public static final String FHIR_JSON = "application/fhir+json";
     private final JobQueue queue = new MemoryQueue();
     private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(parser, queue)).build();
     private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue)).build();
 
 
     // This is required for Guice to load correctly. Not entirely sure why
-    // https://github.com/dropwizard/dropwizard/issues/1772
+//     https://github.com/dropwizard/dropwizard/issues/1772
     @BeforeAll
     public static void setup() {
         JerseyGuiceUtils.reset();
@@ -59,7 +59,7 @@ public class FHIRSubmissionTest {
 
         String jobURL = response.getHeaderString("Content-Location").replace("http://localhost:3002/v1", "");
         WebTarget jobTarget = jobResource.client().target(jobURL);
-        Response jobResp = jobTarget.request().accept("application/fhir+json").get();
+        Response jobResp = jobTarget.request().accept(FHIR_JSON).get();
         assertEquals(HttpStatus.ACCEPTED_202, jobResp.getStatus(), "Job should be in progress");
 
         // Finish the job and check again
@@ -67,7 +67,7 @@ public class FHIRSubmissionTest {
         queue.completeJob(queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getLeft(), JobStatus.COMPLETED);
 
         jobTarget = jobResource.client().target(jobURL);
-        jobResp = jobTarget.request().accept("application/fhir+json").get();
+        jobResp = jobTarget.request().accept(FHIR_JSON).get();
         assertEquals(HttpStatus.OK_200, jobResp.getStatus(), "Job should be done");
 
 
