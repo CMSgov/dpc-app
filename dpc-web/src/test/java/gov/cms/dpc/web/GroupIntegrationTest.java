@@ -1,0 +1,40 @@
+package gov.cms.dpc.web;
+
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import org.hl7.fhir.r4.model.Parameters;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+/**
+ * Simple integration tests for Group resource
+ */
+public class GroupIntegrationTest extends AbstractApplicationTest {
+
+    /**
+     * Test that the group resource correctly accepts/rejects invalid content types.
+     */
+    @Test
+    public void testMediaTypes() {
+
+        // Verify that FHIR is accepted
+        final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");
+
+        final IOperationUntypedWithInput<Parameters> execute = client
+                .operation()
+                .onInstanceVersion(new IdDt("Group", "1"))
+                .named("$export")
+                .withNoParameters(Parameters.class)
+                .useHttpGet();
+
+
+        assertThrows(NonFhirResponseException.class, execute::execute, "Should throw exception, but accept JSON request");
+
+        // Try again, but use a different encoding
+        assertThrows(UnclassifiedServerFailureException.class, () -> execute.encodedXml().execute(), "Should not accept XML encoding");
+    }
+}

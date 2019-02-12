@@ -3,17 +3,20 @@ package gov.cms.dpc.web.resources.v1;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.web.core.FHIRMediaTypes;
+import gov.cms.dpc.web.core.annotations.FHIR;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.UUID;
+
 
 public class GroupResource extends AbstractGroupResource {
 
@@ -34,12 +37,13 @@ public class GroupResource extends AbstractGroupResource {
      * The `Content-Location` header contains the URI to call when
      *
      * @param providerID {@link String} ID of provider to retrieve data for
+     * @param req
      * @return - {@link org.hl7.fhir.r4.model.OperationOutcome} specifying whether or not the request was successful.
      */
     @Override
     @Path("/{providerID}/$export")
     @GET // Need this here, since we're using a path param
-    public Response export(@PathParam("providerID") String providerID) {
+    public Response export(@PathParam("providerID") String providerID, @Context HttpServletRequest req) {
         logger.debug("Exporting data for provider: {}", providerID);
 
         // Generate a job ID and submit it to the queue
