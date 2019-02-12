@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.attribution.AttributionModule;
 import gov.cms.dpc.queue.JobQueueModule;
+import gov.cms.dpc.web.features.FHIRRequestFeature;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -32,6 +33,7 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
     @Override
     public void run(final DPWebConfiguration configuration,
                     final Environment environment) {
-        // TODO: implement application
+        // Add FHIR filters
+        environment.jersey().register(FHIRRequestFeature.class);
     }
 }
