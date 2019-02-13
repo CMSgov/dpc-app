@@ -87,6 +87,12 @@
             <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-aggregation</artifactId>
             <version>1.0-SNAPSHOT</version>

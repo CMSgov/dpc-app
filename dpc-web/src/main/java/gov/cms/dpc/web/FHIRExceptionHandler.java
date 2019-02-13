@@ -1,6 +1,5 @@
 package gov.cms.dpc.web;
 
-import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.web.core.FHIRMediaTypes;
 import gov.cms.dpc.web.core.annotations.FHIR;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
@@ -8,20 +7,18 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+/**
+ * Core error handler for differentiating between FHIR and standard HTTP errors.
+ * This overrides *all* of Dropwizard's error handling, but for any non-FHIR resources, we simply delegate back to the root {@link LoggingExceptionMapper}
+ */
 @Provider
-//@Singleton
 public class FHIRExceptionHandler extends LoggingExceptionMapper<Throwable> {
 
-    @Inject
-    private FhirContext ctx;
     @Context
     private ResourceInfo info;
 
@@ -33,7 +30,8 @@ public class FHIRExceptionHandler extends LoggingExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable exception) {
         final Response response = super.toResponse(exception);
-        // If FHIR, do things
+
+        // If it's a FHIR resource, create a custom operation outcome, when it's an error
         if (isFHIRResource()) {
             final OperationOutcome outcome = new OperationOutcome();
             outcome.addIssue()

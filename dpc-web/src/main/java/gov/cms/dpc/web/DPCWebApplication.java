@@ -41,7 +41,5 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
                     final Environment environment) {
         // Add FHIR filters
         environment.jersey().register(FHIRRequestFeature.class);
-//        environment.jersey().register(new FHIRExceptionHandler());
-//        environment.servlets().addFilter("FHIR", new FHIRServletResponse()).addMappingForUrlPatterns(EnumSet.of(DispatcherType.ERROR), true,"/*");
     }
 }

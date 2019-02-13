@@ -1,14 +1,26 @@
 package gov.cms.dpc.web;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.r4.model.*;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,7 +53,7 @@ public class GroupIntegrationTest extends AbstractApplicationTest {
     }
 
     @Test
-    public void testFHIRMarshaling() {
+    public void testFHIRMarshaling() throws IOException {
 
         final Group group = new Group();
         group.addIdentifier().setValue("Group/test");
@@ -61,18 +73,26 @@ public class GroupIntegrationTest extends AbstractApplicationTest {
                 () -> assertEquals("Doe", resource.getNameFirstRep().getFamily(), "Should have updated family name"),
                 () -> assertEquals("John", resource.getNameFirstRep().getGivenAsSingleString(), "Should have updated given name"));
 
-        // Try to fail it
+        // Try to something that should fail
         final Group g2 = new Group();
 
         g2.addIdentifier().setValue("Group/fail");
 
-        execute = client
-                .create()
-                .resource(g2)
-                .encodedJson()
-                .preferResponseType(Patient.class)
-                .execute();
+        final HttpPost post = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+        final IParser parser = ctx.newJsonParser();
+        post.setEntity(new StringEntity(parser.encodeResourceToString(g2)));
 
-        final IBaseOperationOutcome outcome = execute.getOperationOutcome();
+        final CloseableHttpClient c2 = HttpClients.createDefault();
+
+        try (CloseableHttpResponse response = c2.execute(post)) {
+
+            assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatusLine().getStatusCode(), "Should have 500 error");
+
+            // Try to get the operation outcome
+            final OperationOutcome oo = (OperationOutcome) parser.parseResource(EntityUtils.toString(response.getEntity()));
+            assertAll(() -> assertEquals(1, oo.getIssue().size(), "Should have 1 issue"),
+                    () -> assertEquals(OperationOutcome.IssueSeverity.FATAL, oo.getIssueFirstRep().getSeverity(), "Should be fatal"),
+                    () -> assertEquals("Should fail", oo.getIssueFirstRep().getDetails().getText(), "Should have matching error"));
+        }
     }
 }
