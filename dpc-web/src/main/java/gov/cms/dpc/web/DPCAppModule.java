@@ -23,6 +23,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
 
         // Request/Response handlers
         binder.bind(FHIRHandler.class);
+        binder.bind(FHIRExceptionHandler.class);
 
         // This will eventually go away.
         binder.bind(AggregationEngine.class);

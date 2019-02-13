@@ -63,6 +63,11 @@ public class GroupResource extends AbstractGroupResource {
      */
     @POST
     public Patient marshalTest(Group group) {
+
+        if (group.getIdentifierFirstRep().getValue().equals("Group/fail")) {
+            throw new IllegalStateException("Should fail");
+        }
+
         final HumanName name = new HumanName().setFamily("Doe").addGiven("John");
         return new Patient().addName(name).addIdentifier(new Identifier().setValue("test-id"));
     }

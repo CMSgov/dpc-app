@@ -6,10 +6,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,13 +44,11 @@ public class GroupIntegrationTest extends AbstractApplicationTest {
     public void testFHIRMarshaling() {
 
         final Group group = new Group();
-        final IdType idType = new IdType("Group/test");
-
-        group.setId(idType);
+        group.addIdentifier().setValue("Group/test");
 
         final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");
 
-        final MethodOutcome execute = client
+        MethodOutcome execute = client
                 .create()
                 .resource(group)
                 .encodedJson()
@@ -65,6 +61,18 @@ public class GroupIntegrationTest extends AbstractApplicationTest {
                 () -> assertEquals("Doe", resource.getNameFirstRep().getFamily(), "Should have updated family name"),
                 () -> assertEquals("John", resource.getNameFirstRep().getGivenAsSingleString(), "Should have updated given name"));
 
+        // Try to fail it
+        final Group g2 = new Group();
 
+        g2.addIdentifier().setValue("Group/fail");
+
+        execute = client
+                .create()
+                .resource(g2)
+                .encodedJson()
+                .preferResponseType(Patient.class)
+                .execute();
+
+        final IBaseOperationOutcome outcome = execute.getOperationOutcome();
     }
 }
