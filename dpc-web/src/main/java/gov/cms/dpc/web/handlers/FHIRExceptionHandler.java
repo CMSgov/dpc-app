@@ -1,4 +1,4 @@
-package gov.cms.dpc.web;
+package gov.cms.dpc.web.handlers;
 
 import gov.cms.dpc.web.core.FHIRMediaTypes;
 import gov.cms.dpc.web.core.annotations.FHIR;
