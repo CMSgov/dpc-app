@@ -5,6 +5,9 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.aggregation.AggregationEngine;
+import gov.cms.dpc.web.features.FHIRRequestFeature;
+import gov.cms.dpc.web.handlers.FHIRExceptionHandler;
+import gov.cms.dpc.web.handlers.FHIRHandler;
 import gov.cms.dpc.web.resources.TestResource;
 import gov.cms.dpc.web.resources.v1.BaseResource;
 import gov.cms.dpc.web.resources.v1.GroupResource;
@@ -24,6 +27,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
         // Request/Response handlers
         binder.bind(FHIRHandler.class);
         binder.bind(FHIRExceptionHandler.class);
+        binder.bind(FHIRRequestFeature.class);
 
         // This will eventually go away.
         binder.bind(AggregationEngine.class);

@@ -1,4 +1,4 @@
-package gov.cms.dpc.web;
+package gov.cms.dpc.web.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;

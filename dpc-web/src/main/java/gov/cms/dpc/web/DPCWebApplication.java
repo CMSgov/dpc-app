@@ -5,15 +5,9 @@ import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.attribution.AttributionModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import gov.cms.dpc.web.features.FHIRRequestFeature;
-import gov.cms.dpc.web.filters.FHIRServletResponse;
 import io.dropwizard.Application;
-import io.dropwizard.lifecycle.ServerLifecycleListener;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.eclipse.jetty.server.Server;
-
-import javax.servlet.DispatcherType;
-import java.util.EnumSet;
 
 public class DPCWebApplication extends Application<DPWebConfiguration> {
 
@@ -39,7 +33,5 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
     @Override
     public void run(final DPWebConfiguration configuration,
                     final Environment environment) {
-        // Add FHIR filters
-        environment.jersey().register(FHIRRequestFeature.class);
     }
 }
