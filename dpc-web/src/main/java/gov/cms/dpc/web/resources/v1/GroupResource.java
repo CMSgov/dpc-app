@@ -1,11 +1,12 @@
 package gov.cms.dpc.web.resources.v1;
 
-import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.web.core.FHIRMediaTypes;
-import gov.cms.dpc.web.core.annotations.FHIR;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.Collections;
 import java.util.UUID;
 
 
@@ -22,12 +24,10 @@ public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
-    private final IParser parser;
     private final JobQueue queue;
 
     @Inject
-    public GroupResource(IParser jsonParser, JobQueue queue) {
-        this.parser = jsonParser;
+    public GroupResource(JobQueue queue) {
         this.queue = queue;
     }
 
@@ -55,9 +55,20 @@ public class GroupResource extends AbstractGroupResource {
                 .contentLocation(URI.create("http://localhost:3002/v1/Jobs/" + jobID)).build();
     }
 
-    @GET
-    @Path("/test")
-    public String getTest() {
-        return "group test";
+    /**
+     * Test method for verifying FHIR deserialization, it will eventually be removed.
+     * TODO(nickrobison): Remove this
+     *
+     * @return - {@link String} test string
+     */
+    @POST
+    public Patient marshalTest(Group group) {
+
+        if (group.getIdentifierFirstRep().getValue().equals("Group/fail")) {
+            throw new IllegalStateException("Should fail");
+        }
+
+        final HumanName name = new HumanName().setFamily("Doe").addGiven("John");
+        return new Patient().addName(name).addIdentifier(new Identifier().setValue("test-id"));
     }
 }

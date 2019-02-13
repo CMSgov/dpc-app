@@ -33,7 +33,5 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
     @Override
     public void run(final DPWebConfiguration configuration,
                     final Environment environment) {
-        // Add FHIR filters
-        environment.jersey().register(FHIRRequestFeature.class);
     }
 }
