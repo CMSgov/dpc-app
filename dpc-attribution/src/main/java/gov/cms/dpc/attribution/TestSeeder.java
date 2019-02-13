@@ -13,7 +13,7 @@ import java.util.MissingResourceException;
 
 public class TestSeeder implements AttributionSeeder {
 
-    private static final String CSV = "./test_associations.csv";
+    private static final String CSV = "test_associations.csv";
     private final Logger logger = LoggerFactory.getLogger(TestSeeder.class);
 
     private final AttributionEngine engine;
