@@ -1,6 +1,5 @@
 package gov.cms.dpc.web;
 
-import ca.uhn.fhir.parser.IParser;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -10,7 +9,6 @@ import gov.cms.dpc.web.resources.v1.JobResource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,17 +18,14 @@ import javax.ws.rs.core.Response;
 
 import static gov.cms.dpc.web.core.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 
 /**
  * Verifies the a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRSubmissionTest {
-    private static final IParser parser = mock(IParser.class);
     private final JobQueue queue = new MemoryQueue();
-    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(parser, queue)).build();
+    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue)).build();
     private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue)).build();
 
 
@@ -39,11 +34,6 @@ public class FHIRSubmissionTest {
     @BeforeAll
     public static void setup() {
         JerseyGuiceUtils.reset();
-    }
-
-    @AfterEach
-    public void teardownTest() {
-        reset(parser);
     }
 
     @Test
