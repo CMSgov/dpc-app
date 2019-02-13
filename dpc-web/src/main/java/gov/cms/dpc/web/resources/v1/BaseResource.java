@@ -1,10 +1,10 @@
 package gov.cms.dpc.web.resources.v1;
 
-import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.web.core.Capabilities;
 import gov.cms.dpc.web.resources.AbstractBaseResource;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
 import gov.cms.dpc.web.resources.AbstractJobResource;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
@@ -13,13 +13,11 @@ import javax.ws.rs.Path;
 @Path("/v1")
 public class BaseResource extends AbstractBaseResource {
 
-    private final IParser parser;
     private final AbstractGroupResource gr;
     private final AbstractJobResource jr;
 
     @Inject
-    public BaseResource(IParser jsonParser, GroupResource gr, JobResource jr) {
-        this.parser = jsonParser;
+    public BaseResource(GroupResource gr, JobResource jr) {
         this.gr = gr;
         this.jr = jr;
     }
@@ -30,8 +28,8 @@ public class BaseResource extends AbstractBaseResource {
     }
 
     @Override
-    public String metadata() {
-        return parser.encodeResourceToString(Capabilities.buildCapabilities("http://localhost:3002", "/v1"));
+    public CapabilityStatement metadata() {
+        return Capabilities.buildCapabilities("http://localhost:3002", "/v1");
     }
 
     @Override

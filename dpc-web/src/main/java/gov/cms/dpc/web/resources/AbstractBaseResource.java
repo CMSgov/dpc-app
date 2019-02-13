@@ -1,5 +1,7 @@
 package gov.cms.dpc.web.resources;
 
+import org.hl7.fhir.r4.model.CapabilityStatement;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -29,7 +31,7 @@ public abstract class AbstractBaseResource {
      */
     @Path("/metadata")
     @GET
-    public abstract String metadata();
+    public abstract CapabilityStatement metadata();
 
     @Path("/Group")
     public abstract AbstractGroupResource groupOperations();
