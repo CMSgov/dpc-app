@@ -3,3 +3,4 @@
 
 application.local.conf
 target/
+dependency-reduced-*.xml
