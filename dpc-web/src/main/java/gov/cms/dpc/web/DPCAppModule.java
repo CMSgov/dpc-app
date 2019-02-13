@@ -1,11 +1,13 @@
 package gov.cms.dpc.web;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.aggregation.AggregationEngine;
+import gov.cms.dpc.web.features.FHIRRequestFeature;
+import gov.cms.dpc.web.handlers.FHIRExceptionHandler;
+import gov.cms.dpc.web.handlers.FHIRHandler;
 import gov.cms.dpc.web.resources.TestResource;
 import gov.cms.dpc.web.resources.v1.BaseResource;
 import gov.cms.dpc.web.resources.v1.GroupResource;
@@ -22,6 +24,11 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
     @Override
     public void configure(Binder binder) {
 
+        // Request/Response handlers
+        binder.bind(FHIRHandler.class);
+        binder.bind(FHIRExceptionHandler.class);
+        binder.bind(FHIRRequestFeature.class);
+
         // This will eventually go away.
         binder.bind(AggregationEngine.class);
         binder.bind(Aggregation.class).asEagerSingleton();
@@ -33,7 +40,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
     }
 
     @Provides
-    IParser getJsonParser() {
-        return this.context.newJsonParser();
+    FhirContext getFHIRContext() {
+        return this.context;
     }
 }
