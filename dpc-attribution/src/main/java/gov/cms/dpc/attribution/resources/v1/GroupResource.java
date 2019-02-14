@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import gov.cms.dpc.attribution.engine.AttributionEngine;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;

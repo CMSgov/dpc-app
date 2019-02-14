@@ -9,10 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 
 public class AbstractApplicationTest {
 
-    static final DropwizardTestSupport<DPWebConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCWebApplication.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "0"));
-    static FhirContext ctx;
+    protected static final DropwizardTestSupport<DPWebConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCWebApplication.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "0"));
+    protected FhirContext ctx;
 
-    AbstractApplicationTest() {
+    protected AbstractApplicationTest() {
     }
 
     @BeforeAll
