@@ -18,6 +18,7 @@ public class AttributionIntegrationTest {
 
     @BeforeEach()
     public void migrateAndSeed() throws Exception {
+        APPLICATION.getApplication().run("db", "migrate");
         APPLICATION.getApplication().run("seed");
     }
 

@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.MissingResourceException;
 
@@ -47,18 +48,26 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
             throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
         }
 
+        // Truncate everything
+
         try (final Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
             connection.beginRequest();
+            try (Statement truncateStatement = connection.createStatement()) {
+                truncateStatement.execute("TRUNCATE TABLE ATTRIBUTIONS");
+            }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
                 for (String line; (line = reader.readLine()) != null; ) {
                     final String[] splits = line.split(",");
-                    logger.debug("Associating {} with {}.", splits[1], splits[0]);
-                    try (Statement statement = connection.createStatement()) {
-                        final String query = String.format("INSERT INTO attributions (provider_id, patient_id) VALUES %s, %s", splits[1], splits[0]);
-                        statement.execute(query);
+                    logger.info("Associating {} with {}.", splits[1], splits[0]);
+                    try (PreparedStatement statement = connection.prepareStatement("INSERT INTO attributions (provider_id, patient_id) VALUES (?, ?)")) {
+                        statement.setString(1, splits[1]);
+                        statement.setString(2, splits[0]);
+                        statement.execute();
                     }
                 }
             }
+            connection.commit();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
