@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 @Path("/Group")
 public abstract class AbstractGroupResource {
 
-    public AbstractGroupResource() {
+    protected AbstractGroupResource() {
         // Not used
     }
 
