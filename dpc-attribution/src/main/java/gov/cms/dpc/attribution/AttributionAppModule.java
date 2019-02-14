@@ -7,15 +7,16 @@ import gov.cms.dpc.attribution.jdbi.AttributedPatientsDAO;
 import gov.cms.dpc.attribution.models.AttributionRelationship;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
+import io.dropwizard.migrations.MigrationsBundle;
 import org.hibernate.SessionFactory;
 
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
-    private final HibernateBundle<DPCAttributionConfiguration> bundle;
+    private final HibernateBundle<DPCAttributionConfiguration> hibernateBundle;
 
     AttributionAppModule() {
 
-        bundle = new HibernateBundle<>(AttributionRelationship.class) {
+        hibernateBundle = new HibernateBundle<>(AttributionRelationship.class) {
 
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
@@ -34,6 +35,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
     @Provides
     SessionFactory getSessionFactory() {
-        return bundle.getSessionFactory();
+        return hibernateBundle.getSessionFactory();
     }
 }

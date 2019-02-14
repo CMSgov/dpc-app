@@ -29,6 +29,12 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle());
+        bootstrap.addBundle(new MigrationsBundle<DPCAttributionConfiguration>() {
+            @Override
+            public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
+                return configuration.getDatabase();
+            }
+        });
     }
 
     @Override
