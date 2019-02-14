@@ -23,7 +23,7 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
     @Override
     public void initialize(final Bootstrap<DPWebConfiguration> bootstrap) {
         GuiceBundle<DPWebConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPWebConfiguration.class)
-                .modules(new DPCAppModule(), new JobQueueModule(), new AttributionEngineModule(), new FHIRModule())
+                .modules(new DPCAppModule(), new JobQueueModule(), new FHIRModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);

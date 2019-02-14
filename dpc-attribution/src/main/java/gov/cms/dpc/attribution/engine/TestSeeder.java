@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.engine;
 
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

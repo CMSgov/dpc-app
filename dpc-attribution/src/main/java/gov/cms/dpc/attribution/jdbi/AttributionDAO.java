@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.attribution.engine.AttributionEngine;
 import gov.cms.dpc.attribution.models.AttributionRelationship;
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;

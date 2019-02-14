@@ -2,9 +2,9 @@ package gov.cms.dpc.attribution;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import gov.cms.dpc.attribution.engine.AttributionEngine;
 import gov.cms.dpc.attribution.engine.AttributionEngineModule;
 import gov.cms.dpc.attribution.engine.TestSeeder;
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

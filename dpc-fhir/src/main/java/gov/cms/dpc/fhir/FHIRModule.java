@@ -21,10 +21,4 @@ public class FHIRModule extends AbstractModule {
         bind(FHIRExceptionHandler.class);
         bind(FHIRRequestFeature.class);
     }
-
-    @Provides
-    @Singleton
-    public FhirContext provideContext() {
-        return FhirContext.forR4();
-    }
 }

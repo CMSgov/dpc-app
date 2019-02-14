@@ -2,10 +2,7 @@ package gov.cms.dpc.attribution.engine;
 
 import com.google.inject.PrivateModule;
 import com.google.inject.Scopes;
-import gov.cms.dpc.attribution.engine.AttributionEngine;
-import gov.cms.dpc.attribution.engine.AttributionSeeder;
-import gov.cms.dpc.attribution.engine.LocalAttributionEngine;
-import gov.cms.dpc.attribution.engine.TestSeeder;
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 
 public class AttributionEngineModule extends PrivateModule {
 
