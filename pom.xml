@@ -11,6 +11,7 @@
         <module>dpc-aggregation</module>
         <module>dpc-attribution</module>
         <module>dpc-common</module>
+        <module>dpc-fhir</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>
@@ -38,6 +39,11 @@
                 <version>${dropwizard.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>2.1.1</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import static gov.cms.dpc.web.core.FHIRMediaTypes.FHIR_JSON;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
