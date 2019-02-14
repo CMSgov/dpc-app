@@ -8,9 +8,11 @@ import org.hibernate.query.Query;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public class AttributionDAO extends AbstractDAO<AttributionRelationship> implements AttributionEngine {
 
     @Inject
@@ -22,7 +24,6 @@ public class AttributionDAO extends AbstractDAO<AttributionRelationship> impleme
         return persist(relationship).getAttributionID();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Set<String> getAttributedBeneficiaries(String providerID) {
         final Query query = namedQuery("gov.cms.dpc.attribution.models.AttributionRelationship.findByProvider")
@@ -43,6 +44,19 @@ public class AttributionDAO extends AbstractDAO<AttributionRelationship> impleme
 
     @Override
     public void removeAttributionRelationship(String providerID, String beneficiaryID) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        final Optional<AttributionRelationship> relationship = findAttribution(providerID, beneficiaryID);
+        relationship.ifPresent((rel) -> currentSession().delete(rel));
+    }
+
+    @Override
+    public boolean isAttributed(String providerID, String beneficiaryID) {
+        return findAttribution(providerID, beneficiaryID).isPresent();
+    }
+
+    private Optional<AttributionRelationship> findAttribution(String providerID, String beneficiaryID) {
+        final Query query = namedQuery("gov.cms.dpc.attribution.AttributionRelationship.findProvider");
+        query.setParameter("provID", providerID);
+        query.setParameter("patID", beneficiaryID);
+        return Optional.ofNullable(uniqueResult(query));
     }
 }

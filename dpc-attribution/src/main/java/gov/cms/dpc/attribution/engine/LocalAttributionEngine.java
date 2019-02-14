@@ -52,4 +52,14 @@ public class LocalAttributionEngine implements AttributionEngine {
         logger.debug("Removed {} from {}? {}", beneficiaryID, providerID, removed);
         this.attributionMap.put(beneficiaryID, attributedBeneficiaries);
     }
+
+    @Override
+    public boolean isAttributed(String providerID, String beneficiaryID) {
+        final Set<String> attributedBeneficiaries = this.attributionMap.get(providerID);
+        if (attributedBeneficiaries != null) {
+            return attributedBeneficiaries.contains(beneficiaryID);
+        }
+
+        return false;
+    }
 }
