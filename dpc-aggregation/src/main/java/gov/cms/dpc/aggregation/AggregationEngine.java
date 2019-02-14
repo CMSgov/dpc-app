@@ -1,6 +1,6 @@
 package gov.cms.dpc.aggregation;
 
-import gov.cms.dpc.attribution.AttributionEngine;
+import gov.cms.dpc.attribution.engine.AttributionEngine;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;

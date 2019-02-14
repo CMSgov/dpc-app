@@ -2,6 +2,9 @@ package gov.cms.dpc.attribution;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import gov.cms.dpc.attribution.engine.AttributionEngine;
+import gov.cms.dpc.attribution.engine.AttributionEngineModule;
+import gov.cms.dpc.attribution.engine.TestSeeder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AttributionTest {
 
-    private static final Injector injector = Guice.createInjector(new AttributionModule());
+    private static final Injector injector = Guice.createInjector(new AttributionEngineModule());
     private AttributionEngine engine;
 
     @BeforeEach
