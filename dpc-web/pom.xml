@@ -42,13 +42,27 @@
             <version>2.6</version>
         </dependency>
         <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-structures-r4</artifactId>
-        </dependency>
-        <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-queue</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-aggregation</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-fhir</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <!--Test resources-->
         <dependency>
@@ -77,18 +91,6 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.7</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.dpc</groupId>
-            <artifactId>dpc-aggregation</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.dpc</groupId>
-            <artifactId>dpc-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

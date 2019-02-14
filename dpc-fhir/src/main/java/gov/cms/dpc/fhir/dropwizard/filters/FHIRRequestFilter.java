@@ -1,6 +1,6 @@
-package gov.cms.dpc.web.filters;
+package gov.cms.dpc.fhir.dropwizard.filters;
 
-import gov.cms.dpc.web.core.FHIRMediaTypes;
+import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.eclipse.jetty.server.Response;
 
 import javax.ws.rs.WebApplicationException;

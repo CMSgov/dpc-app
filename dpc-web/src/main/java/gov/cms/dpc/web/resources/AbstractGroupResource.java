@@ -1,6 +1,7 @@
 package gov.cms.dpc.web.resources;
 
-import gov.cms.dpc.web.core.annotations.FHIR;
+
+import gov.cms.dpc.fhir.annotations.FHIR;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;

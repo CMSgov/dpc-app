@@ -3,6 +3,7 @@ package gov.cms.dpc.web;
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.attribution.AttributionModule;
+import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
@@ -22,7 +23,7 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
     @Override
     public void initialize(final Bootstrap<DPWebConfiguration> bootstrap) {
         GuiceBundle<DPWebConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPWebConfiguration.class)
-                .modules(new DPCAppModule(), new JobQueueModule(), new AttributionModule())
+                .modules(new DPCAppModule(), new JobQueueModule(), new AttributionModule(), new FHIRModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);

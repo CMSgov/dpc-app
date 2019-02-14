@@ -1,4 +1,4 @@
-package gov.cms.dpc.web.core;
+package gov.cms.dpc.fhir;
 
 import javax.ws.rs.core.MediaType;
 
