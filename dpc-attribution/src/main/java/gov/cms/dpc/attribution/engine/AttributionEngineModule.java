@@ -1,11 +1,15 @@
-package gov.cms.dpc.attribution;
+package gov.cms.dpc.attribution.engine;
 
 import com.google.inject.PrivateModule;
 import com.google.inject.Scopes;
+import gov.cms.dpc.attribution.engine.AttributionEngine;
+import gov.cms.dpc.attribution.engine.AttributionSeeder;
+import gov.cms.dpc.attribution.engine.LocalAttributionEngine;
+import gov.cms.dpc.attribution.engine.TestSeeder;
 
-public class AttributionModule extends PrivateModule {
+public class AttributionEngineModule extends PrivateModule {
 
-    public AttributionModule() {
+    public AttributionEngineModule() {
         // Not used
     }
 
