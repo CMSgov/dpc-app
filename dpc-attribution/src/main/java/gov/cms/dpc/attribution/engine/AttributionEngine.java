@@ -9,4 +9,6 @@ public interface AttributionEngine {
     void addAttributionRelationship(String providerID, String beneficiaryID);
 
     void removeAttributionRelationship(String providerID, String beneficiaryID);
+
+    boolean isAttributed(String providerID, String beneficiaryID);
 }

@@ -48,7 +48,7 @@ public class FHIRExceptionHandler extends LoggingExceptionMapper<Throwable> {
     }
 
     private boolean isFHIRResource() {
-        return this.info.getResourceClass().getAnnotation(FHIR.class) != null ||
-                this.info.getResourceMethod().getAnnotation(FHIR.class) != null;
+        return (this.info.getResourceClass() != null && this.info.getResourceClass().getAnnotation(FHIR.class) != null) ||
+                (this.info.getResourceMethod() != null && this.info.getResourceMethod().getAnnotation(FHIR.class) != null);
     }
 }

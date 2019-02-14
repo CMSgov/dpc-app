@@ -2,14 +2,14 @@ package gov.cms.dpc.attribution.models;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@NamedQuery(name = "findByProvider", query = "select * from attributions where provider_id = :id")
+@NamedQueries({
+        @NamedQuery(name = "findByProvider", query = "select * from attributions where provider_id = :id"),
+        @NamedQuery(name = "findRelationshipID", query = "select id from attributions where provider_id = :provID and patient_id = :patID")
+})
 public class AttributionRelationship {
 
     @Id

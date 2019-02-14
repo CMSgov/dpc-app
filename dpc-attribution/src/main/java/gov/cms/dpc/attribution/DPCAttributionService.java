@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.attribution.engine.AttributionEngineModule;
+import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -24,7 +25,9 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     @Override
     public void initialize(Bootstrap<DPCAttributionConfiguration> bootstrap) {
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
-                .modules(new AttributionAppModule(), new AttributionEngineModule())
+                .modules(new AttributionAppModule(),
+                        new AttributionEngineModule(),
+                        new FHIRModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
