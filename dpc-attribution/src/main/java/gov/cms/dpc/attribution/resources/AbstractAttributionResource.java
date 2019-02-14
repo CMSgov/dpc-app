@@ -4,7 +4,7 @@ import javax.ws.rs.Path;
 
 public abstract class AbstractAttributionResource {
 
-    AbstractAttributionResource() {
+    protected AbstractAttributionResource() {
 //        Not used
     }
 

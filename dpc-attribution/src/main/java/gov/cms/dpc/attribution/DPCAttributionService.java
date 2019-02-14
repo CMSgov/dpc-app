@@ -35,15 +35,12 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 return configuration.getDatabase();
             }
         });
+
+        bootstrap.addCommand(new SeedCommand());
     }
 
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) {
         // Not used yet
-    }
-
-    @Override
-    protected void addDefaultCommands(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        bootstrap.addCommand(new SeedCommand());
     }
 }
