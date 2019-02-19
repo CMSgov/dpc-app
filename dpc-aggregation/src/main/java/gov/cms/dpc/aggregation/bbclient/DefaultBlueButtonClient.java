@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation.bbclient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.dpc.aggregation.AggregationEngine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
@@ -19,9 +18,9 @@ import java.io.InputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
 
-public class DefaultBlueButtonClient implements BlueButtonCliet {
+public class DefaultBlueButtonClient implements BlueButtonClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
     private static final String KEY_STORE_TYPE = "JKS";
     private static final String DEFAULT_KEY_STORE_PASSWORD = "changeit";
 
@@ -36,14 +35,19 @@ public class DefaultBlueButtonClient implements BlueButtonCliet {
         }
     }
 
-    public Patient requestFhirFromServer(String beneficiaryID) throws BlueButtonClientException {
+    public Patient requestFHIRFromServer(String beneficiaryID) throws BlueButtonClientException {
         // From http://hapifhir.io/doc_rest_client.html
         Patient patient;
         String keyStorePath = System.getProperty("javax.net.ssl.keyStore");
 
-        try {
+        if(keyStorePath == null || keyStorePath.isEmpty()){
+            throw new BlueButtonClientException("javax.net.ssl.keyStore option is empty, cannot find keystore.",
+                    new IllegalStateException()
+            );
+        }
+
+        try (InputStream keyStoreStream = new FileInputStream(keyStorePath)){
             // Need to build a custom HttpClient to handle mutual TLS authentication
-            InputStream keyStoreStream = new FileInputStream(keyStorePath);
             KeyStore keyStore = KeyStore.getInstance(KEY_STORE_TYPE);
             keyStore.load(keyStoreStream, DEFAULT_KEY_STORE_PASSWORD.toCharArray());
 
@@ -57,7 +61,7 @@ public class DefaultBlueButtonClient implements BlueButtonCliet {
             ctx.getRestfulClientFactory().setHttpClient(mutualTlsHttpClient);
             IGenericClient client = ctx.newRestfulGenericClient(this.serverBaseUrl);
             patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
-
+            
         } catch (FileNotFoundException ex){
             throw new BlueButtonClientException("Could not find keystore at location: " + keyStorePath, ex);
         } catch (KeyStoreException ex){
