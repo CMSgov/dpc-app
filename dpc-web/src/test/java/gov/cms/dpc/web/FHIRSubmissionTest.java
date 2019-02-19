@@ -19,6 +19,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
@@ -47,7 +48,7 @@ public class FHIRSubmissionTest {
 
         // Mock the attribution call
         Mockito.when(client.getAttributedBeneficiaries(Mockito.anyString()))
-                .thenReturn(testBeneficiaries);
+                .thenReturn(Optional.of(testBeneficiaries));
 
         // Mock the submission call to verify the job type
         doAnswer((answer -> {

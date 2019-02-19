@@ -13,12 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -51,12 +49,16 @@ public class GroupResource extends AbstractGroupResource {
         logger.debug("Exporting data for provider: {}", providerID);
 
         // Get a list of attributed beneficiaries
-        final Set<String> attributedBeneficiaries = this.client.getAttributedBeneficiaries(providerID);
+        final Optional<Set<String>> attributedBeneficiaries = this.client.getAttributedBeneficiaries(providerID);
+
+        if (attributedBeneficiaries.isEmpty()) {
+            throw new WebApplicationException(String.format("Unable to get attributed patients for provider:", providerID), Response.Status.NOT_FOUND);
+        }
 
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
 
-        this.queue.submitJob(jobID, new JobModel(providerID, attributedBeneficiaries));
+        this.queue.submitJob(jobID, new JobModel(providerID, attributedBeneficiaries.get()));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create("http://localhost:3002/v1/Jobs/" + jobID)).build();

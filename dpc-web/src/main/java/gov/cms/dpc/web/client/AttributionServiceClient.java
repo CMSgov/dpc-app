@@ -13,6 +13,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import java.util.Optional;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
@@ -30,7 +31,7 @@ public class AttributionServiceClient implements AttributionEngine {
     }
 
     @Override
-    public Set<String> getAttributedBeneficiaries(String providerID) {
+    public Optional<Set<String>> getAttributedBeneficiaries(String providerID) {
         final Invocation invocation = this.client
                 .path(String.format("Group/%s", providerID))
                 .request(FHIRMediaTypes.FHIR_JSON)
@@ -40,7 +41,7 @@ public class AttributionServiceClient implements AttributionEngine {
                 throw new WebApplicationException(response.getStatusInfo().getReasonPhrase(), HttpStatus.INTERNAL_SERVER_ERROR_500);
             }
 
-            return (Set<String>) response.readEntity(Set.class);
+            return Optional.of((Set<String>) response.readEntity(Set.class));
         } catch (Exception e) {
             throw new WebApplicationException(e, HttpStatus.INTERNAL_SERVER_ERROR_500);
         }

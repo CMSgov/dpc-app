@@ -8,11 +8,13 @@ import java.util.Objects;
 @Entity(name = "attributions")
 @NamedQueries({
         @NamedQuery(name = "findByProvider", query = "from attributions a where a.providerID = :id"),
-        @NamedQuery(name = "findRelationshipID", query = "select id from attributions a where a.providerID = :provID and a.attributedPatient = :patID")
+        @NamedQuery(name = "findRelationship", query = "from attributions a where a.providerID = :provID and a.attributedPatient = :patID"),
+        @NamedQuery(name = "getProvider", query = "select 1 from attributions a where a.providerID = :provID")
 })
 public class AttributionRelationship {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long attributionID;
 

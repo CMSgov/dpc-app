@@ -22,10 +22,8 @@ public class LocalAttributionEngine implements AttributionEngine {
     }
 
     @Override
-    public synchronized Set<String> getAttributedBeneficiaries(String providerID) {
-        return Objects.requireNonNullElseGet(
-                this.attributionMap.get(providerID),
-                HashSet::new);
+    public synchronized Optional<Set<String>> getAttributedBeneficiaries(String providerID) {
+        return Optional.ofNullable(this.attributionMap.get(providerID));
     }
 
     @Override
