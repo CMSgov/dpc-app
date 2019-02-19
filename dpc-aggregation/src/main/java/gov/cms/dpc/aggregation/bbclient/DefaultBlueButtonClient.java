@@ -56,7 +56,6 @@ public class DefaultBlueButtonClient implements BlueButtonCliet {
 
             ctx.getRestfulClientFactory().setHttpClient(mutualTlsHttpClient);
             IGenericClient client = ctx.newRestfulGenericClient(this.serverBaseUrl);
-            // TODO: Handle case of patient not found for query ID
             patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
 
         } catch (FileNotFoundException ex){
