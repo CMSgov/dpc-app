@@ -1,6 +1,5 @@
 package gov.cms.dpc.web;
 
-import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
@@ -12,10 +11,8 @@ import gov.cms.dpc.web.resources.TestResource;
 import gov.cms.dpc.web.resources.v1.BaseResource;
 import gov.cms.dpc.web.resources.v1.GroupResource;
 import gov.cms.dpc.web.resources.v1.JobResource;
-import io.dropwizard.client.HttpClientBuilder;
 import io.dropwizard.client.JerseyClientBuilder;
 
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
 public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
@@ -29,7 +26,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
 
         // Clients
         binder.bind(AttributionEngine.class)
-        .to(AttributionServiceClient.class);
+                .to(AttributionServiceClient.class);
 
         // This will eventually go away.
         binder.bind(AggregationEngine.class);
@@ -49,10 +46,5 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
                 .build("service-provider")
                 // FIXME(nickrobison): This needs to fixed and pulled from the config
                 .target("http://localhost:3272/v1/");
-    }
-
-    @Provides
-    public FhirContext provideContext() {
-        return FhirContext.forR4();
     }
 }

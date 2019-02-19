@@ -28,14 +28,6 @@ public class FHIRSubmissionTest {
     private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue)).build();
     private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue)).build();
 
-
-    // This is required for Guice to load correctly. Not entirely sure why
-//     https://github.com/dropwizard/dropwizard/issues/1772
-    @BeforeAll
-    public static void setup() {
-        JerseyGuiceUtils.reset();
-    }
-
     @Test
     public void testDataRequest() {
 
