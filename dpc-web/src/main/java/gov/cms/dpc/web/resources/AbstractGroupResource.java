@@ -3,7 +3,6 @@ package gov.cms.dpc.web.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -19,5 +18,5 @@ public abstract class AbstractGroupResource {
 
     @Path("/{providerID}/$export")
     @GET
-    public abstract Response export(@PathParam("providerID") String groupID, HttpServletRequest req);
+    public abstract Response export(@PathParam("providerID") String groupID);
 }
