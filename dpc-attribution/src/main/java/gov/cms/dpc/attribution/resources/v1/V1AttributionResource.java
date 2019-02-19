@@ -12,9 +12,10 @@ public class V1AttributionResource extends AbstractAttributionResource {
     private final GroupResource gr;
 
     @Inject
-    public V1AttributionResource(GroupResource gr) { ;
+    public V1AttributionResource(GroupResource gr) {
         this.gr = gr;
     }
+
     @Override
     public AbstractGroupResource groupOperations() {
         return gr;
