@@ -2,8 +2,8 @@ package gov.cms.dpc.attribution;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
-import gov.cms.dpc.attribution.engine.AttributionEngineModule;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -24,9 +24,11 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void initialize(Bootstrap<DPCAttributionConfiguration> bootstrap) {
+        // This is required for Guice to load correctly. Not entirely sure why
+        // https://github.com/dropwizard/dropwizard/issues/1772
+        JerseyGuiceUtils.reset();
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
                 .modules(new AttributionAppModule(),
-                        new AttributionEngineModule(),
                         new FHIRModule())
                 .build();
 

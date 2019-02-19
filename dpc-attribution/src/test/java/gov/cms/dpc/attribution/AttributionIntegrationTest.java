@@ -12,6 +12,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,19 +26,23 @@ public class AttributionIntegrationTest {
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
 
     @BeforeAll
-    public static void setup() throws Exception {
+    public static void setup() {
         APPLICATION.before();
+    }
+
+    @BeforeEach
+    public void initDB() throws Exception {
         APPLICATION.getApplication().run("db", "migrate");
         APPLICATION.getApplication().run("seed");
     }
 
-    @BeforeEach()
-    public void migrateAndSeed() throws Exception {
-
+    @AfterAll
+    public static void shudown() {
+        APPLICATION.after();
     }
 
     @Test
-    public void test() throws IOException {
+    public void testBasicAttributionFunctionality() throws IOException {
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
 
@@ -104,10 +109,21 @@ public class AttributionIntegrationTest {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
             }
         }
-
-
-
     }
+
+    @Test
+    public void testUnknownProvider() throws IOException {
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf827b");
+            httpGet.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                assertEquals(HttpStatus.NOT_FOUND_404, response.getStatusLine().getStatusCode(), "Should have failed");
+            }
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
     private static <T> List<T> UnmarshallResponse(HttpEntity entity) throws IOException {

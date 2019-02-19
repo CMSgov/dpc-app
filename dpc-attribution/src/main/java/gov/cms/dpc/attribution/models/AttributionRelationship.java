@@ -5,10 +5,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.persistence.*;
 import java.util.Objects;
 
-@Entity
+@Entity(name = "attributions")
 @NamedQueries({
-        @NamedQuery(name = "findByProvider", query = "select * from attributions where provider_id = :id"),
-        @NamedQuery(name = "findRelationshipID", query = "select id from attributions where provider_id = :provID and patient_id = :patID")
+        @NamedQuery(name = "findByProvider", query = "from attributions a where a.providerID = :id"),
+        @NamedQuery(name = "findRelationshipID", query = "select id from attributions a where a.providerID = :provID and a.attributedPatient = :patID")
 })
 public class AttributionRelationship {
 
@@ -25,6 +25,7 @@ public class AttributionRelationship {
     private String attributedPatient;
 
     public AttributionRelationship() {
+        // Not used
     }
 
     public AttributionRelationship(String providerID, String attributedPatients) {

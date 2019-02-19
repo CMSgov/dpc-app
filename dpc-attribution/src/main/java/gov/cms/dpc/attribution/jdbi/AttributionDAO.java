@@ -15,9 +15,12 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public class AttributionDAO extends AbstractDAO<AttributionRelationship> implements AttributionEngine {
 
+    private final SessionFactory factory;
+
     @Inject
     public AttributionDAO(SessionFactory factory) {
         super(factory);
+        this.factory = factory;
     }
 
     public long createAttibutionRelationship(AttributionRelationship relationship) {
@@ -26,7 +29,7 @@ public class AttributionDAO extends AbstractDAO<AttributionRelationship> impleme
 
     @Override
     public Set<String> getAttributedBeneficiaries(String providerID) {
-        final Query query = namedQuery("gov.cms.dpc.attribution.models.AttributionRelationship.findByProvider")
+        final Query query = namedQuery("findByProvider")
                 .setParameter("id", providerID);
 
         List<AttributionRelationship> patients = list(query);
@@ -54,7 +57,7 @@ public class AttributionDAO extends AbstractDAO<AttributionRelationship> impleme
     }
 
     private Optional<AttributionRelationship> findAttribution(String providerID, String beneficiaryID) {
-        final Query query = namedQuery("gov.cms.dpc.attribution.AttributionRelationship.findProvider");
+        final Query query = namedQuery("findProvider");
         query.setParameter("provID", providerID);
         query.setParameter("patID", beneficiaryID);
         return Optional.ofNullable(uniqueResult(query));
