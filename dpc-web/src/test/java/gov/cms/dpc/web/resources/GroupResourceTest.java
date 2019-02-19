@@ -46,7 +46,6 @@ public class GroupResourceTest extends AbstractApplicationTest {
                 .withNoParameters(Parameters.class)
                 .useHttpGet();
 
-
         assertThrows(NonFhirResponseException.class, execute::execute, "Should throw exception, but accept JSON request");
 
         // Try again, but use a different encoding

@@ -13,6 +13,7 @@ import gov.cms.dpc.web.resources.v1.GroupResource;
 import gov.cms.dpc.web.resources.v1.JobResource;
 import io.dropwizard.client.JerseyClientBuilder;
 
+import javax.inject.Singleton;
 import javax.ws.rs.client.WebTarget;
 
 public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
@@ -40,6 +41,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
 
     @Provides
     @AttributionService
+    @Singleton
     public WebTarget provideHttpClient() {
         return new JerseyClientBuilder(getEnvironment())
                 .using(getConfiguration().getHttpClient())

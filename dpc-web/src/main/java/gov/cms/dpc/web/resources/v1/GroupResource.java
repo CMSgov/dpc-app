@@ -1,7 +1,9 @@
 package gov.cms.dpc.web.resources.v1;
 
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.web.client.AttributionServiceClient;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HumanName;
@@ -11,14 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -27,10 +28,12 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
     private final JobQueue queue;
+    private final AttributionEngine client;
 
     @Inject
-    public GroupResource(JobQueue queue) {
+    public GroupResource(JobQueue queue, AttributionEngine client) {
         this.queue = queue;
+        this.client = client;
     }
 
     /**
@@ -39,19 +42,21 @@ public class GroupResource extends AbstractGroupResource {
      * The `Content-Location` header contains the URI to call when
      *
      * @param providerID {@link String} ID of provider to retrieve data for
-     * @param req
      * @return - {@link org.hl7.fhir.r4.model.OperationOutcome} specifying whether or not the request was successful.
      */
     @Override
     @Path("/{providerID}/$export")
     @GET // Need this here, since we're using a path param
-    public Response export(@PathParam("providerID") String providerID, @Context HttpServletRequest req) {
+    public Response export(@PathParam("providerID") String providerID) {
         logger.debug("Exporting data for provider: {}", providerID);
+
+        // Get a list of attributed beneficiaries
+        final Set<String> attributedBeneficiaries = this.client.getAttributedBeneficiaries(providerID);
 
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
 
-        this.queue.submitJob(jobID, new JobModel(providerID));
+        this.queue.submitJob(jobID, new JobModel(providerID, attributedBeneficiaries));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create("http://localhost:3002/v1/Jobs/" + jobID)).build();
