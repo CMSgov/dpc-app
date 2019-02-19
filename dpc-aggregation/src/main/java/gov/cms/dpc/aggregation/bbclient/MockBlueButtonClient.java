@@ -1,6 +1,6 @@
 package gov.cms.dpc.aggregation.bbclient;
 
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
 
 public class MockBlueButtonClient implements BlueButtonCliet {
 
@@ -8,7 +8,7 @@ public class MockBlueButtonClient implements BlueButtonCliet {
 
     }
 
-    public Bundle requestFhirBundle(String beneficiaryId) {
+    public Patient requestFhirFromServer(String beneficiaryId) {
         // TODO
         return null;
     }

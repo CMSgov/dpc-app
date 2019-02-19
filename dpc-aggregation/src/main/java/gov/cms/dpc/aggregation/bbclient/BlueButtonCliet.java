@@ -1,8 +1,8 @@
 package gov.cms.dpc.aggregation.bbclient;
 
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
 
 public interface BlueButtonCliet {
 
-    public Bundle requestFhirBundle(String BeneficiaryID) throws BlueButtonClientException;
+    public Patient requestFhirFromServer(String BeneficiaryID) throws BlueButtonClientException;
 }
