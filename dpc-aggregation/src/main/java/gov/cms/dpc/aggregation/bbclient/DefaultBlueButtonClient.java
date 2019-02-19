@@ -2,11 +2,12 @@ package gov.cms.dpc.aggregation.bbclient;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.aggregation.AggregationEngine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,6 @@ public class DefaultBlueButtonClient implements BlueButtonCliet {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
     private static final String KEY_STORE_TYPE = "JKS";
     private static final String DEFAULT_KEY_STORE_PASSWORD = "changeit";
-    private static final String SEARCH_URL = "ExplanationOfBenefit";
 
     private String serverBaseUrl;
 
@@ -36,13 +36,13 @@ public class DefaultBlueButtonClient implements BlueButtonCliet {
         }
     }
 
-    public Bundle requestFhirBundle(String beneficiaryID) throws BlueButtonClientException {
+    public Patient requestFhirFromServer(String beneficiaryID) throws BlueButtonClientException {
         // From http://hapifhir.io/doc_rest_client.html
-        Bundle results;
+        Patient patient;
         String keyStorePath = System.getProperty("javax.net.ssl.keyStore");
 
         try {
-
+            // Need to build a custom HttpClient to handle mutual TLS authentication
             InputStream keyStoreStream = new FileInputStream(keyStorePath);
             KeyStore keyStore = KeyStore.getInstance(KEY_STORE_TYPE);
             keyStore.load(keyStoreStream, DEFAULT_KEY_STORE_PASSWORD.toCharArray());
@@ -56,10 +56,8 @@ public class DefaultBlueButtonClient implements BlueButtonCliet {
 
             ctx.getRestfulClientFactory().setHttpClient(mutualTlsHttpClient);
             IGenericClient client = ctx.newRestfulGenericClient(this.serverBaseUrl);
-            results = client.search()
-                    .byUrl(buildSearchUrl(beneficiaryID))
-                    .returnBundle(Bundle.class)
-                    .execute();
+            // TODO: Handle case of patient not found for query ID
+            patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
 
         } catch (FileNotFoundException ex){
             throw new BlueButtonClientException("Could not find keystore at location: " + keyStorePath, ex);
@@ -72,13 +70,15 @@ public class DefaultBlueButtonClient implements BlueButtonCliet {
             );
         } catch (KeyManagementException ex){
             throw new BlueButtonClientException("Error loading the keystore", ex);
+        } catch (ResourceNotFoundException ex) {
+            throw new BlueButtonClientException("Could not find beneficiary with ID: " + beneficiaryID, ex);
         }
 
-        return results;
+        return patient;
     }
 
     private String buildSearchUrl(String patientId){
-        return String.format("%s?patient=%s", SEARCH_URL, patientId);
+        return String.format("%sPatient/%s", this.serverBaseUrl, patientId);
     }
 
 }

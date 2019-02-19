@@ -1,8 +1,10 @@
 package gov.cms.dpc.aggregation.bbclient;
 
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,10 +20,15 @@ class BlueButtonClientTest {
 
     @Test
     void testGetFHIRFromBeneficiaryID() throws BlueButtonClientException {
-        Bundle ret = bbc.requestFhirBundle(TEST_BENEFICIARY_ID);
+        Patient ret = bbc.requestFhirFromServer(TEST_BENEFICIARY_ID);
+
+        // Verify basic demo patient information
         assertNotEquals(ret, null);
-        System.out.println("Identifier: " + ret.getIdentifier().getValue());
-        System.out.println("Resource Type: " + ret.getResourceType());
-        System.out.println("FHIR Type: " + ret.fhirType());
+        assertEquals(ret.getBirthDate(), Date.valueOf("2014-06-01"));
+        assertEquals(ret.getGender().getDisplay(), "Unknown");
+        assertEquals(ret.getName().size(), 1);
+        assertEquals(ret.getName().get(0).getFamily(), "Doe");
+        assertEquals(ret.getName().get(0).getGiven().get(0).toString(), "Jane");
     }
+
 }
