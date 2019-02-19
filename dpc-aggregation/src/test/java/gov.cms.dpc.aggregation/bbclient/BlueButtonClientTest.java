@@ -20,7 +20,7 @@ class BlueButtonClientTest {
 
     @Test
     void testGetFHIRFromBeneficiaryID() throws BlueButtonClientException {
-        Patient ret = bbc.requestFhirFromServer(TEST_BENEFICIARY_ID);
+        Patient ret = bbc.requestFHIRFromServer(TEST_BENEFICIARY_ID);
 
         // Verify basic demo patient information
         assertNotEquals(ret, null);
