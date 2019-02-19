@@ -1,10 +1,11 @@
 package gov.cms.dpc.common.interfaces;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface AttributionEngine {
 
-    Set<String> getAttributedBeneficiaries(String providerID);
+    Optional<Set<String>> getAttributedBeneficiaries(String providerID);
 
     void addAttributionRelationship(String providerID, String beneficiaryID);
 

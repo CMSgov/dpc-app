@@ -42,10 +42,16 @@ public class AggregationEngine<T> implements Runnable {
             } else {
                 final JobModel model = (JobModel) uuid.get().getRight();
                 logger.debug("Has job {}. Working.", uuid.get().getLeft());
-                final Set<String> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
-                logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-                // Job is done
-                this.queue.completeJob(uuid.get().getLeft(), JobStatus.COMPLETED);
+                final Optional<Set<String>> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
+                if (attributedBeneficiaries.isPresent()) {
+                    logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.get().size());
+                    // Job is done
+                    this.queue.completeJob(uuid.get().getLeft(), JobStatus.COMPLETED);
+                } else {
+                    this.queue.completeJob(uuid.get().getLeft(), JobStatus.FAILED);
+                }
+
+
             }
         }
         logger.info("Shutting down aggregation engine");

@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.Optional;
 import java.util.Set;
 
 public class GroupResource extends AbstractGroupResource {
@@ -27,7 +29,12 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @UnitOfWork
     public Set<String> getAttributedPatients(@PathParam("groupID") String groupID) {
-        return engine.getAttributedBeneficiaries(groupID);
+        final Optional<Set<String>> attributedBeneficiaries = engine.getAttributedBeneficiaries(groupID);
+        if (attributedBeneficiaries.isEmpty()) {
+            throw new WebApplicationException(String.format("Unable to find provider: {}", groupID), Response.Status.NOT_FOUND);
+        }
+
+        return attributedBeneficiaries.get();
     }
 
     @Path("/{groupID}/{patientID}")
