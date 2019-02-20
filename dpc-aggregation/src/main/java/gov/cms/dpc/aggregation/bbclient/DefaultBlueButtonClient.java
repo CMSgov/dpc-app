@@ -4,13 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
@@ -30,26 +30,25 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     private IGenericClient client;
 
     @Inject
-    public DefaultBlueButtonClient(){
-        Config conf = ConfigFactory.load();
+    public DefaultBlueButtonClient(Config conf) {
         String keyStoreType = conf.getString("aggregation.bbclient.keyStore.type");
         String defaultKeyStorePassword = conf.getString("aggregation.bbclient.keyStore.defaultPassword");
 
         try {
             serverBaseUrl = new URL(conf.getString("aggregation.bbclient.serverBaseUrl"));
 
-        } catch(MalformedURLException ex){
+        } catch (MalformedURLException ex) {
             throw new BlueButtonClientException("Malformed base URL for bluebutton server", ex);
         }
 
-        String keyStorePath = System.getProperty("javax.net.ssl.keyStore");
-        if(keyStorePath == null || keyStorePath.isEmpty()){
-            throw new BlueButtonClientException("javax.net.ssl.keyStore option is empty, cannot find keystore.",
+        String keyStorePath = conf.getString("aggregation.bbclient.keyStore.location");
+        if (keyStorePath == null || keyStorePath.isEmpty()) {
+            throw new BlueButtonClientException("KeyStore location is empty, cannot find keyStore.",
                     new IllegalStateException()
             );
         }
 
-        try (InputStream keyStoreStream = new FileInputStream(keyStorePath)){
+        try (InputStream keyStoreStream = new FileInputStream(keyStorePath)) {
             // Need to build a custom HttpClient to handle mutual TLS authentication
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
@@ -64,16 +63,16 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             ctx.getRestfulClientFactory().setHttpClient(mutualTlsHttpClient);
             client = ctx.newRestfulGenericClient(serverBaseUrl.toString());
 
-        } catch (FileNotFoundException ex){
+        } catch (FileNotFoundException ex) {
             throw new BlueButtonClientException("Could not find keystore at location: " + keyStorePath, ex);
-        } catch (KeyStoreException ex){
+        } catch (KeyStoreException ex) {
             throw new BlueButtonClientException("Wrong keystore type: " + keyStoreType, ex);
         } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException ex) {
             throw new BlueButtonClientException(
                     "Error reading the keystore: either the default password is wrong or the keystore has been corrupted",
                     ex
             );
-        } catch (KeyManagementException ex){
+        } catch (KeyManagementException ex) {
             throw new BlueButtonClientException("Error loading the keystore", ex);
         }
     }
@@ -84,7 +83,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         try {
             patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
 
-        } catch (MalformedURLException ex){
+        } catch (MalformedURLException ex) {
             throw new BlueButtonClientException(
                     "There was an error building the URL from the patientID: " + beneficiaryID,
                     ex

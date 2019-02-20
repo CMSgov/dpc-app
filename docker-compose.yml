@@ -21,5 +21,6 @@ services:
     environment:
       - attributionURL=http://attribution:8080/v1/
       - logging.level=DEBUG
+      - aggregation.bbclient.keyStore.location=/bb.keystore
     depends_on:
       - attribution
