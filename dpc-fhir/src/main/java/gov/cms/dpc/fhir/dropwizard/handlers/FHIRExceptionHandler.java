@@ -1,7 +1,7 @@
-package gov.cms.dpc.web.handlers;
+package gov.cms.dpc.fhir.dropwizard.handlers;
 
-import gov.cms.dpc.web.core.FHIRMediaTypes;
-import gov.cms.dpc.web.core.annotations.FHIR;
+import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -48,7 +48,7 @@ public class FHIRExceptionHandler extends LoggingExceptionMapper<Throwable> {
     }
 
     private boolean isFHIRResource() {
-        return this.info.getResourceClass().getAnnotation(FHIR.class) != null ||
-                this.info.getResourceMethod().getAnnotation(FHIR.class) != null;
+        return (this.info.getResourceClass() != null && this.info.getResourceClass().getAnnotation(FHIR.class) != null) ||
+                (this.info.getResourceMethod() != null && this.info.getResourceMethod().getAnnotation(FHIR.class) != null);
     }
 }

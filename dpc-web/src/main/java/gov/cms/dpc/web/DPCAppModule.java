@@ -1,33 +1,33 @@
 package gov.cms.dpc.web;
 
-import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.aggregation.AggregationEngine;
-import gov.cms.dpc.web.features.FHIRRequestFeature;
-import gov.cms.dpc.web.handlers.FHIRExceptionHandler;
-import gov.cms.dpc.web.handlers.FHIRHandler;
+import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.web.annotations.AttributionService;
+import gov.cms.dpc.web.client.AttributionServiceClient;
 import gov.cms.dpc.web.resources.TestResource;
 import gov.cms.dpc.web.resources.v1.BaseResource;
 import gov.cms.dpc.web.resources.v1.GroupResource;
 import gov.cms.dpc.web.resources.v1.JobResource;
+import io.dropwizard.client.JerseyClientBuilder;
+
+import javax.inject.Singleton;
+import javax.ws.rs.client.WebTarget;
 
 public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
 
-    private final FhirContext context;
-
     DPCAppModule() {
-        this.context = FhirContext.forR4();
+        // Not used
     }
 
     @Override
     public void configure(Binder binder) {
 
-        // Request/Response handlers
-        binder.bind(FHIRHandler.class);
-        binder.bind(FHIRExceptionHandler.class);
-        binder.bind(FHIRRequestFeature.class);
+        // Clients
+        binder.bind(AttributionEngine.class)
+                .to(AttributionServiceClient.class);
 
         // This will eventually go away.
         binder.bind(AggregationEngine.class);
@@ -40,7 +40,13 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
     }
 
     @Provides
-    FhirContext getFHIRContext() {
-        return this.context;
+    @AttributionService
+    @Singleton
+    public WebTarget provideHttpClient() {
+        return new JerseyClientBuilder(getEnvironment())
+                .using(getConfiguration().getHttpClient())
+                .build("service-provider")
+                // FIXME(nickrobison): This needs to fixed and pulled from the config
+                .target("http://localhost:3272/v1/");
     }
 }

@@ -1,39 +1,62 @@
 package gov.cms.dpc.web;
 
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
+import gov.cms.dpc.web.client.AttributionServiceClient;
 import gov.cms.dpc.web.resources.v1.GroupResource;
 import gov.cms.dpc.web.resources.v1.JobResource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.UUID;
 
-import static gov.cms.dpc.web.core.FHIRMediaTypes.FHIR_JSON;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Verifies the a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRSubmissionTest {
-    private final JobQueue queue = new MemoryQueue();
-    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue)).build();
+    private final JobQueue queue = spy(MemoryQueue.class);
+    private final AttributionServiceClient client = mock(AttributionServiceClient.class);
+    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client)).build();
     private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue)).build();
 
 
-    // This is required for Guice to load correctly. Not entirely sure why
-//     https://github.com/dropwizard/dropwizard/issues/1772
-    @BeforeAll
-    public static void setup() {
-        JerseyGuiceUtils.reset();
+    // Test data
+    private HashSet<String> testBeneficiaries = new HashSet<>(Arrays.asList("1", "2", "3", "4"));
+    private final JobModel testJobModel = new JobModel("1", testBeneficiaries);
+
+    @BeforeEach()
+    public void resetMocks() {
+        reset(client);
+        reset(queue);
+
+        // Mock the attribution call
+        Mockito.when(client.getAttributedBeneficiaries(Mockito.anyString()))
+                .thenReturn(Optional.of(testBeneficiaries));
+
+        // Mock the submission call to verify the job type
+        doAnswer((answer -> {
+            final JobModel data = answer.getArgument(1);
+            assertEquals(testJobModel, data, "Should have 4 beneies");
+            return answer.callRealMethod();
+        }))
+                .when(queue).submitJob(Mockito.any(UUID.class), Mockito.any(JobModel.class));
     }
 
     @Test

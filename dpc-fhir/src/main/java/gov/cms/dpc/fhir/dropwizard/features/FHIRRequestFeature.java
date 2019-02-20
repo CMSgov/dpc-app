@@ -1,7 +1,7 @@
-package gov.cms.dpc.web.features;
+package gov.cms.dpc.fhir.dropwizard.features;
 
-import gov.cms.dpc.web.core.annotations.FHIR;
-import gov.cms.dpc.web.filters.FHIRRequestFilter;
+import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.dropwizard.filters.FHIRRequestFilter;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.DynamicFeature;

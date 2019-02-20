@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution;
+package gov.cms.dpc.attribution.engine;
 
 public interface AttributionSeeder {
 
