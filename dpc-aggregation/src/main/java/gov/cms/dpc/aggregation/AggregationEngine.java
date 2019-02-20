@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation;
 
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -19,12 +20,14 @@ public class AggregationEngine<T> implements Runnable {
 
     private final AttributionEngine engine;
     private final JobQueue queue;
+    private final BlueButtonClient bbclient;
     private volatile boolean run = true;
 
     @Inject
-    public AggregationEngine(AttributionEngine engine, JobQueue queue) {
+    public AggregationEngine(AttributionEngine engine, JobQueue queue, BlueButtonClient bbclient) {
         this.engine = engine;
         this.queue = queue;
+        this.bbclient = bbclient;
     }
 
     @Override
