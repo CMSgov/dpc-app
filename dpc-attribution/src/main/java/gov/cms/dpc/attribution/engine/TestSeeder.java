@@ -1,5 +1,6 @@
-package gov.cms.dpc.attribution;
+package gov.cms.dpc.attribution.engine;
 
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,13 +14,13 @@ import java.util.MissingResourceException;
 
 public class TestSeeder implements AttributionSeeder {
 
-    private static final String CSV = "test_associations.csv";
     private final Logger logger = LoggerFactory.getLogger(TestSeeder.class);
+    private static final String CSV = "test_associations.csv";
 
     private final AttributionEngine engine;
 
     @Inject
-    TestSeeder(AttributionEngine engine) {
+    public TestSeeder(AttributionEngine engine) {
         this.engine = engine;
         this.seedAttribution();
     }

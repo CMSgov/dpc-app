@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation;
 
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
-import gov.cms.dpc.attribution.AttributionEngine;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -45,10 +45,16 @@ public class AggregationEngine<T> implements Runnable {
             } else {
                 final JobModel model = (JobModel) uuid.get().getRight();
                 logger.debug("Has job {}. Working.", uuid.get().getLeft());
-                final Set<String> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
-                logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-                // Job is done
-                this.queue.completeJob(uuid.get().getLeft(), JobStatus.COMPLETED);
+                final Optional<Set<String>> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
+                if (attributedBeneficiaries.isPresent()) {
+                    logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.get().size());
+                    // Job is done
+                    this.queue.completeJob(uuid.get().getLeft(), JobStatus.COMPLETED);
+                } else {
+                    this.queue.completeJob(uuid.get().getLeft(), JobStatus.FAILED);
+                }
+
+
             }
         }
         logger.info("Shutting down aggregation engine");

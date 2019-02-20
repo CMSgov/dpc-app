@@ -1,4 +1,4 @@
-package gov.cms.dpc.web;
+package gov.cms.dpc.web.resources;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import gov.cms.dpc.web.AbstractApplicationTest;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Simple integration tests for Group resource
  */
-public class GroupIntegrationTest extends AbstractApplicationTest {
+public class GroupResourceTest extends AbstractApplicationTest {
 
     /**
      * Test that the group resource correctly accepts/rejects invalid content types.
@@ -44,7 +45,6 @@ public class GroupIntegrationTest extends AbstractApplicationTest {
                 .named("$export")
                 .withNoParameters(Parameters.class)
                 .useHttpGet();
-
 
         assertThrows(NonFhirResponseException.class, execute::execute, "Should throw exception, but accept JSON request");
 

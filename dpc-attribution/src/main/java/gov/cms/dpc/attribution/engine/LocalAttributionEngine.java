@@ -1,5 +1,6 @@
-package gov.cms.dpc.attribution;
+package gov.cms.dpc.attribution.engine;
 
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +22,8 @@ public class LocalAttributionEngine implements AttributionEngine {
     }
 
     @Override
-    public synchronized Set<String> getAttributedBeneficiaries(String providerID) {
-        return Objects.requireNonNullElseGet(
-                this.attributionMap.get(providerID),
-                HashSet::new);
+    public synchronized Optional<Set<String>> getAttributedBeneficiaries(String providerID) {
+        return Optional.ofNullable(this.attributionMap.get(providerID));
     }
 
     @Override
@@ -51,5 +50,15 @@ public class LocalAttributionEngine implements AttributionEngine {
         final boolean removed = attributedBeneficiaries.remove(beneficiaryID);
         logger.debug("Removed {} from {}? {}", beneficiaryID, providerID, removed);
         this.attributionMap.put(beneficiaryID, attributedBeneficiaries);
+    }
+
+    @Override
+    public boolean isAttributed(String providerID, String beneficiaryID) {
+        final Set<String> attributedBeneficiaries = this.attributionMap.get(providerID);
+        if (attributedBeneficiaries != null) {
+            return attributedBeneficiaries.contains(beneficiaryID);
+        }
+
+        return false;
     }
 }

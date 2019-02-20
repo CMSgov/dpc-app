@@ -1,6 +1,6 @@
-package gov.cms.dpc.web.core.annotations;
+package gov.cms.dpc.fhir.annotations;
 
-import gov.cms.dpc.web.core.FHIRMediaTypes;
+import gov.cms.dpc.fhir.FHIRMediaTypes;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
