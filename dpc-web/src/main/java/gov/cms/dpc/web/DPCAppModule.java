@@ -12,11 +12,15 @@ import gov.cms.dpc.web.resources.v1.BaseResource;
 import gov.cms.dpc.web.resources.v1.GroupResource;
 import gov.cms.dpc.web.resources.v1.JobResource;
 import io.dropwizard.client.JerseyClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 import javax.ws.rs.client.WebTarget;
 
 public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
+
+    private static final Logger logger = LoggerFactory.getLogger(DPCAppModule.class);
 
     DPCAppModule() {
         // Not used
@@ -43,10 +47,10 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
     @AttributionService
     @Singleton
     public WebTarget provideHttpClient() {
+        logger.debug("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
         return new JerseyClientBuilder(getEnvironment())
                 .using(getConfiguration().getHttpClient())
-                .build("service-provider")
-                // FIXME(nickrobison): This needs to fixed and pulled from the config
-                .target("http://localhost:3272/v1/");
+                .build("attribution-service")
+                .target(getConfiguration().getAttributionURL());
     }
 }
