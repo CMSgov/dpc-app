@@ -3,13 +3,15 @@ package gov.cms.dpc.aggregation.bbclient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,18 +23,17 @@ import java.security.cert.CertificateException;
 public class DefaultBlueButtonClient implements BlueButtonClient {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
-    private static final String KEY_STORE_TYPE = "JKS";
-    private static final String DEFAULT_KEY_STORE_PASSWORD = "changeit";
 
     private String serverBaseUrl;
+    private String keyStoreType;
+    private String defaultKeyStorePassword;
 
-    public DefaultBlueButtonClient(String blueButtonServerBaseUrl){
-        // Add slash to end of URL if it doesn't already exist
-        if (blueButtonServerBaseUrl.endsWith("/")){
-            this.serverBaseUrl = blueButtonServerBaseUrl;
-        } else {
-            this.serverBaseUrl = blueButtonServerBaseUrl + "/";
-        }
+    @Inject
+    public DefaultBlueButtonClient(){
+        Config conf = ConfigFactory.load();
+        keyStoreType = conf.getString("aggregation.bbclient.keyStore.type");
+        defaultKeyStorePassword = conf.getString("aggregation.bbclient.keyStore.defaultPassword");
+        serverBaseUrl = conf.getString("aggregation.bbclient.serverBaseUrl");
     }
 
     public Patient requestFHIRFromServer(String beneficiaryID) throws BlueButtonClientException {
@@ -48,11 +49,11 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
 
         try (InputStream keyStoreStream = new FileInputStream(keyStorePath)){
             // Need to build a custom HttpClient to handle mutual TLS authentication
-            KeyStore keyStore = KeyStore.getInstance(KEY_STORE_TYPE);
-            keyStore.load(keyStoreStream, DEFAULT_KEY_STORE_PASSWORD.toCharArray());
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
 
             SSLContext sslContext = SSLContexts.custom()
-                    .loadKeyMaterial(keyStore, DEFAULT_KEY_STORE_PASSWORD.toCharArray())
+                    .loadKeyMaterial(keyStore, defaultKeyStorePassword.toCharArray())
                     .build();
 
             HttpClient mutualTlsHttpClient = HttpClients.custom().setSSLContext(sslContext).build();
@@ -61,11 +62,11 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             ctx.getRestfulClientFactory().setHttpClient(mutualTlsHttpClient);
             IGenericClient client = ctx.newRestfulGenericClient(this.serverBaseUrl);
             patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
-            
+
         } catch (FileNotFoundException ex){
             throw new BlueButtonClientException("Could not find keystore at location: " + keyStorePath, ex);
         } catch (KeyStoreException ex){
-            throw new BlueButtonClientException("Wrong keystore type: " + KEY_STORE_TYPE, ex);
+            throw new BlueButtonClientException("Wrong keystore type: " + keyStoreType, ex);
         } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException ex) {
             throw new BlueButtonClientException(
                     "Error reading the keystore: either the default password is wrong or the keystore has been corrupted",

@@ -9,13 +9,12 @@ import java.sql.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BlueButtonClientTest {
-    private static final String TEST_BLUEBUTTON_ENDPOINT = "https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir/";
     private static final String TEST_BENEFICIARY_ID = "20140000008325";
     private DefaultBlueButtonClient bbc;
 
     @BeforeEach
     public void setupBlueButtonClient(){
-        bbc = new DefaultBlueButtonClient(TEST_BLUEBUTTON_ENDPOINT);
+        bbc = new DefaultBlueButtonClient();
     }
 
     @Test

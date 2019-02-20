@@ -2,6 +2,7 @@ package gov.cms.dpc.web;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
+import gov.cms.dpc.aggregation.bbclient.BlueButtonClientModule;
 import gov.cms.dpc.attribution.AttributionModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import gov.cms.dpc.web.features.FHIRRequestFeature;
@@ -23,7 +24,7 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
     @Override
     public void initialize(final Bootstrap<DPWebConfiguration> bootstrap) {
         GuiceBundle<DPWebConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPWebConfiguration.class)
-                .modules(new DPCAppModule(), new JobQueueModule(), new AttributionModule())
+                .modules(new DPCAppModule(), new JobQueueModule(), new AttributionModule(), new BlueButtonClientModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
