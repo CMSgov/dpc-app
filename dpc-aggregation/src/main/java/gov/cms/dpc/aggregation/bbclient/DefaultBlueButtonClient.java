@@ -25,22 +25,16 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
 
     private String serverBaseUrl;
-    private String keyStoreType;
-    private String defaultKeyStorePassword;
+    private IGenericClient client;
 
     @Inject
     public DefaultBlueButtonClient(){
         Config conf = ConfigFactory.load();
-        keyStoreType = conf.getString("aggregation.bbclient.keyStore.type");
-        defaultKeyStorePassword = conf.getString("aggregation.bbclient.keyStore.defaultPassword");
+        String keyStoreType = conf.getString("aggregation.bbclient.keyStore.type");
+        String defaultKeyStorePassword = conf.getString("aggregation.bbclient.keyStore.defaultPassword");
         serverBaseUrl = conf.getString("aggregation.bbclient.serverBaseUrl");
-    }
 
-    public Patient requestFHIRFromServer(String beneficiaryID) throws BlueButtonClientException {
-        // From http://hapifhir.io/doc_rest_client.html
-        Patient patient;
         String keyStorePath = System.getProperty("javax.net.ssl.keyStore");
-
         if(keyStorePath == null || keyStorePath.isEmpty()){
             throw new BlueButtonClientException("javax.net.ssl.keyStore option is empty, cannot find keystore.",
                     new IllegalStateException()
@@ -60,8 +54,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             FhirContext ctx = FhirContext.forDstu3();
 
             ctx.getRestfulClientFactory().setHttpClient(mutualTlsHttpClient);
-            IGenericClient client = ctx.newRestfulGenericClient(this.serverBaseUrl);
-            patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
+            client = ctx.newRestfulGenericClient(this.serverBaseUrl);
 
         } catch (FileNotFoundException ex){
             throw new BlueButtonClientException("Could not find keystore at location: " + keyStorePath, ex);
@@ -74,6 +67,16 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             );
         } catch (KeyManagementException ex){
             throw new BlueButtonClientException("Error loading the keystore", ex);
+        }
+    }
+
+    public Patient requestFHIRFromServer(String beneficiaryID) throws BlueButtonClientException {
+        // From http://hapifhir.io/doc_rest_client.html
+        Patient patient;
+
+        try {
+            patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
+
         } catch (ResourceNotFoundException ex) {
             throw new BlueButtonClientException("Could not find beneficiary with ID: " + beneficiaryID, ex);
         }
@@ -82,7 +85,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     }
 
     private String buildSearchUrl(String patientId){
-        return String.format("%sPatient/%s", this.serverBaseUrl, patientId);
+        return String.format("%sPatient/%s", serverBaseUrl, patientId);
     }
 
 }
