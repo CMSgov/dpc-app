@@ -17,6 +17,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateException;
 
@@ -24,7 +26,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
 
-    private String serverBaseUrl;
+    private URL serverBaseUrl;
     private IGenericClient client;
 
     @Inject
@@ -32,7 +34,13 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         Config conf = ConfigFactory.load();
         String keyStoreType = conf.getString("aggregation.bbclient.keyStore.type");
         String defaultKeyStorePassword = conf.getString("aggregation.bbclient.keyStore.defaultPassword");
-        serverBaseUrl = conf.getString("aggregation.bbclient.serverBaseUrl");
+
+        try {
+            serverBaseUrl = new URL(conf.getString("aggregation.bbclient.serverBaseUrl"));
+
+        } catch(MalformedURLException ex){
+            throw new BlueButtonClientException("Malformed base URL for bluebutton server", ex);
+        }
 
         String keyStorePath = System.getProperty("javax.net.ssl.keyStore");
         if(keyStorePath == null || keyStorePath.isEmpty()){
@@ -54,7 +62,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             FhirContext ctx = FhirContext.forDstu3();
 
             ctx.getRestfulClientFactory().setHttpClient(mutualTlsHttpClient);
-            client = ctx.newRestfulGenericClient(this.serverBaseUrl);
+            client = ctx.newRestfulGenericClient(serverBaseUrl.toString());
 
         } catch (FileNotFoundException ex){
             throw new BlueButtonClientException("Could not find keystore at location: " + keyStorePath, ex);
@@ -70,12 +78,17 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         }
     }
 
-    public Patient requestFHIRFromServer(String beneficiaryID) throws BlueButtonClientException {
-        // From http://hapifhir.io/doc_rest_client.html
+    public Patient requestFHIRFromServer(String beneficiaryID) {
         Patient patient;
 
         try {
             patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
+
+        } catch (MalformedURLException ex){
+            throw new BlueButtonClientException(
+                    "There was an error building the URL from the patientID: " + beneficiaryID,
+                    ex
+            );
 
         } catch (ResourceNotFoundException ex) {
             throw new BlueButtonClientException("Could not find beneficiary with ID: " + beneficiaryID, ex);
@@ -84,8 +97,8 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         return patient;
     }
 
-    private String buildSearchUrl(String patientId){
-        return String.format("%sPatient/%s", serverBaseUrl, patientId);
+    private String buildSearchUrl(String beneficiaryID) throws MalformedURLException {
+        return new URL(serverBaseUrl, "Patient/" + beneficiaryID).toString();
     }
 
 }
