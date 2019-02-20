@@ -3,6 +3,7 @@ package gov.cms.dpc.web;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
+import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.AggregationEngine;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.web.annotations.AttributionService;
@@ -52,5 +53,10 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
                 .using(getConfiguration().getHttpClient())
                 .build("attribution-service")
                 .target(getConfiguration().getAttributionURL());
+    }
+
+    @Provides
+    public Config provideConfig() {
+        return getConfiguration().getConfig();
     }
 }

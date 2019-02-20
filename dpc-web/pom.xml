@@ -87,6 +87,8 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-client</artifactId>
+            <!--This will need to get flipped back to test, once we fully decouple the aggregtion engine-->
+            <!--<scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -144,16 +146,15 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <from>
-                        <image>openjdk:11-jdk-slim</image>
-                    </from>
                     <to>
                         <image>${project.artifactId}</image>
                     </to>
+                    <extraDirectory>
+                        <path>${project.basedir}/../bbcerts</path>
+                    </extraDirectory>
                     <container>
                         <args>
                             <arg>server</arg>
-                            <!--<arg>${jib.container.appRoot}/resources/application.conf</arg>-->
                         </args>
                         <ports>
                             <port>8080</port>
