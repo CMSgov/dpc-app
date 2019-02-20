@@ -3,8 +3,8 @@ package gov.cms.dpc.web;
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
-import gov.cms.dpc.attribution.engine.AttributionEngineModule;
 import gov.cms.dpc.fhir.FHIRModule;
+import gov.cms.dpc.aggregation.bbclient.BlueButtonClientModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
@@ -27,7 +27,7 @@ public class DPCWebApplication extends Application<DPWebConfiguration> {
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         GuiceBundle<DPWebConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPWebConfiguration.class)
-                .modules(new DPCAppModule(), new JobQueueModule(), new FHIRModule())
+                .modules(new DPCAppModule(), new JobQueueModule(), new FHIRModule(), new BlueButtonClientModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
