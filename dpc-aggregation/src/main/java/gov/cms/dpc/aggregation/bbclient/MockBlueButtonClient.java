@@ -9,7 +9,12 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     }
 
-    public Patient requestFHIRFromServer(String beneficiaryId) {
+    public Patient getBeneficiaryDataAsFHIR(String beneficiaryId) {
+        // TODO
+        return null;
+    }
+
+    public String getBeneficiaryDataAsJSON(String beneficiaryId) {
         // TODO
         return null;
     }

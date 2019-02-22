@@ -78,7 +78,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         }
     }
 
-    public Patient requestFHIRFromServer(String beneficiaryID) {
+    public Patient getBeneficiaryDataAsFHIR(String beneficiaryID) {
         Patient patient;
 
         try {
@@ -95,6 +95,11 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         }
 
         return patient;
+    }
+
+    public String getBeneficiaryDataAsJSON(String beneficiaryID){
+        Patient patient = getBeneficiaryDataAsFHIR(beneficiaryID);
+        return FhirContext.forDstu3().newJsonParser().encodeResourceToString(patient);
     }
 
     private String buildSearchUrl(String beneficiaryID) throws MalformedURLException {
