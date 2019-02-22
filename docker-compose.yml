@@ -7,12 +7,15 @@ services:
       - POSTGRES_DB=dpc-attribution
       - POSTGRES_PASSWORD=dpc-safe
     ports:
-      - "5433:5432"
+      - "5432:5432"
 
   attribution:
     image: dpc-attribution
     depends_on:
       - db
+    environment:
+      - SEED=true
+      - ENV=dev
 
   web:
     image: dpc-web
