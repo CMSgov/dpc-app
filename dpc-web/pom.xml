@@ -5,7 +5,7 @@
     <parent>
         <artifactId>dpc-app</artifactId>
         <groupId>gov.cms.dpc</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -50,24 +50,24 @@
         <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-queue</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-aggregation</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-fhir</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
         <!--Test resources-->

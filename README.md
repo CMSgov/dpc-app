@@ -32,8 +32,8 @@ Once the JARs are built, they can be run in two ways.
 
 1. Executed using *Docker Compose* `docker-compose up`
 1. Manually by running each of the JARs
-    1. `java -jar target/dpc-attribution-1.0-SNAPSHOT.jar server`
-    1. `java -jar target/dpc-web-1.0-SNAPSHOT.jar server`
+    1. `java -jar target/dpc-attribution-0.1.0.jar server`
+    1. `java -jar target/dpc-web-0.1.0.jar server`
     
     By default, the services will attempt to load a `local.application.conf` file from the current execution directory. 
     This can be overriden in two ways.
@@ -53,8 +53,8 @@ We provide a small CSV [file](dpc-attribution/src/main/resources/test_associatio
 The database can be automatically migrated and seeded by running the following commands, before starting the Attribution service. 
 
 ```bash
-java -jar target/dpc-attribution-1.0-SNAPSHOT.jar db migrate
-java -jar target/dpc-attribution-1.0-SNAPSHOT.jar seed
+java -jar target/dpc-attribution-0.1.0.jar db migrate
+java -jar target/dpc-attribution-0.1.0.jar seed
 
 ``` 
 
