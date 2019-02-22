@@ -38,4 +38,7 @@ public abstract class AbstractBaseResource {
 
     @Path("/Jobs")
     public abstract AbstractJobResource jobOperations();
+
+    @Path("/Data")
+    public abstract AbstractDataResource dataOperations();
 }
