@@ -6,7 +6,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-@Produces("application/fhir+json")
+@Produces("application/json")
 @Path("/Jobs")
 public abstract class AbstractJobResource {
 
@@ -14,7 +14,7 @@ public abstract class AbstractJobResource {
         // Not used
     }
 
-    @Path("{jobID}")
+    @Path("/{jobID}")
     @GET
-    public abstract Response checkJobStatus(@PathParam("jobID") String jobID);
+    public abstract Response checkJobStatus(String jobID);
 }

@@ -36,6 +36,6 @@ public abstract class AbstractBaseResource {
     @Path("/Group")
     public abstract AbstractGroupResource groupOperations();
 
-    @Path("/jobs")
+    @Path("/Jobs")
     public abstract AbstractJobResource jobOperations();
 }
