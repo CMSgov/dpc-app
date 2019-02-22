@@ -5,4 +5,5 @@ application.local.conf
 target/
 dependency-reduced-*.xml
 *.db
-bbcerts/
+bbcerts/*
+!bbcerts/README.md
