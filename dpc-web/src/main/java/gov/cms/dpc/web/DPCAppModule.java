@@ -5,11 +5,13 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.AggregationEngine;
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.web.annotations.AttributionService;
 import gov.cms.dpc.web.client.AttributionServiceClient;
 import gov.cms.dpc.web.resources.TestResource;
 import gov.cms.dpc.web.resources.v1.BaseResource;
+import gov.cms.dpc.web.resources.v1.DataResource;
 import gov.cms.dpc.web.resources.v1.GroupResource;
 import gov.cms.dpc.web.resources.v1.JobResource;
 import io.dropwizard.client.JerseyClientBuilder;
@@ -42,6 +44,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
         binder.bind(BaseResource.class);
         binder.bind(GroupResource.class);
         binder.bind(JobResource.class);
+        binder.bind(DataResource.class);
     }
 
     @Provides
@@ -58,5 +61,11 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
     @Provides
     public Config provideConfig() {
         return getConfiguration().getConfig();
+    }
+
+    @Provides
+    @ExportPath
+    public String provideExportPath() {
+        return getConfiguration().getExportPath();
     }
 }
