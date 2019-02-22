@@ -2,6 +2,7 @@ package gov.cms.dpc.web.resources.v1;
 
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.web.models.JobCompletionModel;
 import gov.cms.dpc.web.resources.AbstractJobResource;
 import org.eclipse.jetty.http.HttpStatus;
@@ -20,10 +21,12 @@ import java.util.UUID;
 public class JobResource extends AbstractJobResource {
 
     private final JobQueue queue;
+    private final String baseURL;
 
     @Inject
-    public JobResource(JobQueue queue) {
+    public JobResource(JobQueue queue, @APIV1 String baseURL) {
         this.queue = queue;
+        this.baseURL = baseURL;
     }
 
     @Path("/{jobID}")
@@ -44,7 +47,9 @@ public class JobResource extends AbstractJobResource {
                 break;
             }
             case COMPLETED: {
-                final JobCompletionModel completionModel = new JobCompletionModel(Instant.now().atOffset(ZoneOffset.UTC), String.format("http://localhost:3002/v1/Job/%s", jobID), Collections.singletonList(String.format("http://localhost:3002/v1/Data/%s", jobID)));
+                final JobCompletionModel completionModel = new JobCompletionModel(
+                        Instant.now().atOffset(ZoneOffset.UTC), String.format("%s/Job/%s", baseURL, jobID),
+                        Collections.singletonList(String.format("%s/Data/%s", this.baseURL, jobID)));
                 builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                 break;
             }

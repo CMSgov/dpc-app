@@ -7,7 +7,9 @@ import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.AggregationEngine;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.web.annotations.AttributionService;
+import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.web.client.AttributionServiceClient;
 import gov.cms.dpc.web.resources.TestResource;
 import gov.cms.dpc.web.resources.v1.BaseResource;
@@ -19,7 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Context;
 
 public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
 
@@ -67,5 +71,17 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
     @ExportPath
     public String provideExportPath() {
         return getConfiguration().getExportPath();
+    }
+
+    @Provides
+    @ServiceBaseURL
+    public String provideBaseURL(@Context HttpServletRequest request) {
+        return String.format("%s://%s:%s", request.getScheme(), request.getServerName(), request.getServerPort());
+    }
+
+    @Provides
+    @APIV1
+    public String provideV1URL(@ServiceBaseURL String baseURL) {
+        return baseURL + "/v1";
     }
 }
