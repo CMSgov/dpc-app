@@ -2,11 +2,18 @@ package gov.cms.dpc.web.resources.v1;
 
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.web.models.JobCompletionModel;
 import gov.cms.dpc.web.resources.AbstractJobResource;
 import org.eclipse.jetty.http.HttpStatus;
 
 import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,8 +26,10 @@ public class JobResource extends AbstractJobResource {
         this.queue = queue;
     }
 
+    @Path("/{jobID}")
+    @GET
     @Override
-    public Response checkJobStatus(String jobID) {
+    public Response checkJobStatus(@PathParam("jobID") String jobID) {
         final Optional<JobStatus> jobStatus = this.queue.getJobStatus(UUID.fromString(jobID));
 
         if (jobStatus.isEmpty()) {
@@ -35,7 +44,8 @@ public class JobResource extends AbstractJobResource {
                 break;
             }
             case COMPLETED: {
-                builder = builder.status(HttpStatus.OK_200);
+                final JobCompletionModel completionModel = new JobCompletionModel(Instant.now().atOffset(ZoneOffset.UTC), String.format("http://localhost:3002/v1/Job/%s", jobID), Collections.singletonList(String.format("http://localhost:3002/v1/Data/%s", jobID)));
+                builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                 break;
             }
             case FAILED: {
