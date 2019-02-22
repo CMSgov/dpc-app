@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.AggregationEngine;
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.web.annotations.AttributionService;
 import gov.cms.dpc.web.client.AttributionServiceClient;
@@ -60,5 +61,11 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
     @Provides
     public Config provideConfig() {
         return getConfiguration().getConfig();
+    }
+
+    @Provides
+    @ExportPath
+    public String provideExportPath() {
+        return getConfiguration().getExportPath();
     }
 }

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -72,7 +74,7 @@ public class FHIRSubmissionTest {
 
         String jobURL = response.getHeaderString("Content-Location").replace("http://localhost:3002/v1", "");
         WebTarget jobTarget = jobResource.client().target(jobURL);
-        Response jobResp = jobTarget.request().accept(FHIR_JSON).get();
+        Response jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
         assertEquals(HttpStatus.ACCEPTED_202, jobResp.getStatus(), "Job should be in progress");
 
         // Finish the job and check again
@@ -80,7 +82,7 @@ public class FHIRSubmissionTest {
         queue.completeJob(queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getLeft(), JobStatus.COMPLETED);
 
         jobTarget = jobResource.client().target(jobURL);
-        jobResp = jobTarget.request().accept(FHIR_JSON).get();
+        jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
         assertEquals(HttpStatus.OK_200, jobResp.getStatus(), "Job should be done");
 
 

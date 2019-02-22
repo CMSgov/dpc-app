@@ -11,6 +11,8 @@ import javax.validation.constraints.NotNull;
 public class DPWebConfiguration extends TypesafeConfiguration {
 
     private String testValue;
+    @NotEmpty
+    private String exportPath;
 
     @Valid
     @NotNull
@@ -47,5 +49,13 @@ public class DPWebConfiguration extends TypesafeConfiguration {
 
     public void setAttributionURL(String attributionURL) {
         this.attributionURL = attributionURL;
+    }
+
+    public String getExportPath() {
+        return exportPath;
+    }
+
+    public void setExportPath(String exportPath) {
+        this.exportPath = exportPath;
     }
 }

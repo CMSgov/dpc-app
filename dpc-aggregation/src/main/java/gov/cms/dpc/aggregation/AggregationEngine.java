@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
@@ -28,14 +29,16 @@ public class AggregationEngine implements Runnable {
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
     private final FhirContext context;
+    private final String exportPath;
     private volatile boolean run = true;
 
     @Inject
-    public AggregationEngine(AttributionEngine engine, JobQueue queue, BlueButtonClient bbclient) {
+    public AggregationEngine(AttributionEngine engine, JobQueue queue, BlueButtonClient bbclient,  @ExportPath String exportPath) {
         this.engine = engine;
         this.queue = queue;
         this.bbclient = bbclient;
         this.context = FhirContext.forDstu3();
+        this.exportPath = exportPath;
     }
 
     @Override
@@ -79,7 +82,7 @@ public class AggregationEngine implements Runnable {
 
     private void workJob(UUID jobID, JobModel job) throws IOException {
         final IParser parser = context.newJsonParser();
-        try (final FileOutputStream writer = new FileOutputStream(String.format("/tmp/%s.ndjson", jobID.toString()))) {
+        try (final FileOutputStream writer = new FileOutputStream(String.format("%s/%s.ndjson", exportPath, jobID.toString()))) {
             job.getBeneficiaries()
                     .stream()
                     .map(this.bbclient::requestFHIRFromServer)
