@@ -25,5 +25,11 @@ services:
       - attributionURL=http://attribution:8080/v1/
       - logging.level=DEBUG
       - aggregation.bbclient.keyStore.location=/bb.keystore
+      - exportPath=/app/data
     depends_on:
       - attribution
+    volumes:
+      - export-volume:/app/data
+
+volumes:
+  export-volume:
