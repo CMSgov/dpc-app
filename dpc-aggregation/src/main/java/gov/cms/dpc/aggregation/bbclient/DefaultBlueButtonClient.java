@@ -55,6 +55,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
 
             SSLContext sslContext = SSLContexts.custom()
                     .loadKeyMaterial(keyStore, defaultKeyStorePassword.toCharArray())
+                    .loadTrustMaterial(keyStore, null)
                     .build();
 
             HttpClient mutualTlsHttpClient = HttpClients.custom().setSSLContext(sslContext).build();
