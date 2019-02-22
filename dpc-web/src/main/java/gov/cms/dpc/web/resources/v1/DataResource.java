@@ -1,5 +1,6 @@
 package gov.cms.dpc.web.resources.v1;
 
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.web.resources.AbstractDataResource;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -24,8 +25,8 @@ public class DataResource extends AbstractDataResource {
     private final String fileLocation;
 
     @Inject
-    public DataResource() {
-        this.fileLocation = "/tmp";
+    public DataResource(@ExportPath String exportPath) {
+        this.fileLocation = exportPath;
     }
 
 
