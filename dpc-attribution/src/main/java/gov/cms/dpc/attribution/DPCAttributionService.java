@@ -33,7 +33,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 .build();
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle());
+        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.attribution"));
         bootstrap.addBundle(new MigrationsBundle<DPCAttributionConfiguration>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {

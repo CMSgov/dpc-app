@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=dpc-attribution
+      - POSTGRES_PASSWORD=dpc-safe
+    ports:
+      - "5432:5432"
+
+  attribution:
+    image: dpc-attribution
+    depends_on:
+      - db
+    environment:
+      - SEED=true
+      - ENV=dev
+
+  web:
+    image: dpc-web
+    ports:
+      - "3002:3002"
+    environment:
+      - attributionURL=http://attribution:8080/v1/
+      - logging.level=DEBUG
+      - aggregation.bbclient.keyStore.location=/bb.keystore
+    depends_on:
+      - attribution

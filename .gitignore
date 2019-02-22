@@ -5,3 +5,4 @@ application.local.conf
 target/
 dependency-reduced-*.xml
 *.db
+bbcerts/

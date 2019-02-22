@@ -29,6 +29,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <hapi.fhir.version>3.6.0</hapi.fhir.version>
         <java.version>11</java.version>
+        <jib.container.appRoot>/app</jib.container.appRoot>
     </properties>
 
     <dependencyManagement>
@@ -99,7 +100,6 @@
                 <groupId>ca.uhn.hapi.fhir</groupId>
                 <artifactId>hapi-fhir-client</artifactId>
                 <version>${hapi.fhir.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -144,6 +144,24 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.1.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <from>
+                            <image>openjdk:11-jdk-slim</image>
+                        </from>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>dockerBuild</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
