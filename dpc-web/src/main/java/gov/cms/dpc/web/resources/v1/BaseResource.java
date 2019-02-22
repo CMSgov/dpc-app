@@ -1,5 +1,6 @@
 package gov.cms.dpc.web.resources.v1;
 
+import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.web.core.Capabilities;
 import gov.cms.dpc.web.resources.AbstractBaseResource;
 import gov.cms.dpc.web.resources.AbstractDataResource;
@@ -17,12 +18,14 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractGroupResource gr;
     private final AbstractJobResource jr;
     private final AbstractDataResource dr;
+    private final String baseURL;
 
     @Inject
-    public BaseResource(GroupResource gr, JobResource jr, DataResource dr) {
+    public BaseResource(GroupResource gr, JobResource jr, DataResource dr, @ServiceBaseURL String baseURL) {
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
+        this.baseURL = baseURL;
     }
 
     @Override
@@ -32,7 +35,7 @@ public class BaseResource extends AbstractBaseResource {
 
     @Override
     public CapabilityStatement metadata() {
-        return Capabilities.buildCapabilities("http://localhost:3002", "/v1");
+        return Capabilities.buildCapabilities(this.baseURL, "/v1");
     }
 
     @Override

@@ -33,10 +33,11 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRSubmissionTest {
+    public static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private final JobQueue queue = spy(MemoryQueue.class);
     private final AttributionServiceClient client = mock(AttributionServiceClient.class);
-    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client)).build();
-    private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue)).build();
+    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client, TEST_BASE_URL)).build();
+    private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue, TEST_BASE_URL)).build();
 
 
     // Test data
@@ -72,7 +73,7 @@ public class FHIRSubmissionTest {
 
         // Check that the job is in progress
 
-        String jobURL = response.getHeaderString("Content-Location").replace("http://localhost:3002/v1", "");
+        String jobURL = response.getHeaderString("Content-Location").replace(TEST_BASE_URL, "");
         WebTarget jobTarget = jobResource.client().target(jobURL);
         Response jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
         assertEquals(HttpStatus.ACCEPTED_202, jobResp.getStatus(), "Job should be in progress");
