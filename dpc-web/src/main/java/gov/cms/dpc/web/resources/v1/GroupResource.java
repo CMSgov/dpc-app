@@ -3,7 +3,7 @@ package gov.cms.dpc.web.resources.v1;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.web.client.AttributionServiceClient;
+import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HumanName;
@@ -27,11 +27,13 @@ public class GroupResource extends AbstractGroupResource {
 
     private final JobQueue queue;
     private final AttributionEngine client;
+    private final String baseURL;
 
     @Inject
-    public GroupResource(JobQueue queue, AttributionEngine client) {
+    public GroupResource(JobQueue queue, AttributionEngine client, @APIV1 String baseURL) {
         this.queue = queue;
         this.client = client;
+        this.baseURL = baseURL;
     }
 
     /**
@@ -61,7 +63,7 @@ public class GroupResource extends AbstractGroupResource {
         this.queue.submitJob(jobID, new JobModel(providerID, attributedBeneficiaries.get()));
 
         return Response.status(Response.Status.NO_CONTENT)
-                .contentLocation(URI.create("http://localhost:3002/v1/Jobs/" + jobID)).build();
+                .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
 
     /**
