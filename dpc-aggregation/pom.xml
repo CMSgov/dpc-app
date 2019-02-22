@@ -18,12 +18,6 @@
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
-            <artifactId>dpc-attribution</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-queue</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
@@ -54,6 +48,4 @@
             <version>1.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
-
 </project>

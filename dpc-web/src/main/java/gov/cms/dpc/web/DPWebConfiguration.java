@@ -18,6 +18,7 @@ public class DPWebConfiguration extends TypesafeConfiguration {
     private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
 
     @NotEmpty
+    @NotNull
     private String attributionURL;
 
     DPWebConfiguration() {
