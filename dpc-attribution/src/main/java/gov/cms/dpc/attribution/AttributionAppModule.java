@@ -95,7 +95,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
         @Override
         public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
-            logger.warn("DB Config: {}", configuration.getDatabase().toString());
             return configuration.getDatabase();
         }
     }

@@ -27,7 +27,7 @@ import java.util.MissingResourceException;
 public class DefaultBlueButtonClient implements BlueButtonClient {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
-    public static final String BB_KEYSTORE = "/bb.keystore";
+    private static final String BB_KEYSTORE = "/bb.keystore";
 
     private URL serverBaseUrl;
     private IGenericClient client;
@@ -101,7 +101,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     }
 
     /**
-     * Helper function to get the keystore from either the Configuration file, or the config settings
+     * Helper function to get the keystore from either the location specified in the Configuration file, or from the JAR resources.
      * If the Config path is set, the helper will try to pull from the absolute file path.
      * Otherwise it looks for the {@link DefaultBlueButtonClient#BB_KEYSTORE} in the resources path.
      *
