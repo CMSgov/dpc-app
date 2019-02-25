@@ -2,7 +2,6 @@ package gov.cms.dpc.web.resources.v1;
 
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.web.resources.AbstractDataResource;
-import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
