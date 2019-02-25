@@ -43,11 +43,15 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     SessionFactory getSessionFactory(AttributionHibernateModule hibernate) {
         // This is necessary because the session factory doesn't load on its own.
-        // FIXME(nickrobison): DPC-96
+        // I'm really not sure how to fix this, I think it's due to the interaction with the Proxy Factory
+        // For now, we'll simply catch the IllegalStateException and ignore it, anything else, we throw
         try {
-            hibernate.run(getConfiguration(), getEnvironment());
+            final DPCAttributionConfiguration configuration = getConfiguration();
+            hibernate.run(configuration, getEnvironment());
         } catch (Exception e) {
-            logger.debug("Problem getting factory.", e);
+            if (!(e instanceof IllegalStateException)) {
+                throw new RuntimeException(e);
+            }
         }
         return hibernate.getSessionFactory();
     }
@@ -91,6 +95,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
         @Override
         public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
+            logger.warn("DB Config: {}", configuration.getDatabase().toString());
             return configuration.getDatabase();
         }
     }

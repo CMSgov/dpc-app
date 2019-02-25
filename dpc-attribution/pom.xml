@@ -33,12 +33,6 @@
             <artifactId>h2</artifactId>
             <version>1.4.197</version>
         </dependency>
-        <!--This is required for Java 11 support. The version shipped with Hibernate is too old-->
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.24.1-GA</version>
-        </dependency>
         <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
             <groupId>javax.xml.bind</groupId>
