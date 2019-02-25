@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import gov.cms.dpc.web.AbstractApplicationTest;
 import org.apache.http.HttpStatus;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -46,7 +48,7 @@ public class GroupResourceTest extends AbstractApplicationTest {
                 .withNoParameters(Parameters.class)
                 .useHttpGet();
 
-        assertThrows(NonFhirResponseException.class, execute::execute, "Should throw exception, but accept JSON request");
+        assertThrows(InternalErrorException.class, execute::execute, "Should throw exception, but accept JSON request");
 
         // Try again, but use a different encoding
         assertThrows(UnclassifiedServerFailureException.class, () -> execute.encodedXml().execute(), "Should not accept XML encoding");
