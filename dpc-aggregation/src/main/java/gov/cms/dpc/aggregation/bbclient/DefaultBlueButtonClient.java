@@ -19,12 +19,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.MissingResourceException;
 
 public class DefaultBlueButtonClient implements BlueButtonClient {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
+    public static final String BB_KEYSTORE = "/bb.keystore";
 
     private URL serverBaseUrl;
     private IGenericClient client;
@@ -41,14 +44,12 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             throw new BlueButtonClientException("Malformed base URL for bluebutton server", ex);
         }
 
-        String keyStorePath = conf.getString("aggregation.bbclient.keyStore.location");
-        if (keyStorePath == null || keyStorePath.isEmpty()) {
-            throw new BlueButtonClientException("KeyStore location is empty, cannot find keyStore.",
-                    new IllegalStateException()
-            );
-        }
 
-        try (InputStream keyStoreStream = new FileInputStream(keyStorePath)) {
+//        try (InputStream keyStoreStream = new FileInputStream(keyStorePath)) {
+        try (final InputStream keyStoreStream = getKeyStoreStream(conf)) {
+            if (keyStoreStream == null) {
+                throw new IllegalArgumentException("Need keystore in resources");
+            }
             // Need to build a custom HttpClient to handle mutual TLS authentication
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
@@ -64,8 +65,6 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             ctx.getRestfulClientFactory().setHttpClient(mutualTlsHttpClient);
             client = ctx.newRestfulGenericClient(serverBaseUrl.toString());
 
-        } catch (FileNotFoundException ex) {
-            throw new BlueButtonClientException("Could not find keystore at location: " + keyStorePath, ex);
         } catch (KeyStoreException ex) {
             throw new BlueButtonClientException("Wrong keystore type: " + keyStoreType, ex);
         } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException ex) {
@@ -101,4 +100,33 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         return new URL(serverBaseUrl, "Patient/" + beneficiaryID).toString();
     }
 
+    /**
+     * Helper function to get the keystore from either the Configuration file, or the config settings
+     * If the Config path is set, the helper will try to pull from the absolute file path.
+     * Otherwise it looks for the {@link DefaultBlueButtonClient#BB_KEYSTORE} in the resources path.
+     *
+     * @param config - {@link Config} Configuration settings for bbclient
+     * @return - {@link InputStream} to keystore
+     */
+    // TODO(isears-cms): This should be injected by Guice
+    private static InputStream getKeyStoreStream(Config config) {
+        final InputStream keyStoreStream;
+
+        if (!config.hasPath("aggregation.bbclient.keyStore.location")) {
+            keyStoreStream = DefaultBlueButtonClient.class.getResourceAsStream(BB_KEYSTORE);
+            if (keyStoreStream == null) {
+                throw new BlueButtonClientException("KeyStore location is empty, cannot find keyStore.",
+                        new MissingResourceException("", DefaultBlueButtonClient.class.getName(), BB_KEYSTORE));
+            }
+        } else {
+            final String keyStorePath = config.getString("aggregation.bbclient.keyStore.location");
+            try {
+                keyStoreStream = new FileInputStream(keyStorePath);
+            } catch (FileNotFoundException e) {
+                logger.error("Unable to find keystore.", e.getMessage());
+                throw new BlueButtonClientException("Could not find keystore at location: " + Paths.get(keyStorePath).toAbsolutePath().toString(), e);
+            }
+        }
+        return keyStoreStream;
+    }
 }
