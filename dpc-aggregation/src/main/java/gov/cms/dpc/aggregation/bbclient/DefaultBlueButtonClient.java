@@ -27,7 +27,9 @@ import java.util.MissingResourceException;
 public class DefaultBlueButtonClient implements BlueButtonClient {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
-    private static final String BB_KEYSTORE = "/bb.keystore";
+    // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
+    private static final String KEYSTORE_RESOURCE_KEY = "/bb.keystore";
+    public static final String MALFORED_URL = "Malformed base URL for bluebutton server";
 
     private URL serverBaseUrl;
     private IGenericClient client;
@@ -41,15 +43,13 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             serverBaseUrl = new URL(conf.getString("aggregation.bbclient.serverBaseUrl"));
 
         } catch (MalformedURLException ex) {
-            throw new BlueButtonClientException("Malformed base URL for bluebutton server", ex);
+            logger.error(MALFORED_URL, ex);
+            throw new BlueButtonClientException(MALFORED_URL, ex);
         }
 
 
 //        try (InputStream keyStoreStream = new FileInputStream(keyStorePath)) {
         try (final InputStream keyStoreStream = getKeyStoreStream(conf)) {
-            if (keyStoreStream == null) {
-                throw new IllegalArgumentException("Need keystore in resources");
-            }
             // Need to build a custom HttpClient to handle mutual TLS authentication
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
@@ -66,6 +66,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             client = ctx.newRestfulGenericClient(serverBaseUrl.toString());
 
         } catch (KeyStoreException ex) {
+            logger.error("Cannot open keystore of type {}", ex);
             throw new BlueButtonClientException("Wrong keystore type: " + keyStoreType, ex);
         } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException ex) {
             throw new BlueButtonClientException(
@@ -73,6 +74,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
                     ex
             );
         } catch (KeyManagementException ex) {
+            logger.error("Cannot load keystore keys", ex);
             throw new BlueButtonClientException("Error loading the keystore", ex);
         }
     }
@@ -103,7 +105,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     /**
      * Helper function to get the keystore from either the location specified in the Configuration file, or from the JAR resources.
      * If the Config path is set, the helper will try to pull from the absolute file path.
-     * Otherwise it looks for the {@link DefaultBlueButtonClient#BB_KEYSTORE} in the resources path.
+     * Otherwise it looks for the {@link DefaultBlueButtonClient#KEYSTORE_RESOURCE_KEY} in the resources path.
      *
      * @param config - {@link Config} Configuration settings for bbclient
      * @return - {@link InputStream} to keystore
@@ -113,18 +115,20 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         final InputStream keyStoreStream;
 
         if (!config.hasPath("aggregation.bbclient.keyStore.location")) {
-            keyStoreStream = DefaultBlueButtonClient.class.getResourceAsStream(BB_KEYSTORE);
+            keyStoreStream = DefaultBlueButtonClient.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
             if (keyStoreStream == null) {
-                throw new BlueButtonClientException("KeyStore location is empty, cannot find keyStore.",
-                        new MissingResourceException("", DefaultBlueButtonClient.class.getName(), BB_KEYSTORE));
+                logger.error("KeyStore location is empty, cannot find keyStore {} in resources", KEYSTORE_RESOURCE_KEY);
+                throw new BlueButtonClientException("Unable to get keystore from resources",
+                        new MissingResourceException("", DefaultBlueButtonClient.class.getName(), KEYSTORE_RESOURCE_KEY));
             }
         } else {
             final String keyStorePath = config.getString("aggregation.bbclient.keyStore.location");
+            logger.debug("Opening keystream from location: {}", keyStorePath);
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);
             } catch (FileNotFoundException e) {
-                logger.error("Unable to find keystore.", e.getMessage());
-                throw new BlueButtonClientException("Could not find keystore at location: " + Paths.get(keyStorePath).toAbsolutePath().toString(), e);
+                logger.error("Could not find keystore at location: {}" + Paths.get(keyStorePath).toAbsolutePath().toString());
+                throw new BlueButtonClientException("Unable to find keystore", e);
             }
         }
         return keyStoreStream;
