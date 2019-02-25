@@ -23,8 +23,7 @@ services:
       - "3002:3002"
     environment:
       - attributionURL=http://attribution:8080/v1/
-      - logging.level=DEBUG
-      - aggregation.bbclient.keyStore.location=/bb.keystore
+      - ENV=dev
       - exportPath=/app/data
     depends_on:
       - attribution
