@@ -11,7 +11,6 @@
         <module>dpc-aggregation</module>
         <module>dpc-attribution</module>
         <module>dpc-common</module>
-        <module>dpc-fhir</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>
