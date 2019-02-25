@@ -29,7 +29,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
     private static final String KEYSTORE_RESOURCE_KEY = "/bb.keystore";
-    public static final String MALFORED_URL = "Malformed base URL for bluebutton server";
+    private static final String MALFORED_URL = "Malformed base URL for bluebutton server";
 
     private URL serverBaseUrl;
     private IGenericClient client;
@@ -47,8 +47,6 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
             throw new BlueButtonClientException(MALFORED_URL, ex);
         }
 
-
-//        try (InputStream keyStoreStream = new FileInputStream(keyStorePath)) {
         try (final InputStream keyStoreStream = getKeyStoreStream(conf)) {
             // Need to build a custom HttpClient to handle mutual TLS authentication
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
