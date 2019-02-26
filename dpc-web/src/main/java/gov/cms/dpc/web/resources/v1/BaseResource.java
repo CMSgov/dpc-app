@@ -6,7 +6,7 @@ import gov.cms.dpc.web.resources.AbstractBaseResource;
 import gov.cms.dpc.web.resources.AbstractDataResource;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
 import gov.cms.dpc.web.resources.AbstractJobResource;
-import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;

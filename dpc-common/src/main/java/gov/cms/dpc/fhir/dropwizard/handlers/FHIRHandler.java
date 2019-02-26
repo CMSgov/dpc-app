@@ -3,7 +3,7 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.dstu3.model.BaseResource;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;

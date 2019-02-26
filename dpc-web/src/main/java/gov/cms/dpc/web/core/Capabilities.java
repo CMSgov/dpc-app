@@ -1,12 +1,13 @@
 package gov.cms.dpc.web.core;
 
-import org.hl7.fhir.r4.model.*;
+
+import org.hl7.fhir.dstu3.model.*;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hl7.fhir.r4.model.CapabilityStatement.*;
+import static org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 
 public class Capabilities {
 
@@ -23,7 +24,7 @@ public class Capabilities {
                 .setStatus(Enumerations.PublicationStatus.ACTIVE)
                 .setDateElement(releaseDate)
                 .setPublisher("Centers for Medicare and Medicaid Services")
-                .setFhirVersion("4.0.0")
+                .setFhirVersion("3.6.0")
                 .setSoftware(generateSoftwareComponent(releaseDate))
                 .setKind(CapabilityStatementKind.CAPABILITY)
                 .setRest(generateRestComponents(baseUri + version))
@@ -53,11 +54,11 @@ public class Capabilities {
         serverComponent.setInteraction(Collections.singletonList(batchInteraction));
 
         // Add the version and metadata endpoints
-        final CapabilityStatementRestResourceOperationComponent metadataResource = new CapabilityStatementRestResourceOperationComponent(new StringType("Metadata"), new CanonicalType(String.format("%s/metadata", baseURI)));
-        final CapabilityStatementRestResourceOperationComponent versionResource = new CapabilityStatementRestResourceOperationComponent(new StringType("Version"), new CanonicalType(String.format("%s/_version", baseURI)));
+        final CapabilityStatementRestOperationComponent metadataResource = new CapabilityStatementRestOperationComponent(new StringType("Metadata"), new Reference(String.format("%s/metadata", baseURI)));
+        final CapabilityStatementRestOperationComponent versionResource = new CapabilityStatementRestOperationComponent(new StringType("Version"), new Reference(String.format("%s/_version", baseURI)));
 
         // Add the Group export paths
-        final CapabilityStatementRestResourceOperationComponent providerExport = new CapabilityStatementRestResourceOperationComponent(new StringType("Provider export"), new CanonicalType(String.format("%s/Group/providerID/$export", baseURI)));
+        final CapabilityStatementRestOperationComponent providerExport = new CapabilityStatement.CapabilityStatementRestOperationComponent(new StringType("Provider export"), new Reference(String.format("%s/Group/providerID/$export", baseURI)));
         serverComponent.setOperation(Arrays.asList(providerExport, metadataResource, versionResource));
 
         return Collections.singletonList(serverComponent);
