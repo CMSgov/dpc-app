@@ -28,6 +28,7 @@ public class Capabilities {
                 .setSoftware(generateSoftwareComponent(releaseDate))
                 .setKind(CapabilityStatementKind.CAPABILITY)
                 .setRest(generateRestComponents(baseUri + version))
+                .setAcceptUnknown(UnknownContentCode.NO)
                 .setFormat(Arrays.asList(new CodeType("application/json"), new CodeType("application/fhir+json")));
 
         // Set the narrative
