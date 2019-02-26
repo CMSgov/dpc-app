@@ -3,8 +3,8 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ResourceInfo;

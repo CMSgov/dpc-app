@@ -5,10 +5,10 @@ import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.web.resources.AbstractGroupResource;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +38,11 @@ public class GroupResource extends AbstractGroupResource {
 
     /**
      * Begin export process for the given provider
-     * On success, returns a {@link org.eclipse.jetty.http.HttpStatus#NO_CONTENT_204} response along with a {@link org.hl7.fhir.r4.model.OperationOutcome} result.
+     * On success, returns a {@link org.eclipse.jetty.http.HttpStatus#NO_CONTENT_204} response along with a {@link org.hl7.fhir.dstu3.model.OperationOutcome} result.
      * The `Content-Location` header contains the URI to call when
      *
      * @param providerID {@link String} ID of provider to retrieve data for
-     * @return - {@link org.hl7.fhir.r4.model.OperationOutcome} specifying whether or not the request was successful.
+     * @return - {@link org.hl7.fhir.dstu3.model.OperationOutcome} specifying whether or not the request was successful.
      */
     @Override
     @Path("/{providerID}/$export")

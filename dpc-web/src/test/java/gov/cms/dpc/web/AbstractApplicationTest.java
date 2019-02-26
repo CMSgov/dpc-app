@@ -24,7 +24,7 @@ public class AbstractApplicationTest {
 
     @BeforeEach
     public void createContext() {
-        ctx = FhirContext.forR4();
+        ctx = FhirContext.forDstu3();
     }
 
     @AfterAll

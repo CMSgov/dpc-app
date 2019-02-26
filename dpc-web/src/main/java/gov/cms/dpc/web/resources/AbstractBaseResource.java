@@ -1,6 +1,6 @@
 package gov.cms.dpc.web.resources;
 
-import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

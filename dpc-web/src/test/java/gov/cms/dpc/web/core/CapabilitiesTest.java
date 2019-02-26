@@ -5,7 +5,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
-import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ public class CapabilitiesTest {
 
     @BeforeEach
     public void setupValidator() {
-        final FhirContext ctx = FhirContext.forR4();
+        final FhirContext ctx = FhirContext.forDstu3();
 
         validator = ctx.newValidator();
 
