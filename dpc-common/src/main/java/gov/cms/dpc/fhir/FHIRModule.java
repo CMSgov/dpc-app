@@ -25,7 +25,7 @@ public class FHIRModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public FhirContext provideContext() {
-        return FhirContext.forR4();
+    public FhirContext provideSTU3Context() {
+        return FhirContext.forDstu3();
     }
 }
