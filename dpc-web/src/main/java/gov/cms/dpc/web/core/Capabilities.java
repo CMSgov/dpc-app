@@ -24,7 +24,8 @@ public class Capabilities {
                 .setStatus(Enumerations.PublicationStatus.ACTIVE)
                 .setDateElement(releaseDate)
                 .setPublisher("Centers for Medicare and Medicaid Services")
-                .setFhirVersion("3.6.0")
+                // This should track the FHIR version used by BlueButton
+                .setFhirVersion("3.0.1")
                 .setSoftware(generateSoftwareComponent(releaseDate))
                 .setKind(CapabilityStatementKind.CAPABILITY)
                 .setRest(generateRestComponents(baseUri + version))
