@@ -37,7 +37,7 @@ public class AttributionIntegrationTest {
     }
 
     @AfterAll
-    public static void shudown() {
+    public static void shutdown() {
         APPLICATION.after();
     }
 
