@@ -62,9 +62,7 @@ public class BlueButtonClientProvider implements Provider<BlueButtonClient> {
             // Need to build FHIR client capable of doing mutual TLS authentication
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
-
-            //fhirContext = FhirContext.forDstu3();
-
+            
             fhirContext.getRestfulClientFactory()
                     .setHttpClient(buildMutualTlsClient(keyStore, defaultKeyStorePassword.toCharArray()));
             client = fhirContext.newRestfulGenericClient(serverBaseUrl.toString());
