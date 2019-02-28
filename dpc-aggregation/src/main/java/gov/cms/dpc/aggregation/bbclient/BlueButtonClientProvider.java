@@ -24,18 +24,18 @@ import java.security.cert.CertificateException;
 import java.util.MissingResourceException;
 
 public class BlueButtonClientProvider implements Provider<BlueButtonClient> {
-    private Config conf;
-
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientProvider.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
     private static final String KEYSTORE_RESOURCE_KEY = "/bb.keystore";
 
     // Error messages
-    private static final String MALFORED_URL = "Malformed base URL for bluebutton server";
+    private static final String MALFORMED_URL = "Malformed base URL for bluebutton server";
     private static final String BAD_KEYSTORE = "Error loading key material. It's possible that the keystore password is wrong or the keystore has been corrupted";
     private static final String UNOPENABLE_KEYSTORE = "Could not open keystore";
     private static final String INCOMPATIBLE_KEYSTORE_TYPE = "System was unable to create an instance of of the given keystore type";
     private static final String BAD_CLIENT_CERT_KEY = "There was an issue with the client certificate and/or key";
+
+    private Config conf;
 
     @Inject
     public BlueButtonClientProvider(Config conf) {
@@ -43,17 +43,17 @@ public class BlueButtonClientProvider implements Provider<BlueButtonClient> {
     }
 
     public BlueButtonClient get() {
-        String keyStoreType = conf.getString("aggregation.bbclient.keyStore.type");
-        String defaultKeyStorePassword = conf.getString("aggregation.bbclient.keyStore.defaultPassword");
-        URL serverBaseUrl;
-        IGenericClient client;
+        final String keyStoreType = conf.getString("aggregation.bbclient.keyStore.type");
+        final String defaultKeyStorePassword = conf.getString("aggregation.bbclient.keyStore.defaultPassword");
+        final URL serverBaseUrl;
+        final IGenericClient client;
 
         try {
             serverBaseUrl = new URL(conf.getString("aggregation.bbclient.serverBaseUrl"));
 
         } catch (MalformedURLException ex) {
-            logger.error(MALFORED_URL, ex);
-            throw new BlueButtonClientException(MALFORED_URL, ex);
+            logger.error(MALFORMED_URL, ex);
+            throw new BlueButtonClientException(MALFORMED_URL, ex);
         }
 
         try (final InputStream keyStoreStream = getKeyStoreStream()) {
@@ -116,7 +116,7 @@ public class BlueButtonClientProvider implements Provider<BlueButtonClient> {
      * @return {@link HttpClient} compatible with HAPI FHIR TLS client
      */
     private HttpClient buildMutualTlsClient(KeyStore keyStore, char[] keyStorePass) {
-        SSLContext sslContext;
+        final SSLContext sslContext;
 
         try {
             sslContext = SSLContexts.custom()
