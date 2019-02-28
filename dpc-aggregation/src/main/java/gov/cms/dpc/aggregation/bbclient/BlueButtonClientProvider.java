@@ -36,10 +36,12 @@ public class BlueButtonClientProvider implements Provider<BlueButtonClient> {
     private static final String BAD_CLIENT_CERT_KEY = "There was an issue with the client certificate and/or key";
 
     private Config conf;
+    private FhirContext fhirContext;
 
     @Inject
-    public BlueButtonClientProvider(Config conf) {
+    public BlueButtonClientProvider(Config conf, FhirContext fhirContext) {
         this.conf = conf;
+        this.fhirContext = fhirContext;
     }
 
     public BlueButtonClient get() {
@@ -61,11 +63,11 @@ public class BlueButtonClientProvider implements Provider<BlueButtonClient> {
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
 
-            FhirContext ctx = FhirContext.forDstu3();
+            //fhirContext = FhirContext.forDstu3();
 
-            ctx.getRestfulClientFactory()
+            fhirContext.getRestfulClientFactory()
                     .setHttpClient(buildMutualTlsClient(keyStore, defaultKeyStorePassword.toCharArray()));
-            client = ctx.newRestfulGenericClient(serverBaseUrl.toString());
+            client = fhirContext.newRestfulGenericClient(serverBaseUrl.toString());
 
         } catch (IOException ex) {
             throw new BlueButtonClientException(UNOPENABLE_KEYSTORE, ex);
