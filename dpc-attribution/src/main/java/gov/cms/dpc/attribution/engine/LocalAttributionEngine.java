@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.engine;
 
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,11 @@ public class LocalAttributionEngine implements AttributionEngine {
         attributedBeneficiaries.add(beneficiaryID);
 
         this.attributionMap.put(providerID, attributedBeneficiaries);
+    }
+
+    @Override
+    public void addAttributionRelationships(Bundle attributionBundle) {
+        // Not implemented
     }
 
     @Override

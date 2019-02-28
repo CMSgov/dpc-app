@@ -5,6 +5,10 @@ import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -44,6 +48,22 @@ public class AttributionDAO extends AbstractDAO<AttributionRelationship> impleme
     @Override
     public void addAttributionRelationship(String providerID, String beneficiaryID) {
         persist(new AttributionRelationship(providerID, beneficiaryID));
+    }
+
+    @Override
+    public void addAttributionRelationships(Bundle attributionBundle) {
+        // Web API check that this is ok to do
+        final Practitioner practitioner = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
+
+        // Get the patients and create the attribution
+
+        attributionBundle
+                .getEntry()
+                .stream()
+                .filter(Bundle.BundleEntryComponent::hasResource)
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter((resource -> resource.getResourceType() == ResourceType.Patient))
+                .forEach(patient -> persist(new AttributionRelationship(practitioner.getIdentifierFirstRep().getValue(), ((Patient) patient).getIdentifierFirstRep().getValue())));
     }
 
     @Override
