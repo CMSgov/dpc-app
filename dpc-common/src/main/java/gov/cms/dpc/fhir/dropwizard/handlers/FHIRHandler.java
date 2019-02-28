@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.BaseResource;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import javax.ws.rs.ext.Provider;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 @Provider
 @FHIR
@@ -35,6 +37,8 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
     @Override
     public BaseResource readFrom(Class<BaseResource> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
         final IParser parser = ctx.newJsonParser();
+//        final StringWriter writer = new StringWriter();
+//        IOUtils.copy(entityStream, writer, StandardCharsets.UTF_8);
         return (BaseResource) parser.parseResource(new InputStreamReader(entityStream));
     }
 

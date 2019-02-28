@@ -12,10 +12,7 @@ import gov.cms.dpc.web.annotations.AttributionService;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.web.client.AttributionServiceClient;
 import gov.cms.dpc.web.resources.TestResource;
-import gov.cms.dpc.web.resources.v1.BaseResource;
-import gov.cms.dpc.web.resources.v1.DataResource;
-import gov.cms.dpc.web.resources.v1.GroupResource;
-import gov.cms.dpc.web.resources.v1.JobResource;
+import gov.cms.dpc.web.resources.v1.*;
 import io.dropwizard.client.JerseyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +46,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
         binder.bind(GroupResource.class);
         binder.bind(JobResource.class);
         binder.bind(DataResource.class);
+        binder.bind(RosterResource.class);
     }
 
     @Provides

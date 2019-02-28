@@ -36,7 +36,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(AttributionHibernateModule.class).in(Scopes.SINGLETON);
         binder.bind(AttributionDAO.class);
         binder.bind(AttributionEngine.class).to(AttributionDAO.class);
-        binder.bind(V1AttributionResource.class);
 //
     }
 

@@ -53,7 +53,7 @@ public class AttributionServiceClient implements AttributionEngine {
         final Invocation invocation = this.client
                 .path(String.format("Group/%s/%s", providerID, beneficiaryID))
                 .request(FHIRMediaTypes.FHIR_JSON)
-                .buildPut(Entity.json(null));
+                .buildPut(null);
         handleNonBodyResponse(invocation);
     }
 
