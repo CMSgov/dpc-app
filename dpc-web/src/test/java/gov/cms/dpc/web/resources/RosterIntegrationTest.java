@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.stream.Collectors;
 
-public class RosterResourceTest extends AbstractApplicationTest {
+public class RosterIntegrationTest extends AbstractApplicationTest {
 
     private static final String CSV = "test_associations.csv";
     private List<Bundle> providerBundles = new ArrayList<>();
@@ -32,7 +32,7 @@ public class RosterResourceTest extends AbstractApplicationTest {
 
         final List<Pair<String, String>> providerPairs = new ArrayList<>();
         // Get the test seeds
-        final InputStream resource = RosterResourceTest.class.getClassLoader().getResourceAsStream(CSV);
+        final InputStream resource = RosterIntegrationTest.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
             throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
         }
@@ -62,7 +62,6 @@ public class RosterResourceTest extends AbstractApplicationTest {
                                 patient.addIdentifier().setValue(value.getRight());
                                 bundle.addEntry().setResource(patient);
                             });
-
                     providerBundles.add(bundle);
                 });
     }

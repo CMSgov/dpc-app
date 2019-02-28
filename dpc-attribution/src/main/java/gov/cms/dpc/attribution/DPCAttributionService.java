@@ -10,8 +10,12 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
+
+    private static final Logger logger = LoggerFactory.getLogger(DPCAttributionService.class);
 
     public static void main(final String[] args) throws Exception {
         new DPCAttributionService().run(args);
@@ -37,6 +41,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(new MigrationsBundle<DPCAttributionConfiguration>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
+                logger.debug("Connection to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
                 return configuration.getDatabase();
             }
         });

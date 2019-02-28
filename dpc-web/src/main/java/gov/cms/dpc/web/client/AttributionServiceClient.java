@@ -1,15 +1,16 @@
 package gov.cms.dpc.web.client;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.web.DPWebConfiguration;
 import gov.cms.dpc.web.annotations.AttributionService;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Bundle;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
@@ -22,12 +23,14 @@ public class AttributionServiceClient implements AttributionEngine {
     private final WebTarget client;
     private final DPWebConfiguration config;
     private final ObjectMapper mapper;
+    private final FhirContext ctx;
 
     @Inject
-    public AttributionServiceClient(@AttributionService WebTarget client, DPWebConfiguration config) {
+    public AttributionServiceClient(@AttributionService WebTarget client, DPWebConfiguration config, FhirContext ctx) {
         this.client = client;
         this.config = config;
         this.mapper = new ObjectMapper();
+        this.ctx = ctx;
     }
 
     @Override
@@ -55,6 +58,11 @@ public class AttributionServiceClient implements AttributionEngine {
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .buildPut(null);
         handleNonBodyResponse(invocation);
+    }
+
+    @Override
+    public void addAttributionRelationships(Bundle attributionBundle) {
+        // Not implemented yet
     }
 
     @Override
