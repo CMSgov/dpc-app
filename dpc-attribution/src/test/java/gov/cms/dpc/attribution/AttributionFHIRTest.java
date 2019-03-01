@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
@@ -37,16 +38,14 @@ public class AttributionFHIRTest {
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations.csv";
-    private static List<Bundle> providerBundles = new ArrayList<>();
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static SeedProcessor seedProcessor;
 
     @BeforeAll
     public static void setup() throws IOException {
         APPLICATION.before();
 
-        // Load the attribution data
-        final List<Pair<String, String>> providerPairs = new ArrayList<>();
         // Get the test seeds
         final InputStream resource = AttributionFHIRTest.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
@@ -54,18 +53,8 @@ public class AttributionFHIRTest {
         }
 
         // Read in the seeds and create the 'Roster' bundle
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
-            for (String line; (line = reader.readLine()) != null; ) {
-                final String[] splits = line.split(",");
-
-                providerPairs.add(Pair.of(splits[1], splits[0]));
-            }
-        }
-
-        groupedPairs = providerPairs
-                .stream()
-                .collect(Collectors.groupingBy(Pair::getLeft));
+        seedProcessor = new SeedProcessor(resource);
+        groupedPairs = seedProcessor.extractProviderMap();
     }
 
     @BeforeEach
@@ -93,7 +82,7 @@ public class AttributionFHIRTest {
         return groupedPairs
                 .entrySet()
                 .stream()
-                .map(this::generateRosterBundle)
+                .map(seedProcessor::generateRosterBundle)
                 .map((bundle) -> DynamicTest.dynamicTest(nameGenerator.apply(bundle), () -> submitRoster(bundle)));
 
     }
@@ -126,6 +115,7 @@ public class AttributionFHIRTest {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
                 List<String> beneies = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
                 });
+                // Since the practitioner is not
                 assertEquals(bundle.getEntry().size() - 1, beneies.size(), "Should have the same number of beneies");
             }
 
@@ -136,25 +126,12 @@ public class AttributionFHIRTest {
             try (CloseableHttpResponse response = client.execute(isAttributed)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
             }
+
+            // Remove the patient and try again
         }
 
         dropDB();
     }
 
-    private Bundle generateRosterBundle(Map.Entry<String, List<Pair<String, String>>> entry) {
-        final Bundle bundle = new Bundle();
 
-        final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(entry.getKey());
-        bundle.addEntry().setResource(practitioner);
-
-        entry.getValue()
-                .forEach((value) -> {
-                    final Patient patient = new Patient();
-                    patient.addIdentifier().setValue(value.getRight());
-                    bundle.addEntry().setResource(patient);
-                });
-
-        return bundle;
-    }
 }

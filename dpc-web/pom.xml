@@ -91,6 +91,12 @@
     </dependencies>
 
     <build>
+        <!--Pull in the attribution seeds so we can use them for the integration tests.-->
+        <testResources>
+            <testResource>
+                <directory>${project.basedir}/../src/resources</directory>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>

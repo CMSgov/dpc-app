@@ -6,6 +6,7 @@ import com.google.inject.Provides;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.MethodOutcomeHandler;
 
 import javax.inject.Singleton;
 
@@ -19,6 +20,8 @@ public class FHIRModule extends AbstractModule {
     protected void configure() {
         // Request/Response handlers
         bind(FHIRHandler.class);
+        bind(MethodOutcomeHandler.class);
+        // Request/Response handlers
         bind(FHIRExceptionHandler.class);
         bind(FHIRRequestFeature.class);
     }

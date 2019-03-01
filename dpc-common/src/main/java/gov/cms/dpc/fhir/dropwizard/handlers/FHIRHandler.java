@@ -3,7 +3,6 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.BaseResource;
 
 import javax.inject.Inject;
@@ -16,7 +15,6 @@ import javax.ws.rs.ext.Provider;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 
 @Provider
 @FHIR

@@ -11,5 +11,5 @@ import javax.ws.rs.Path;
 public abstract class AbstractRosterResource {
 
     @POST
-    public abstract void submitRoster(Bundle providerBundle);
+    public abstract Bundle submitRoster(Bundle providerBundle);
 }
