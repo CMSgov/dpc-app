@@ -16,8 +16,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -45,23 +43,16 @@ public class BlueButtonClientModule extends AbstractModule {
     }
 
     @Provides
-    public BlueButtonClient provideBlueButtonClient(Config config, FhirContext fhirContext, HttpClient httpClient) {
-        final URL serverBaseUrl;
-        final IGenericClient client;
+    public BlueButtonClient provideBlueButtonClient(IGenericClient fhirRestClient) {
+        return new DefaultBlueButtonClient(fhirRestClient);
+    }
 
-        try {
-            serverBaseUrl = new URL(config.getString("aggregation.bbclient.serverBaseUrl"));
+    @Provides
+    public IGenericClient provideFhirRestClient(Config config, FhirContext fhirContext, HttpClient httpClient) {
+        final String serverBaseUrl = config.getString("aggregation.bbclient.serverBaseUrl");
+        fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
-        } catch (MalformedURLException ex) {
-            logger.error(MALFORMED_URL, ex);
-            throw new BlueButtonClientException(MALFORMED_URL, ex);
-        }
-
-        fhirContext.getRestfulClientFactory()
-                .setHttpClient(httpClient);
-        client = fhirContext.newRestfulGenericClient(serverBaseUrl.toString());
-
-        return new DefaultBlueButtonClient(client, serverBaseUrl);
+        return fhirContext.newRestfulGenericClient(serverBaseUrl);
     }
 
     @Provides
