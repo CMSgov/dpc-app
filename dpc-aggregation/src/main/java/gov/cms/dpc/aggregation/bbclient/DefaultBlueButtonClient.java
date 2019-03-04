@@ -23,10 +23,9 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     }
 
     public Patient requestFHIRFromServer(String beneficiaryID) {
-        Patient patient;
 
         try {
-            patient = client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
+            return client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
 
         } catch (MalformedURLException ex) {
             throw new BlueButtonClientException(
@@ -37,8 +36,6 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         } catch (ResourceNotFoundException ex) {
             throw new BlueButtonClientException("Could not find beneficiary with ID: " + beneficiaryID, ex);
         }
-
-        return patient;
     }
 
     private String buildSearchUrl(String beneficiaryID) throws MalformedURLException {
