@@ -64,10 +64,13 @@ public class BlueButtonClientProvider implements Provider<BlueButtonClient> {
             client = fhirContext.newRestfulGenericClient(serverBaseUrl.toString());
 
         } catch (IOException ex) {
+            logger.error(UNOPENABLE_KEYSTORE);
             throw new BlueButtonClientException(UNOPENABLE_KEYSTORE, ex);
         } catch (KeyStoreException ex) {
+            logger.error(INCOMPATIBLE_KEYSTORE_TYPE);
             throw new BlueButtonClientException(INCOMPATIBLE_KEYSTORE_TYPE, ex);
         } catch (NoSuchAlgorithmException | CertificateException ex) {
+            logger.error(BAD_KEYSTORE);
             throw new BlueButtonClientException(BAD_KEYSTORE, ex);
         }
 
@@ -91,8 +94,10 @@ public class BlueButtonClientProvider implements Provider<BlueButtonClient> {
                     .build();
 
         } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
+            logger.error(BAD_KEYSTORE);
             throw new BlueButtonClientException(BAD_KEYSTORE, ex);
         } catch (KeyManagementException ex) {
+            logger.error(BAD_CLIENT_CERT_KEY);
             throw new BlueButtonClientException(BAD_CLIENT_CERT_KEY, ex);
         }
 
