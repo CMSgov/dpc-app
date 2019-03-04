@@ -49,7 +49,7 @@ public class BlueButtonClientModule extends AbstractModule {
 
     @Provides
     public IGenericClient provideFhirRestClient(Config config, FhirContext fhirContext, HttpClient httpClient) {
-        final String serverBaseUrl = config.getString("aggregation.bbclient.serverBaseUrl");
+        final String serverBaseUrl = config.getString("dpc.aggregation.bbclient.serverBaseUrl");
         fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
         return fhirContext.newRestfulGenericClient(serverBaseUrl);
@@ -57,8 +57,8 @@ public class BlueButtonClientModule extends AbstractModule {
 
     @Provides
     public KeyStore provideKeyStore(Config config) {
-        final String keyStoreType = config.getString("aggregation.bbclient.keyStore.type");
-        final String defaultKeyStorePassword = config.getString("aggregation.bbclient.keyStore.defaultPassword");
+        final String keyStoreType = config.getString("dpc.aggregation.bbclient.keyStore.type");
+        final String defaultKeyStorePassword = config.getString("dpc.aggregation.bbclient.keyStore.defaultPassword");
 
         try (final InputStream keyStoreStream = getKeyStoreStream(config)) {
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
@@ -78,7 +78,7 @@ public class BlueButtonClientModule extends AbstractModule {
 
     @Provides
     public HttpClient provideHttpClient(Config config, KeyStore keyStore) {
-        final String defaultKeyStorePassword = config.getString("aggregation.bbclient.keyStore.defaultPassword");
+        final String defaultKeyStorePassword = config.getString("dpc.aggregation.bbclient.keyStore.defaultPassword");
         return buildMutualTlsClient(keyStore, defaultKeyStorePassword.toCharArray());
     }
 
@@ -92,7 +92,7 @@ public class BlueButtonClientModule extends AbstractModule {
     private InputStream getKeyStoreStream(Config config) {
         final InputStream keyStoreStream;
 
-        if (!config.hasPath("aggregation.bbclient.keyStore.location")) {
+        if (!config.hasPath("dpc.aggregation.bbclient.keyStore.location")) {
             keyStoreStream = DefaultBlueButtonClient.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
             if (keyStoreStream == null) {
                 logger.error("KeyStore location is empty, cannot find keyStore {} in resources", KEYSTORE_RESOURCE_KEY);
@@ -100,7 +100,7 @@ public class BlueButtonClientModule extends AbstractModule {
                         new MissingResourceException("", DefaultBlueButtonClient.class.getName(), KEYSTORE_RESOURCE_KEY));
             }
         } else {
-            final String keyStorePath = config.getString("aggregation.bbclient.keyStore.location");
+            final String keyStorePath = config.getString("dpc.aggregation.bbclient.keyStore.location");
             logger.debug("Opening keystream from location: {}", keyStorePath);
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);

@@ -40,7 +40,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
         binder.bind(AttributionEngine.class)
                 .to(AttributionServiceClient.class);
 
-        // This will eventually go away.
+        // TODO: This will eventually go away.
         binder.bind(AggregationEngine.class);
         binder.bind(Aggregation.class).asEagerSingleton();
         binder.bind(TestResource.class);
