@@ -35,7 +35,7 @@ public class BlueButtonClientModule extends AbstractModule {
     private static final String INCOMPATIBLE_KEYSTORE_TYPE = "System was unable to create an instance of of the given keystore type";
     private static final String BAD_CLIENT_CERT_KEY = "There was an issue with the client certificate and/or key";
 
-    public BlueButtonClientModule(){
+    public BlueButtonClientModule() {
 
     }
 
@@ -45,9 +45,7 @@ public class BlueButtonClientModule extends AbstractModule {
     }
 
     @Provides
-    public BlueButtonClient provideBlueButtonClient(Config config, FhirContext fhirContext) {
-        final String keyStoreType = config.getString("aggregation.bbclient.keyStore.type");
-        final String defaultKeyStorePassword = config.getString("aggregation.bbclient.keyStore.defaultPassword");
+    public BlueButtonClient provideBlueButtonClient(Config config, FhirContext fhirContext, HttpClient httpClient) {
         final URL serverBaseUrl;
         final IGenericClient client;
 
@@ -59,15 +57,22 @@ public class BlueButtonClientModule extends AbstractModule {
             throw new BlueButtonClientException(MALFORMED_URL, ex);
         }
 
+        fhirContext.getRestfulClientFactory()
+                .setHttpClient(httpClient);
+        client = fhirContext.newRestfulGenericClient(serverBaseUrl.toString());
+
+        return new DefaultBlueButtonClient(client, serverBaseUrl);
+    }
+
+    @Provides
+    public KeyStore provideKeyStore(Config config) {
+        final String keyStoreType = config.getString("aggregation.bbclient.keyStore.type");
+        final String defaultKeyStorePassword = config.getString("aggregation.bbclient.keyStore.defaultPassword");
+
         try (final InputStream keyStoreStream = getKeyStoreStream(config)) {
-            // Need to build FHIR client capable of doing mutual TLS authentication
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
-
-            fhirContext.getRestfulClientFactory()
-                    .setHttpClient(buildMutualTlsClient(keyStore, defaultKeyStorePassword.toCharArray()));
-            client = fhirContext.newRestfulGenericClient(serverBaseUrl.toString());
-
+            return keyStore;
         } catch (IOException ex) {
             logger.error(UNOPENABLE_KEYSTORE);
             throw new BlueButtonClientException(UNOPENABLE_KEYSTORE, ex);
@@ -78,13 +83,17 @@ public class BlueButtonClientModule extends AbstractModule {
             logger.error(BAD_KEYSTORE);
             throw new BlueButtonClientException(BAD_KEYSTORE, ex);
         }
+    }
 
-        return new DefaultBlueButtonClient(client, serverBaseUrl);
+    @Provides
+    public HttpClient provideHttpClient(Config config, KeyStore keyStore) {
+        final String defaultKeyStorePassword = config.getString("aggregation.bbclient.keyStore.defaultPassword");
+        return buildMutualTlsClient(keyStore, defaultKeyStorePassword.toCharArray());
     }
 
     /**
-     * Provider to get the keystore from either the location specified in the Configuration file, or from the JAR resources.
-     * If the Config path is set, the provider will try to pull from the absolute file path.
+     * Helper function get the keystore from either the location specified in the Configuration file, or from the JAR resources.
+     * If the Config path is set, the helper will try to pull from the absolute file path.
      * Otherwise it looks for the {@link BlueButtonClientModule#KEYSTORE_RESOURCE_KEY} in the resources path.
      *
      * @return - {@link InputStream} to keystore
