@@ -39,7 +39,7 @@
             <artifactId>dropwizard-guicier</artifactId>
         </dependency>
         <dependency>
-            <groupId>ca.mestevens.java</groupId>
+            <groupId>${typesafe.config.groupID}</groupId>
             <artifactId>typesafe-dropwizard-configuration</artifactId>
         </dependency>
         <dependency>
@@ -71,7 +71,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
+            <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
         </dependency>
         <dependency>
@@ -79,7 +79,7 @@
             <artifactId>ph-schematron</artifactId>
         </dependency>
         <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
+            <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-client</artifactId>
             <!--This will need to get flipped back to test, once we fully decouple the aggregtion engine-->
             <!--<scope>test</scope>-->
