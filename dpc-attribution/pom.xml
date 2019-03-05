@@ -43,7 +43,7 @@
             <artifactId>dropwizard-guicier</artifactId>
         </dependency>
         <dependency>
-            <groupId>ca.mestevens.java</groupId>
+            <groupId>${typesafe.config.groupID}</groupId>
             <artifactId>typesafe-dropwizard-configuration</artifactId>
         </dependency>
         <dependency>

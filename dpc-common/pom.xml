@@ -22,11 +22,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
+            <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-base</artifactId>
         </dependency>
         <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
+            <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
         </dependency>
         <dependency>
