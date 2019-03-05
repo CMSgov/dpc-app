@@ -5,8 +5,11 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.aggregation.qclient.MockQueueClient;
 import gov.cms.dpc.aggregation.resources.v1.BeneficiaryResource;
 import gov.cms.dpc.aggregation.resources.v1.V1AggregationResource;
+import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.queue.JobQueue;
 
 import javax.inject.Singleton;
 
@@ -33,5 +36,16 @@ public class AggregationModule extends DropwizardAwareModule<DPCAggregationConfi
     @Provides
     public BeneficiaryResource provideAggregationResource(AggregationEngine engine) {
         return new BeneficiaryResource(engine);
+    }
+
+    @Provides
+    public JobQueue provideJobQueue() {
+        return new MockQueueClient();
+    }
+
+    @Provides
+    @ExportPath
+    public String provideExportPath() {
+        return getConfiguration().getExportPath();
     }
 }

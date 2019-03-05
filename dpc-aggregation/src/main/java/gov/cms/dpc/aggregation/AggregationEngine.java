@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.common.annotations.ExportPath;
-import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -26,53 +25,54 @@ public class AggregationEngine implements Runnable {
     private static final char delim = '\n';
 
     //private final AttributionEngine engine;
-    //private final JobQueue queue;
+    private final JobQueue queue;
     private final BlueButtonClient bbclient;
     private final FhirContext context;
-    //private final String exportPath;
+    private final String exportPath;
     private volatile boolean run = true;
 
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath String exportPath) {
         //this.engine = engine;
-        //this.queue = queue;
+        this.queue = queue;
         this.bbclient = bbclient;
         this.context = FhirContext.forDstu3();
-        //this.exportPath = exportPath;
+        this.exportPath = exportPath;
     }
 
     @Override
     public void run() {
 
         while (run) {
-            // TODO: impelemnt
-//            final Optional<Pair<UUID, Object>> workPair = this.queue.workJob();
-//            if (workPair.isEmpty()) {
-//                try {
-//                    logger.debug("No job, waiting 2 seconds");
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-//                final JobModel model = (JobModel) workPair.get().getRight();
-//                final UUID jobID = workPair.get().getLeft();
-//                logger.debug("Has job {}. Working.", jobID);
-//                final Optional<Set<String>> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
-//                if (attributedBeneficiaries.isPresent()) {
-//                    logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.get().size());
-//                    try {
-//                        this.workJob(jobID, model);
-//                        this.queue.completeJob(jobID, JobStatus.COMPLETED);
-//                    } catch (Exception e) {
-//                        logger.error("Cannot process job {}", jobID, e);
-//                        this.queue.completeJob(jobID, JobStatus.FAILED);
-//                    }
-//                } else {
-//                    logger.error("Cannot execute Job {} with no beneficiaries", jobID);
-//                    this.queue.completeJob(jobID, JobStatus.FAILED);
-//                }
-//            }
+            final Optional<Pair<UUID, Object>> workPair = this.queue.workJob();
+            if (workPair.isEmpty()) {
+                try {
+                    logger.debug("No job, waiting 2 seconds");
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                final JobModel model = (JobModel) workPair.get().getRight();
+                final UUID jobID = workPair.get().getLeft();
+                logger.debug("Has job {}. Working.", jobID);
+                //final Optional<Set<String>> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
+                Set<String> attributedBeneficiaries = model.getBeneficiaries();
+
+                if (!attributedBeneficiaries.isEmpty()) {
+                    logger.debug("Has {} attributed beneficiaries",attributedBeneficiaries.size());
+                    try {
+                        this.workJob(jobID, model);
+                        this.queue.completeJob(jobID, JobStatus.COMPLETED);
+                    } catch (Exception e) {
+                        logger.error("Cannot process job {}", jobID, e);
+                        this.queue.completeJob(jobID, JobStatus.FAILED);
+                    }
+                } else {
+                    logger.error("Cannot execute Job {} with no beneficiaries", jobID);
+                    this.queue.completeJob(jobID, JobStatus.FAILED);
+                }
+            }
         }
         logger.info("Shutting down aggregation engine");
     }
@@ -83,8 +83,7 @@ public class AggregationEngine implements Runnable {
 
     private void workJob(UUID jobID, JobModel job) throws IOException {
         final IParser parser = context.newJsonParser();
-        // TODO: Remove holder value
-        try (final FileOutputStream writer = new FileOutputStream(String.format("%s/%s.ndjson", "bla", jobID.toString()))) {
+        try (final FileOutputStream writer = new FileOutputStream(String.format("%s/%s.ndjson", exportPath, jobID.toString()))) {
             job.getBeneficiaries()
                     .stream()
                     .map(this.bbclient::requestFHIRFromServer)
@@ -100,5 +99,10 @@ public class AggregationEngine implements Runnable {
                     });
             writer.flush();
         }
+    }
+
+    private Optional<Pair<UUID, Object>> checkQueue() {
+        // TODO: Implement queue communication
+        return Optional.ofNullable(null);
     }
 }
