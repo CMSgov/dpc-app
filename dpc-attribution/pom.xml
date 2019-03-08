@@ -80,6 +80,9 @@
             <resource>
                 <directory>${project.basedir}/../src/resources</directory>
             </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
         </resources>
         <plugins>
             <plugin>
