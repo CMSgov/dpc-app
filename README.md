@@ -6,19 +6,7 @@ Clone and Build Submodules
 First-time clone:
 
 ```bash
-git clone --recursive https://github.com/CMSgov/dpc-app
-```
-
-Or, to pull submodules into existing repository:
-
-```bash
-git submodule init
-git submodule update
-```
-
-Build with makefile:
-```bash
-Make
+git clone https://github.com/CMSgov/dpc-app
 ```
 
 How to start the DPC Services
