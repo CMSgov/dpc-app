@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation;
+package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -11,6 +11,7 @@ import gov.cms.dpc.queue.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,7 +25,6 @@ public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
     private static final char delim = '\n';
 
-    //private final AttributionEngine engine;
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
     private final FhirContext context;
@@ -32,7 +32,7 @@ public class AggregationEngine implements Runnable {
     private volatile boolean run = true;
 
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath String exportPath) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath @Nullable String exportPath) {
         //this.engine = engine;
         this.queue = queue;
         this.bbclient = bbclient;

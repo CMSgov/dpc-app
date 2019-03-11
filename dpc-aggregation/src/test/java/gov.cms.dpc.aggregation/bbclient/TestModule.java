@@ -10,7 +10,7 @@ public class TestModule extends AbstractModule {
 
     @Provides
     Config provideTestConfig() {
-        return ConfigFactory.load();
+        return ConfigFactory.load().getConfig("dpc.aggregation");
     }
 
     @Provides

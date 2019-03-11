@@ -24,7 +24,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAggregationConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
-                .modules(new AggregationModule(), new BlueButtonClientModule())
+                .modules(new AggregationAppModule(), new BlueButtonClientModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
