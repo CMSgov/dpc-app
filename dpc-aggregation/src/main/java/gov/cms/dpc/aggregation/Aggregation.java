@@ -1,6 +1,6 @@
-package gov.cms.dpc.web;
+package gov.cms.dpc.aggregation;
 
-import gov.cms.dpc.aggregation.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import io.dropwizard.lifecycle.Managed;
 
 import javax.inject.Inject;

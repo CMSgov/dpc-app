@@ -5,23 +5,29 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.qclient.MockQueueClient;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
-public class AggregationModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
+public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
+
+    private static final Logger logger = LoggerFactory.getLogger(AggregationAppModule.class);
+
+    AggregationAppModule() {
+
+    }
 
     @Override
     public void configure(Binder binder) {
         binder.bind(AggregationEngine.class);
+        binder.bind(Aggregation.class).asEagerSingleton();
 
-    }
-
-    @Provides
-    public Config provideConfig() {
-        return getConfiguration().getConfig();
     }
 
     @Provides
@@ -40,5 +46,10 @@ public class AggregationModule extends DropwizardAwareModule<DPCAggregationConfi
     @ExportPath
     public String provideExportPath() {
         return getConfiguration().getExportPath();
+    }
+
+    @Provides
+    public Config provideConfig() {
+        return getConfiguration().getConfig();
     }
 }
