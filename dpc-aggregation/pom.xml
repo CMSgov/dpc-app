@@ -60,6 +60,10 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-testing</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -116,6 +120,9 @@
                     <to>
                         <image>${project.artifactId}</image>
                     </to>
+                    <extraDirectory>
+                        <path>${project.basedir}/../bbcerts</path>
+                    </extraDirectory>
                     <container>
                         <args>
                             <arg>server</arg>
@@ -127,10 +134,5 @@
                 </configuration>
             </plugin>
         </plugins>
-        <testResources>
-            <testResource>
-                <directory>${project.basedir}/../bbcerts</directory>
-            </testResource>
-        </testResources>
     </build>
 </project>

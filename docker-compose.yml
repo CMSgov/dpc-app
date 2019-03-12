@@ -13,6 +13,8 @@ services:
     image: dpc-aggregation
     ports:
       - "8081:8081"
+    environment:
+      - ENV=dev
 
 
   attribution:
