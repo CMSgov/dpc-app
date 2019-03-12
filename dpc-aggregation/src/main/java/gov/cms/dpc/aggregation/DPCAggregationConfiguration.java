@@ -9,6 +9,7 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration {
     private String exportPath;
 
     public String getExportPath() {
-        return exportPath;
+        // TODO: Put this in conf file?
+        return "/tmp";
     }
 }

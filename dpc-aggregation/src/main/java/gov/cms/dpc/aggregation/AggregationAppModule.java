@@ -6,13 +6,12 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
-import gov.cms.dpc.aggregation.qclient.MockQueueClient;
+import gov.cms.dpc.aggregation.qclient.MockEmptyQueueClient;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
@@ -39,7 +38,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     public JobQueue provideJobQueue() {
         // TODO: provide an actual client when it gets implemented
-        return new MockQueueClient();
+        return new MockEmptyQueueClient();
     }
 
     @Provides
