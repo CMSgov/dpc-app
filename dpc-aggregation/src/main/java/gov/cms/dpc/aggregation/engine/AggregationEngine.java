@@ -32,7 +32,7 @@ public class AggregationEngine implements Runnable {
     private volatile boolean run = true;
 
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath @Nullable String exportPath) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath String exportPath) {
         //this.engine = engine;
         this.queue = queue;
         this.bbclient = bbclient;
@@ -56,7 +56,6 @@ public class AggregationEngine implements Runnable {
                 final JobModel model = (JobModel) workPair.get().getRight();
                 final UUID jobID = workPair.get().getLeft();
                 logger.debug("Has job {}. Working.", jobID);
-                //final Optional<Set<String>> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
                 Set<String> attributedBeneficiaries = model.getBeneficiaries();
 
                 if (!attributedBeneficiaries.isEmpty()) {

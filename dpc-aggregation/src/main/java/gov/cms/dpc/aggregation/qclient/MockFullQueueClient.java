@@ -8,7 +8,7 @@ import gov.cms.dpc.queue.Pair;
 
 import java.util.*;
 
-public class MockQueueClient implements JobQueue {
+public class MockFullQueueClient implements JobQueue {
     private final Set<String> testBeneficiaryIds = new HashSet<String>(Arrays.asList("20140000008325", "20140000008326"));
 
     public <T> void submitJob(UUID jobId, T data) {
