@@ -99,9 +99,4 @@ public class AggregationEngine implements Runnable {
             writer.flush();
         }
     }
-
-    private Optional<Pair<UUID, Object>> checkQueue() {
-        // TODO: Implement queue communication
-        return Optional.ofNullable(null);
-    }
 }
