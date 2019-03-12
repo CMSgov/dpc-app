@@ -143,9 +143,6 @@
                     <to>
                         <image>${project.artifactId}</image>
                     </to>
-                    <extraDirectory>
-                        <path>${project.basedir}/../bbcerts</path>
-                    </extraDirectory>
                     <container>
                         <args>
                             <arg>server</arg>
