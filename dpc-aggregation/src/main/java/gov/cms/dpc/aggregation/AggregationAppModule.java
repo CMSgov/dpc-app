@@ -7,7 +7,6 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.qclient.MockEmptyQueueClient;
-import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +38,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     public JobQueue provideJobQueue() {
         // TODO: provide an actual client when it gets implemented
         return new MockEmptyQueueClient();
-    }
-
-    @Provides
-    @ExportPath
-    public String provideExportPath() {
-        return getConfiguration().getExportPath();
     }
 
     @Provides
