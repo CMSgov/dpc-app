@@ -2,8 +2,8 @@ package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
-import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -32,12 +32,11 @@ public class AggregationEngine implements Runnable {
     private volatile boolean run = true;
 
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath String exportPath) {
-        //this.engine = engine;
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, Config config) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.context = FhirContext.forDstu3();
-        this.exportPath = exportPath;
+        this.exportPath = config.getString("exportPath");
     }
 
     @Override
