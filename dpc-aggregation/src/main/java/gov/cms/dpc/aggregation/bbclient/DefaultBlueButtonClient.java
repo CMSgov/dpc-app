@@ -20,7 +20,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     public Patient requestFHIRFromServer(String beneficiaryID) {
 
         try {
-            logger.info("Attempting to fetch data from baseURL: {}", client.getServerBase());
+            logger.debug("Attempting to fetch patient ID {} from baseURL: {}", beneficiaryID, client.getServerBase());
             return client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
 
         } catch (ResourceNotFoundException ex) {

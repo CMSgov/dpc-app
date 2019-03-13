@@ -10,12 +10,6 @@ public class TestModule extends AbstractModule {
 
     @Provides
     Config provideTestConfig() {
-        return ConfigFactory.load();
-    }
-
-    @Provides
-    @ExportPath
-    public String provideExportPath() {
-        return "/tmp";
+        return ConfigFactory.load().getConfig("dpc.aggregation");
     }
 }
