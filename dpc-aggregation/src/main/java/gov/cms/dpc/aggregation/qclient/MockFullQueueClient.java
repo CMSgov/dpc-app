@@ -8,18 +8,8 @@ import gov.cms.dpc.queue.Pair;
 
 import java.util.*;
 
-public class MockFullQueueClient implements JobQueue {
+public class MockFullQueueClient extends AbstractMockQueueClient {
     private final Set<String> testBeneficiaryIds = new HashSet<String>(Arrays.asList("20140000008325", "20140000008326"));
-
-    public <T> void submitJob(UUID jobId, T data) {
-        // TODO
-
-    }
-
-    public Optional<JobStatus> getJobStatus(UUID jobId) {
-        // TODO
-        return Optional.of(JobStatus.COMPLETED);
-    }
 
     public <T> Optional<Pair<UUID, T>> workJob() {
         return Optional.of(new Pair<>(
@@ -28,16 +18,4 @@ public class MockFullQueueClient implements JobQueue {
         ));
     }
 
-    public void completeJob(UUID uuid, JobStatus jobStatus) {
-        // TODO
-    }
-
-    public void removeJob(UUID uuid) {
-        // TODO
-    }
-
-    public int queueSize() {
-        // TODO
-        return -1;
-    }
 }
