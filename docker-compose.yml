@@ -9,6 +9,14 @@ services:
     ports:
       - "5432:5432"
 
+  aggregation:
+    image: dpc-aggregation
+    ports:
+      - "8081:8081"
+    environment:
+      - ENV=dev
+
+
   attribution:
     image: dpc-attribution
     depends_on:

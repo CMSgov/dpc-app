@@ -4,7 +4,6 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
-import gov.cms.dpc.aggregation.AggregationEngine;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -40,9 +39,7 @@ public class DPCAppModule extends DropwizardAwareModule<DPWebConfiguration> {
         binder.bind(AttributionEngine.class)
                 .to(AttributionServiceClient.class);
 
-        // This will eventually go away.
-        binder.bind(AggregationEngine.class);
-        binder.bind(Aggregation.class).asEagerSingleton();
+        // TODO: This will eventually go away.
         binder.bind(TestResource.class);
         // V1 Resources
         binder.bind(BaseResource.class);

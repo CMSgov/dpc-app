@@ -1,10 +1,9 @@
-package gov.cms.dpc.aggregation;
+package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
-import gov.cms.dpc.common.annotations.ExportPath;
-import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -12,6 +11,7 @@ import gov.cms.dpc.queue.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,7 +25,6 @@ public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
     private static final char delim = '\n';
 
-    private final AttributionEngine engine;
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
     private final FhirContext context;
@@ -33,12 +32,11 @@ public class AggregationEngine implements Runnable {
     private volatile boolean run = true;
 
     @Inject
-    public AggregationEngine(AttributionEngine engine, JobQueue queue, BlueButtonClient bbclient,  @ExportPath String exportPath) {
-        this.engine = engine;
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, Config config) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.context = FhirContext.forDstu3();
-        this.exportPath = exportPath;
+        this.exportPath = config.getString("exportPath");
     }
 
     @Override
@@ -57,9 +55,10 @@ public class AggregationEngine implements Runnable {
                 final JobModel model = (JobModel) workPair.get().getRight();
                 final UUID jobID = workPair.get().getLeft();
                 logger.debug("Has job {}. Working.", jobID);
-                final Optional<Set<String>> attributedBeneficiaries = this.engine.getAttributedBeneficiaries(model.getProviderID());
-                if (attributedBeneficiaries.isPresent()) {
-                    logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.get().size());
+                Set<String> attributedBeneficiaries = model.getBeneficiaries();
+
+                if (!attributedBeneficiaries.isEmpty()) {
+                    logger.debug("Has {} attributed beneficiaries",attributedBeneficiaries.size());
                     try {
                         this.workJob(jobID, model);
                         this.queue.completeJob(jobID, JobStatus.COMPLETED);
