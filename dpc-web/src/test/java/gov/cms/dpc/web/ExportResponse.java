@@ -55,20 +55,12 @@ public class ExportResponse {
     }
 
     public static class FileOutput {
-//        private String type;
+        //        private String type;
         private String url;
 
         public FileOutput() {
 //            Not used
         }
-
-//        public String getType() {
-//            return type;
-//        }
-//
-//        public void setType(String type) {
-//            this.type = type;
-//        }
 
         public String getUrl() {
             return url;
