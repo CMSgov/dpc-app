@@ -9,11 +9,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dpc-aggregation</artifactId>
-    <name>DPC BlueButton Interaction Service</name>
+    <artifactId>dpc-api</artifactId>
+    <name>DPC Public API Service</name>
 
     <properties>
-        <mainClass>gov.cms.dpc.aggregation.DPCAggregationService</mainClass>
+        <mainClass>gov.cms.dpc.api.DPCAPIService</mainClass>
     </properties>
 
     <dependencies>
@@ -21,22 +21,41 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <scope>compile</scope>
+        </dependency>
         <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.hubspot.dropwizard</groupId>
+            <artifactId>dropwizard-guicier</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${typesafe.config.groupID}</groupId>
             <artifactId>typesafe-dropwizard-configuration</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-queue</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-aggregation</artifactId>
             <version>0.2.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
@@ -46,39 +65,39 @@
             <version>0.2.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-structures-dstu3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe</groupId>
-            <artifactId>config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.hubspot.dropwizard</groupId>
-            <artifactId>dropwizard-guicier</artifactId>
-        </dependency>
-        <!--No longer shipped with Java 11, so we need to include it manually-->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
+        <!--Test resources-->
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.helger</groupId>
+            <artifactId>ph-schematron</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-client</artifactId>
+            <!--This will need to get flipped back to test, once we fully decouple the aggregtion engine-->
+            <!--<scope>test</scope>-->
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
     </dependencies>
 
     <build>
+        <!--Pull in the attribution seeds so we can use them for the integration tests.-->
+        <testResources>
+            <testResource>
+                <directory>${project.basedir}/../src/resources</directory>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -124,7 +143,6 @@
                     </archive>
                 </configuration>
             </plugin>
-            <!-- For building docker image -->
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
@@ -132,15 +150,12 @@
                     <to>
                         <image>${project.artifactId}</image>
                     </to>
-                    <extraDirectory>
-                        <path>${project.basedir}/../bbcerts</path>
-                    </extraDirectory>
                     <container>
                         <args>
                             <arg>server</arg>
                         </args>
                         <ports>
-                            <port>8081</port>
+                            <port>8080</port>
                         </ports>
                     </container>
                 </configuration>

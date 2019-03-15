@@ -6,7 +6,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <modules>
-        <module>dpc-web</module>
+        <module>dpc-api</module>
         <module>dpc-queue</module>
         <module>dpc-aggregation</module>
         <module>dpc-attribution</module>
@@ -18,7 +18,7 @@
     <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>DPCApp</name>
+    <name>DPC Application</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
