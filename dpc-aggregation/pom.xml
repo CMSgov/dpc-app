@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dpc-aggregation</artifactId>
+    <name>DPC BlueButton Interaction Service</name>
 
     <properties>
         <mainClass>gov.cms.dpc.aggregation.DPCAggregationService</mainClass>
