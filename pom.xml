@@ -6,7 +6,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <modules>
-        <module>dpc-web</module>
+        <module>dpc-api</module>
         <module>dpc-queue</module>
         <module>dpc-aggregation</module>
         <module>dpc-attribution</module>
