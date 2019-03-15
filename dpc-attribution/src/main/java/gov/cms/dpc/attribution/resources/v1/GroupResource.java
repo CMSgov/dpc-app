@@ -2,8 +2,10 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,15 @@ public class GroupResource extends AbstractGroupResource {
     @Inject
     GroupResource(AttributionEngine engine) {
         this.engine = engine;
+    }
+
+    @POST
+    @FHIR
+    @UnitOfWork
+    public Response submitRoster(Bundle providerBundle) {
+        this.engine.addAttributionRelationships(providerBundle);
+
+        return Response.ok().build();
     }
 
     @Path("/{groupID}")

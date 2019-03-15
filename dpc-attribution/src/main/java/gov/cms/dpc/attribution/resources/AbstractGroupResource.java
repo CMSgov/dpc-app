@@ -1,8 +1,10 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hl7.fhir.dstu3.model.Bundle;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.util.Set;
 
 @Path("/Group")
@@ -12,6 +14,10 @@ public abstract class AbstractGroupResource {
     protected AbstractGroupResource() {
         // Not used
     }
+
+    @POST
+    @FHIR
+    public abstract Response submitRoster(Bundle providerBundle);
 
     @GET
     @Path("/{groupID}")

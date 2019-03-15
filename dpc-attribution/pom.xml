@@ -43,7 +43,7 @@
             <artifactId>dropwizard-guicier</artifactId>
         </dependency>
         <dependency>
-            <groupId>ca.mestevens.java</groupId>
+            <groupId>${typesafe.config.groupID}</groupId>
             <artifactId>typesafe-dropwizard-configuration</artifactId>
         </dependency>
         <dependency>
@@ -76,6 +76,14 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/../src/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>

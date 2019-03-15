@@ -41,4 +41,7 @@ public abstract class AbstractBaseResource {
 
     @Path("/Data")
     public abstract AbstractDataResource dataOperations();
+
+    @Path("/Bundle")
+    public abstract AbstractRosterResource rosterOperations();
 }

@@ -17,6 +17,10 @@ public class AbstractApplicationTest {
     protected AbstractApplicationTest() {
     }
 
+    protected String getBaseURL() {
+        return String.format("http://localhost:%d/v1/", APPLICATION.getLocalPort());
+    }
+
     @BeforeAll
     public static void setup() {
         APPLICATION.before();
