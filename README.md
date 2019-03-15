@@ -1,5 +1,11 @@
 # Data @ The Point of Care
 
+The *Data at the Point of Care* application is a pilot project through the US *Centers for Medicare and Medicaid Services* focused on improving access to Medicare claims data within the clincial care process.
+
+This repo consists of the main *Fast Healthcare Interoperability Resources* (FHIR) server which exposes the CMS [BlueButton](https://bluebutton.cms.gov) service using the [FHIR Bulk Specification](https://github.com/smart-on-fhir/fhir-bulk-data-docs).
+
+Currently, this project is linked to the Blue Button development sandbox, but only via a privately held certificate. 
+
 Clone and Build Submodules
 ---
 
