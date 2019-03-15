@@ -30,7 +30,7 @@
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
         <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
         <hapi.fhir.groupID>${jitpack.groupID}.hapi-fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>outcome-headers-SNAPSHOT</hapi.fhir.version>
+        <hapi.fhir.version>jitpack-SNAPSHOT</hapi.fhir.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
     </properties>
