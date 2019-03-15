@@ -20,6 +20,12 @@
     <packaging>pom</packaging>
 
     <name>DPCApp</name>
+    <url>https://github.com/CMSgov/dpc-app</url>
+    <scm>
+        <connection>scm:git:git@github.com:CMSGov/dpc-app.git</connection>
+        <url>scm:git:git@github.com:CMSGov/dpc-app.git</url>
+        <developerConnection>scm:git:git@github.com:CMSGov/dpc-app.git</developerConnection>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -31,6 +37,27 @@
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
     </properties>
+
+    <developers>
+        <developer>
+            <id>nick</id>
+            <name>Nick Robison</name>
+            <email>nicholas.a.robison@omb.eop.gov</email>
+            <organization>United States Digital Service</organization>
+        </developer>
+        <developer>
+            <id>isaac</id>
+            <name>Isaac Sears</name>
+            <email>isaac.sears@cms.hhs.gov</email>
+            <organization>United States Digital Service</organization>
+        </developer>
+        <developer>
+            <id>gina</id>
+            <name>Gina Maini</name>
+            <email>gina.m.maini@omb.eop.gov</email>
+            <organization>United States Digital Service</organization>
+        </developer>
+    </developers>
 
     <dependencyManagement>
         <dependencies>
