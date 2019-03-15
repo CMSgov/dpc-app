@@ -35,8 +35,6 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
     @Override
     public BaseResource readFrom(Class<BaseResource> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
         final IParser parser = ctx.newJsonParser();
-//        final StringWriter writer = new StringWriter();
-//        IOUtils.copy(entityStream, writer, StandardCharsets.UTF_8);
         return (BaseResource) parser.parseResource(new InputStreamReader(entityStream));
     }
 
