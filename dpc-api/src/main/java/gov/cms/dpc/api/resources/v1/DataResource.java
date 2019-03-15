@@ -33,15 +33,12 @@ public class DataResource extends AbstractDataResource {
     @Path("/{fileID}/")
     @GET
     public Response export(@PathParam("fileID") String fileID) {
-        final StreamingOutput fileStream = new StreamingOutput() {
-            @Override
-            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                final java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", fileLocation, fileID));
-                logger.debug("Streaming file {}", path.toString());
-                final byte[] data = Files.readAllBytes(path);
-                outputStream.write(data);
-                outputStream.flush();
-            }
+        final StreamingOutput fileStream = outputStream -> {
+            final java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", fileLocation, fileID));
+            logger.debug("Streaming file {}", path.toString());
+            final byte[] data = Files.readAllBytes(path);
+            outputStream.write(data);
+            outputStream.flush();
         };
 
         return Response.ok(fileStream).build();

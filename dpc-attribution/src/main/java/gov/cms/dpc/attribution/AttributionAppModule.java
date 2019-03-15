@@ -37,6 +37,8 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(AttributionDAO.class);
         binder.bind(AttributionEngine.class).to(AttributionDAO.class);
         binder.bind(V1AttributionResource.class);
+
+
 //
     }
 
