@@ -11,10 +11,7 @@ import gov.cms.dpc.api.annotations.AttributionService;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.resources.TestResource;
-import gov.cms.dpc.api.resources.v1.BaseResource;
-import gov.cms.dpc.api.resources.v1.DataResource;
-import gov.cms.dpc.api.resources.v1.GroupResource;
-import gov.cms.dpc.api.resources.v1.JobResource;
+import gov.cms.dpc.api.resources.v1.*;
 import io.dropwizard.client.JerseyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +43,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPAPIConfiguration> {
         binder.bind(GroupResource.class);
         binder.bind(JobResource.class);
         binder.bind(DataResource.class);
+        binder.bind(RosterResource.class);
     }
 
     @Provides
