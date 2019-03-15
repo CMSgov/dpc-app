@@ -21,14 +21,13 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,13 +58,8 @@ public class AttributionFHIRTest {
 
     @BeforeEach
     public void initDB() throws Exception {
-        APPLICATION.getApplication().run("db", "migrate");
-    }
-
-    @AfterEach
-    public void dropDB() throws Exception {
-        // Drop everything in the database, so we can start fresh each time.
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything");
+        APPLICATION.getApplication().run("db", "migrate");
     }
 
     @AfterAll
@@ -129,8 +123,6 @@ public class AttributionFHIRTest {
 
             // Remove the patient and try again
         }
-
-        dropDB();
     }
 
 
