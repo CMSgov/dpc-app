@@ -9,7 +9,8 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_ebb4f1b65c80_key -iv $encrypted_ebb4f1b65c80_iv -in bbcerts/bb.keystore.enc -out bbcerts/bb.keystore -d
 
 before_script:
-  - docker-compose up
+  - docker-compose up -d
 
 script:
+  - sleep 30
   - curl http://localhost:3002
