@@ -7,7 +7,7 @@ services:
       - POSTGRES_DB=dpc-attribution
       - POSTGRES_PASSWORD=dpc-safe
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   aggregation:
     image: dpc-aggregation
