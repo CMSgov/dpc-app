@@ -1,5 +1,6 @@
-language: java
+sudo: required
 
+language: java
 jdk:
   - oraclejdk11
 
