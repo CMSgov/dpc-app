@@ -13,4 +13,5 @@ before_script:
 
 script:
   - sleep 30
+  - docker ps
   - curl http://localhost:3002
