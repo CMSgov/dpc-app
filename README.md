@@ -1,5 +1,7 @@
 # Data @ The Point of Care
 
+[![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
+
 Clone and Build Submodules
 ---
 
