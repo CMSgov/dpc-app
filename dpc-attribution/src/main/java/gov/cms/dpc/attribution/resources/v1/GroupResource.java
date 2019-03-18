@@ -42,7 +42,7 @@ public class GroupResource extends AbstractGroupResource {
     public Set<String> getAttributedPatients(@PathParam("groupID") String groupID) {
         final Optional<Set<String>> attributedBeneficiaries = engine.getAttributedBeneficiaries(groupID);
         if (attributedBeneficiaries.isEmpty()) {
-            throw new WebApplicationException(String.format("Unable to find provider: {}", groupID), Response.Status.NOT_FOUND);
+            throw new WebApplicationException(String.format("Unable to find provider: %s", groupID), Response.Status.NOT_FOUND);
         }
 
         return attributedBeneficiaries.get();
