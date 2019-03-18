@@ -3,22 +3,70 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
-        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
-    <changeSet id="1" author="nickrobison-usds">
+    <changeSet id="basetable-layout" author="nickrobison-usds">
         <createTable tableName="ATTRIBUTIONS">
             <column name="id" autoIncrement="true" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="provider_id" type="VARCHAR"/>
-            <column name="patient_id" type="VARCHAR"/>
+            <column name="provider_id" type="UUID"/>
+            <column name="patient_id" type="UUID"/>
+            <column name="created_at" type="DATETIME"/>
         </createTable>
 
         <createIndex tableName="ATTRIBUTIONS" indexName="attributions_provider_idx">
             <column name="provider_id"/>
         </createIndex>
+
+        <createTable tableName="PROVIDERS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="provider_id" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR"/>
+            <column name="last_name" type="VARCHAR"/>
+        </createTable>
+
+        <createIndex tableName="PROVIDERS" indexName="providers_id_idx">
+            <column name="provider_id"/>
+        </createIndex>
+        
+        <createTable tableName="PATIENTS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="beneficiary_id" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR"/>
+            <column name="last_name" type="VARCHAR"/>
+            <column name="dob" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="PATIENTS" indexName="beneficiary_id_idx">
+            <column name="beneficiary_id"/>
+        </createIndex>
+    </changeSet>
+    
+    <changeSet id="add-attribution-fk" author="nickrobison-usds">
+        <addForeignKeyConstraint
+                baseTableName="ATTRIBUTIONS"
+                baseColumnNames="provider_id"
+                constraintName="fk_attribution_providers"
+                referencedTableName="PROVIDERS"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="ATTRIBUTIONS"
+                baseColumnNames="patient_id"
+                constraintName="fk_attribution_patients"
+                referencedTableName="PATIENTS"
+                referencedColumnNames="id"/>
     </changeSet>
 
 </databaseChangeLog>

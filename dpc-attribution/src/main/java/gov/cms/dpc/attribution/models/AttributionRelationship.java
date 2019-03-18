@@ -1,16 +1,15 @@
 package gov.cms.dpc.attribution.models;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 @Entity(name = "attributions")
-@NamedQueries({
-        @NamedQuery(name = "findByProvider", query = "from attributions a where a.providerID = :id"),
-        @NamedQuery(name = "findRelationship", query = "from attributions a where a.providerID = :provID and a.attributedPatient = :patID"),
-        @NamedQuery(name = "getProvider", query = "select 1 from attributions a where a.providerID = :provID")
-})
+//@NamedQueries({
+
+//})
 public class AttributionRelationship {
 
     @Id
@@ -18,21 +17,25 @@ public class AttributionRelationship {
     @Column(name = "id", updatable = false, nullable = false)
     private Long attributionID;
 
-    @NotEmpty
-    @Column(name = "provider_id")
-    private String providerID;
+    @ManyToOne(cascade = CascadeType.ALL)
+    private ProviderEntity provider;
 
-    @NotEmpty
-    @Column(name = "patient_id")
-    private String attributedPatient;
+//    @Column(name = "patient_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    private PatientEntity patient;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private OffsetDateTime created;
 
     public AttributionRelationship() {
         // Not used
     }
 
-    public AttributionRelationship(String providerID, String attributedPatients) {
-        this.providerID = providerID;
-        this.attributedPatient = attributedPatients;
+    public AttributionRelationship(ProviderEntity provider, PatientEntity patient, OffsetDateTime created) {
+        this.provider = provider;
+        this.patient = patient;
+        this.created = created;
     }
 
     public Long getAttributionID() {
@@ -43,20 +46,28 @@ public class AttributionRelationship {
         this.attributionID = attributionID;
     }
 
-    public String getProviderID() {
-        return providerID;
+    public ProviderEntity getProvider() {
+        return provider;
     }
 
-    public void setProviderID(String providerID) {
-        this.providerID = providerID;
+    public void setProvider(ProviderEntity provider) {
+        this.provider = provider;
     }
 
-    public String getAttributedPatient() {
-        return attributedPatient;
+    public PatientEntity getPatient() {
+        return patient;
     }
 
-    public void setAttributedPatient(String attributedPatient) {
-        this.attributedPatient = attributedPatient;
+    public void setPatient(PatientEntity patient) {
+        this.patient = patient;
+    }
+
+    public OffsetDateTime getCreated() {
+        return created;
+    }
+
+    public void setCreated(OffsetDateTime created) {
+        this.created = created;
     }
 
     @Override
@@ -65,12 +76,13 @@ public class AttributionRelationship {
         if (o == null || getClass() != o.getClass()) return false;
         AttributionRelationship that = (AttributionRelationship) o;
         return Objects.equals(attributionID, that.attributionID) &&
-                Objects.equals(providerID, that.providerID) &&
-                Objects.equals(attributedPatient, that.attributedPatient);
+                Objects.equals(provider, that.provider) &&
+                Objects.equals(patient, that.patient) &&
+                Objects.equals(created, that.created);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(attributionID, providerID, attributedPatient);
+        return Objects.hash(attributionID, provider, patient, created);
     }
 }
