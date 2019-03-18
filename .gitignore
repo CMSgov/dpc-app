@@ -7,3 +7,4 @@ dependency-reduced-*.xml
 *.db
 bbcerts/*
 !bbcerts/README.md
+!bbcerts/bb.keystore.enc
