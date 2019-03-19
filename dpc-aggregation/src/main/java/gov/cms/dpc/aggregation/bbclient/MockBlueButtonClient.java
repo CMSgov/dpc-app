@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation.bbclient;
 
 
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 
 public class MockBlueButtonClient implements BlueButtonClient {
@@ -15,7 +15,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
         return null;
     }
 
-    public ExplanationOfBenefit requestEOBFromServer(String patientID) {
+    public Bundle requestEOBBundleFromServer(String patientID) {
         // TODO
         return null;
     }
