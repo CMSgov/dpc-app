@@ -1,5 +1,6 @@
 package gov.cms.dpc.aggregation.bbclient;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -9,11 +10,11 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BlueButtonClientTest {
-    private static final String TEST_BENEFICIARY_ID = "20140000008325";
+    private static final String TEST_PATIENT_ID = "20140000008325";
+    private static final String TEST_NONEXISTENT_PATIENT_ID = "31337";
     private static BlueButtonClient bbc;
 
     @BeforeAll
@@ -22,11 +23,9 @@ class BlueButtonClientTest {
         bbc = injector.getInstance(BlueButtonClient.class);
     }
 
-    // TODO: need to verify that resourceNotFoundException gets thrown when bbclient can't find a resource
-
     @Test
     void shouldGetFHIRFromPatientID() {
-        Patient ret = bbc.requestPatientFromServer(TEST_BENEFICIARY_ID);
+        Patient ret = bbc.requestPatientFromServer(TEST_PATIENT_ID);
 
         // Verify basic demo patient information
         assertNotEquals(ret, null);
@@ -39,9 +38,21 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetEOBFromPatientID() {
-        Bundle explanationOfBenefits = bbc.requestEOBBundleFromServer(TEST_BENEFICIARY_ID);
+        Bundle explanationOfBenefits = bbc.requestEOBBundleFromServer(TEST_PATIENT_ID);
 
         assertNotEquals(explanationOfBenefits, null);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenResourceNotFound() {
+        assertThrows(ResourceNotFoundException.class, () -> {
+            bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID);
+        });
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            bbc.requestEOBBundleFromServer(TEST_NONEXISTENT_PATIENT_ID);
+        });
+
     }
 
 }
