@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.bbclient;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,8 @@ class BlueButtonClientTest {
     }
 
     @Test
-    void testGetFHIRFromBeneficiaryID() throws BlueButtonClientException {
-        Patient ret = bbc.requestFHIRFromServer(TEST_BENEFICIARY_ID);
+    void shouldGetFHIRFromPatientID() {
+        Patient ret = bbc.requestPatientFromServer(TEST_BENEFICIARY_ID);
 
         // Verify basic demo patient information
         assertNotEquals(ret, null);
@@ -32,6 +33,13 @@ class BlueButtonClientTest {
         assertEquals(ret.getName().size(), 1);
         assertEquals(ret.getName().get(0).getFamily(), "Doe");
         assertEquals(ret.getName().get(0).getGiven().get(0).toString(), "Jane");
+    }
+
+    @Test
+    void shouldGetEOBFromPatientID() {
+        ExplanationOfBenefit explanationOfBenefit = bbc.requestEOBFromServer(TEST_BENEFICIARY_ID);
+
+        assertNotEquals(explanationOfBenefit, null);
     }
 
 }

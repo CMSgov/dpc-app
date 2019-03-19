@@ -11,7 +11,6 @@ import gov.cms.dpc.queue.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -84,7 +83,7 @@ public class AggregationEngine implements Runnable {
         try (final FileOutputStream writer = new FileOutputStream(String.format("%s/%s.ndjson", exportPath, jobID.toString()))) {
             job.getBeneficiaries()
                     .stream()
-                    .map(this.bbclient::requestFHIRFromServer)
+                    .map(this.bbclient::requestPatientFromServer)
                     .map(parser::encodeResourceToString)
                     .forEach(str -> {
                         try {

@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.bbclient;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,18 +18,22 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         this.client = client;
     }
 
-    public Patient requestFHIRFromServer(String beneficiaryID) {
+    public Patient requestPatientFromServer(String patientID) {
 
         try {
-            logger.debug("Attempting to fetch patient ID {} from baseURL: {}", beneficiaryID, client.getServerBase());
-            return client.read().resource(Patient.class).withUrl(buildSearchUrl(beneficiaryID)).execute();
+            logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientID, client.getServerBase());
+            return client.read().resource(Patient.class).withUrl(buildSearchUrl(patientID)).execute();
 
         } catch (ResourceNotFoundException ex) {
-            throw new BlueButtonClientException("Could not find beneficiary with ID: " + beneficiaryID, ex);
+            throw new BlueButtonClientException("Could not find beneficiary with ID: " + patientID, ex);
         }
     }
 
-    private String buildSearchUrl(String beneficiaryID) {
-        return client.getServerBase() + "Patient/" + beneficiaryID;
+    public ExplanationOfBenefit requestEOBFromServer(String PatientID) throws BlueButtonClientException {
+        return null;
+    }
+
+    private String buildSearchUrl(String patientID) {
+        return client.getServerBase() + "Patient/" + patientID;
     }
 }
