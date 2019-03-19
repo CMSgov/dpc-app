@@ -19,28 +19,20 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         this.client = client;
     }
 
-    public Patient requestPatientFromServer(String patientID) {
-        try {
-            logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientID, client.getServerBase());
-            return client.read().resource(Patient.class).withId(patientID).execute();
+    public Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException {
+        logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientID, client.getServerBase());
+        return client.read().resource(Patient.class).withId(patientID).execute();
 
-        } catch (ResourceNotFoundException ex) {
-            throw new BlueButtonClientException("Could not find patient with ID: " + patientID, ex);
-        }
     }
 
-    public Bundle requestEOBBundleFromServer(String patientID) {
-        try {
-            // TODO: need to implement some kind of pagination? EOB bundles can be HUGE
-            logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientID, client.getServerBase());
-            return client.search()
-                    .forResource(ExplanationOfBenefit.class)
-                    .where(ExplanationOfBenefit.PATIENT.hasId(patientID))
-                    .returnBundle(Bundle.class)
-                    .execute();
+    public Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException {
+        // TODO: need to implement some kind of pagination? EOB bundles can be HUGE
+        logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientID, client.getServerBase());
+        return client.search()
+                .forResource(ExplanationOfBenefit.class)
+                .where(ExplanationOfBenefit.PATIENT.hasId(patientID))
+                .returnBundle(Bundle.class)
+                .execute();
 
-        } catch (ResourceNotFoundException ex) {
-            throw new BlueButtonClientException("Could not find EOBs for patient with ID: " + patientID, ex);
-        }
     }
 }

@@ -66,13 +66,13 @@ public class BlueButtonClientModule extends AbstractModule {
             return keyStore;
         } catch (IOException ex) {
             logger.error(UNOPENABLE_KEYSTORE);
-            throw new BlueButtonClientException(UNOPENABLE_KEYSTORE, ex);
+            throw new BlueButtonClientSetupException(UNOPENABLE_KEYSTORE, ex);
         } catch (KeyStoreException ex) {
             logger.error(INCOMPATIBLE_KEYSTORE_TYPE);
-            throw new BlueButtonClientException(INCOMPATIBLE_KEYSTORE_TYPE, ex);
+            throw new BlueButtonClientSetupException(INCOMPATIBLE_KEYSTORE_TYPE, ex);
         } catch (NoSuchAlgorithmException | CertificateException ex) {
             logger.error(BAD_KEYSTORE);
-            throw new BlueButtonClientException(BAD_KEYSTORE, ex);
+            throw new BlueButtonClientSetupException(BAD_KEYSTORE, ex);
         }
     }
 
@@ -96,7 +96,7 @@ public class BlueButtonClientModule extends AbstractModule {
             keyStoreStream = DefaultBlueButtonClient.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
             if (keyStoreStream == null) {
                 logger.error("KeyStore location is empty, cannot find keyStore {} in resources", KEYSTORE_RESOURCE_KEY);
-                throw new BlueButtonClientException("Unable to get keystore from resources",
+                throw new BlueButtonClientSetupException("Unable to get keystore from resources",
                         new MissingResourceException("", DefaultBlueButtonClient.class.getName(), KEYSTORE_RESOURCE_KEY));
             }
         } else {
@@ -106,7 +106,7 @@ public class BlueButtonClientModule extends AbstractModule {
                 keyStoreStream = new FileInputStream(keyStorePath);
             } catch (FileNotFoundException e) {
                 logger.error("Could not find keystore at location: {}" + Paths.get(keyStorePath).toAbsolutePath().toString());
-                throw new BlueButtonClientException("Unable to find keystore", e);
+                throw new BlueButtonClientSetupException("Unable to find keystore", e);
             }
         }
 
@@ -131,10 +131,10 @@ public class BlueButtonClientModule extends AbstractModule {
 
         } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
             logger.error(BAD_KEYSTORE);
-            throw new BlueButtonClientException(BAD_KEYSTORE, ex);
+            throw new BlueButtonClientSetupException(BAD_KEYSTORE, ex);
         } catch (KeyManagementException ex) {
             logger.error(BAD_CLIENT_CERT_KEY);
-            throw new BlueButtonClientException(BAD_CLIENT_CERT_KEY, ex);
+            throw new BlueButtonClientSetupException(BAD_CLIENT_CERT_KEY, ex);
         }
 
         return HttpClients.custom().setSSLContext(sslContext).build();
