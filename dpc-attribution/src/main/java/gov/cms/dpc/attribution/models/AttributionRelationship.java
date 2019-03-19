@@ -12,7 +12,7 @@ import java.util.Objects;
                 "from providers prov " +
                 "left join attributions a on a.provider = prov.providerID " +
                 "left join patients as pat on a.patient = pat.patientID " +
-                "where prov.providerNPPES = :provID and pat.beneficiaryID = :patID")
+                "where prov.providerNPI = :provID and pat.beneficiaryID = :patID")
 })
 public class AttributionRelationship {
 
