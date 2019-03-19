@@ -4,7 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -14,16 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class BlueButtonClientTest {
     private static final String TEST_BENEFICIARY_ID = "20140000008325";
-    private BlueButtonClient bbc;
+    private static BlueButtonClient bbc;
 
-    @BeforeEach
-    public void setupBlueButtonClient() {
+    @BeforeAll
+    public static void setupBlueButtonClient() {
         final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule());
         bbc = injector.getInstance(BlueButtonClient.class);
     }
 
     // TODO: need to verify that resourceNotFoundException gets thrown when bbclient can't find a resource
-    
+
     @Test
     void shouldGetFHIRFromPatientID() {
         Patient ret = bbc.requestPatientFromServer(TEST_BENEFICIARY_ID);
