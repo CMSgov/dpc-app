@@ -11,8 +11,7 @@ import java.util.UUID;
 @Entity(name = "providers")
 @NamedQueries({
         @NamedQuery(name = "getProvider", query = "select 1 from providers a where a.providerNPPES = :provID"),
-        @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPPES = :id"),
-//        @NamedQuery(name = "findRelationship", query = "from providers a where a.providerNPPES = :provID and a.patient = :patID")
+        @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPPES = :id")
 })
 public class ProviderEntity {
 

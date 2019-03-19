@@ -7,9 +7,13 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 
 @Entity(name = "attributions")
-//@NamedQueries({
-
-//})
+@NamedQueries({
+        @NamedQuery(name = "findRelationship", query = "select 1 " +
+                "from providers prov " +
+                "left join attributions a on a.provider = prov.providerID " +
+                "left join patients as pat on a.patient = pat.patientID " +
+                "where prov.providerNPPES = :provID and pat.beneficiaryID = :patID")
+})
 public class AttributionRelationship {
 
     @Id
@@ -30,6 +34,7 @@ public class AttributionRelationship {
 
     public AttributionRelationship() {
         // Not used
+        this.created = OffsetDateTime.now();
     }
 
     public AttributionRelationship(ProviderEntity provider, PatientEntity patient, OffsetDateTime created) {
