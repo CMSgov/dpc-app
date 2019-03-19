@@ -2,7 +2,7 @@ package gov.cms.dpc.aggregation.bbclient;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +22,8 @@ class BlueButtonClientTest {
         bbc = injector.getInstance(BlueButtonClient.class);
     }
 
+    // TODO: need to verify that resourceNotFoundException gets thrown when bbclient can't find a resource
+    
     @Test
     void shouldGetFHIRFromPatientID() {
         Patient ret = bbc.requestPatientFromServer(TEST_BENEFICIARY_ID);
@@ -37,9 +39,9 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetEOBFromPatientID() {
-        ExplanationOfBenefit explanationOfBenefit = bbc.requestEOBFromServer(TEST_BENEFICIARY_ID);
+        Bundle explanationOfBenefits = bbc.requestEOBBundleFromServer(TEST_BENEFICIARY_ID);
 
-        assertNotEquals(explanationOfBenefit, null);
+        assertNotEquals(explanationOfBenefits, null);
     }
 
 }
