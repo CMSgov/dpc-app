@@ -28,11 +28,17 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     public Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException {
         // TODO: need to implement some kind of pagination? EOB bundles can be HUGE
         logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientID, client.getServerBase());
-        return client.search()
+        Bundle ret = client.search()
                 .forResource(ExplanationOfBenefit.class)
                 .where(ExplanationOfBenefit.PATIENT.hasId(patientID))
                 .returnBundle(Bundle.class)
                 .execute();
+
+        if(ret.getTotal() == 0) {
+            throw new ResourceNotFoundException("Cannot find any EOBs for patient with ID: " + patientID);
+        }else {
+            return ret;
+        }
 
     }
 }
