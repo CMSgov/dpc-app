@@ -75,27 +75,24 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
     }
 
     @Override
+    // TODO(nickrobison): To be completed in DPC-21
     public void removeAttributionRelationship(String providerID, String beneficiaryID) {
-        final Optional<AttributionRelationship> relationship = findAttribution(providerID, beneficiaryID);
-        relationship.ifPresent((rel) -> currentSession().delete(rel));
+//        final Optional<ProviderEntity> relationship = findAttribution(providerID, beneficiaryID);
+//        relationship.ifPresent((rel) -> currentSession().delete(rel));
     }
 
     @Override
     public boolean isAttributed(String providerID, String beneficiaryID) {
-        return findAttribution(providerID, beneficiaryID).isPresent();
+        final Query query = namedQuery("findRelationship");
+        query.setParameter("provID", providerID);
+        query.setParameter("patID", beneficiaryID);
+
+        return uniqueResult(query) != null;
     }
 
     private boolean providerExists(String providerID) {
         final Query query = namedQuery("getProvider");
         query.setParameter("provID", providerID);
         return uniqueResult(query) != null;
-    }
-
-    private Optional<AttributionRelationship> findAttribution(String providerID, String beneficiaryID) {
-        final Query query = namedQuery("findRelationship");
-        query.setParameter("provID", providerID);
-        query.setParameter("patID", beneficiaryID);
-        return Optional.empty();
-//        return Optional.ofNullable(uniqueResult(query));
     }
 }
