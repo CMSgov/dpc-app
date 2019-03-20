@@ -63,7 +63,8 @@ public class AttributionFHIRTest {
     }
 
     @AfterAll
-    public static void shutdown() {
+    public static void shutdown() throws Exception {
+        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything");
         APPLICATION.after();
     }
 
