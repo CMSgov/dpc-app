@@ -6,14 +6,13 @@ import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.After;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,23 +42,22 @@ public class AttributionIntegrationTest {
     @Test
     public void testBasicAttributionFunctionality() throws IOException {
 
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
 
             final HttpGet httpGet = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254");
             httpGet.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
+            try (final CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
                 List<String> beneficiaries = UnmarshallResponse(response.getEntity());
                 assertEquals(50, beneficiaries.size(), "Should have 50 beneficiaries");
             }
 
             // Check is attributed
-
             final HttpGet isAttributed = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254/19990000002901");
             isAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
-            try (CloseableHttpResponse response = client.execute(isAttributed)) {
+            try (final CloseableHttpResponse response = client.execute(isAttributed)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
             }
 
