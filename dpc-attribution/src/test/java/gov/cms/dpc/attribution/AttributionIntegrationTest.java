@@ -10,8 +10,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -27,15 +28,15 @@ public class AttributionIntegrationTest {
 
     }
 
-    @BeforeAll
-    public static void initDB() throws Exception {
+    @BeforeEach
+    public void initDB() throws Exception {
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate");
 //        APPLICATION.getApplication().run("seed");
     }
 
-    @AfterAll
-    public static void shutdown() {
+    @AfterEach
+    public void shutdown() {
         APPLICATION.after();
     }
 
