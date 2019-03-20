@@ -32,7 +32,7 @@ public class AttributionIntegrationTest {
     public void initDB() throws Exception {
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate");
-//        APPLICATION.getApplication().run("seed");
+        APPLICATION.getApplication().run("seed");
     }
 
     @AfterEach
