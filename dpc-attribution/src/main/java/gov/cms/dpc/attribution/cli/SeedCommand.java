@@ -113,7 +113,6 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
                                     // Add the relationship
                                     new AttributionRelationship(providerEntity, patientEntity, OffsetDateTime.now());
                                     try (PreparedStatement statement = connection.prepareStatement("INSERT INTO attributions (provider_id, patient_id, created_at) VALUES (?, ?, ?)")) {
-//                                        statement.setObject(1, UUID.randomUUID());
                                         statement.setObject(1, providerEntity.getProviderID());
                                         statement.setObject(2, patientEntity.getPatientID());
                                         statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
