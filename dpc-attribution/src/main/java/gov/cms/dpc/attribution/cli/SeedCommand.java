@@ -126,6 +126,7 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
                     });
             connection.commit();
             logger.info("Finished loading seeds");
+            dataSource.stop();
         }
     }
 }

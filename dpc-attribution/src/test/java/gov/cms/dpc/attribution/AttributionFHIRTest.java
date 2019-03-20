@@ -42,8 +42,10 @@ public class AttributionFHIRTest {
     private static SeedProcessor seedProcessor;
 
     @BeforeAll
-    public static void setup() throws IOException {
+    public static void setup() throws Exception {
         APPLICATION.before();
+        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything");
+        APPLICATION.getApplication().run("db", "migrate");
 
         // Get the test seeds
         final InputStream resource = AttributionFHIRTest.class.getClassLoader().getResourceAsStream(CSV);
@@ -58,13 +60,10 @@ public class AttributionFHIRTest {
 
     @BeforeEach
     public void initDB() throws Exception {
-        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything");
-        APPLICATION.getApplication().run("db", "migrate");
     }
 
     @AfterAll
     public static void shutdown() throws Exception {
-        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything");
         APPLICATION.after();
     }
 
