@@ -27,8 +27,7 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
     }
 
     public long createAttibutionRelationship(AttributionRelationship relationship) {
-//        return persist(relationship).getAttributionID();
-        return 1;
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -50,7 +49,7 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
 
     @Override
     public void addAttributionRelationship(String providerID, String beneficiaryID) {
-//        persist(new AttributionRelationship(providerID, beneficiaryID));
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -77,8 +76,7 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
     @Override
     // TODO(nickrobison): To be completed in DPC-21
     public void removeAttributionRelationship(String providerID, String beneficiaryID) {
-//        final Optional<ProviderEntity> relationship = findAttribution(providerID, beneficiaryID);
-//        relationship.ifPresent((rel) -> currentSession().delete(rel));
+        throw new UnsupportedOperationException("Not implemented until DPC-21");
     }
 
     @Override
