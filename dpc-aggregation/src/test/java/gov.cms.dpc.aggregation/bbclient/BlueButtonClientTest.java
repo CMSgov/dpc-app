@@ -34,12 +34,14 @@ class BlueButtonClientTest {
         Patient ret = bbc.requestPatientFromServer(TEST_PATIENT_ID);
 
         // Verify basic demo patient information
-        assertNotEquals(ret, null);
-        assertEquals(ret.getBirthDate(), Date.valueOf("2014-06-01"));
-        assertEquals(ret.getGender().getDisplay(), "Unknown");
-        assertEquals(ret.getName().size(), 1);
-        assertEquals(ret.getName().get(0).getFamily(), "Doe");
-        assertEquals(ret.getName().get(0).getGiven().get(0).toString(), "Jane");
+        assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
+
+        String patientDataCorrupted = "The demo Patient object data differs from what is expected";
+        assertEquals(ret.getBirthDate(), Date.valueOf("2014-06-01"), patientDataCorrupted);
+        assertEquals(ret.getGender().getDisplay(), "Unknown", patientDataCorrupted);
+        assertEquals(ret.getName().size(), 1, patientDataCorrupted);
+        assertEquals(ret.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
+        assertEquals(ret.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
     }
 
     @Test
