@@ -79,7 +79,6 @@ class BlueButtonClientTest {
         assertEquals(response.getTotal(), 592, "This demo patient should have exactly 592 EOBs");
     }
 
-
     @Test
     void shouldThrowExceptionWhenResourceNotFound() {
         assertThrows(
