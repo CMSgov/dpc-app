@@ -59,7 +59,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
                 .execute();
 
         if(ret.hasEntry()) {
-            if(ret.getEntry().size() == 0) { // Case where patient exists, but
+            if(ret.getEntry().size() == 0) { // Case where patient exists, but doesn't have any associated EoB records
                 return ret;
             }
 
