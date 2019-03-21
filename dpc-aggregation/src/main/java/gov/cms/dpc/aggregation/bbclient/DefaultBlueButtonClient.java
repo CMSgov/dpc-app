@@ -34,9 +34,11 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
                 .returnBundle(Bundle.class)
                 .execute();
 
-        if(ret.getTotal() == 0) {
-            throw new ResourceNotFoundException("Cannot find any EOBs for patient with ID: " + patientID);
-        }else {
+        if(ret.getEntry() == null) { // Case where patientID does not exist at all
+            throw new ResourceNotFoundException("No patient found with ID: " + patientID);
+        }else if(ret.getEntry().size() == 0) { // Case where patient exists, but has no EOBs
+            throw new ResourceNotFoundException("Could not find any EOBs for Patient with ID: " + patientID);
+        } else {
             return ret;
         }
 
