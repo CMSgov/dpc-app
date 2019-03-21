@@ -48,8 +48,8 @@ class BlueButtonClientTest {
     void shouldGetEOBFromPatientID() {
         Bundle response = bbc.requestEOBBundleFromServer(TEST_PATIENT_ID);
 
-        assertNotEquals(response, null);
-        assertEquals(response.getTotal(), 32);
+        assertNotNull(response, "The demo patient should have a non-null EOB bundle");
+        assertEquals(response.getTotal(), 32, "The demo patient should have exactly 32 EOBs");
     }
 
     @Test
@@ -57,7 +57,11 @@ class BlueButtonClientTest {
         Bundle response = bbc.requestEOBBundleFromServer(TEST_PATIENT_ID);
 
         response.getEntry().forEach((entry) -> {
-            assertEquals(entry.getResource().getResourceType(), ResourceType.ExplanationOfBenefit);
+            assertEquals(
+                    entry.getResource().getResourceType(),
+                    ResourceType.ExplanationOfBenefit,
+                    "EOB bundles returned by the BlueButton client should only contain EOB objects"
+            );
         });
     }
 
@@ -65,26 +69,32 @@ class BlueButtonClientTest {
     void shouldHandlePatientsWithOnlyOneEOB() {
         Bundle response = bbc.requestEOBBundleFromServer(TEST_SINGLE_EOB_PATIENT_ID);
 
-        assertEquals(response.getTotal(), 1);
+        assertEquals(response.getTotal(), 1, "This demo patient should have exactly 1 EOB");
     }
 
     @Test
     void shouldHandlePatientsWithVeryManyEOBs() {
         Bundle response = bbc.requestEOBBundleFromServer(TEST_LARGE_EOB_PATIENT_ID);
 
-        assertEquals(response.getTotal(), 592);
+        assertEquals(response.getTotal(), 592, "This demo patient should have exactly 592 EOBs");
     }
 
 
     @Test
     void shouldThrowExceptionWhenResourceNotFound() {
-        assertThrows(ResourceNotFoundException.class, () -> {
-            bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID);
-        });
+        assertThrows(
+                ResourceNotFoundException.class, () -> {
+                    bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID);
+                },
+                "BlueButton client should throw exceptions when asked to retrieve a non-existent patient"
+        );
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            bbc.requestEOBBundleFromServer(TEST_NONEXISTENT_PATIENT_ID);
-        });
+        assertThrows(
+                ResourceNotFoundException.class, () -> {
+                    bbc.requestEOBBundleFromServer(TEST_NONEXISTENT_PATIENT_ID);
+                },
+                "BlueButton client should throw exceptions when asked to retrieve EOBs for a non-existent patient"
+        );
 
     }
 
