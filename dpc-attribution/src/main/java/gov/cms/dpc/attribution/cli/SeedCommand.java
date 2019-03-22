@@ -2,7 +2,6 @@ package gov.cms.dpc.attribution.cli;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.engine.TestSeeder;
 import gov.cms.dpc.attribution.models.AttributionRelationship;
 import gov.cms.dpc.attribution.models.PatientEntity;
 import gov.cms.dpc.attribution.models.ProviderEntity;
@@ -37,7 +36,7 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
     public SeedCommand() {
         super("seed", "Seed the attribution roster");
         // Get the test seeds
-        final InputStream resource = TestSeeder.class.getClassLoader().getResourceAsStream(CSV);
+        final InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
             throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
         }
