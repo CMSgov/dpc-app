@@ -1,15 +1,10 @@
 package gov.cms.dpc.common.utils;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -17,6 +12,8 @@ import java.util.stream.Collectors;
  * Mostly used for testing, but also by the SeedCommand in the AttributionService
  */
 public class SeedProcessor {
+
+    private static final Random rand = new Random();
 
     private final InputStream is;
 
@@ -62,14 +59,19 @@ public class SeedProcessor {
         bundle.setId(new IdType("Roster", "12345"));
         bundle.setType(Bundle.BundleType.COLLECTION);
 
+        // Create the provider with the necessary fields
         final Practitioner practitioner = new Practitioner();
         practitioner.addIdentifier().setValue(entry.getKey());
+        practitioner.addName().addGiven("Test").setFamily("Provider");
         bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
 
         entry.getValue()
                 .forEach((value) -> {
+                    // Add some random values to the patient
                     final Patient patient = new Patient();
                     patient.addIdentifier().setValue(value.getRight());
+                    patient.addName().addGiven("Tester " + rand.nextInt()).setFamily("Patient");
+                    patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
                     final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
                     component.setResource(patient);
                     component.setFullUrl("http://something.gov/" + patient.getIdentifierFirstRep().getValue());

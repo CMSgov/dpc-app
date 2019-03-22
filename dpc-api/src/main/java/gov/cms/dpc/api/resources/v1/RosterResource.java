@@ -15,7 +15,8 @@ public class RosterResource extends AbstractRosterResource {
         this.attributionEngine = engine;
     }
 
-    // FIXME(nickrobison): Per the FHIR spec, we're supposed to return a MethodOutcome response, but per DPC-128, that's not happening.
+    // TODO(nickrobison): The FHIR spec says we're supposed to return a MethodOutcome response, but per DPC-128, that's not happening.
+    // TODO(nickrobison): Perform FHIR input validation
     @Override
     public Bundle submitRoster(Bundle providerBundle) {
         attributionEngine.addAttributionRelationships(providerBundle);
