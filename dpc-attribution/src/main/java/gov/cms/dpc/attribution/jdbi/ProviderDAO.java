@@ -19,15 +19,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-public class AttributionDAO extends AbstractDAO<ProviderEntity> implements AttributionEngine {
+public class ProviderDAO extends AbstractDAO<ProviderEntity> implements AttributionEngine {
+
+    private final RelationshipDAO rDAO;
 
     @Inject
-    public AttributionDAO(SessionFactory factory) {
+    public ProviderDAO(SessionFactory factory) {
         super(factory);
-    }
-
-    public long createAttibutionRelationship(AttributionRelationship relationship) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        this.rDAO = new RelationshipDAO(factory);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
             return Optional.empty();
         }
         final Query query = namedQuery("findByProvider")
-                .setParameter("id", provider);
+                .setParameter("id", FHIRExtractors.getProviderNPI(provider));
 
         final ProviderEntity providerEntity = uniqueResult(query);
         if (providerEntity == null) {
@@ -79,18 +78,19 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
     }
 
     @Override
-    // TODO(nickrobison): To be completed in DPC-21
     public void removeAttributionRelationship(Practitioner provider, Patient patient) {
-        throw new UnsupportedOperationException("Not implemented until DPC-21");
+
+        // Lookup the attribution relationship by NPI and MPI
+        final AttributionRelationship attributionRelationship = this.rDAO.lookupAttributionRelationship(provider, patient);
+
+        if (attributionRelationship != null) {
+            this.rDAO.removeAttributionRelationship(attributionRelationship);
+        }
     }
 
     @Override
     public boolean isAttributed(Practitioner provider, Patient patient) {
-        final Query query = namedQuery("findRelationship");
-        query.setParameter("provID", provider);
-        query.setParameter("patID", patient);
-
-        return uniqueResult(query) != null;
+        return this.rDAO.lookupAttributionRelationship(provider, patient) != null;
     }
 
     private boolean providerExists(String providerNPI) {
