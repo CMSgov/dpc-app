@@ -1,6 +1,8 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.attribution.models.AttributionRelationship;
+import gov.cms.dpc.attribution.models.PatientEntity;
+import gov.cms.dpc.attribution.models.ProviderEntity;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.SessionFactory;
@@ -17,7 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-public class AttributionDAO extends AbstractDAO<AttributionRelationship> implements AttributionEngine {
+public class AttributionDAO extends AbstractDAO<ProviderEntity> implements AttributionEngine {
 
     @Inject
     public AttributionDAO(SessionFactory factory) {
@@ -25,7 +27,7 @@ public class AttributionDAO extends AbstractDAO<AttributionRelationship> impleme
     }
 
     public long createAttibutionRelationship(AttributionRelationship relationship) {
-        return persist(relationship).getAttributionID();
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -37,56 +39,58 @@ public class AttributionDAO extends AbstractDAO<AttributionRelationship> impleme
         final Query query = namedQuery("findByProvider")
                 .setParameter("id", providerID);
 
-        List<AttributionRelationship> patients = list(query);
+        final ProviderEntity provider = uniqueResult(query);
 
-        return Optional.of(patients
+        return Optional.of(provider.getAttributedPatients()
                 .stream()
-                .map(AttributionRelationship::getAttributedPatient)
+                .map(PatientEntity::getBeneficiaryID)
                 .collect(Collectors.toSet()));
     }
 
     @Override
     public void addAttributionRelationship(String providerID, String beneficiaryID) {
-        persist(new AttributionRelationship(providerID, beneficiaryID));
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void addAttributionRelationships(Bundle attributionBundle) {
         // Web API check that this is ok to do
         final Practitioner practitioner = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
+        final ProviderEntity provider = ProviderEntity.fromFHIR(practitioner);
 
         // Get the patients and create the attribution
 
-        attributionBundle
+        final List<PatientEntity> patients = attributionBundle
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter((resource -> resource.getResourceType() == ResourceType.Patient))
-                .forEach(patient -> persist(new AttributionRelationship(practitioner.getIdentifierFirstRep().getValue(), ((Patient) patient).getIdentifierFirstRep().getValue())));
+                .map(patient -> PatientEntity.fromFHIR((Patient) patient))
+                .collect(Collectors.toList());
+
+        provider.setAttributedPatients(patients);
+        persist(provider);
     }
 
     @Override
+    // TODO(nickrobison): To be completed in DPC-21
     public void removeAttributionRelationship(String providerID, String beneficiaryID) {
-        final Optional<AttributionRelationship> relationship = findAttribution(providerID, beneficiaryID);
-        relationship.ifPresent((rel) -> currentSession().delete(rel));
+        throw new UnsupportedOperationException("Not implemented until DPC-21");
     }
 
     @Override
     public boolean isAttributed(String providerID, String beneficiaryID) {
-        return findAttribution(providerID, beneficiaryID).isPresent();
+        final Query query = namedQuery("findRelationship");
+        query.setParameter("provID", providerID);
+        query.setParameter("patID", beneficiaryID);
+
+        return uniqueResult(query) != null;
     }
 
     private boolean providerExists(String providerID) {
         final Query query = namedQuery("getProvider");
         query.setParameter("provID", providerID);
         return uniqueResult(query) != null;
-    }
-
-    private Optional<AttributionRelationship> findAttribution(String providerID, String beneficiaryID) {
-        final Query query = namedQuery("findRelationship");
-        query.setParameter("provID", providerID);
-        query.setParameter("patID", beneficiaryID);
-        return Optional.ofNullable(uniqueResult(query));
     }
 }
