@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.api.annotations.IntegrationTest;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@IntegrationTest
 public class EndToEndRequestTest extends AbstractApplicationTest {
 
     private static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
