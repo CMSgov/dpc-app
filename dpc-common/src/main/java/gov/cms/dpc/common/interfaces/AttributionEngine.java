@@ -1,19 +1,54 @@
 package gov.cms.dpc.common.interfaces;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface AttributionEngine {
 
-    Optional<Set<String>> getAttributedBeneficiaries(String providerID);
+    /**
+     * Returns the MBI (Medicare Beneficiary ID) for the {@link org.hl7.fhir.dstu3.model.Patient} resources for the given {@link org.hl7.fhir.dstu3.model.Practitioner}.
+     * If no patients are attributed, an empty {@link Optional} is returned.
+     *
+     * @param provider - {@link Practitioner} provider to retrieve attributed patients for
+     * @return - {@link Optional} {@link List} of patient MBIs
+     */
+    Optional<List<String>> getAttributedPatientIDs(Practitioner provider);
 
-    void addAttributionRelationship(String providerID, String beneficiaryID);
+    /**
+     * Create an attribution relationship between the given provider and patient.
+     *
+     * @param provider - {@link Practitioner} provider to associate patient with
+     * @param patient  - {@link Patient} patient to associate to provider
+     */
+    void addAttributionRelationship(Practitioner provider, Patient patient);
 
+    /**
+     * Submit a {@link Bundle} Roster resource which contains a {@link Practitioner} and a set of {@link Patient} resources to associate to the given {@link Practitioner}.
+     * Currently, this is a write only operation, which means the previous attributions for the given {@link Practitioner} are removed and the newly supplied Roster is used.
+     * The input format assumes that the {@link Bundle#getEntryFirstRep()} call returns a {@link Practitioner} resource and subsequent {@link org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent} are of type {@link Patient}.
+     *
+     * @param attributionBundle - {@link Bundle} which contains Roster information
+     */
     void addAttributionRelationships(Bundle attributionBundle);
 
-    void removeAttributionRelationship(String providerID, String beneficiaryID);
+    /**
+     * Remove an attribution relationship between the given provider and patient.
+     *
+     * @param provider - {@link Practitioner} to remove attribution relationship from
+     * @param patient  - {@link Patient} to remove from provder's attribution list
+     */
+    void removeAttributionRelationship(Practitioner provider, Patient patient);
 
-    boolean isAttributed(String providerID, String beneficiaryID);
+    /**
+     * Determine if the given {@link Patient} is attributed to the {@link Practitioner}.
+     *
+     * @param provider - {@link Practitioner} to determine attribution relationship
+     * @param patient  - {@link Patient} to verify is attributed to the given provider
+     * @return - {@code true} patient is attributed to the provider. {@code false} patient is not attributed to the provider.
+     */
+    boolean isAttributed(Practitioner provider, Patient patient);
 }

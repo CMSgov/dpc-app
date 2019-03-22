@@ -4,6 +4,7 @@ import gov.cms.dpc.attribution.models.AttributionRelationship;
 import gov.cms.dpc.attribution.models.PatientEntity;
 import gov.cms.dpc.attribution.models.ProviderEntity;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -15,7 +16,6 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -31,24 +31,29 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
     }
 
     @Override
-    public Optional<Set<String>> getAttributedBeneficiaries(String providerID) {
+    public Optional<List<String>> getAttributedPatientIDs(Practitioner provider) {
 
-        if (!providerExists(providerID)) {
+        // Extract the provider NPI
+        if (!providerExists(FHIRExtractors.getProviderNPI(provider))) {
             return Optional.empty();
         }
         final Query query = namedQuery("findByProvider")
-                .setParameter("id", providerID);
+                .setParameter("id", provider);
 
-        final ProviderEntity provider = uniqueResult(query);
+        final ProviderEntity providerEntity = uniqueResult(query);
+        if (providerEntity == null) {
+            return Optional.empty();
+        }
 
-        return Optional.of(provider.getAttributedPatients()
+        return Optional.of(providerEntity
+                .getAttributedPatients()
                 .stream()
                 .map(PatientEntity::getBeneficiaryID)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toList()));
     }
 
     @Override
-    public void addAttributionRelationship(String providerID, String beneficiaryID) {
+    public void addAttributionRelationship(Practitioner provider, Patient patient) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -75,22 +80,22 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
 
     @Override
     // TODO(nickrobison): To be completed in DPC-21
-    public void removeAttributionRelationship(String providerID, String beneficiaryID) {
+    public void removeAttributionRelationship(Practitioner provider, Patient patient) {
         throw new UnsupportedOperationException("Not implemented until DPC-21");
     }
 
     @Override
-    public boolean isAttributed(String providerID, String beneficiaryID) {
+    public boolean isAttributed(Practitioner provider, Patient patient) {
         final Query query = namedQuery("findRelationship");
-        query.setParameter("provID", providerID);
-        query.setParameter("patID", beneficiaryID);
+        query.setParameter("provID", provider);
+        query.setParameter("patID", patient);
 
         return uniqueResult(query) != null;
     }
 
-    private boolean providerExists(String providerID) {
+    private boolean providerExists(String providerNPI) {
         final Query query = namedQuery("getProvider");
-        query.setParameter("provID", providerID);
+        query.setParameter("provID", providerNPI);
         return uniqueResult(query) != null;
     }
 }

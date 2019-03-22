@@ -10,6 +10,7 @@ import gov.cms.dpc.api.resources.v1.JobResource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,10 +19,7 @@ import org.mockito.Mockito;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,7 +38,7 @@ public class FHIRSubmissionTest {
 
 
     // Test data
-    private HashSet<String> testBeneficiaries = new HashSet<>(Arrays.asList("1", "2", "3", "4"));
+    private List<String> testBeneficiaries = List.of("1", "2", "3", "4");
     private final JobModel testJobModel = new JobModel("1", testBeneficiaries);
 
     @BeforeEach()
@@ -49,7 +47,7 @@ public class FHIRSubmissionTest {
         reset(queue);
 
         // Mock the attribution call
-        Mockito.when(client.getAttributedBeneficiaries(Mockito.anyString()))
+        Mockito.when(client.getAttributedPatientIDs(Mockito.any(Practitioner.class)))
                 .thenReturn(Optional.of(testBeneficiaries));
 
         // Mock the submission call to verify the job type
