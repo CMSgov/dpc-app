@@ -90,7 +90,7 @@ public class GroupResource extends AbstractGroupResource {
                     FHIRBuilders.buildPatientFromMBI(patientID));
         } catch (Exception e) {
             logger.error("Error removing patient", e);
-            throw new WebApplicationException("Cannot remove patient attribution patients", HttpStatus.INTERNAL_SERVER_ERROR_500);
+            throw new WebApplicationException("Cannot remove attributed patients", HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
     }
 }

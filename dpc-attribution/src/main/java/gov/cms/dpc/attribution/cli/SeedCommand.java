@@ -58,14 +58,14 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
         try (final Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             connection.beginRequest();
-            try (Statement truncateStatement = connection.createStatement()) {
-                //TODO: This is incredibly hacking, I think we can remove this with DPC-168
-                truncateStatement.execute("SET REFERENTIAL_INTEGRITY FALSE; " +
-                        "TRUNCATE TABLE ATTRIBUTIONS; " +
-                        "TRUNCATE TABLE PROVIDERS; " +
-                        "TRUNCATE TABLE PATIENTS; " +
-                        "SET REFERENTIAL_INTEGRITY TRUE");
-            }
+//            try (Statement truncateStatement = connection.createStatement()) {
+//                //TODO: This is incredibly hacky, I think we can remove this with DPC-168
+//                truncateStatement.execute("SET REFERENTIAL_INTEGRITY FALSE; " +
+//                        "TRUNCATE TABLE ATTRIBUTIONS; " +
+//                        "TRUNCATE TABLE PROVIDERS; " +
+//                        "TRUNCATE TABLE PATIENTS; " +
+//                        "SET REFERENTIAL_INTEGRITY TRUE");
+//            }
 
             // TODO: This should be moved to a more robust SQL framework, which will be handled in DPC-169
             this.seedProcessor

@@ -8,10 +8,9 @@ import java.util.Objects;
 
 @Entity(name = "attributions")
 @NamedQueries({
-        @NamedQuery(name = "findRelationship", query = "select 1 " +
-                "from providers prov " +
-                "left join attributions a on a.provider = prov.providerID " +
-                "left join patients as pat on a.patient = pat.patientID " +
+        @NamedQuery(name = "findRelationship", query = "select a from attributions a " +
+                "inner join providers prov on a.provider = prov.providerID " +
+                "inner join patients as pat on a.patient = pat.patientID " +
                 "where prov.providerNPI = :provID and pat.beneficiaryID = :patID")
 })
 public class AttributionRelationship {
@@ -21,11 +20,11 @@ public class AttributionRelationship {
     @Column(name = "id", updatable = false, nullable = false)
     private Long attributionID;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private ProviderEntity provider;
 
 //    @Column(name = "patient_id")
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private PatientEntity patient;
 
     @Column(name = "created_at")
@@ -33,7 +32,12 @@ public class AttributionRelationship {
     private OffsetDateTime created;
 
     public AttributionRelationship() {
-        // Not used
+        this.created = OffsetDateTime.now();
+    }
+
+    public AttributionRelationship(ProviderEntity provider, PatientEntity patient) {
+        this.provider = provider;
+        this.patient = patient;
         this.created = OffsetDateTime.now();
     }
 
