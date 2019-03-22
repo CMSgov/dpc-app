@@ -7,7 +7,7 @@ import gov.cms.dpc.queue.Pair;
 import java.util.*;
 
 public class MockFullQueueClient extends AbstractMockQueueClient {
-    private final Set<String> testBeneficiaryIds = new HashSet<String>(Arrays.asList("20140000008325", "20140000008326"));
+    private final List<String> testBeneficiaryIds = Arrays.asList("20140000008325", "20140000008326");
 
     public <T> Optional<Pair<UUID, T>> workJob() {
         return Optional.of(new Pair<>(

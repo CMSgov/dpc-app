@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -54,7 +55,7 @@ public class AggregationEngine implements Runnable {
                 final JobModel model = (JobModel) workPair.get().getRight();
                 final UUID jobID = workPair.get().getLeft();
                 logger.debug("Has job {}. Working.", jobID);
-                Set<String> attributedBeneficiaries = model.getBeneficiaries();
+                List<String> attributedBeneficiaries = model.getBeneficiaries();
 
                 if (!attributedBeneficiaries.isEmpty()) {
                     logger.debug("Has {} attributed beneficiaries",attributedBeneficiaries.size());

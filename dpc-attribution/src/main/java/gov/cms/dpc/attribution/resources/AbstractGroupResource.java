@@ -5,7 +5,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.Set;
+import java.util.List;
 
 @Path("/Group")
 @FHIR
@@ -21,7 +21,7 @@ public abstract class AbstractGroupResource {
 
     @GET
     @Path("/{groupID}")
-    public abstract Set<String> getAttributedPatients(String groupID);
+    public abstract List<String> getAttributedPatients(String groupID);
 
     @GET
     @Path("/{groupID}/{patientID}")

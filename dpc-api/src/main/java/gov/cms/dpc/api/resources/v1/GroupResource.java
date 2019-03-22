@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.common.models.JobModel;
+import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -51,7 +53,7 @@ public class GroupResource extends AbstractGroupResource {
         logger.debug("Exporting data for provider: {}", providerID);
 
         // Get a list of attributed beneficiaries
-        final Optional<Set<String>> attributedBeneficiaries = this.client.getAttributedBeneficiaries(providerID);
+        final Optional<List<String>> attributedBeneficiaries = this.client.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(providerID));
 
         if (attributedBeneficiaries.isEmpty()) {
             throw new WebApplicationException(String.format("Unable to get attributed patients for provider: {}", providerID), Response.Status.NOT_FOUND);

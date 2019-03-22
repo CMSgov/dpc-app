@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
@@ -12,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public class GroupResource extends AbstractGroupResource {
 
@@ -39,8 +40,9 @@ public class GroupResource extends AbstractGroupResource {
     @GET
     @Override
     @UnitOfWork
-    public Set<String> getAttributedPatients(@PathParam("groupID") String groupID) {
-        final Optional<Set<String>> attributedBeneficiaries = engine.getAttributedBeneficiaries(groupID);
+    public List<String> getAttributedPatients(@PathParam("groupID") String groupID) {
+        // Create a practitioner resource for retrieval
+        final Optional<List<String>> attributedBeneficiaries = engine.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(groupID));
         if (attributedBeneficiaries.isEmpty()) {
             throw new WebApplicationException(String.format("Unable to find provider: %s", groupID), Response.Status.NOT_FOUND);
         }
@@ -53,7 +55,9 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     @Override
     public boolean isAttributed(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
-        final boolean attributed = engine.isAttributed(groupID, patientID);
+        final boolean attributed = engine.isAttributed(
+                FHIRBuilders.buildPractitionerFromNPI(groupID),
+                FHIRBuilders.buildPatientFromMBI(patientID));
         if (!attributed) {
             throw new WebApplicationException(HttpStatus.NOT_ACCEPTABLE_406);
         }
@@ -66,7 +70,9 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public void attributePatient(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
         try {
-            this.engine.addAttributionRelationship(groupID, patientID);
+            this.engine.addAttributionRelationship(
+                    FHIRBuilders.buildPractitionerFromNPI(groupID),
+                    FHIRBuilders.buildPatientFromMBI(patientID));
         } catch (Exception e) {
             logger.error("Error attributing patient", e);
             throw new WebApplicationException("Cannot attribute patients", HttpStatus.INTERNAL_SERVER_ERROR_500);
@@ -79,7 +85,9 @@ public class GroupResource extends AbstractGroupResource {
     @DELETE
     public void removeAttribution(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
         try {
-            this.engine.removeAttributionRelationship(groupID, patientID);
+            this.engine.removeAttributionRelationship(
+                    FHIRBuilders.buildPractitionerFromNPI(groupID),
+                    FHIRBuilders.buildPatientFromMBI(patientID));
         } catch (Exception e) {
             logger.error("Error removing patient", e);
             throw new WebApplicationException("Cannot remove patient attribution patients", HttpStatus.INTERNAL_SERVER_ERROR_500);
