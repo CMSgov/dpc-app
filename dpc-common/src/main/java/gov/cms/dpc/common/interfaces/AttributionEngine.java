@@ -7,6 +7,11 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The Attribution Engine manages relationships between providers (represented as {@link Practitioner} resources) and {@link Patient}.
+ * Currently, relationships must be expressed through a patient Roster (represented as a generic {@link Bundle} resource).
+ * Eventually, we'll add support for analyzing claims patterns to determine whether or not an attribution relationship exists.
+ */
 public interface AttributionEngine {
 
     /**
