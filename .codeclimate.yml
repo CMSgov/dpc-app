@@ -1,0 +1,17 @@
+version: 2
+checks:
+  # IntelliJ generates suspicious equals/hashcode methods.
+  # So we bump the complexity metric to 9, which should weed them out
+  method-complexity:
+    enabled: true
+    threshold: 9
+  # Disabled because IntelliJ generates suspicious equals/hashcode methods.
+  identical-code:
+    enabled: false
+plugins:
+  git-legal:
+    enabled: true
+  sonar-java:
+    enabled: true
+    config:
+      sonar.java.source: "11"
