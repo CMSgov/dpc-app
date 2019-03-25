@@ -5,6 +5,10 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 
 public class FHIRBuilders {
 
+    private FHIRBuilders() {
+        // Not used
+    }
+
     /**
      * Generates a {@link Practitioner} resource which contains an associated National Provider ID (NPI)
      *

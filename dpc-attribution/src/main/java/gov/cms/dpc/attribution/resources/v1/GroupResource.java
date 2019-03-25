@@ -31,6 +31,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     public Response submitRoster(Bundle providerBundle) {
+        logger.debug("API request to submit roster");
         this.engine.addAttributionRelationships(providerBundle);
 
         return Response.ok().build();
@@ -41,6 +42,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @UnitOfWork
     public List<String> getAttributedPatients(@PathParam("groupID") String groupID) {
+        logger.debug("API request to retrieve attributed patients for {}", groupID);
         // Create a practitioner resource for retrieval
         final Optional<List<String>> attributedBeneficiaries = engine.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(groupID));
         if (attributedBeneficiaries.isEmpty()) {
@@ -55,6 +57,7 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     @Override
     public boolean isAttributed(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
+        logger.debug("API request to determine attribution between {} and {}", groupID, patientID);
         final boolean attributed = engine.isAttributed(
                 FHIRBuilders.buildPractitionerFromNPI(groupID),
                 FHIRBuilders.buildPatientFromMBI(patientID));
@@ -69,6 +72,7 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     @Override
     public void attributePatient(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
+        logger.debug("API request to add attribution between {} and {}", groupID, patientID);
         try {
             this.engine.addAttributionRelationship(
                     FHIRBuilders.buildPractitionerFromNPI(groupID),
@@ -84,6 +88,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @DELETE
     public void removeAttribution(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
+        logger.debug("API request to remove attribution between {} and {}", groupID, patientID);
         try {
             this.engine.removeAttributionRelationship(
                     FHIRBuilders.buildPractitionerFromNPI(groupID),
