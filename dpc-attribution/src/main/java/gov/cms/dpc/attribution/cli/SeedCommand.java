@@ -74,8 +74,12 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
                         break;
                     }
                     case "org.postgresql.Driver": {
-                        truncateStatement.execute("TRUNCATE TABLE PROVIDERS CASCADE; TRUNCATE TABLE PATIENTS CASCADE");
+                        truncateStatement.execute("TRUNCATE TABLE PROVIDERS CASCADE;" +
+                                "TRUNCATE TABLE PATIENTS CASCADE");
                         break;
+                    }
+                    default: {
+                        throw new IllegalStateException(String.format("Cannot connect to database of type: %s", driverClass));
                     }
                 }
             }

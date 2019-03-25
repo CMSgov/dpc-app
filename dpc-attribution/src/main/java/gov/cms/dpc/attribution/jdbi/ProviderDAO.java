@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.jdbi;
 import gov.cms.dpc.attribution.models.AttributionRelationship;
 import gov.cms.dpc.attribution.models.PatientEntity;
 import gov.cms.dpc.attribution.models.ProviderEntity;
+import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
@@ -12,6 +13,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -20,6 +23,8 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class ProviderDAO extends AbstractDAO<ProviderEntity> implements AttributionEngine {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProviderDAO.class);
 
     private final RelationshipDAO rDAO;
 
@@ -81,16 +86,23 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     public void removeAttributionRelationship(Practitioner provider, Patient patient) {
 
         // Lookup the attribution relationship by NPI and MPI
-        final AttributionRelationship attributionRelationship = this.rDAO.lookupAttributionRelationship(provider, patient);
-
-        if (attributionRelationship != null) {
+        // If nothing exists, simply note it and return
+        try {
+            final AttributionRelationship attributionRelationship = this.rDAO.lookupAttributionRelationship(provider, patient);
             this.rDAO.removeAttributionRelationship(attributionRelationship);
+        } catch (UnknownRelationship e) {
+            logger.warn("Attempting to delete unknown attribution relationship.", e);
         }
     }
 
     @Override
     public boolean isAttributed(Practitioner provider, Patient patient) {
-        return this.rDAO.lookupAttributionRelationship(provider, patient) != null;
+        try {
+            this.rDAO.lookupAttributionRelationship(provider, patient);
+            return true;
+        } catch (UnknownRelationship e) {
+            return false;
+        }
     }
 
     private boolean providerExists(String providerNPI) {
