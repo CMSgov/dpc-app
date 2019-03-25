@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.api.DPAPIConfiguration;
 import gov.cms.dpc.api.annotations.AttributionService;
@@ -26,19 +27,14 @@ import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class AttributionServiceClient implements AttributionEngine {
-
-    private static final Logger logger = LoggerFactory.getLogger(AttributionServiceClient.class);
+    private static final String GROUP_PROVIDER_FMT = "Group/%s/%s";
 
     private final WebTarget client;
-    private final DPAPIConfiguration config;
-    private final ObjectMapper mapper;
     private final IParser parser;
 
     @Inject
-    public AttributionServiceClient(@AttributionService WebTarget client, DPAPIConfiguration config, FhirContext ctx) {
+    public AttributionServiceClient(@AttributionService WebTarget client, FhirContext ctx) {
         this.client = client;
-        this.config = config;
-        this.mapper = new ObjectMapper();
         this.parser = ctx.newJsonParser();
     }
 
@@ -61,9 +57,8 @@ public class AttributionServiceClient implements AttributionEngine {
 
     @Override
     public void addAttributionRelationship(Practitioner provider, Patient patient) {
-
         final Invocation invocation = this.client
-                .path(String.format("Group/%s/%s", provider, patient))
+                .path(String.format(GROUP_PROVIDER_FMT, provider, patient))
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .buildPut(null);
         handleNonBodyResponse(invocation);
@@ -82,7 +77,7 @@ public class AttributionServiceClient implements AttributionEngine {
     @Override
     public void removeAttributionRelationship(Practitioner provider, Patient patient) {
         final Invocation invocation = this.client
-                .path(String.format("Group/%s/%s", provider, patient))
+                .path(String.format(GROUP_PROVIDER_FMT, provider, patient))
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .buildDelete();
         handleNonBodyResponse(invocation);
@@ -91,7 +86,7 @@ public class AttributionServiceClient implements AttributionEngine {
     @Override
     public boolean isAttributed(Practitioner provider, Patient patient) {
         final Invocation invocation = this.client
-                .path(String.format("Group/%s/%s", provider, patient))
+                .path(String.format(GROUP_PROVIDER_FMT, provider, patient))
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .buildGet();
 

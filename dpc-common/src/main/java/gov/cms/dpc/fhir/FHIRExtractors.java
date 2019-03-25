@@ -8,6 +8,10 @@ import org.hl7.fhir.dstu3.model.Practitioner;
  */
 public class FHIRExtractors {
 
+    private FHIRExtractors() {
+        // Not used
+    }
+
     /**
      * Extract the National Provider ID (NPI) from the given {@link Practitioner} resource
      * This currently assumes that the NPI is the first ID associated to the resource,
