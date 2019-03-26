@@ -2,26 +2,25 @@ package gov.cms.dpc.common.models;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class JobModel {
 
-    public static final long serializationUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     private final String providerID;
-    private final List<String> beneficiaries;
+    private final List<String> patients;
 
-    public JobModel(String providerID, List<String> beneficiaries) {
+    public JobModel(String providerID, List<String> patients) {
         this.providerID = providerID;
-        this.beneficiaries = beneficiaries;
+        this.patients = patients;
     }
 
     public String getProviderID() {
         return providerID;
     }
 
-    public List<String> getBeneficiaries() {
-        return beneficiaries;
+    public List<String> getPatients() {
+        return patients;
     }
 
     @Override
@@ -30,11 +29,11 @@ public class JobModel {
         if (o == null || getClass() != o.getClass()) return false;
         JobModel jobModel = (JobModel) o;
         return providerID.equals(jobModel.providerID) &&
-                beneficiaries.equals(jobModel.beneficiaries);
+                patients.equals(jobModel.patients);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(providerID, beneficiaries);
+        return Objects.hash(providerID, patients);
     }
 }

@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public class AggregationEngine implements Runnable {
@@ -55,7 +54,7 @@ public class AggregationEngine implements Runnable {
                 final JobModel model = (JobModel) workPair.get().getRight();
                 final UUID jobID = workPair.get().getLeft();
                 logger.debug("Has job {}. Working.", jobID);
-                List<String> attributedBeneficiaries = model.getBeneficiaries();
+                List<String> attributedBeneficiaries = model.getPatients();
 
                 if (!attributedBeneficiaries.isEmpty()) {
                     logger.debug("Has {} attributed beneficiaries",attributedBeneficiaries.size());
@@ -82,7 +81,7 @@ public class AggregationEngine implements Runnable {
     private void workJob(UUID jobID, JobModel job) throws IOException {
         final IParser parser = context.newJsonParser();
         try (final FileOutputStream writer = new FileOutputStream(String.format("%s/%s.ndjson", exportPath, jobID.toString()))) {
-            job.getBeneficiaries()
+            job.getPatients()
                     .stream()
                     .map(this.bbclient::requestPatientFromServer)
                     .map(parser::encodeResourceToString)
