@@ -15,6 +15,7 @@ before_install:
   - ./cc-test-reporter before-build
 
 after_script:
+  - mvn jacoco:report
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
     do
