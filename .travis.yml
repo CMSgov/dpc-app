@@ -16,8 +16,9 @@ after_script:
   - chmod +x ./cc-test-reporter
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
-      ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco
     do
+      ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco
+    done
 
   - ./cc-test-reporter sum-coverage coverage/codeclimate.json
   - ./cc-test-reporter upload-coverage
