@@ -3,7 +3,9 @@ package gov.cms.dpc.attribution.jdbi;
 import gov.cms.dpc.attribution.models.AttributionRelationship;
 import gov.cms.dpc.attribution.models.PatientEntity;
 import gov.cms.dpc.attribution.models.ProviderEntity;
+import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -11,44 +13,51 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-public class AttributionDAO extends AbstractDAO<ProviderEntity> implements AttributionEngine {
+public class ProviderDAO extends AbstractDAO<ProviderEntity> implements AttributionEngine {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProviderDAO.class);
+
+    private final RelationshipDAO rDAO;
 
     @Inject
-    public AttributionDAO(SessionFactory factory) {
+    public ProviderDAO(SessionFactory factory) {
         super(factory);
-    }
-
-    public long createAttibutionRelationship(AttributionRelationship relationship) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        this.rDAO = new RelationshipDAO(factory);
     }
 
     @Override
-    public Optional<Set<String>> getAttributedBeneficiaries(String providerID) {
+    public Optional<List<String>> getAttributedPatientIDs(Practitioner provider) {
 
-        if (!providerExists(providerID)) {
+        // Extract the provider NPI
+        if (!providerExists(FHIRExtractors.getProviderNPI(provider))) {
             return Optional.empty();
         }
         final Query query = namedQuery("findByProvider")
-                .setParameter("id", providerID);
+                .setParameter("id", FHIRExtractors.getProviderNPI(provider));
 
-        final ProviderEntity provider = uniqueResult(query);
+        final ProviderEntity providerEntity = uniqueResult(query);
+        if (providerEntity == null) {
+            return Optional.empty();
+        }
 
-        return Optional.of(provider.getAttributedPatients()
+        return Optional.of(providerEntity
+                .getAttributedPatients()
                 .stream()
                 .map(PatientEntity::getBeneficiaryID)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toList()));
     }
 
     @Override
-    public void addAttributionRelationship(String providerID, String beneficiaryID) {
+    public void addAttributionRelationship(Practitioner provider, Patient patient) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -74,23 +83,31 @@ public class AttributionDAO extends AbstractDAO<ProviderEntity> implements Attri
     }
 
     @Override
-    // TODO(nickrobison): To be completed in DPC-21
-    public void removeAttributionRelationship(String providerID, String beneficiaryID) {
-        throw new UnsupportedOperationException("Not implemented until DPC-21");
+    public void removeAttributionRelationship(Practitioner provider, Patient patient) {
+
+        // Lookup the attribution relationship by NPI and MPI
+        // If nothing exists, simply note it and return
+        try {
+            final AttributionRelationship attributionRelationship = this.rDAO.lookupAttributionRelationship(provider, patient);
+            this.rDAO.removeAttributionRelationship(attributionRelationship);
+        } catch (UnknownRelationship e) {
+            logger.warn("Attempting to delete unknown attribution relationship.", e);
+        }
     }
 
     @Override
-    public boolean isAttributed(String providerID, String beneficiaryID) {
-        final Query query = namedQuery("findRelationship");
-        query.setParameter("provID", providerID);
-        query.setParameter("patID", beneficiaryID);
-
-        return uniqueResult(query) != null;
+    public boolean isAttributed(Practitioner provider, Patient patient) {
+        try {
+            this.rDAO.lookupAttributionRelationship(provider, patient);
+            return true;
+        } catch (UnknownRelationship e) {
+            return false;
+        }
     }
 
-    private boolean providerExists(String providerID) {
+    private boolean providerExists(String providerNPI) {
         final Query query = namedQuery("getProvider");
-        query.setParameter("provID", providerID);
+        query.setParameter("provID", providerNPI);
         return uniqueResult(query) != null;
     }
 }
