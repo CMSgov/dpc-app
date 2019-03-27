@@ -1,6 +1,26 @@
+env:
+  global:
+    # The CC_TEST_REPORTER_ID
+    - secure: 56a4WQc7qRidTpb3VArrrBAm4LHF4pJge2tipcQpuDdlJ7Ec6Y/ohDACgFKcKHWsJiCxsU8RfGcdbbr2DtyTOF/8cVrV5Qdei+L4uG7v4Sap7k2O8fycBKVx9veMK5OK0vgMtF8u2I0q9E8BRlODFeMU6fGW1UqFnA0dzkQZOebpsdQEbC30RVxRz3UVMeZb19OZZgFQtruXhguoeC2s8h2vqNbqTTTHJ7IKIL01Jqg3EydwjzvbBR7y1wuiu6icZgY1PapHBbgkZ34NlibVO2GpfjaAGx/kmxMFSZZoPL+cY/52bzCQfEr03IU481GFo6KyWx+20uqX6ZySwblk5qjTrwT+TIQOY0iaIEcgiEVkvaHwEaMooOMRK1QeXS+CEc5A6Nf8PTjFdM8rpHxj515Ng13kYM/hF+Bil1huN27QSelEtcK1yqeFyKfcLFqKxKB3XjehJJiOwjRVQib323Tzq4lvP2vwpeP+p/zSCVr9GoK2nK53s7OCe1SaVuovbGIRELLkhRGMF4mHqXg7p6kl1q/M2zWy5XGMdBJBpS2fTDAQPN2+PGOpXEz8nTmQUWjRKG2B4UeViZ096OdAkBK0nwAeDFct+18DOZxc1KUQv0Q1GvIhue5XURt5jUxTqednYbUHKR+3WlTe/W7iG+UX5SQwp9CQWOiM3/kH5rE=
+
 language: java
 jdk:
   - oraclejdk11
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_ebb4f1b65c80_key -iv $encrypted_ebb4f1b65c80_iv -in bbcerts/bb.keystore.enc -out bbcerts/bb.keystore -d
+  - wget https://codeclimate.com/downloads/test-reporter/test-reporter-0.6.3-linux-amd64 -O ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+after_script:
+  - mvn jacoco:report
+  - |
+    for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
+    do
+      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco
+    done
+
+  - ./cc-test-reporter sum-coverage coverage/codeclimate.json
+  - ./cc-test-reporter upload-coverage
+
