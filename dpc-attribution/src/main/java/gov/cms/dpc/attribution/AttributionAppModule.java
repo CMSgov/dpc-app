@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Entity;
+import java.time.Duration;
 import java.util.Set;
 
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
@@ -67,6 +68,17 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     GroupResource provideAttributionResource(AttributionHibernateModule hibernateModule, AttributionEngine engine) {
         return new UnitOfWorkAwareProxyFactory(hibernateModule)
                 .create(GroupResource.class, AttributionEngine.class, engine);
+    }
+
+    @Provides
+    RelationshipDAO provideRelationshipDAO(AttributionHibernateModule hibernateModule, SessionFactory factory) {
+        return new UnitOfWorkAwareProxyFactory(hibernateModule)
+                .create(RelationshipDAO.class, SessionFactory.class, factory);
+    }
+
+    @Provides
+    Duration provideExpiration(DPCAttributionConfiguration config) {
+        return config.getExpirationThreshold();
     }
 
     public static class AttributionHibernateModule extends HibernateBundle<DPCAttributionConfiguration> implements ConfiguredBundle<DPCAttributionConfiguration> {

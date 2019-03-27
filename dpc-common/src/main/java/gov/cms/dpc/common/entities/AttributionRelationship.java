@@ -93,4 +93,14 @@ public class AttributionRelationship {
     public int hashCode() {
         return Objects.hash(attributionID, provider, patient, created);
     }
+
+    @Override
+    public String toString() {
+        return "AttributionRelationship{" +
+                "attributionID=" + attributionID +
+                ", provider=" + provider +
+                ", patient=" + patient +
+                ", created=" + created +
+                '}';
+    }
 }
