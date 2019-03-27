@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.models;
 
+import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -103,7 +104,7 @@ public class ProviderEntity {
 
         final ProviderEntity provider = new ProviderEntity();
 
-        provider.setProviderNPI(resource.getIdentifierFirstRep().getValue());
+        provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));
         final HumanName name = resource.getNameFirstRep();
         provider.setProviderFirstName(name.getGivenAsSingleString());
         provider.setProviderLastName(name.getFamily());

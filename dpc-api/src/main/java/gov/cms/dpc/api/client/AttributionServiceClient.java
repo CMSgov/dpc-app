@@ -4,11 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.api.DPAPIConfiguration;
 import gov.cms.dpc.api.annotations.AttributionService;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,31 +21,27 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class AttributionServiceClient implements AttributionEngine {
-
-    private static final Logger logger = LoggerFactory.getLogger(AttributionServiceClient.class);
+    private static final String GROUP_PROVIDER_FMT = "Group/%s/%s";
 
     private final WebTarget client;
-    private final DPAPIConfiguration config;
-    private final ObjectMapper mapper;
     private final IParser parser;
 
     @Inject
-    public AttributionServiceClient(@AttributionService WebTarget client, DPAPIConfiguration config, FhirContext ctx) {
+    public AttributionServiceClient(@AttributionService WebTarget client, FhirContext ctx) {
         this.client = client;
-        this.config = config;
-        this.mapper = new ObjectMapper();
         this.parser = ctx.newJsonParser();
     }
 
     @Override
-    public Optional<Set<String>> getAttributedBeneficiaries(String providerID) {
+    public Optional<List<String>> getAttributedPatientIDs(Practitioner provider) {
         final Invocation invocation = this.client
-                .path(String.format("Group/%s", providerID))
+                .path(String.format("Group/%s", provider))
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .buildGet();
         try (Response response = invocation.invoke()) {
@@ -50,17 +49,16 @@ public class AttributionServiceClient implements AttributionEngine {
                 throw new WebApplicationException(response.getStatusInfo().getReasonPhrase(), HttpStatus.NOT_FOUND_404);
             }
 
-            return Optional.of((Set<String>) response.readEntity(Set.class));
+            return Optional.of((List<String>) response.readEntity(List.class));
         } catch (Exception e) {
             throw new WebApplicationException(e, HttpStatus.NOT_FOUND_404);
         }
     }
 
     @Override
-    public void addAttributionRelationship(String providerID, String beneficiaryID) {
-
+    public void addAttributionRelationship(Practitioner provider, Patient patient) {
         final Invocation invocation = this.client
-                .path(String.format("Group/%s/%s", providerID, beneficiaryID))
+                .path(String.format(GROUP_PROVIDER_FMT, provider, patient))
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .buildPut(null);
         handleNonBodyResponse(invocation);
@@ -77,18 +75,18 @@ public class AttributionServiceClient implements AttributionEngine {
     }
 
     @Override
-    public void removeAttributionRelationship(String providerID, String beneficiaryID) {
+    public void removeAttributionRelationship(Practitioner provider, Patient patient) {
         final Invocation invocation = this.client
-                .path(String.format("Group/%s/%s", providerID, beneficiaryID))
+                .path(String.format(GROUP_PROVIDER_FMT, provider, patient))
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .buildDelete();
         handleNonBodyResponse(invocation);
     }
 
     @Override
-    public boolean isAttributed(String providerID, String beneficiaryID) {
+    public boolean isAttributed(Practitioner provider, Patient patient) {
         final Invocation invocation = this.client
-                .path(String.format("Group/%s/%s", providerID, beneficiaryID))
+                .path(String.format(GROUP_PROVIDER_FMT, provider, patient))
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .buildGet();
 

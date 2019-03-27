@@ -2,7 +2,6 @@ package gov.cms.dpc.attribution.cli;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.engine.TestSeeder;
 import gov.cms.dpc.attribution.models.AttributionRelationship;
 import gov.cms.dpc.attribution.models.PatientEntity;
 import gov.cms.dpc.attribution.models.ProviderEntity;
@@ -37,7 +36,7 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
     public SeedCommand() {
         super("seed", "Seed the attribution roster");
         // Get the test seeds
-        final InputStream resource = TestSeeder.class.getClassLoader().getResourceAsStream(CSV);
+        final InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
             throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
         }
@@ -60,12 +59,29 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
             connection.setAutoCommit(false);
             connection.beginRequest();
             try (Statement truncateStatement = connection.createStatement()) {
-                //TODO: This is incredibly hacking, I think we can remove this with DPC-168
-                truncateStatement.execute("SET REFERENTIAL_INTEGRITY FALSE; " +
-                        "TRUNCATE TABLE ATTRIBUTIONS; " +
-                        "TRUNCATE TABLE PROVIDERS; " +
-                        "TRUNCATE TABLE PATIENTS; " +
-                        "SET REFERENTIAL_INTEGRITY TRUE");
+
+//                TODO: This is incredibly hacky, I think we can remove this with DPC-168
+//                The problem is that we need unique truncate statements for H2 vs Postgres
+                final String driverClass = dataSourceFactory.getDriverClass();
+                logger.debug("Truncating data for connection type {}", driverClass);
+                switch (driverClass) {
+                    case "org.h2.Driver": {
+                        truncateStatement.execute("SET REFERENTIAL_INTEGRITY FALSE; " +
+                                "TRUNCATE TABLE ATTRIBUTIONS; " +
+                                "TRUNCATE TABLE PROVIDERS; " +
+                                "TRUNCATE TABLE PATIENTS; " +
+                                "SET REFERENTIAL_INTEGRITY TRUE");
+                        break;
+                    }
+                    case "org.postgresql.Driver": {
+                        truncateStatement.execute("TRUNCATE TABLE PROVIDERS CASCADE;" +
+                                "TRUNCATE TABLE PATIENTS CASCADE");
+                        break;
+                    }
+                    default: {
+                        throw new IllegalStateException(String.format("Cannot connect to database of type: %s", driverClass));
+                    }
+                }
             }
 
             // TODO: This should be moved to a more robust SQL framework, which will be handled in DPC-169
