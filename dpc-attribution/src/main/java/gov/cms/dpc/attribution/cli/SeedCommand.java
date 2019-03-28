@@ -6,6 +6,7 @@ import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
+import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.utils.SeedProcessor;
