@@ -6,7 +6,6 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
-import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.persistence.Entity;
 import java.util.Set;
 
@@ -38,23 +38,18 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(ProviderDAO.class);
         binder.bind(AttributionEngine.class).to(ProviderDAO.class);
         binder.bind(V1AttributionResource.class);
-
-
-//
     }
 
     @Provides
+    @Singleton
     SessionFactory getSessionFactory(AttributionHibernateModule hibernate) {
         // This is necessary because the session factory doesn't load on its own.
         // I'm really not sure how to fix this, I think it's due to the interaction with the Proxy Factory
-        // For now, we'll simply catch the IllegalStateException and ignore it, anything else, we throw
+        final DPCAttributionConfiguration configuration = getConfiguration();
         try {
-            final DPCAttributionConfiguration configuration = getConfiguration();
             hibernate.run(configuration, getEnvironment());
         } catch (Exception e) {
-            if (!(e instanceof IllegalStateException)) {
-                throw new RuntimeException(e);
-            }
+            throw new RuntimeException(e);
         }
         return hibernate.getSessionFactory();
     }
