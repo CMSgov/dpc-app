@@ -15,6 +15,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static final String CSV = "test_associations.csv";
 
     private final SeedProcessor seedProcessor;
+    private final Settings settings;
 
 
     public SeedCommand(Application<DPCAttributionConfiguration> application) {
@@ -41,6 +44,8 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
         }
         this.seedProcessor = new SeedProcessor(resource);
+
+        this.settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
     }
 
     @Override
@@ -77,15 +82,19 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
                         logger.info("Adding provider {}", providerEntity.getProviderNPI());
 
-                        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO providers (id, provider_id, first_name, last_name) VALUES (?, ?, ?, ?)")) {
-                            statement.setObject(1, providerEntity.getProviderID());
-                            statement.setObject(2, providerEntity.getProviderNPI());
-                            statement.setString(3, providerEntity.getProviderFirstName());
-                            statement.setString(4, providerEntity.getProviderLastName());
-                            statement.execute();
-                        } catch (SQLException e) {
-                            throw new IllegalStateException(e);
-                        }
+//                        try (DSLContext context = DSL.using(connection, this.settings)) {
+//                            final ProvidersRecord providersRecord = context.newRecord(Providers.PROVIDERS, providerEntity);
+//                            context.executeInsert(providersRecord);
+//                        }
+//                        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO providers (id, provider_id, first_name, last_name) VALUES (?, ?, ?, ?)")) {
+//                            statement.setObject(1, providerEntity.getProviderID());
+//                            statement.setObject(2, providerEntity.getProviderNPI());
+//                            statement.setString(3, providerEntity.getProviderFirstName());
+//                            statement.setString(4, providerEntity.getProviderLastName());
+//                            statement.execute();
+//                        } catch (SQLException e) {
+//                            throw new IllegalStateException(e);
+//                        }
                         bundle
                                 .getEntry()
                                 .stream()

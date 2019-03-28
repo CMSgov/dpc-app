@@ -14,6 +14,8 @@
 
     <properties>
         <mainClass>gov.cms.dpc.attribution.DPCAttributionService</mainClass>
+        <jooq.version>3.11.10</jooq.version>
+        <pgsql.version>42.2.5</pgsql.version>
     </properties>
 
     <dependencies>
@@ -47,9 +49,14 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>${jooq.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.5</version>
+            <version>${pgsql.version}</version>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
@@ -152,6 +159,57 @@
                         </permissions>
                     </extraDirectory>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>${jooq.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-postgres-jpa</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generator>
+                                <database>
+                                    <name>org.jooq.meta.extensions.jpa.JPADatabase</name>
+                                    <properties>
+                                        <property>
+                                            <key>packages</key>
+                                            <value>gov.cms.dpc.attribution.models</value>
+                                        </property>
+                                        <property>
+                                            <key>dialect</key>
+                                            <value>MYSQl</value>
+                                        </property>
+                                    </properties>
+                                    <includes>.*</includes>
+                                </database>
+                                <generate>
+                                </generate>
+                                <target>
+                                    <packageName>gov.cms.dpc.attribution.dao</packageName>
+                                    <directory>target/generated-sources/jooq</directory>
+                                </target>
+                            </generator>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${pgsql.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-meta-extensions</artifactId>
+                        <version>${jooq.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

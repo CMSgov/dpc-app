@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.models;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
+import org.hibernate.annotations.Type;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -19,6 +20,7 @@ public class ProviderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false)
+//    @Type(type="org.hibernate.type.PostgresUUIDType")
     private UUID providerID;
 
     @Column(name = "provider_id")
