@@ -1,15 +1,15 @@
 package gov.cms.dpc.attribution.cli;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.models.AttributionRelationship;
 import gov.cms.dpc.attribution.models.PatientEntity;
 import gov.cms.dpc.attribution.models.ProviderEntity;
 import gov.cms.dpc.common.utils.SeedProcessor;
-import io.dropwizard.cli.ConfiguredCommand;
+import io.dropwizard.Application;
+import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -25,7 +25,7 @@ import java.time.OffsetDateTime;
 import java.util.MissingResourceException;
 import java.util.UUID;
 
-public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> {
+public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
     private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
@@ -33,8 +33,8 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
     private final SeedProcessor seedProcessor;
 
 
-    public SeedCommand() {
-        super("seed", "Seed the attribution roster");
+    public SeedCommand(Application<DPCAttributionConfiguration> application) {
+        super(application, "seed", "Seed the attribution roster");
         // Get the test seeds
         final InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
@@ -44,11 +44,11 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
     }
 
     @Override
-    protected void run(Bootstrap<DPCAttributionConfiguration> bootstrap, Namespace namespace, DPCAttributionConfiguration configuration) throws Exception {
+    protected void run(Environment environment, Namespace namespace, DPCAttributionConfiguration configuration) throws Exception {
         // Get the db factory
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
-        dataSourceFactory.asSingleConnectionPool();
-        final ManagedDataSource dataSource = dataSourceFactory.build(new MetricRegistry(), "attribution-seeder");
+//        dataSourceFactory.asSingleConnectionPool();
+        final ManagedDataSource dataSource = dataSourceFactory.build(environment.metrics(), "attribution-seeder");
 
         // Read in the seeds file and write things
         logger.info("Seeding attributions");
@@ -59,29 +59,8 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
             connection.setAutoCommit(false);
             connection.beginRequest();
             try (Statement truncateStatement = connection.createStatement()) {
-
-//                TODO: This is incredibly hacky, I think we can remove this with DPC-168
-//                The problem is that we need unique truncate statements for H2 vs Postgres
-                final String driverClass = dataSourceFactory.getDriverClass();
-                logger.debug("Truncating data for connection type {}", driverClass);
-                switch (driverClass) {
-                    case "org.h2.Driver": {
-                        truncateStatement.execute("SET REFERENTIAL_INTEGRITY FALSE; " +
-                                "TRUNCATE TABLE ATTRIBUTIONS; " +
-                                "TRUNCATE TABLE PROVIDERS; " +
-                                "TRUNCATE TABLE PATIENTS; " +
-                                "SET REFERENTIAL_INTEGRITY TRUE");
-                        break;
-                    }
-                    case "org.postgresql.Driver": {
-                        truncateStatement.execute("TRUNCATE TABLE PROVIDERS CASCADE;" +
-                                "TRUNCATE TABLE PATIENTS CASCADE");
-                        break;
-                    }
-                    default: {
-                        throw new IllegalStateException(String.format("Cannot connect to database of type: %s", driverClass));
-                    }
-                }
+                truncateStatement.execute("TRUNCATE TABLE PROVIDERS CASCADE;" +
+                        "TRUNCATE TABLE PATIENTS CASCADE");
             }
 
             // TODO: This should be moved to a more robust SQL framework, which will be handled in DPC-169
@@ -145,7 +124,7 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
                     });
             connection.commit();
             logger.info("Finished loading seeds");
-            dataSource.stop();
         }
+        dataSource.stop();
     }
 }
