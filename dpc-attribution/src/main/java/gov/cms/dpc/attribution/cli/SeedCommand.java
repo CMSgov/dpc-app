@@ -1,9 +1,11 @@
 package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.models.AttributionRelationship;
-import gov.cms.dpc.attribution.models.PatientEntity;
-import gov.cms.dpc.attribution.models.ProviderEntity;
+import gov.cms.dpc.attribution.dao.tables.Providers;
+import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
+import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
@@ -15,8 +17,10 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.jooq.DSLContext;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,10 +86,10 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
                         logger.info("Adding provider {}", providerEntity.getProviderNPI());
 
-//                        try (DSLContext context = DSL.using(connection, this.settings)) {
-//                            final ProvidersRecord providersRecord = context.newRecord(Providers.PROVIDERS, providerEntity);
-//                            context.executeInsert(providersRecord);
-//                        }
+                        try (DSLContext context = DSL.using(connection, this.settings)) {
+                            final ProvidersRecord providersRecord = context.newRecord(Providers.PROVIDERS, providerEntity);
+                            context.executeInsert(providersRecord);
+                        }
 //                        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO providers (id, provider_id, first_name, last_name) VALUES (?, ?, ?, ?)")) {
 //                            statement.setObject(1, providerEntity.getProviderID());
 //                            statement.setObject(2, providerEntity.getProviderNPI());

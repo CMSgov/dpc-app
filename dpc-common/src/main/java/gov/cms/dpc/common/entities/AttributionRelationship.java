@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.models;
+package gov.cms.dpc.common.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 

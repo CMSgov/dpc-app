@@ -1,8 +1,8 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.attribution.models.AttributionRelationship;
-import gov.cms.dpc.attribution.models.PatientEntity;
-import gov.cms.dpc.attribution.models.ProviderEntity;
+import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRExtractors;

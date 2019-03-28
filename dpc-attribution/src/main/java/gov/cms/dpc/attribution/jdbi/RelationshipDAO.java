@@ -1,6 +1,6 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.attribution.models.AttributionRelationship;
+import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;

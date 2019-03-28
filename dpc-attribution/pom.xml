@@ -179,11 +179,11 @@
                                     <properties>
                                         <property>
                                             <key>packages</key>
-                                            <value>gov.cms.dpc.attribution.models</value>
+                                            <value>gov.cms.dpc.common.entities</value>
                                         </property>
                                         <property>
                                             <key>dialect</key>
-                                            <value>MYSQl</value>
+                                            <value>org.hibernate.dialect.PostgreSQL9Dialect</value>
                                         </property>
                                     </properties>
                                     <includes>.*</includes>
@@ -199,11 +199,6 @@
                     </execution>
                 </executions>
                 <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${pgsql.version}</version>
-                    </dependency>
                     <dependency>
                         <groupId>org.jooq</groupId>
                         <artifactId>jooq-meta-extensions</artifactId>
