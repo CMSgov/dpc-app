@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
+import gov.cms.dpc.attribution.dao.tables.Attributions;
 import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
@@ -21,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.jooq.DSLContext;
+import org.jooq.TableRecord;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
@@ -102,11 +104,14 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                                     context.executeInsert(patient);
 
                                     // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
-                                    final AttributionsRecord attr = new AttributionsRecord();
                                     attr.setCreatedAt(Timestamp.from(creationTimestamp.toInstant()));
                                     attr.setProviderId(pr.getId());
                                     attr.setPatientId(patient.getId());
                                     context.executeInsert(attr);
+                                });
+                        // Insert everything in a single transaction
+                        context.batchInsert(insertList);
+
                                 });
 
                     });
