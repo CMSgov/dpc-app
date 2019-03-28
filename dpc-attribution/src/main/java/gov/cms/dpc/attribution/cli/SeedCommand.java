@@ -1,9 +1,10 @@
 package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
+import gov.cms.dpc.attribution.dao.tables.Attributions;
+import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
-import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
-import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.utils.SeedProcessor;
@@ -18,6 +19,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.jooq.DSLContext;
+import org.jooq.TableRecord;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
@@ -25,9 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.MissingResourceException;
 import java.util.UUID;
 
@@ -61,17 +64,11 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         // Read in the seeds file and write things
         logger.info("Seeding attributions");
 
-        // Truncate everything
+        try (DSLContext context = DSL.using(dataSource.getConnection(), this.settings)) {
 
-        try (final Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(false);
-            connection.beginRequest();
-            try (Statement truncateStatement = connection.createStatement()) {
-                truncateStatement.execute("TRUNCATE TABLE PROVIDERS CASCADE;" +
-                        "TRUNCATE TABLE PATIENTS CASCADE");
-            }
+            // Truncate everything
+            context.truncate(Attributions.ATTRIBUTIONS);
 
-            // TODO: This should be moved to a more robust SQL framework, which will be handled in DPC-169
             this.seedProcessor
                     .extractProviderMap()
                     .entrySet()
@@ -86,57 +83,34 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
                         logger.info("Adding provider {}", providerEntity.getProviderNPI());
 
-                        try (DSLContext context = DSL.using(connection, this.settings)) {
-                            final ProvidersRecord providersRecord = context.newRecord(Providers.PROVIDERS, providerEntity);
-                            context.executeInsert(providersRecord);
-                        }
-//                        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO providers (id, provider_id, first_name, last_name) VALUES (?, ?, ?, ?)")) {
-//                            statement.setObject(1, providerEntity.getProviderID());
-//                            statement.setObject(2, providerEntity.getProviderNPI());
-//                            statement.setString(3, providerEntity.getProviderFirstName());
-//                            statement.setString(4, providerEntity.getProviderLastName());
-//                            statement.execute();
-//                        } catch (SQLException e) {
-//                            throw new IllegalStateException(e);
-//                        }
+                        // Create a list of records to insert into the database
+                        // We don't care about the type, so we'll just use a wildcard
+                        List<TableRecord<?>> insertList = new ArrayList<>();
+
+                        insertList.add(context.newRecord(Providers.PROVIDERS, providerEntity));
+
                         bundle
                                 .getEntry()
                                 .stream()
                                 .map(Bundle.BundleEntryComponent::getResource)
                                 .filter((resource -> resource.getResourceType() == ResourceType.Patient))
                                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
-                                // Add the patient
                                 .forEach(patientEntity -> {
-                                    patientEntity.setPatientID(UUID.randomUUID());
-                                    try (PreparedStatement statement = connection.prepareStatement("INSERT INTO patients (id, beneficiary_id, first_name, last_name, dob) VALUES (?, ?, ?, ?, ?)")) {
-                                        statement.setObject(1, patientEntity.getPatientID());
-                                        statement.setObject(2, patientEntity.getBeneficiaryID());
-                                        statement.setString(3, patientEntity.getPatientFirstName());
-                                        statement.setString(4, patientEntity.getPatientLastName());
-                                        statement.setDate(5, Date.valueOf(patientEntity.getDob()));
-                                        statement.execute();
+                                    // Create a new record from the patient entity
+                                    insertList.add(context.newRecord(Patients.PATIENTS, patientEntity));
 
-
-                                    } catch (SQLException e) {
-                                        throw new IllegalStateException(e);
-                                    }
-
-                                    // Add the relationship
-                                    new AttributionRelationship(providerEntity, patientEntity, OffsetDateTime.now());
-                                    try (PreparedStatement statement = connection.prepareStatement("INSERT INTO attributions (provider_id, patient_id, created_at) VALUES (?, ?, ?)")) {
-                                        statement.setObject(1, providerEntity.getProviderID());
-                                        statement.setObject(2, patientEntity.getPatientID());
-                                        statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-                                        statement.execute();
-                                    } catch (SQLException e) {
-                                        throw new IllegalStateException(e);
-                                    }
-
+                                    // Manually create a new Attribution record
+                                    final AttributionsRecord attr = new AttributionsRecord();
+                                    attr.setProviderId(providerEntity.getProviderID());
+                                    attr.setPatientId(patientEntity.getPatientID());
+                                    attr.setCreatedAt(Timestamp.from(Instant.now()));
+                                    insertList.add(attr);
                                 });
+                        // Insert everything in a single transaction
+                        context.batchInsert(insertList);
+
                     });
-            connection.commit();
             logger.info("Finished loading seeds");
         }
-        dataSource.stop();
     }
 }
