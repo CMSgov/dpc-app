@@ -16,6 +16,7 @@ import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
+import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.MissingResourceException;
 import java.util.UUID;
@@ -55,12 +57,22 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     }
 
     @Override
+    public void configure(Subparser subparser) {
+        subparser
+                .addArgument("-t", "--timestamp")
+                .dest("timestamp")
+                .type(String.class)
+                .required(false)
+                .help("Custom timestamp to use when adding attributed relationships.");
+    }
+
+    @Override
     protected void run(Environment environment, Namespace namespace, DPCAttributionConfiguration configuration) throws Exception {
         // Get the db factory
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(environment.metrics(), "attribution-seeder");
 
-        final OffsetDateTime creationTimestamp = OffsetDateTime.now();
+        final Timestamp creationTimestamp = generateTimestamp(namespace);
 
         // Read in the seeds file and write things
         logger.info("Seeding attributions at time {}");
@@ -99,12 +111,13 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                                     // Create a new record from the patient entity
                                     patientEntity.setPatientID(UUID.randomUUID());
                                     final PatientsRecord patient = context.newRecord(Patients.PATIENTS, patientEntity);
+                                    patient.setId(UUID.randomUUID());
                                     context.executeInsert(patient);
 
                                     // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
-                                    attr.setCreatedAt(Timestamp.from(creationTimestamp.toInstant()));
                                     attr.setProviderId(pr.getId());
                                     attr.setPatientId(patient.getId());
+                                    attr.setCreatedAt(creationTimestamp);
                                     context.executeInsert(attr);
                                 });
 
@@ -113,5 +126,13 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     });
             logger.info("Finished loading seeds");
         }
+    }
+
+    private static Timestamp generateTimestamp(Namespace namespace) {
+        final String timestamp = namespace.getString("timestamp");
+        if (timestamp == null) {
+            return Timestamp.from(Instant.now());
+        }
+        return Timestamp.valueOf(timestamp);
     }
 }

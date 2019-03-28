@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
+import static gov.cms.dpc.attribution.SharedMethods.UnmarshallResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AttributionResourceTest {
@@ -120,13 +121,5 @@ public class AttributionResourceTest {
                 assertEquals(HttpStatus.NOT_FOUND_404, response.getStatusLine().getStatusCode(), "Should have failed");
             }
         }
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private static <T> List<T> UnmarshallResponse(HttpEntity entity) throws IOException {
-        final ObjectMapper mapper = new ObjectMapper();
-
-        return (List<T>) mapper.readValue(entity.getContent(), List.class);
     }
 }

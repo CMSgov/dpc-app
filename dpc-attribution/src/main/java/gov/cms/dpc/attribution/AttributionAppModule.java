@@ -6,15 +6,22 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
+import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.ConfiguredBundle;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
+import org.jooq.DSLContext;
+import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.Settings;
+import org.jooq.impl.DSL;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Entity;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Set;
 
@@ -79,6 +87,19 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     Duration provideExpiration(DPCAttributionConfiguration config) {
         return config.getExpirationThreshold();
+    }
+
+    @Provides
+    DSLContext provideDSL(DPCAttributionConfiguration config) {
+        final DataSourceFactory factory = config.getDatabase();
+        final ManagedDataSource dataSource = factory.build(getEnvironment().metrics(), "tested-things");
+        final Settings settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
+
+        try {
+            return DSL.using(dataSource.getConnection(), settings);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static class AttributionHibernateModule extends HibernateBundle<DPCAttributionConfiguration> implements ConfiguredBundle<DPCAttributionConfiguration> {

@@ -1,7 +1,8 @@
 package gov.cms.dpc.attribution.jobs;
 
 import com.google.inject.Injector;
-import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
+import gov.cms.dpc.attribution.dao.tables.Attributions;
+import org.jooq.DSLContext;
 import org.knowm.sundial.Job;
 import org.knowm.sundial.SundialJobScheduler;
 import org.knowm.sundial.annotations.SimpleTrigger;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,7 +23,7 @@ public class ExpireAttributions extends Job {
     private static final Logger logger = LoggerFactory.getLogger(ExpireAttributions.class);
 
     @Inject
-    private RelationshipDAO dao;
+    private DSLContext context;
     @Inject
     private Duration expirationThreshold;
     private OffsetDateTime expirationTemporal;
@@ -32,10 +34,10 @@ public class ExpireAttributions extends Job {
         this.expirationTemporal = OffsetDateTime.now().minus(this.expirationThreshold);
     }
 
-    public ExpireAttributions(RelationshipDAO dao, Duration threshold) {
-        this.dao = dao;
-        this.expirationTemporal = OffsetDateTime.now().minus(threshold);
-    }
+//    public ExpireAttributions(RelationshipDAO dao, Duration threshold) {
+//        this.dao = dao;
+//        this.expirationTemporal = OffsetDateTime.now().minus(threshold);
+//    }
 
 
     @Override
@@ -44,13 +46,17 @@ public class ExpireAttributions extends Job {
         // Find all the jobs and remove them
         logger.debug("Removing attribution relationships created before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
-        this.dao
-                .getAttributions()
-                .stream()
-                .filter((attr) -> attr.getCreated().isBefore(this.expirationTemporal))
-                .forEach(relationship -> {
-                    logger.debug("Removing attribution {}", relationship);
-                    this.dao.removeAttributionRelationship(relationship);
-                });
+        try {
+
+            final int removed = context
+                    .delete(Attributions.ATTRIBUTIONS)
+                    .where(Attributions.ATTRIBUTIONS.CREATED_AT.le(Timestamp.from(this.expirationTemporal.toInstant())))
+                    .execute();
+            logger.debug("Expired {} attribution relationships.", removed);
+        } finally {
+            context.close();
+        }
+
+
     }
 }
