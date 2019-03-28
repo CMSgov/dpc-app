@@ -46,7 +46,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
             }
         });
 
-        bootstrap.addCommand(new SeedCommand());
+        bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
     }
 
     @Override

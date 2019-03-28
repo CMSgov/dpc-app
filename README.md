@@ -20,6 +20,27 @@ How to start the DPC Services
 This will also construct the *Docker* images for the API and Aggregation services.
 To skip the Docker build pass -Djib.skip=True
 
+*DPC* requires a running Postgres database.
+The `docker-compose` file includes the necessary application and configurations, and can be started like so: 
+
+```bash
+docker-compose up db
+```
+
+By default, the application attempts to connect to the `dpc_atrribution` database on the localhost as the `postgres` user.
+This can be overridden in the configuration files.
+For example, modifying the `dpc-attribution` configuration:
+
+```yaml
+dpc.attribution {
+  database = {
+    driverClass = org.postgresql.Driver
+    url = "jdbc:postgresql://localhost:5432/dpc-dev"
+    user = postgres
+  }
+}
+``` 
+
 Once the JARs are built, they can be run in two ways.
 
 1. Executed using *Docker Compose* `docker-compose up`
