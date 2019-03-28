@@ -47,7 +47,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     protected void run(Environment environment, Namespace namespace, DPCAttributionConfiguration configuration) throws Exception {
         // Get the db factory
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
-//        dataSourceFactory.asSingleConnectionPool();
         final ManagedDataSource dataSource = dataSourceFactory.build(environment.metrics(), "attribution-seeder");
 
         // Read in the seeds file and write things
