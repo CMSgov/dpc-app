@@ -1,10 +1,11 @@
 package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.dao.tables.Attributions;
 import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
+import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
+import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.utils.SeedProcessor;
@@ -19,7 +20,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.jooq.DSLContext;
-import org.jooq.TableRecord;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
@@ -28,9 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.OffsetDateTime;
 import java.util.MissingResourceException;
 import java.util.UUID;
 
@@ -61,13 +59,16 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(environment.metrics(), "attribution-seeder");
 
+        final OffsetDateTime creationTimestamp = OffsetDateTime.now();
+
         // Read in the seeds file and write things
-        logger.info("Seeding attributions");
+        logger.info("Seeding attributions at time {}");
 
         try (DSLContext context = DSL.using(dataSource.getConnection(), this.settings)) {
 
             // Truncate everything
-            context.truncate(Attributions.ATTRIBUTIONS);
+            context.truncate(Patients.PATIENTS).cascade().execute();
+            context.truncate(Providers.PROVIDERS).cascade().execute();
 
             this.seedProcessor
                     .extractProviderMap()
@@ -83,11 +84,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
                         logger.info("Adding provider {}", providerEntity.getProviderNPI());
 
-                        // Create a list of records to insert into the database
-                        // We don't care about the type, so we'll just use a wildcard
-                        List<TableRecord<?>> insertList = new ArrayList<>();
-
-                        insertList.add(context.newRecord(Providers.PROVIDERS, providerEntity));
+                        final ProvidersRecord pr = context.newRecord(Providers.PROVIDERS, providerEntity);
+                        pr.setId(UUID.randomUUID());
+                        context.executeInsert(pr);
 
                         bundle
                                 .getEntry()
@@ -97,17 +96,17 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
                                 .forEach(patientEntity -> {
                                     // Create a new record from the patient entity
-                                    insertList.add(context.newRecord(Patients.PATIENTS, patientEntity));
+                                    patientEntity.setPatientID(UUID.randomUUID());
+                                    final PatientsRecord patient = context.newRecord(Patients.PATIENTS, patientEntity);
+                                    context.executeInsert(patient);
 
-                                    // Manually create a new Attribution record
+                                    // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
                                     final AttributionsRecord attr = new AttributionsRecord();
-                                    attr.setProviderId(providerEntity.getProviderID());
-                                    attr.setPatientId(patientEntity.getPatientID());
-                                    attr.setCreatedAt(Timestamp.from(Instant.now()));
-                                    insertList.add(attr);
+                                    attr.setCreatedAt(Timestamp.from(creationTimestamp.toInstant()));
+                                    attr.setProviderId(pr.getId());
+                                    attr.setPatientId(patient.getId());
+                                    context.executeInsert(attr);
                                 });
-                        // Insert everything in a single transaction
-                        context.batchInsert(insertList);
 
                     });
             logger.info("Finished loading seeds");

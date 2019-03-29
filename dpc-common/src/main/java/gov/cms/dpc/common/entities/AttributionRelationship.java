@@ -23,7 +23,6 @@ public class AttributionRelationship {
     @ManyToOne(cascade = CascadeType.PERSIST)
     private ProviderEntity provider;
 
-//    @Column(name = "patient_id")
     @ManyToOne(cascade = CascadeType.PERSIST)
     private PatientEntity patient;
 
