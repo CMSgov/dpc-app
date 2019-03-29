@@ -5,7 +5,7 @@ import gov.cms.dpc.attribution.dao.tables.Attributions;
 import org.jooq.DSLContext;
 import org.knowm.sundial.Job;
 import org.knowm.sundial.SundialJobScheduler;
-import org.knowm.sundial.annotations.SimpleTrigger;
+import org.knowm.sundial.annotations.CronTrigger;
 import org.knowm.sundial.exceptions.JobInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +15,12 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
 
-@SimpleTrigger(repeatInterval = 30, timeUnit = TimeUnit.SECONDS)
+/**
+ * This job runs every day at midnight to expire (remove) attribution relationships which are older than a certain threshold.
+ * The value is set in the config file and defaults to 90 days.
+ */
+@CronTrigger(cron = "0 0 * * * ?")
 public class ExpireAttributions extends Job {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpireAttributions.class);
@@ -33,12 +36,6 @@ public class ExpireAttributions extends Job {
         attribute.injectMembers(this);
         this.expirationTemporal = OffsetDateTime.now().minus(this.expirationThreshold);
     }
-
-//    public ExpireAttributions(RelationshipDAO dao, Duration threshold) {
-//        this.dao = dao;
-//        this.expirationTemporal = OffsetDateTime.now().minus(threshold);
-//    }
-
 
     @Override
     public void doRun() throws JobInterruptException {

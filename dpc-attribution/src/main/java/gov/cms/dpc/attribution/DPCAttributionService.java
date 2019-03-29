@@ -63,7 +63,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) {
-        environment.jersey();
         // Not used yet
     }
 }
