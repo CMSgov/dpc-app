@@ -9,17 +9,23 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu3.model.*;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockserver.client.server.MockServerClient;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.matchers.Times;
+import org.mockserver.model.Header;
+import org.mockserver.model.HttpRequest;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
+import java.util.Base64;
 import java.util.List;
 import java.util.MissingResourceException;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,15 +44,24 @@ class BlueButtonClientTest {
     private static BlueButtonClient bbc;
 
     //@InjectMocks
-    private static BlueButtonClientModule blueButtonClientModule;
+    //private static BlueButtonClientModule blueButtonClientModule;
 
     //@Mock
     private static HttpClient mockHttpClient;
 
+    private static ClientAndServer mockServer;
+
+
+
     @BeforeAll
     public static void setupMockHttpClient() throws IOException {
 
-        mockHttpClient = Mockito.mock(HttpClient.class);
+    }
+
+    @BeforeAll
+    public static void setupBlueButtonClient() throws IOException {
+        //blueButtonClientModule = new BlueButtonClientModule();
+        mockServer = ClientAndServer.startClientAndServer(1080); // TODO: verify this starts/stops only once during tests
 
         final InputStream resource = BlueButtonClientTest.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
@@ -56,27 +71,27 @@ class BlueButtonClientTest {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
             for (String line; (line = reader.readLine()) != null; ) {
                 final String[] splits = line.split(",");
-                addMockBlueButtonInteraction(mockHttpClient, splits[0], Integer.parseInt(splits[1]), splits[2]);
+                createMockServerExpectation(splits[0], Integer.parseInt(splits[1]), splits[2]);
 
             }
         }
-    }
 
-    @BeforeAll
-    public static void setupBlueButtonClient() {
-        blueButtonClientModule = new BlueButtonClientModule();
-
-        final Injector injector = Guice.createInjector(new TestModule(), blueButtonClientModule);
+        final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule());
         bbc = injector.getInstance(BlueButtonClient.class);
     }
 
-    @Test
-    void mockitoTest() throws IOException {
-        HttpGet sampleGetRequest = new HttpGet("https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir/Patient/20140000008325");
-        HttpResponse resp = mockHttpClient.execute(sampleGetRequest);
-
-        assertEquals(resp.getStatusLine().getStatusCode(),888);
+    @AfterAll
+    public static void tearDown() {
+        mockServer.stop();
     }
+
+//    @Test
+//    void mockitoTest() throws IOException {
+//        HttpGet sampleGetRequest = new HttpGet("https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir/Patient/20140000008325");
+//        HttpResponse resp = mockHttpClient.execute(sampleGetRequest);
+//
+//        assertEquals(resp.getStatusLine().getStatusCode(),888);
+//    }
 
     @Test
     void shouldGetFHIRFromPatientID() {
@@ -163,6 +178,25 @@ class BlueButtonClientTest {
 
         Mockito.when(mockHttpClient.execute(Mockito.argThat(new HttpGetMatcher(new HttpGet(requestURI)))))
                 .thenReturn(httpResponse);
+    }
+
+    private static void createMockServerExpectation(String path, int respCode, String payload){
+        new MockServerClient("localhost", 1080)
+                .when(
+                        HttpRequest.request()
+                        .withMethod("GET")
+                        .withPath(path),
+                        Times.exactly(1)
+                )
+                .respond(
+                        org.mockserver.model.HttpResponse.response()
+                        .withStatusCode(respCode)
+                        .withHeader(
+                            new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
+                        )
+                        .withBody(Base64.getDecoder().decode(payload))
+                        .withDelay(TimeUnit.SECONDS, 1)
+                );
     }
 
 }
