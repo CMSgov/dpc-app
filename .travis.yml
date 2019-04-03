@@ -10,6 +10,10 @@ jdk:
 services:
   - postgresql
 
+cache:
+  directories:
+    - $HOME/.m2
+
 # Setup the postgres database for testing
 before_script:
   - psql -c 'create database dpc_attribution;' -U postgres

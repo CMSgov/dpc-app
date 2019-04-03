@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.models;
+package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -18,7 +18,7 @@ public class ProviderEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID providerID;
 
     @Column(name = "provider_id")
