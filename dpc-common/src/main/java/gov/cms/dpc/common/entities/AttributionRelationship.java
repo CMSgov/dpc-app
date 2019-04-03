@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.models;
+package gov.cms.dpc.common.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -23,7 +23,6 @@ public class AttributionRelationship {
     @ManyToOne(cascade = CascadeType.PERSIST)
     private ProviderEntity provider;
 
-//    @Column(name = "patient_id")
     @ManyToOne(cascade = CascadeType.PERSIST)
     private PatientEntity patient;
 

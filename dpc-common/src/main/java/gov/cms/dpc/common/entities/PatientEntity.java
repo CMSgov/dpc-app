@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.models;
+package gov.cms.dpc.common.entities;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -17,7 +17,7 @@ public class PatientEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID patientID;
 
     @NotEmpty

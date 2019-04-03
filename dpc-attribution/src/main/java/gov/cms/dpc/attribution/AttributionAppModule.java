@@ -72,7 +72,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     public static class AttributionHibernateModule extends HibernateBundle<DPCAttributionConfiguration> implements ConfiguredBundle<DPCAttributionConfiguration> {
 
         private static final Logger logger = LoggerFactory.getLogger(AttributionHibernateModule.class);
-        public static String PREFIX_STRING = "gov.cms.dpc.attribution.models";
+        public static String PREFIX_STRING = "gov.cms.dpc.common.entities";
 
         @Inject
         public AttributionHibernateModule() {
