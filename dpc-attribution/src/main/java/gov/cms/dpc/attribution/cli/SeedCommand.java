@@ -115,14 +115,12 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                                     context.executeInsert(patient);
 
                                     // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
+                                    final AttributionsRecord attr = new AttributionsRecord();
                                     attr.setProviderId(pr.getId());
                                     attr.setPatientId(patient.getId());
                                     attr.setCreatedAt(creationTimestamp);
                                     context.executeInsert(attr);
                                 });
-
-                                });
-
                     });
             logger.info("Finished loading seeds");
         }
