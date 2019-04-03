@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation.bbclient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.typesafe.config.Config;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,16 +38,15 @@ class BlueButtonClientTest {
 
     private static BlueButtonClient bbc;
     private static ClientAndServer mockServer;
-
-    @BeforeAll
-    public static void setupMockHttpClient() throws IOException {
-
-    }
+    private static Config conf;
 
     @BeforeAll
     public static void setupBlueButtonClient() throws IOException {
-        // TODO: throw missing resource exceptions if test data not found
-        mockServer = ClientAndServer.startClientAndServer(1080); // TODO: verify this starts/stops only once during tests
+        final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule());
+        bbc = injector.getInstance(BlueButtonClient.class);
+        conf  = injector.getInstance(Config.class);
+
+        mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));
         createMockServerExpectation("/v1/fhir/metadata", 200, getRawXML(METADATA_PATH), List.of());
 
         for(String patientId : TEST_PATIENT_IDS) {
@@ -64,9 +64,6 @@ class BlueButtonClientTest {
                     Arrays.asList(Parameter.param("patient", patientId))
             );
         }
-
-        final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule());
-        bbc = injector.getInstance(BlueButtonClient.class);
     }
 
     @AfterAll
@@ -135,7 +132,7 @@ class BlueButtonClientTest {
     }
 
     private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams){
-        new MockServerClient("localhost", 1080)
+        new MockServerClient("localhost", conf.getInt("test.mockServerPort"))
                 .when(
                         HttpRequest.request()
                         .withMethod("GET")
