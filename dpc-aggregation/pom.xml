@@ -14,6 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.aggregation.DPCAggregationService</mainClass>
+        <mockserverVersion>3.10.8</mockserverVersion>
     </properties>
 
     <dependencies>
@@ -76,6 +77,22 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mock-server/mockserver-core -->
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>${mockserverVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-client-java</artifactId>
+            <version>${mockserverVersion}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
