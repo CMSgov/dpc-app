@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import gov.cms.dpc.common.models.JobModel;
+import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -19,7 +19,6 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 

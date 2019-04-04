@@ -1,5 +1,13 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
+import gov.cms.dpc.queue.models.JobModel;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.redisson.Redisson;
@@ -7,10 +15,7 @@ import org.redisson.api.RQueue;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class QueueTest {
 
     private JobQueue queue;
+    private SessionFactory sessionFactory;
+    private Session session;
 
     @BeforeEach
     public void setupQueue() {
@@ -28,7 +35,24 @@ public class QueueTest {
         // Get the job queue and clear it
         final RQueue<Object> jobQueue = client.getQueue("jobqueue");
         jobQueue.clear();
-        queue = new DistributedQueue(client);
+
+        // Create the session factory
+        final Configuration conf = new Configuration();
+        sessionFactory = conf.configure().buildSessionFactory();
+        session = sessionFactory.openSession();
+        queue = new DistributedQueue(client, session);
+    }
+
+    @AfterEach
+    public void shutdown() {
+        final Transaction tx = session.beginTransaction();
+        try {
+            final Query query = session.createQuery("delete from job_queue");
+            query.executeUpdate();
+        } finally {
+            tx.commit();
+        }
+        sessionFactory.close();
     }
 
     @Test
@@ -38,7 +62,7 @@ public class QueueTest {
         jobSet.add(UUID.randomUUID());
         jobSet.add(UUID.randomUUID());
 
-        jobSet.forEach((job) -> queue.submitJob(job, new TestJob("test job")));
+        jobSet.forEach((job) -> queue.submitJob(job, QueueTest.buildModel(job)));
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
 
         // Check the status of the job
@@ -51,9 +75,11 @@ public class QueueTest {
 
         Optional<Pair<UUID, TestJob>> workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have job to work");
+        // Check that the status is RUNNING
+        final Optional<JobStatus> status = this.queue.getJobStatus(workJob.get().getLeft());
+        assertAll(() -> assertTrue(status.isPresent(), "Should have Job status"),
+                () -> assertEquals(JobStatus.RUNNING, status.get(), "Job should be running"));
         queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED);
-        // Remove from the job set so we can track what's been done
-        jobSet.remove(workJob.get().getLeft());
 
         final Optional<JobStatus> updatedStatus = queue.getJobStatus(workJob.get().getLeft());
         assertAll(() -> assertTrue(updatedStatus.isPresent(), "Should have job status"),
@@ -63,18 +89,15 @@ public class QueueTest {
         workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have a 2nd job to work");
         queue.completeJob(workJob.get().getLeft(), JobStatus.FAILED);
-        jobSet.remove(workJob.get().getLeft());
+//        jobSet.remove(workJob.get().getLeft());
 
         Optional<JobStatus> failedStatus = queue.getJobStatus(workJob.get().getLeft());
         assertAll(() -> assertTrue(failedStatus.isPresent(), "Should have job status"),
                 () -> assertEquals(JobStatus.FAILED, failedStatus.get(), "Job should have failed"));
 
-        assertAll(() -> assertTrue(jobSet.isEmpty(), "Should have worked both jobs"),
-                () -> assertTrue(queue.workJob().isEmpty(), "Should not have another job to work"));
-
         // Remove some jobs
-        queue.removeJob(workJob.get().getLeft());
-        assertEquals(1, queue.queueSize(), "Should only have a single job");
+//        queue.removeJob(workJob.get().getLeft());
+        assertEquals(0, queue.queueSize(), "Not have any jobs in the queue");
     }
 
     @Test
@@ -86,7 +109,7 @@ public class QueueTest {
                 () -> assertEquals(0, queue.queueSize(), "Should have an empty queue"));
 
         assertTrue(queue.getJobStatus(jobID).isEmpty(), "Should not be able to get missing job status");
-        assertThrows(IllegalArgumentException.class, () -> queue.completeJob(jobID, JobStatus.FAILED), "Should error when completing a job which does not exist");
+        assertThrows(JobQueueFailure.class, () -> queue.completeJob(jobID, JobStatus.FAILED), "Should error when completing a job which does not exist");
     }
 
     private static <T> T getSetFirst(Set<T> set) {
@@ -112,5 +135,9 @@ public class QueueTest {
         public void setStatus(JobStatus status) {
             this.status = status;
         }
+    }
+
+    private static JobModel buildModel(UUID id) {
+        return new JobModel(id, JobModel.ResourceType.PATIENT, "test-provider-1", List.of("test-patient-1", "test-patient-2"));
     }
 }

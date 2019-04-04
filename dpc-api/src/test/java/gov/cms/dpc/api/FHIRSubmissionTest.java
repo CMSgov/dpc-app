@@ -1,6 +1,6 @@
 package gov.cms.dpc.api;
 
-import gov.cms.dpc.common.models.JobModel;
+import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;

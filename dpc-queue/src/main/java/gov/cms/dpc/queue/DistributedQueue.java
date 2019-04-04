@@ -1,11 +1,15 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
+import gov.cms.dpc.queue.models.JobModel;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
@@ -18,23 +22,33 @@ public class DistributedQueue implements JobQueue {
     private static final Logger logger = LoggerFactory.getLogger(DistributedQueue.class);
 
     private final Queue<UUID> queue;
+    private final Session session;
 
     @Inject
-    DistributedQueue(RedissonClient client) {
-        queue = client.getQueue("jobqueue");
+    DistributedQueue(RedissonClient client, Session session) {
+        this.queue = client.getQueue("jobqueue");
+        this.session = session;
     }
 
     @Override
     public <T> void submitJob(UUID jobID, T data) {
         logger.debug("Adding job {} to the queue with data {}.", jobID, data);
         // Persist the job in postgres
+        final Transaction tx = this.session.beginTransaction();
+        try {
+
+            this.session.save(data);
+            tx.commit();
+        } catch (Exception e) {
+            logger.error("Cannot add job to database", e);
+            tx.rollback();
+        }
         // Add to the redis queue
         // Offer?
         boolean added;
         try {
             added = this.queue.add(jobID);
         } catch (RuntimeException e) {
-
             throw new JobQueueFailure(jobID, e);
         }
 
@@ -47,7 +61,16 @@ public class DistributedQueue implements JobQueue {
     @Override
     public Optional<JobStatus> getJobStatus(UUID jobID) {
         // Get from Postgres
-        return Optional.empty();
+        final Transaction tx = this.session.beginTransaction();
+        try {
+            final JobModel jobModel = this.session.get(JobModel.class, jobID);
+            if (jobModel == null) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(jobModel.getStatus());
+        } finally {
+            tx.commit();
+        }
     }
 
     @Override
@@ -58,18 +81,55 @@ public class DistributedQueue implements JobQueue {
         }
 
         // Fetch the Job from Postgres
-        return Optional.empty();
+        final Transaction tx = this.session.beginTransaction();
+
+        try {
+            final JobModel jobModel = this.session.get(JobModel.class, jobID);
+            if (jobModel == null) {
+                throw new JobQueueFailure(jobID, "Unable to fetch job from database");
+            }
+
+            // Verify that the job is in progress, otherwise fail
+            if (jobModel.getStatus() != JobStatus.QUEUED) {
+                throw new JobQueueFailure(jobID, String.format("Cannot work job in state: %s", jobModel.getStatus()));
+            }
+
+            // Update the status and persist it
+            jobModel.setStatus(JobStatus.RUNNING);
+            this.session.update(jobModel);
+            tx.commit();
+
+            return Optional.of(new Pair<>(jobID, (T) jobModel));
+        } catch (Exception e) {
+            tx.rollback();
+            logger.error("Cannot retrieve job from DB.", e);
+            throw new JobQueueFailure(jobID, e);
+        }
     }
 
     @Override
     public void completeJob(UUID jobID, JobStatus status) {
-        // Update
+
+        final Transaction tx = this.session.beginTransaction();
+        try {
+            final JobModel jobModel = this.session.get(JobModel.class, jobID);
+            jobModel.setStatus(status);
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+            logger.error("Unable to complete job", e);
+            throw new JobQueueFailure(jobID, e);
+        }
     }
 
     @Override
     public void removeJob(UUID jobID) {
+        throw new UnsupportedOperationException("Job removal is not supported");
         // Remove from postgres and queue
-        this.queue.remove(jobID);
+//        final JobModel jobToDelete = new JobModel();
+//        jobToDelete.setJobID(jobID);
+//        this.session.delete(jobToDelete);
+//        this.queue.remove(jobID);
     }
 
     @Override

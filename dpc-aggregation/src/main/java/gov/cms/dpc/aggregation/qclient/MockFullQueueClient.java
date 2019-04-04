@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation.qclient;
 
 
-import gov.cms.dpc.common.models.JobModel;
+import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.Pair;
 
 import java.util.*;
