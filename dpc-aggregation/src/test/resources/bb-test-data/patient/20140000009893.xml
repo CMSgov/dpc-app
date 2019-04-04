@@ -1,3 +1,31 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:4b0e7abbf6bc8cd41f524aeb09fcfcd791922868488a6cd256e5f579cf1b4311
-size 1013
+<Patient xmlns="http://hl7.org/fhir">
+   <id value="20140000009893"/>
+   <extension url="https://bluebutton.cms.gov/resources/variables/race">
+      <valueCoding>
+         <system value="https://bluebutton.cms.gov/resources/variables/race"/>
+         <code value="1"/>
+         <display value="White"/>
+      </valueCoding>
+   </extension>
+   <identifier>
+      <system value="https://bluebutton.cms.gov/resources/variables/bene_id"/>
+      <value value="20140000009893"/>
+   </identifier>
+   <identifier>
+      <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"/>
+      <value value="fc463c4b2788ad575acf9194fc132c53cdad9b93d36955315d1af1ec7445d330"/>
+   </identifier>
+   <name>
+      <use value="usual"/>
+      <family value="Doe"/>
+      <given value="John"/>
+      <given value="X"/>
+   </name>
+   <gender value="unknown"/>
+   <birthDate value="2014-06-01"/>
+   <address>
+      <district value="999"/>
+      <state value="20"/>
+      <postalCode value="99999"/>
+   </address>
+</Patient>
