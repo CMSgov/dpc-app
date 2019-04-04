@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.typesafe.config.Config;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,19 +48,19 @@ class BlueButtonClientTest {
         conf  = injector.getInstance(Config.class);
 
         mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));
-        createMockServerExpectation("/v1/fhir/metadata", 200, getRawXML(METADATA_PATH), List.of());
+        createMockServerExpectation("/v1/fhir/metadata", HttpStatus.OK_200, getRawXML(METADATA_PATH), List.of());
 
         for(String patientId : TEST_PATIENT_IDS) {
             createMockServerExpectation(
                     "/v1/fhir/Patient/" + patientId,
-                    200,
+                    HttpStatus.OK_200,
                     getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
                     List.of()
             );
 
             createMockServerExpectation(
                     "/v1/fhir/ExplanationOfBenefit",
-                    200,
+                    HttpStatus.OK_200,
                     getRawXML(SAMPLE_EOB_PATH_PREFIX + patientId + ".xml"),
                     Arrays.asList(Parameter.param("patient", patientId))
             );
