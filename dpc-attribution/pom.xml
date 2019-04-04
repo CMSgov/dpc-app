@@ -14,6 +14,8 @@
 
     <properties>
         <mainClass>gov.cms.dpc.attribution.DPCAttributionService</mainClass>
+        <jooq.version>3.11.10</jooq.version>
+        <pgsql.version>42.2.5</pgsql.version>
     </properties>
 
     <dependencies>
@@ -30,9 +32,9 @@
             <artifactId>dropwizard-hibernate</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.197</version>
+            <groupId>org.knowm</groupId>
+            <artifactId>dropwizard-sundial</artifactId>
+            <version>1.3.1</version>
         </dependency>
         <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
@@ -52,9 +54,14 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>${jooq.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.5</version>
+            <version>${pgsql.version}</version>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
@@ -66,6 +73,7 @@
             <artifactId>reflections</artifactId>
             <version>0.9.11</version>
         </dependency>
+        <!--Testing dependencies-->
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
@@ -73,6 +81,15 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-client</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -157,6 +174,52 @@
                         </permissions>
                     </extraDirectory>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>${jooq.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-postgres-jpa</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generator>
+                                <database>
+                                    <name>org.jooq.meta.extensions.jpa.JPADatabase</name>
+                                    <properties>
+                                        <property>
+                                            <key>packages</key>
+                                            <value>gov.cms.dpc.common.entities</value>
+                                        </property>
+                                        <property>
+                                            <key>dialect</key>
+                                            <value>org.hibernate.dialect.PostgreSQL9Dialect</value>
+                                        </property>
+                                    </properties>
+                                    <includes>.*</includes>
+                                </database>
+                                <generate>
+                                </generate>
+                                <target>
+                                    <packageName>gov.cms.dpc.attribution.dao</packageName>
+                                    <directory>target/generated-sources/jooq</directory>
+                                </target>
+                            </generator>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-meta-extensions</artifactId>
+                        <version>${jooq.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

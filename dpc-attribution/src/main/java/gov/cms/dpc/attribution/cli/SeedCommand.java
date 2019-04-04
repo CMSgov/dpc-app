@@ -1,90 +1,88 @@
 package gov.cms.dpc.attribution.cli;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.models.AttributionRelationship;
-import gov.cms.dpc.attribution.models.PatientEntity;
-import gov.cms.dpc.attribution.models.ProviderEntity;
+import gov.cms.dpc.attribution.dao.tables.Patients;
+import gov.cms.dpc.attribution.dao.tables.Providers;
+import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
+import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
+import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
+import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.utils.SeedProcessor;
-import io.dropwizard.cli.ConfiguredCommand;
+import io.dropwizard.Application;
+import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
+import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.jooq.DSLContext;
+import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.Settings;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.sql.*;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.MissingResourceException;
 import java.util.UUID;
 
-public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> {
+public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
     private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
 
     private final SeedProcessor seedProcessor;
+    private final Settings settings;
 
 
-    public SeedCommand() {
-        super("seed", "Seed the attribution roster");
+    public SeedCommand(Application<DPCAttributionConfiguration> application) {
+        super(application, "seed", "Seed the attribution roster");
         // Get the test seeds
         final InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
             throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
         }
         this.seedProcessor = new SeedProcessor(resource);
+
+        this.settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
     }
 
     @Override
-    protected void run(Bootstrap<DPCAttributionConfiguration> bootstrap, Namespace namespace, DPCAttributionConfiguration configuration) throws Exception {
+    public void configure(Subparser subparser) {
+        subparser
+                .addArgument("-t", "--timestamp")
+                .dest("timestamp")
+                .type(String.class)
+                .required(false)
+                .help("Custom timestamp to use when adding attributed relationships.");
+    }
+
+    @Override
+    protected void run(Environment environment, Namespace namespace, DPCAttributionConfiguration configuration) throws Exception {
         // Get the db factory
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
-        dataSourceFactory.asSingleConnectionPool();
-        final ManagedDataSource dataSource = dataSourceFactory.build(new MetricRegistry(), "attribution-seeder");
+        final ManagedDataSource dataSource = dataSourceFactory.build(environment.metrics(), "attribution-seeder");
+
+        final Timestamp creationTimestamp = generateTimestamp(namespace);
 
         // Read in the seeds file and write things
-        logger.info("Seeding attributions");
+        logger.info("Seeding attributions at time {}");
 
-        // Truncate everything
+        try (DSLContext context = DSL.using(dataSource.getConnection(), this.settings)) {
 
-        try (final Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(false);
-            connection.beginRequest();
-            try (Statement truncateStatement = connection.createStatement()) {
+            // Truncate everything
+            context.truncate(Patients.PATIENTS).cascade().execute();
+            context.truncate(Providers.PROVIDERS).cascade().execute();
 
-//                TODO: This is incredibly hacky, I think we can remove this with DPC-168
-//                The problem is that we need unique truncate statements for H2 vs Postgres
-                final String driverClass = dataSourceFactory.getDriverClass();
-                logger.debug("Truncating data for connection type {}", driverClass);
-                switch (driverClass) {
-                    case "org.h2.Driver": {
-                        truncateStatement.execute("SET REFERENTIAL_INTEGRITY FALSE; " +
-                                "TRUNCATE TABLE ATTRIBUTIONS; " +
-                                "TRUNCATE TABLE PROVIDERS; " +
-                                "TRUNCATE TABLE PATIENTS; " +
-                                "SET REFERENTIAL_INTEGRITY TRUE");
-                        break;
-                    }
-                    case "org.postgresql.Driver": {
-                        truncateStatement.execute("TRUNCATE TABLE PROVIDERS CASCADE;" +
-                                "TRUNCATE TABLE PATIENTS CASCADE");
-                        break;
-                    }
-                    default: {
-                        throw new IllegalStateException(String.format("Cannot connect to database of type: %s", driverClass));
-                    }
-                }
-            }
-
-            // TODO: This should be moved to a more robust SQL framework, which will be handled in DPC-169
             this.seedProcessor
                     .extractProviderMap()
                     .entrySet()
@@ -99,53 +97,40 @@ public class SeedCommand extends ConfiguredCommand<DPCAttributionConfiguration> 
 
                         logger.info("Adding provider {}", providerEntity.getProviderNPI());
 
-                        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO providers (id, provider_id, first_name, last_name) VALUES (?, ?, ?, ?)")) {
-                            statement.setObject(1, providerEntity.getProviderID());
-                            statement.setObject(2, providerEntity.getProviderNPI());
-                            statement.setString(3, providerEntity.getProviderFirstName());
-                            statement.setString(4, providerEntity.getProviderLastName());
-                            statement.execute();
-                        } catch (SQLException e) {
-                            throw new IllegalStateException(e);
-                        }
+                        final ProvidersRecord pr = context.newRecord(Providers.PROVIDERS, providerEntity);
+                        pr.setId(UUID.randomUUID());
+                        context.executeInsert(pr);
+
                         bundle
                                 .getEntry()
                                 .stream()
                                 .map(Bundle.BundleEntryComponent::getResource)
                                 .filter((resource -> resource.getResourceType() == ResourceType.Patient))
                                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
-                                // Add the patient
                                 .forEach(patientEntity -> {
+                                    // Create a new record from the patient entity
                                     patientEntity.setPatientID(UUID.randomUUID());
-                                    try (PreparedStatement statement = connection.prepareStatement("INSERT INTO patients (id, beneficiary_id, first_name, last_name, dob) VALUES (?, ?, ?, ?, ?)")) {
-                                        statement.setObject(1, patientEntity.getPatientID());
-                                        statement.setObject(2, patientEntity.getBeneficiaryID());
-                                        statement.setString(3, patientEntity.getPatientFirstName());
-                                        statement.setString(4, patientEntity.getPatientLastName());
-                                        statement.setDate(5, Date.valueOf(patientEntity.getDob()));
-                                        statement.execute();
+                                    final PatientsRecord patient = context.newRecord(Patients.PATIENTS, patientEntity);
+                                    patient.setId(UUID.randomUUID());
+                                    context.executeInsert(patient);
 
-
-                                    } catch (SQLException e) {
-                                        throw new IllegalStateException(e);
-                                    }
-
-                                    // Add the relationship
-                                    new AttributionRelationship(providerEntity, patientEntity, OffsetDateTime.now());
-                                    try (PreparedStatement statement = connection.prepareStatement("INSERT INTO attributions (provider_id, patient_id, created_at) VALUES (?, ?, ?)")) {
-                                        statement.setObject(1, providerEntity.getProviderID());
-                                        statement.setObject(2, patientEntity.getPatientID());
-                                        statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-                                        statement.execute();
-                                    } catch (SQLException e) {
-                                        throw new IllegalStateException(e);
-                                    }
-
+                                    // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
+                                    final AttributionsRecord attr = new AttributionsRecord();
+                                    attr.setProviderId(pr.getId());
+                                    attr.setPatientId(patient.getId());
+                                    attr.setCreatedAt(creationTimestamp);
+                                    context.executeInsert(attr);
                                 });
                     });
-            connection.commit();
             logger.info("Finished loading seeds");
-            dataSource.stop();
         }
+    }
+
+    private static Timestamp generateTimestamp(Namespace namespace) {
+        final String timestamp = namespace.getString("timestamp");
+        if (timestamp == null) {
+            return Timestamp.from(Instant.now());
+        }
+        return Timestamp.valueOf(timestamp);
     }
 }

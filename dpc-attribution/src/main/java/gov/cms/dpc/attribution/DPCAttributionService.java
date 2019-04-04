@@ -10,6 +10,9 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.knowm.dropwizard.sundial.SundialBundle;
+import org.knowm.dropwizard.sundial.SundialConfiguration;
+import org.knowm.sundial.SundialJobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +49,16 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
             }
         });
 
-        bootstrap.addCommand(new SeedCommand());
+        final SundialBundle<DPCAttributionConfiguration> sundialBundle = new SundialBundle<>() {
+            @Override
+            public SundialConfiguration getSundialConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
+                return dpcAttributionConfiguration.getSundial();
+            }
+        };
+
+        bootstrap.addBundle(sundialBundle);
+
+        bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
     }
 
     @Override

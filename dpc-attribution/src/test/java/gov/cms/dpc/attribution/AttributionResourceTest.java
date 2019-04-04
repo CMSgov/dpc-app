@@ -1,10 +1,8 @@
 package gov.cms.dpc.attribution;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -19,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
+import static gov.cms.dpc.attribution.SharedMethods.UnmarshallResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AttributionResourceTest {
@@ -120,13 +119,5 @@ public class AttributionResourceTest {
                 assertEquals(HttpStatus.NOT_FOUND_404, response.getStatusLine().getStatusCode(), "Should have failed");
             }
         }
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private static <T> List<T> UnmarshallResponse(HttpEntity entity) throws IOException {
-        final ObjectMapper mapper = new ObjectMapper();
-
-        return (List<T>) mapper.readValue(entity.getContent(), List.class);
     }
 }

@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<job-scheduling-data>
+
+    <schedule>
+
+
+        <!-- job with simple trigger -->
+        <job>
+            <name>ExpireAttributions</name>
+            <job-class>gov.cms.dpc.attribution.jobs.ExpireAttributions</job-class>
+            <!--<job-data-map>-->
+                <!--<entry>-->
+                    <!--<key>MyParam</key>-->
+                    <!--<value>42</value>-->
+                <!--</entry>-->
+            <!--</job-data-map>-->
+        </job>
+        <trigger>
+            <simple>
+                <name>SampleJob2-Trigger</name>
+                <job-name>ExpireAttributions</job-name>
+                <repeat-count>5</repeat-count>
+                <repeat-interval>5000</repeat-interval>
+            </simple>
+        </trigger>
+
+    </schedule>
+
+</job-scheduling-data>
