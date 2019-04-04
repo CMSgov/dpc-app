@@ -1,10 +1,8 @@
 package gov.cms.dpc.attribution;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;

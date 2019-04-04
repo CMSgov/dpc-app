@@ -85,7 +85,7 @@ class ExpirationJobTest {
                 .request()
                 .post(Entity.text(""));
 
-        assertEquals(200, response.getStatus(), "Job should have started correctly");
+        assertEquals(HttpStatus.OK_200, response.getStatus(), "Job should have started correctly");
     }
 
     void stopJob(Client client, String jobName) {
@@ -97,7 +97,7 @@ class ExpirationJobTest {
                 .request()
                 .post(Entity.text(""));
 
-        assertEquals(200, response.getStatus(), "Job should have stopped");
+        assertEquals(HttpStatus.OK_200, response.getStatus(), "Job should have stopped");
     }
 
     /**
