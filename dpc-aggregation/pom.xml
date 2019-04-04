@@ -14,6 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.aggregation.DPCAggregationService</mainClass>
+        <mockserverVersion>3.10.8</mockserverVersion>
     </properties>
 
     <dependencies>
@@ -79,19 +80,17 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.24.0</version>
-            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mock-server/mockserver-core -->
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
-            <version>3.10.8</version>
+            <version>${mockserverVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-client-java</artifactId>
-            <version>3.10.8</version>
+            <version>${mockserverVersion}</version>
         </dependency>
 
     </dependencies>
