@@ -131,6 +131,14 @@ class BlueButtonClientTest {
         );
     }
 
+    /**
+     * Helper method that configures the mock server to respond to a given GET request
+     *
+     * @param path The path segment of the URL that would be received by BlueButton
+     * @param respCode The desired HTTP response code
+     * @param payload The data that the mock server should return in response to this GET request
+     * @param qStringParams The query string parameters that must be present to generate this response
+     */
     private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams){
         new MockServerClient("localhost", conf.getInt("test.mockServerPort"))
                 .when(
