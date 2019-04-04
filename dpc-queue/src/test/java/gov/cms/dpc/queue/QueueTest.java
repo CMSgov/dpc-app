@@ -2,6 +2,10 @@ package gov.cms.dpc.queue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.redisson.Redisson;
+import org.redisson.api.RQueue;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -13,11 +17,18 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class QueueTest {
 
-    private MemoryQueue queue;
+    private JobQueue queue;
 
     @BeforeEach
     public void setupQueue() {
-        queue = new MemoryQueue();
+        final Config config = new Config();
+        config.useSingleServer().setAddress("redis://localhost:6379");
+
+        final RedissonClient client = Redisson.create(config);
+        // Get the job queue and clear it
+        final RQueue<Object> jobQueue = client.getQueue("jobqueue");
+        jobQueue.clear();
+        queue = new DistributedQueue(client);
     }
 
     @Test

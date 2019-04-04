@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Simple in-memory queue for tracking job statuses
  */
-public class MemoryQueue implements JobQueue{
+public class MemoryQueue implements JobQueue {
 
     private static Logger logger = LoggerFactory.getLogger(MemoryQueue.class);
 
