@@ -26,7 +26,12 @@ import java.util.List;
 import static gov.cms.dpc.attribution.SharedMethods.UnmarshallResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpirationJobTest {
+/**
+ * Integration test for verifying that the expiration jobs runs correctly.
+ * We currently don't have a way of verifying that the job runs when expected, since we can't really override Dropwizard's time source.
+ * In the future, we might consider using something like ByteBuddy to intercept all system time calls and see if the job still gets run.
+ */
+class ExpirationJobTest {
 
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private Client client;
@@ -38,6 +43,7 @@ public class ExpirationJobTest {
         APPLICATION.getApplication().run("db", "migrate");
         // Seed the database, but use a really early time
         APPLICATION.getApplication().run("seed", "-t 2015-01-01 12:12:12");
+        // TODO: Add additional attributions created after the expiration threshold (DPC-186)
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
     }
@@ -48,7 +54,7 @@ public class ExpirationJobTest {
     }
 
     @Test
-    public void test() throws IOException, InterruptedException {
+    void test() throws IOException, InterruptedException {
         this.startJob(this.client, "ExpireAttributions");
 
         this.stopJob(this.client, "ExpireAttributions");
