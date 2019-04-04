@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.List;
 
 @SuppressWarnings("unchecked")
 public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
@@ -32,7 +33,7 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
      * @return - {@link AttributionRelationship} if one exists
      * @throws UnknownRelationship - thrown if attribution is missing
      */
-    AttributionRelationship lookupAttributionRelationship(Practitioner provider, Patient patient) {
+    public AttributionRelationship lookupAttributionRelationship(Practitioner provider, Patient patient) {
 
         final String providerNPI = FHIRExtractors.getProviderNPI(provider);
         final String patientMPI = FHIRExtractors.getPatientMPI(patient);
@@ -57,7 +58,16 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
      *
      * @param relationship - {@link AttributionRelationship} to remove
      */
-    void removeAttributionRelationship(AttributionRelationship relationship) {
+    public void removeAttributionRelationship(AttributionRelationship relationship) {
         currentSession().delete(relationship);
+    }
+
+    /**
+     * Retrieve all {@link AttributionRelationship} entities in the database.
+     *
+     * @return - {@link List} {@link AttributionRelationship}
+     */
+    public List<AttributionRelationship> getAttributions() {
+        return list(query("FROM ATTRIBUTIONS"));
     }
 }

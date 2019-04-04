@@ -1,17 +1,9 @@
-# Data @ The Point of Care
+Data @ The Point of Care
+-
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
 [![Maintainability](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/maintainability)](https://codeclimate.com/github/CMSgov/dpc-app/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/test_coverage)](https://codeclimate.com/github/CMSgov/dpc-app/test_coverage)
-
-Clone and Build Submodules
----
-
-First-time clone:
-
-```bash
-git clone https://github.com/CMSgov/dpc-app
-```
 
 How to start the DPC Services
 ---
@@ -62,7 +54,7 @@ Seeding the database
 ---
 
 In order to successfully test the application, there needs to be initial data loaded into the attribution database.
-We provide a small CSV [file](dpc-attribution/src/main/resources/test_associations.csv) which associates some fake providers with valid patients from the BlueButton sandbox.
+We provide a small CSV [file](src/main/resources/test_associations.csv) which associates some fake providers with valid patients from the BlueButton sandbox.
 The database can be automatically migrated and seeded by running the following commands, before starting the Attribution service. 
 
 ```bash

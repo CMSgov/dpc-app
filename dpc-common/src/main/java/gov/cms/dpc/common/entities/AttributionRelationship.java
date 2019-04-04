@@ -3,7 +3,9 @@ package gov.cms.dpc.common.entities;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Entity(name = "attributions")
@@ -44,6 +46,12 @@ public class AttributionRelationship {
         this.provider = provider;
         this.patient = patient;
         this.created = created;
+    }
+
+    public AttributionRelationship(ProviderEntity provider, PatientEntity patient, Timestamp created) {
+        this.provider = provider;
+        this.patient = patient;
+        this.created = OffsetDateTime.ofInstant(created.toInstant(), ZoneOffset.UTC);
     }
 
     public Long getAttributionID() {
@@ -92,5 +100,15 @@ public class AttributionRelationship {
     @Override
     public int hashCode() {
         return Objects.hash(attributionID, provider, patient, created);
+    }
+
+    @Override
+    public String toString() {
+        return "AttributionRelationship{" +
+                "attributionID=" + attributionID +
+                ", provider=" + provider +
+                ", patient=" + patient +
+                ", created=" + created +
+                '}';
     }
 }
