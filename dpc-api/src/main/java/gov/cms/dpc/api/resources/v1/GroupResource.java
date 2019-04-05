@@ -1,11 +1,11 @@
 package gov.cms.dpc.api.resources.v1;
 
+import gov.cms.dpc.api.resources.AbstractGroupResource;
+import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.common.annotations.APIV1;
-import gov.cms.dpc.api.resources.AbstractGroupResource;
+import gov.cms.dpc.queue.models.JobModel;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;

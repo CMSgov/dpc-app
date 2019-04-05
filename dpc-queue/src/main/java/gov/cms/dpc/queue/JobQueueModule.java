@@ -17,7 +17,7 @@ public class JobQueueModule extends PrivateModule {
     private final boolean inMemory;
 
     public JobQueueModule() {
-        this.inMemory = true;
+        this.inMemory = false;
     }
 
     public JobQueueModule(boolean inMemory) {
@@ -27,18 +27,17 @@ public class JobQueueModule extends PrivateModule {
     @Override
     protected void configure() {
 
-        // bind it up
-//        logger.debug("Binding {} to Queue", clazz.getName());
-//        Multibinder.newSetBinder(binder(), JobQueue.class)
-//                .addBinding()
-//                .to(new TypeLiteral<JobQueue<T>>() {
-//                })
-//        .in(Scopes.SINGLETON);
-
-        // Manually bind to the Memory Queue, as a Singleton
-        bind(JobQueue.class)
-                .to(MemoryQueue.class)
-                .in(Scopes.SINGLETON);
+        // Manually bind
+        // to the Memory Queue, as a Singleton
+        if (this.inMemory) {
+            bind(JobQueue.class)
+                    .to(MemoryQueue.class)
+                    .in(Scopes.SINGLETON);
+        } else {
+            bind(JobQueue.class)
+                    .to(DistributedQueue.class)
+                    .in(Scopes.SINGLETON);
+        }
 
         // Expose things
         expose(JobQueue.class);
@@ -48,7 +47,7 @@ public class JobQueueModule extends PrivateModule {
     RedissonClient provideClient() {
         final Config config = new Config();
 
-        config.setTransportMode(TransportMode.EPOLL);
+//        config.setTransportMode(TransportMode.EPOLL);
         config.useSingleServer().setAddress("redis://localhost:6379");
 
         return Redisson.create(config);

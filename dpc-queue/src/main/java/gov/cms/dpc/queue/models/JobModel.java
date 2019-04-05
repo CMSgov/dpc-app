@@ -30,6 +30,7 @@ public class JobModel {
     @Column(name = "provider_id")
     private String providerID;
     @Convert(converter = StringListConverter.class)
+    @Column(name = "patients", columnDefinition = "text")
     private List<String> patients;
     private JobStatus status;
 

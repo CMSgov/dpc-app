@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.Serializable;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
@@ -42,6 +41,7 @@ public class DistributedQueue implements JobQueue {
         } catch (Exception e) {
             logger.error("Cannot add job to database", e);
             tx.rollback();
+            throw new JobQueueFailure(jobID, e);
         }
         // Add to the redis queue
         // Offer?

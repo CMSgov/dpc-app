@@ -5,7 +5,6 @@ import java.util.UUID;
 
 /**
  * Interface for submitting/retrieving export jobs to a backing queue.
- *
  */
 public interface JobQueue {
 

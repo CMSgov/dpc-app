@@ -2,13 +2,15 @@ package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import gov.cms.dpc.common.hibernate.IDPCDatabase;
 import io.dropwizard.client.JerseyClientConfiguration;
+import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class DPAPIConfiguration extends TypesafeConfiguration {
+public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase {
 
     private String testValue;
     @NotEmpty
@@ -19,11 +21,20 @@ public class DPAPIConfiguration extends TypesafeConfiguration {
     @JsonProperty
     private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
 
+    @Valid
+    @NotNull
+    @JsonProperty("database")
+    private DataSourceFactory database = new DataSourceFactory();
+
     @NotEmpty
     @NotNull
     private String attributionURL;
 
-    DPAPIConfiguration() {
+    public DataSourceFactory getDatabase() {
+        return database;
+    }
+
+    DPCAPIConfiguration() {
 //        Not used;
     }
 
