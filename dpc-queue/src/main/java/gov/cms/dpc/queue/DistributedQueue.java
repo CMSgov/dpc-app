@@ -63,10 +63,10 @@ public class DistributedQueue implements JobQueue {
         final Transaction tx = this.session.beginTransaction();
         try {
             final JobModel jobModel = this.session.get(JobModel.class, jobID);
-            this.session.refresh(jobModel);
             if (jobModel == null) {
                 return Optional.empty();
             }
+            this.session.refresh(jobModel);
             logger.debug("Job {} has status {}.", jobID, jobModel.getStatus());
             return Optional.ofNullable(jobModel.getStatus());
         } finally {
