@@ -88,11 +88,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    Session provideSession(SessionFactory factory) {
-        return factory.openSession();
-    }
-
-    @Provides
     @AdditionalPaths
     public List<String> provideAdditionalPaths() {
         return List.of("gov.cms.dpc.queue.models");

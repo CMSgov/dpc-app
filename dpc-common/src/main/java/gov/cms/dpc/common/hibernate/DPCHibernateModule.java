@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import io.dropwizard.Configuration;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import javax.inject.Singleton;
@@ -32,5 +33,10 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
             throw new RuntimeException(e);
         }
         return hibernate.getSessionFactory();
+    }
+
+    @Provides
+    Session provideSession(SessionFactory factory) {
+        return factory.openSession();
     }
 }

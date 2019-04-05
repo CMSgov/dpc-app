@@ -4,6 +4,8 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClientModule;
+import gov.cms.dpc.common.hibernate.DPCHibernateModule;
+import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -12,7 +14,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
     public static void main(final String[] args) throws Exception {
         new DPCAggregationService().run(args);
-
     }
 
     @Override
@@ -24,7 +25,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAggregationConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
-                .modules(new AggregationAppModule(), new BlueButtonClientModule())
+                .modules(new DPCHibernateModule(), new AggregationAppModule(), new BlueButtonClientModule(), new JobQueueModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);

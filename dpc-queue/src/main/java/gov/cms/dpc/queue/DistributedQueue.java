@@ -35,7 +35,6 @@ public class DistributedQueue implements JobQueue {
         // Persist the job in postgres
         final Transaction tx = this.session.beginTransaction();
         try {
-
             this.session.save(data);
             tx.commit();
         } catch (Exception e) {
@@ -64,9 +63,11 @@ public class DistributedQueue implements JobQueue {
         final Transaction tx = this.session.beginTransaction();
         try {
             final JobModel jobModel = this.session.get(JobModel.class, jobID);
+            this.session.refresh(jobModel);
             if (jobModel == null) {
                 return Optional.empty();
             }
+            logger.debug("Job {} has status {}.", jobID, jobModel.getStatus());
             return Optional.ofNullable(jobModel.getStatus());
         } finally {
             tx.commit();
@@ -109,11 +110,13 @@ public class DistributedQueue implements JobQueue {
 
     @Override
     public void completeJob(UUID jobID, JobStatus status) {
+        logger.debug("Completing job {} with status {}.", jobID, status);
 
         final Transaction tx = this.session.beginTransaction();
         try {
             final JobModel jobModel = this.session.get(JobModel.class, jobID);
             jobModel.setStatus(status);
+            this.session.update(jobModel);
             tx.commit();
         } catch (Exception e) {
             tx.rollback();
