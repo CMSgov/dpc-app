@@ -34,6 +34,5 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
-
     }
 }
