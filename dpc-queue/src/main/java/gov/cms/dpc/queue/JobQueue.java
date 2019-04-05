@@ -1,5 +1,7 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.queue.models.JobModel;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -8,11 +10,11 @@ import java.util.UUID;
  */
 public interface JobQueue {
 
-    <T> void submitJob(UUID jobID, T data);
+    void submitJob(UUID jobID, JobModel data);
 
     Optional<JobStatus> getJobStatus(UUID jobID);
 
-    <T> Optional<Pair<UUID, T>> workJob();
+    Optional<Pair<UUID, JobModel>> workJob();
 
     void completeJob(UUID jobID, JobStatus status);
 

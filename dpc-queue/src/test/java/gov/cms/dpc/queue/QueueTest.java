@@ -100,7 +100,7 @@ public class QueueTest {
 
         // Complete the job and check its status
 
-        Optional<Pair<UUID, TestJob>> workJob = queue.workJob();
+        Optional<Pair<UUID, JobModel>> workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have job to work");
         // Check that the status is RUNNING
         final Optional<JobStatus> status = queue.getJobStatus(workJob.get().getLeft());

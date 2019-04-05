@@ -42,7 +42,7 @@ public class AggregationEngine implements Runnable {
     public void run() {
 
         while (run) {
-            final Optional<Pair<UUID, Object>> workPair = this.queue.workJob();
+            final Optional<Pair<UUID, JobModel>> workPair = this.queue.workJob();
             if (workPair.isEmpty()) {
                 try {
                     logger.debug("No job, waiting 2 seconds");
@@ -51,7 +51,7 @@ public class AggregationEngine implements Runnable {
                     e.printStackTrace();
                 }
             } else {
-                final JobModel model = (JobModel) workPair.get().getRight();
+                final JobModel model = workPair.get().getRight();
                 final UUID jobID = workPair.get().getLeft();
                 logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
                 List<String> attributedBeneficiaries = model.getPatients();

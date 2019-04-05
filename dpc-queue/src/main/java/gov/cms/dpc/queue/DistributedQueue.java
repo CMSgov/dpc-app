@@ -30,7 +30,7 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
-    public <T> void submitJob(UUID jobID, T data) {
+    public void submitJob(UUID jobID, JobModel data) {
         logger.debug("Adding job {} to the queue with data {}.", jobID, data);
         // Persist the job in postgres
         final Transaction tx = this.session.beginTransaction();
@@ -75,7 +75,7 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
-    public <T> Optional<Pair<UUID, T>> workJob() {
+    public Optional<Pair<UUID, JobModel>> workJob() {
         final UUID jobID = this.queue.poll();
         if (jobID == null) {
             return Optional.empty();
@@ -100,7 +100,7 @@ public class DistributedQueue implements JobQueue {
             this.session.update(jobModel);
             tx.commit();
 
-            return Optional.of(new Pair<>(jobID, (T) jobModel));
+            return Optional.of(new Pair<>(jobID, jobModel));
         } catch (Exception e) {
             tx.rollback();
             logger.error("Cannot retrieve job from DB.", e);
