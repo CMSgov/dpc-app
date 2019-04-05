@@ -9,6 +9,7 @@ jdk:
 
 services:
   - postgresql
+  - redis-server
 
 cache:
   directories:

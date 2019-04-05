@@ -53,7 +53,7 @@ public class AggregationEngine implements Runnable {
             } else {
                 final JobModel model = (JobModel) workPair.get().getRight();
                 final UUID jobID = workPair.get().getLeft();
-                logger.debug("Has job {}. Working.", jobID);
+                logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
                 List<String> attributedBeneficiaries = model.getPatients();
 
                 if (!attributedBeneficiaries.isEmpty()) {
