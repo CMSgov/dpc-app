@@ -126,17 +126,12 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
-    public void removeJob(UUID jobID) {
-        throw new UnsupportedOperationException("Job removal is not supported");
-        // Remove from postgres and queue
-//        final JobModel jobToDelete = new JobModel();
-//        jobToDelete.setJobID(jobID);
-//        this.session.delete(jobToDelete);
-//        this.queue.remove(jobID);
+    public long queueSize() {
+        return this.queue.size();
     }
 
     @Override
-    public int queueSize() {
-        return this.queue.size();
+    public String queueType() {
+        return "Redis Queue";
     }
 }

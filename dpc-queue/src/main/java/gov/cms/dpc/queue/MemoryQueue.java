@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +66,7 @@ public class MemoryQueue implements JobQueue {
         logger.debug("Completed job {} with status: {}", jobID, status);
         final JobModel<Object> job = this.queue.get(jobID);
         if (job == null) {
-            throw new IllegalArgumentException(String.format("Job %s does not exist in queue", jobID));
+            throw new JobQueueFailure(jobID, "Job does not exist in queue");
         }
 
         job.setStatus(status);
@@ -73,12 +74,16 @@ public class MemoryQueue implements JobQueue {
     }
 
     @Override
-    public synchronized void removeJob(UUID jobID) {
-        this.queue.remove(jobID);
+    public long queueSize() {
+        return this.queue
+                .values()
+                .stream()
+                .filter(job -> job.getStatus() == JobStatus.QUEUED)
+                .count();
     }
 
     @Override
-    public int queueSize() {
-        return this.queue.size();
+    public String queueType() {
+        return "MemoryQueue";
     }
 }

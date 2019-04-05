@@ -7,40 +7,68 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.junit.jupiter.api.*;
 import org.redisson.Redisson;
 import org.redisson.api.RQueue;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class QueueTest {
 
-    private JobQueue queue;
+//    private JobQueue queue;
     private SessionFactory sessionFactory;
     private Session session;
+    private List<String> queues = List.of("memory", "distributed");
+
+
+    @TestFactory
+    Stream<DynamicTest> testSource() {
+
+        BiFunction<JobQueue, String, String> nameGenerator = (queue, operation) -> String.format("Testing operation: %s on queue: %s", operation, queue.queueType());
+        return queues
+                .stream()
+                .map(queueName -> {
+                    if (queueName.equals("memory")) {
+                        return new MemoryQueue();
+                    } else if (queueName.equals("distributed")) {
+                        final Config config = new Config();
+                        config.useSingleServer().setAddress("redis://localhost:6379");
+
+                        final RedissonClient client = Redisson.create(config);
+                        // Get the job queue and clear it
+                        final RQueue<Object> jobQueue = client.getQueue("jobqueue");
+                        jobQueue.clear();
+
+                        // Create the session factory
+                        final Configuration conf = new Configuration();
+                        sessionFactory = conf.configure().buildSessionFactory();
+                        session = sessionFactory.openSession();
+                        return new DistributedQueue(client, session);
+                    } else {
+                        throw new IllegalArgumentException("I'm not that kind of queue");
+                    }
+                })
+                .map(queue -> {
+                    final DynamicTest first = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Simple Submission"), () -> testSimpleSubmissionCompletion(queue));
+                    final DynamicTest second = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Missing Job"), () -> testMissingJob(queue));
+                    return List.of(first, second);
+                })
+                .flatMap(Collection::stream);
+    }
 
     @BeforeEach
     public void setupQueue() {
-        final Config config = new Config();
-        config.useSingleServer().setAddress("redis://localhost:6379");
 
-        final RedissonClient client = Redisson.create(config);
-        // Get the job queue and clear it
-        final RQueue<Object> jobQueue = client.getQueue("jobqueue");
-        jobQueue.clear();
-
-        // Create the session factory
-        final Configuration conf = new Configuration();
-        sessionFactory = conf.configure().buildSessionFactory();
-        session = sessionFactory.openSession();
-        queue = new DistributedQueue(client, session);
     }
 
     @AfterEach
@@ -55,8 +83,7 @@ public class QueueTest {
         sessionFactory.close();
     }
 
-    @Test
-    public void testSimpleSubmissionCompletion() {
+    public void testSimpleSubmissionCompletion(JobQueue queue) {
         // Add a couple of jobs
         final Set<UUID> jobSet = new HashSet<>();
         jobSet.add(UUID.randomUUID());
@@ -76,7 +103,7 @@ public class QueueTest {
         Optional<Pair<UUID, TestJob>> workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have job to work");
         // Check that the status is RUNNING
-        final Optional<JobStatus> status = this.queue.getJobStatus(workJob.get().getLeft());
+        final Optional<JobStatus> status = queue.getJobStatus(workJob.get().getLeft());
         assertAll(() -> assertTrue(status.isPresent(), "Should have Job status"),
                 () -> assertEquals(JobStatus.RUNNING, status.get(), "Job should be running"));
         queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED);
@@ -100,8 +127,7 @@ public class QueueTest {
         assertEquals(0, queue.queueSize(), "Not have any jobs in the queue");
     }
 
-    @Test
-    public void testMissingJob() {
+    public void testMissingJob(JobQueue queue) {
         UUID jobID = UUID.randomUUID();
 
         // Check that things are empty

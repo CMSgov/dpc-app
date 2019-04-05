@@ -25,7 +25,7 @@ public abstract class AbstractMockQueueClient implements JobQueue {
         // TODO
     }
 
-    public int queueSize() {
+    public long queueSize() {
         // TODO
         return -1;
     }

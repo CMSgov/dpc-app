@@ -16,9 +16,20 @@ public interface JobQueue {
 
     void completeJob(UUID jobID, JobStatus status);
 
-    void removeJob(UUID jobID);
+    /**
+     * Number of items in the queue.
+     * For the {@link MemoryQueue}, this returns the number of jobs with the {@link JobStatus#QUEUED}.
+     *
+     * @return - {@link long} number of jobs waiting to be run
+     */
+    long queueSize();
 
-    int queueSize();
+    /**
+     * Returns the name of the type of underlying queue
+     *
+     * @return - {@link String} queue type
+     */
+    String queueType();
 }
 
 
