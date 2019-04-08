@@ -1,8 +1,10 @@
 # Blue Button TLS Resources
 
-Should contain a JKS keystore named bb.keystore that contains two entries:
+This directory should contain a JKS keystore named bb.keystore that contains two entries:
 - The client key and certificate used in mutual TLS authentication with the BlueButton server
 - The BlueButton server's certificate, if self-signed
+
+The keystore will primarily be used to by the BlueButtonClient to connect to the BlueButton sandbox backend during integration tests.
 
 ## Creating a Keystore from .pem
 
