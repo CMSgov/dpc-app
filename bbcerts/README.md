@@ -31,3 +31,10 @@ keytool -list -keystore ./bb.keystore
 ```bash
 keytool -delete -keystore ./bb.keystore -alias your-alias-here
 ```
+
+## External Resources
+
+The current bbclient private key can be obtained from one of two places:
+
+- https://confluence.cms.gov/pages/viewpage.action?spaceKey=BCDA&title=BB+Sandbox+Access (bundled, requires EUA)
+- https://github.com/CMSgov/bcda-app/tree/master/shared_files (unbundled, public)
