@@ -53,7 +53,7 @@ public class FHIRSubmissionTest {
         // Mock the submission call to verify the job type
         doAnswer((answer -> {
             final JobModel data = answer.getArgument(1);
-            assertEquals(testJobModel.getPatients().size(), data.getPatients().size(), "Should have 4 beneies");
+            assertEquals(testJobModel.getPatients().size(), data.getPatients().size(), "Should have 4 patients");
             return answer.callRealMethod();
         }))
                 .when(queue).submitJob(Mockito.any(UUID.class), Mockito.any(JobModel.class));

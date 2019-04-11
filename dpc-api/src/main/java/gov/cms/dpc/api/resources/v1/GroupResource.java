@@ -55,7 +55,7 @@ public class GroupResource extends AbstractGroupResource {
         final Optional<List<String>> attributedBeneficiaries = this.client.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(providerID));
 
         if (attributedBeneficiaries.isEmpty()) {
-            throw new WebApplicationException(String.format("Unable to get attributed patients for provider: {}", providerID), Response.Status.NOT_FOUND);
+            throw new WebApplicationException(String.format("Unable to get attributed patients for provider: %s", providerID), Response.Status.NOT_FOUND);
         }
 
         // Generate a job ID and submit it to the queue

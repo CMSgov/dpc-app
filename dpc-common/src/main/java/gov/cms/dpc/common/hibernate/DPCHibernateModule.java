@@ -14,6 +14,7 @@ import javax.inject.Singleton;
 public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends DropwizardAwareModule<T> {
 
     public DPCHibernateModule() {
+        // Not used
     }
 
     @Override
@@ -30,7 +31,7 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
             //noinspection unchecked
             hibernate.run(getConfiguration(), getEnvironment());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
         return hibernate.getSessionFactory();
     }

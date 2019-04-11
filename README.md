@@ -5,22 +5,30 @@ Data @ The Point of Care
 [![Maintainability](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/maintainability)](https://codeclimate.com/github/CMSgov/dpc-app/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/test_coverage)](https://codeclimate.com/github/CMSgov/dpc-app/test_coverage)
 
-How to start the DPC Services
+Building DPC
 ---
 
 1. Run `mvn clean install` to build your application.
 This will also construct the *Docker* images for the API and Aggregation services.
-To skip the Docker build pass -Djib.skip=True
+To skip the Docker build pass `-Djib.skip=True`
 
-*DPC* requires a running Postgres database.
-The `docker-compose` file includes the necessary application and configurations, and can be started like so: 
+Required services
+---
+
+DPC requires two external services to be running. *Postgres* and *Redis*
+
+The `docker-compose` file includes the necessary applications and configurations, and can be started like so: 
 
 ```bash
-docker-compose up db
+docker-compose up db redis
 ```
 
 By default, the application attempts to connect to the `dpc_atrribution` database on the localhost as the `postgres` user.
-This can be overridden in the configuration files.
+This database needs to be manually created, but table setup and data migration will be handled by the DPC services.
+
+For Redis, we assume the server is running on the localhost, with the default port. 
+
+The defaults can be overridden in the configuration files.
 For example, modifying the `dpc-attribution` configuration:
 
 ```yaml
@@ -30,8 +38,16 @@ dpc.attribution {
     url = "jdbc:postgresql://localhost:5432/dpc-dev"
     user = postgres
   }
+  queue {
+      singleServerConfig {
+        address = "redis://localhost:6379"
+      }
+    }
 }
-``` 
+```
+
+Running DPC
+--- 
 
 Once the JARs are built, they can be run in two ways.
 

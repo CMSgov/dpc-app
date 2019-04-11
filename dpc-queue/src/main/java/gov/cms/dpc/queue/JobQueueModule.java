@@ -20,9 +20,6 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
 
     public JobQueueModule() {
         this.inMemory = false;
-//
-////        config.setTransportMode(TransportMode.EPOLL);
-//        config.useSingleServer().setAddress("redis://localhost:6379");
     }
 
     @Override
