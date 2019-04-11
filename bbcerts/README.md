@@ -1,8 +1,10 @@
 # Blue Button TLS Resources
 
-Should contain a JKS keystore named bb.keystore that contains two entries:
+This directory should contain a JKS keystore named bb.keystore that contains two entries:
 - The client key and certificate used in mutual TLS authentication with the BlueButton server
 - The BlueButton server's certificate, if self-signed
+
+The keystore will primarily be used to by the BlueButtonClient to connect to the BlueButton sandbox backend during integration tests.
 
 ## Creating a Keystore from .pem
 
@@ -29,3 +31,10 @@ keytool -list -keystore ./bb.keystore
 ```bash
 keytool -delete -keystore ./bb.keystore -alias your-alias-here
 ```
+
+## External Resources
+
+The current bbclient private key can be obtained from one of two places:
+
+- https://confluence.cms.gov/pages/viewpage.action?spaceKey=BCDA&title=BB+Sandbox+Access (bundled, requires EUA)
+- https://github.com/CMSgov/bcda-app/tree/master/shared_files (unbundled, public)

@@ -26,12 +26,6 @@ public class BlueButtonClientModule extends AbstractModule {
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientModule.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
     private static final String KEYSTORE_RESOURCE_KEY = "/bb.keystore";
-    // Error messages
-    private static final String MALFORMED_URL = "Malformed base URL for bluebutton server";
-    private static final String BAD_KEYSTORE = "Error loading key material. It's possible that the keystore password is wrong or the keystore has been corrupted";
-    private static final String UNOPENABLE_KEYSTORE = "Could not open keystore";
-    private static final String INCOMPATIBLE_KEYSTORE_TYPE = "System was unable to create an instance of of the given keystore type";
-    private static final String BAD_CLIENT_CERT_KEY = "There was an issue with the client certificate and/or key";
 
     public BlueButtonClientModule() {
 
@@ -64,15 +58,9 @@ public class BlueButtonClientModule extends AbstractModule {
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
             return keyStore;
-        } catch (IOException ex) {
-            logger.error(UNOPENABLE_KEYSTORE);
-            throw new BlueButtonClientSetupException(UNOPENABLE_KEYSTORE, ex);
-        } catch (KeyStoreException ex) {
-            logger.error(INCOMPATIBLE_KEYSTORE_TYPE);
-            throw new BlueButtonClientSetupException(INCOMPATIBLE_KEYSTORE_TYPE, ex);
-        } catch (NoSuchAlgorithmException | CertificateException ex) {
-            logger.error(BAD_KEYSTORE);
-            throw new BlueButtonClientSetupException(BAD_KEYSTORE, ex);
+        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
+            logger.error(ex.getMessage());
+            throw new BlueButtonClientSetupException(ex.getMessage(), ex);
         }
     }
 
@@ -129,12 +117,9 @@ public class BlueButtonClientModule extends AbstractModule {
                     .loadTrustMaterial(keyStore, null)
                     .build();
 
-        } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
-            logger.error(BAD_KEYSTORE);
-            throw new BlueButtonClientSetupException(BAD_KEYSTORE, ex);
-        } catch (KeyManagementException ex) {
-            logger.error(BAD_CLIENT_CERT_KEY);
-            throw new BlueButtonClientSetupException(BAD_CLIENT_CERT_KEY, ex);
+        } catch (KeyManagementException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
+            logger.error(ex.getMessage());
+            throw new BlueButtonClientSetupException(ex.getMessage(), ex);
         }
 
         return HttpClients.custom().setSSLContext(sslContext).build();
