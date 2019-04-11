@@ -1,6 +1,6 @@
 package gov.cms.dpc.api;
 
-import gov.cms.dpc.common.models.JobModel;
+import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -39,7 +39,7 @@ public class FHIRSubmissionTest {
 
     // Test data
     private List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private final JobModel testJobModel = new JobModel("1", testBeneficiaries);
+    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), JobModel.ResourceType.PATIENT, "1", testBeneficiaries);
 
     @BeforeEach()
     public void resetMocks() {
@@ -53,7 +53,7 @@ public class FHIRSubmissionTest {
         // Mock the submission call to verify the job type
         doAnswer((answer -> {
             final JobModel data = answer.getArgument(1);
-            assertEquals(testJobModel, data, "Should have 4 beneies");
+            assertEquals(testJobModel.getPatients().size(), data.getPatients().size(), "Should have 4 patients");
             return answer.callRealMethod();
         }))
                 .when(queue).submitJob(Mockito.any(UUID.class), Mockito.any(JobModel.class));

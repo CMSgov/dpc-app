@@ -4,7 +4,9 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.api.annotations.AttributionService;
@@ -13,6 +15,8 @@ import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
 import io.dropwizard.client.JerseyClientBuilder;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +24,9 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
+import java.util.List;
 
-public class DPCAPIModule extends DropwizardAwareModule<DPAPIConfiguration> {
+public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAPIModule.class);
 
@@ -31,6 +36,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPAPIConfiguration> {
 
     @Override
     public void configure(Binder binder) {
+
+        binder.requestStaticInjection(DPCHibernateBundle.class);
 
         // Clients
         binder.bind(AttributionEngine.class)
@@ -78,5 +85,11 @@ public class DPCAPIModule extends DropwizardAwareModule<DPAPIConfiguration> {
     @APIV1
     public String provideV1URL(@ServiceBaseURL String baseURL) {
         return baseURL + "/v1";
+    }
+
+    @Provides
+    @AdditionalPaths
+    public List<String> provideAdditionalPaths() {
+        return List.of("gov.cms.dpc.queue.models");
     }
 }

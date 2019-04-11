@@ -1,29 +1,18 @@
 <?xml version='1.0' encoding='utf-8'?>
 <job-scheduling-data>
-
     <schedule>
-
-
-        <!-- job with simple trigger -->
+        <!-- job with cron trigger -->
         <job>
             <name>ExpireAttributions</name>
             <job-class>gov.cms.dpc.attribution.jobs.ExpireAttributions</job-class>
-            <!--<job-data-map>-->
-                <!--<entry>-->
-                    <!--<key>MyParam</key>-->
-                    <!--<value>42</value>-->
-                <!--</entry>-->
-            <!--</job-data-map>-->
+            <concurrency-allowed>false</concurrency-allowed>
         </job>
         <trigger>
-            <simple>
-                <name>SampleJob2-Trigger</name>
+            <cron>
+                <name>ExpireAttributions-Trigger</name>
                 <job-name>ExpireAttributions</job-name>
-                <repeat-count>5</repeat-count>
-                <repeat-interval>5000</repeat-interval>
-            </simple>
+                <cron-expression>0 0 * * * ?</cron-expression>
+            </cron>
         </trigger>
-
     </schedule>
-
 </job-scheduling-data>
