@@ -15,7 +15,6 @@
     <properties>
         <mainClass>gov.cms.dpc.attribution.DPCAttributionService</mainClass>
         <jooq.version>3.11.10</jooq.version>
-        <pgsql.version>42.2.5</pgsql.version>
     </properties>
 
     <dependencies>
@@ -61,17 +60,11 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${pgsql.version}</version>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-common</artifactId>
             <version>0.2.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.11</version>
         </dependency>
         <!--Testing dependencies-->
         <dependency>

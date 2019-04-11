@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation.qclient;
 
 
-import gov.cms.dpc.common.models.JobModel;
+import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.Pair;
 
 import java.util.*;
@@ -9,11 +9,17 @@ import java.util.*;
 public class MockFullQueueClient extends AbstractMockQueueClient {
     private final List<String> testBeneficiaryIds = Arrays.asList("20140000008325", "20140000008326");
 
-    public <T> Optional<Pair<UUID, T>> workJob() {
+    public Optional<Pair<UUID, JobModel>> workJob() {
+        final UUID uuid = UUID.randomUUID();
         return Optional.of(new Pair<>(
-                UUID.randomUUID(),
-                (T) new JobModel("testProviderId", testBeneficiaryIds)
+                uuid,
+                new JobModel(uuid, JobModel.ResourceType.PATIENT, "testProviderId", testBeneficiaryIds)
         ));
+    }
+
+    @Override
+    public String queueType() {
+        return "MockFullQueue";
     }
 
 }

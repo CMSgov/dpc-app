@@ -1,11 +1,11 @@
 package gov.cms.dpc.api.resources.v1;
 
+import gov.cms.dpc.api.resources.AbstractGroupResource;
+import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.common.annotations.APIV1;
-import gov.cms.dpc.api.resources.AbstractGroupResource;
+import gov.cms.dpc.queue.models.JobModel;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -19,7 +19,6 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 
@@ -56,13 +55,13 @@ public class GroupResource extends AbstractGroupResource {
         final Optional<List<String>> attributedBeneficiaries = this.client.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(providerID));
 
         if (attributedBeneficiaries.isEmpty()) {
-            throw new WebApplicationException(String.format("Unable to get attributed patients for provider: {}", providerID), Response.Status.NOT_FOUND);
+            throw new WebApplicationException(String.format("Unable to get attributed patients for provider: %s", providerID), Response.Status.NOT_FOUND);
         }
 
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
 
-        this.queue.submitJob(jobID, new JobModel(providerID, attributedBeneficiaries.get()));
+        this.queue.submitJob(jobID, new JobModel(jobID, JobModel.ResourceType.PATIENT, providerID, attributedBeneficiaries.get()));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();

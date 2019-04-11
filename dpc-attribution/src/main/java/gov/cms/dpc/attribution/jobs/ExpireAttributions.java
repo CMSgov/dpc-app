@@ -36,6 +36,7 @@ public class ExpireAttributions extends Job {
         // Manually load the Guice injector. Since the job loads at the beginning of the startup process, Guice is not automatically injected.
         final Injector attribute = (Injector) SundialJobScheduler.getServletContext().getAttribute("com.google.inject.Injector");
         attribute.injectMembers(this);
+        logger.debug("Expiration threshold: {} days", expirationThreshold.toDays());
         // Calculate the expiration date (e.g. all relationships created BEFORE this time will be removed
         this.expirationTemporal = OffsetDateTime.now().minus(this.expirationThreshold);
     }

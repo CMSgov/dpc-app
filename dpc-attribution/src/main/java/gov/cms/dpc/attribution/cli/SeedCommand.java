@@ -75,7 +75,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final Timestamp creationTimestamp = generateTimestamp(namespace);
 
         // Read in the seeds file and write things
-        logger.info("Seeding attributions at time {}");
+        logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
 
         try (DSLContext context = DSL.using(dataSource.getConnection(), this.settings)) {
 

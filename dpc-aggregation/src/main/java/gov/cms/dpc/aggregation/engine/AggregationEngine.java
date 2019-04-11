@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
-import gov.cms.dpc.common.models.JobModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
+import gov.cms.dpc.queue.models.JobModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class AggregationEngine implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
-    private static final char delim = '\n';
+    private static final char DELIM = '\n';
 
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
@@ -42,22 +42,23 @@ public class AggregationEngine implements Runnable {
     public void run() {
 
         while (run) {
-            final Optional<Pair<UUID, Object>> workPair = this.queue.workJob();
+            final Optional<Pair<UUID, JobModel>> workPair = this.queue.workJob();
             if (workPair.isEmpty()) {
                 try {
                     logger.debug("No job, waiting 2 seconds");
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error("Interrupted. {}", e.getMessage());
+                    Thread.currentThread().interrupt();
                 }
             } else {
-                final JobModel model = (JobModel) workPair.get().getRight();
+                final JobModel model = workPair.get().getRight();
                 final UUID jobID = workPair.get().getLeft();
-                logger.debug("Has job {}. Working.", jobID);
+                logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
                 List<String> attributedBeneficiaries = model.getPatients();
 
                 if (!attributedBeneficiaries.isEmpty()) {
-                    logger.debug("Has {} attributed beneficiaries",attributedBeneficiaries.size());
+                    logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
                     try {
                         this.workJob(jobID, model);
                         this.queue.completeJob(jobID, JobStatus.COMPLETED);
@@ -89,7 +90,7 @@ public class AggregationEngine implements Runnable {
                         try {
                             logger.debug("Writing {} to file", str);
                             writer.write(str.getBytes(StandardCharsets.UTF_8));
-                            writer.write(delim);
+                            writer.write(DELIM);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }

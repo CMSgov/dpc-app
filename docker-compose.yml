@@ -1,6 +1,12 @@
 version: '3'
 
 services:
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
   db:
     image: postgres
     environment:
@@ -12,18 +18,23 @@ services:
   aggregation:
     image: dpc-aggregation
     ports:
-      - "8081:8081"
+      - "8088:8081"
     environment:
       - ENV=dev
-
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - export-volume:/app/data
 
   attribution:
     image: dpc-attribution
     depends_on:
       - db
     environment:
-      - SEED=true
       - ENV=dev
+    ports:
+      - "3500:8080"
 
   web:
     image: dpc-web
@@ -40,3 +51,8 @@ services:
 
 volumes:
   export-volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /tmp
+      o: bind
