@@ -16,10 +16,8 @@ import java.io.IOException;
 
 public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, DPCQueueConfig {
 
-    private String testValue;
     @NotEmpty
     private String exportPath;
-
     @Valid
     @NotNull
     @JsonProperty
@@ -40,14 +38,6 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     DPCAPIConfiguration() {
 //        Not used;
-    }
-
-    public String getTestValue() {
-        return this.testValue;
-    }
-
-    public void setTestValue(String testValue) {
-        this.testValue = testValue;
     }
 
     public JerseyClientConfiguration getHttpClient() {
