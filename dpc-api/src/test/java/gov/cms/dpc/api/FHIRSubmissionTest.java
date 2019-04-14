@@ -39,7 +39,7 @@ public class FHIRSubmissionTest {
 
     // Test data
     private List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), JobModel.ResourceType.PATIENT, "1", testBeneficiaries);
+    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), List.of(JobModel.ResourceType.PATIENT), "1", testBeneficiaries);
 
     @BeforeEach()
     public void resetMocks() {

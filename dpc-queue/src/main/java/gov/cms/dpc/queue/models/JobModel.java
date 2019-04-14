@@ -2,6 +2,7 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 
 import javax.persistence.*;
 import java.util.List;
@@ -23,7 +24,9 @@ public class JobModel {
 
     @Id
     private UUID jobID;
-    private ResourceType type;
+    @Convert(converter = ResourceTypeListConverter.class)
+    @Column(name = "resources")
+    private List<ResourceType> resources;
     @Column(name = "provider_id")
     private String providerID;
     @Convert(converter = StringListConverter.class)
@@ -35,9 +38,9 @@ public class JobModel {
         // Hibernate required
     }
 
-    public JobModel(UUID jobID, ResourceType type, String providerID, List<String> patients) {
+    public JobModel(UUID jobID, List<ResourceType> resources, String providerID, List<String> patients) {
         this.jobID = jobID;
-        this.type = type;
+        this.resources = resources;
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -51,12 +54,12 @@ public class JobModel {
         this.jobID = jobID;
     }
 
-    public ResourceType getType() {
-        return type;
+    public List<ResourceType> getResources() {
+        return resources;
     }
 
-    public void setType(ResourceType type) {
-        this.type = type;
+    public void setType(List<ResourceType> types) {
+        this.resources = resources;
     }
 
     public String getProviderID() {
@@ -89,7 +92,7 @@ public class JobModel {
         if (o == null || getClass() != o.getClass()) return false;
         JobModel jobModel = (JobModel) o;
         return Objects.equals(jobID, jobModel.jobID) &&
-                type == jobModel.type &&
+                Objects.equals(resources, jobModel.resources) &&
                 Objects.equals(providerID, jobModel.providerID) &&
                 Objects.equals(patients, jobModel.patients) &&
                 status == jobModel.status;
@@ -97,6 +100,6 @@ public class JobModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobID, type, providerID, patients, status);
+        return Objects.hash(jobID, resources, providerID, patients, status);
     }
 }

@@ -13,7 +13,7 @@ public class MockFullQueueClient extends AbstractMockQueueClient {
         final UUID uuid = UUID.randomUUID();
         return Optional.of(new Pair<>(
                 uuid,
-                new JobModel(uuid, JobModel.ResourceType.PATIENT, "testProviderId", testBeneficiaryIds)
+                new JobModel(uuid, List.of(JobModel.ResourceType.PATIENT), "testProviderId", testBeneficiaryIds)
         ));
     }
 

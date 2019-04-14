@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Arrays;
 
 
 public class GroupResource extends AbstractGroupResource {
@@ -61,7 +62,7 @@ public class GroupResource extends AbstractGroupResource {
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
 
-        this.queue.submitJob(jobID, new JobModel(jobID, JobModel.ResourceType.PATIENT, providerID, attributedBeneficiaries.get()));
+        this.queue.submitJob(jobID, new JobModel(jobID, List.of(JobModel.ResourceType.PATIENT), providerID, attributedBeneficiaries.get()));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();

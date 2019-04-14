@@ -61,7 +61,8 @@ public class QueueTest {
                 .map(queue -> {
                     final DynamicTest first = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Simple Submission"), () -> testSimpleSubmissionCompletion(queue));
                     final DynamicTest second = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Missing Job"), () -> testMissingJob(queue));
-                    return List.of(first, second);
+                    final DynamicTest third = DynamicTest.dynamicTest(nameGenerator.apply(queue, "EOB Submission"), () -> testPatientAndEOBSubmission(queue));
+                    return List.of(first, second, third);
                 })
                 .flatMap(Collection::stream);
     }
@@ -127,6 +128,21 @@ public class QueueTest {
         assertEquals(0, queue.queueSize(), "Not have any jobs in the queue");
     }
 
+    public void testPatientAndEOBSubmission(JobQueue queue) {
+        // Add a job with a EOB resource
+        final var jobSubmission = QueueTest.buildModel(UUID.randomUUID(), JobModel.ResourceType.PATIENT, JobModel.ResourceType.EOB);
+        queue.submitJob(jobSubmission.getJobID(), jobSubmission);
+
+        // Retrieve the job with both resources
+        final var jobRetrived = queue.workJob();
+        assertTrue(jobRetrived.isPresent());
+        final var resourcesRetrived = jobRetrived.get().getRight().getResources();
+        assertTrue(resourcesRetrived.containsAll(List.of(JobModel.ResourceType.PATIENT, JobModel.ResourceType.EOB)));
+
+        // Complete job
+        queue.completeJob(jobSubmission.getJobID(), JobStatus.COMPLETED);
+    }
+
     public void testMissingJob(JobQueue queue) {
         UUID jobID = UUID.randomUUID();
 
@@ -164,6 +180,10 @@ public class QueueTest {
     }
 
     private static JobModel buildModel(UUID id) {
-        return new JobModel(id, JobModel.ResourceType.PATIENT, "test-provider-1", List.of("test-patient-1", "test-patient-2"));
+        return buildModel(id, JobModel.ResourceType.PATIENT );
+    }
+
+    private static JobModel buildModel(UUID id, JobModel.ResourceType ... resources) {
+        return new JobModel(id, Arrays.asList(resources), "test-provider-1", List.of("test-patient-1", "test-patient-2"));
     }
 }
