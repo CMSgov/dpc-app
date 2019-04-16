@@ -26,9 +26,14 @@ docker-compose up db redis
 By default, the application attempts to connect to the `dpc_atrribution` database on the localhost as the `postgres` user.
 This database needs to be manually created, but table setup and data migration will be handled by the DPC services.
 
-For Redis, we assume the server is running on the localhost, with the default port. 
+For Redis, we assume the server is running on the localhost, with the default port.
 
 The defaults can be overridden in the configuration files.
+Common configuration options (such as database connection strings) are stored in the `server.conf` file within the `src/main/resources` directory.
+These settings are included in the various modules via the `include "server.conf"` attribute in module application config files.
+See the `dpc-attribution` [application.conf](dpc-attribution/src/main/resources/application.conf) for an example.
+
+Default settings can be overridden either directly in the module configurations, or via an `application.local.conf` file in the project root directory. 
 For example, modifying the `dpc-attribution` configuration:
 
 ```yaml
@@ -45,6 +50,12 @@ dpc.attribution {
     }
 }
 ```
+
+#### Note:
+
+On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory.
+This can create an issue when running tests with IntelliJ which by default sets the working directory to be the module root, which means any local overrides are ignored.
+This can be fixed by setting the working directory to the project root, but needs to done manually. 
 
 Running DPC
 --- 
