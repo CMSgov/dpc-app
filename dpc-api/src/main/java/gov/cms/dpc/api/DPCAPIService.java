@@ -32,7 +32,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                 .build();
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle());
+        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
     }
 
     @Override

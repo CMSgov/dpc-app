@@ -96,6 +96,14 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/../src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <!--Pull in the attribution seeds so we can use them for the integration tests.-->
         <testResources>
             <testResource>
