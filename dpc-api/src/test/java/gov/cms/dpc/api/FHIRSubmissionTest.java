@@ -40,7 +40,7 @@ public class FHIRSubmissionTest {
 
     // Test data
     private List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), List.of(JobModel.ResourceType.PATIENT), "1", testBeneficiaries);
+    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), List.of(ResourceType.Patient), "1", testBeneficiaries);
 
     // Setup the Attribution service mock with a dummy list of beneficiaries
     @BeforeEach
@@ -118,9 +118,9 @@ public class FHIRSubmissionTest {
         // Should yield a job with Patient and EOB resources
         var job = queue.workJob();
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getResources();
+        var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 1),
-                () -> assertTrue(resources.contains(JobModel.ResourceType.PATIENT)));
+                () -> assertTrue(resources.contains(ResourceType.Patient)));
     }
 
     /**
@@ -140,10 +140,10 @@ public class FHIRSubmissionTest {
         // Should yield a job with Patient and EOB resources
         var job = queue.workJob();
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getResources();
+        var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 2),
-                () -> assertTrue(resources.contains(JobModel.ResourceType.PATIENT)),
-                () -> assertTrue(resources.contains(JobModel.ResourceType.EOB)));
+                () -> assertTrue(resources.contains(ResourceType.Patient)),
+                () -> assertTrue(resources.contains(ResourceType.ExplanationOfBenefit)));
     }
 
     /**
@@ -175,12 +175,11 @@ public class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with all resource types
-        var allResources = Arrays.asList(JobModel.ResourceType.values());
         var job = queue.workJob();
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getResources();
-        assertAll(() -> assertEquals(resources.size(), allResources.size()),
-                () -> assertTrue(resources.containsAll(allResources)));
+        var resources = job.get().getRight().getResourceTypes();
+        assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()),
+                () -> assertTrue(resources.containsAll(JobModel.validResourceTypes)));
 
     }
 }

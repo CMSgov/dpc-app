@@ -6,7 +6,6 @@ import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,20 +15,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
-
-    // A list of all the FHIR.ResourceType's that DPC supports externally and their mapping to a
-    // Job resource type which DPC support internally.
-    // NOTE: This list must be modified when new resource types are supported.
-    private static final List<Pair<ResourceType, JobModel.ResourceType>> resourceTypeMap = Arrays.asList(
-            Pair.of(ResourceType.Patient, JobModel.ResourceType.PATIENT),
-            Pair.of(ResourceType.ExplanationOfBenefit, JobModel.ResourceType.EOB)
-    );
 
     // The delimiter for the '_types' list query param.
     private static final String LIST_DELIM = ",";
@@ -99,41 +89,37 @@ public class GroupResource extends AbstractGroupResource {
      * Convert the '_types' query param to a list of resources to add to the job. Handle the empty case,
      * by returning all valid resource types.
      *
-     * @return - A list of {@link JobModel.ResourceType} to return for this request.
+     * @return - A list of {@link ResourceType} to return for this request.
      */
-    private List<JobModel.ResourceType> handleTypeQueryParam(String resourcesListParam) {
+    private List<ResourceType> handleTypeQueryParam(String resourcesListParam) {
         // If the query param is omitted, the FHIR spec states that all resources should be returned
         if (resourcesListParam == null || resourcesListParam.isEmpty()) {
-            return GroupResource.resourceTypeMap
-                    .stream()
-                    .map(p -> p.getRight())
-                    .collect(Collectors.toList());
+            return JobModel.validResourceTypes;
         }
 
-        var resources = new ArrayList<JobModel.ResourceType>();
+        var resources = new ArrayList<ResourceType>();
         for (String queryResource: resourcesListParam.split(LIST_DELIM)) {
-            final var jobResourceType = matchJobResourceType(queryResource);
-            if (jobResourceType.isEmpty()) {
+            final var foundResourceType = matchResourceType(queryResource);
+            if (foundResourceType.isEmpty()) {
                 throw new WebApplicationException(String.format("Unsupported resource name in the '_type' query parameter: %s", queryResource), Response.Status.BAD_REQUEST);
             }
-            resources.add(jobResourceType.get());
+            resources.add(foundResourceType.get());
         }
         return resources;
     }
 
     /**
-     * Convert a single resource type in a query param into a {@link JobModel.ResourceType}.
+     * Convert a single resource type in a query param into a {@link ResourceType}.
      *
      * @param queryResourceType - The text from the query param
-     * @return If match is found a {@link JobModel.ResourceType}
+     * @return If match is found a {@link ResourceType}
      */
-    private Optional<JobModel.ResourceType> matchJobResourceType(String queryResourceType) {
+    private Optional<ResourceType> matchResourceType(String queryResourceType) {
         final var canonical = queryResourceType.trim().toUpperCase();
 
         // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
-        return GroupResource.resourceTypeMap.stream()
-                .filter(pair -> pair.getLeft().toString().equalsIgnoreCase(canonical))
-                .map(pair -> pair.getRight())
+        return JobModel.validResourceTypes.stream()
+                .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
                 .findFirst();
     }
 }

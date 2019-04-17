@@ -80,22 +80,26 @@ public class AggregationEngine implements Runnable {
     }
 
     private void workJob(UUID jobID, JobModel job) throws IOException {
-        final IParser parser = context.newJsonParser();
         try (final FileOutputStream writer = new FileOutputStream(String.format("%s/%s.ndjson", exportPath, jobID.toString()))) {
-            job.getPatients()
-                    .stream()
-                    .map(this.bbclient::requestPatientFromServer)
-                    .map(parser::encodeResourceToString)
-                    .forEach(str -> {
-                        try {
-                            logger.debug("Writing {} to file", str);
-                            writer.write(str.getBytes(StandardCharsets.UTF_8));
-                            writer.write(DELIM);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            workResource(writer, job);
             writer.flush();
         }
+    }
+
+    private void workResource(FileOutputStream writer, JobModel job) {
+        final IParser parser = context.newJsonParser();
+        job.getPatients()
+                .stream()
+                .map(this.bbclient::requestPatientFromServer)
+                .map(parser::encodeResourceToString)
+                .forEach(str -> {
+                    try {
+                        logger.debug("Writing {} to file", str);
+                        writer.write(str.getBytes(StandardCharsets.UTF_8));
+                        writer.write(DELIM);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 }

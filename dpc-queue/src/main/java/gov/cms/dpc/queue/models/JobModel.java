@@ -4,6 +4,8 @@ import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 
+import org.hl7.fhir.dstu3.model.ResourceType;
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
@@ -11,36 +13,33 @@ import java.util.UUID;
 
 @Entity(name = "job_queue")
 public class JobModel {
-
-    /**
-     * Enum which represents the resource types available for export from BlueButton
-     */
-    public enum ResourceType {
-        PATIENT,
-        EOB
-    }
-
     public static final long serialVersionUID = 42L;
+
+    public static final List<ResourceType> validResourceTypes = List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit);
 
     @Id
     private UUID jobID;
+
     @Convert(converter = ResourceTypeListConverter.class)
-    @Column(name = "resources")
-    private List<ResourceType> resources;
+    @Column(name = "resourceTypes")
+    private List<ResourceType> resourceTypes;
+
     @Column(name = "provider_id")
     private String providerID;
+
     @Convert(converter = StringListConverter.class)
     @Column(name = "patients", columnDefinition = "text")
     private List<String> patients;
+
     private JobStatus status;
 
     public JobModel() {
         // Hibernate required
     }
 
-    public JobModel(UUID jobID, List<ResourceType> resources, String providerID, List<String> patients) {
+    public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
-        this.resources = resources;
+        this.resourceTypes = resourceTypes;
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -54,12 +53,12 @@ public class JobModel {
         this.jobID = jobID;
     }
 
-    public List<ResourceType> getResources() {
-        return resources;
+    public List<ResourceType> getResourceTypes() {
+        return resourceTypes;
     }
 
-    public void setType(List<ResourceType> types) {
-        this.resources = resources;
+    public void setResourceTypes(List<ResourceType> types) {
+            this.resourceTypes = resourceTypes;
     }
 
     public String getProviderID() {
@@ -92,7 +91,7 @@ public class JobModel {
         if (o == null || getClass() != o.getClass()) return false;
         JobModel jobModel = (JobModel) o;
         return Objects.equals(jobID, jobModel.jobID) &&
-                Objects.equals(resources, jobModel.resources) &&
+                Objects.equals(resourceTypes, jobModel.resourceTypes) &&
                 Objects.equals(providerID, jobModel.providerID) &&
                 Objects.equals(patients, jobModel.patients) &&
                 status == jobModel.status;
@@ -100,6 +99,6 @@ public class JobModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobID, resources, providerID, patients, status);
+        return Objects.hash(jobID, resourceTypes, providerID, patients, status);
     }
 }

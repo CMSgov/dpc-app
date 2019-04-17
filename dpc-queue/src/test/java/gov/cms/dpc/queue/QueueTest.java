@@ -9,6 +9,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.*;
 import org.redisson.Redisson;
 import org.redisson.api.RQueue;
@@ -130,14 +131,14 @@ public class QueueTest {
 
     public void testPatientAndEOBSubmission(JobQueue queue) {
         // Add a job with a EOB resource
-        final var jobSubmission = QueueTest.buildModel(UUID.randomUUID(), JobModel.ResourceType.PATIENT, JobModel.ResourceType.EOB);
+        final var jobSubmission = QueueTest.buildModel(UUID.randomUUID(), ResourceType.Patient, ResourceType.ExplanationOfBenefit);
         queue.submitJob(jobSubmission.getJobID(), jobSubmission);
 
         // Retrieve the job with both resources
         final var jobRetrived = queue.workJob();
         assertTrue(jobRetrived.isPresent());
-        final var resourcesRetrived = jobRetrived.get().getRight().getResources();
-        assertTrue(resourcesRetrived.containsAll(List.of(JobModel.ResourceType.PATIENT, JobModel.ResourceType.EOB)));
+        final var resourcesRetrived = jobRetrived.get().getRight().getResourceTypes();
+        assertTrue(resourcesRetrived.containsAll(List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit)));
 
         // Complete job
         queue.completeJob(jobSubmission.getJobID(), JobStatus.COMPLETED);
@@ -180,10 +181,10 @@ public class QueueTest {
     }
 
     private static JobModel buildModel(UUID id) {
-        return buildModel(id, JobModel.ResourceType.PATIENT );
+        return buildModel(id, ResourceType.Patient );
     }
 
-    private static JobModel buildModel(UUID id, JobModel.ResourceType ... resources) {
+    private static JobModel buildModel(UUID id, ResourceType ... resources) {
         return new JobModel(id, Arrays.asList(resources), "test-provider-1", List.of("test-patient-1", "test-patient-2"));
     }
 }
