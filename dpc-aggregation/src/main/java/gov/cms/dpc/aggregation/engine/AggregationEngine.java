@@ -50,9 +50,19 @@ public class AggregationEngine implements Runnable {
      */
     @Override
     public void run() {
-
+        // Run loop
         while (run) {
-            workQueue();
+            if (queue.queueSize() > 0) {
+                workQueue();
+            } else {
+                try {
+                    logger.debug("No job, waiting 2 seconds");
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    logger.error("Interrupted. {}", e.getMessage());
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
         logger.info("Shutting down aggregation engine");
     }
@@ -75,37 +85,31 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Work the queue. If empty, pause.
+     * Work the job queue.
      */
     public void workQueue() {
         final Optional<Pair<UUID, JobModel>> workPair = this.queue.workJob();
         if (workPair.isEmpty()) {
-            try {
-                logger.debug("No job, waiting 2 seconds");
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                logger.error("Interrupted. {}", e.getMessage());
-                Thread.currentThread().interrupt();
-            }
-        } else {
-            final JobModel model = workPair.get().getRight();
-            final UUID jobID = workPair.get().getLeft();
-            logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
-            List<String> attributedBeneficiaries = model.getPatients();
+            return;
+        }
 
-            if (!attributedBeneficiaries.isEmpty()) {
-                logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-                try {
-                    this.workJob(model);
-                    this.queue.completeJob(jobID, JobStatus.COMPLETED);
-                } catch (Exception e) {
-                    logger.error("Cannot process job {}", jobID, e);
-                    this.queue.completeJob(jobID, JobStatus.FAILED);
-                }
-            } else {
-                logger.error("Cannot execute Job {} with no beneficiaries", jobID);
+        final JobModel model = workPair.get().getRight();
+        final UUID jobID = workPair.get().getLeft();
+        logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
+        List<String> attributedBeneficiaries = model.getPatients();
+
+        if (!attributedBeneficiaries.isEmpty()) {
+            logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
+            try {
+                this.workJob(model);
+                this.queue.completeJob(jobID, JobStatus.COMPLETED);
+            } catch (Exception e) {
+                logger.error("Cannot process job {}", jobID, e);
                 this.queue.completeJob(jobID, JobStatus.FAILED);
             }
+        } else {
+            logger.error("Cannot execute Job {} with no beneficiaries", jobID);
+            this.queue.completeJob(jobID, JobStatus.FAILED);
         }
     }
 
