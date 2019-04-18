@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
+import gov.cms.dpc.attribution.jdbi.RosterEngine;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
@@ -34,7 +35,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Override
     public void configure(Binder binder) {
         binder.bind(ProviderDAO.class);
-        binder.bind(AttributionEngine.class).to(ProviderDAO.class);
+        binder.bind(AttributionEngine.class).to(RosterEngine.class);
         binder.bind(V1AttributionResource.class);
     }
 

@@ -69,17 +69,19 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
 
         // Get the patients and create the attribution
 
-        final List<PatientEntity> patients = attributionBundle
+        attributionBundle
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter((resource -> resource.getResourceType() == ResourceType.Patient))
                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
-                .collect(Collectors.toList());
+                .map((pEntity) -> new AttributionRelationship(provider, pEntity))
+                .forEach(this.rDAO::addAttributionRelationship);
 
-        provider.setAttributedPatients(patients);
-        persist(provider);
+//        provider.setAttributedPatients(patients);
+//        currentSession().saveOrUpdate(provider);
+//        persist(provider);
     }
 
     @Override

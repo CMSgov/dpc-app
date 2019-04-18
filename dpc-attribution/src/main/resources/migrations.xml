@@ -33,7 +33,7 @@
         <createIndex tableName="PROVIDERS" indexName="providers_id_idx">
             <column name="provider_id"/>
         </createIndex>
-        
+
         <createTable tableName="PATIENTS">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
@@ -52,7 +52,7 @@
             <column name="beneficiary_id"/>
         </createIndex>
     </changeSet>
-    
+
     <changeSet id="add-attribution-fk" author="nickrobison-usds">
         <addForeignKeyConstraint
                 baseTableName="ATTRIBUTIONS"
@@ -67,6 +67,11 @@
                 constraintName="fk_attribution_patients"
                 referencedTableName="PATIENTS"
                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="add-unique-constraints" author="nickrobison-usds">
+        <addUniqueConstraint tableName="providers" columnNames="provider_id"/>
+        <addUniqueConstraint tableName="patients" columnNames="beneficiary_id"/>
     </changeSet>
 
 </databaseChangeLog>

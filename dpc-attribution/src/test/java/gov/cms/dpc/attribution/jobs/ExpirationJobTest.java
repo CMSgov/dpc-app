@@ -11,6 +11,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +25,10 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.UUID;
 
 import static gov.cms.dpc.attribution.SharedMethods.UnmarshallResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ExpirationJobTest {
 
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
+    private static final String PROVIDER_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
     private Client client;
 
     @BeforeEach
@@ -55,6 +63,7 @@ class ExpirationJobTest {
 
     @Test
     void test() throws IOException, InterruptedException {
+
         this.startJob(this.client, "ExpireAttributions");
 
         this.stopJob(this.client, "ExpireAttributions");
@@ -65,7 +74,7 @@ class ExpirationJobTest {
         // Check how many are left
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
 
-            final HttpGet httpGet = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254");
+            final HttpGet httpGet = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + PROVIDER_ID);
             httpGet.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (final CloseableHttpResponse response = client.execute(httpGet)) {

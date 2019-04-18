@@ -22,7 +22,7 @@ public class AttributionRelationship {
     @Column(name = "id", updatable = false, nullable = false)
     private Long attributionID;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     private ProviderEntity provider;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
