@@ -8,6 +8,7 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
 import gov.cms.dpc.queue.models.JobModel;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,12 @@ public class AggregationEngine implements Runnable {
     private final String exportPath;
     private volatile boolean run = true;
 
+    /**
+     * Create an engine
+     * @param bbclient - the BlueButton client to use
+     * @param queue - the Job queue that will direct the work done
+     * @param config - the configuration for the engine
+     */
     @Inject
     public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, Config config) {
         this.queue = queue;
@@ -38,59 +45,110 @@ public class AggregationEngine implements Runnable {
         this.exportPath = config.getString("exportPath");
     }
 
+    /**
+     * Run the engine. Part of the Runnable interface.
+     */
     @Override
     public void run() {
 
         while (run) {
-            final Optional<Pair<UUID, JobModel>> workPair = this.queue.workJob();
-            if (workPair.isEmpty()) {
-                try {
-                    logger.debug("No job, waiting 2 seconds");
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    logger.error("Interrupted. {}", e.getMessage());
-                    Thread.currentThread().interrupt();
-                }
-            } else {
-                final JobModel model = workPair.get().getRight();
-                final UUID jobID = workPair.get().getLeft();
-                logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
-                List<String> attributedBeneficiaries = model.getPatients();
-
-                if (!attributedBeneficiaries.isEmpty()) {
-                    logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-                    try {
-                        this.workJob(jobID, model);
-                        this.queue.completeJob(jobID, JobStatus.COMPLETED);
-                    } catch (Exception e) {
-                        logger.error("Cannot process job {}", jobID, e);
-                        this.queue.completeJob(jobID, JobStatus.FAILED);
-                    }
-                } else {
-                    logger.error("Cannot execute Job {} with no beneficiaries", jobID);
-                    this.queue.completeJob(jobID, JobStatus.FAILED);
-                }
-            }
+            workQueue();
         }
         logger.info("Shutting down aggregation engine");
     }
 
+    /**
+     * Stop the engine
+     */
     public void stop() {
         this.run = false;
     }
 
-    private void workJob(UUID jobID, JobModel job) throws IOException {
-        try (final FileOutputStream writer = new FileOutputStream(String.format("%s/%s.ndjson", exportPath, jobID.toString()))) {
-            workResource(writer, job);
-            writer.flush();
+    /**
+     * Form the full file name of an output file
+     *
+     * @param jobID
+     * @param resourceType
+     */
+    public String formOutputFilePath(UUID jobID, ResourceType resourceType) {
+        return String.format("%s/%s.%s.ndjson", exportPath, jobID.toString(), resourceType.getPath());
+    }
+
+    /**
+     * Work the queue. If empty, pause.
+     */
+    public void workQueue() {
+        final Optional<Pair<UUID, JobModel>> workPair = this.queue.workJob();
+        if (workPair.isEmpty()) {
+            try {
+                logger.debug("No job, waiting 2 seconds");
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                logger.error("Interrupted. {}", e.getMessage());
+                Thread.currentThread().interrupt();
+            }
+        } else {
+            final JobModel model = workPair.get().getRight();
+            final UUID jobID = workPair.get().getLeft();
+            logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
+            List<String> attributedBeneficiaries = model.getPatients();
+
+            if (!attributedBeneficiaries.isEmpty()) {
+                logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
+                try {
+                    this.workJob(model);
+                    this.queue.completeJob(jobID, JobStatus.COMPLETED);
+                } catch (Exception e) {
+                    logger.error("Cannot process job {}", jobID, e);
+                    this.queue.completeJob(jobID, JobStatus.FAILED);
+                }
+            } else {
+                logger.error("Cannot execute Job {} with no beneficiaries", jobID);
+                this.queue.completeJob(jobID, JobStatus.FAILED);
+            }
         }
     }
 
-    private void workResource(FileOutputStream writer, JobModel job) {
+    /**
+     * Process the job. Return when complete/
+     *
+     * @param job - The job model to execute
+     * @throws IOException
+     */
+    private void workJob(JobModel job) throws IOException {
+        for (ResourceType resourceType: job.getResourceTypes()) {
+            if (!JobModel.validResourceTypes.contains(resourceType)) {
+                throw new RuntimeException("Unexpected resource type: " + resourceType.toString());
+            }
+
+            try (final FileOutputStream writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType))) {
+                workResource(writer, job, resourceType);
+                writer.flush();
+            }
+        }
+    }
+
+    /**
+     * Write out a single provider NDJSON file for a single resource type
+     *
+     * @param writer - the stream to write to
+     * @param job - the job to process
+     * @param resourceType - the FHIR resource type to write out
+     */
+    private void workResource(FileOutputStream writer, JobModel job, ResourceType resourceType) {
         final IParser parser = context.newJsonParser();
+
         job.getPatients()
                 .stream()
-                .map(this.bbclient::requestPatientFromServer)
+                .map(patientId -> {
+                    switch (resourceType) {
+                        case Patient:
+                            return this.bbclient.requestPatientFromServer(patientId);
+                        case ExplanationOfBenefit:
+                            return this.bbclient.requestEOBBundleFromServer(patientId);
+                    }
+                    throw new RuntimeException("Unexpected resource type: " + resourceType.toString());
+                })
                 .map(parser::encodeResourceToString)
                 .forEach(str -> {
                     try {
