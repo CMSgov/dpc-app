@@ -23,6 +23,10 @@ public class RosterUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(RosterUtils.class);
 
+    private RosterUtils() {
+        // Not used
+    }
+
     /**
      * Helper method for adding a roster {@link Bundle} to the RDBMS backend
      *

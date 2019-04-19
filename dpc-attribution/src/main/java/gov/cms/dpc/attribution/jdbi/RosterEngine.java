@@ -119,12 +119,9 @@ public class RosterEngine implements AttributionEngine {
             final AttributionsRecord attributionsRecord = attributionsRecords.get(0);
 
             // Remove all the records
-            int removed = 0;
-            removed += ctx.deleteFrom(ATTRIBUTIONS).where(ATTRIBUTIONS.ID.eq(attributionsRecord.getId())).execute();
-            removed += ctx.deleteFrom(PATIENTS).where(PATIENTS.ID.eq(attributionsRecord.getPatientId())).execute();
-            removed += ctx.deleteFrom(PROVIDERS).where(PROVIDERS.ID.eq(attributionsRecord.getPatientId())).execute();
+            final int removed = ctx.deleteFrom(ATTRIBUTIONS).where(ATTRIBUTIONS.ID.eq(attributionsRecord.getId())).execute();
 
-            if (removed != 3) {
+            if (removed != 1) {
                 throw new IllegalStateException("Failure removing attribution relationship. Row leftover");
             }
         });
@@ -132,7 +129,6 @@ public class RosterEngine implements AttributionEngine {
 
     @Override
     public boolean isAttributed(Practitioner provider, Patient patient) {
-//        return true;
         return context.fetchExists(context.selectOne()
                 .from(ATTRIBUTIONS)
                 .join(PATIENTS).on(PATIENTS.ID.eq(ATTRIBUTIONS.PATIENT_ID))
