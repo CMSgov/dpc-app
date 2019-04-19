@@ -69,7 +69,7 @@ public abstract class AbstractRecordUpserter<R extends UpdatableRecordImpl<R>> {
      * {@link Map} of {@link String} {@link Object} values which represent the {@link TableField} and values to update for the underlying record.
      * This always includes the values returned by {@link AbstractRecordUpserter#getExcludedFields()}, and optionally includes the values from {@link AbstractRecordUpserter#getConflictFields()} as well.
      *
-     * @param excludeConflictFields - {@code true} exclude conflicting fields from the update. {@link false} update conflicting fields.
+     * @param excludeConflictFields - {@code true} exclude conflicting fields from the update. {@code false} update conflicting fields.
      * @return - {@link Map} of {@link String} {@link Object} values which will be updated when a conflict occurs.
      */
     public Map<String, Object> getUpdateMap(boolean excludeConflictFields) {
@@ -102,7 +102,7 @@ public abstract class AbstractRecordUpserter<R extends UpdatableRecordImpl<R>> {
      * Allows the user to specify whether or not to exclude conflict fields from the update.
      *
      * @param returnFields          - {@link Collection} of {@link TableField} which specifies which values to return from the database
-     * @param excludeConflictFields - {@code true} exclude conflicting fields from the update. {@link false} update conflicting fields.
+     * @param excludeConflictFields - {@code true} exclude conflicting fields from the update. {@code false} update conflicting fields.
      * @return - {@link R} containing only the fields specified by {@code returnFields}
      */
     public R upsert(Collection<TableField<R, ?>> returnFields, boolean excludeConflictFields) {
@@ -124,8 +124,7 @@ public abstract class AbstractRecordUpserter<R extends UpdatableRecordImpl<R>> {
     }
 
     private void excludeMapFields(Map<String, Object> recordMap, List<TableField<R, ?>> fields) {
-        fields
-                .stream()
+        fields.stream()
                 .map(Field::getName)
                 .forEach(recordMap::remove);
     }
