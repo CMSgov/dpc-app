@@ -1,6 +1,5 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.attribution.AttributionException;
 import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;

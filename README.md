@@ -17,6 +17,8 @@ Required services
 
 DPC requires two external services to be running. *Postgres* and *Redis*
 
+Any version of Redis should suffice, but we require at least Postgres *9.5*.
+
 The `docker-compose` file includes the necessary applications and configurations, and can be started like so: 
 
 ```bash
