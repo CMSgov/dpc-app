@@ -114,9 +114,20 @@ public class QueueTest {
         assertAll(() -> assertTrue(updatedStatus.isPresent(), "Should have job status"),
                 () -> assertEquals(JobStatus.COMPLETED, updatedStatus.get(), "Job should be completed"));
 
-        // Fail the job and check its status
+        // Get resource info from the job
+        final Optional<JobModel> job = queue.getJob(workJob.get().getLeft());
+        assertAll(() -> assertTrue(job.isPresent(), "should have a job"),
+                () -> assertNotNull(job.get().getResourceTypes()));
+
+        // Work the second job
         workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have a 2nd job to work");
+
+        // Try to work again last job again, this should return no job
+        var emptyJob = queue.workJob();
+        assertTrue(emptyJob.isEmpty(), "the queue should not have ANY ready items");
+
+        // Fail the second job and check its status
         queue.completeJob(workJob.get().getLeft(), JobStatus.FAILED);
 //        jobSet.remove(workJob.get().getLeft());
 
