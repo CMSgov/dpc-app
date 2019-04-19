@@ -10,6 +10,8 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -18,6 +20,8 @@ import static gov.cms.dpc.attribution.dao.tables.Patients.PATIENTS;
 import static gov.cms.dpc.attribution.dao.tables.Providers.PROVIDERS;
 
 public class RosterUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(RosterUtils.class);
 
     /**
      * Helper method for adding a roster {@link Bundle} to the RDBMS backend
@@ -28,17 +32,16 @@ public class RosterUtils {
      */
     public static void handleAttributionBundle(Bundle attributionBundle, DSLContext ctx, Timestamp creationTimestamp) {
 
-        // Insert the provider , patients, and the attribution relationships
+        // Insert the provider, patient, and attribution relationships
         final Practitioner provider = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
 
         final ProviderEntity providerEntity = ProviderEntity.fromFHIR(provider);
-        providerEntity.setProviderID(UUID.randomUUID());
+        if (providerEntity.getProviderID() == null) {
+            providerEntity.setProviderID(UUID.randomUUID());
+        }
 
-//            logger.info("Adding provider {}", providerEntity.getProviderNPI());
-
-        final ProvidersRecord providerRecord = ctx.newRecord(PROVIDERS, providerEntity);
-        providerRecord.setId(UUID.randomUUID());
-        new ProviderRecordUpserter(ctx, providerRecord).upsert();
+        logger.debug("Adding provider {}", providerEntity.getProviderNPI());
+        final ProvidersRecord providerRecord = new ProviderRecordUpserter(ctx, ctx.newRecord(PROVIDERS, providerEntity)).upsert();
 
         attributionBundle
                 .getEntry()
@@ -51,9 +54,13 @@ public class RosterUtils {
 
     private static void createUpdateAttributionRelationship(DSLContext ctx, PatientEntity patientEntity, ProvidersRecord providerRecord, Timestamp creationTimestamp) {
         // Create a new record from the patient entity
-        patientEntity.setPatientID(UUID.randomUUID());
+        if (patientEntity.getPatientID() == null) {
+            patientEntity.setPatientID(UUID.randomUUID());
+        }
         final PatientRecordUpserter patientRecordUpserter = new PatientRecordUpserter(ctx, ctx.newRecord(PATIENTS, patientEntity));
         final PatientsRecord patient = patientRecordUpserter.upsert();
+
+        logger.debug("Attribution patient {} to provider {}.", patient.getBeneficiaryId(), providerRecord.getProviderId());
 
         // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
         final AttributionsRecord attr = new AttributionsRecord();

@@ -21,7 +21,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.*;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -122,37 +121,37 @@ public class AttributionFHIRTest {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
             }
 
-//            // Add an additional patient
-//            // Create a new bundle with extra patients to attribute
-//            final String newPatientID = "test-new-patient-id";
-//            final Bundle updateBundle = createAttributionBundle(providerID, newPatientID);
-//
-//            // Submit the bundle
-//            final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
-//            submitUpdate.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//            submitUpdate.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(updateBundle)));
-//
-//            try (CloseableHttpResponse response = client.execute(submitUpdate)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
-//            }
-//
-//            // Check how many are attributed
-//
-//            try (CloseableHttpResponse response = client.execute(getPatients)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
-//                final List<String> patients = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
-//                });
-//                // Since the practitioner is not
-//                assertEquals(bundle.getEntry().size(), patients.size(), "Should have an additional patient");
-//            }
-//
-//            // Check that a specific patient is attributed
-//            final HttpGet updatedAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), providerID, newPatientID));
-//            updatedAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//
-//            try (CloseableHttpResponse response = client.execute(updatedAttributed)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
-//            }
+            // Add an additional patient
+            // Create a new bundle with extra patients to attribute
+            final String newPatientID = "test-new-patient-id";
+            final Bundle updateBundle = createAttributionBundle(providerID, newPatientID);
+
+            // Submit the bundle
+            final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+            submitUpdate.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+            submitUpdate.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(updateBundle)));
+
+            try (CloseableHttpResponse response = client.execute(submitUpdate)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+            }
+
+            // Check how many are attributed
+
+            try (CloseableHttpResponse response = client.execute(getPatients)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
+                final List<String> patients = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
+                });
+                // Since the practitioner is not
+                assertEquals(bundle.getEntry().size(), patients.size(), "Should have an additional patient");
+            }
+
+            // Check that a specific patient is attributed
+            final HttpGet updatedAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), providerID, newPatientID));
+            updatedAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+
+            try (CloseableHttpResponse response = client.execute(updatedAttributed)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
+            }
 
 
 //             Remove the patient and try again
