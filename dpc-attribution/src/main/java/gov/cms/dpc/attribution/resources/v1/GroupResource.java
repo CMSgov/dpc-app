@@ -43,12 +43,19 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     public List<String> getAttributedPatients(@PathParam("groupID") String groupID) {
         logger.debug("API request to retrieve attributed patients for {}", groupID);
-        // Create a practitioner resource for retrieval
-        final Optional<List<String>> attributedBeneficiaries = engine.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(groupID));
+        
+        Optional<List<String>> attributedBeneficiaries;
+        try {
+            // Create a practitioner resource for retrieval
+            attributedBeneficiaries = engine.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(groupID));
+        } catch (Exception e) {
+            logger.error("Cannot get attributed patients for {}", groupID, e);
+            throw new WebApplicationException(String.format("Unable to retrieve attributed patients for: %s", groupID), Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
         if (attributedBeneficiaries.isEmpty()) {
             throw new WebApplicationException(String.format("Unable to find provider: %s", groupID), Response.Status.NOT_FOUND);
         }
-
         return attributedBeneficiaries.get();
     }
 
