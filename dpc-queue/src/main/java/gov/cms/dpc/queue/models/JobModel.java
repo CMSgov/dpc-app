@@ -61,7 +61,7 @@ public class JobModel {
         return resourceTypes;
     }
 
-    public void setResourceTypes(List<ResourceType> types) {
+    public void setResourceTypes(List<ResourceType> resourceTypes) {
             this.resourceTypes = resourceTypes;
     }
 
