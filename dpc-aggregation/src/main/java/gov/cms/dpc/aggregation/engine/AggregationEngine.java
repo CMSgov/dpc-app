@@ -7,6 +7,7 @@ import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -121,8 +122,8 @@ public class AggregationEngine implements Runnable {
      */
     private void workJob(JobModel job) throws IOException {
         for (ResourceType resourceType: job.getResourceTypes()) {
-            if (!JobModel.validResourceTypes.contains(resourceType)) {
-                throw new RuntimeException("Unexpected resource type: " + resourceType.toString());
+            if (!JobModel.isValidResourceType(resourceType)) {
+                throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
             }
 
             try (final FileOutputStream writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType))) {
@@ -150,8 +151,9 @@ public class AggregationEngine implements Runnable {
                             return this.bbclient.requestPatientFromServer(patientId);
                         case ExplanationOfBenefit:
                             return this.bbclient.requestEOBBundleFromServer(patientId);
+                        default:
+                            throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
                     }
-                    throw new RuntimeException("Unexpected resource type: " + resourceType.toString());
                 })
                 .map(parser::encodeResourceToString)
                 .forEach(str -> {
@@ -160,7 +162,7 @@ public class AggregationEngine implements Runnable {
                         writer.write(str.getBytes(StandardCharsets.UTF_8));
                         writer.write(DELIM);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new JobQueueFailure(job.getJobID(), e);
                     }
                 });
     }

@@ -15,8 +15,28 @@ import java.util.UUID;
 public class JobModel {
     public static final long serialVersionUID = 42L;
 
+    /**
+     * The list of resource type supported by DCP
+     */
     public static final List<ResourceType> validResourceTypes = List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit);
 
+    /**
+     * Test if the resource type is in the list of resources supported by the DCP
+     *
+     * @param type
+     * @return True iff the passed in type is valid f
+     */
+    public static Boolean isValidResourceType(ResourceType type) {
+        return validResourceTypes.contains(type);
+    }
+
+    /**
+     * Form a file name for passed in parameters.
+     *
+     * @param jobID - the jobs id
+     * @param resourceType - the resource type
+     * @return a file name
+     */
     public static String outputFileName(UUID jobID, ResourceType resourceType) {
         return String.format("%s.%s", jobID.toString(), resourceType.getPath());
     }

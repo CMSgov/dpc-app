@@ -52,7 +52,7 @@ public class GroupResource extends AbstractGroupResource {
         // Get a list of attributed beneficiaries
         final Optional<List<String>> attributedBeneficiaries = this.client.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(providerID));
 
-        if (attributedBeneficiaries.isEmpty()) {
+        if (!attributedBeneficiaries.isPresent()) {
             throw new WebApplicationException(String.format("Unable to get attributed patients for provider: %s", providerID), Response.Status.NOT_FOUND);
         }
 
