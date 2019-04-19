@@ -9,7 +9,10 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.sql.Timestamp;
@@ -24,6 +27,8 @@ import static gov.cms.dpc.attribution.dao.tables.Providers.PROVIDERS;
 
 public class RosterEngine implements AttributionEngine {
 
+    private static final Logger logger = LoggerFactory.getLogger(RosterEngine.class);
+
     private final DSLContext context;
 
     @Inject
@@ -35,17 +40,18 @@ public class RosterEngine implements AttributionEngine {
     @Override
     public Optional<List<String>> getAttributedPatientIDs(Practitioner provider) {
 
-//        try {
+        final String providerNPI = FHIRExtractors.getProviderNPI(provider);
+
+        if (!context.fetchExists(context.selectOne().from(PROVIDERS).where(PROVIDERS.PROVIDER_ID.eq(providerNPI)))) {
+            return Optional.empty();
+        }
         final List<String> beneficiaryIDs = context.select()
                 .from(PROVIDERS)
                 .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
                 .join(PATIENTS).on((ATTRIBUTIONS.PATIENT_ID).eq(PATIENTS.ID))
-                .where(PROVIDERS.PROVIDER_ID.eq(FHIRExtractors.getProviderNPI(provider)))
+                .where(PROVIDERS.PROVIDER_ID.eq(providerNPI))
                 .fetch().getValues(PATIENTS.BENEFICIARY_ID);
 
-        if (beneficiaryIDs.isEmpty()) {
-            return Optional.empty();
-        }
         return Optional.of(beneficiaryIDs);
     }
 
@@ -62,13 +68,6 @@ public class RosterEngine implements AttributionEngine {
 
             final PatientsRecord patientRecord = patientUpserter.upsert();
             final ProvidersRecord providerRecord = providerUpserter.upsert();
-
-//            ctx.insertInto(providerRecord.getTable())
-//                    .set(providerRecord)
-//                    .onConflict(PROVIDERS.PROVIDER_ID)
-//                    .doUpdate()
-//                    .set(providerRecord)
-//                    .execute();
 
             // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
             final AttributionsRecord attr = new AttributionsRecord();
@@ -92,14 +91,35 @@ public class RosterEngine implements AttributionEngine {
 
     @Override
     public void removeAttributionRelationship(Practitioner provider, Patient patient) {
-        throw new UnsupportedOperationException("Cannot remove with JOOQ");
-        // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
-//        final AttributionsRecord attr = new AttributionsRecord();
-//        attr.setProviderId(UUID.fromString(FHIRExtractors.getProviderNPI(provider)));
-//        attr.setPatientId(UUID.fromString(FHIRExtractors.getPatientMPI(patient)));
-//        attr.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
-//
-//        context.executeInsert(attr);
+
+        // We have to manually delete everything, until JOOQ supports DELETE CASCADE
+        // https://github.com/jOOQ/jOOQ/issues/7367
+        // We'll do it all in a single transaction
+
+        // Fetch the relationships, then delete all the things
+        context.transaction(config -> {
+
+            final DSLContext ctx = DSL.using(config);
+            final String providerNPI = FHIRExtractors.getProviderNPI(provider);
+            final String patientMPI = FHIRExtractors.getPatientMPI(patient);
+            final Result<AttributionsRecord> attributionsRecords = ctx.selectFrom(ATTRIBUTIONS
+                    .join(PROVIDERS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
+                    .join(PATIENTS).on((ATTRIBUTIONS.PATIENT_ID).eq(PATIENTS.ID)))
+                    .where(PROVIDERS.PROVIDER_ID.eq(providerNPI).and(PATIENTS.BENEFICIARY_ID.eq(patientMPI)))
+                    .fetchInto(ATTRIBUTIONS);
+
+            if (attributionsRecords.isEmpty()) {
+                logger.warn("Cannot find attribution relationship between {} and {}.");
+            }
+
+            // Just get the first one, because we know they're unique
+            final AttributionsRecord attributionsRecord = attributionsRecords.get(0);
+
+            // Remove all the records
+            ctx.deleteFrom(ATTRIBUTIONS).where(ATTRIBUTIONS.ID.eq(attributionsRecord.getId())).execute();
+            ctx.deleteFrom(PATIENTS).where(PATIENTS.ID.eq(attributionsRecord.getPatientId())).execute();
+            ctx.deleteFrom(PROVIDERS).where(PROVIDERS.ID.eq(attributionsRecord.getPatientId())).execute();
+        });
     }
 
     @Override

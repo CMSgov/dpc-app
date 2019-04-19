@@ -43,7 +43,7 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     public List<String> getAttributedPatients(@PathParam("groupID") String groupID) {
         logger.debug("API request to retrieve attributed patients for {}", groupID);
-        
+
         Optional<List<String>> attributedBeneficiaries;
         try {
             // Create a practitioner resource for retrieval
