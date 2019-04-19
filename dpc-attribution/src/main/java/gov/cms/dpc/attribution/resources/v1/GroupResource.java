@@ -4,7 +4,6 @@ import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.slf4j.Logger;
@@ -29,7 +28,6 @@ public class GroupResource extends AbstractGroupResource {
 
     @POST
     @FHIR
-    @UnitOfWork
     public Response submitRoster(Bundle providerBundle) {
         logger.debug("API request to submit roster");
         this.engine.addAttributionRelationships(providerBundle);
@@ -40,7 +38,6 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{groupID}")
     @GET
     @Override
-    @UnitOfWork
     public List<String> getAttributedPatients(@PathParam("groupID") String groupID) {
         logger.debug("API request to retrieve attributed patients for {}", groupID);
 
@@ -61,7 +58,6 @@ public class GroupResource extends AbstractGroupResource {
 
     @Path("/{groupID}/{patientID}")
     @GET
-    @UnitOfWork
     @Override
     public boolean isAttributed(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
         logger.debug("API request to determine attribution between {} and {}", groupID, patientID);
@@ -76,7 +72,6 @@ public class GroupResource extends AbstractGroupResource {
 
     @Path("/{groupID}/{patientID}")
     @PUT
-    @UnitOfWork
     @Override
     public void attributePatient(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
         logger.debug("API request to add attribution between {} and {}", groupID, patientID);
@@ -91,7 +86,6 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     @Path("/{groupID}/{patientID}")
-    @UnitOfWork
     @Override
     @DELETE
     public void removeAttribution(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {

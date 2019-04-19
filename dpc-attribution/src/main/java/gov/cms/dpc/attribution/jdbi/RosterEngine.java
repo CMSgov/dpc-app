@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import gov.cms.dpc.attribution.AttributionException;
 import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
@@ -75,7 +76,10 @@ public class RosterEngine implements AttributionEngine {
             attr.setPatientId(patientRecord.getId());
             attr.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
 
-            ctx.executeInsert(attr);
+            final int updated = ctx.executeInsert(attr);
+            if (updated != 1) {
+                throw new IllegalStateException("Attribution table was not modified");
+            }
         });
     }
 
@@ -116,9 +120,14 @@ public class RosterEngine implements AttributionEngine {
             final AttributionsRecord attributionsRecord = attributionsRecords.get(0);
 
             // Remove all the records
-            ctx.deleteFrom(ATTRIBUTIONS).where(ATTRIBUTIONS.ID.eq(attributionsRecord.getId())).execute();
-            ctx.deleteFrom(PATIENTS).where(PATIENTS.ID.eq(attributionsRecord.getPatientId())).execute();
-            ctx.deleteFrom(PROVIDERS).where(PROVIDERS.ID.eq(attributionsRecord.getPatientId())).execute();
+            int removed = 0;
+            removed += ctx.deleteFrom(ATTRIBUTIONS).where(ATTRIBUTIONS.ID.eq(attributionsRecord.getId())).execute();
+            removed += ctx.deleteFrom(PATIENTS).where(PATIENTS.ID.eq(attributionsRecord.getPatientId())).execute();
+            removed += ctx.deleteFrom(PROVIDERS).where(PROVIDERS.ID.eq(attributionsRecord.getPatientId())).execute();
+
+            if (removed != 3) {
+                throw new IllegalStateException("Failure removing attribution relationship. Row leftover");
+            }
         });
     }
 

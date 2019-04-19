@@ -19,7 +19,10 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -58,12 +61,8 @@ public class AttributionFHIRTest {
         groupedPairs = seedProcessor.extractProviderMap();
     }
 
-    @BeforeEach
-    public void initDB() throws Exception {
-    }
-
     @AfterAll
-    public static void shutdown() throws Exception {
+    public static void shutdown() {
         APPLICATION.after();
     }
 
@@ -82,9 +81,6 @@ public class AttributionFHIRTest {
     }
 
     private void submitRoster(Bundle bundle) throws Exception {
-
-        // Manually call lifecycle hooks
-        initDB();
 
         final String providerID = ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue();
         final String patientID = ((Patient) bundle.getEntry().get(1).getResource()).getIdentifierFirstRep().getValue();
@@ -109,7 +105,6 @@ public class AttributionFHIRTest {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
                 List<String> beneies = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
                 });
-                // Since the practitioner is not
                 assertEquals(bundle.getEntry().size() - 1, beneies.size(), "Should have the same number of beneies");
             }
 
@@ -152,9 +147,6 @@ public class AttributionFHIRTest {
             try (CloseableHttpResponse response = client.execute(updatedAttributed)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
             }
-
-
-//             Remove the patient and try again
         }
     }
 
