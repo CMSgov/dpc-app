@@ -18,6 +18,10 @@ public abstract class AbstractMockQueueClient implements JobQueue {
         return Optional.of(JobStatus.COMPLETED);
     }
 
+    public Optional<JobModel> getJob(UUID jobID) {
+        return Optional.empty();
+    }
+
     public void completeJob(UUID uuid, JobStatus jobStatus) {
         // TODO
     }

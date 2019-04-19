@@ -43,6 +43,15 @@ public class MemoryQueue implements JobQueue {
     }
 
     @Override
+    public synchronized Optional<JobModel> getJob(UUID jobID) {
+        final JobModel jobData = this.queue.get(jobID);
+        if (jobData == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(jobData);
+    }
+
+    @Override
     public synchronized Optional<Pair<UUID, JobModel>> workJob() {
         logger.debug("Pulling first QUEUED job");
         final Optional<Map.Entry<UUID, JobModel>> first = this.queue.entrySet()

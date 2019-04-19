@@ -49,12 +49,18 @@ class AggregationEngineTest {
         engine = new AggregationEngine(bbclient, queue, config);
     }
 
+    /**
+     * Test if the BB Mock Client will return a patient.
+     */
     @Test
     void mockBlueButtonClientTest() {
         Patient patient = bbclient.requestPatientFromServer(MockBlueButtonClient.TEST_PATIENT_IDS[0]);
         assertNotNull(patient);
     }
 
+    /**
+     * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
+     */
     @Test
     void simpleJobTest() {
         final var jobId = UUID.randomUUID();
@@ -63,11 +69,14 @@ class AggregationEngineTest {
         engine.workQueue();
 
         // Look at the result
-        assertEquals(queue.getJobStatus(jobId), Optional.of(JobStatus.COMPLETED));
+        assertEquals(Optional.of(JobStatus.COMPLETED), queue.getJobStatus(jobId));
         var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
         assertTrue(Files.exists(Path.of(outputFilePath)));
     }
 
+    /**
+     * Test if the engine can handle a job with multiple output files and patients
+     */
     @Test
     void multipleFileJobTest() {
         final var jobId = UUID.randomUUID();
@@ -76,13 +85,16 @@ class AggregationEngineTest {
         engine.workQueue();
 
         // Look at the result
-        assertEquals(queue.getJobStatus(jobId), Optional.of(JobStatus.COMPLETED));
-        JobModel.validResourceTypes.stream().forEach( resourceType -> {
+        assertEquals(Optional.of(JobStatus.COMPLETED), queue.getJobStatus(jobId));
+        JobModel.validResourceTypes.stream().forEach(resourceType -> {
             var outputFilePath = engine.formOutputFilePath(jobId, resourceType);
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
     }
 
+    /**
+     * Test if the engine can handle a job with bad parameters
+     */
     @Test
     void badJobTest() {
         // Test with a unsupported resource type
@@ -92,7 +104,7 @@ class AggregationEngineTest {
         engine.workQueue();
 
         // Look at the result
-        assertEquals(queue.getJobStatus(jobId), Optional.of(JobStatus.FAILED));
+        assertEquals(Optional.of(JobStatus.FAILED), queue.getJobStatus(jobId));
     }
 
 }

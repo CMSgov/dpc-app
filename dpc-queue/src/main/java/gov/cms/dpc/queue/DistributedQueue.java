@@ -75,6 +75,22 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
+    public Optional<JobModel> getJob(UUID jobID) {
+        // Get from Postgres
+        final Transaction tx = this.session.beginTransaction();
+        try {
+            final JobModel jobModel = this.session.get(JobModel.class, jobID);
+            if (jobModel == null) {
+                return Optional.empty();
+            }
+            this.session.refresh(jobModel);
+            return Optional.ofNullable(jobModel);
+        } finally {
+            tx.commit();
+        }
+    }
+
+    @Override
     public Optional<Pair<UUID, JobModel>> workJob() {
         final UUID jobID = this.queue.poll();
         if (jobID == null) {

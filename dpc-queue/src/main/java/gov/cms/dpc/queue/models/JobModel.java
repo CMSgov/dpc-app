@@ -17,6 +17,10 @@ public class JobModel {
 
     public static final List<ResourceType> validResourceTypes = List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit);
 
+    public static String outputFileName(UUID jobID, ResourceType resourceType) {
+        return String.format("%s.%s", jobID.toString(), resourceType.getPath());
+    }
+
     @Id
     private UUID jobID;
 

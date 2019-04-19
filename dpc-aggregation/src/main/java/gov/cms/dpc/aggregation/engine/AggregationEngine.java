@@ -81,7 +81,7 @@ public class AggregationEngine implements Runnable {
      * @param resourceType
      */
     public String formOutputFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.%s.ndjson", exportPath, jobID.toString(), resourceType.getPath());
+        return String.format("%s/%s.ndjson", exportPath, JobModel.outputFileName(jobID, resourceType));
     }
 
     /**

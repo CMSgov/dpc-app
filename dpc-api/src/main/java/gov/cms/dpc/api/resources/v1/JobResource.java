@@ -5,7 +5,9 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
+import gov.cms.dpc.queue.models.JobModel;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -14,9 +16,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class JobResource extends AbstractJobResource {
 
@@ -33,7 +36,8 @@ public class JobResource extends AbstractJobResource {
     @GET
     @Override
     public Response checkJobStatus(@PathParam("jobID") String jobID) {
-        final Optional<JobStatus> jobStatus = this.queue.getJobStatus(UUID.fromString(jobID));
+        final UUID jobUUID = UUID.fromString(jobID);
+        final Optional<JobStatus> jobStatus = this.queue.getJobStatus(jobUUID);
 
         if (jobStatus.isEmpty()) {
             return Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build();
@@ -42,19 +46,22 @@ public class JobResource extends AbstractJobResource {
         Response.ResponseBuilder builder = Response.noContent();
 
         switch (jobStatus.get()) {
-            case RUNNING: {
+            case RUNNING: case QUEUED: {
                 builder = builder.status(HttpStatus.ACCEPTED_202).header("X-Progress", jobStatus.get());
                 break;
             }
             case COMPLETED: {
+                final JobModel job = queue.getJob(jobUUID).get();
                 final JobCompletionModel completionModel = new JobCompletionModel(
-                        Instant.now().atOffset(ZoneOffset.UTC), String.format("%s/Job/%s", baseURL, jobID),
-                        Collections.singletonList(String.format("%s/Data/%s", this.baseURL, jobID)));
+                        Instant.now().atOffset(ZoneOffset.UTC),
+                        String.format("%s/Job/%s", baseURL, jobID),
+                        outputURLs(jobUUID, job.getResourceTypes()));
                 builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                 break;
             }
             case FAILED: {
                 builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
+                // TODO (rickhawes) - Consider to add more information about why the job failed, if it would be helpful
                 break;
             }
             default: {
@@ -63,5 +70,15 @@ public class JobResource extends AbstractJobResource {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Form a list of output file directories
+     * @return the output list for the response
+     */
+    private List<String> outputURLs(UUID jobID, List<ResourceType> resourceTypes) {
+        return resourceTypes.stream().map(resourceType -> {
+           return String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType));
+        }).collect(Collectors.toList());
     }
 }

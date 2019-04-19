@@ -14,6 +14,8 @@ public interface JobQueue {
 
     Optional<JobStatus> getJobStatus(UUID jobID);
 
+    Optional<JobModel> getJob(UUID jobID);
+
     Optional<Pair<UUID, JobModel>> workJob();
 
     void completeJob(UUID jobID, JobStatus status);
