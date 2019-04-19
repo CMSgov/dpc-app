@@ -21,6 +21,7 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Singleton;
 import java.sql.SQLException;
 import java.time.Duration;
 
@@ -66,11 +67,8 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    DSLContext provideDSL(DPCAttributionConfiguration config) {
-        final DataSourceFactory factory = config.getDatabase();
-        final ManagedDataSource dataSource = factory.build(getEnvironment().metrics(), "tested-things");
+    DSLContext provideDSL(ManagedDataSource dataSource) {
         final Settings settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
-
         try {
             return DSL.using(dataSource.getConnection(), settings);
         } catch (SQLException e) {

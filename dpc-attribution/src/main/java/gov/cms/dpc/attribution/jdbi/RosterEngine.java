@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -59,10 +60,18 @@ public class RosterEngine implements AttributionEngine {
             final DSLContext ctx = DSL.using(config);
 
 
-            final PatientsRecord patientRecord = ctx.newRecord(PATIENTS, patient);
-            final ProvidersRecord providerRecord = ctx.newRecord(PROVIDERS, provider);
-            ctx.executeInsert(patientRecord);
-            ctx.executeInsert(providerRecord);
+            final PatientRecordUpserter patientUpserter = new PatientRecordUpserter(ctx, ctx.newRecord(PATIENTS, patient));
+            final ProviderRecordUpserter providerUpserter = new ProviderRecordUpserter(ctx, ctx.newRecord(PROVIDERS, provider));
+
+            final PatientsRecord patientRecord = patientUpserter.upsert();
+            final ProvidersRecord providerRecord = providerUpserter.upsert();
+
+//            ctx.insertInto(providerRecord.getTable())
+//                    .set(providerRecord)
+//                    .onConflict(PROVIDERS.PROVIDER_ID)
+//                    .doUpdate()
+//                    .set(providerRecord)
+//                    .execute();
 
             // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
             final AttributionsRecord attr = new AttributionsRecord();
@@ -76,55 +85,60 @@ public class RosterEngine implements AttributionEngine {
 
     @Override
     public void addAttributionRelationships(Bundle attributionBundle) {
-        context.transaction(config -> {
+//        context.transaction(config -> {
 
-            final DSLContext ctx = DSL.using(config);
+//            final DSLContext ctx = DSL.using(config);
+        final DSLContext ctx = context;
 
-            final Timestamp creationTimestamp = Timestamp.from(Instant.now());
-            // Insert the provider , patients, and the attribution relationships
-            final Practitioner provider = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
 
-            final ProviderEntity providerEntity = ProviderEntity.fromFHIR(provider);
-            providerEntity.setProviderID(UUID.randomUUID());
+        final Timestamp creationTimestamp = Timestamp.from(Instant.now());
+        // Insert the provider , patients, and the attribution relationships
+        final Practitioner provider = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
+
+        final ProviderEntity providerEntity = ProviderEntity.fromFHIR(provider);
+        providerEntity.setProviderID(UUID.randomUUID());
 
 //            logger.info("Adding provider {}", providerEntity.getProviderNPI());
 
-            final ProvidersRecord pr = ctx.newRecord(PROVIDERS, providerEntity);
-            pr.setId(UUID.randomUUID());
-            ctx.executeInsert(pr);
+        final ProvidersRecord pr = ctx.newRecord(PROVIDERS, providerEntity);
+        pr.setId(UUID.randomUUID());
+        new ProviderRecordUpserter(ctx, pr).upsert();
+//        this.upsertRecord(ctx, pr, Collections.emptyList(), PROVIDERS.PROVIDER_ID);
 
-            attributionBundle
-                    .getEntry()
-                    .stream()
-                    .map(Bundle.BundleEntryComponent::getResource)
-                    .filter((resource -> resource.getResourceType() == ResourceType.Patient))
-                    .map(patient -> PatientEntity.fromFHIR((Patient) patient))
-                    .forEach(patientEntity -> {
-                        // Create a new record from the patient entity
-                        patientEntity.setPatientID(UUID.randomUUID());
-                        final PatientsRecord patient = ctx.newRecord(PATIENTS, patientEntity);
-                        patient.setId(UUID.randomUUID());
-                        ctx.executeInsert(patient);
+        attributionBundle
+                .getEntry()
+                .stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter((resource -> resource.getResourceType() == ResourceType.Patient))
+                .map(patient -> PatientEntity.fromFHIR((Patient) patient))
+                .forEach(patientEntity -> {
+                    // Create a new record from the patient entity
+                    patientEntity.setPatientID(UUID.randomUUID());
+                    final PatientRecordUpserter patientRecordUpserter = new PatientRecordUpserter(ctx, ctx.newRecord(PATIENTS, patientEntity));
+                    final PatientsRecord patient = patientRecordUpserter.upsert();
+//                    patient.setId(UUID.randomUUID());
+//                    this.upsertRecord(ctx, patient, Collections.singletonList(PATIENTS.ID), PATIENTS.BENEFICIARY_ID);
 
-                        // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
-                        final AttributionsRecord attr = new AttributionsRecord();
-                        attr.setProviderId(pr.getId());
-                        attr.setPatientId(patient.getId());
-                        attr.setCreatedAt(creationTimestamp);
-                        ctx.executeInsert(attr);
-                    });
-        });
+                    // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
+                    final AttributionsRecord attr = new AttributionsRecord();
+                    attr.setProviderId(pr.getId());
+                    attr.setPatientId(patient.getId());
+                    attr.setCreatedAt(creationTimestamp);
+                    ctx.executeInsert(attr);
+                });
+//        });
     }
 
     @Override
     public void removeAttributionRelationship(Practitioner provider, Patient patient) {
+        throw new UnsupportedOperationException("Cannot remove with JOOQ");
         // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
-        final AttributionsRecord attr = new AttributionsRecord();
-        attr.setProviderId(UUID.fromString(FHIRExtractors.getProviderNPI(provider)));
-        attr.setPatientId(UUID.fromString(FHIRExtractors.getPatientMPI(patient)));
-        attr.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
-
-        context.executeInsert(attr);
+//        final AttributionsRecord attr = new AttributionsRecord();
+//        attr.setProviderId(UUID.fromString(FHIRExtractors.getProviderNPI(provider)));
+//        attr.setPatientId(UUID.fromString(FHIRExtractors.getPatientMPI(patient)));
+//        attr.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+//
+//        context.executeInsert(attr);
     }
 
     @Override

@@ -25,7 +25,7 @@ public class ProviderEntity {
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID providerID;
 
-    @Column(name = "provider_id")
+    @Column(name = "provider_id", unique = true)
     private String providerNPI;
     @Column(name = "first_name")
     private String providerFirstName;
