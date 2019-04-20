@@ -25,6 +25,7 @@ public class AggregationEngine implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
     private static final char DELIM = '\n';
+    private static final Integer WAIT_TIME = 2000;
 
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
@@ -53,17 +54,17 @@ public class AggregationEngine implements Runnable {
     public void run() {
         // Run loop
         while (run) {
-            if (queue.queueSize() > 0) {
-                workQueue();
-            } else {
+            this.queue.workJob().ifPresentOrElse(pair -> {
+                workJob(pair.getRight());
+            }, () -> {
                 try {
-                    logger.debug("No job, waiting 2 seconds");
-                    Thread.sleep(2000);
+                    logger.debug("No job, waiting {} milliseconds", WAIT_TIME);
+                    Thread.sleep(WAIT_TIME);
                 } catch (InterruptedException e) {
                     logger.error("Interrupted. {}", e.getMessage());
                     Thread.currentThread().interrupt();
                 }
-            }
+            });
         }
         logger.info("Shutting down aggregation engine");
     }
@@ -86,23 +87,28 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Work the job queue.
+     * Work a single job in the queue.
+     *
+     * @param job - the job to execute
      */
-    public void workQueue() {
-        final Optional<Pair<UUID, JobModel>> workPair = this.queue.workJob();
-        if (workPair.isEmpty()) {
-            return;
-        }
-
-        final JobModel model = workPair.get().getRight();
-        final UUID jobID = workPair.get().getLeft();
+    public void workJob(JobModel job) {
+        final UUID jobID = job.getJobID();
         logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
-        List<String> attributedBeneficiaries = model.getPatients();
+        List<String> attributedBeneficiaries = job.getPatients();
 
         if (!attributedBeneficiaries.isEmpty()) {
             logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
             try {
-                this.workJob(model);
+                for (ResourceType resourceType: job.getResourceTypes()) {
+                    if (!JobModel.isValidResourceType(resourceType)) {
+                        throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
+                    }
+
+                    try (final FileOutputStream writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType))) {
+                        workResource(writer, job, resourceType);
+                        writer.flush();
+                    }
+                }
                 this.queue.completeJob(jobID, JobStatus.COMPLETED);
             } catch (Exception e) {
                 logger.error("Cannot process job {}", jobID, e);
@@ -114,24 +120,6 @@ public class AggregationEngine implements Runnable {
         }
     }
 
-    /**
-     * Process the job. Return when complete/
-     *
-     * @param job - The job model to execute
-     * @throws IOException
-     */
-    private void workJob(JobModel job) throws IOException {
-        for (ResourceType resourceType: job.getResourceTypes()) {
-            if (!JobModel.isValidResourceType(resourceType)) {
-                throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
-            }
-
-            try (final FileOutputStream writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType))) {
-                workResource(writer, job, resourceType);
-                writer.flush();
-            }
-        }
-    }
 
     /**
      * Write out a single provider NDJSON file for a single resource type

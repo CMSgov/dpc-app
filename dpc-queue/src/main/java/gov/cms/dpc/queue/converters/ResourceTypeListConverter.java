@@ -1,6 +1,5 @@
 package gov.cms.dpc.queue.converters;
 
-import gov.cms.dpc.queue.models.JobModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -21,7 +20,7 @@ public class ResourceTypeListConverter implements AttributeConverter<List<Resour
 
     @Override
     public String convertToDatabaseColumn(List<ResourceType> attribute) {
-        StringJoiner joiner = new StringJoiner(LIST_DELIM);
+        final var joiner = new StringJoiner(LIST_DELIM);
         for (ResourceType type: attribute) {
             joiner.add(type.toString());
         }
@@ -30,7 +29,7 @@ public class ResourceTypeListConverter implements AttributeConverter<List<Resour
 
     @Override
     public List<ResourceType> convertToEntityAttribute(String dbData) {
-        var resourceList = new ArrayList<ResourceType>();
+        final var resourceList = new ArrayList<ResourceType>();
         for (String typeString: dbData.split(LIST_DELIM)) {
             try {
                 final var type = ResourceType.valueOf(typeString);

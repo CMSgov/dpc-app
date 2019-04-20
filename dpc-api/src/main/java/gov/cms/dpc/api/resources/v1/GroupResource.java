@@ -97,7 +97,7 @@ public class GroupResource extends AbstractGroupResource {
             return JobModel.validResourceTypes;
         }
 
-        var resources = new ArrayList<ResourceType>();
+        final var resources = new ArrayList<ResourceType>();
         for (String queryResource: resourcesListParam.split(LIST_DELIM)) {
             final var foundResourceType = matchResourceType(queryResource);
             if (foundResourceType.isEmpty()) {

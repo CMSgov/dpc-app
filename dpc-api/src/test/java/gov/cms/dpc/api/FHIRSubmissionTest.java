@@ -32,6 +32,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRSubmissionTest {
     public static final String TEST_BASE_URL = "http://localhost:3002/v1";
+    public static final String TEST_PROVIDER_ID = "1";
     private final JobQueue queue = spy(MemoryQueue.class);
     private final AttributionServiceClient client = mock(AttributionServiceClient.class);
     private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client, TEST_BASE_URL)).build();
@@ -40,7 +41,10 @@ public class FHIRSubmissionTest {
 
     // Test data
     private List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), List.of(ResourceType.Patient), "1", testBeneficiaries);
+    private final JobModel testJobModel = new JobModel(UUID.randomUUID(),
+            Collections.singletonList(ResourceType.Patient),
+            TEST_PROVIDER_ID,
+            testBeneficiaries);
 
     // Setup the Attribution service mock with a dummy list of beneficiaries
     @BeforeEach

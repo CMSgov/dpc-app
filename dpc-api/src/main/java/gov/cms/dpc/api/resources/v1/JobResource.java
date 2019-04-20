@@ -37,39 +37,35 @@ public class JobResource extends AbstractJobResource {
     @Override
     public Response checkJobStatus(@PathParam("jobID") String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
-        final Optional<JobStatus> jobStatus = this.queue.getJobStatus(jobUUID);
+        final Optional<JobModel> maybeJob = this.queue.getJob(jobUUID);
 
-        if (jobStatus.isEmpty()) {
-            return Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build();
-        }
-
-        Response.ResponseBuilder builder = Response.noContent();
-
-        switch (jobStatus.get()) {
-            case RUNNING: case QUEUED: {
-                builder = builder.status(HttpStatus.ACCEPTED_202).header("X-Progress", jobStatus.get());
-                break;
+        // Return a response based on status
+        return maybeJob.map(job -> {
+            Response.ResponseBuilder builder = Response.noContent();
+            JobStatus jobStatus = job.getStatus();
+            switch (jobStatus) {
+                case RUNNING: case QUEUED: {
+                    builder = builder.status(HttpStatus.ACCEPTED_202).header("X-Progress", jobStatus);
+                    break;
+                }
+                case COMPLETED: {
+                    final JobCompletionModel completionModel = new JobCompletionModel(
+                            Instant.now().atOffset(ZoneOffset.UTC),
+                            String.format("%s/Job/%s", baseURL, jobID),
+                            outputURLs(jobUUID, job.getResourceTypes()));
+                    builder = builder.status(HttpStatus.OK_200).entity(completionModel);
+                    break;
+                }
+                case FAILED: {
+                    builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
+                    break;
+                }
+                default: {
+                    builder = builder.status(HttpStatus.ACCEPTED_202);
+                }
             }
-            case COMPLETED: {
-                final JobModel job = queue.getJob(jobUUID).get();
-                final JobCompletionModel completionModel = new JobCompletionModel(
-                        Instant.now().atOffset(ZoneOffset.UTC),
-                        String.format("%s/Job/%s", baseURL, jobID),
-                        outputURLs(jobUUID, job.getResourceTypes()));
-                builder = builder.status(HttpStatus.OK_200).entity(completionModel);
-                break;
-            }
-            case FAILED: {
-                builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
-                // TODO (rickhawes) - Consider to add more information about why the job failed, if it would be helpful
-                break;
-            }
-            default: {
-                builder = builder.status(HttpStatus.ACCEPTED_202);
-            }
-        }
-
-        return builder.build();
+            return builder.build();
+        }).orElse(Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build());
     }
 
     /**
@@ -77,8 +73,8 @@ public class JobResource extends AbstractJobResource {
      * @return the output list for the response
      */
     private List<String> outputURLs(UUID jobID, List<ResourceType> resourceTypes) {
-        return resourceTypes.stream().map(resourceType -> {
-           return String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType));
-        }).collect(Collectors.toList());
+        return resourceTypes.stream()
+                .map(resourceType -> String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType)))
+                .collect(Collectors.toList());
     }
 }
