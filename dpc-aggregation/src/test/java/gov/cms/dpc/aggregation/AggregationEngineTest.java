@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
@@ -63,10 +64,16 @@ class AggregationEngineTest {
      */
     @Test
     void simpleJobTest() {
+        // Make a simple job with one resource type
         final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId, List.of(ResourceType.Patient), TEST_PROVIDER_ID, List.of(MockBlueButtonClient.TEST_PATIENT_IDS[0]));
+        JobModel job = new JobModel(jobId,
+                Collections.singletonList(ResourceType.Patient),
+                TEST_PROVIDER_ID,
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS[0]));
+
+        // Do the job
         queue.submitJob(jobId, job);
-        engine.workQueue();
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
         assertEquals(Optional.of(JobStatus.COMPLETED), queue.getJobStatus(jobId));
@@ -79,10 +86,16 @@ class AggregationEngineTest {
      */
     @Test
     void multipleFileJobTest() {
+        // build a job with multiple resource types
         final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId, JobModel.validResourceTypes, TEST_PROVIDER_ID, List.of(MockBlueButtonClient.TEST_PATIENT_IDS));
+        JobModel job = new JobModel(jobId,
+                JobModel.validResourceTypes,
+                TEST_PROVIDER_ID,
+                List.of(MockBlueButtonClient.TEST_PATIENT_IDS));
+
+        // Do the job
         queue.submitJob(jobId, job);
-        engine.workQueue();
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
         assertEquals(Optional.of(JobStatus.COMPLETED), queue.getJobStatus(jobId));
@@ -97,11 +110,16 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTest() {
-        // Test with a unsupported resource type
+        // Job with a unsupported resource type
         final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId, List.of(ResourceType.Schedule), TEST_PROVIDER_ID, List.of(MockBlueButtonClient.TEST_PATIENT_IDS));
+        JobModel job = new JobModel(jobId,
+                List.of(ResourceType.Schedule),
+                TEST_PROVIDER_ID,
+                List.of(MockBlueButtonClient.TEST_PATIENT_IDS));
+
+        // Do the job
         queue.submitJob(jobId, job);
-        engine.workQueue();
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
         assertEquals(Optional.of(JobStatus.FAILED), queue.getJobStatus(jobId));

@@ -55,7 +55,7 @@ public class AggregationEngine implements Runnable {
         // Run loop
         while (run) {
             this.queue.workJob().ifPresentOrElse(pair -> {
-                workJob(pair.getRight());
+                completeJob(pair.getRight());
             }, () -> {
                 try {
                     logger.debug("No job, waiting {} milliseconds", WAIT_TIME);
@@ -87,35 +87,37 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Work a single job in the queue.
+     * Work a single job in the queue to completion
      *
      * @param job - the job to execute
      */
-    public void workJob(JobModel job) {
+    public void completeJob(JobModel job) {
         final UUID jobID = job.getJobID();
         logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
         List<String> attributedBeneficiaries = job.getPatients();
 
-        if (!attributedBeneficiaries.isEmpty()) {
-            logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-            try {
-                for (ResourceType resourceType: job.getResourceTypes()) {
-                    if (!JobModel.isValidResourceType(resourceType)) {
-                        throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
-                    }
-
-                    try (final FileOutputStream writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType))) {
-                        workResource(writer, job, resourceType);
-                        writer.flush();
-                    }
-                }
-                this.queue.completeJob(jobID, JobStatus.COMPLETED);
-            } catch (Exception e) {
-                logger.error("Cannot process job {}", jobID, e);
-                this.queue.completeJob(jobID, JobStatus.FAILED);
-            }
-        } else {
+        // Guard against an empty bene list
+        if (attributedBeneficiaries.isEmpty()) {
             logger.error("Cannot execute Job {} with no beneficiaries", jobID);
+            this.queue.completeJob(jobID, JobStatus.FAILED);
+            return;
+        }
+
+        logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
+        try {
+            for (ResourceType resourceType: job.getResourceTypes()) {
+                if (!JobModel.isValidResourceType(resourceType)) {
+                    throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
+                }
+
+                try (final FileOutputStream writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType))) {
+                    workResource(writer, job, resourceType);
+                    writer.flush();
+                }
+            }
+            this.queue.completeJob(jobID, JobStatus.COMPLETED);
+        } catch (Exception e) {
+            logger.error("Cannot process job {}", jobID, e);
             this.queue.completeJob(jobID, JobStatus.FAILED);
         }
     }
