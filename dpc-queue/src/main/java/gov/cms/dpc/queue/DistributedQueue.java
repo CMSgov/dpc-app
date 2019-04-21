@@ -31,7 +31,8 @@ public class DistributedQueue implements JobQueue {
 
     @Override
     public void submitJob(UUID jobID, JobModel data) {
-        logger.debug("Adding job {} to the queue with data {}.", jobID, data);
+        assert(jobID == data.getJobID());
+        logger.debug("Adding jobID {} to the queue with for provider {}.", jobID, data.getProviderID());
         // Persist the job in postgres
         final Transaction tx = this.session.beginTransaction();
         try {
@@ -54,23 +55,6 @@ public class DistributedQueue implements JobQueue {
         if (!added) {
             logger.error("Job {} not submitted to queue.", jobID);
             throw new JobQueueFailure(jobID, "Unable to add to queue.");
-        }
-    }
-
-    @Override
-    public Optional<JobStatus> getJobStatus(UUID jobID) {
-        // Get from Postgres
-        final Transaction tx = this.session.beginTransaction();
-        try {
-            final JobModel jobModel = this.session.get(JobModel.class, jobID);
-            if (jobModel == null) {
-                return Optional.empty();
-            }
-            this.session.refresh(jobModel);
-            logger.debug("Job {} has status {}.", jobID, jobModel.getStatus());
-            return Optional.ofNullable(jobModel.getStatus());
-        } finally {
-            tx.commit();
         }
     }
 
@@ -126,6 +110,7 @@ public class DistributedQueue implements JobQueue {
 
     @Override
     public void completeJob(UUID jobID, JobStatus status) {
+        assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         logger.debug("Completing job {} with status {}.", jobID, status);
 
         final Transaction tx = this.session.beginTransaction();

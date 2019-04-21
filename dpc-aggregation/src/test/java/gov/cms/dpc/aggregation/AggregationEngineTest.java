@@ -76,7 +76,8 @@ class AggregationEngineTest {
         queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
-        assertEquals(Optional.of(JobStatus.COMPLETED), queue.getJobStatus(jobId));
+        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
         var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
         assertTrue(Files.exists(Path.of(outputFilePath)));
     }
@@ -98,7 +99,8 @@ class AggregationEngineTest {
         queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
-        assertEquals(Optional.of(JobStatus.COMPLETED), queue.getJobStatus(jobId));
+        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
         JobModel.validResourceTypes.stream().forEach(resourceType -> {
             var outputFilePath = engine.formOutputFilePath(jobId, resourceType);
             assertTrue(Files.exists(Path.of(outputFilePath)));
@@ -122,7 +124,7 @@ class AggregationEngineTest {
         queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
-        assertEquals(Optional.of(JobStatus.FAILED), queue.getJobStatus(jobId));
-    }
+        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
+                () -> assertEquals(JobStatus.FAILED, queue.getJob(jobId).get().getStatus()));    }
 
 }

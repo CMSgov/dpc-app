@@ -96,27 +96,26 @@ public class QueueTest {
 
         // Check the status of the job
         final UUID firstJob = getSetFirst(jobSet);
-        final Optional<JobStatus> jobStatus = queue.getJobStatus(firstJob);
-        assertAll(() -> assertTrue(jobStatus.isPresent(), "Should have a matching status"),
-                () -> assertEquals(JobStatus.QUEUED, jobStatus.get(), "Job should be queue"));
+        final Optional<JobModel> job = queue.getJob(firstJob);
+        assertAll(() -> assertTrue(job.isPresent(), "Should have a matching status"),
+                () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be queue"));
 
-        // Complete the job and check its status
-
+        // Work the job
         Optional<Pair<UUID, JobModel>> workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have job to work");
+
         // Check that the status is RUNNING
-        final Optional<JobStatus> status = queue.getJobStatus(workJob.get().getLeft());
-        assertAll(() -> assertTrue(status.isPresent(), "Should have Job status"),
-                () -> assertEquals(JobStatus.RUNNING, status.get(), "Job should be running"));
+        final Optional<JobModel> runningJob = queue.getJob(workJob.get().getLeft());
+        assertAll(() -> assertTrue(runningJob.isPresent(), "Should have Job status"),
+                () -> assertEquals(JobStatus.RUNNING, runningJob.get().getStatus(), "Job should be running"));
+
+        // Complete the job
         queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED);
 
-        final Optional<JobStatus> updatedStatus = queue.getJobStatus(workJob.get().getLeft());
-        assertAll(() -> assertTrue(updatedStatus.isPresent(), "Should have job status"),
-                () -> assertEquals(JobStatus.COMPLETED, updatedStatus.get(), "Job should be completed"));
-
-        // Get resource info from the job
-        final Optional<JobModel> job = queue.getJob(workJob.get().getLeft());
-        assertAll(() -> assertTrue(job.isPresent(), "should have a job"),
+        // Check that the status is COMPLETED and with resource types
+        final Optional<JobModel> completedJob = queue.getJob(workJob.get().getLeft());
+        assertAll(() -> assertTrue(completedJob.isPresent(), "Should have job"),
+                () -> assertEquals(JobStatus.COMPLETED, completedJob.get().getStatus(), "Job should be completed"),
                 () -> assertNotNull(job.get().getResourceTypes()));
 
         // Work the second job
@@ -131,9 +130,9 @@ public class QueueTest {
         queue.completeJob(workJob.get().getLeft(), JobStatus.FAILED);
 //        jobSet.remove(workJob.get().getLeft());
 
-        Optional<JobStatus> failedStatus = queue.getJobStatus(workJob.get().getLeft());
-        assertAll(() -> assertTrue(failedStatus.isPresent(), "Should have job status"),
-                () -> assertEquals(JobStatus.FAILED, failedStatus.get(), "Job should have failed"));
+        Optional<JobModel> failedJob = queue.getJob(workJob.get().getLeft());
+        assertAll(() -> assertTrue(failedJob.isPresent(), "Should have job in the queue"),
+                () -> assertEquals(JobStatus.FAILED, failedJob.get().getStatus(), "Job should have failed"));
 
         // Remove some jobs
 //        queue.removeJob(workJob.get().getLeft());
@@ -162,7 +161,7 @@ public class QueueTest {
         assertAll(() -> assertTrue(queue.workJob().isEmpty(), "Should not have job to work"),
                 () -> assertEquals(0, queue.queueSize(), "Should have an empty queue"));
 
-        assertTrue(queue.getJobStatus(jobID).isEmpty(), "Should not be able to get missing job status");
+        assertTrue(queue.getJob(jobID).isEmpty(), "Should not be able to get missing job");
         assertThrows(JobQueueFailure.class, () -> queue.completeJob(jobID, JobStatus.FAILED), "Should error when completing a job which does not exist");
     }
 
