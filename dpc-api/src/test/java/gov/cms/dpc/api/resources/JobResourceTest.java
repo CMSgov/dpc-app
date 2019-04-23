@@ -5,6 +5,7 @@ import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class JobResourceTest {
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(jobID.toString());
 
-        assertEquals(response.getStatus(), 404);
+        assertEquals(HttpStatus.NOT_FOUND_404, response.getStatus());
     }
 
     /**
@@ -49,7 +50,7 @@ public class JobResourceTest {
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(jobID.toString());
-        assertAll(() -> assertEquals(202, response.getStatus()),
+        assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
                 () -> assertEquals(JobStatus.QUEUED.toString(), response.getHeaderString("X-Progress")));
     }
 
@@ -72,7 +73,7 @@ public class JobResourceTest {
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(jobID.toString());
-        assertAll(() -> assertEquals(202, response.getStatus()),
+        assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
                 () -> assertEquals(JobStatus.RUNNING.toString(), response.getHeaderString("X-Progress")));
     }
 
@@ -96,7 +97,7 @@ public class JobResourceTest {
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(jobID.toString());
-        assertAll(() -> assertEquals(200, response.getStatus()));
+        assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
@@ -126,6 +127,6 @@ public class JobResourceTest {
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(jobID.toString());
-        assertAll(() -> assertEquals(500, response.getStatus()));
+        assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus()));
     }
 }
