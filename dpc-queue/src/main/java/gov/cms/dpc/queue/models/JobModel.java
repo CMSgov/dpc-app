@@ -45,7 +45,7 @@ public class JobModel {
     private UUID jobID;
 
     @Convert(converter = ResourceTypeListConverter.class)
-    @Column(name = "resourceTypes")
+    @Column(name = "resource_types")
     private List<ResourceType> resourceTypes;
 
     @Column(name = "provider_id")
