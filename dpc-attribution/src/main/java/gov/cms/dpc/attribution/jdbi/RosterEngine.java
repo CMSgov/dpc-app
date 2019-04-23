@@ -112,7 +112,7 @@ public class RosterEngine implements AttributionEngine {
                     .fetchInto(ATTRIBUTIONS);
 
             if (attributionsRecords.isEmpty()) {
-                logger.warn("Cannot find attribution relationship between {} and {}.");
+                logger.warn("Cannot find attribution relationship between {} and {}.", providerNPI, patientMPI);
             }
 
             // Just get the first one, because we know they're unique

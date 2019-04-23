@@ -45,7 +45,9 @@ public class RosterUtils {
         }
 
         logger.debug("Adding provider {}", providerEntity.getProviderNPI());
-        final ProvidersRecord providerRecord = new ProviderRecordUpserter(ctx, ctx.newRecord(PROVIDERS, providerEntity)).upsert();
+        final ProvidersRecord providerRecord = ctx.newRecord(PROVIDERS, providerEntity);
+        // Upsert the record and get the new ID
+        providerRecord.setId(new ProviderRecordUpserter(ctx, providerRecord).upsert().getId());
 
         attributionBundle
                 .getEntry()
@@ -64,7 +66,7 @@ public class RosterUtils {
         final PatientRecordUpserter patientRecordUpserter = new PatientRecordUpserter(ctx, ctx.newRecord(PATIENTS, patientEntity));
         final PatientsRecord patient = patientRecordUpserter.upsert();
 
-        logger.debug("Attribution patient {} to provider {}.", patient.getBeneficiaryId(), providerRecord.getProviderId());
+        logger.debug("Attributing patient {} to provider {}.", patientEntity.getBeneficiaryID(), providerRecord.getProviderId());
 
         // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
         final AttributionsRecord attr = new AttributionsRecord();
