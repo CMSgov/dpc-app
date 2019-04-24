@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Queue;
@@ -96,12 +97,17 @@ public class DistributedQueue implements JobQueue {
             if (jobModel.getStatus() != JobStatus.QUEUED) {
                 throw new JobQueueFailure(jobID, String.format("Cannot work job in state: %s", jobModel.getStatus()));
             }
+            assert(jobModel.getSubmitTime().isPresent());
 
             // Update the status and persist it
             jobModel.setStatus(JobStatus.RUNNING);
             jobModel.setStartTime(OffsetDateTime.now());
             this.session.update(jobModel);
             tx.commit();
+
+            // Log
+            final var queueDuration = Duration.between(jobModel.getSubmitTime().get(), jobModel.getStartTime().get());
+            logger.debug("Starting to work job {}. {} seconds of queue time.", jobID, queueDuration.toMillis() / 1000.0);
 
             return Optional.of(new Pair<>(jobID, jobModel));
         } catch (Exception e) {
@@ -114,15 +120,21 @@ public class DistributedQueue implements JobQueue {
     @Override
     public void completeJob(UUID jobID, JobStatus status) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
-        logger.debug("Completing job {} with status {}.", jobID, status);
-
         final Transaction tx = this.session.beginTransaction();
         try {
             final JobModel jobModel = this.session.get(JobModel.class, jobID);
+            if (jobModel.getStatus() != JobStatus.RUNNING) {
+                throw new JobQueueFailure(jobID, String.format("Cannot complete job in state: %s", jobModel.getStatus()));
+            }
+            assert(jobModel.getStartTime().isPresent());
+
             jobModel.setStatus(status);
             jobModel.setCompleteTime(OffsetDateTime.now());
             this.session.update(jobModel);
             tx.commit();
+
+            final var workDuration = Duration.between(jobModel.getStartTime().get(), jobModel.getCompleteTime().get());
+            logger.debug("Completed job {} with status {} and duration {} seconds", jobID, status, workDuration.toMillis()/ 1000.0);
         } catch (Exception e) {
             tx.rollback();
             logger.error("Unable to complete job", e);
