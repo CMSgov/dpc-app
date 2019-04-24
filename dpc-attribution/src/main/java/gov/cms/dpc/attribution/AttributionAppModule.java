@@ -7,6 +7,7 @@ import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
+import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.db.DataSourceFactory;
@@ -36,6 +37,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(ProviderDAO.class);
         binder.bind(AttributionEngine.class).to(ProviderDAO.class);
         binder.bind(V1AttributionResource.class);
+        binder.bind(TruncateDatabase.class);
     }
 
     /**

@@ -35,6 +35,7 @@ services:
       - ENV=dev
     ports:
       - "3500:8080"
+      - "9900:9900"
 
   api:
     image: dpc-api
