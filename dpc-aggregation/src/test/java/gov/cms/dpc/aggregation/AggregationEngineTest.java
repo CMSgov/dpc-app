@@ -20,21 +20,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.List;
+import java.nio.file.Paths;
+import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
+    private static final String RSA_PRIVATE_KEY_PATH = "./test_rsa_private_key.der";
+    private static final String RSA_PUBLIC_KEY_PATH = "./test_rsa_public_key.der";
     private BlueButtonClient bbclient;
     private JobQueue queue;
     private AggregationEngine engine;
+    private RSAPublicKey rsaPublicKey;
+    private RSAPrivateKey rsaPrivateKey;
 
     static private Config config;
 
@@ -44,10 +54,26 @@ class AggregationEngineTest {
     }
 
     @BeforeEach
-    void setupEach() {
+    void setupEach() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         queue = new MemoryQueue();
         bbclient = new MockBlueButtonClient();
         engine = new AggregationEngine(bbclient, queue, config);
+
+
+        // Ref: https://stackoverflow.com/questions/11410770/load-rsa-public-key-from-file
+        KeyFactory keyFactory  = KeyFactory.getInstance("RSA"); // Throws NoSuchAlgorithmException
+
+        Path privateKeyPath = Paths.get(getClass().getClassLoader().getResource(RSA_PRIVATE_KEY_PATH).getFile());
+        byte[] privateKeyRaw = Files.readAllBytes(privateKeyPath); // Throws IOException
+        PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyRaw);
+        rsaPrivateKey = (RSAPrivateKey) keyFactory.generatePrivate(privateKeySpec); // Throws InvalidKeySpecException
+
+        Path publicKeyPath = Paths.get(getClass().getClassLoader().getResource(RSA_PUBLIC_KEY_PATH).getFile());
+        byte[] publicKeyRaw = Files.readAllBytes(publicKeyPath); // Throws IOException
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyRaw);
+        rsaPublicKey = (RSAPublicKey) keyFactory.generatePublic(publicKeySpec); // Throws InvalidKeySpecException
+
+
     }
 
     /**
@@ -125,6 +151,36 @@ class AggregationEngineTest {
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.FAILED, queue.getJob(jobId).get().getStatus()));    }
+                () -> assertEquals(JobStatus.FAILED, queue.getJob(jobId).get().getStatus()));
+    }
+
+    /**
+     * Test if the engine writes encrypted files to the Tmp filesystem
+     */
+    @Test
+    void shouldWritedEncryptedTmpFiles()  {
+        // TODO (isears)
+
+    }
+
+    /**
+     * Do a quick encrypt/decrypt test with the test keypair to make sure it's valid
+     */
+    @Test
+    void testKeypairShouldBeValid() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        byte[] challenge = new byte[1000];
+        ThreadLocalRandom.current().nextBytes(challenge);
+
+        Signature sig = Signature.getInstance("SHA256withRSA");
+        sig.initSign(rsaPrivateKey);
+        sig.update(challenge);
+        byte[] signature = sig.sign();
+
+        sig.initVerify(rsaPublicKey);
+        sig.update(challenge);
+
+        assertTrue(sig.verify(signature));
+
+    }
 
 }

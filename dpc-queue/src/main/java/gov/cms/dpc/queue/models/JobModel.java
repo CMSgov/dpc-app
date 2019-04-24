@@ -7,6 +7,7 @@ import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
+import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -57,16 +58,30 @@ public class JobModel {
 
     private JobStatus status;
 
+    // TODO (isears): Add hibernate annotations?
+    private RSAPublicKey rsaPublicKey;
+
     public JobModel() {
         // Hibernate required
     }
 
+    // TODO (isears) remove this constructor when aggregation-engine encryption is implemented
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
+    }
+
+    // TODO (isears): enforce a key length here?
+    public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
+        this.jobID  = jobID;
+        this.resourceTypes = resourceTypes;
+        this.providerID = providerID;
+        this.patients  = patients;
+        this.status = JobStatus.QUEUED;
+        this.rsaPublicKey = pubKey;
     }
 
     public UUID getJobID() {
@@ -107,6 +122,20 @@ public class JobModel {
 
     public void setStatus(JobStatus status) {
         this.status = status;
+    }
+
+    // TODO (isears): this check won't be necessary once the old constructor is removed
+    public RSAPublicKey getRsaPublicKey() {
+        if (rsaPublicKey == null) {
+            throw new NullPointerException("This Job was created without a public key!");
+        } else {
+            return rsaPublicKey;
+        }
+    }
+
+    // TODO (isears): enforce a key length here?
+    public void setRsaPublicKey(RSAPublicKey rsaPublicKey) {
+        this.rsaPublicKey = rsaPublicKey;
     }
 
     @Override
