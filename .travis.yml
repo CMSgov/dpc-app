@@ -35,6 +35,7 @@ after_script:
     do
     JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
     done
+  - ls reports
   - docker-compose down
   - docker-compose up -d --scale api=0
   - sleep 30

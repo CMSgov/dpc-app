@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@IntegrationTest
 public class EndToEndRequestTest extends AbstractApplicationTest {
 
 
