@@ -1,5 +1,8 @@
 package gov.cms.dpc.api.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import gov.cms.dpc.api.converters.OffsetDateTimeToStringConverter;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +12,15 @@ import java.util.List;
  */
 public class JobCompletionModel {
 
-    // FIXME(nickrobison): This needs to the time that the export request actually started, rather than just when it was retrieved.
+    /**
+     * An instant type that indicates the server's time when the query is run. No resources that have a modified data after this instant should be in the response.
+     */
+    @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
     private OffsetDateTime transactionTime;
+
+    /**
+     * The full request of the original request URL
+     */
     private String request;
 
     /**

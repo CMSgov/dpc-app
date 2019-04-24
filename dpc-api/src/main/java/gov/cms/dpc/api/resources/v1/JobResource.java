@@ -50,11 +50,12 @@ public class JobResource extends AbstractJobResource {
                     break;
                 }
                 case COMPLETED: {
+                    assert(job.getCompleteTime().isPresent());
                     final var resourceQueryParam = job.getResourceTypes().stream()
                             .map(type -> type.toString())
                             .collect(Collectors.joining(GroupResource.LIST_DELIM));
                     final JobCompletionModel completionModel = new JobCompletionModel(
-                            Instant.now().atOffset(ZoneOffset.UTC),
+                            job.getCompleteTime().get(),
                             String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(),resourceQueryParam),
                             outputList(jobUUID, job.getResourceTypes()));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
