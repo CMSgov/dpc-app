@@ -1,6 +1,8 @@
 package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.cli.DemoCommand;
@@ -34,7 +36,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
-        bootstrap.addCommand(new DemoCommand(bootstrap.getApplication()));
+        bootstrap.addCommand(new DemoCommand());
     }
 
     @Override
