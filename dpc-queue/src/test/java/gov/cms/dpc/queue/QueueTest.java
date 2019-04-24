@@ -9,6 +9,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.*;
 import org.redisson.Redisson;
 import org.redisson.api.RQueue;
@@ -61,7 +62,8 @@ public class QueueTest {
                 .map(queue -> {
                     final DynamicTest first = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Simple Submission"), () -> testSimpleSubmissionCompletion(queue));
                     final DynamicTest second = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Missing Job"), () -> testMissingJob(queue));
-                    return List.of(first, second);
+                    final DynamicTest third = DynamicTest.dynamicTest(nameGenerator.apply(queue, "EOB Submission"), () -> testPatientAndEOBSubmission(queue));
+                    return List.of(first, second, third);
                 })
                 .flatMap(Collection::stream);
     }
@@ -94,37 +96,62 @@ public class QueueTest {
 
         // Check the status of the job
         final UUID firstJob = getSetFirst(jobSet);
-        final Optional<JobStatus> jobStatus = queue.getJobStatus(firstJob);
-        assertAll(() -> assertTrue(jobStatus.isPresent(), "Should have a matching status"),
-                () -> assertEquals(JobStatus.QUEUED, jobStatus.get(), "Job should be queue"));
+        final Optional<JobModel> job = queue.getJob(firstJob);
+        assertAll(() -> assertTrue(job.isPresent(), "Should have a matching status"),
+                () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be queue"));
 
-        // Complete the job and check its status
-
+        // Work the job
         Optional<Pair<UUID, JobModel>> workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have job to work");
+
         // Check that the status is RUNNING
-        final Optional<JobStatus> status = queue.getJobStatus(workJob.get().getLeft());
-        assertAll(() -> assertTrue(status.isPresent(), "Should have Job status"),
-                () -> assertEquals(JobStatus.RUNNING, status.get(), "Job should be running"));
+        final Optional<JobModel> runningJob = queue.getJob(workJob.get().getLeft());
+        assertAll(() -> assertTrue(runningJob.isPresent(), "Should have Job status"),
+                () -> assertEquals(JobStatus.RUNNING, runningJob.get().getStatus(), "Job should be running"));
+
+        // Complete the job
         queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED);
 
-        final Optional<JobStatus> updatedStatus = queue.getJobStatus(workJob.get().getLeft());
-        assertAll(() -> assertTrue(updatedStatus.isPresent(), "Should have job status"),
-                () -> assertEquals(JobStatus.COMPLETED, updatedStatus.get(), "Job should be completed"));
+        // Check that the status is COMPLETED and with resource types
+        final Optional<JobModel> completedJob = queue.getJob(workJob.get().getLeft());
+        assertAll(() -> assertTrue(completedJob.isPresent(), "Should have job"),
+                () -> assertEquals(JobStatus.COMPLETED, completedJob.get().getStatus(), "Job should be completed"),
+                () -> assertNotNull(job.get().getResourceTypes()));
 
-        // Fail the job and check its status
+        // Work the second job
         workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have a 2nd job to work");
+
+        // Try to work again last job again, this should return no job
+        var emptyJob = queue.workJob();
+        assertTrue(emptyJob.isEmpty(), "the queue should not have ANY ready items");
+
+        // Fail the second job and check its status
         queue.completeJob(workJob.get().getLeft(), JobStatus.FAILED);
 //        jobSet.remove(workJob.get().getLeft());
 
-        Optional<JobStatus> failedStatus = queue.getJobStatus(workJob.get().getLeft());
-        assertAll(() -> assertTrue(failedStatus.isPresent(), "Should have job status"),
-                () -> assertEquals(JobStatus.FAILED, failedStatus.get(), "Job should have failed"));
+        Optional<JobModel> failedJob = queue.getJob(workJob.get().getLeft());
+        assertAll(() -> assertTrue(failedJob.isPresent(), "Should have job in the queue"),
+                () -> assertEquals(JobStatus.FAILED, failedJob.get().getStatus(), "Job should have failed"));
 
         // Remove some jobs
 //        queue.removeJob(workJob.get().getLeft());
         assertEquals(0, queue.queueSize(), "Not have any jobs in the queue");
+    }
+
+    public void testPatientAndEOBSubmission(JobQueue queue) {
+        // Add a job with a EOB resource
+        final var jobSubmission = QueueTest.buildModel(UUID.randomUUID(), ResourceType.Patient, ResourceType.ExplanationOfBenefit);
+        queue.submitJob(jobSubmission.getJobID(), jobSubmission);
+
+        // Retrieve the job with both resources
+        final var jobRetrived = queue.workJob();
+        assertTrue(jobRetrived.isPresent());
+        final var resourcesRetrived = jobRetrived.get().getRight().getResourceTypes();
+        assertTrue(resourcesRetrived.containsAll(List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit)));
+
+        // Complete job
+        queue.completeJob(jobSubmission.getJobID(), JobStatus.COMPLETED);
     }
 
     public void testMissingJob(JobQueue queue) {
@@ -134,7 +161,7 @@ public class QueueTest {
         assertAll(() -> assertTrue(queue.workJob().isEmpty(), "Should not have job to work"),
                 () -> assertEquals(0, queue.queueSize(), "Should have an empty queue"));
 
-        assertTrue(queue.getJobStatus(jobID).isEmpty(), "Should not be able to get missing job status");
+        assertTrue(queue.getJob(jobID).isEmpty(), "Should not be able to get missing job");
         assertThrows(JobQueueFailure.class, () -> queue.completeJob(jobID, JobStatus.FAILED), "Should error when completing a job which does not exist");
     }
 
@@ -164,6 +191,10 @@ public class QueueTest {
     }
 
     private static JobModel buildModel(UUID id) {
-        return new JobModel(id, JobModel.ResourceType.PATIENT, "test-provider-1", List.of("test-patient-1", "test-patient-2"));
+        return buildModel(id, ResourceType.Patient );
+    }
+
+    private static JobModel buildModel(UUID id, ResourceType ... resources) {
+        return new JobModel(id, Arrays.asList(resources), "test-provider-1", List.of("test-patient-1", "test-patient-2"));
     }
 }

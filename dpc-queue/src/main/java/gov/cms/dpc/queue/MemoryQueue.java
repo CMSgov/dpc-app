@@ -26,20 +26,19 @@ public class MemoryQueue implements JobQueue {
     }
 
     @Override
-    public synchronized void submitJob(UUID jobID, JobModel data) {
+    public synchronized void submitJob(UUID jobID, JobModel job) {
+        assert(jobID == job.getJobID());
         logger.debug("Submitting job: {}", jobID);
-        this.queue.put(jobID, data);
+        this.queue.put(jobID, job);
     }
 
     @Override
-    public synchronized Optional<JobStatus> getJobStatus(UUID jobID) {
-        logger.debug("Getting status for job: {}", jobID);
+    public synchronized Optional<JobModel> getJob(UUID jobID) {
         final JobModel jobData = this.queue.get(jobID);
         if (jobData == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(this.queue.get(jobID).getStatus());
-
+        return Optional.ofNullable(jobData);
     }
 
     @Override
@@ -63,6 +62,7 @@ public class MemoryQueue implements JobQueue {
 
     @Override
     public synchronized void completeJob(UUID jobID, JobStatus status) {
+        assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         logger.debug("Completed job {} with status: {}", jobID, status);
         final JobModel job = this.queue.get(jobID);
         if (job == null) {

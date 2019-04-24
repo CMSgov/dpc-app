@@ -2,6 +2,9 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
+
+import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
 import java.util.List;
@@ -10,34 +13,57 @@ import java.util.UUID;
 
 @Entity(name = "job_queue")
 public class JobModel {
+    public static final long serialVersionUID = 42L;
 
     /**
-     * Enum which represents the resource types available for export from BlueButton
+     * The list of resource type supported by DCP
      */
-    public enum ResourceType {
-        PATIENT,
-        EOB
+    public static final List<ResourceType> validResourceTypes = List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit);
+
+    /**
+     * Test if the resource type is in the list of resources supported by the DCP
+     *
+     * @param type
+     * @return True iff the passed in type is valid f
+     */
+    public static Boolean isValidResourceType(ResourceType type) {
+        return validResourceTypes.contains(type);
     }
 
-    public static final long serialVersionUID = 42L;
+    /**
+     * Form a file name for passed in parameters.
+     *
+     * @param jobID - the jobs id
+     * @param resourceType - the resource type
+     * @return a file name
+     */
+    public static String outputFileName(UUID jobID, ResourceType resourceType) {
+        return String.format("%s.%s", jobID.toString(), resourceType.getPath());
+    }
 
     @Id
     private UUID jobID;
-    private ResourceType type;
+
+    @Convert(converter = ResourceTypeListConverter.class)
+    @Column(name = "resource_types")
+    private List<ResourceType> resourceTypes;
+
     @Column(name = "provider_id")
     private String providerID;
+
     @Convert(converter = StringListConverter.class)
     @Column(name = "patients", columnDefinition = "text")
     private List<String> patients;
+
     private JobStatus status;
 
     public JobModel() {
         // Hibernate required
     }
 
-    public JobModel(UUID jobID, ResourceType type, String providerID, List<String> patients) {
+    public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
-        this.type = type;
+        this.resourceTypes = resourceTypes;
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -51,12 +77,12 @@ public class JobModel {
         this.jobID = jobID;
     }
 
-    public ResourceType getType() {
-        return type;
+    public List<ResourceType> getResourceTypes() {
+        return resourceTypes;
     }
 
-    public void setType(ResourceType type) {
-        this.type = type;
+    public void setResourceTypes(List<ResourceType> resourceTypes) {
+            this.resourceTypes = resourceTypes;
     }
 
     public String getProviderID() {
@@ -89,7 +115,7 @@ public class JobModel {
         if (o == null || getClass() != o.getClass()) return false;
         JobModel jobModel = (JobModel) o;
         return Objects.equals(jobID, jobModel.jobID) &&
-                type == jobModel.type &&
+                Objects.equals(resourceTypes, jobModel.resourceTypes) &&
                 Objects.equals(providerID, jobModel.providerID) &&
                 Objects.equals(patients, jobModel.patients) &&
                 status == jobModel.status;
@@ -97,6 +123,6 @@ public class JobModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobID, type, providerID, patients, status);
+        return Objects.hash(jobID, resourceTypes, providerID, patients, status);
     }
 }
