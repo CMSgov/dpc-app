@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import gov.cms.dpc.api.models.OutputEntryModel;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -49,10 +50,13 @@ public class JobResource extends AbstractJobResource {
                     break;
                 }
                 case COMPLETED: {
+                    final var resourceQueryParam = job.getResourceTypes().stream()
+                            .map(type -> type.toString())
+                            .collect(Collectors.joining(GroupResource.LIST_DELIM));
                     final JobCompletionModel completionModel = new JobCompletionModel(
                             Instant.now().atOffset(ZoneOffset.UTC),
-                            String.format("%s/Job/%s", baseURL, jobID),
-                            outputURLs(jobUUID, job.getResourceTypes()));
+                            String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(),resourceQueryParam),
+                            outputList(jobUUID, job.getResourceTypes()));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                     break;
                 }
@@ -69,12 +73,16 @@ public class JobResource extends AbstractJobResource {
     }
 
     /**
-     * Form a list of output file directories
+     * Form a list of output entries
+     *
      * @return the output list for the response
      */
-    private List<String> outputURLs(UUID jobID, List<ResourceType> resourceTypes) {
+    private List<OutputEntryModel> outputList(UUID jobID, List<ResourceType> resourceTypes) {
         return resourceTypes.stream()
-                .map(resourceType -> String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType)))
+                .map(resourceType -> {
+                    final var url = String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType));
+                    return new OutputEntryModel(resourceType, url);
+                })
                 .collect(Collectors.toList());
     }
 }
