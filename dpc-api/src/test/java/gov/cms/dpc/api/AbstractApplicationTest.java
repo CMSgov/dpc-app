@@ -1,14 +1,12 @@
 package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.api.annotations.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
-@IntegrationTest
 public class AbstractApplicationTest {
 
     protected static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "7777"));

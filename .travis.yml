@@ -29,7 +29,8 @@ before_install:
 after_script:
   - docker-compose down
   - docker-compose up -d --scale api=0
-  - mvn test -DexcludedGroups=none -pl dpc-api
+  # Run the integration-test profile, which only runs a subset of the tests
+  - mvn test -Pintegration-tests -pl dpc-api
   - mvn jacoco:report
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
