@@ -12,8 +12,17 @@ public class JobCompletionModel {
     // FIXME(nickrobison): This needs to the time that the export request actually started, rather than just when it was retrieved.
     private OffsetDateTime transactionTime;
     private String request;
-    private final boolean requiresAccessToken = false;
+
+    /**
+     * Boolean value indicating whether downloading the generated files will require an authentication token
+     */
+    private final boolean secure = false;
+
+    /**
+     * List of output entries with one entry for each generated file
+     */
     private List<OutputEntryModel> output;
+
     // FIXME(nickrobison): Should return errors as well. OperationOutcomes, serialized as NDJSON
     private final List<String> error = new ArrayList<>();
 
@@ -43,8 +52,8 @@ public class JobCompletionModel {
         this.request = request;
     }
 
-    public boolean isRequiresAccessToken() {
-        return requiresAccessToken;
+    public boolean isSecure() {
+        return secure;
     }
 
     public List<OutputEntryModel> getOutput() {
