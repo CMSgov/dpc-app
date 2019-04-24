@@ -11,6 +11,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRSubmissionTest {
     public static final String TEST_BASE_URL = "http://localhost:3002/v1";
+    public static final String TEST_PROVIDER_ID = "1";
     private final JobQueue queue = spy(MemoryQueue.class);
     private final AttributionServiceClient client = mock(AttributionServiceClient.class);
     private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client, TEST_BASE_URL)).build();
@@ -39,9 +41,13 @@ public class FHIRSubmissionTest {
 
     // Test data
     private List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), JobModel.ResourceType.PATIENT, "1", testBeneficiaries);
+    private final JobModel testJobModel = new JobModel(UUID.randomUUID(),
+            Collections.singletonList(ResourceType.Patient),
+            TEST_PROVIDER_ID,
+            testBeneficiaries);
 
-    @BeforeEach()
+    // Setup the Attribution service mock with a dummy list of beneficiaries
+    @BeforeEach
     public void resetMocks() {
         reset(client);
         reset(queue);
@@ -55,13 +61,11 @@ public class FHIRSubmissionTest {
             final JobModel data = answer.getArgument(1);
             assertEquals(testJobModel.getPatients().size(), data.getPatients().size(), "Should have 4 patients");
             return answer.callRealMethod();
-        }))
-                .when(queue).submitJob(Mockito.any(UUID.class), Mockito.any(JobModel.class));
+        })).when(queue).submitJob(Mockito.any(UUID.class), Mockito.any(JobModel.class));
     }
 
     @Test
     public void testDataRequest() {
-
         final WebTarget target = groupResource.client().target("/Group/1/$export");
         target.request().accept(FHIR_JSON);
         final Response response = target.request().get();
@@ -99,5 +103,87 @@ public class FHIRSubmissionTest {
 //        final Bundle responseBundle = (Bundle) execute.getParameter().get(0).getResource();
 //
 //        assertEquals(1, responseBundle.getTotal(), "Should only have 1 groupResource");
+    }
+
+    /**
+     * Test with a resource type in the '_type' query parameter
+     */
+    @Test
+    public void testOneResourceSubmission() {
+        // A request with parameters ...
+        final WebTarget target = groupResource.client()
+                .target("/Group/1/$export")
+                .queryParam("_type", ResourceType.Patient);
+        target.request().accept(FHIR_JSON);
+        final Response response = target.request().get();
+        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+                () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
+
+        // Should yield a job with Patient and EOB resources
+        var job = queue.workJob();
+        assertTrue(job.isPresent());
+        var resources = job.get().getRight().getResourceTypes();
+        assertAll(() -> assertEquals(resources.size(), 1),
+                () -> assertTrue(resources.contains(ResourceType.Patient)));
+    }
+
+    /**
+     * Test with a list of resource types in the '_type' query parameter
+     */
+    @Test
+    public void testTwoResourceSubmission() {
+        // A request with parameters ...
+        final WebTarget target = groupResource.client()
+                .target("/Group/1/$export")
+                .queryParam("_type", String.format("%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit));
+        target.request().accept(FHIR_JSON);
+        final Response response = target.request().get();
+        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+                () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
+
+        // Should yield a job with Patient and EOB resources
+        var job = queue.workJob();
+        assertTrue(job.isPresent());
+        var resources = job.get().getRight().getResourceTypes();
+        assertAll(() -> assertEquals(resources.size(), 2),
+                () -> assertTrue(resources.contains(ResourceType.Patient)),
+                () -> assertTrue(resources.contains(ResourceType.ExplanationOfBenefit)));
+    }
+
+    /**
+     * Negative test with a bad type of resource types in the '_type' query parameter
+     */
+    @Test
+    public void testBadResourceSubmission() {
+        // A request with a bad resource type parameter...
+        final WebTarget target = groupResource.client()
+                .target("/Group/1/$export")
+                .queryParam("_type", "BadResource");
+        final Response response = target.request().get();
+        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatus(), "Should have 400 status"));
+
+        // Should yield a queue should have no entries
+        assertEquals(queue.queueSize(), 0);
+    }
+
+    /**
+     * Test with no _type parameter
+     */
+    @Test
+    public void testNoResourceSubmission() {
+        // A request with no resource type parameters...
+        final WebTarget target = groupResource.client().target("/Group/1/$export");
+        target.request().accept(FHIR_JSON);
+        final Response response = target.request().get();
+        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+                () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
+
+        // Should yield a job with all resource types
+        var job = queue.workJob();
+        assertTrue(job.isPresent());
+        var resources = job.get().getRight().getResourceTypes();
+        assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()),
+                () -> assertTrue(resources.containsAll(JobModel.validResourceTypes)));
+
     }
 }
