@@ -1,27 +1,19 @@
 package gov.cms.dpc.api.cli;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.api.models.JobCompletionModel;
-import gov.cms.dpc.common.utils.SeedProcessor;
 import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 
 import java.io.File;
@@ -31,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 public class DemoCommand extends Command {
-
-    private static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
     private final FhirContext ctx;
 
     public DemoCommand() {
@@ -42,12 +32,21 @@ public class DemoCommand extends Command {
 
     @Override
     public void configure(Subparser subparser) {
+        // Option for specifying seeds file
         subparser
                 .addArgument("-f", "--file")
                 .dest("seed-file")
                 .type(String.class)
                 .setDefault("src/resources/test_associations.csv")
                 .help("Association file to use for demo purposes. Defaults to project root");
+
+        // Option for overriding provider id
+        subparser
+                .addArgument("-p", "--provider")
+                .dest("provider-id")
+                .type(String.class)
+                .setDefault(ClientUtils.PROVIDER_ID)
+                .help("Execute as a specific provider");
     }
 
     @Override
@@ -58,13 +57,9 @@ public class DemoCommand extends Command {
         final String baseURL = "http://localhost:3002/v1/";
         final IGenericClient exportClient = ctx.newRestfulGenericClient(baseURL);
 
-        final IOperationUntypedWithInput<Parameters> exportOperation = exportClient
-                .operation()
-                .onInstance(new IdDt("Group", PROVIDER_ID))
-                .named("$export")
-                .withNoParameters(Parameters.class)
-                .encodedJson()
-                .useHttpGet();
+        final String providerID = namespace.getString("provider-id");
+
+        final IOperationUntypedWithInput<Parameters> exportOperation = ClientUtils.createExportOperation(exportClient, providerID);
 
         // Make the initial export request
         // If it's a 404, that's fine, for anything else, fail
@@ -79,92 +74,52 @@ public class DemoCommand extends Command {
             }
         }
 
+        // Sleep for 2 seconds, for presentation reasons
+        Thread.sleep(2000);
+
         // Read the provider bundle from the given file
-        Bundle providerBundle;
         final String seedsFile = getSeedsFile(namespace);
         try (InputStream resource = new FileInputStream(new File(seedsFile))) {
+            // Now, submit the bundle
+            System.out.println("Uploading Patient roster");
+            final IGenericClient rosterClient = ctx.newRestfulGenericClient(baseURL);
+            final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource);
+            rosterSubmission.execute();
 
-            final SeedProcessor seedProcessor = new SeedProcessor(resource);
+            // Sleep for 2 seconds, for presentation reasons
+            Thread.sleep(2000);
 
-            final Map<String, List<Pair<String, String>>> providerMap = seedProcessor.extractProviderMap();
+            // Retry the export request
+            System.out.println("Retrying export request");
+            String exportURL = "";
 
-            // Find the entry for the given key (yes, I know this is bad)
-            final Map.Entry<String, List<Pair<String, String>>> providerRoster = providerMap
-                    .entrySet()
-                    .stream()
-                    .filter((entry) -> entry.getKey().equals(PROVIDER_ID))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Cannot find matching provider"));
-
-            providerBundle = seedProcessor.generateRosterBundle(providerRoster);
-        }
-
-        // Now, submit the bundle
-        System.out.println("Uploading Patient roster");
-        final IGenericClient rosterClient = ctx.newRestfulGenericClient(baseURL);
-
-        // FIXME: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.
-        // Instead, we rely on the fact that an error is not thrown.
-        rosterClient
-                .create()
-                .resource(providerBundle)
-                .encodedJson()
-                .execute();
-
-        // Retry the export request
-        System.out.println("Retrying export request");
-        String exportURL = "";
-
-        try {
-            exportOperation.execute();
-        } catch (BaseServerResponseException e) {
-            if (e instanceof NonFhirResponseException) {
-                final NonFhirResponseException e1 = (NonFhirResponseException) e;
-                if (e1.getStatusCode() != HttpStatus.NO_CONTENT_204) {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-
-                // Get the correct header
-                final Map<String, List<String>> headers = e1.getResponseHeaders();
-
-                // Get the headers and check the status
-                exportURL = headers.get("content-location").get(0);
-                System.out.printf("Export job started. Progress URL: %s\n", exportURL);
-            }
-        }
-
-        // Poll the job until it's done
-
-        // Use the traditional HTTP Client to check the job status
-        JobCompletionModel jobResponse = null;
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet jobGet = new HttpGet(exportURL);
-            boolean done = false;
-
-            while (!done) {
-                Thread.sleep(1000);
-                System.out.println("Checking Job status");
-                try (CloseableHttpResponse response = client.execute(jobGet)) {
-                    final int statusCode = response.getStatusLine().getStatusCode();
-                    done = statusCode == HttpStatus.OK_200 || statusCode > 300;
-                    if (done) {
-
-                        if (statusCode > 300) {
-                            System.out.printf("Received error: %s", response.getStatusLine().getReasonPhrase());
-                            System.exit(1);
-                        }
-                        final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-                        jobResponse = mapper.readValue(response.getEntity().getContent(), JobCompletionModel.class);
+            try {
+                exportOperation.execute();
+            } catch (BaseServerResponseException e) {
+                if (e instanceof NonFhirResponseException) {
+                    final NonFhirResponseException e1 = (NonFhirResponseException) e;
+                    if (e1.getStatusCode() != HttpStatus.NO_CONTENT_204) {
+                        e.printStackTrace();
+                        System.exit(1);
                     }
+
+                    // Get the correct header
+                    final Map<String, List<String>> headers = e1.getResponseHeaders();
+
+                    // Get the headers and check the status
+                    exportURL = headers.get("content-location").get(0);
+                    System.out.printf("Export job started. Progress URL: %s\n", exportURL);
                 }
             }
+
+            // Poll the job until it's done
+            final JobCompletionModel jobResponse = ClientUtils.awaitExportResponse(exportURL, "Checking job status");
+
+            System.out.print("\n\nExport job completed successfully.\n\nAvailable files:\n");
+            jobResponse.getOutput().forEach(System.out::println);
+
+            System.exit(0);
         }
-
-        System.out.print("Export job completed successfully.\nAvailable files:\n");
-        jobResponse.getOutput().forEach(System.out::println);
-
-        System.exit(0);
     }
 
     private static String getSeedsFile(Namespace namespace) {

@@ -32,6 +32,13 @@ public class ClientUtils {
 
     public static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
 
+    /**
+     * Helper method for creating an export request using the FHIR client
+     *
+     * @param client     - {@link IGenericClient} client to use for request
+     * @param providerID - {@link String} provider ID to request data for
+     * @return - {@link IOperationUntypedWithInput} export request, ready to execute
+     */
     public static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient client, String providerID) {
         return client
                 .operation()
@@ -42,6 +49,14 @@ public class ClientUtils {
                 .useHttpGet();
     }
 
+    /**
+     * Helper method for creating a roster {@link Bundle} and corresponding FHIR Post
+     *
+     * @param client   - {@link IGenericClient} client to use for request
+     * @param resource - {@link InputStream} representing test associations file
+     * @return - {@link ICreateTyped} FHIR Post operation, ready to execute
+     * @throws IOException - throws if unable to read the file
+     */
     public static ICreateTyped createRosterSubmission(IGenericClient client, InputStream resource) throws IOException {
         final SeedProcessor seedProcessor = new SeedProcessor(resource);
 
@@ -66,7 +81,16 @@ public class ClientUtils {
                 .encodedJson();
     }
 
-    public static JobCompletionModel awaitExportResponse(String jobLocation) throws IOException, InterruptedException {
+    /**
+     * Helper method to wait for an export request to complete, simply polls the given endpoint every second.
+     *
+     * @param jobLocation   - {@link String} URL where client can get job status
+     * @param statusMessage - {@link String} status message to print on each iteration
+     * @return - {@link JobCompletionModel} Completed job response
+     * @throws IOException          - throws if the HTTP request fails
+     * @throws InterruptedException - throws if the thread is interrupted
+     */
+    public static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage) throws IOException, InterruptedException {
         // Use the traditional HTTP Client to check the job status
         JobCompletionModel jobResponse = null;
         try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -75,7 +99,7 @@ public class ClientUtils {
 
             while (!done) {
                 Thread.sleep(1000);
-                System.out.println("Trying");
+                System.out.println(statusMessage);
                 try (CloseableHttpResponse response = client.execute(jobGet)) {
                     final int statusCode = response.getStatusLine().getStatusCode();
                     done = statusCode == HttpStatus.OK_200 || statusCode > 300;
@@ -89,6 +113,14 @@ public class ClientUtils {
         return jobResponse;
     }
 
+    /**
+     * Helper method to download a file from the {@link gov.cms.dpc.api.resources.v1.DataResource}
+     * Uses the {@link File#createTempFile(String, String)} method to create the file handle
+     *
+     * @param fileID - {@link String} full URL of the file to download
+     * @return - {@link File} file handle where the data is stored
+     * @throws IOException - throws if the HTTP request or file writing fails
+     */
     public static File fetchExportedFiles(String fileID) throws IOException {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
 

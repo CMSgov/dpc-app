@@ -76,7 +76,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         // Get the headers and check the status
         final String jobLocation = headers.get("content-location").get(0);
 
-        final JobCompletionModel jobResponse = ClientUtils.awaitExportResponse(jobLocation);
+        final JobCompletionModel jobResponse = ClientUtils.awaitExportResponse(jobLocation, "Trying");
 
 
         assertNotNull(jobResponse, "Should have Job Response");
