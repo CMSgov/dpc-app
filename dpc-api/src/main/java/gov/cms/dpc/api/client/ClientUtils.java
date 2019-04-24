@@ -1,0 +1,106 @@
+package gov.cms.dpc.api.client;
+
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import gov.cms.dpc.api.models.JobCompletionModel;
+import gov.cms.dpc.common.utils.SeedProcessor;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Parameters;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Shared methods for testing export jobs
+ * Used by the {@link gov.cms.dpc.api.cli.DemoCommand} and the EndtoEndRequestTest classes.
+ */
+public class ClientUtils {
+
+    public static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
+
+    public static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient client, String providerID) {
+        return client
+                .operation()
+                .onInstance(new IdDt("Group", providerID))
+                .named("$export")
+                .withNoParameters(Parameters.class)
+                .encodedJson()
+                .useHttpGet();
+    }
+
+    public static ICreateTyped createRosterSubmission(IGenericClient client, InputStream resource) throws IOException {
+        final SeedProcessor seedProcessor = new SeedProcessor(resource);
+
+        final Map<String, List<Pair<String, String>>> providerMap = seedProcessor.extractProviderMap();
+
+        // Find the entry for the given key (yes, I know this is bad)
+        final Map.Entry<String, List<Pair<String, String>>> providerRoster = providerMap
+                .entrySet()
+                .stream()
+                .filter((entry) -> entry.getKey().equals(PROVIDER_ID))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Cannot find matching provider"));
+
+        final Bundle providerBundle = seedProcessor.generateRosterBundle(providerRoster);
+
+        // Now, submit the bundle
+        // FIXME: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.
+        // Instead, we rely on the fact that an error is not thrown.
+        return client
+                .create()
+                .resource(providerBundle)
+                .encodedJson();
+    }
+
+    public static JobCompletionModel awaitExportResponse(String jobLocation) throws IOException, InterruptedException {
+        // Use the traditional HTTP Client to check the job status
+        JobCompletionModel jobResponse = null;
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet jobGet = new HttpGet(jobLocation);
+            boolean done = false;
+
+            while (!done) {
+                Thread.sleep(1000);
+                System.out.println("Trying");
+                try (CloseableHttpResponse response = client.execute(jobGet)) {
+                    final int statusCode = response.getStatusLine().getStatusCode();
+                    done = statusCode == HttpStatus.OK_200 || statusCode > 300;
+                    if (done) {
+                        final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+                        jobResponse = mapper.readValue(response.getEntity().getContent(), JobCompletionModel.class);
+                    }
+                }
+            }
+        }
+        return jobResponse;
+    }
+
+    public static File fetchExportedFiles(String fileID) throws IOException {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+
+            final File tempFile = File.createTempFile("dpc", ".ndjson");
+
+            final HttpGet fileGet = new HttpGet(fileID);
+            try (CloseableHttpResponse fileResponse = client.execute(fileGet)) {
+
+                fileResponse.getEntity().writeTo(new FileOutputStream(tempFile));
+
+                return tempFile;
+            }
+        }
+    }
+}
