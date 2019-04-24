@@ -16,6 +16,7 @@ cache:
     - $HOME/.m2
 
 before_install:
+  - sudo /etc/init.d/postgresql stop
   - docker-compose up -d db redis
   - wget https://codeclimate.com/downloads/test-reporter/test-reporter-0.6.3-linux-amd64 -O ./cc-test-reporter
   - chmod +x ./cc-test-reporter
