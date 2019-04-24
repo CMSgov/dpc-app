@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,7 +28,8 @@ public class MemoryQueue implements JobQueue {
 
     @Override
     public synchronized void submitJob(UUID jobID, JobModel job) {
-        assert(jobID == job.getJobID());
+        assert(jobID == job.getJobID() && job.getStatus() == JobStatus.QUEUED);
+        job.setSubmitTime(OffsetDateTime.now());
         logger.debug("Submitting job: {}", jobID);
         this.queue.put(jobID, job);
     }
@@ -53,6 +55,7 @@ public class MemoryQueue implements JobQueue {
             final UUID key = first.get().getKey();
             final JobModel data = first.get().getValue();
             data.setStatus(JobStatus.RUNNING);
+            data.setStartTime(OffsetDateTime.now());
             logger.debug("Found job {}", key);
             this.queue.replace(key, data);
             return Optional.of(new Pair<>(key, data));
@@ -70,6 +73,7 @@ public class MemoryQueue implements JobQueue {
         }
 
         job.setStatus(status);
+        job.setCompleteTime(OffsetDateTime.now());
         this.queue.replace(jobID, job);
     }
 

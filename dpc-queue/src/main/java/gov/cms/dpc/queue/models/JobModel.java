@@ -7,8 +7,10 @@ import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity(name = "job_queue")
@@ -41,21 +43,55 @@ public class JobModel {
         return String.format("%s.%s", jobID.toString(), resourceType.getPath());
     }
 
+    /**
+     * The unique job identifier
+     */
     @Id
     private UUID jobID;
 
+    /**
+     * The list of resource types requested
+     */
     @Convert(converter = ResourceTypeListConverter.class)
     @Column(name = "resource_types")
     private List<ResourceType> resourceTypes;
 
+    /**
+     * The provider-id from the request
+     */
     @Column(name = "provider_id")
     private String providerID;
 
+    /**
+     * The list of patient-ids for the specified provider from the attribution server
+     */
     @Convert(converter = StringListConverter.class)
     @Column(name = "patients", columnDefinition = "text")
     private List<String> patients;
 
+    /**
+     * The current status of this job
+     */
     private JobStatus status;
+
+    /**
+     * The time the job was submitted
+     */
+    @Column(name = "submit_time", nullable = true)
+    private OffsetDateTime submitTime;
+
+    /**
+     * The time the job started to work
+     */
+    @Column(name = "start_time", nullable = true)
+    private OffsetDateTime startTime;
+
+    /**
+     * The time the job was completed
+     */
+    @Column(name = "complete_time", nullable = true)
+    private OffsetDateTime completeTime;
+
 
     public JobModel() {
         // Hibernate required
@@ -109,6 +145,30 @@ public class JobModel {
         this.status = status;
     }
 
+    public Optional<OffsetDateTime> getSubmitTime() {
+        return Optional.ofNullable(submitTime);
+    }
+
+    public void setSubmitTime(OffsetDateTime submitTime) {
+        this.submitTime = submitTime;
+    }
+
+    public Optional<OffsetDateTime> getStartTime() {
+        return Optional.ofNullable(startTime);
+    }
+
+    public void setStartTime(OffsetDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public Optional<OffsetDateTime> getCompleteTime() {
+        return Optional.ofNullable(completeTime);
+    }
+
+    public void setCompleteTime(OffsetDateTime completeTime) {
+        this.completeTime = completeTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -118,11 +178,14 @@ public class JobModel {
                 Objects.equals(resourceTypes, jobModel.resourceTypes) &&
                 Objects.equals(providerID, jobModel.providerID) &&
                 Objects.equals(patients, jobModel.patients) &&
+                Objects.equals(submitTime, jobModel.submitTime) &&
+                Objects.equals(startTime, jobModel.startTime) &&
+                Objects.equals(completeTime, jobModel.completeTime) &&
                 status == jobModel.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobID, resourceTypes, providerID, patients, status);
+        return Objects.hash(jobID, resourceTypes, providerID, patients, status, submitTime, startTime, completeTime);
     }
 }

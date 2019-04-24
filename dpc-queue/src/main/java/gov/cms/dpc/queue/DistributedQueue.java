@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
@@ -31,8 +32,9 @@ public class DistributedQueue implements JobQueue {
 
     @Override
     public void submitJob(UUID jobID, JobModel data) {
-        assert(jobID == data.getJobID());
+        assert(jobID == data.getJobID() && data.getStatus() == JobStatus.QUEUED);
         logger.debug("Adding jobID {} to the queue with for provider {}.", jobID, data.getProviderID());
+        data.setSubmitTime(OffsetDateTime.now());
         // Persist the job in postgres
         final Transaction tx = this.session.beginTransaction();
         try {
@@ -97,6 +99,7 @@ public class DistributedQueue implements JobQueue {
 
             // Update the status and persist it
             jobModel.setStatus(JobStatus.RUNNING);
+            jobModel.setStartTime(OffsetDateTime.now());
             this.session.update(jobModel);
             tx.commit();
 
@@ -117,6 +120,7 @@ public class DistributedQueue implements JobQueue {
         try {
             final JobModel jobModel = this.session.get(JobModel.class, jobID);
             jobModel.setStatus(status);
+            jobModel.setCompleteTime(OffsetDateTime.now());
             this.session.update(jobModel);
             tx.commit();
         } catch (Exception e) {
