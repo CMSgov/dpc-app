@@ -7,24 +7,28 @@ language: java
 jdk:
   - oraclejdk11
 
-services:
-  - postgresql
-  - redis-server
+#services:
+#  - postgresql
+#  - redis-server
 
 cache:
   directories:
     - $HOME/.m2
 
-# Setup the postgres database for testing
-before_script:
-  - psql -c 'create database dpc_attribution;' -U postgres
-
 before_install:
+  - docker-compose up -d db redis
   - wget https://codeclimate.com/downloads/test-reporter/test-reporter-0.6.3-linux-amd64 -O ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
+# Setup the postgres database for testing
+#before_script:
+#  - psql -c 'create database dpc_attribution;' -U postgres
+
 after_script:
+  - docker-compose down
+  - docker-compose up -d --scale api=0
+  - mvn test -DexcludedGroups=none -pl dpc-api
   - mvn jacoco:report
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
