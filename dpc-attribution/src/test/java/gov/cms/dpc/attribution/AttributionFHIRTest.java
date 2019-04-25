@@ -24,11 +24,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -69,14 +71,16 @@ public class AttributionFHIRTest {
     @TestFactory
     Stream<DynamicTest> generateBundleTests() {
 
-        Function<Bundle, String> nameGenerator = (bundle) -> String.format("Testing provider: %s", ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue());
+        BiFunction<Bundle, String, String> nameGenerator = (bundle, operation) -> String.format("[%s] provider: %s", operation.toUpperCase(), ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue());
 
         // Get all the provider IDs and generate tests for them.
         return groupedPairs
                 .entrySet()
                 .stream()
                 .map(seedProcessor::generateRosterBundle)
-                .map((bundle) -> DynamicTest.dynamicTest(nameGenerator.apply(bundle), () -> submitRoster(bundle)));
+                .flatMap((bundle) -> Stream.of(
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));
 
     }
 
@@ -115,6 +119,18 @@ public class AttributionFHIRTest {
             try (CloseableHttpResponse response = client.execute(isAttributed)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
             }
+        }
+    }
+
+
+    private void updateRoster(Bundle bundle) throws IOException {
+
+        final String providerID = ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue();
+
+        final HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
+        getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
 
             // Add an additional patient
             // Create a new bundle with extra patients to attribute
@@ -149,6 +165,4 @@ public class AttributionFHIRTest {
             }
         }
     }
-
-
 }
