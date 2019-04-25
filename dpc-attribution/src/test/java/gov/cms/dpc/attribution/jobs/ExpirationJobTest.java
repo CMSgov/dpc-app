@@ -49,8 +49,7 @@ class ExpirationJobTest {
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate");
         // Seed the database, but use a really early time
-        APPLICATION.getApplication().run("seed", "-t 2015-01-01 12:12:12");
-        // TODO: Add additional attributions created after the expiration threshold (DPC-186)
+        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z");
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
     }

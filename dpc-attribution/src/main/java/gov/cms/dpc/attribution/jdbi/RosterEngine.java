@@ -15,9 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,7 +71,7 @@ public class RosterEngine implements AttributionEngine {
             final AttributionsRecord attr = new AttributionsRecord();
             attr.setProviderId(providerRecord.getId());
             attr.setPatientId(patientRecord.getId());
-            attr.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+            attr.setCreatedAt(OffsetDateTime.now());
 
             final int updated = ctx.executeInsert(attr);
             if (updated != 1) {
@@ -87,8 +85,7 @@ public class RosterEngine implements AttributionEngine {
         context.transaction(config -> {
 
             final DSLContext ctx = DSL.using(config);
-            final Timestamp creationTimestamp = Timestamp.from(Instant.now());
-            RosterUtils.handleAttributionBundle(attributionBundle, ctx, creationTimestamp);
+            RosterUtils.submitAttributionBundle(attributionBundle, ctx, OffsetDateTime.now());
         });
     }
 

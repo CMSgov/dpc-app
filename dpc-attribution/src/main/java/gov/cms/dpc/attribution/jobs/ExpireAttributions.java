@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -49,7 +48,7 @@ public class ExpireAttributions extends Job {
         try {
             final int removed = context
                     .delete(Attributions.ATTRIBUTIONS)
-                    .where(Attributions.ATTRIBUTIONS.CREATED_AT.le(Timestamp.from(this.expirationTemporal.toInstant())))
+                    .where(Attributions.ATTRIBUTIONS.CREATED_AT.le(this.expirationTemporal))
                     .execute();
             logger.debug("Expired {} attribution relationships.", removed);
         } finally {

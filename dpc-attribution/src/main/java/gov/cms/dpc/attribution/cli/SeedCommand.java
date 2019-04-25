@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.MissingResourceException;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
@@ -61,7 +62,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(environment.metrics(), "attribution-seeder");
 
-        final Timestamp creationTimestamp = generateTimestamp(namespace);
+        final OffsetDateTime creationTimestamp = generateTimestamp(namespace);
 
         // Read in the seeds file and write things
         logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
@@ -77,16 +78,16 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     .entrySet()
                     .stream()
                     .map(this.seedProcessor::generateRosterBundle)
-                    .forEach(bundle -> RosterUtils.handleAttributionBundle(bundle, context, creationTimestamp));
+                    .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, creationTimestamp));
             logger.info("Finished loading seeds");
         }
     }
 
-    private static Timestamp generateTimestamp(Namespace namespace) {
+    private static OffsetDateTime generateTimestamp(Namespace namespace) {
         final String timestamp = namespace.getString("timestamp");
         if (timestamp == null) {
-            return Timestamp.from(Instant.now());
+            return OffsetDateTime.now();
         }
-        return Timestamp.valueOf(timestamp);
+        return OffsetDateTime.parse(timestamp.trim());
     }
 }

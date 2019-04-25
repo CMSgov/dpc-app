@@ -74,4 +74,8 @@
         <addUniqueConstraint tableName="patients" columnNames="beneficiary_id"/>
     </changeSet>
 
+    <changeSet id="migrate-to-timezone" author="nickrobison-usds">
+        <modifyDataType tableName="attributions" columnName="created_at" newDataType="TIMESTAMP WITH TIME ZONE"/>
+    </changeSet>
+
 </databaseChangeLog>

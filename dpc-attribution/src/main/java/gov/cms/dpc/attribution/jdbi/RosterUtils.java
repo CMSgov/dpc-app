@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static gov.cms.dpc.attribution.dao.tables.Patients.PATIENTS;
@@ -29,12 +30,13 @@ public class RosterUtils {
 
     /**
      * Helper method for adding a roster {@link Bundle} to the RDBMS backend
+     * When submitting the bundle, the values in the provided {@link Bundle} are merged with any existing values in the database.
      *
      * @param attributionBundle - Roster {@link Bundle} to add/update
      * @param ctx               - {@link DSLContext} DB context to utilize
      * @param creationTimestamp - {@link Timestamp} of when the attribution relationships were updated
      */
-    public static void handleAttributionBundle(Bundle attributionBundle, DSLContext ctx, Timestamp creationTimestamp) {
+    public static void submitAttributionBundle(Bundle attributionBundle, DSLContext ctx, OffsetDateTime creationTimestamp) {
 
         // Insert the provider, patient, and attribution relationships
         final Practitioner provider = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
@@ -58,7 +60,7 @@ public class RosterUtils {
                 .forEach(patientEntity -> RosterUtils.createUpdateAttributionRelationship(ctx, patientEntity, providerRecord, creationTimestamp));
     }
 
-    private static void createUpdateAttributionRelationship(DSLContext ctx, PatientEntity patientEntity, ProvidersRecord providerRecord, Timestamp creationTimestamp) {
+    private static void createUpdateAttributionRelationship(DSLContext ctx, PatientEntity patientEntity, ProvidersRecord providerRecord, OffsetDateTime creationTimestamp) {
         // Create a new record from the patient entity
         if (patientEntity.getPatientID() == null) {
             patientEntity.setPatientID(UUID.randomUUID());

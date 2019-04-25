@@ -31,7 +31,7 @@ public class AttributionRelationship {
     @ManyToOne(cascade = CascadeType.PERSIST)
     private PatientEntity patient;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
     private OffsetDateTime created;
 
