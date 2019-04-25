@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.aggregation.bbclient.MockBlueButtonClient;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.EncryptingAggregationEngine;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -42,7 +43,7 @@ class AggregationEngineTest {
     private static final String RSA_PUBLIC_KEY_PATH = "./test_rsa_public_key.der";
     private BlueButtonClient bbclient;
     private JobQueue queue;
-    private AggregationEngine engine;
+    private EncryptingAggregationEngine engine;
     private RSAPublicKey rsaPublicKey;
     private RSAPrivateKey rsaPrivateKey;
 
@@ -57,7 +58,7 @@ class AggregationEngineTest {
     void setupEach() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         queue = new MemoryQueue();
         bbclient = new MockBlueButtonClient();
-        engine = new AggregationEngine(bbclient, queue, config);
+        engine = new EncryptingAggregationEngine(bbclient, queue, config);
 
 
         // Ref: https://stackoverflow.com/questions/11410770/load-rsa-public-key-from-file
@@ -158,8 +159,29 @@ class AggregationEngineTest {
      * Test if the engine writes encrypted files to the Tmp filesystem
      */
     @Test
-    void shouldWritedEncryptedTmpFiles()  {
-        // TODO (isears)
+    void shouldWriteEncryptedTmpFiles()  {
+        // Make a simple job with one resource type
+        final var jobId = UUID.randomUUID();
+        JobModel job = new JobModel(jobId,
+                Collections.singletonList(ResourceType.Patient),
+                TEST_PROVIDER_ID,
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS[0]),
+                rsaPublicKey
+        );
+
+        // Do the job
+        queue.submitJob(jobId, job);
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+
+        // Look at the result
+        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
+        var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
+        var metadataFilePath = engine.formOutputMetadataPath(jobId, ResourceType.Patient);
+
+        // TODO (isears): read file and verify it's encrypted
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        assertTrue(Files.exists(Path.of(metadataFilePath)));
 
     }
 

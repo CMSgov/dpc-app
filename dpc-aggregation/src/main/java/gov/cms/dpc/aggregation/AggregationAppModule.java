@@ -9,7 +9,9 @@ import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 
+import javax.crypto.Cipher;
 import javax.inject.Singleton;
+import java.io.OutputStream;
 import java.util.List;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
