@@ -22,17 +22,8 @@ public class JobCompletionModel {
      * The full request of the original request URL
      */
     private String request;
-
-    /**
-     * Boolean value indicating whether downloading the generated files will require an authentication token
-     */
-    private final boolean secure = false;
-
-    /**
-     * List of output entries with one entry for each generated file
-     */
+    private final boolean requiresAccessToken = false;
     private List<OutputEntryModel> output;
-
     // FIXME(nickrobison): Should return errors as well. OperationOutcomes, serialized as NDJSON
     private final List<String> error = new ArrayList<>();
 
@@ -62,8 +53,8 @@ public class JobCompletionModel {
         this.request = request;
     }
 
-    public boolean isSecure() {
-        return secure;
+    public boolean isRequiresAccessToken() {
+        return requiresAccessToken;
     }
 
     public List<OutputEntryModel> getOutput() {
