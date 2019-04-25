@@ -22,6 +22,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
+ */
 public class JobResource extends AbstractJobResource {
 
     private final JobQueue queue;

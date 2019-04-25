@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implements the model for the JSON response for a complete job. See https://hl7.org/fhir/2018May/async.html for details.
+ * Implements the model for the JSON response for a complete job.
+ * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
  */
 public class JobCompletionModel {
 
@@ -24,7 +25,7 @@ public class JobCompletionModel {
     private String request;
     private final boolean requiresAccessToken = false;
     private List<OutputEntryModel> output;
-    // FIXME(nickrobison): Should return errors as well. OperationOutcomes, serialized as NDJSON
+    // FIXME(rickhawes): DPC-205 will fill in this array.
     private final List<String> error = new ArrayList<>();
 
     public JobCompletionModel() {
