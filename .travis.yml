@@ -48,6 +48,6 @@ after_script:
         JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
     done
 
-  - ./cc-test-reporter sum-coverage reports/codeclimate.* coverage/codeclimate.json
+  - ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
   - ./cc-test-reporter upload-coverage
 
