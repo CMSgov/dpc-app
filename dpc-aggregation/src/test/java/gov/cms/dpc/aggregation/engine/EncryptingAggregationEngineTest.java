@@ -1,5 +1,8 @@
 package gov.cms.dpc.aggregation.engine;
 
+import ca.uhn.fhir.context.FhirContext;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
@@ -8,12 +11,18 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,8 +32,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -65,15 +73,13 @@ class EncryptingAggregationEngineTest {
         byte[] publicKeyRaw = Files.readAllBytes(publicKeyPath); // Throws IOException
         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyRaw);
         rsaPublicKey = (RSAPublicKey) keyFactory.generatePublic(publicKeySpec); // Throws InvalidKeySpecException
-
-
     }
 
     /**
      * Test if the engine writes encrypted files to the Tmp filesystem
      */
     @Test
-    void shouldWriteEncryptedTmpFiles()  {
+    void shouldWriteEncryptedTmpFiles() throws Exception { // TODO (isears): do better
         // Make a simple job with one resource type
         final var jobId = UUID.randomUUID();
         JobModel job = new JobModel(jobId,
@@ -93,10 +99,14 @@ class EncryptingAggregationEngineTest {
         var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
         var metadataFilePath = engine.formOutputMetadataPath(jobId, ResourceType.Patient);
 
-        // TODO (isears): read file and verify it's encrypted
         assertTrue(Files.exists(Path.of(outputFilePath)));
         assertTrue(Files.exists(Path.of(metadataFilePath)));
 
+        // Attempt to decrypt result
+        String cleartext = decryptTmpFile(Path.of(metadataFilePath), Path.of(outputFilePath));
+        IBaseResource result = FhirContext.forDstu3().newJsonParser().parseResource(cleartext);
+
+        assertTrue(result instanceof Patient);
     }
 
     /**
@@ -116,7 +126,48 @@ class EncryptingAggregationEngineTest {
         sig.update(challenge);
 
         assertTrue(sig.verify(signature));
+    }
 
+    private String decryptTmpFile(Path metadataPath, Path dataPath) throws Exception {  // TODO (isears): Do better
+        byte[] metadataRaw = Files.readAllBytes(metadataPath);
+        Map<String,Object> metadataActual = new ObjectMapper().readValue(metadataRaw, new TypeReference<Map<String,Object>>(){});
+
+        // Check metadata has all required fields
+        assertTrue(metadataActual.containsKey("SymmetricProperties"));
+        assertTrue(metadataActual.containsKey("AsymmetricProperties"));
+
+
+        Map symmetricProperties =  (Map) metadataActual.get("SymmetricProperties");
+        String symmetricCipher = (String) symmetricProperties.get("Cipher");
+        byte[] encryptedSymmetricKey = Base64.getDecoder().decode((String) symmetricProperties.get("EncryptedKey"));
+        byte[] symmetricIv = Base64.getDecoder().decode((String) symmetricProperties.get("InitializationVector"));
+        int gcmTagLength = (int) symmetricProperties.get("TagLength");
+
+        Map asymmetricProperties = (Map) metadataActual.get("AsymmetricProperties");
+        String asymmetricCipher = (String) asymmetricProperties.get("Cipher");
+
+        // Make sure the same RSA public key is echoed back in the metadata
+        assertArrayEquals(Base64.getDecoder().decode((String) asymmetricProperties.get("PublicKey")), rsaPublicKey.getEncoded());
+
+
+        // Initialize asymmetric cipher for decrypting the symmetric key
+        Cipher rsaCipher = Cipher.getInstance(asymmetricCipher);
+        rsaCipher.init(Cipher.DECRYPT_MODE, rsaPrivateKey);
+
+        // Initialize the symmetric cipher using the asymmetric cipher to decrypt the secret key
+        byte[] aesSecretKeyRaw = rsaCipher.doFinal(encryptedSymmetricKey);
+        Cipher aesCipher = Cipher.getInstance(symmetricCipher);
+        aesCipher.init(
+                Cipher.DECRYPT_MODE,
+                new SecretKeySpec(aesSecretKeyRaw, symmetricCipher.split("/")[0]),
+                new GCMParameterSpec(gcmTagLength, symmetricIv)
+        );
+
+        try(final FileInputStream reader  = new FileInputStream(dataPath.toString())) {
+
+            CipherInputStream cipherReader = new CipherInputStream(reader, aesCipher);
+            return new String(cipherReader.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
 }
