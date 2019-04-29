@@ -3,6 +3,7 @@ package gov.cms.dpc.api.models;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class JobCompletionModel {
 
@@ -14,6 +15,7 @@ public class JobCompletionModel {
     private List<String> output;
     // FIXME(nickrobison): Should return errors as well. OperationOutcomes, serialized as NDJSON
     private final List<String> error = new ArrayList<>();
+    private Map<String, Object> encryptionParameters;
 
     public JobCompletionModel() {
 
@@ -23,6 +25,13 @@ public class JobCompletionModel {
         this.transactionTime = transactionTime;
         this.request = request;
         this.output = output;
+    }
+
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<String> output, Map<String, Object> encryptionParameters) {
+        this.transactionTime = transactionTime;
+        this.request = request;
+        this.output = output;
+        this.encryptionParameters = encryptionParameters;
     }
 
     public OffsetDateTime getTransactionTime() {
@@ -55,5 +64,13 @@ public class JobCompletionModel {
 
     public List<String> getError() {
         return error;
+    }
+
+    public Map<String, Object> getEncryptionParameters() {
+        return encryptionParameters;
+    }
+
+    public void setEncryptionParameters(Map<String, Object> encryptionParameters) {
+        this.encryptionParameters = encryptionParameters;
     }
 }

@@ -25,7 +25,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -71,7 +70,6 @@ class EncryptingAggregationEngineTest {
 
         byte[] privateKeyRaw = testPrivateKeyResource.readAllBytes();
         byte[] publicKeyRaw = testPublicKeyResource.readAllBytes();
-
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 

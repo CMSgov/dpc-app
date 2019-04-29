@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.SecureRandom;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +76,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
 
         try {
             // Generate Key
-            KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/")[0]); // No such alg exception
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/")[0]);
             keyGenerator.init(keyBits);
             SecretKey secretKey = keyGenerator.generateKey();
 
@@ -126,8 +128,13 @@ public class EncryptingAggregationEngine extends AggregationEngine {
     private void saveEncryptionMetadata(JobModel job, ResourceType resourceType, SecretKey aesSecretKey, byte[] iv) {
 
         try {
+
+            KeyFactory rsaKeyFactory = KeyFactory.getInstance("RSA");
             Cipher rsaCipher = Cipher.getInstance(asymmetricCipher);
-            rsaCipher.init(Cipher.ENCRYPT_MODE, job.getRsaPublicKey());
+            rsaCipher.init(
+                    Cipher.ENCRYPT_MODE,
+                    rsaKeyFactory.generatePublic(new X509EncodedKeySpec(job.getRsaPublicKey()))
+            );
 
             Map<String,Object> metadata = new HashMap<>();
             Map<String,Object> symmetricMetadata = new HashMap<>();
@@ -139,7 +146,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
             symmetricMetadata.put("TagLength", gcmTagLength);
 
             asymmetricMetadata.put("Cipher", asymmetricCipher);
-            asymmetricMetadata.put("PublicKey", Base64.getEncoder().encodeToString(job.getRsaPublicKey().getEncoded()));
+            asymmetricMetadata.put("PublicKey", Base64.getEncoder().encodeToString(job.getRsaPublicKey()));
 
             metadata.put("SymmetricProperties", symmetricMetadata);
             metadata.put("AsymmetricProperties", asymmetricMetadata);

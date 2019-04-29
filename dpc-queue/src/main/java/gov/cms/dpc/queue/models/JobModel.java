@@ -7,6 +7,7 @@ import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
+import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.Objects;
@@ -58,7 +59,7 @@ public class JobModel {
 
     private JobStatus status;
 
-    private RSAPublicKey rsaPublicKey;
+    private byte[] rsaPublicKey;
 
     public JobModel() {
         // Hibernate required
@@ -78,7 +79,7 @@ public class JobModel {
         this.providerID = providerID;
         this.patients  = patients;
         this.status = JobStatus.QUEUED;
-        this.rsaPublicKey = pubKey;
+        this.rsaPublicKey = pubKey.getEncoded();
     }
 
     public UUID getJobID() {
@@ -121,7 +122,7 @@ public class JobModel {
         this.status = status;
     }
 
-    public RSAPublicKey getRsaPublicKey() {
+    public byte[] getRsaPublicKey() {
         if (rsaPublicKey == null) {
             throw new NullPointerException("This Job was created without a public key!");
         } else {
@@ -129,8 +130,12 @@ public class JobModel {
         }
     }
 
-    public void setRsaPublicKey(RSAPublicKey rsaPublicKey) {
+    public void setRsaPublicKey(byte[] rsaPublicKey) {
         this.rsaPublicKey = rsaPublicKey;
+    }
+
+    public void setPublicKey(RSAPublicKey rsaPublicKey) {
+        this.rsaPublicKey = rsaPublicKey.getEncoded();
     }
 
     @Override
