@@ -37,7 +37,7 @@ public class DemoCommand extends Command {
                 .addArgument("-f", "--file")
                 .dest("seed-file")
                 .type(String.class)
-                .setDefault("src/resources/test_associations.csv")
+                .setDefault("src/main/resources/test_associations.csv")
                 .help("Association file to use for demo purposes. Defaults to project root");
 
         // Option for overriding provider id
