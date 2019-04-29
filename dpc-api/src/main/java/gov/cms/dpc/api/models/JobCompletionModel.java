@@ -2,6 +2,7 @@ package gov.cms.dpc.api.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.api.converters.OffsetDateTimeToStringConverter;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -12,6 +13,34 @@ import java.util.List;
  * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
  */
 public class JobCompletionModel {
+    /**
+     * An entry in the {@link JobCompletionModel} output field.
+     */
+    public static class OutputEntry {
+        /**
+         * the FHIR resource type that is contained in the file
+         */
+        private ResourceType type;
+
+        /**
+         * the path to the file
+         */
+        private String url;
+
+        public OutputEntry(ResourceType type, String url) {
+            this.type = type;
+            this.url = url;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public ResourceType getType() {
+            return type;
+        }
+    }
+
 
     /**
      * An instant type that indicates the server's time when the query is run. No resources that have a modified data after this instant should be in the response.
@@ -24,15 +53,11 @@ public class JobCompletionModel {
      */
     private String request;
     private final boolean requiresAccessToken = false;
-    private List<OutputEntryModel> output;
+    private List<OutputEntry> output;
     // FIXME(rickhawes): DPC-205 will fill in this array.
     private final List<String> error = new ArrayList<>();
 
-    public JobCompletionModel() {
-
-    }
-
-    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntryModel> output) {
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output) {
         this.transactionTime = transactionTime;
         this.request = request;
         this.output = output;
@@ -58,11 +83,11 @@ public class JobCompletionModel {
         return requiresAccessToken;
     }
 
-    public List<OutputEntryModel> getOutput() {
+    public List<OutputEntry> getOutput() {
         return output;
     }
 
-    public void setOutput(List<OutputEntryModel> output) {
+    public void setOutput(List<OutputEntry> output) {
         this.output = output;
     }
 

@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.models.JobCompletionModel;
-import gov.cms.dpc.api.models.OutputEntryModel;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -102,9 +101,9 @@ public class JobResourceTest {
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
-        for (OutputEntryModel entry: completion.getOutput()) {
-            assertTrue(JobModel.validResourceTypes.contains(entry.type));
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, entry.type)), entry.url);
+        for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
+            assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, entry.getType())), entry.getUrl());
         }
     }
 
