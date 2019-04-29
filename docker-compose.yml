@@ -35,9 +35,10 @@ services:
       - ENV=dev
     ports:
       - "3500:8080"
+      - "9901:9900"
 
-  web:
-    image: dpc-web
+  api:
+    image: dpc-api
     ports:
       - "3002:3002"
     environment:

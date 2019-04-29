@@ -59,12 +59,6 @@
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
-            <artifactId>dpc-aggregation</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-common</artifactId>
             <version>0.2.0-SNAPSHOT</version>
             <scope>compile</scope>
@@ -107,7 +101,7 @@
         <!--Pull in the attribution seeds so we can use them for the integration tests.-->
         <testResources>
             <testResource>
-                <directory>${project.basedir}/../src/resources</directory>
+                <directory>${project.basedir}/../src/main/resources</directory>
             </testResource>
         </testResources>
         <plugins>
