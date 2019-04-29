@@ -3,12 +3,7 @@ package gov.cms.dpc.attribution.cli;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
-import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
-import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
-import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
-import gov.cms.dpc.common.entities.AttributionRelationship;
-import gov.cms.dpc.common.entities.PatientEntity;
-import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.attribution.jdbi.RosterUtils;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
@@ -17,10 +12,6 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.jooq.DSLContext;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
@@ -33,7 +24,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.MissingResourceException;
-import java.util.UUID;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
@@ -72,7 +62,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(environment.metrics(), "attribution-seeder");
 
-        final Timestamp creationTimestamp = generateTimestamp(namespace);
+        final OffsetDateTime creationTimestamp = generateTimestamp(namespace);
 
         // Read in the seeds file and write things
         logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
@@ -88,49 +78,16 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     .entrySet()
                     .stream()
                     .map(this.seedProcessor::generateRosterBundle)
-                    .forEach(bundle -> {
-                        // Insert the provider , patients, and the attribution relationships
-                        final Practitioner provider = (Practitioner) bundle.getEntryFirstRep().getResource();
-
-                        final ProviderEntity providerEntity = ProviderEntity.fromFHIR(provider);
-                        providerEntity.setProviderID(UUID.randomUUID());
-
-                        logger.info("Adding provider {}", providerEntity.getProviderNPI());
-
-                        final ProvidersRecord pr = context.newRecord(Providers.PROVIDERS, providerEntity);
-                        pr.setId(UUID.randomUUID());
-                        context.executeInsert(pr);
-
-                        bundle
-                                .getEntry()
-                                .stream()
-                                .map(Bundle.BundleEntryComponent::getResource)
-                                .filter((resource -> resource.getResourceType() == ResourceType.Patient))
-                                .map(patient -> PatientEntity.fromFHIR((Patient) patient))
-                                .forEach(patientEntity -> {
-                                    // Create a new record from the patient entity
-                                    patientEntity.setPatientID(UUID.randomUUID());
-                                    final PatientsRecord patient = context.newRecord(Patients.PATIENTS, patientEntity);
-                                    patient.setId(UUID.randomUUID());
-                                    context.executeInsert(patient);
-
-                                    // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
-                                    final AttributionsRecord attr = new AttributionsRecord();
-                                    attr.setProviderId(pr.getId());
-                                    attr.setPatientId(patient.getId());
-                                    attr.setCreatedAt(creationTimestamp);
-                                    context.executeInsert(attr);
-                                });
-                    });
+                    .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, creationTimestamp));
             logger.info("Finished loading seeds");
         }
     }
 
-    private static Timestamp generateTimestamp(Namespace namespace) {
+    private static OffsetDateTime generateTimestamp(Namespace namespace) {
         final String timestamp = namespace.getString("timestamp");
         if (timestamp == null) {
-            return Timestamp.from(Instant.now());
+            return OffsetDateTime.now();
         }
-        return Timestamp.valueOf(timestamp);
+        return OffsetDateTime.parse(timestamp.trim());
     }
 }

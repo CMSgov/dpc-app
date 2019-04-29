@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
+import org.hibernate.annotations.SQLInsert;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -10,10 +11,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "providers")
-@NamedQueries({
+@NamedQueries(value = {
         @NamedQuery(name = "getProvider", query = "select 1 from providers a where a.providerNPI = :provID"),
         @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id")
 })
+@SQLInsert(sql = "INSERT INTO providers(first_name, last_name, provider_id, id) VALUES(?, ?, ?, ?)" +
+        " ON CONFLICT (provider_id) DO UPDATE SET last_name = EXCLUDED.last_name," +
+        " first_name = EXCLUDED.first_name")
 public class ProviderEntity {
 
     @Id
@@ -21,7 +25,7 @@ public class ProviderEntity {
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID providerID;
 
-    @Column(name = "provider_id")
+    @Column(name = "provider_id", unique = true)
     private String providerNPI;
     @Column(name = "first_name")
     private String providerFirstName;
