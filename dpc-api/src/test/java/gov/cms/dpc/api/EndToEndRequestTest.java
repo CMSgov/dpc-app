@@ -82,7 +82,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         assertEquals(1, jobResponse.getOutput().size(), "Should have 1 file");
 
         // Get the first file and download it.
-        final String fileID = jobResponse.getOutput().get(0);
+        final String fileID = jobResponse.getOutput().get(0).getUrl();
         final File tempFile = ClientUtils.fetchExportedFiles(fileID);
 
         // Read the file back in and parse the patients
