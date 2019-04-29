@@ -7,34 +7,43 @@ language: java
 jdk:
   - oraclejdk11
 
-addons:
-  postgresql: "9.6"
-
-services:
-  - postgresql
-  - redis-server
-
 cache:
   directories:
     - $HOME/.m2
 
-# Setup the postgres database for testing
-before_script:
-  - psql -c 'create database dpc_attribution;' -U postgres
-
 before_install:
+  - sudo /etc/init.d/postgresql stop
+  - docker-compose up -d db redis
   - wget https://codeclimate.com/downloads/test-reporter/test-reporter-0.6.3-linux-amd64 -O ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
+# Setup the postgres database for testing
+#before_script:
+#  - psql -c 'create database dpc_attribution;' -U postgres
+
 after_script:
+  # Format the test results and copy to a new directory
+  - mkdir reports
+  - mvn jacoco:report
+    - |
+    for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
+    do
+    JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
+    done
+  - ls reports
+  - docker-compose down
+  - docker-compose up -d --scale api=0
+  - sleep 30
+  # Run the integration-test profile, which only runs a subset of the tests
+  - mvn test -Pintegration-tests -pl dpc-api
   - mvn jacoco:report
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
     do
-      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco
+        JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
     done
 
-  - ./cc-test-reporter sum-coverage coverage/codeclimate.json
+  - ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
   - ./cc-test-reporter upload-coverage
 
