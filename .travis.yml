@@ -7,10 +7,6 @@ language: java
 jdk:
   - oraclejdk11
 
-#services:
-#  - postgresql
-#  - redis-server
-
 cache:
   directories:
     - $HOME/.m2
