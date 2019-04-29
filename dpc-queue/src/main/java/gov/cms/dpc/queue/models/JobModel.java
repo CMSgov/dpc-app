@@ -4,6 +4,7 @@ import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
@@ -105,6 +106,20 @@ public class JobModel {
         this.status = JobStatus.QUEUED;
     }
 
+    /**
+     * Is the job model fields consistent. Useful before and after serialization.
+     *
+     * @return True if the fields are consistent with each other
+     */
+    public Boolean isValid() {
+        switch (status) {
+            case QUEUED: return submitTime != null;
+            case RUNNING: return submitTime  != null && startTime != null;
+            case COMPLETED: case FAILED: return submitTime != null && startTime != null && completeTime != null;
+            default: return false;
+        }
+    }
+
     public UUID getJobID() {
         return jobID;
     }
@@ -173,15 +188,17 @@ public class JobModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        JobModel jobModel = (JobModel) o;
-        return Objects.equals(jobID, jobModel.jobID) &&
-                Objects.equals(resourceTypes, jobModel.resourceTypes) &&
-                Objects.equals(providerID, jobModel.providerID) &&
-                Objects.equals(patients, jobModel.patients) &&
-                Objects.equals(submitTime, jobModel.submitTime) &&
-                Objects.equals(startTime, jobModel.startTime) &&
-                Objects.equals(completeTime, jobModel.completeTime) &&
-                status == jobModel.status;
+        JobModel other = (JobModel) o;
+        return new EqualsBuilder()
+                .append(jobID, other.jobID)
+                .append(resourceTypes, other.resourceTypes)
+                .append(providerID, other.providerID)
+                .append(patients, other.patients)
+                .append(submitTime, other.submitTime)
+                .append(startTime, other.startTime)
+                .append(completeTime, other.completeTime)
+                .append(status, other.status)
+                .isEquals();
     }
 
     @Override
