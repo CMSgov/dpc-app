@@ -22,7 +22,7 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
     // The delimiter for the '_types' list query param.
-    private static final String LIST_DELIM = ",";
+    public static final String LIST_DELIM = ",";
 
     private final JobQueue queue;
     private final AttributionEngine client;

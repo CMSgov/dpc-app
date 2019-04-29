@@ -101,10 +101,10 @@ public class JobResourceTest {
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
-        JobModel.validResourceTypes.stream().forEach(resourceType -> {
-            var expectedURL = String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, resourceType));
-            assertTrue(completion.getOutput().contains(expectedURL));
-        });
+        for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
+            assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, entry.getType())), entry.getUrl());
+        }
     }
 
     /**
