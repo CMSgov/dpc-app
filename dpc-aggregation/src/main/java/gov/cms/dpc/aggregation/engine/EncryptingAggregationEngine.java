@@ -85,10 +85,9 @@ public class EncryptingAggregationEngine extends AggregationEngine {
 
             saveEncryptionMetadata(job, resourceType, secretKey, iv);
 
-            // Ideally, we explicitly remove key material from memory when we're done.
-            // Unfortunately, calling secretKey.destroy() will throw DestroyFailedException
+            // Ideally, we explicitly remove key material (with secretKey.destroy();) from memory when we're done.
+            // Unfortunately, calling secretKey.destroy(); will throw DestroyFailedException
             // As of Apr 2019, there was still no good way to do this in OpenJDK (ref: https://bugs.openjdk.java.net/browse/JDK-8160206)
-            // secretKey.destroy();
 
         } catch(GeneralSecurityException | IOException ex) {
             throw new JobQueueFailure(job.getJobID(), ex);
