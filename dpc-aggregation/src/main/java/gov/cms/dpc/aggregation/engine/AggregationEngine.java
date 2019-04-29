@@ -115,7 +115,6 @@ public class AggregationEngine implements Runnable {
                     throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
                 }
 
-                // TODO (isears): This is where the encryption needs to happen
                 try (final FileOutputStream writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType))) {
                     workResource(writer, job, resourceType);
                     writer.flush();
@@ -136,7 +135,7 @@ public class AggregationEngine implements Runnable {
      * @param job - the job to process
      * @param resourceType - the FHIR resource type to write out
      */
-    protected void workResource(OutputStream writer, JobModel job, ResourceType resourceType) throws Exception { // TODO (isears): do better
+    protected void workResource(OutputStream writer, JobModel job, ResourceType resourceType) {
         final IParser parser = context.newJsonParser();
 
         job.getPatients()

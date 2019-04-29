@@ -58,14 +58,12 @@ public class JobModel {
 
     private JobStatus status;
 
-    // TODO (isears): Add hibernate annotations?
     private RSAPublicKey rsaPublicKey;
 
     public JobModel() {
         // Hibernate required
     }
 
-    // TODO (isears) remove this constructor when aggregation-engine encryption is implemented
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
@@ -74,7 +72,6 @@ public class JobModel {
         this.status = JobStatus.QUEUED;
     }
 
-    // TODO (isears): enforce a key length here?
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
         this.jobID  = jobID;
         this.resourceTypes = resourceTypes;
@@ -124,7 +121,6 @@ public class JobModel {
         this.status = status;
     }
 
-    // TODO (isears): this check won't be necessary once the old constructor is removed
     public RSAPublicKey getRsaPublicKey() {
         if (rsaPublicKey == null) {
             throw new NullPointerException("This Job was created without a public key!");
@@ -133,7 +129,6 @@ public class JobModel {
         }
     }
 
-    // TODO (isears): enforce a key length here?
     public void setRsaPublicKey(RSAPublicKey rsaPublicKey) {
         this.rsaPublicKey = rsaPublicKey;
     }

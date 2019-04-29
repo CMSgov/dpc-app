@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -16,8 +15,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.inject.Inject;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
@@ -26,13 +27,11 @@ import java.util.UUID;
 
 public class EncryptingAggregationEngine extends AggregationEngine {
 
-    private static final Logger logger = LoggerFactory.getLogger(EncryptingAggregationEngine.class);
-
     private static final String SYMMETRIC_CIPHER =  "AES/GCM/NoPadding";
     private static final String ASYMMETRIC_CIPHER = "RSA/ECB/PKCS1Padding";
     private static final int KEY_BITS = 128;
     private static final int GCM_TAG_LENGTH = 128;
-    private static final int IV_BITS = 96;
+    private static final int IV_BITS = 96; // GCM Salt SHALL be 12 bytes ref: RFC 5288, Sec 3
 
 
     /**
@@ -51,79 +50,103 @@ public class EncryptingAggregationEngine extends AggregationEngine {
         return String.format("%s/%s.ndjson.enc", exportPath, JobModel.outputFileName(jobID, resourceType));
     }
 
-    @Override
-    protected void workResource(OutputStream writer, JobModel job, ResourceType resourceType) throws Exception { // TODO (isears): Do better
-        SecureRandom secureRandom = new SecureRandom();
-
-        // Generate Key
-        KeyGenerator keyGenerator = KeyGenerator.getInstance(SYMMETRIC_CIPHER.split("/")[0]);
-        keyGenerator.init(KEY_BITS);
-        SecretKey secretKey = keyGenerator.generateKey();
-
-        // Generate IV
-        byte[] iv =  new byte[IV_BITS / 8];
-        secureRandom.nextBytes(iv);
-
-
-        Cipher aesCipher = Cipher.getInstance(SYMMETRIC_CIPHER);
-        aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
-
-        try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);) {
-            super.workResource(cipherOutputStream, job, resourceType);
-        }
-
-        saveEncryptionMetadata(job, resourceType, secretKey, iv);
-
-        // TODO (isears): Ideally we destroy the key after everything is done, but this throws a DestroyFailedException
-        //secretKey.destroy();
-
+    public String formOutputMetadataPath(UUID jobID, ResourceType resourceType) {
+        return String.format("%s/%s-metadata.json", exportPath, JobModel.outputFileName(jobID, resourceType));
     }
 
-    // TODO (isears): re-write this javadoc to reflect changes
+    /**
+     * Creates and configures a {@link CipherOutputStream} and injects it into the Aggregation engine to override the
+     * generic FileOutputStream
+     *
+     * @param writer - the stream to be wrapped in a {@link CipherOutputStream}
+     * @param job - the job to process
+     * @param resourceType - the FHIR resource type to write out
+     */
+    @Override
+    protected void workResource(OutputStream writer, JobModel job, ResourceType resourceType) {
+        SecureRandom secureRandom = new SecureRandom();
+
+        try {
+            // Generate Key
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(SYMMETRIC_CIPHER.split("/")[0]); // No such alg exception
+            keyGenerator.init(KEY_BITS);
+            SecretKey secretKey = keyGenerator.generateKey();
+
+            // Generate IV
+            byte[] iv =  new byte[IV_BITS / 8];
+            secureRandom.nextBytes(iv);
+
+            Cipher aesCipher = Cipher.getInstance(SYMMETRIC_CIPHER);
+            aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
+
+            try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);) {
+                super.workResource(cipherOutputStream, job, resourceType);
+            }
+
+            saveEncryptionMetadata(job, resourceType, secretKey, iv);
+
+            // Ideally, we explicitly remove key material from memory when we're done.
+            // Unfortunately, calling secretKey.destroy() will throw DestroyFailedException
+            // As of Apr 2019, there was still no good way to do this in OpenJDK (ref: https://bugs.openjdk.java.net/browse/JDK-8160206)
+            // secretKey.destroy();
+
+        } catch(GeneralSecurityException | IOException ex) {
+            throw new JobQueueFailure(job.getJobID(), ex);
+        }
+    }
+
     /**
      * Encodes crypto metadata in the following format:
      * {
-     *     "SymmetricCipher": "AES cipher type",
-     *     "SymmetricKey" : "Symmetric key, encrypted by the asymmetric key (e.g. RSA public key), then base64-encoded",
-     *     "SymmetricIv" : "Initialization vector, base64 encoded"
-     *     "AsymmetricCipher": "RSA cipher type",
-     *     "AsymmetricPublicKey" : "e.g. RSA public key, base64-encoded"
+     *     "SymmetricProperties" : {
+     *         "Cipher" : (String) AES cipher type (for consumption by javax.crypto.Cipher.getInstance(...)),
+     *         "EncryptedKey" : (String) AES secret - encrypted, then base64-encoded,
+     *         "InitializationVector" : (String) AES IV - base64-encoded,
+     *         "TagLength" : (int) GCM tag length, if using AES/GCM
+     *     },
+     *
+     *     "AsymmetricProperties" : {
+     *         "Cipher" : (String) RSA cipher type (for consumption by javax.crypto.Cipher.getInstance(...)),
+     *         "PublicKey" : (String) Base64-encoded RSA public key that was initially provided by the vendor
+     *     }
      * }
      *
-     * @param job
-     * @param resourceType
-     * @param aesSecretKey
-     * @param iv
-     * @throws Exception
+     * This metadata is saved to a json file named [outputFileName]-metadata.json on the tmp filesystem
+     *
+     * @param job - the current job pulled from the queue
+     * @param resourceType - FHIR type of the requested resource
+     * @param aesSecretKey - the {@link SecretKey} used in the symmetric encryption algorithm to encrypt the data
+     * @param iv - a raw byte array corresponding to the iv used by the symmetric encryption algorithm to encrypt the data
      */
-    private void saveEncryptionMetadata(JobModel job, ResourceType resourceType, SecretKey aesSecretKey, byte[] iv) throws Exception { // TODO (isears): Do better
+    private void saveEncryptionMetadata(JobModel job, ResourceType resourceType, SecretKey aesSecretKey, byte[] iv) {
 
-        Cipher rsaCipher = Cipher.getInstance(ASYMMETRIC_CIPHER);
-        rsaCipher.init(Cipher.ENCRYPT_MODE, job.getRsaPublicKey());
+        try {
+            Cipher rsaCipher = Cipher.getInstance(ASYMMETRIC_CIPHER);
+            rsaCipher.init(Cipher.ENCRYPT_MODE, job.getRsaPublicKey());
 
-        Map<String,Object> metadata = new HashMap<>();
-        Map<String,Object> symmetricMetadata = new HashMap<>();
-        Map<String,Object> asymmetricMetadata = new HashMap<>();
+            Map<String,Object> metadata = new HashMap<>();
+            Map<String,Object> symmetricMetadata = new HashMap<>();
+            Map<String,Object> asymmetricMetadata = new HashMap<>();
 
-        symmetricMetadata.put("Cipher", SYMMETRIC_CIPHER);
-        symmetricMetadata.put("EncryptedKey", Base64.getEncoder().encodeToString(rsaCipher.doFinal(aesSecretKey.getEncoded())));
-        symmetricMetadata.put("InitializationVector", Base64.getEncoder().encodeToString(iv));
-        symmetricMetadata.put("TagLength", GCM_TAG_LENGTH);
+            symmetricMetadata.put("Cipher", SYMMETRIC_CIPHER);
+            symmetricMetadata.put("EncryptedKey", Base64.getEncoder().encodeToString(rsaCipher.doFinal(aesSecretKey.getEncoded())));
+            symmetricMetadata.put("InitializationVector", Base64.getEncoder().encodeToString(iv));
+            symmetricMetadata.put("TagLength", GCM_TAG_LENGTH);
 
-        asymmetricMetadata.put("Cipher", ASYMMETRIC_CIPHER);
-        asymmetricMetadata.put("PublicKey", Base64.getEncoder().encodeToString(job.getRsaPublicKey().getEncoded()));
+            asymmetricMetadata.put("Cipher", ASYMMETRIC_CIPHER);
+            asymmetricMetadata.put("PublicKey", Base64.getEncoder().encodeToString(job.getRsaPublicKey().getEncoded()));
 
-        metadata.put("SymmetricProperties", symmetricMetadata);
-        metadata.put("AsymmetricProperties", asymmetricMetadata);
+            metadata.put("SymmetricProperties", symmetricMetadata);
+            metadata.put("AsymmetricProperties", asymmetricMetadata);
 
-        String json = new ObjectMapper().writeValueAsString(metadata);
+            String json = new ObjectMapper().writeValueAsString(metadata);
 
-        try(final FileOutputStream writer = new FileOutputStream(formOutputMetadataPath(job.getJobID(), resourceType))) {
-            writer.write(json.getBytes(StandardCharsets.UTF_8));
+            try(final FileOutputStream writer = new FileOutputStream(formOutputMetadataPath(job.getJobID(), resourceType))) {
+                writer.write(json.getBytes(StandardCharsets.UTF_8));
+            }
+
+        } catch(GeneralSecurityException | IOException ex) {
+            throw new JobQueueFailure(job.getJobID(), ex);
         }
-    }
-
-    public String formOutputMetadataPath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s-metadata.json", exportPath, JobModel.outputFileName(jobID, resourceType));
     }
 }

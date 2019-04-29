@@ -15,12 +15,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +35,7 @@ class AggregationEngineTest {
     }
 
     @BeforeEach
-    void setupEach() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+    void setupEach() {
         queue = new MemoryQueue();
         bbclient = new MockBlueButtonClient();
         engine = new AggregationEngine(bbclient, queue, config);
