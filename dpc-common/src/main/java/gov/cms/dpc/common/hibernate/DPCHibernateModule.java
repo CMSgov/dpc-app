@@ -5,6 +5,8 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import io.dropwizard.Configuration;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.db.ManagedDataSource;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -34,6 +36,13 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
             throw new IllegalStateException(e);
         }
         return hibernate.getSessionFactory();
+    }
+
+    @Provides
+    @Singleton
+    ManagedDataSource provideDataSource() {
+        final DataSourceFactory factory = getConfiguration().getDatabase();
+        return factory.build(getEnvironment().metrics(), "tested-things");
     }
 
     @Provides

@@ -21,7 +21,7 @@ public class PatientEntity {
     private UUID patientID;
 
     @NotEmpty
-    @Column(name = "beneficiary_id")
+    @Column(name = "beneficiary_id", unique = true)
     private String beneficiaryID;
 
     @Column(name = "first_name")

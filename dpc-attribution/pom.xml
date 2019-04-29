@@ -194,12 +194,13 @@
                                         </property>
                                         <property>
                                             <key>dialect</key>
-                                            <value>org.hibernate.dialect.PostgreSQL9Dialect</value>
+                                            <value>org.hibernate.dialect.PostgreSQL10Dialect</value>
                                         </property>
                                     </properties>
                                     <includes>.*</includes>
                                 </database>
                                 <generate>
+                                    <javaTimeTypes>true</javaTimeTypes>
                                 </generate>
                                 <target>
                                     <packageName>gov.cms.dpc.attribution.dao</packageName>
