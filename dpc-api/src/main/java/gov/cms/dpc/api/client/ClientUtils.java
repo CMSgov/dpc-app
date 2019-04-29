@@ -16,6 +16,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +33,11 @@ import java.util.Map;
 public class ClientUtils {
 
     public static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
+    private static final Logger logger = LoggerFactory.getLogger(ClientUtils.class);
+
+    private ClientUtils() {
+        // Not used
+    }
 
     /**
      * Helper method for creating an export request using the FHIR client
@@ -73,7 +80,7 @@ public class ClientUtils {
         final Bundle providerBundle = seedProcessor.generateRosterBundle(providerRoster);
 
         // Now, submit the bundle
-        // FIXME: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.
+        // TODO: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.
         // Instead, we rely on the fact that an error is not thrown.
         return client
                 .create()
@@ -99,7 +106,7 @@ public class ClientUtils {
 
             while (!done) {
                 Thread.sleep(1000);
-                System.out.println(statusMessage);
+                logger.debug(statusMessage);
                 try (CloseableHttpResponse response = client.execute(jobGet)) {
                     final int statusCode = response.getStatusLine().getStatusCode();
                     done = statusCode == HttpStatus.OK_200 || statusCode > 300;

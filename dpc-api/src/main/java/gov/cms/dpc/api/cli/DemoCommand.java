@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.api.models.JobCompletionModel;
@@ -65,13 +64,8 @@ public class DemoCommand extends Command {
         // If it's a 404, that's fine, for anything else, fail
         try {
             exportOperation.execute();
-        } catch (BaseServerResponseException e) {
-            if (e instanceof ResourceNotFoundException) {
-                System.out.println("Provider is not registered with the system");
-            } else {
-                e.printStackTrace();
-                System.exit(1);
-            }
+        } catch (ResourceNotFoundException e) {
+            System.out.println("Provider is not registered with the system");
         }
 
         // Sleep for 2 seconds, for presentation reasons
@@ -79,7 +73,8 @@ public class DemoCommand extends Command {
 
         // Read the provider bundle from the given file
         final String seedsFile = getSeedsFile(namespace);
-        try (InputStream resource = new FileInputStream(new File(seedsFile))) {
+        try (
+                InputStream resource = new FileInputStream(new File(seedsFile))) {
             // Now, submit the bundle
             System.out.println("Uploading Patient roster");
             final IGenericClient rosterClient = ctx.newRestfulGenericClient(baseURL);
@@ -95,31 +90,30 @@ public class DemoCommand extends Command {
 
             try {
                 exportOperation.execute();
-            } catch (BaseServerResponseException e) {
-                if (e instanceof NonFhirResponseException) {
-                    final NonFhirResponseException e1 = (NonFhirResponseException) e;
-                    if (e1.getStatusCode() != HttpStatus.NO_CONTENT_204) {
-                        e.printStackTrace();
-                        System.exit(1);
-                    }
-
-                    // Get the correct header
-                    final Map<String, List<String>> headers = e1.getResponseHeaders();
-
-                    // Get the headers and check the status
-                    exportURL = headers.get("content-location").get(0);
-                    System.out.printf("Export job started. Progress URL: %s\n", exportURL);
+            } catch (NonFhirResponseException e) {
+                final NonFhirResponseException e1 = e;
+                if (e1.getStatusCode() != HttpStatus.NO_CONTENT_204) {
+                    e.printStackTrace();
+                    System.exit(1);
                 }
+
+                // Get the correct header
+                final Map<String, List<String>> headers = e1.getResponseHeaders();
+
+                // Get the headers and check the status
+                exportURL = headers.get("content-location").get(0);
+                System.out.printf("Export job started. Progress URL: %s%n", exportURL);
             }
 
             // Poll the job until it's done
             final JobCompletionModel jobResponse = ClientUtils.awaitExportResponse(exportURL, "Checking job status");
 
-            System.out.print("\n\nExport job completed successfully.\n\nAvailable files:\n");
+            System.out.print("\n\nExport job completed successfully.%n%nAvailable files:%n");
             jobResponse.getOutput().forEach(System.out::println);
 
             System.exit(0);
         }
+
     }
 
     private static String getSeedsFile(Namespace namespace) {
