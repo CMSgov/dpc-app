@@ -53,6 +53,10 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
         return relationship;
     }
 
+    public void addAttributionRelationship(AttributionRelationship relationship) {
+        persist(relationship);
+    }
+
     /**
      * Remove the given attribution relationship
      *

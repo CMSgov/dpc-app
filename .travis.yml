@@ -7,6 +7,9 @@ language: java
 jdk:
   - oraclejdk11
 
+addons:
+  postgresql: "9.6"
+
 services:
   - postgresql
   - redis-server

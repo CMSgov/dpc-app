@@ -8,7 +8,6 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/Group")
-@FHIR
 public abstract class AbstractGroupResource {
 
     protected AbstractGroupResource() {

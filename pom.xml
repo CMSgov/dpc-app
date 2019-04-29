@@ -227,6 +227,10 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <configuration>
+                            <!--Exclude generated sources, such as Jooq-->
+                            <excludePackageNames>gov.cms.dpc.attribution.dao</excludePackageNames>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
