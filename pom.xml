@@ -282,6 +282,14 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!--Exclude auto-generated JOOQ classes-->
+                        <exclude>gov/cms/dpc/attribution/dao/**/*</exclude>
+                        <!-- Exclude the cli commands, which we don't have tests for-->
+                        <exclude>gov/cms/dpc/**/cli/**/*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
