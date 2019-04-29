@@ -26,12 +26,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class EncryptingAggregationEngine extends AggregationEngine {
-
-    private static final String SYMMETRIC_CIPHER =  "AES/GCM/NoPadding";
-    private static final String ASYMMETRIC_CIPHER = "RSA/ECB/PKCS1Padding";
-    private static final int KEY_BITS = 128;
-    private static final int GCM_TAG_LENGTH = 128;
-    private static final int IV_BITS = 96; // GCM Salt SHALL be 12 bytes ref: RFC 5288, Sec 3
+    
+    private String symmetricCipher;
+    private String asymmetricCipher;
+    private int keyBits;
+    private int gcmTagLength;
+    private int ivBits;
 
 
     /**
@@ -43,6 +43,12 @@ public class EncryptingAggregationEngine extends AggregationEngine {
     @Inject
     public EncryptingAggregationEngine(BlueButtonClient bbclient, JobQueue queue, Config config) {
         super(bbclient, queue, config);
+
+        symmetricCipher = config.getString("encryption.symmetricCipher");
+        asymmetricCipher = config.getString("encryption.asymmetricCipher");
+        keyBits = config.getInt("encryption.keyBits");
+        gcmTagLength = config.getInt("encryption.gcmTagLength");
+        ivBits = config.getInt("encryption.ivBits");
     }
 
     @Override
@@ -68,16 +74,16 @@ public class EncryptingAggregationEngine extends AggregationEngine {
 
         try {
             // Generate Key
-            KeyGenerator keyGenerator = KeyGenerator.getInstance(SYMMETRIC_CIPHER.split("/")[0]); // No such alg exception
-            keyGenerator.init(KEY_BITS);
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/")[0]); // No such alg exception
+            keyGenerator.init(keyBits);
             SecretKey secretKey = keyGenerator.generateKey();
 
             // Generate IV
-            byte[] iv =  new byte[IV_BITS / 8];
+            byte[] iv =  new byte[ivBits / 8];
             secureRandom.nextBytes(iv);
 
-            Cipher aesCipher = Cipher.getInstance(SYMMETRIC_CIPHER);
-            aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(GCM_TAG_LENGTH, iv));
+            Cipher aesCipher = Cipher.getInstance(symmetricCipher);
+            aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
 
             try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);) {
                 super.workResource(cipherOutputStream, job, resourceType);
@@ -120,19 +126,19 @@ public class EncryptingAggregationEngine extends AggregationEngine {
     private void saveEncryptionMetadata(JobModel job, ResourceType resourceType, SecretKey aesSecretKey, byte[] iv) {
 
         try {
-            Cipher rsaCipher = Cipher.getInstance(ASYMMETRIC_CIPHER);
+            Cipher rsaCipher = Cipher.getInstance(asymmetricCipher);
             rsaCipher.init(Cipher.ENCRYPT_MODE, job.getRsaPublicKey());
 
             Map<String,Object> metadata = new HashMap<>();
             Map<String,Object> symmetricMetadata = new HashMap<>();
             Map<String,Object> asymmetricMetadata = new HashMap<>();
 
-            symmetricMetadata.put("Cipher", SYMMETRIC_CIPHER);
+            symmetricMetadata.put("Cipher", symmetricCipher);
             symmetricMetadata.put("EncryptedKey", Base64.getEncoder().encodeToString(rsaCipher.doFinal(aesSecretKey.getEncoded())));
             symmetricMetadata.put("InitializationVector", Base64.getEncoder().encodeToString(iv));
-            symmetricMetadata.put("TagLength", GCM_TAG_LENGTH);
+            symmetricMetadata.put("TagLength", gcmTagLength);
 
-            asymmetricMetadata.put("Cipher", ASYMMETRIC_CIPHER);
+            asymmetricMetadata.put("Cipher", asymmetricCipher);
             asymmetricMetadata.put("PublicKey", Base64.getEncoder().encodeToString(job.getRsaPublicKey().getEncoded()));
 
             metadata.put("SymmetricProperties", symmetricMetadata);
