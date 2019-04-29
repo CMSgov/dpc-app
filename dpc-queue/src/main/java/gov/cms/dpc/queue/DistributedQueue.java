@@ -9,9 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Implements a distributed {@link JobQueue} using Redis and Postgres
@@ -19,6 +24,7 @@ import java.util.UUID;
 public class DistributedQueue implements JobQueue {
 
     private static final Logger logger = LoggerFactory.getLogger(DistributedQueue.class);
+    private static final Double MILLIS_PER_SECOND = 1000.0;
 
     private final Queue<UUID> queue;
     private final Session session;
@@ -31,8 +37,9 @@ public class DistributedQueue implements JobQueue {
 
     @Override
     public void submitJob(UUID jobID, JobModel data) {
-        assert(jobID == data.getJobID());
+        assert(jobID == data.getJobID() && data.getStatus() == JobStatus.QUEUED);
         logger.debug("Adding jobID {} to the queue with for provider {}.", jobID, data.getProviderID());
+        data.setSubmitTime(OffsetDateTime.now());
         // Persist the job in postgres
         final Transaction tx = this.session.beginTransaction();
         try {
@@ -80,50 +87,37 @@ public class DistributedQueue implements JobQueue {
         if (jobID == null) {
             return Optional.empty();
         }
-
-        // Fetch the Job from Postgres
-        final Transaction tx = this.session.beginTransaction();
-
-        try {
-            final JobModel jobModel = this.session.get(JobModel.class, jobID);
-            if (jobModel == null) {
-                throw new JobQueueFailure(jobID, "Unable to fetch job from database");
-            }
-
+        final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
             // Verify that the job is in progress, otherwise fail
-            if (jobModel.getStatus() != JobStatus.QUEUED) {
-                throw new JobQueueFailure(jobID, String.format("Cannot work job in state: %s", jobModel.getStatus()));
+            if (job.getStatus() != JobStatus.QUEUED) {
+                throw new JobQueueFailure(jobID, String.format("Cannot work job in state: %s", job.getStatus()));
             }
 
-            // Update the status and persist it
-            jobModel.setStatus(JobStatus.RUNNING);
-            this.session.update(jobModel);
-            tx.commit();
+            // Update the status and start time
+            job.setStatus(JobStatus.RUNNING);
+            job.setStartTime(OffsetDateTime.now());
+        });
+        final var delay = Duration.between(updatedJob.getSubmitTime().get(), updatedJob.getStartTime().get()).toMillis()/MILLIS_PER_SECOND;
+        logger.debug("Started work job {}, waited in queue for {} seconds", jobID, delay);
 
-            return Optional.of(new Pair<>(jobID, jobModel));
-        } catch (Exception e) {
-            tx.rollback();
-            logger.error("Cannot retrieve job from DB.", e);
-            throw new JobQueueFailure(jobID, e);
-        }
+        return Optional.of(new Pair(jobID, updatedJob));
     }
 
     @Override
     public void completeJob(UUID jobID, JobStatus status) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
-        logger.debug("Completing job {} with status {}.", jobID, status);
+        final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
+            // Verify that the job is running
+            if (job.getStatus() != JobStatus.RUNNING) {
+                throw new JobQueueFailure(jobID, String.format("Cannot complete job in state: %s", job.getStatus()));
+            }
 
-        final Transaction tx = this.session.beginTransaction();
-        try {
-            final JobModel jobModel = this.session.get(JobModel.class, jobID);
-            jobModel.setStatus(status);
-            this.session.update(jobModel);
-            tx.commit();
-        } catch (Exception e) {
-            tx.rollback();
-            logger.error("Unable to complete job", e);
-            throw new JobQueueFailure(jobID, e);
-        }
+            // Set the status and the complete time
+            job.setStatus(status);
+            job.setCompleteTime(OffsetDateTime.now());
+        });
+        final var workDuration = Duration.between(updatedJob.getStartTime().get(), updatedJob.getCompleteTime().get()).toMillis()/MILLIS_PER_SECOND;
+        logger.debug("Completed job {} with status {} and duration {} seconds", jobID, status, workDuration);
     }
 
     @Override
@@ -134,5 +128,36 @@ public class DistributedQueue implements JobQueue {
     @Override
     public String queueType() {
         return "Redis Queue";
+    }
+
+    /**
+     * Fetch the job from the database, call the mutator function to update the job, and save the update in the database.
+     *
+     * @param jobID - The jobID to fetch from the database.
+     * @param mutator - Function called to update the job. If the mutator throws, rollback the transaction.
+     * @return the {@link JobModel} after the a successful
+     */
+    private JobModel updateModel(UUID jobID, Consumer<JobModel> mutator) {
+        final Transaction tx = this.session.beginTransaction();
+        try {
+            final JobModel jobModel = this.session.get(JobModel.class, jobID);
+            if (jobModel == null) {
+                throw new JobQueueFailure(jobID, "Unable to fetch job from database");
+            }
+            if (!jobModel.isValid()) {
+                throw new JobQueueFailure(jobID, "Job fetched with an invalid values");
+            }
+
+            // Mutate the model
+            mutator.accept(jobModel);
+
+            this.session.update(jobModel);
+            tx.commit();
+            return jobModel;
+        } catch (Exception e) {
+            tx.rollback();
+            logger.error("Unable to update job model", e);
+            throw new JobQueueFailure(jobID, e);
+        }
     }
 }

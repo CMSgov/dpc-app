@@ -5,6 +5,7 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -14,13 +15,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
+ */
 public class JobResource extends AbstractJobResource {
 
     private final JobQueue queue;
@@ -41,6 +43,9 @@ public class JobResource extends AbstractJobResource {
 
         // Return a response based on status
         return maybeJob.map(job -> {
+            if (!job.isValid()) {
+                throw new JobQueueFailure(jobUUID, "Fetched an invalid job model");
+            }
             Response.ResponseBuilder builder = Response.noContent();
             JobStatus jobStatus = job.getStatus();
             switch (jobStatus) {
@@ -49,10 +54,14 @@ public class JobResource extends AbstractJobResource {
                     break;
                 }
                 case COMPLETED: {
+                    assert(job.getCompleteTime().isPresent());
+                    final String resourceQueryParam = job.getResourceTypes().stream()
+                            .map(ResourceType::toString)
+                            .collect(Collectors.joining(GroupResource.LIST_DELIM));
                     final JobCompletionModel completionModel = new JobCompletionModel(
-                            Instant.now().atOffset(ZoneOffset.UTC),
-                            String.format("%s/Job/%s", baseURL, jobID),
-                            outputURLs(jobUUID, job.getResourceTypes()));
+                            job.getStartTime().get(),
+                            String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),
+                            outputList(jobUUID, job.getResourceTypes()));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                     break;
                 }
@@ -69,12 +78,16 @@ public class JobResource extends AbstractJobResource {
     }
 
     /**
-     * Form a list of output file directories
+     * Form a list of output entries
+     *
      * @return the output list for the response
      */
-    private List<String> outputURLs(UUID jobID, List<ResourceType> resourceTypes) {
+    private List<JobCompletionModel.OutputEntry> outputList(UUID jobID, List<ResourceType> resourceTypes) {
         return resourceTypes.stream()
-                .map(resourceType -> String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType)))
+                .map(resourceType -> {
+                    final var url = String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType));
+                    return new JobCompletionModel.OutputEntry(resourceType, url);
+                })
                 .collect(Collectors.toList());
     }
 }
