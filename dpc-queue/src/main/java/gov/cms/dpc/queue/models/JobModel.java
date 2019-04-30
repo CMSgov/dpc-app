@@ -243,6 +243,14 @@ public class JobModel implements Serializable  {
         this.completeTime = completeTime;
     }
 
+    public List<ResourceType> getErroringTypes() {
+        return erroringTypes;
+    }
+
+    public void setErroringTypes(List<ResourceType> erroringTypes) {
+        this.erroringTypes = erroringTypes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
