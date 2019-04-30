@@ -131,7 +131,7 @@ public class AggregationEngine implements Runnable {
      * @param job          - the job to process
      * @param resourceType - the FHIR resource type to write out
      */
-    protected void workResource(OutputStream writer, JobModel job, ResourceType resourceType) {
+    private void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, ResourceType resourceType) {
         final IParser parser = context.newJsonParser();
 
         Observable.fromIterable(job.getPatients())
