@@ -6,6 +6,7 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.EncryptingAggregationEngine;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 
@@ -23,7 +24,16 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Override
     public void configure(Binder binder) {
         binder.requestStaticInjection(DPCHibernateBundle.class);
-        binder.bind(AggregationEngine.class);
+
+        if(
+                getConfiguration().getConfig().hasPath("encryption.enabled") &&
+                getConfiguration().getConfig().getBoolean("encryption.enabled")
+        )  {
+            binder.bind(AggregationEngine.class).to(EncryptingAggregationEngine.class);
+        } else  {
+            binder.bind(AggregationEngine.class);
+        }
+
         binder.bind(Aggregation.class).asEagerSingleton();
     }
 
