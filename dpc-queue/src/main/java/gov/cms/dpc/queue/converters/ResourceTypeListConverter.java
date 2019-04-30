@@ -29,8 +29,12 @@ public class ResourceTypeListConverter implements AttributeConverter<List<Resour
 
     @Override
     public List<ResourceType> convertToEntityAttribute(String dbData) {
+        
         final var resourceList = new ArrayList<ResourceType>();
-        for (String typeString: dbData.split(LIST_DELIM, -1)) {
+        if (dbData.isEmpty()) {
+            return resourceList;
+        }       
+        for (String typeString : dbData.split(LIST_DELIM, -1)) {
             try {
                 final var type = ResourceType.valueOf(typeString);
                 resourceList.add(type);
