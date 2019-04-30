@@ -124,6 +124,7 @@ public class JobModel implements Serializable  {
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
+        this.erroringTypes = List.of();
         this.rsaPublicKey = pubKey.getEncoded();
     }
 
