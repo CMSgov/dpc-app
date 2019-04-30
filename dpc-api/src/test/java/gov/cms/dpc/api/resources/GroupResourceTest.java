@@ -5,7 +5,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import gov.cms.dpc.api.AbstractApplicationTest;
 import org.apache.http.HttpStatus;
@@ -46,9 +45,7 @@ public class GroupResourceTest extends AbstractApplicationTest {
                 .withNoParameters(Parameters.class)
                 .useHttpGet();
 
-        assertThrows(InternalErrorException.class, execute::execute, "Should throw exception, but accept JSON request");
-
-        // Try again, but use a different encoding
+        // Execute using fhir+xml (which we don't support)
         assertThrows(UnclassifiedServerFailureException.class, () -> execute.encodedXml().execute(), "Should not accept XML encoding");
     }
 

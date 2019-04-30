@@ -19,7 +19,10 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,9 +30,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static gov.cms.dpc.attribution.SharedMethods.createAttributionBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AttributionFHIRTest {
@@ -58,35 +62,30 @@ public class AttributionFHIRTest {
         groupedPairs = seedProcessor.extractProviderMap();
     }
 
-    @BeforeEach
-    public void initDB() throws Exception {
-    }
-
     @AfterAll
-    public static void shutdown() throws Exception {
+    public static void shutdown() {
         APPLICATION.after();
     }
 
     @TestFactory
     Stream<DynamicTest> generateBundleTests() {
 
-        Function<Bundle, String> nameGenerator = (bundle) -> String.format("Testing provider: %s", ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue());
+        BiFunction<Bundle, String, String> nameGenerator = (bundle, operation) -> String.format("[%s] provider: %s", operation.toUpperCase(), ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue());
 
         // Get all the provider IDs and generate tests for them.
         return groupedPairs
                 .entrySet()
                 .stream()
                 .map(seedProcessor::generateRosterBundle)
-                .map((bundle) -> DynamicTest.dynamicTest(nameGenerator.apply(bundle), () -> submitRoster(bundle)));
+                .flatMap((bundle) -> Stream.of(
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));
 
     }
 
     private void submitRoster(Bundle bundle) throws Exception {
 
-        // Manually call lifecycle hooks
-        initDB();
-
-        final String practitionerID = ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue();
+        final String providerID = ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue();
         final String patientID = ((Patient) bundle.getEntry().get(1).getResource()).getIdentifierFirstRep().getValue();
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -102,28 +101,67 @@ public class AttributionFHIRTest {
             // Get the patients
 
             // Check how many are attributed
-            final HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + practitionerID);
+            final HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
             getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (CloseableHttpResponse response = client.execute(getPatients)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
                 List<String> beneies = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
                 });
-                // Since the practitioner is not
                 assertEquals(bundle.getEntry().size() - 1, beneies.size(), "Should have the same number of beneies");
             }
 
             // Check that a specific patient is attributed
-            final HttpGet isAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), practitionerID, patientID));
+            final HttpGet isAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), providerID, patientID));
             isAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (CloseableHttpResponse response = client.execute(isAttributed)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
             }
-
-            // Remove the patient and try again
         }
     }
 
 
+    private void updateRoster(Bundle bundle) throws IOException {
+
+        final String providerID = ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue();
+
+        final HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
+        getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+
+            // Add an additional patient
+            // Create a new bundle with extra patients to attribute
+            final String newPatientID = "test-new-patient-id";
+            final Bundle updateBundle = createAttributionBundle(providerID, newPatientID);
+
+            // Submit the bundle
+            final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+            submitUpdate.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+            submitUpdate.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(updateBundle)));
+
+            try (CloseableHttpResponse response = client.execute(submitUpdate)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+            }
+
+            // Check how many are attributed
+
+            try (CloseableHttpResponse response = client.execute(getPatients)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
+                final List<String> patients = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
+                });
+                // Since the practitioner is not
+                assertEquals(bundle.getEntry().size(), patients.size(), "Should have an additional patient");
+            }
+
+            // Check that a specific patient is attributed
+            final HttpGet updatedAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), providerID, newPatientID));
+            updatedAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+
+            try (CloseableHttpResponse response = client.execute(updatedAttributed)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
+            }
+        }
+    }
 }

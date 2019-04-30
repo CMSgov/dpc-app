@@ -5,8 +5,10 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
+import gov.cms.dpc.attribution.jdbi.RosterEngine;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
+import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.db.DataSourceFactory;
@@ -20,6 +22,7 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Singleton;
 import java.sql.SQLException;
 import java.time.Duration;
 
@@ -34,8 +37,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Override
     public void configure(Binder binder) {
         binder.bind(ProviderDAO.class);
-        binder.bind(AttributionEngine.class).to(ProviderDAO.class);
+        binder.bind(AttributionEngine.class).to(RosterEngine.class);
         binder.bind(V1AttributionResource.class);
+        binder.bind(TruncateDatabase.class);
     }
 
     /**
@@ -65,11 +69,8 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    DSLContext provideDSL(DPCAttributionConfiguration config) {
-        final DataSourceFactory factory = config.getDatabase();
-        final ManagedDataSource dataSource = factory.build(getEnvironment().metrics(), "tested-things");
+    DSLContext provideDSL(ManagedDataSource dataSource) {
         final Settings settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
-
         try {
             return DSL.using(dataSource.getConnection(), settings);
         } catch (SQLException e) {

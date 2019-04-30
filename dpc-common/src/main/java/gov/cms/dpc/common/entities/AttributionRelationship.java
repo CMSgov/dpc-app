@@ -15,6 +15,9 @@ import java.util.Objects;
                 "inner join patients as pat on a.patient = pat.patientID " +
                 "where prov.providerNPI = :provID and pat.beneficiaryID = :patID")
 })
+@Table(name = "attributions",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"patient_id", "provider_id"})}
+)
 public class AttributionRelationship {
 
     @Id
@@ -22,13 +25,13 @@ public class AttributionRelationship {
     @Column(name = "id", updatable = false, nullable = false)
     private Long attributionID;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.MERGE)
     private ProviderEntity provider;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     private PatientEntity patient;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
     private OffsetDateTime created;
 

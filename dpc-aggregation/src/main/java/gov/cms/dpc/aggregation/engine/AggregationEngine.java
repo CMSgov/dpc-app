@@ -58,6 +58,7 @@ public class AggregationEngine implements Runnable {
     @Override
     public void run() {
         // Run loop
+        logger.info("Starting aggregation engine with exportPath:\"{}\"", exportPath);
         while (run) {
             this.queue.workJob().ifPresentOrElse(pair -> {
                 completeJob(pair.getRight());

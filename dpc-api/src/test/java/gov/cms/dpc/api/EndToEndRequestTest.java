@@ -1,21 +1,15 @@
 package gov.cms.dpc.api;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.annotations.IntegrationTest;
-import gov.cms.dpc.common.utils.SeedProcessor;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import gov.cms.dpc.api.client.ClientUtils;
+import gov.cms.dpc.api.models.JobCompletionModel;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -29,10 +23,9 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@IntegrationTest
 public class EndToEndRequestTest extends AbstractApplicationTest {
 
-    private static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
+
     private static final String CSV = "test_associations.csv";
 
     /**
@@ -50,13 +43,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         // Submit an export request for a provider which is not known to the system.
         final IGenericClient exportClient = ctx.newRestfulGenericClient(getBaseURL());
 
-        final IOperationUntypedWithInput<Parameters> exportOperation = exportClient
-                .operation()
-                .onInstance(new IdDt("Group", PROVIDER_ID))
-                .named("$export")
-                .withNoParameters(Parameters.class)
-                .encodedJson()
-                .useHttpGet();
+        final IOperationUntypedWithInput<Parameters> exportOperation = ClientUtils.createExportOperation(exportClient, ClientUtils.PROVIDER_ID);
 
         ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, exportOperation::execute);
 
@@ -75,30 +62,9 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
             throw new MissingResourceException("Can not find seeds file", EndToEndRequestTest.class.getName(), CSV);
         }
 
-        final SeedProcessor seedProcessor = new SeedProcessor(resource);
-
-        final Map<String, List<Pair<String, String>>> providerMap = seedProcessor.extractProviderMap();
-
-        // Find the entry for the given key (yes, I know this is bad)
-        final Map.Entry<String, List<Pair<String, String>>> providerRoster = providerMap
-                .entrySet()
-                .stream()
-                .filter((entry) -> entry.getKey().equals(PROVIDER_ID))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Cannot find matching provider"));
-
-        final Bundle providerBundle = seedProcessor.generateRosterBundle(providerRoster);
-
-        // Now, submit the bundle
         final IGenericClient rosterClient = ctx.newRestfulGenericClient(getBaseURL());
-
-        // FIXME: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.
-        // Instead, we rely on the fact that an error is not thrown.
-        rosterClient
-                .create()
-                .resource(providerBundle)
-                .encodedJson()
-                .execute();
+        final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource);
+        rosterSubmission.execute();
 
         // Try the export request again
         final NonFhirResponseException exportThrown = assertThrows(NonFhirResponseException.class, exportOperation::execute);
@@ -109,50 +75,26 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         // Get the headers and check the status
         final String jobLocation = headers.get("content-location").get(0);
 
-        // Use the traditional HTTP Client to check the job status
-        ExportResponse jobResponse = null;
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet jobGet = new HttpGet(jobLocation);
-            boolean done = false;
-
-            while (!done) {
-                Thread.sleep(1000);
-                System.out.println("Trying");
-                try (CloseableHttpResponse response = client.execute(jobGet)) {
-                    final int statusCode = response.getStatusLine().getStatusCode();
-                    done = statusCode == HttpStatus.OK_200 || statusCode > 300;
-                    if (done) {
-                        final ObjectMapper mapper = new ObjectMapper();
-                        jobResponse = mapper.readValue(response.getEntity().getContent(), ExportResponse.class);
-                    }
-                }
-            }
-            assertNotNull(jobResponse, "Should have Job Response");
+        final JobCompletionModel jobResponse = ClientUtils.awaitExportResponse(jobLocation, "Trying");
 
 
-            assertEquals(1, jobResponse.getOutput().size(), "Should have 1 file");
+        assertNotNull(jobResponse, "Should have Job Response");
+        assertEquals(1, jobResponse.getOutput().size(), "Should have 1 file");
 
-            // Get the first file and download it.
+        // Get the first file and download it.
+        final String fileID = jobResponse.getOutput().get(0).getUrl();
+        final File tempFile = ClientUtils.fetchExportedFiles(fileID);
 
-            final String fileID = jobResponse.getOutput().get(0);
-            final File tempFile = File.createTempFile("dpc", ".ndjson");
+        // Read the file back in and parse the patients
+        final IParser parser = ctx.newJsonParser();
 
-            final HttpGet fileGet = new HttpGet(fileID);
-            try (CloseableHttpResponse fileResponse = client.execute(fileGet)) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(tempFile))) {
+            final List<Patient> patients = bufferedReader.lines()
+                    .map((line) -> (Patient) parser.parseResource(line))
+                    .collect(Collectors.toList());
 
-                fileResponse.getEntity().writeTo(new FileOutputStream(tempFile));
-            }
-
-            // Read the file back in and parse the patients
-            final IParser parser = ctx.newJsonParser();
-
-            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(tempFile))) {
-                final List<Patient> patients = bufferedReader.lines()
-                        .map((line) -> (Patient) parser.parseResource(line))
-                        .collect(Collectors.toList());
-
-                assertEquals(100, patients.size(), "Should have 100 patients");
-            }
+            assertEquals(100, patients.size(), "Should have 100 patients");
         }
     }
 }
+
