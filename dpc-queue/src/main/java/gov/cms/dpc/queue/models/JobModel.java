@@ -14,6 +14,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * The JobModel tracks the work done on a bulk export request. It contains the essential details of the request and
+ * the results of the requests.
+ */
 @Entity(name = "job_queue")
 public class JobModel {
     public static final long serialVersionUID = 42L;
@@ -93,6 +97,13 @@ public class JobModel {
     @Column(name = "complete_time", nullable = true)
     private OffsetDateTime completeTime;
 
+    /**
+     * A list of resource types that produced errors. The errors themselves are stored in a temp file. 
+     */
+    @Convert(converter = ResourceTypeListConverter.class)
+    @Column(name = "erroring_types")
+    private List<ResourceType> erroringTypes;
+
 
     public JobModel() {
         // Hibernate required
@@ -104,6 +115,7 @@ public class JobModel {
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
+        this.erroringTypes = List.of();
     }
 
     /**
@@ -182,6 +194,14 @@ public class JobModel {
 
     public void setCompleteTime(OffsetDateTime completeTime) {
         this.completeTime = completeTime;
+    }
+
+    public List<ResourceType> getErroringTypes() {
+        return erroringTypes;
+    }
+
+    public void setErroringTypes(List<ResourceType> erroringTypes) {
+        this.erroringTypes = erroringTypes;
     }
 
     @Override

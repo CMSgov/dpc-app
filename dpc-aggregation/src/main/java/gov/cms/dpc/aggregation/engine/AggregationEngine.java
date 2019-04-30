@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -131,7 +132,7 @@ public class AggregationEngine implements Runnable {
      * @param job - the job to process
      * @param resourceType - the FHIR resource type to write out
      */
-    private void workResource(FileOutputStream writer, JobModel job, ResourceType resourceType) {
+    private void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, ResourceType resourceType) {
         final IParser parser = context.newJsonParser();
 
         job.getPatients()
