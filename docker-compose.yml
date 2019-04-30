@@ -18,7 +18,8 @@ services:
   aggregation:
     image: dpc-aggregation
     ports:
-      - "8088:8081"
+      - "3002:3002"
+      - "9901:9900"
     environment:
       - ENV=dev
     depends_on:
@@ -35,7 +36,7 @@ services:
       - ENV=dev
     ports:
       - "3500:8080"
-      - "9901:9900"
+      - "9900:9900"
 
   api:
     image: dpc-api

@@ -16,9 +16,12 @@ import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.MissingResourceException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,12 +48,12 @@ class BlueButtonClientTest {
     public static void setupBlueButtonClient() throws IOException {
         final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule());
         bbc = injector.getInstance(BlueButtonClient.class);
-        conf  = injector.getInstance(Config.class);
+        conf = injector.getInstance(Config.class);
 
         mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));
         createMockServerExpectation("/v1/fhir/metadata", HttpStatus.OK_200, getRawXML(METADATA_PATH), List.of());
 
-        for(String patientId : TEST_PATIENT_IDS) {
+        for (String patientId : TEST_PATIENT_IDS) {
             createMockServerExpectation(
                     "/v1/fhir/Patient/" + patientId,
                     HttpStatus.OK_200,
@@ -109,6 +112,15 @@ class BlueButtonClientTest {
     }
 
     @Test
+    void shouldReturnCapabilitiesStatement() {
+        final CapabilityStatement statement = bbc.requestCapabilityStatement();
+
+        assertNotNull(statement, "Should be able to request capabilities statement.");
+        // We just need a simple test to verify that the statement is returned correctly.
+        assertEquals(Enumerations.PublicationStatus.ACTIVE, statement.getStatus(), "Should have ACTIVE status from test metadata");
+    }
+
+    @Test
     void shouldHandlePatientsWithOnlyOneEOB() {
         Bundle response = bbc.requestEOBBundleFromServer(TEST_SINGLE_EOB_PATIENT_ID);
 
@@ -135,35 +147,35 @@ class BlueButtonClientTest {
     /**
      * Helper method that configures the mock server to respond to a given GET request
      *
-     * @param path The path segment of the URL that would be received by BlueButton
-     * @param respCode The desired HTTP response code
-     * @param payload The data that the mock server should return in response to this GET request
+     * @param path          The path segment of the URL that would be received by BlueButton
+     * @param respCode      The desired HTTP response code
+     * @param payload       The data that the mock server should return in response to this GET request
      * @param qStringParams The query string parameters that must be present to generate this response
      */
-    private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams){
+    private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams) {
         new MockServerClient("localhost", conf.getInt("test.mockServerPort"))
                 .when(
                         HttpRequest.request()
-                        .withMethod("GET")
-                        .withPath(path)
-                        .withQueryStringParameters(qStringParams),
+                                .withMethod("GET")
+                                .withPath(path)
+                                .withQueryStringParameters(qStringParams),
                         Times.unlimited()
                 )
                 .respond(
                         org.mockserver.model.HttpResponse.response()
-                        .withStatusCode(respCode)
-                        .withHeader(
-                            new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
-                        )
-                        .withBody(payload)
-                        .withDelay(TimeUnit.SECONDS, 1)
+                                .withStatusCode(respCode)
+                                .withHeader(
+                                        new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
+                                )
+                                .withBody(payload)
+                                .withDelay(TimeUnit.SECONDS, 1)
                 );
     }
 
     private static String getRawXML(String path) throws IOException {
         InputStream sampleData = BlueButtonClientTest.class.getClassLoader().getResourceAsStream(path);
 
-        if(sampleData == null) {
+        if (sampleData == null) {
             throw new MissingResourceException("Cannot find sample requests", BlueButtonClientTest.class.getName(), path);
         }
 

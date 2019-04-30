@@ -2,7 +2,10 @@ package gov.cms.dpc.aggregation.bbclient;
 
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -13,6 +16,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     private static final String SAMPLE_EOB_PATH_PREFIX = "bb-test-data/eob/";
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
+    private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     public static final String[] TEST_PATIENT_IDS = {"20140000008325", "20140000009893"};
 
     public MockBlueButtonClient(){
@@ -27,6 +31,12 @@ public class MockBlueButtonClient implements BlueButtonClient {
     public Bundle requestEOBBundleFromServer(String patientID) {
         final var path = SAMPLE_EOB_PATH_PREFIX + patientID + ".xml";
         return requestFromServer(Bundle.class, path);
+    }
+
+    @Override
+    public CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException {
+        final var path = SAMPLE_METADATA_PATH_PREFIX + "meta.xml";
+        return requestFromServer(CapabilityStatement.class, path);
     }
 
     /**

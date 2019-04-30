@@ -6,6 +6,8 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.health.BlueButtonHealthCheck;
+import gov.cms.dpc.aggregation.health.JobQueueHealthCheck;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 
@@ -23,6 +25,10 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.requestStaticInjection(DPCHibernateBundle.class);
         binder.bind(AggregationEngine.class);
         binder.bind(Aggregation.class).asEagerSingleton();
+
+        // Healthchecks
+        binder.bind(JobQueueHealthCheck.class);
+        binder.bind(BlueButtonHealthCheck.class);
     }
 
     @Provides
