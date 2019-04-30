@@ -114,6 +114,14 @@ public class JobModel implements Serializable  {
     @Column(name = "complete_time", nullable = true)
     private OffsetDateTime completeTime;
 
+    /**
+     * A list of resource types that produced errors. The errors themselves are stored in a temp file. 
+     */
+    @Convert(converter = ResourceTypeListConverter.class)
+    @Column(name = "erroring_types")
+    private List<ResourceType> erroringTypes;
+
+
     public JobModel() {
         // Hibernate required
     }
@@ -124,6 +132,7 @@ public class JobModel implements Serializable  {
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
+        this.erroringTypes = List.of();
     }
 
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
@@ -233,7 +242,6 @@ public class JobModel implements Serializable  {
     public void setCompleteTime(OffsetDateTime completeTime) {
         this.completeTime = completeTime;
     }
-
 
     @Override
     public boolean equals(Object o) {
