@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implements the model for the JSON response for a complete job.
@@ -56,11 +57,19 @@ public class JobCompletionModel {
     private List<OutputEntry> output;
     // FIXME(rickhawes): DPC-205 will fill in this array.
     private final List<String> error = new ArrayList<>();
+    private Map<String, Object> encryptionParameters;
 
     public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output) {
         this.transactionTime = transactionTime;
         this.request = request;
         this.output = output;
+    }
+
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, Map<String, Object> encryptionParameters) {
+        this.transactionTime = transactionTime;
+        this.request = request;
+        this.output = output;
+        this.encryptionParameters = encryptionParameters;
     }
 
     public OffsetDateTime getTransactionTime() {
@@ -93,5 +102,13 @@ public class JobCompletionModel {
 
     public List<String> getError() {
         return error;
+    }
+
+    public Map<String, Object> getEncryptionParameters() {
+        return encryptionParameters;
+    }
+
+    public void setEncryptionParameters(Map<String, Object> encryptionParameters) {
+        this.encryptionParameters = encryptionParameters;
     }
 }
