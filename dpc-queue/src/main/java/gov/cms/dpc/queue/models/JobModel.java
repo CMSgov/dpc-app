@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
+import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -74,6 +75,7 @@ public class JobModel {
      * The current status of this job
      */
     private JobStatus status;
+    private byte[] rsaPublicKey;
 
     /**
      * The time the job was submitted
@@ -93,7 +95,6 @@ public class JobModel {
     @Column(name = "complete_time", nullable = true)
     private OffsetDateTime completeTime;
 
-
     public JobModel() {
         // Hibernate required
     }
@@ -104,6 +105,15 @@ public class JobModel {
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
+    }
+
+    public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
+        this.jobID = jobID;
+        this.resourceTypes = resourceTypes;
+        this.providerID = providerID;
+        this.patients = patients;
+        this.status = JobStatus.QUEUED;
+        this.rsaPublicKey = pubKey.getEncoded();
     }
 
     /**
@@ -118,6 +128,7 @@ public class JobModel {
             case COMPLETED: case FAILED: return submitTime != null && startTime != null && completeTime != null;
             default: return false;
         }
+
     }
 
     public UUID getJobID() {
@@ -158,6 +169,22 @@ public class JobModel {
 
     public void setStatus(JobStatus status) {
         this.status = status;
+    }
+
+    public byte[] getRsaPublicKey() {
+        if (rsaPublicKey == null) {
+            throw new NullPointerException("This Job was created without a public key!");
+        } else {
+            return rsaPublicKey;
+        }
+    }
+
+    public void setRsaPublicKey(byte[] rsaPublicKey) {
+        this.rsaPublicKey = rsaPublicKey;
+    }
+
+    public void setPublicKey(RSAPublicKey rsaPublicKey) {
+        this.rsaPublicKey = rsaPublicKey.getEncoded();
     }
 
     public Optional<OffsetDateTime> getSubmitTime() {

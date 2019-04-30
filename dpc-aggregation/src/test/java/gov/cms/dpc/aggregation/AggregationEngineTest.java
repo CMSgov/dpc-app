@@ -1,6 +1,5 @@
 package gov.cms.dpc.aggregation;
 
-import com.google.inject.Injector;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
@@ -10,23 +9,15 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.List;
-
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -125,6 +116,6 @@ class AggregationEngineTest {
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.FAILED, queue.getJob(jobId).get().getStatus()));    }
-
+                () -> assertEquals(JobStatus.FAILED, queue.getJob(jobId).get().getStatus()));
+    }
 }
