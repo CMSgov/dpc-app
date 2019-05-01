@@ -81,7 +81,7 @@ public class FHIRSubmissionTest {
 
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
-        queue.completeJob(queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getLeft(), JobStatus.COMPLETED);
+        queue.completeJob(queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getLeft(), JobStatus.COMPLETED, List.of());
 
         jobTarget = jobResource.client().target(jobURL);
         jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();

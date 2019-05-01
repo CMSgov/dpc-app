@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
+import javax.annotation.Nullable;
 import javax.persistence.AttributeConverter;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,9 @@ public class ResourceTypeListConverter implements AttributeConverter<List<Resour
 
     @Override
     public String convertToDatabaseColumn(List<ResourceType> attribute) {
+        if (attribute == null || attribute.isEmpty()) {
+            return "";
+        }
         final var joiner = new StringJoiner(LIST_DELIM);
         for (ResourceType type: attribute) {
             joiner.add(type.toString());
