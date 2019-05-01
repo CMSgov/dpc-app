@@ -55,6 +55,7 @@ public class JobModel {
     @Id
     private UUID jobID;
 
+
     /**
      * The list of resource types requested
      */
@@ -79,6 +80,11 @@ public class JobModel {
      * The current status of this job
      */
     private JobStatus status;
+
+    /**
+     * The public key used to encrypt the files
+     */
+    @Column(name = "rsa_public_key")
     private byte[] rsaPublicKey;
 
     /**
@@ -112,6 +118,15 @@ public class JobModel {
     }
 
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
+        this.jobID = jobID;
+        this.resourceTypes = resourceTypes;
+        this.providerID = providerID;
+        this.patients = patients;
+        this.status = JobStatus.QUEUED;
+        this.erroringTypes = List.of();
+    }
+
+    public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
         this.providerID = providerID;

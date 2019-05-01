@@ -195,6 +195,9 @@ public class QueueTest {
     }
 
     private static JobModel buildModel(UUID id, ResourceType ... resources) {
-        return new JobModel(id, Arrays.asList(resources), "test-provider-1", List.of("test-patient-1", "test-patient-2"));
+        return new JobModel(id,
+                Arrays.asList(resources),
+                "test-provider-1",
+                List.of("test-patient-1", "test-patient-2"));
     }
 }
