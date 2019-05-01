@@ -7,8 +7,10 @@ import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.io.Serializable;
+import javax.validation.constraints.NotNull;
 import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -107,8 +109,8 @@ public class JobModel implements Serializable  {
      * A list of resource types that produced errors. The errors themselves are stored in a temp file. 
      */
     @Convert(converter = ResourceTypeListConverter.class)
-    @Column(name = "erroring_types")
-    private List<ResourceType> erroringTypes;
+    @Column(name = "erring_types")
+    private List<ResourceType> erringTypes;
 
 
     public JobModel() {
@@ -121,7 +123,7 @@ public class JobModel implements Serializable  {
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
-        this.erroringTypes = List.of();
+        this.erringTypes = List.of();
     }
 
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
@@ -130,7 +132,7 @@ public class JobModel implements Serializable  {
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
-        this.erroringTypes = List.of();
+        this.erringTypes = List.of();
         this.rsaPublicKey = pubKey.getEncoded();
     }
 
@@ -229,12 +231,12 @@ public class JobModel implements Serializable  {
         this.completeTime = completeTime;
     }
 
-    public List<ResourceType> getErroringTypes() {
-        return erroringTypes;
+    public List<ResourceType> getErringTypes() {
+        return erringTypes;
     }
 
-    public void setErroringTypes(List<ResourceType> erroringTypes) {
-        this.erroringTypes = erroringTypes;
+    public void setErringTypes(@NotNull List<ResourceType> erringTypes) {
+        this.erringTypes = erringTypes;
     }
 
     @Override

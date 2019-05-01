@@ -1,7 +1,11 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.models.JobModel;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,8 +43,9 @@ public interface JobQueue {
      *
      * @param jobID - the job
      * @param status - the new  {@link JobStatus} of the job. Must be `COMPLETED` or `FAILED`.
+     * @param erringTypes - The resource types that had errors in their processing
      */
-    void completeJob(UUID jobID, JobStatus status);
+    void completeJob(UUID jobID, JobStatus status, @NotNull List<ResourceType> erringTypes);
 
     /**
      * Number of items in the queue.

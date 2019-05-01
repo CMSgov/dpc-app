@@ -73,7 +73,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      * @param resourceType - the FHIR resource type to write out
      */
     @Override
-    protected void workResource(OutputStream writer, JobModel job, ResourceType resourceType) {
+    protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, ResourceType resourceType) {
         SecureRandom secureRandom = new SecureRandom();
 
         try {
@@ -90,7 +90,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
             aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
 
             try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);) {
-                super.workResource(cipherOutputStream, job, resourceType);
+                super.workResource(cipherOutputStream, errorWriter, job, resourceType);
             }
 
             saveEncryptionMetadata(job, resourceType, secretKey, iv);
