@@ -65,6 +65,7 @@ public class JobModel implements Serializable  {
     @Id
     private UUID jobID;
 
+
     /**
      * The list of resource types requested
      */
@@ -132,7 +133,6 @@ public class JobModel implements Serializable  {
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
-        this.erroringTypes = List.of();
     }
 
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
