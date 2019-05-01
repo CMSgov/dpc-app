@@ -118,14 +118,6 @@ public class JobModel {
         this.patients = patients;
         this.status = JobStatus.QUEUED;
         this.erroringTypes = List.of();
-    }
-
-    public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
-        this.jobID = jobID;
-        this.resourceTypes = resourceTypes;
-        this.providerID = providerID;
-        this.patients = patients;
-        this.status = JobStatus.QUEUED;
         this.rsaPublicKey = pubKey.getEncoded();
     }
 
