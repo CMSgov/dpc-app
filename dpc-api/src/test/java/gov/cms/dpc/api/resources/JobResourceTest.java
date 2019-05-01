@@ -92,7 +92,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        queue.completeJob(jobID, JobStatus.COMPLETED);
+        queue.completeJob(jobID, JobStatus.COMPLETED, List.of());
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -122,7 +122,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        queue.completeJob(jobID, JobStatus.FAILED);
+        queue.completeJob(jobID, JobStatus.FAILED, List.of());
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);

@@ -4,13 +4,16 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
@@ -104,7 +107,7 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
-    public void completeJob(UUID jobID, JobStatus status) {
+    public void completeJob(UUID jobID, JobStatus status, List<ResourceType> erringTypes) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
             // Verify that the job is running
@@ -114,6 +117,7 @@ public class DistributedQueue implements JobQueue {
 
             // Set the status and the complete time
             job.setStatus(status);
+            job.setErringTypes(erringTypes);
             job.setCompleteTime(OffsetDateTime.now());
         });
         final var workDuration = Duration.between(updatedJob.getStartTime().get(), updatedJob.getCompleteTime().get()).toMillis()/MILLIS_PER_SECOND;

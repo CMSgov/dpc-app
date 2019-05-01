@@ -2,16 +2,16 @@ package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.validation.constraints.Null;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Simple in-memory queue for tracking job statuses
@@ -70,7 +70,7 @@ public class MemoryQueue implements JobQueue {
     }
 
     @Override
-    public synchronized void completeJob(UUID jobID, JobStatus status) {
+    public synchronized void completeJob(UUID jobID, JobStatus status, List<ResourceType> erringTypes) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
 
         final JobModel job = this.queue.get(jobID);
@@ -81,6 +81,7 @@ public class MemoryQueue implements JobQueue {
         assert(job.getStartTime().isPresent());
 
         job.setStatus(status);
+        job.setErringTypes(erringTypes);
         job.setCompleteTime(OffsetDateTime.now());
         this.queue.replace(jobID, job);
 

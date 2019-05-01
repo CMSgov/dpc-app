@@ -110,7 +110,7 @@ public class QueueTest {
                 () -> assertEquals(JobStatus.RUNNING, runningJob.get().getStatus(), "Job should be running"));
 
         // Complete the job
-        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED);
+        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, List.of());
 
         // Check that the status is COMPLETED and with resource types
         final Optional<JobModel> completedJob = queue.getJob(workJob.get().getLeft());
@@ -127,7 +127,7 @@ public class QueueTest {
         assertTrue(emptyJob.isEmpty(), "the queue should not have ANY ready items");
 
         // Fail the second job and check its status
-        queue.completeJob(workJob.get().getLeft(), JobStatus.FAILED);
+        queue.completeJob(workJob.get().getLeft(), JobStatus.FAILED, List.of());
 //        jobSet.remove(workJob.get().getLeft());
 
         Optional<JobModel> failedJob = queue.getJob(workJob.get().getLeft());
@@ -151,7 +151,7 @@ public class QueueTest {
         assertTrue(resourcesRetrived.containsAll(List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit)));
 
         // Complete job
-        queue.completeJob(jobSubmission.getJobID(), JobStatus.COMPLETED);
+        queue.completeJob(jobSubmission.getJobID(), JobStatus.COMPLETED, List.of());
     }
 
     public void testMissingJob(JobQueue queue) {
@@ -162,7 +162,7 @@ public class QueueTest {
                 () -> assertEquals(0, queue.queueSize(), "Should have an empty queue"));
 
         assertTrue(queue.getJob(jobID).isEmpty(), "Should not be able to get missing job");
-        assertThrows(JobQueueFailure.class, () -> queue.completeJob(jobID, JobStatus.FAILED), "Should error when completing a job which does not exist");
+        assertThrows(JobQueueFailure.class, () -> queue.completeJob(jobID, JobStatus.FAILED, List.of()), "Should error when completing a job which does not exist");
     }
 
     private static <T> T getSetFirst(Set<T> set) {
