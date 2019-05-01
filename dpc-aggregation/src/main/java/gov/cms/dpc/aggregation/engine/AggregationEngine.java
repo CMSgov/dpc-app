@@ -25,10 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.interfaces.RSAPrivateKey;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -122,7 +122,7 @@ public class AggregationEngine implements Runnable {
 
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
         try {
-            for (JobResult jobResult: job.getJobResults()) {
+            for (JobResult jobResult : job.getJobResults()) {
                 final var resourceType = jobResult.getResourceType();
                 if (!JobModel.isValidResourceType(resourceType)) {
                     throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
