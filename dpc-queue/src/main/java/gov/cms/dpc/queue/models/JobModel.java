@@ -53,6 +53,7 @@ public class JobModel implements Serializable  {
     @Id
     private UUID jobID;
 
+
     /**
      * The list of resource types requested
      */
@@ -77,6 +78,11 @@ public class JobModel implements Serializable  {
      * The current status of this job
      */
     private JobStatus status;
+
+    /**
+     * The public key used to encrypt the files
+     */
+    @Column(name = "rsa_public_key")
     private byte[] rsaPublicKey;
 
     /**
