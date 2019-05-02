@@ -22,7 +22,8 @@ before_install:
 #before_script:
 #  - psql -c 'create database dpc_attribution;' -U postgres
 
-after_script:
+script:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   # Format the test results and copy to a new directory
   - mkdir reports
   - mvn jacoco:report
