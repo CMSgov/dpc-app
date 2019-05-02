@@ -38,8 +38,7 @@ public class DistributedQueue implements JobQueue {
         assert (jobID == data.getJobID() && data.getStatus() == JobStatus.QUEUED);
         final OffsetDateTime submitTime = OffsetDateTime.now();
         logger.debug("Adding jobID {} to the queue at {} with for provider {}.",
-                jobID,
-                submitTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                jobID, submitTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 data.getProviderID());
         data.setSubmitTime(submitTime);
         // Persist the job in postgres
