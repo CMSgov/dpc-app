@@ -27,10 +27,10 @@ script:
   # Format the test results and copy to a new directory
   - mkdir reports
   - mvn jacoco:report
-    - |
+  - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
     do
-    JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
+      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
     done
   - ls reports
   - docker-compose down
@@ -42,9 +42,8 @@ script:
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
     do
-        JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
+      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
     done
-
   - ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
   - ./cc-test-reporter upload-coverage
 

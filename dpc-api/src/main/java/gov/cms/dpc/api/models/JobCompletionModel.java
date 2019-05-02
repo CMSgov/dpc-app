@@ -28,6 +28,10 @@ public class JobCompletionModel {
          */
         private String url;
 
+        public OutputEntry() {
+            // Jackson Required
+        }
+
         public OutputEntry(ResourceType type, String url) {
             this.type = type;
             this.url = url;
@@ -58,6 +62,10 @@ public class JobCompletionModel {
     // FIXME(rickhawes): DPC-205 will fill in this array.
     private final List<String> error = new ArrayList<>();
     private Map<String, Object> encryptionParameters;
+
+    public JobCompletionModel() {
+        // Jackson requireds
+    }
 
     public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output) {
         this.transactionTime = transactionTime;
