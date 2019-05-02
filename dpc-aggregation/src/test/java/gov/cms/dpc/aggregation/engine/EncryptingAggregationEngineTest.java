@@ -90,7 +90,7 @@ class EncryptingAggregationEngineTest {
         JobModel job = new JobModel(jobId,
                 Collections.singletonList(ResourceType.Patient),
                 TEST_PROVIDER_ID,
-                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS[0]),
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)),
                 rsaPublicKey
         );
 
