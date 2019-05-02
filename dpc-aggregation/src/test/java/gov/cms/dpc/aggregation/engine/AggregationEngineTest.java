@@ -1,15 +1,15 @@
-package gov.cms.dpc.aggregation;
+package gov.cms.dpc.aggregation.engine;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.aggregation.bbclient.MockBlueButtonClient;
-import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import io.github.resilience4j.retry.RetryConfig;
+import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
@@ -50,7 +50,7 @@ class AggregationEngineTest {
      */
     @Test
     void mockBlueButtonClientTest() {
-        Patient patient = bbclient.requestPatientFromServer(MockBlueButtonClient.TEST_PATIENT_IDS[0]);
+        Patient patient = bbclient.requestPatientFromServer(MockBlueButtonClient.TEST_PATIENT_IDS.get(0));
         assertNotNull(patient);
     }
 
@@ -64,7 +64,7 @@ class AggregationEngineTest {
         JobModel job = new JobModel(jobId,
                 Collections.singletonList(ResourceType.Patient),
                 TEST_PROVIDER_ID,
-                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS[0]));
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)));
 
         // Do the job
         queue.submitJob(jobId, job);
@@ -75,6 +75,8 @@ class AggregationEngineTest {
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
         var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
         assertTrue(Files.exists(Path.of(outputFilePath)));
+        var errorFilePath = engine.formErrorFilePath(jobId, ResourceType.Patient);
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
     /**
@@ -87,7 +89,7 @@ class AggregationEngineTest {
         JobModel job = new JobModel(jobId,
                 JobModel.validResourceTypes,
                 TEST_PROVIDER_ID,
-                List.of(MockBlueButtonClient.TEST_PATIENT_IDS));
+                MockBlueButtonClient.TEST_PATIENT_IDS);
 
         // Do the job
         queue.submitJob(jobId, job);
@@ -112,7 +114,7 @@ class AggregationEngineTest {
         JobModel job = new JobModel(jobId,
                 List.of(ResourceType.Schedule),
                 TEST_PROVIDER_ID,
-                List.of(MockBlueButtonClient.TEST_PATIENT_IDS));
+                MockBlueButtonClient.TEST_PATIENT_IDS);
 
         // Do the job
         queue.submitJob(jobId, job);
