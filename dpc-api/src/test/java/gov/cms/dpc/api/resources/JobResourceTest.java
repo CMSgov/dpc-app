@@ -6,6 +6,9 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -101,9 +104,48 @@ public class JobResourceTest {
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
+        assertAll(() -> assertEquals(2, completion.getOutput().size()),
+                () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
             assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, entry.getType())), entry.getUrl());
+        }
+    }
+
+
+    /**
+     * Test with a successful job with one patient error
+     */
+    @Test
+    public void testJobWithError() {
+        final var jobID = UUID.randomUUID();
+        final var queue = new MemoryQueue();
+
+        // Setup a completed job
+        final var job = new JobModel(jobID,
+                JobModel.validResourceTypes,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID));
+        queue.submitJob(jobID, job);
+        queue.workJob();
+        queue.completeJob(jobID, JobStatus.COMPLETED, List.of(ResourceType.Patient));
+
+        // Test the response for ock
+        final var resource = new JobResource(queue, TEST_BASEURL);
+        final Response response = resource.checkJobStatus(jobID.toString());
+        assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
+
+        // Test the completion model
+        final var completion = (JobCompletionModel) response.getEntity();
+        assertAll(() -> assertEquals(2, completion.getOutput().size()),
+                () -> assertEquals(1, completion.getError().size()));
+        for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
+            assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, entry.getType())), entry.getUrl());
+        }
+        for (JobCompletionModel.OutputEntry entry: completion.getError()) {
+            assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.errorFileName(jobID, entry.getType())), entry.getUrl());
         }
     }
 
