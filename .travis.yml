@@ -24,9 +24,10 @@ before_install:
 
 script:
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - mvn test -B -V
   # Format the test results and copy to a new directory
-  - mkdir reports
   - mvn jacoco:report
+  - mkdir reports
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
     do

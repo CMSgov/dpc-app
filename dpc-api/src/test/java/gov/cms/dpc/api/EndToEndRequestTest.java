@@ -9,10 +9,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -83,12 +81,13 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         assertEquals(0, jobResponse.getError().size(), "Should not have any errors");
 
         // Validate each of the resources
-        validateResourceFile(jobResponse, ResourceType.Patient, 100);
-        validateResourceFile(jobResponse, ResourceType.ExplanationOfBenefit, 100);
-        assertThrows(IllegalStateException.class, () -> validateResourceFile(jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
+        validateResourceFile(Patient.class, jobResponse, ResourceType.Patient, 100);
+        // EOBs are structured as bundles, even though they have the EOB resource type
+        validateResourceFile(Bundle.class, jobResponse, ResourceType.ExplanationOfBenefit, 100);
+        assertThrows(IllegalStateException.class, () -> validateResourceFile(Schedule.class, jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
     }
 
-    private void validateResourceFile(JobCompletionModel response, ResourceType resourceType, int expectedSize) throws IOException {
+    private <T extends IBaseResource> void validateResourceFile(Class<T> clazz, JobCompletionModel response, ResourceType resourceType, int expectedSize) throws IOException {
         final String fileID = response
                 .getOutput()
                 .stream()
@@ -103,11 +102,11 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         final IParser parser = ctx.newJsonParser();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(tempFile))) {
-            final List<Patient> patients = bufferedReader.lines()
-                    .map((line) -> (Patient) parser.parseResource(line))
+            final List<T> entries = bufferedReader.lines()
+                    .map((line) -> clazz.cast(parser.parseResource(line)))
                     .collect(Collectors.toList());
 
-            assertEquals(expectedSize, patients.size(), String.format("Should have %d patients in the resource", expectedSize));
+            assertEquals(expectedSize, entries.size(), String.format("Should have %d entries in the resource", expectedSize));
         }
     }
 }
