@@ -61,7 +61,8 @@ public class JobResource extends AbstractJobResource {
                     final JobCompletionModel completionModel = new JobCompletionModel(
                             job.getStartTime().get(),
                             String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),
-                            outputList(jobUUID, job.getResourceTypes()));
+                            outputList(job),
+                            errorList(job));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                     break;
                 }
@@ -82,10 +83,24 @@ public class JobResource extends AbstractJobResource {
      *
      * @return the output list for the response
      */
-    private List<JobCompletionModel.OutputEntry> outputList(UUID jobID, List<ResourceType> resourceTypes) {
-        return resourceTypes.stream()
+    private List<JobCompletionModel.OutputEntry> outputList(JobModel job) {
+        return job.getResourceTypes().stream()
                 .map(resourceType -> {
-                    final var url = String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType));
+                    final var url = String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(job.getJobID(), resourceType));
+                    return new JobCompletionModel.OutputEntry(resourceType, url);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Form a list of output entries that are erring
+     *
+     * @return the output list for the response
+     */
+    private List<JobCompletionModel.OutputEntry> errorList(JobModel job) {
+        return job.getErringTypes().stream()
+                .map(resourceType -> {
+                    final var url = String.format("%s/Data/%s", this.baseURL, JobModel.errorFileName(job.getJobID(), resourceType));
                     return new JobCompletionModel.OutputEntry(resourceType, url);
                 })
                 .collect(Collectors.toList());

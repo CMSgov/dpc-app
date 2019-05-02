@@ -55,20 +55,21 @@ public class JobCompletionModel {
     private String request;
     private final boolean requiresAccessToken = false;
     private List<OutputEntry> output;
-    // FIXME(rickhawes): DPC-205 will fill in this array.
-    private final List<String> error = new ArrayList<>();
+    private List<OutputEntry> error;
     private Map<String, Object> encryptionParameters;
 
-    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output) {
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, List<OutputEntry> error) {
         this.transactionTime = transactionTime;
         this.request = request;
         this.output = output;
+        this.error = error;
     }
 
-    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, Map<String, Object> encryptionParameters) {
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, List<OutputEntry> error, Map<String, Object> encryptionParameters) {
         this.transactionTime = transactionTime;
         this.request = request;
         this.output = output;
+        this.error = error;
         this.encryptionParameters = encryptionParameters;
     }
 
@@ -100,8 +101,12 @@ public class JobCompletionModel {
         this.output = output;
     }
 
-    public List<String> getError() {
+    public List<OutputEntry> getError() {
         return error;
+    }
+
+    public void setError(List<OutputEntry> error) {
+        this.error = error;
     }
 
     public Map<String, Object> getEncryptionParameters() {

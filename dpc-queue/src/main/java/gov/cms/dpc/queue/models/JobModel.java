@@ -52,6 +52,17 @@ public class JobModel {
     }
 
     /**
+     * Form a error file name for passed in parameters.
+     *
+     * @param jobID - the jobs id
+     * @param resourceType - the resource type
+     * @return a file name
+     */
+    public static String errorFileName(UUID jobID, ResourceType resourceType) {
+        return String.format("%s.%s.error", jobID.toString(), resourceType.getPath());
+    }
+
+    /**
      * The unique job identifier
      */
     @Id
