@@ -10,10 +10,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import javax.persistence.*;
 import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Entity(name = "job_queue")
 public class JobModel {
@@ -231,5 +228,20 @@ public class JobModel {
     @Override
     public int hashCode() {
         return Objects.hash(jobID, resourceTypes, providerID, patients, status, submitTime, startTime, completeTime);
+    }
+
+    @Override
+    public String toString() {
+        return "JobModel{" +
+                "jobID=" + jobID +
+                ", resourceTypes=" + resourceTypes +
+                ", providerID='" + providerID + '\'' +
+                ", patients=" + patients +
+                ", status=" + status +
+                ", rsaPublicKey=" + Arrays.toString(rsaPublicKey) +
+                ", submitTime=" + submitTime +
+                ", startTime=" + startTime +
+                ", completeTime=" + completeTime +
+                '}';
     }
 }
