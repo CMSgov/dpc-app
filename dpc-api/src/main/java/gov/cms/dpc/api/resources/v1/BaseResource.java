@@ -1,12 +1,11 @@
 package gov.cms.dpc.api.resources.v1;
 
-import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
+import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 
@@ -56,11 +55,5 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     public AbstractRosterResource rosterOperations() {
         return this.rr;
-    }
-
-    @GET
-    @Path("/_healthy")
-    public boolean checkHealth() {
-        return true;
     }
 }
