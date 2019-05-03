@@ -101,4 +101,9 @@ public class MemoryQueue implements JobQueue {
     public String queueType() {
         return "MemoryQueue";
     }
+
+    @Override
+    public void isHealthy() {
+
+    }
 }

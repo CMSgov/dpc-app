@@ -7,10 +7,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.redisson.Redisson;
 import org.redisson.api.RQueue;
 import org.redisson.api.RedissonClient;
@@ -18,7 +19,6 @@ import org.redisson.config.Config;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class QueueTest {
 
-//    private JobQueue queue;
+    //    private JobQueue queue;
     private SessionFactory sessionFactory;
     private Session session;
     private List<String> queues = List.of("memory", "distributed");
@@ -54,7 +54,7 @@ public class QueueTest {
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
                         session = sessionFactory.openSession();
-                        return new DistributedQueue(client, session);
+                        return new DistributedQueue(client, session, "SELECT 1");
                     } else {
                         throw new IllegalArgumentException("I'm not that kind of queue");
                     }
@@ -191,10 +191,10 @@ public class QueueTest {
     }
 
     private static JobModel buildModel(UUID id) {
-        return buildModel(id, ResourceType.Patient );
+        return buildModel(id, ResourceType.Patient);
     }
 
-    private static JobModel buildModel(UUID id, ResourceType ... resources) {
+    private static JobModel buildModel(UUID id, ResourceType... resources) {
         return new JobModel(id, Arrays.asList(resources), "test-provider-1", List.of("test-patient-1", "test-patient-2"));
     }
 }

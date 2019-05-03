@@ -3,7 +3,6 @@ package gov.cms.dpc.queue.models;
 import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
@@ -36,7 +35,7 @@ public class JobModel {
     /**
      * Form a file name for passed in parameters.
      *
-     * @param jobID - the jobs id
+     * @param jobID        - the jobs id
      * @param resourceType - the resource type
      * @return a file name
      */
@@ -113,10 +112,15 @@ public class JobModel {
      */
     public Boolean isValid() {
         switch (status) {
-            case QUEUED: return submitTime != null;
-            case RUNNING: return submitTime  != null && startTime != null;
-            case COMPLETED: case FAILED: return submitTime != null && startTime != null && completeTime != null;
-            default: return false;
+            case QUEUED:
+                return submitTime != null;
+            case RUNNING:
+                return submitTime != null && startTime != null;
+            case COMPLETED:
+            case FAILED:
+                return submitTime != null && startTime != null && completeTime != null;
+            default:
+                return false;
         }
     }
 
@@ -133,7 +137,7 @@ public class JobModel {
     }
 
     public void setResourceTypes(List<ResourceType> resourceTypes) {
-            this.resourceTypes = resourceTypes;
+        this.resourceTypes = resourceTypes;
     }
 
     public String getProviderID() {

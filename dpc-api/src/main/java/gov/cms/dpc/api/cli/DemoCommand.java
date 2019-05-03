@@ -52,7 +52,8 @@ public class DemoCommand extends Command {
     @Override
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         System.out.println("Running demo!");
-        final String baseURL = "http://localhost:3002/v1/";
+//        final String baseURL = "http://localhost:3002/v1/";
+        final String baseURL = "http://tf-api-load-balancer-15818064.us-east-1.elb.amazonaws.com/v1/";
 
         // Make the initial export request
         // If it's a 404, that's fine, for anything else, fail
