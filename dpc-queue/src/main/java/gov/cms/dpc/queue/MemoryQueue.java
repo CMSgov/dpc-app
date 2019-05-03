@@ -104,6 +104,6 @@ public class MemoryQueue implements JobQueue {
 
     @Override
     public void isHealthy() {
-
+        // Memory is always healthy
     }
 }
