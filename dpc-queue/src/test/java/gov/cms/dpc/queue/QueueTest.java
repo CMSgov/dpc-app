@@ -28,7 +28,6 @@ public class QueueTest {
 
     //    private JobQueue queue;
     private SessionFactory sessionFactory;
-    private Session session;
     private List<String> queues = List.of("memory", "distributed");
 
 
@@ -53,8 +52,7 @@ public class QueueTest {
                         // Create the session factory
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
-                        session = sessionFactory.openSession();
-                        return new DistributedQueue(client, session, "SELECT 1");
+                        return new DistributedQueue(client, sessionFactory, "SELECT 1");
                     } else {
                         throw new IllegalArgumentException("I'm not that kind of queue");
                     }
@@ -75,12 +73,15 @@ public class QueueTest {
 
     @AfterEach
     public void shutdown() {
-        final Transaction tx = session.beginTransaction();
-        try {
-            final Query query = session.createQuery("delete from job_queue");
-            query.executeUpdate();
-        } finally {
-            tx.commit();
+        try (final Session session = sessionFactory.openSession()) {
+
+            final Transaction tx = session.beginTransaction();
+            try {
+                final Query query = session.createQuery("delete from job_queue");
+                query.executeUpdate();
+            } finally {
+                tx.commit();
+            }
         }
         sessionFactory.close();
     }

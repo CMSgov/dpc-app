@@ -5,6 +5,7 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.redisson.api.RedissonClient;
@@ -17,9 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Implements a distributed {@link JobQueue} using Redis and Postgres
@@ -31,31 +30,33 @@ public class DistributedQueue implements JobQueue {
 
     private final RedissonClient client;
     private final Queue<UUID> queue;
-    private final Session session;
+    private final SessionFactory factory;
     private final String healthQuery;
 
     @Inject
-    DistributedQueue(RedissonClient client, Session session, @HealthCheckQuery String healthQuery) {
+    DistributedQueue(RedissonClient client, SessionFactory factory, @HealthCheckQuery String healthQuery) {
         this.client = client;
         this.queue = client.getQueue("jobqueue");
-        this.session = session;
+        this.factory = factory;
         this.healthQuery = healthQuery;
     }
 
     @Override
     public void submitJob(UUID jobID, JobModel data) {
-        assert(jobID == data.getJobID() && data.getStatus() == JobStatus.QUEUED);
+        assert (jobID == data.getJobID() && data.getStatus() == JobStatus.QUEUED);
         logger.debug("Adding jobID {} to the queue with for provider {}.", jobID, data.getProviderID());
         data.setSubmitTime(OffsetDateTime.now());
         // Persist the job in postgres
-        final Transaction tx = this.session.beginTransaction();
-        try {
-            this.session.save(data);
-            tx.commit();
-        } catch (Exception e) {
-            logger.error("Cannot add job to database", e);
-            tx.rollback();
-            throw new JobQueueFailure(jobID, e);
+        try (final Session session = this.factory.openSession()) {
+            final Transaction tx = session.beginTransaction();
+            try {
+                session.save(data);
+                tx.commit();
+            } catch (Exception e) {
+                logger.error("Cannot add job to database", e);
+                tx.rollback();
+                throw new JobQueueFailure(jobID, e);
+            }
         }
         // Add to the redis queue
         // Offer?
@@ -75,16 +76,19 @@ public class DistributedQueue implements JobQueue {
     @Override
     public Optional<JobModel> getJob(UUID jobID) {
         // Get from Postgres
-        final Transaction tx = this.session.beginTransaction();
-        try {
-            final JobModel jobModel = this.session.get(JobModel.class, jobID);
-            if (jobModel == null) {
-                return Optional.empty();
+        try (final Session session = this.factory.openSession()) {
+
+            final Transaction tx = session.beginTransaction();
+            try {
+                final JobModel jobModel = session.get(JobModel.class, jobID);
+                if (jobModel == null) {
+                    return Optional.empty();
+                }
+                session.refresh(jobModel);
+                return Optional.ofNullable(jobModel);
+            } finally {
+                tx.commit();
             }
-            this.session.refresh(jobModel);
-            return Optional.ofNullable(jobModel);
-        } finally {
-            tx.commit();
         }
     }
 
@@ -104,7 +108,7 @@ public class DistributedQueue implements JobQueue {
             job.setStatus(JobStatus.RUNNING);
             job.setStartTime(OffsetDateTime.now());
         });
-        final var delay = Duration.between(updatedJob.getSubmitTime().get(), updatedJob.getStartTime().get()).toMillis()/MILLIS_PER_SECOND;
+        final var delay = Duration.between(updatedJob.getSubmitTime().get(), updatedJob.getStartTime().get()).toMillis() / MILLIS_PER_SECOND;
         logger.debug("Started work job {}, waited in queue for {} seconds", jobID, delay);
 
         return Optional.of(new Pair(jobID, updatedJob));
@@ -112,7 +116,7 @@ public class DistributedQueue implements JobQueue {
 
     @Override
     public void completeJob(UUID jobID, JobStatus status) {
-        assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
+        assert (status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
             // Verify that the job is running
             if (job.getStatus() != JobStatus.RUNNING) {
@@ -123,7 +127,7 @@ public class DistributedQueue implements JobQueue {
             job.setStatus(status);
             job.setCompleteTime(OffsetDateTime.now());
         });
-        final var workDuration = Duration.between(updatedJob.getStartTime().get(), updatedJob.getCompleteTime().get()).toMillis()/MILLIS_PER_SECOND;
+        final var workDuration = Duration.between(updatedJob.getStartTime().get(), updatedJob.getCompleteTime().get()).toMillis() / MILLIS_PER_SECOND;
         logger.debug("Completed job {} with status {} and duration {} seconds", jobID, status, workDuration);
     }
 
@@ -150,42 +154,48 @@ public class DistributedQueue implements JobQueue {
         }
 
         // Now the DB
-        try {
-            final Query healthCheck = this.session.createSQLQuery(healthQuery);
-            healthCheck.getFirstResult();
-        } catch (Exception e) {
-            throw new JobQueueUnhealthy("Database cluster is not responding", e);
+        try (final Session session = this.factory.openSession()) {
+
+            try {
+                final Query healthCheck = session.createSQLQuery(healthQuery);
+                healthCheck.getFirstResult();
+            } catch (Exception e) {
+                throw new JobQueueUnhealthy("Database cluster is not responding", e);
+            }
         }
     }
 
     /**
      * Fetch the job from the database, call the mutator function to update the job, and save the update in the database.
      *
-     * @param jobID - The jobID to fetch from the database.
+     * @param jobID   - The jobID to fetch from the database.
      * @param mutator - Function called to update the job. If the mutator throws, rollback the transaction.
      * @return the {@link JobModel} after the a successful
      */
     private JobModel updateModel(UUID jobID, Consumer<JobModel> mutator) {
-        final Transaction tx = this.session.beginTransaction();
-        try {
-            final JobModel jobModel = this.session.get(JobModel.class, jobID);
-            if (jobModel == null) {
-                throw new JobQueueFailure(jobID, "Unable to fetch job from database");
-            }
-            if (!jobModel.isValid()) {
-                throw new JobQueueFailure(jobID, "Job fetched with an invalid values");
-            }
+        try (final Session session = this.factory.openSession()) {
 
-            // Mutate the model
-            mutator.accept(jobModel);
+            final Transaction tx = session.beginTransaction();
+            try {
+                final JobModel jobModel = session.get(JobModel.class, jobID);
+                if (jobModel == null) {
+                    throw new JobQueueFailure(jobID, "Unable to fetch job from database");
+                }
+                if (!jobModel.isValid()) {
+                    throw new JobQueueFailure(jobID, "Job fetched with an invalid values");
+                }
 
-            this.session.update(jobModel);
-            tx.commit();
-            return jobModel;
-        } catch (Exception e) {
-            tx.rollback();
-            logger.error("Unable to update job model", e);
-            throw new JobQueueFailure(jobID, e);
+                // Mutate the model
+                mutator.accept(jobModel);
+
+                session.update(jobModel);
+                tx.commit();
+                return jobModel;
+            } catch (Exception e) {
+                tx.rollback();
+                logger.error("Unable to update job model", e);
+                throw new JobQueueFailure(jobID, e);
+            }
         }
     }
 }

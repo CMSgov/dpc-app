@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,16 +17,20 @@ import static org.mockito.Mockito.*;
 public class QueueHealthTest {
 
     private RedissonClient client = mock(RedissonClient.class);
+    final SessionFactory factory = mock(SessionFactory.class);
     private Session session = mock(Session.class);
     private NodesGroup nGroup = mock(NodesGroup.class);
     private NativeQuery query = mock(NativeQuery.class);
 
     @BeforeEach
     void setupQueueDependencies() {
-        reset(session, client, nGroup, query);
+        reset(factory, session, client, nGroup, query);
         // Setup the mocks to return ok
         when(client.getNodesGroup())
                 .thenReturn(nGroup);
+
+        when(factory.openSession())
+                .thenReturn(session);
 
         when(session.createSQLQuery(Mockito.anyString()))
                 .thenReturn(query);
@@ -40,7 +45,7 @@ public class QueueHealthTest {
         when(query.getFirstResult())
                 .thenReturn(1);
 
-        final DistributedQueue queue = new DistributedQueue(client, session, "SELECT 1 from job_queue");
+        final DistributedQueue queue = new DistributedQueue(client, factory, "SELECT 1 from job_queue");
         assertDoesNotThrow(queue::isHealthy, "Queue should be healthy");
     }
 
@@ -51,7 +56,7 @@ public class QueueHealthTest {
                     throw new RedisTimeoutException("");
                 });
 
-        final DistributedQueue queue = new DistributedQueue(client, session, "SELECT 1 from job_queue");
+        final DistributedQueue queue = new DistributedQueue(client, factory, "SELECT 1 from job_queue");
         final JobQueueUnhealthy unhealthy = assertThrows(JobQueueUnhealthy.class, queue::isHealthy, "Queue should fail due to redis");
         assertEquals(RedisTimeoutException.class, unhealthy.getCause().getClass(), "Should have thrown timeout exception");
     }
@@ -61,7 +66,7 @@ public class QueueHealthTest {
         when(nGroup.pingAll())
                 .thenReturn(false);
 
-        final DistributedQueue queue = new DistributedQueue(client, session, "SELECT 1 from job_queue");
+        final DistributedQueue queue = new DistributedQueue(client, factory, "SELECT 1 from job_queue");
         final JobQueueUnhealthy unhealthy = assertThrows(JobQueueUnhealthy.class, queue::isHealthy, "Queue should fail due to redis");
         assertNotEquals(RedisTimeoutException.class, unhealthy.getCause().getClass(), "Should not have thrown timeout exception");
     }

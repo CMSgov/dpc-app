@@ -7,7 +7,6 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import javax.inject.Singleton;
@@ -43,10 +42,5 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
     ManagedDataSource provideDataSource() {
         final DataSourceFactory factory = getConfiguration().getDatabase();
         return factory.build(getEnvironment().metrics(), "tested-things");
-    }
-
-    @Provides
-    Session provideSession(SessionFactory factory) {
-        return factory.openSession();
     }
 }
