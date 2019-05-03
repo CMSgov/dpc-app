@@ -70,7 +70,7 @@ public class AbstractApplicationTest {
 
     private void checkHealth() throws IOException {
         // URI of the API Service Healthcheck
-        final String healthURI = String.format("http:://localhost:%s/healthcheck", APPLICATION.getAdminPort());
+        final String healthURI = String.format("http://localhost:%s/healthcheck", APPLICATION.getAdminPort());
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet healthCheck = new HttpGet(healthURI);
 
