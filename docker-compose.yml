@@ -18,7 +18,6 @@ services:
   aggregation:
     image: dpc-aggregation
     ports:
-      - "3002:3002"
       - "9901:9900"
     environment:
       - ENV=dev
