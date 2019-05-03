@@ -13,10 +13,15 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.inject.Inject;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,7 +35,7 @@ public class AggregationEngine implements Runnable {
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
     private final FhirContext context;
-    private final String exportPath;
+    protected final String exportPath;
     private volatile boolean run = true;
 
     /**
@@ -131,7 +136,7 @@ public class AggregationEngine implements Runnable {
      * @param job - the job to process
      * @param resourceType - the FHIR resource type to write out
      */
-    private void workResource(FileOutputStream writer, JobModel job, ResourceType resourceType) {
+    protected void workResource(OutputStream writer, JobModel job, ResourceType resourceType) {
         final IParser parser = context.newJsonParser();
 
         job.getPatients()
