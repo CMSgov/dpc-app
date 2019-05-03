@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AbstractApplicationTest {
 
     protected static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
-    public static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9901/tasks/truncate";
+    public static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9900/tasks/truncate";
     protected FhirContext ctx;
 
     protected AbstractApplicationTest() {
@@ -69,6 +69,7 @@ public class AbstractApplicationTest {
     }
 
     private void checkHealth() throws IOException {
+        // URI of the API Service Healthcheck
         final String healthURI = String.format("http:://localhost:%s/healthcheck", APPLICATION.getAdminPort());
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet healthCheck = new HttpGet(healthURI);

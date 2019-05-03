@@ -61,7 +61,7 @@ public interface AttributionEngine {
      * Determine if the {@link AttributionEngine} is accessible.
      * Note: This is not a full Healthcheck, which is handled by the dpc-attribution service itself, it just checks for a valid response.
      *
-     * @return - {@code true} Service is accessible. {@link false service is not accessible}
+     * @return - {@code true} Service is accessible. {@code false service is not accessible}
      */
     boolean isHealthy();
 }
