@@ -102,6 +102,11 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         }
     }
 
+    @Override
+    public boolean isHealthy() {
+        return true;
+    }
+
     private boolean providerExists(String providerNPI) {
         final Query query = namedQuery("getProvider");
         query.setParameter("provID", providerNPI);

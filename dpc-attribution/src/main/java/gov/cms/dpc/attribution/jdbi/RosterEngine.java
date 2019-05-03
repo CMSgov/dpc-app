@@ -135,4 +135,9 @@ public class RosterEngine implements AttributionEngine {
                         .and(PROVIDERS.PROVIDER_ID
                                 .eq(FHIRExtractors.getProviderNPI(provider)))));
     }
+
+    @Override
+    public boolean isHealthy() {
+        return true;
+    }
 }

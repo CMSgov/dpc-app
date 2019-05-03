@@ -4,6 +4,8 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.api.health.AttributionHealthCheck;
+import gov.cms.dpc.api.health.JobQueueHealthCheck;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
@@ -51,6 +53,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(JobResource.class);
         binder.bind(DataResource.class);
         binder.bind(RosterResource.class);
+
+        // Healthchecks
+        binder.bind(AttributionHealthCheck.class);
+        binder.bind(JobQueueHealthCheck.class);
     }
 
     @Provides

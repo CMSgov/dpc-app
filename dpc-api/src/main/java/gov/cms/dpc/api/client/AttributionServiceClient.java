@@ -2,10 +2,10 @@ package gov.cms.dpc.api.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import gov.cms.dpc.api.annotations.AttributionService;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
-import gov.cms.dpc.api.annotations.AttributionService;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -93,6 +93,24 @@ public class AttributionServiceClient implements AttributionEngine {
             throw new WebApplicationException(e, HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
         return true;
+    }
+
+    @Override
+    public boolean isHealthy() {
+        final Invocation invocation = this.client
+                .path("/healthy")
+                .request()
+                .buildGet();
+
+        try (Response response = invocation.invoke()) {
+            if (!HttpStatus.isSuccess(response.getStatus())) {
+                return false;
+            }
+        } catch (Exception e) {
+            throw new WebApplicationException("Cannot reach attribution service", HttpStatus.INTERNAL_SERVER_ERROR_500);
+        }
+
+        return false;
     }
 
     /**
