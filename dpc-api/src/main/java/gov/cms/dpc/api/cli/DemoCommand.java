@@ -47,12 +47,19 @@ public class DemoCommand extends Command {
                 .type(String.class)
                 .setDefault(ClientUtils.PROVIDER_ID)
                 .help("Execute as a specific provider");
+
+        subparser
+                .addArgument("--host")
+                .dest("hostname")
+                .type(String.class)
+                .setDefault("http://localhost:3002")
+                .help("Set the hostname (including port number) for running the Demo against");
     }
 
     @Override
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         System.out.println("Running demo!");
-        final String baseURL = "http://localhost:3002/v1/";
+        final String baseURL = buildBaseURL(namespace);
 
         // Make the initial export request
         // If it's a 404, that's fine, for anything else, fail
@@ -63,7 +70,7 @@ public class DemoCommand extends Command {
             System.out.println("Provider is not registered with the system");
         }
 
-        // Sleep for 2 seconds, for presentation reasons
+//         Sleep for 2 seconds, for presentation reasons
         Thread.sleep(2000);
 
         this.uploadBundle(namespace, baseURL);
@@ -75,7 +82,7 @@ public class DemoCommand extends Command {
         final JobCompletionModel jobResponse = monitorExportRequest(exportOperation);
 
         System.out.print("\n\nExport job completed successfully.%n%nAvailable files:%n");
-        jobResponse.getOutput().forEach(System.out::println);
+        jobResponse.getOutput().forEach(entry -> System.out.println(entry.getUrl()));
 
         System.exit(0);
     }
@@ -128,5 +135,9 @@ public class DemoCommand extends Command {
 
     private static String getSeedsFile(Namespace namespace) {
         return namespace.getString("seed-file");
+    }
+
+    private static String buildBaseURL(Namespace namespace) {
+        return "http://" + namespace.getString("hostname") + "/v1/";
     }
 }
