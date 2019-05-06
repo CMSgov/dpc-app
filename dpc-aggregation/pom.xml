@@ -163,7 +163,10 @@
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
                     <to>
-                        <image>${project.artifactId}</image>
+                        <image>${jib.ecr.root}</image>
+                        <tags>
+                            <tag>dpc-aggregation</tag>
+                        </tags>
                     </to>
                     <extraDirectory>
                         <path>${project.basedir}/../bbcerts</path>

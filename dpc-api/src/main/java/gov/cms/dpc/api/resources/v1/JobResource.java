@@ -9,6 +9,8 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -24,6 +26,8 @@ import java.util.stream.Collectors;
  * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
  */
 public class JobResource extends AbstractJobResource {
+
+    private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
 
     private final JobQueue queue;
     private final String baseURL;
@@ -43,6 +47,7 @@ public class JobResource extends AbstractJobResource {
 
         // Return a response based on status
         return maybeJob.map(job -> {
+            logger.debug("Fetched Job: {}", job);
             if (!job.isValid()) {
                 throw new JobQueueFailure(jobUUID, "Fetched an invalid job model");
             }
