@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.bbclient;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.typesafe.config.Config;
@@ -44,7 +45,10 @@ public class BlueButtonClientModule extends AbstractModule {
     @Provides
     public IGenericClient provideFhirRestClient(Config config, FhirContext fhirContext, HttpClient httpClient) {
         final String serverBaseUrl = config.getString("bbclient.serverBaseUrl");
-        fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
+        final IRestfulClientFactory factory = fhirContext.getRestfulClientFactory();
+        factory.setHttpClient(httpClient);
+        factory.setConnectionRequestTimeout(2000);
+        factory.setSocketTimeout(2000);
 
         return fhirContext.newRestfulGenericClient(serverBaseUrl);
     }
