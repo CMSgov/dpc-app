@@ -39,7 +39,7 @@ script:
   - sleep 30
   # Run the integration-test profile, which only runs a subset of the tests
   - timeout 300 mvn test -Pintegration-tests -pl dpc-api
-  - docker logs dpc-app_aggregation_1
+  - docker logs dpcapp_aggregation_1
   - mvn jacoco:report
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
