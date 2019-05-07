@@ -2,14 +2,12 @@ package gov.cms.dpc.aggregation.bbclient;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.typesafe.config.Config;
 import org.apache.http.client.HttpClient;
-import org.apache.http.config.SocketConfig;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +45,7 @@ public class BlueButtonClientModule extends AbstractModule {
     @Provides
     public IGenericClient provideFhirRestClient(Config config, FhirContext fhirContext, HttpClient httpClient) {
         final String serverBaseUrl = config.getString("bbclient.serverBaseUrl");
-        final IRestfulClientFactory factory = fhirContext.getRestfulClientFactory();
-        factory.setHttpClient(httpClient);
-        factory.setConnectionRequestTimeout(2000);
-        factory.setSocketTimeout(2000);
+        fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
         return fhirContext.newRestfulGenericClient(serverBaseUrl);
     }
@@ -129,19 +124,14 @@ public class BlueButtonClientModule extends AbstractModule {
         }
 
         // Configure the socket timeout for the connection, incl. ssl tunneling
-        final PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-        connManager.setMaxTotal(200);
-        connManager.setDefaultMaxPerRoute(100);
-
-        SocketConfig sc = SocketConfig.custom()
-                .setSoTimeout(2000)
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(2000)
+                .setConnectionRequestTimeout(2000)
+                .setSocketTimeout(2000)
                 .build();
 
-        connManager.setDefaultSocketConfig(sc);
-
         return HttpClients.custom()
-                .setConnectionManager(connManager)
-                .setConnectionManagerShared(true)
+                .setDefaultRequestConfig(requestConfig)
                 .setSSLContext(sslContext)
                 .build();
     }
