@@ -7,7 +7,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.typesafe.config.Config;
 import org.apache.http.client.HttpClient;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +128,21 @@ public class BlueButtonClientModule extends AbstractModule {
             throw new BlueButtonClientSetupException(ex.getMessage(), ex);
         }
 
-        return HttpClients.custom().setSSLContext(sslContext).build();
+        // Configure the socket timeout for the connection, incl. ssl tunneling
+        final PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+        connManager.setMaxTotal(200);
+        connManager.setDefaultMaxPerRoute(100);
+
+        SocketConfig sc = SocketConfig.custom()
+                .setSoTimeout(2000)
+                .build();
+
+        connManager.setDefaultSocketConfig(sc);
+
+        return HttpClients.custom()
+                .setConnectionManager(connManager)
+                .setConnectionManagerShared(true)
+                .setSSLContext(sslContext)
+                .build();
     }
 }
