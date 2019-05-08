@@ -15,6 +15,7 @@
     <properties>
         <mainClass>gov.cms.dpc.aggregation.DPCAggregationService</mainClass>
         <mockserverVersion>3.10.8</mockserverVersion>
+        <resilience4j.version>0.14.1</resilience4j.version>
     </properties>
 
     <dependencies>
@@ -80,6 +81,21 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.reactivex.rxjava2</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>2.2.8</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-retry</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-rxjava2</artifactId>
+            <version>${resilience4j.version}</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
