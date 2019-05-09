@@ -6,6 +6,7 @@ import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.Pair;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import io.github.resilience4j.retry.Retry;
@@ -77,8 +78,8 @@ public class AggregationEngine implements Runnable {
     /**
      * Form the full file name of an output file
      *
-     * @param jobID
-     * @param resourceType
+     * @param jobID        - {@link UUID} ID of export job
+     * @param resourceType - {@link ResourceType} to append to filename
      */
     public String formOutputFilePath(UUID jobID, ResourceType resourceType) {
         return String.format("%s/%s.ndjson", exportPath, JobModel.outputFileName(jobID, resourceType));
@@ -120,7 +121,6 @@ public class AggregationEngine implements Runnable {
         }
     }
 
-
     /**
      * Write out a single provider NDJSON file for a single resource type
      *
@@ -132,9 +132,11 @@ public class AggregationEngine implements Runnable {
         final IParser parser = context.newJsonParser();
 
         Observable.fromIterable(job.getPatients())
-                .flatMap(patient -> this.handleResource(patient, resourceType, parser))
+                .flatMap(patient -> this.fetchResource(patient, resourceType, parser))
                 .subscribeOn(Schedulers.io())
+                // If an error gets signaled, log it and send an empty observable, signalling that we should continue processing the next patient
                 .doOnError(e -> logger.error("Error: ", e))
+                .onErrorResumeNext(Observable.empty())
                 .blockingSubscribe(str -> {
                     try {
                         logger.trace("Writing {}.", str);
@@ -156,28 +158,43 @@ public class AggregationEngine implements Runnable {
                 })
                 .map(Optional::get)
                 .doOnError(e -> logger.error("Error", e))
-                .subscribe(workPair -> {
-                    final JobModel model = workPair.getRight();
-                    final UUID jobID = workPair.getLeft();
-                    logger.debug("Has job {}. Working.", jobID);
-                    List<String> attributedBeneficiaries = model.getPatients();
-
-                    if (!attributedBeneficiaries.isEmpty()) {
-                        logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-                        try {
-                            this.completeJob(model);
-                        } catch (Exception e) {
-                            logger.error("Cannot process job {}", jobID, e);
-                            this.queue.completeJob(jobID, JobStatus.FAILED);
-                        }
-                    } else {
-                        logger.error("Cannot execute Job {} with no beneficiaries", jobID);
-                        this.queue.completeJob(jobID, JobStatus.FAILED);
-                    }
-                });
+                .subscribe(this::workExportJob);
     }
 
-    private Observable<String> handleResource(String identifier, ResourceType resourceType, IParser parser) {
+    /**
+     * Wrapper method for dispatching the job and handling any errors that would cause the job to fail
+     *
+     * @param workPair - job {@link Pair} with {@link UUID} or {@link JobModel}
+     */
+    private void workExportJob(Pair<UUID, JobModel> workPair) {
+        final JobModel model = workPair.getRight();
+        final UUID jobID = workPair.getLeft();
+        logger.debug("Has job {}. Working.", jobID);
+        List<String> attributedBeneficiaries = model.getPatients();
+
+        if (!attributedBeneficiaries.isEmpty()) {
+            logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
+            try {
+                this.completeJob(model);
+            } catch (Exception e) {
+                logger.error("Cannot process job {}", jobID, e);
+                this.queue.completeJob(jobID, JobStatus.FAILED);
+            }
+        } else {
+            logger.error("Cannot execute Job {} with no beneficiaries", jobID);
+            this.queue.completeJob(jobID, JobStatus.FAILED);
+        }
+    }
+
+    /**
+     * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to a String
+     *
+     * @param identifier   - {@link String} patient ID
+     * @param resourceType - {@link ResourceType} to fetch from BlueButton
+     * @param parser       - {@link IParser} FHIR parser to use for JSON conversion
+     * @return - {@link Observable} of {@link String} to pass back to reactive loop
+     */
+    private Observable<String> fetchResource(String identifier, ResourceType resourceType, IParser parser) {
         // Create retry handler
         RetryConfig config = RetryConfig.ofDefaults();
         Retry retry = Retry.of("testName", config);
