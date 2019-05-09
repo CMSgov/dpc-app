@@ -7,7 +7,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 
 public interface BlueButtonClient {
 
-    public Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException;
+    Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException;
 
-    public Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException;
+    Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException;
 }

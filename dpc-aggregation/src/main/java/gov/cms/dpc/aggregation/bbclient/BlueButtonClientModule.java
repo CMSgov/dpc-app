@@ -3,9 +3,9 @@ package gov.cms.dpc.aggregation.bbclient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.typesafe.config.Config;
-import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
@@ -29,8 +29,10 @@ public class BlueButtonClientModule extends AbstractModule {
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
     private static final String KEYSTORE_RESOURCE_KEY = "/bb.keystore";
 
+    @Inject
+    private BBClientConfiguration bbClientConfiguration;
+
     public BlueButtonClientModule() {
-        // Not used
     }
 
     @Override
@@ -44,21 +46,20 @@ public class BlueButtonClientModule extends AbstractModule {
     }
 
     @Provides
-    public IGenericClient provideFhirRestClient(Config config, FhirContext fhirContext, HttpClient httpClient) {
-        final String serverBaseUrl = config.getString("bbclient.serverBaseUrl");
+    public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
         fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
-        return fhirContext.newRestfulGenericClient(serverBaseUrl);
+        return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseURL());
     }
 
     @Provides
-    public KeyStore provideKeyStore(Config config) {
-        final String keyStoreType = config.getString("bbclient.keyStore.type");
-        final String defaultKeyStorePassword = config.getString("bbclient.keyStore.defaultPassword");
+    public KeyStore provideKeyStore() {
 
-        try (final InputStream keyStoreStream = getKeyStoreStream(config)) {
-            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-            keyStore.load(keyStoreStream, defaultKeyStorePassword.toCharArray());
+        final BBClientConfiguration.KeystoreConfiguration keystoreConfiguration = this.bbClientConfiguration.getKeystore();
+
+        try (final InputStream keyStoreStream = getKeyStoreStream()) {
+            KeyStore keyStore = KeyStore.getInstance(keystoreConfiguration.getType());
+            keyStore.load(keyStoreStream, keystoreConfiguration.getDefaultPassword().toCharArray());
             return keyStore;
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
             logger.error(ex.getMessage());
@@ -79,10 +80,10 @@ public class BlueButtonClientModule extends AbstractModule {
      *
      * @return - {@link InputStream} to keystore
      */
-    private InputStream getKeyStoreStream(Config config) {
+    private InputStream getKeyStoreStream() {
         final InputStream keyStoreStream;
 
-        if (!config.hasPath("bbclient.keyStore.location")) {
+        if (this.bbClientConfiguration.getKeystore().getLocation() == null) {
             keyStoreStream = DefaultBlueButtonClient.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
             if (keyStoreStream == null) {
                 logger.error("KeyStore location is empty, cannot find keyStore {} in resources", KEYSTORE_RESOURCE_KEY);
@@ -90,7 +91,7 @@ public class BlueButtonClientModule extends AbstractModule {
                         new MissingResourceException("", DefaultBlueButtonClient.class.getName(), KEYSTORE_RESOURCE_KEY));
             }
         } else {
-            final String keyStorePath = config.getString("bbclient.keyStore.location");
+            final String keyStorePath = this.bbClientConfiguration.getKeystore().getLocation();
             logger.debug("Opening keystream from location: {}", keyStorePath);
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);
@@ -125,10 +126,11 @@ public class BlueButtonClientModule extends AbstractModule {
         }
 
         // Configure the socket timeout for the connection, incl. ssl tunneling
+        final BBClientConfiguration.TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(5000)
-                .setConnectionRequestTimeout(5000)
-                .setSocketTimeout(5000)
+                .setConnectTimeout(timeouts.getConnectionTimeout())
+                .setConnectionRequestTimeout(timeouts.getRequestTimeout())
+                .setSocketTimeout(timeouts.getSocketTimeout())
                 .build();
 
         return HttpClients.custom()

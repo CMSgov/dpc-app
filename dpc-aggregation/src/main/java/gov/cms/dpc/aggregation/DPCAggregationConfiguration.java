@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation;
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.typesafe.config.ConfigRenderOptions;
+import gov.cms.dpc.aggregation.bbclient.BBClientConfiguration;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
 import gov.cms.dpc.queue.DPCQueueConfig;
 import io.dropwizard.db.DataSourceFactory;
@@ -19,6 +20,14 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @JsonProperty("database")
     private DataSourceFactory database = new DataSourceFactory();
 
+    @Valid
+    @NotNull
+    @JsonProperty("bblient")
+    private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
+
+    public BBClientConfiguration getClientConfiguration() {
+        return clientConfiguration;
+    }
 
     @Override
     public DataSourceFactory getDatabase() {
