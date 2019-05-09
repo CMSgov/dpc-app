@@ -7,6 +7,7 @@ import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
+import gov.cms.dpc.queue.models.JobResult;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
@@ -73,7 +74,6 @@ public class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Check that the job is in progress
-
         String jobURL = response.getHeaderString("Content-Location").replace(TEST_BASE_URL, "");
         WebTarget jobTarget = jobResource.client().target(jobURL);
         Response jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
@@ -81,7 +81,8 @@ public class FHIRSubmissionTest {
 
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
-        queue.completeJob(queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getLeft(), JobStatus.COMPLETED, List.of());
+        final var job = queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getRight();
+        queue.completeJob(job.getJobID(), JobStatus.COMPLETED, job.getJobResults());
 
         jobTarget = jobResource.client().target(jobURL);
         jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
@@ -120,11 +121,12 @@ public class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
-        var job = queue.workJob();
+        final var job = queue.workJob();
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getResourceTypes();
+        final var jobID = job.get().getLeft();
+        final var resources = job.get().getRight().getJobResults();
         assertAll(() -> assertEquals(resources.size(), 1),
-                () -> assertTrue(resources.contains(ResourceType.Patient)));
+                () -> assertTrue(resources.contains(new JobResult(jobID, ResourceType.Patient))));
     }
 
     /**
@@ -181,9 +183,7 @@ public class FHIRSubmissionTest {
         // Should yield a job with all resource types
         var job = queue.workJob();
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getResourceTypes();
-        assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()),
-                () -> assertTrue(resources.containsAll(JobModel.validResourceTypes)));
-
+        var resources = job.get().getRight().getJobResults();
+        assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()));
     }
 }

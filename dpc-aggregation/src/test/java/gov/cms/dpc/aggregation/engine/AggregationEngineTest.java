@@ -153,5 +153,13 @@ class AggregationEngineTest {
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServer(idCaptor.capture());
         Mockito.verify(bbclient, atLeastOnce()).requestEOBBundleFromServer(idCaptor.capture());
         assertEquals(6, idCaptor.getAllValues().stream().filter(value -> value.equals("-1")).count(), "Should have been called 6 times for both methods");
+        // Look at the result. It should have one error, but be successful otherwise.
+        assertTrue(queue.getJob(jobID).isPresent());
+        final var actual = queue.getJob(jobID).get();
+        var expectedErrorPath = engine.formErrorFilePath(jobID, ResourceType.Patient);
+        assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
+                () -> assertEquals(1, actual.getJobResults().size()),
+                () -> assertEquals(1, actual.getJobResults().get(0).getErrorCount()),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected error file"));
     }
 }
