@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.typesafe.config.Config;
+import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
@@ -29,12 +30,12 @@ public class BlueButtonClientModule extends AbstractModule {
     private static final String KEYSTORE_RESOURCE_KEY = "/bb.keystore";
 
     public BlueButtonClientModule() {
-
+        // Not used
     }
 
     @Override
     protected void configure() {
-        //Unused
+        // Not used
     }
 
     @Provides
@@ -125,9 +126,9 @@ public class BlueButtonClientModule extends AbstractModule {
 
         // Configure the socket timeout for the connection, incl. ssl tunneling
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(2000)
-                .setConnectionRequestTimeout(2000)
-                .setSocketTimeout(2000)
+                .setConnectTimeout(5000)
+                .setConnectionRequestTimeout(5000)
+                .setSocketTimeout(5000)
                 .build();
 
         return HttpClients.custom()
