@@ -96,7 +96,7 @@ public class AttributionServiceClient implements AttributionEngine {
     }
 
     @Override
-    public boolean isHealthy() {
+    public void assertHealthy() {
         final Invocation invocation = this.client
                 .path("/healthy")
                 .request()
@@ -104,13 +104,11 @@ public class AttributionServiceClient implements AttributionEngine {
 
         try (Response response = invocation.invoke()) {
             if (!HttpStatus.isSuccess(response.getStatus())) {
-                return false;
+                throw new WebApplicationException("Attribution service returned bad response", Response.Status.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             throw new WebApplicationException("Cannot reach attribution service", HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
-
-        return false;
     }
 
     /**

@@ -59,9 +59,8 @@ public interface AttributionEngine {
 
     /**
      * Determine if the {@link AttributionEngine} is accessible.
+     * If the engine is accessible, the method will return successfully. Otherwise, it will thrown an error is there's a problem.
      * Note: This is not a full Healthcheck, which is handled by the dpc-attribution service itself, it just checks for a valid response.
-     *
-     * @return - {@code true} Service is accessible. {@code false service is not accessible}
      */
-    boolean isHealthy();
+    void assertHealthy();
 }

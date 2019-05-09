@@ -21,10 +21,7 @@ public class AttributionHealthCheck extends HealthCheck {
 
     @Override
     protected Result check() throws Exception {
-        if (engine.isHealthy()) {
-            return Result.healthy();
-        }
-
-        return Result.healthy("Cannot reach Attribution Service");
+        engine.assertHealthy();
+        return Result.healthy();
     }
 }

@@ -137,7 +137,7 @@ public class RosterEngine implements AttributionEngine {
     }
 
     @Override
-    public boolean isHealthy() {
-        return true;
+    public void assertHealthy() {
+        // If we can reach it, it's healthy
     }
 }

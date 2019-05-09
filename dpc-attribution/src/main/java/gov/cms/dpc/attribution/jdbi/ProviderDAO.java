@@ -103,8 +103,8 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     }
 
     @Override
-    public boolean isHealthy() {
-        return true;
+    public void assertHealthy() {
+        // If we can reach it, it's healthy
     }
 
     private boolean providerExists(String providerNPI) {
