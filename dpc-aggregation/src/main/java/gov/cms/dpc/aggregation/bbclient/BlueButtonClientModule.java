@@ -30,10 +30,9 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientModule.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
     private static final String KEYSTORE_RESOURCE_KEY = "/bb.keystore";
-    private final BBClientConfiguration bbClientConfiguration;
+    private BBClientConfiguration bbClientConfiguration;
 
     public BlueButtonClientModule() {
-        bbClientConfiguration = getConfiguration().getClientConfiguration();
     }
 
     public BlueButtonClientModule(BBClientConfiguration config) {
@@ -42,7 +41,7 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
 
     @Override
     public void configure(Binder binder) {
-        // Not used
+        this.bbClientConfiguration = getConfiguration().getClientConfiguration();
     }
 
     @Provides

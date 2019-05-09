@@ -22,7 +22,7 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     @Valid
     @NotNull
-    @JsonProperty("bblient")
+    @JsonProperty("bbclient")
     private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
     public BBClientConfiguration getClientConfiguration() {

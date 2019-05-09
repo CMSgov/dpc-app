@@ -28,7 +28,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     @Override
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
         GuiceBundle<DPCAggregationConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
-                .modules(new DPCHibernateModule(), new AggregationAppModule(), new JobQueueModule())
+                .modules(new DPCHibernateModule(), new AggregationAppModule(), new JobQueueModule(), new BlueButtonClientModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
