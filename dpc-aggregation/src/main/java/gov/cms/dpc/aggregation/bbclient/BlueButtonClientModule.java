@@ -2,10 +2,12 @@ package gov.cms.dpc.aggregation.bbclient;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
@@ -23,20 +25,23 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.MissingResourceException;
 
-public class BlueButtonClientModule extends AbstractModule {
+public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientModule.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
     private static final String KEYSTORE_RESOURCE_KEY = "/bb.keystore";
-
-    @Inject
-    private BBClientConfiguration bbClientConfiguration;
+    private final BBClientConfiguration bbClientConfiguration;
 
     public BlueButtonClientModule() {
+        bbClientConfiguration = getConfiguration().getClientConfiguration();
+    }
+
+    public BlueButtonClientModule(BBClientConfiguration config) {
+        this.bbClientConfiguration = config;
     }
 
     @Override
-    protected void configure() {
+    public void configure(Binder binder) {
         // Not used
     }
 
@@ -49,7 +54,7 @@ public class BlueButtonClientModule extends AbstractModule {
     public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
         fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
-        return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseURL());
+        return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());
     }
 
     @Provides
@@ -68,9 +73,8 @@ public class BlueButtonClientModule extends AbstractModule {
     }
 
     @Provides
-    public HttpClient provideHttpClient(Config config, KeyStore keyStore) {
-        final String defaultKeyStorePassword = config.getString("bbclient.keyStore.defaultPassword");
-        return buildMutualTlsClient(keyStore, defaultKeyStorePassword.toCharArray());
+    public HttpClient provideHttpClient(KeyStore keyStore) {
+        return buildMutualTlsClient(keyStore, this.bbClientConfiguration.getKeystore().getDefaultPassword().toCharArray());
     }
 
     /**

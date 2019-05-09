@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 public class BBClientConfiguration {
 
     @NotEmpty
-    private String serverBaseURL;
+    private String serverBaseUrl;
 
     @Valid
     @NotNull
@@ -33,12 +33,12 @@ public class BBClientConfiguration {
         // Not used
     }
 
-    public String getServerBaseURL() {
-        return serverBaseURL;
+    public String getServerBaseUrl() {
+        return serverBaseUrl;
     }
 
-    public void setServerBaseURL(String serverBaseURL) {
-        this.serverBaseURL = serverBaseURL;
+    public void setServerBaseUrl(String serverBaseUrl) {
+        this.serverBaseUrl = serverBaseUrl;
     }
 
     public static class TimeoutConfiguration {
