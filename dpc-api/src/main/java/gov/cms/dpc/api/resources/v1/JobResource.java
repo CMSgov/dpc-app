@@ -89,10 +89,11 @@ public class JobResource extends AbstractJobResource {
      * @return the output list for the response
      */
     private List<JobCompletionModel.OutputEntry> outputList(JobModel job) {
-        return job.getResourceTypes().stream()
-                .map(resourceType -> {
+        return job.getJobResults().stream()
+                .map(jobResult -> {
+                    final var resourceType = jobResult.getResourceType();
                     final var url = String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(job.getJobID(), resourceType));
-                    return new JobCompletionModel.OutputEntry(resourceType, url);
+                    return new JobCompletionModel.OutputEntry(resourceType, url, jobResult.getCount());
                 })
                 .collect(Collectors.toList());
     }
@@ -103,10 +104,12 @@ public class JobResource extends AbstractJobResource {
      * @return the output list for the response
      */
     private List<JobCompletionModel.OutputEntry> errorList(JobModel job) {
-        return job.getErringTypes().stream()
-                .map(resourceType -> {
+        return job.getJobResults().stream()
+                .filter(jobResource -> jobResource.getErrorCount() > 0)
+                .map(jobResult -> {
+                    final var resourceType = jobResult.getResourceType();
                     final var url = String.format("%s/Data/%s", this.baseURL, JobModel.errorFileName(job.getJobID(), resourceType));
-                    return new JobCompletionModel.OutputEntry(resourceType, url);
+                    return new JobCompletionModel.OutputEntry(resourceType, url, jobResult.getErrorCount());
                 })
                 .collect(Collectors.toList());
     }

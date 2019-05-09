@@ -6,6 +6,7 @@ import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.crypto.Cipher;
@@ -68,10 +69,10 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      *
      * @param writer - the stream to be wrapped in a {@link CipherOutputStream}
      * @param job - the job to process
-     * @param resourceType - the FHIR resource type to write out
+     * @param jobResult - the per resource-type job results
      */
     @Override
-    protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, ResourceType resourceType) {
+    protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
         SecureRandom secureRandom = new SecureRandom();
 
         try {
@@ -88,10 +89,10 @@ public class EncryptingAggregationEngine extends AggregationEngine {
             aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
 
             try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);) {
-                super.workResource(cipherOutputStream, errorWriter, job, resourceType);
+                super.workResource(cipherOutputStream, errorWriter, job, jobResult);
             }
 
-            saveEncryptionMetadata(job, resourceType, secretKey, iv);
+            saveEncryptionMetadata(job, jobResult, secretKey, iv);
 
             // Ideally, we explicitly remove key material (with secretKey.destroy();) from memory when we're done.
             // Unfortunately, calling secretKey.destroy(); will throw DestroyFailedException
@@ -121,11 +122,11 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      * This metadata is saved to a json file named [outputFileName]-metadata.json on the tmp filesystem
      *
      * @param job - the current job pulled from the queue
-     * @param resourceType - FHIR type of the requested resource
+     * @param jobResult - The per resource-type result of the job
      * @param aesSecretKey - the {@link SecretKey} used in the symmetric encryption algorithm to encrypt the data
      * @param iv - a raw byte array corresponding to the iv used by the symmetric encryption algorithm to encrypt the data
      */
-    private void saveEncryptionMetadata(JobModel job, ResourceType resourceType, SecretKey aesSecretKey, byte[] iv) {
+    private void saveEncryptionMetadata(JobModel job, JobResult jobResult, SecretKey aesSecretKey, byte[] iv) {
 
         try {
 
@@ -153,7 +154,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
 
             String json = new ObjectMapper().writeValueAsString(metadata);
 
-            try(final FileOutputStream writer = new FileOutputStream(formOutputMetadataPath(job.getJobID(), resourceType))) {
+            try(final FileOutputStream writer = new FileOutputStream(formOutputMetadataPath(job.getJobID(), jobResult.getResourceType()))) {
                 writer.write(json.getBytes(StandardCharsets.UTF_8));
             }
 

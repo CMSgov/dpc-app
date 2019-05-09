@@ -2,18 +2,17 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
-import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The JobModel tracks the work done on a bulk export request. It contains the essential details of the request and
@@ -66,13 +65,12 @@ public class JobModel implements Serializable  {
     @Id
     private UUID jobID;
 
-
     /**
      * The list of resource types requested
      */
-    @Convert(converter = ResourceTypeListConverter.class)
-    @Column(name = "resource_types")
-    private List<ResourceType> resourceTypes;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name="jobID")
+    private List<JobResult> jobResults;
 
     /**
      * The provider-id from the request
@@ -116,34 +114,24 @@ public class JobModel implements Serializable  {
     @Column(name = "complete_time", nullable = true)
     private OffsetDateTime completeTime;
 
-    /**
-     * A list of resource types that produced errors. The errors themselves are stored in a temp file. 
-     */
-    @Convert(converter = ResourceTypeListConverter.class)
-    @Column(name = "erring_types")
-    private List<ResourceType> erringTypes;
-
-
     public JobModel() {
         // Hibernate required
     }
 
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
-        this.resourceTypes = resourceTypes;
+        this.jobResults = resourceTypes.stream().map(resourceType -> new JobResult(jobID, resourceType)).collect(Collectors.toList());
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
-        this.erringTypes = List.of();
     }
 
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
         this.jobID = jobID;
-        this.resourceTypes = resourceTypes;
+        this.jobResults = resourceTypes.stream().map(resourceType -> new JobResult(jobID, resourceType)).collect(Collectors.toList());
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
-        this.erringTypes = List.of();
         this.rsaPublicKey = pubKey.getEncoded();
     }
 
@@ -170,12 +158,16 @@ public class JobModel implements Serializable  {
         this.jobID = jobID;
     }
 
-    public List<ResourceType> getResourceTypes() {
-        return resourceTypes;
+    public List<JobResult> getJobResults() {
+        return jobResults;
     }
 
-    public void setResourceTypes(List<ResourceType> resourceTypes) {
-            this.resourceTypes = resourceTypes;
+    public List<ResourceType> getResourceTypes() {
+        return jobResults.stream().map(JobResult::getResourceType).collect(Collectors.toList());
+    }
+
+    public void setJobResults(List<JobResult> jobResults) {
+            this.jobResults = jobResults;
     }
 
     public String getProviderID() {
@@ -242,13 +234,6 @@ public class JobModel implements Serializable  {
         this.completeTime = completeTime;
     }
 
-    public List<ResourceType> getErringTypes() {
-        return erringTypes;
-    }
-
-    public void setErringTypes(@NotNull List<ResourceType> erringTypes) {
-        this.erringTypes = erringTypes;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -257,7 +242,7 @@ public class JobModel implements Serializable  {
         JobModel other = (JobModel) o;
         return new EqualsBuilder()
                 .append(jobID, other.jobID)
-                .append(resourceTypes, other.resourceTypes)
+                .append(jobResults, other.jobResults)
                 .append(providerID, other.providerID)
                 .append(patients, other.patients)
                 .append(submitTime, other.submitTime)
@@ -269,7 +254,7 @@ public class JobModel implements Serializable  {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobID, resourceTypes, providerID, patients, status, submitTime, startTime, completeTime);
+        return Objects.hash(jobID, jobResults, providerID, patients, status, submitTime, startTime, completeTime);
     }
 
     @Override

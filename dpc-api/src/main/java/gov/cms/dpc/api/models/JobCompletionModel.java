@@ -32,9 +32,15 @@ public class JobCompletionModel {
             // Jackson Required
         }
 
-        public OutputEntry(ResourceType type, String url) {
+        /**
+         * The number of resources in the file
+         */
+        private Integer count;
+
+        public OutputEntry(ResourceType type, String url, Integer count) {
             this.type = type;
             this.url = url;
+            this.count = count;
         }
 
         public String getUrl() {
@@ -44,8 +50,11 @@ public class JobCompletionModel {
         public ResourceType getType() {
             return type;
         }
-    }
 
+        public Integer getCount() {
+            return count;
+        }
+    }
 
     /**
      * An instant type that indicates the server's time when the query is run. No resources that have a modified data after this instant should be in the response.
