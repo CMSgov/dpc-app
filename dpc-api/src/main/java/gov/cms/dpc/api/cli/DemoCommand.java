@@ -52,7 +52,7 @@ public class DemoCommand extends Command {
                 .addArgument("--host")
                 .dest("hostname")
                 .type(String.class)
-                .setDefault("http://localhost:3002")
+                .setDefault("localhost:3002")
                 .help("Set the hostname (including port number) for running the Demo against");
     }
 
