@@ -2,7 +2,6 @@ package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.models.JobResult;
 import gov.cms.dpc.queue.models.JobModel;
-import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.util.List;
 import java.util.Optional;

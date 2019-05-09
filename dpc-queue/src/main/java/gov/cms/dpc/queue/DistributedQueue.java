@@ -5,12 +5,10 @@ import gov.cms.dpc.queue.models.JobResult;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.time.Duration;
 import java.time.OffsetDateTime;

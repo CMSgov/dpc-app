@@ -6,7 +6,6 @@ import gov.cms.dpc.queue.JobStatus;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.io.Serializable;
 import javax.validation.constraints.NotNull;
@@ -66,7 +65,6 @@ public class JobModel implements Serializable  {
     @Id
     private UUID jobID;
 
-
     /**
      * The list of resource types requested
      */
@@ -115,14 +113,6 @@ public class JobModel implements Serializable  {
      */
     @Column(name = "complete_time", nullable = true)
     private OffsetDateTime completeTime;
-
-    /**
-     * A list of resource types that produced errors. The errors themselves are stored in a temp file. 
-     */
-    @Convert(converter = ResourceTypeListConverter.class)
-    @Column(name = "erring_types")
-    private List<ResourceType> erringTypes;
-
 
     public JobModel() {
         // Hibernate required
@@ -244,13 +234,6 @@ public class JobModel implements Serializable  {
         this.completeTime = completeTime;
     }
 
-    public List<ResourceType> getErringTypes() {
-        return erringTypes;
-    }
-
-    public void setErringTypes(@NotNull List<ResourceType> erringTypes) {
-        this.erringTypes = erringTypes;
-    }
 
     @Override
     public boolean equals(Object o) {
