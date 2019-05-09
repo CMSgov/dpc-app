@@ -138,6 +138,8 @@ public class RosterEngine implements AttributionEngine {
 
     @Override
     public void assertHealthy() {
-        // If we can reach it, it's healthy
+        context.selectOne()
+                .from(ATTRIBUTIONS)
+                .fetchOptional();
     }
 }

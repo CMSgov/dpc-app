@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.health;
+package gov.cms.dpc.attribution.health;
 
 import com.codahale.metrics.health.HealthCheck;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
@@ -8,18 +8,15 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-/**
- * Simple check for validating at the {@link gov.cms.dpc.common.interfaces.AttributionEngine} is healthy
- */
 @Singleton
-public class AttributionHealthCheck extends HealthCheck {
+public class RosterEngineHealthCheck extends HealthCheck {
 
-    private static final Logger logger = LoggerFactory.getLogger(AttributionHealthCheck.class);
+    private final static Logger logger = LoggerFactory.getLogger(RosterEngineHealthCheck.class);
 
     private final AttributionEngine engine;
 
     @Inject
-    public AttributionHealthCheck(AttributionEngine engine) {
+    RosterEngineHealthCheck(AttributionEngine engine) {
         this.engine = engine;
     }
 
@@ -29,7 +26,7 @@ public class AttributionHealthCheck extends HealthCheck {
             engine.assertHealthy();
             return Result.healthy();
         } catch (Exception e) {
-            logger.error("Attribution service failed healthcheck", e);
+            logger.error("Roster engine failed healthcheck", e);
             return Result.unhealthy(e.getMessage());
         }
     }

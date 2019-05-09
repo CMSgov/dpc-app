@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
+import gov.cms.dpc.attribution.health.RosterEngineHealthCheck;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterEngine;
@@ -11,7 +12,6 @@ import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
@@ -22,7 +22,6 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Singleton;
 import java.sql.SQLException;
 import java.time.Duration;
 
@@ -40,6 +39,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(AttributionEngine.class).to(RosterEngine.class);
         binder.bind(V1AttributionResource.class);
         binder.bind(TruncateDatabase.class);
+
+        // Healthchecks
+        binder.bind(RosterEngineHealthCheck.class);
     }
 
     /**
