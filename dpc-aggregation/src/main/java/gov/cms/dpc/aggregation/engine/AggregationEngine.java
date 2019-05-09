@@ -33,13 +33,11 @@ public class AggregationEngine implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
     private static final char DELIM = '\n';
-    private static final Integer WAIT_TIME = 2000;
 
+    final String exportPath;
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
     private final FhirContext context;
-    protected final String exportPath;
-    private volatile boolean run = true;
     private Disposable subscribe;
 
     /**
@@ -65,19 +63,6 @@ public class AggregationEngine implements Runnable {
         // Run loop
         logger.info("Starting aggregation engine with exportPath:\"{}\"", exportPath);
         this.pollQueue();
-//        while (run) {
-//            this.queue.workJob().ifPresentOrElse(pair -> {
-//                completeJob(pair.getRight());
-//            }, () -> {
-//                try {
-//                    logger.debug("No job, waiting {} milliseconds", WAIT_TIME);
-//                    Thread.sleep(WAIT_TIME);
-//                } catch (InterruptedException e) {
-//                    logger.error("Interrupted. {}", e.getMessage());
-//                    Thread.currentThread().interrupt();
-//                }
-//            });sa
-//        }
 
     }
 
@@ -86,7 +71,6 @@ public class AggregationEngine implements Runnable {
      */
     public void stop() {
         logger.info("Shutting down aggregation engine");
-        this.run = false;
         this.subscribe.dispose();
     }
 
@@ -153,42 +137,18 @@ public class AggregationEngine implements Runnable {
                 .doOnError(e -> logger.error("Error: ", e))
                 .blockingSubscribe(str -> {
                     try {
-                        logger.debug("Writing {} to file on thread {}", str, Thread.currentThread().getName());
+                        logger.trace("Writing {}.", str);
                         writer.write(str.getBytes(StandardCharsets.UTF_8));
                         writer.write(DELIM);
                     } catch (IOException e) {
                         throw new JobQueueFailure(job.getJobID(), e);
                     }
                 });
-
-//        job.getPatients()
-//                .stream()
-//                .map(patientId -> )
-////                .map(patientId -> {
-////                    switch (resourceType) {
-////                        case Patient:
-////                            return this.bbclient.requestPatientFromServer(patientId);
-////                        case ExplanationOfBenefit:
-////                            return this.bbclient.requestEOBBundleFromServer(patientId);
-////                        default:
-////                            throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
-////                    }
-////                })
-////                .map(parser::encodeResourceToString)
-//                .forEach(str -> {
-//                    try {
-//                        logger.debug("Writing {} to file", str);
-//                        writer.write(str.getBytes(StandardCharsets.UTF_8));
-//                        writer.write(DELIM);
-//                    } catch (IOException e) {
-//
-//                    }
-//                });
     }
 
     private void pollQueue() {
         subscribe = Observable.fromCallable(this.queue::workJob)
-                .doOnNext(job -> logger.debug("Awaiting job on {}", Thread.currentThread().getName()))
+                .doOnNext(job -> logger.trace("Awaiting job from queue"))
                 .filter(Optional::isPresent)
                 .repeatWhen(completed -> {
                     logger.debug("No job, retrying in 2 seconds");
@@ -234,7 +194,8 @@ public class AggregationEngine implements Runnable {
             }
         })
                 .compose(retryTransformer)
-                .doOnNext(p -> logger.debug("Fetching {} on {}", p, Thread.currentThread().getName()))
+                .doOnNext(p -> logger.debug("Fetching {}", p))
+                .doOnError(e -> logger.error("Error fetching from BB.", e))
                 .map(parser::encodeResourceToString);
     }
 }
