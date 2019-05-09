@@ -3,10 +3,8 @@ package gov.cms.dpc.aggregation.bbclient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.inject.Binder;
-import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
-import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -33,6 +31,7 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
     private BBClientConfiguration bbClientConfiguration;
 
     public BlueButtonClientModule() {
+        // Not used
     }
 
     public BlueButtonClientModule(BBClientConfiguration config) {
@@ -41,7 +40,11 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
 
     @Override
     public void configure(Binder binder) {
-        this.bbClientConfiguration = getConfiguration().getClientConfiguration();
+        // If the config is null, pull it from Dropwizard
+        // This is gross, but necessary in order to get the injection to be handled correctly in both prod/test
+        if (this.bbClientConfiguration == null) {
+            this.bbClientConfiguration = getConfiguration().getClientConfiguration();
+        }
     }
 
     @Provides
