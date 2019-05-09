@@ -9,6 +9,8 @@ import org.hl7.fhir.dstu3.model.Practitioner;
  */
 public class UnknownRelationship extends RuntimeException {
 
+    public static final long serialVersionUID = 42L;
+
     private final String providerNPI;
     private final String patientMPI;
 

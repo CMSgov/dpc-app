@@ -36,7 +36,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
-                .modules(new DPCHibernateModule(),
+                .modules(new DPCHibernateModule<>(),
                         new AttributionAppModule(),
                         new FHIRModule())
                 .build();

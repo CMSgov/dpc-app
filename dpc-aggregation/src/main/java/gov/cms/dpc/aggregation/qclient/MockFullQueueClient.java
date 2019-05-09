@@ -9,6 +9,7 @@ import java.util.*;
 public class MockFullQueueClient extends AbstractMockQueueClient {
     private final List<String> testBeneficiaryIds = Arrays.asList("20140000008325", "20140000008326");
 
+    @Override
     public Optional<Pair<UUID, JobModel>> workJob() {
         final UUID uuid = UUID.randomUUID();
         return Optional.of(new Pair<>(

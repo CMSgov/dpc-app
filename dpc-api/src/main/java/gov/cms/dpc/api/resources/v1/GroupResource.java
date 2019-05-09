@@ -52,7 +52,7 @@ public class GroupResource extends AbstractGroupResource {
         // Get a list of attributed beneficiaries
         final Optional<List<String>> attributedBeneficiaries = this.client.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(providerID));
 
-        if (!attributedBeneficiaries.isPresent()) {
+        if (attributedBeneficiaries.isEmpty()) {
             throw new WebApplicationException(String.format("Unable to get attributed patients for provider: %s", providerID), Response.Status.NOT_FOUND);
         }
 
@@ -98,7 +98,7 @@ public class GroupResource extends AbstractGroupResource {
         }
 
         final var resources = new ArrayList<ResourceType>();
-        for (String queryResource: resourcesListParam.split(LIST_DELIM)) {
+        for (String queryResource: resourcesListParam.split(LIST_DELIM, -1)) {
             final var foundResourceType = matchResourceType(queryResource);
             if (foundResourceType.isEmpty()) {
                 throw new WebApplicationException(String.format("Unsupported resource name in the '_type' query parameter: %s", queryResource), Response.Status.BAD_REQUEST);

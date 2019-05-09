@@ -80,7 +80,7 @@ public class PatientEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PatientEntity)) return false;
         PatientEntity that = (PatientEntity) o;
         return patientID.equals(that.patientID) &&
                 beneficiaryID.equals(that.beneficiaryID) &&

@@ -25,6 +25,7 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @JsonProperty("sundial")
     private SundialConfiguration sundial = new SundialConfiguration();
 
+    @Override
     public DataSourceFactory getDatabase() {
         return database;
     }

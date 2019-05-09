@@ -11,7 +11,6 @@ import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
@@ -19,17 +18,11 @@ import org.jooq.DSLContext;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.inject.Singleton;
 import java.sql.SQLException;
 import java.time.Duration;
 
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
-
-    private static final Logger logger = LoggerFactory.getLogger(AttributionAppModule.class);
-
 
     AttributionAppModule() {
     }
@@ -52,13 +45,13 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
      * @return - {@link GroupResource} with injected database session
      */
     @Provides
-    GroupResource provideAttributionResource(DPCHibernateBundle hibernateModule, AttributionEngine engine) {
+    GroupResource provideAttributionResource(DPCHibernateBundle<DPCAttributionConfiguration> hibernateModule, AttributionEngine engine) {
         return new UnitOfWorkAwareProxyFactory(hibernateModule)
                 .create(GroupResource.class, AttributionEngine.class, engine);
     }
 
     @Provides
-    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle hibernateModule, SessionFactory factory) {
+    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle<DPCAttributionConfiguration> hibernateModule, SessionFactory factory) {
         return new UnitOfWorkAwareProxyFactory(hibernateModule)
                 .create(RelationshipDAO.class, SessionFactory.class, factory);
     }

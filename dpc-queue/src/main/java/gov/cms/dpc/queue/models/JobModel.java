@@ -8,12 +8,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
 import java.util.*;
 
 @Entity(name = "job_queue")
-public class JobModel {
+public class JobModel implements Serializable  {
     public static final long serialVersionUID = 42L;
 
     /**
@@ -211,7 +212,7 @@ public class JobModel {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof JobModel)) return false;
         JobModel other = (JobModel) o;
         return new EqualsBuilder()
                 .append(jobID, other.jobID)
