@@ -22,6 +22,7 @@ import org.jooq.impl.DSL;
 import java.sql.SQLException;
 import java.time.Duration;
 
+@SuppressWarnings("rawtypes") // Until we merge DPC-104
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
     AttributionAppModule() {
@@ -45,13 +46,13 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
      * @return - {@link GroupResource} with injected database session
      */
     @Provides
-    GroupResource provideAttributionResource(DPCHibernateBundle<DPCAttributionConfiguration> hibernateModule, AttributionEngine engine) {
+    GroupResource provideAttributionResource(DPCHibernateBundle hibernateModule, AttributionEngine engine) {
         return new UnitOfWorkAwareProxyFactory(hibernateModule)
                 .create(GroupResource.class, AttributionEngine.class, engine);
     }
 
     @Provides
-    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle<DPCAttributionConfiguration> hibernateModule, SessionFactory factory) {
+    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle hibernateModule, SessionFactory factory) {
         return new UnitOfWorkAwareProxyFactory(hibernateModule)
                 .create(RelationshipDAO.class, SessionFactory.class, factory);
     }

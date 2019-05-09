@@ -26,8 +26,8 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
 
     @Provides
     @Singleton
-    @SuppressWarnings("CloseableProvides") // Until we merge DPC-233
-    SessionFactory getSessionFactory(DPCHibernateBundle<T> hibernate) {
+    @SuppressWarnings({"CloseableProvides", "rawtypes", "unchecked"}) // Until we merge DPC-233 and DPC-104
+    SessionFactory getSessionFactory(DPCHibernateBundle hibernate) {
         // This is necessary because the session factory doesn't load on its own.
         // I'm really not sure how to fix this, I think it's due to the interaction with the Proxy Factory
         try {
