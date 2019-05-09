@@ -14,7 +14,10 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 public class GroupResource extends AbstractGroupResource {
@@ -38,9 +41,10 @@ public class GroupResource extends AbstractGroupResource {
     /**
      * Begin export process for the given provider
      * On success, returns a {@link org.eclipse.jetty.http.HttpStatus#NO_CONTENT_204} response along with a {@link org.hl7.fhir.dstu3.model.OperationOutcome} result.
-     * The `Content-Location` header contains the URI to call when
+     * The `Content-Location` header contains the URI to call when checking job status.
      *
-     * @param providerID {@link String} ID of provider to retrieve data for
+     * @param providerID    {@link String} ID of provider to retrieve data for
+     * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}
      * @return - {@link org.hl7.fhir.dstu3.model.OperationOutcome} specifying whether or not the request was successful.
      */
     @Override
@@ -72,6 +76,7 @@ public class GroupResource extends AbstractGroupResource {
      * Test method for verifying FHIR deserialization, it will eventually be removed.
      * TODO(nickrobison): Remove this
      *
+     * @param group - {@link Group} to use for testing
      * @return - {@link String} test string
      */
     @POST
@@ -86,9 +91,10 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     /**
-     * Convert the '_types' query param to a list of resources to add to the job. Handle the empty case,
+     * Convert the '_types' {@link QueryParam} to a list of resources to add to the job. Handle the empty case,
      * by returning all valid resource types.
      *
+     * @param resourcesListParam - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}s
      * @return - A list of {@link ResourceType} to return for this request.
      */
     private List<ResourceType> handleTypeQueryParam(String resourcesListParam) {
@@ -98,7 +104,7 @@ public class GroupResource extends AbstractGroupResource {
         }
 
         final var resources = new ArrayList<ResourceType>();
-        for (String queryResource: resourcesListParam.split(LIST_DELIM, -1)) {
+        for (String queryResource : resourcesListParam.split(LIST_DELIM, -1)) {
             final var foundResourceType = matchResourceType(queryResource);
             if (foundResourceType.isEmpty()) {
                 throw new WebApplicationException(String.format("Unsupported resource name in the '_type' query parameter: %s", queryResource), Response.Status.BAD_REQUEST);
