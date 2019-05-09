@@ -137,12 +137,13 @@ class AggregationEngineTest {
         queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
-        // Look at the result. It should have an erring type, but be successful otherwise.
+        // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJob(jobID).isPresent());
-        final var result = queue.getJob(jobID).get();
-        var errorFilePath = engine.formErrorFilePath(jobID, ResourceType.Patient);
-        assertAll(() -> assertEquals(JobStatus.COMPLETED, result.getStatus()),
-                () -> assertIterableEquals(List.of(ResourceType.Patient), result.getErringTypes()),
-                () -> assertTrue(Files.exists(Path.of(errorFilePath)), "expected error file"));
+        final var actual = queue.getJob(jobID).get();
+        var expectedErrorPath = engine.formErrorFilePath(jobID, ResourceType.Patient);
+        assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
+                () -> assertEquals(1, actual.getJobResults().size()),
+                () -> assertEquals(1, actual.getJobResults().get(0).getErrorCount()),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected error file"));
     }
 }

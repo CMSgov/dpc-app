@@ -10,17 +10,14 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.inject.Inject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.*;
 
 public class AggregationEngine implements Runnable {
@@ -112,37 +109,38 @@ public class AggregationEngine implements Runnable {
         // Guard against an empty bene list
         if (attributedBeneficiaries.isEmpty()) {
             logger.error("Cannot execute Job {} with no beneficiaries", jobID);
-            this.queue.completeJob(jobID, JobStatus.FAILED, List.of());
+            this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
             return;
         }
 
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
         try {
-            final var erringTypes = new ArrayList<ResourceType>();
-            for (ResourceType resourceType: job.getResourceTypes()) {
+            for (JobResult jobResult: job.getJobResults()) {
+                final var resourceType = jobResult.getResourceType();
                 if (!JobModel.isValidResourceType(resourceType)) {
                     throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
                 }
 
                 try (final var writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType));
                     final var errorWriter = new ByteArrayOutputStream()) {
-                    workResource(writer, errorWriter, job, resourceType);
+
+                    // Process the job for the specified resource type
+                    workResource(writer, errorWriter, job, jobResult);
                     writer.flush();
 
                     // Write our errors if present
-                    if (errorWriter.size() > 0) {
+                    if (jobResult.getErrorCount() > 0) {
                         try (final var errorFile = new FileOutputStream(formErrorFilePath(job.getJobID(), resourceType))) {
                             errorFile.write(errorWriter.toByteArray());
                             errorFile.flush();
                         }
-                        erringTypes.add(resourceType);
                     }
                 }
             }
-            this.queue.completeJob(jobID, JobStatus.COMPLETED, erringTypes);
+            this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
         } catch (Exception e) {
             logger.error("Cannot process job {}", jobID, e);
-            this.queue.completeJob(jobID, JobStatus.FAILED, List.of());
+            this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
         }
     }
 
@@ -152,14 +150,15 @@ public class AggregationEngine implements Runnable {
      * @param writer - the stream to write results
      * @param errorWriter - the stream to write operational resources
      * @param job - the job to process
-     * @param resourceType - the FHIR resource type to write out
+     * @param jobResult - the result of the work on the resource type.
      */
-    protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, ResourceType resourceType) {
+    protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
         final IParser parser = context.newJsonParser();
+        final var resourceType = jobResult.getResourceType();
         job.getPatients()
                 .stream()
                 .map(patientId -> requestResource(job, resourceType, patientId))
-                .forEach(resource -> writeResource(job, resourceType, writer, errorWriter, parser, resource));
+                .forEach(resource -> writeResource(job, jobResult, writer, errorWriter, parser, resource));
     }
 
     /**
@@ -194,23 +193,25 @@ public class AggregationEngine implements Runnable {
      * Write the resource into the appropriate streams.
      *
      * @param job - the context for this work
-     * @param resourceType - the resource type that is being written
+     * @param jobResult - the resource type that is being written
      * @param mainWriter - the main stream for successful resources
      * @param errorWriter - the error stream for operational outcomes
      * @param parser - the serializer to use should be Json
      * @param resource - the resource to write out
      */
-    protected void writeResource(JobModel job, ResourceType resourceType, OutputStream mainWriter, OutputStream errorWriter, IParser parser, Resource resource) {
+    protected void writeResource(JobModel job, JobResult jobResult, OutputStream mainWriter, OutputStream errorWriter, IParser parser, Resource resource) {
         try {
             final String str = parser.encodeResourceToString(resource);
             if (resource.getResourceType() == ResourceType.OperationOutcome) {
                 logger.debug("Writing {} to error file", str);
                 errorWriter.write(str.getBytes(StandardCharsets.UTF_8));
                 errorWriter.write(DELIM);
+                jobResult.incrementErrorCount();
             } else {
                 logger.debug("Writing {} to file", str);
                 mainWriter.write(str.getBytes(StandardCharsets.UTF_8));
                 mainWriter.write(DELIM);
+                jobResult.incrementCount();
             }
         } catch (IOException e) {
             throw new JobQueueFailure(job.getJobID(), e);

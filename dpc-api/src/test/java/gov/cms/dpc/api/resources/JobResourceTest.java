@@ -5,9 +5,8 @@ import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
@@ -95,7 +94,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        queue.completeJob(jobID, JobStatus.COMPLETED, List.of());
+        queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -121,16 +120,18 @@ public class JobResourceTest {
         final var jobID = UUID.randomUUID();
         final var queue = new MemoryQueue();
 
-        // Setup a completed job
+        // Setup a completed job with one error
         final var job = new JobModel(jobID,
                 JobModel.validResourceTypes,
                 TEST_PROVIDER_ID,
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        queue.completeJob(jobID, JobStatus.COMPLETED, List.of(ResourceType.Patient));
+        assertEquals(JobModel.validResourceTypes.size(), job.getJobResults().size());
+        job.getJobResults().get(0).incrementErrorCount();
+        queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 
-        // Test the response for ock
+        // Test the response for ok
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
@@ -164,7 +165,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        queue.completeJob(jobID, JobStatus.FAILED, List.of());
+        queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);

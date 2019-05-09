@@ -2,13 +2,12 @@ package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.*;
 import org.redisson.Redisson;
@@ -18,7 +17,6 @@ import org.redisson.config.Config;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -77,8 +75,8 @@ public class QueueTest {
     public void shutdown() {
         final Transaction tx = session.beginTransaction();
         try {
-            final Query query = session.createQuery("delete from job_queue");
-            query.executeUpdate();
+            session.createQuery("delete from job_result").executeUpdate();
+            session.createQuery("delete from job_queue").executeUpdate();
         } finally {
             tx.commit();
         }
@@ -110,13 +108,13 @@ public class QueueTest {
                 () -> assertEquals(JobStatus.RUNNING, runningJob.get().getStatus(), "Job should be running"));
 
         // Complete the job
-        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, List.of());
+        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, runningJob.get().getJobResults());
 
         // Check that the status is COMPLETED and with resource types
         final Optional<JobModel> completedJob = queue.getJob(workJob.get().getLeft());
         assertAll(() -> assertTrue(completedJob.isPresent(), "Should have job"),
                 () -> assertEquals(JobStatus.COMPLETED, completedJob.get().getStatus(), "Job should be completed"),
-                () -> assertNotNull(job.get().getResourceTypes()));
+                () -> assertNotNull(job.get().getJobResults()));
 
         // Work the second job
         workJob = queue.workJob();
@@ -127,7 +125,8 @@ public class QueueTest {
         assertTrue(emptyJob.isEmpty(), "the queue should not have ANY ready items");
 
         // Fail the second job and check its status
-        queue.completeJob(workJob.get().getLeft(), JobStatus.FAILED, List.of());
+        final var secondJob = workJob.get().getRight();
+        queue.completeJob(secondJob.getJobID(), JobStatus.FAILED, secondJob.getJobResults());
 //        jobSet.remove(workJob.get().getLeft());
 
         Optional<JobModel> failedJob = queue.getJob(workJob.get().getLeft());
@@ -141,17 +140,19 @@ public class QueueTest {
 
     public void testPatientAndEOBSubmission(JobQueue queue) {
         // Add a job with a EOB resource
-        final var jobSubmission = QueueTest.buildModel(UUID.randomUUID(), ResourceType.Patient, ResourceType.ExplanationOfBenefit);
-        queue.submitJob(jobSubmission.getJobID(), jobSubmission);
+        final var jobID = UUID.randomUUID();
+        final var jobSubmission = QueueTest.buildModel(jobID, ResourceType.Patient, ResourceType.ExplanationOfBenefit);
+        queue.submitJob(jobID, jobSubmission);
 
         // Retrieve the job with both resources
-        final var jobRetrived = queue.workJob();
-        assertTrue(jobRetrived.isPresent());
-        final var resourcesRetrived = jobRetrived.get().getRight().getResourceTypes();
-        assertTrue(resourcesRetrived.containsAll(List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit)));
+        final var actualJob = queue.workJob();
+        assertTrue(actualJob.isPresent());
+        final var actualResults = actualJob.get().getRight().getJobResults();
+        final var expectedResults =  List.of(new JobResult(jobID, ResourceType.Patient), new JobResult(jobID, ResourceType.ExplanationOfBenefit));
+        assertTrue(actualResults.containsAll(expectedResults), "Didn't find the resources types expected.");
 
         // Complete job
-        queue.completeJob(jobSubmission.getJobID(), JobStatus.COMPLETED, List.of());
+        queue.completeJob(jobSubmission.getJobID(), JobStatus.COMPLETED, jobSubmission.getJobResults());
     }
 
     public void testMissingJob(JobQueue queue) {
