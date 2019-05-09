@@ -22,14 +22,16 @@ before_install:
 #before_script:
 #  - psql -c 'create database dpc_attribution;' -U postgres
 
-after_script:
+script:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - mvn test -B -V
   # Format the test results and copy to a new directory
-  - mkdir reports
   - mvn jacoco:report
-    - |
+  - mkdir reports
+  - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
     do
-    JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
+      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.unit.$module.json
     done
   - ls reports
   - docker-compose down
@@ -41,9 +43,8 @@ after_script:
   - |
     for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
     do
-        JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
+      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
     done
-
   - ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
   - ./cc-test-reporter upload-coverage
 

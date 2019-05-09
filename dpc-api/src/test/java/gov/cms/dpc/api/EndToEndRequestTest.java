@@ -6,13 +6,11 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.dpc.api.annotations.IntegrationTest;
 import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -79,21 +77,36 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
 
 
         assertNotNull(jobResponse, "Should have Job Response");
-        assertEquals(1, jobResponse.getOutput().size(), "Should have 1 file");
+        assertEquals(2, jobResponse.getOutput().size(), "Should have 2 resource files");
+        assertEquals(0, jobResponse.getError().size(), "Should not have any errors");
 
-        // Get the first file and download it.
-        final String fileID = jobResponse.getOutput().get(0).getUrl();
+        // Validate each of the resources
+        validateResourceFile(Patient.class, jobResponse, ResourceType.Patient, 100);
+        // EOBs are structured as bundles, even though they have the EOB resource type
+        validateResourceFile(Bundle.class, jobResponse, ResourceType.ExplanationOfBenefit, 100);
+        assertThrows(IllegalStateException.class, () -> validateResourceFile(Schedule.class, jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
+    }
+
+    private <T extends IBaseResource> void validateResourceFile(Class<T> clazz, JobCompletionModel response, ResourceType resourceType, int expectedSize) throws IOException {
+        final String fileID = response
+                .getOutput()
+                .stream()
+                .filter(output -> output.getType() == resourceType)
+                .map(JobCompletionModel.OutputEntry::getUrl)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Should have at least 1 patient resource"));
+
         final File tempFile = ClientUtils.fetchExportedFiles(fileID);
 
         // Read the file back in and parse the patients
         final IParser parser = ctx.newJsonParser();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(tempFile))) {
-            final List<Patient> patients = bufferedReader.lines()
-                    .map((line) -> (Patient) parser.parseResource(line))
+            final List<T> entries = bufferedReader.lines()
+                    .map((line) -> clazz.cast(parser.parseResource(line)))
                     .collect(Collectors.toList());
 
-            assertEquals(100, patients.size(), "Should have 100 patients");
+            assertEquals(expectedSize, entries.size(), String.format("Should have %d entries in the resource", expectedSize));
         }
     }
 }
