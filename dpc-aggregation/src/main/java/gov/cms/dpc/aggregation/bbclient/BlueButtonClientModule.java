@@ -6,6 +6,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
+import io.github.resilience4j.retry.RetryConfig;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
@@ -77,6 +78,14 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
     @Provides
     public HttpClient provideHttpClient(KeyStore keyStore) {
         return buildMutualTlsClient(keyStore, this.bbClientConfiguration.getKeystore().getDefaultPassword().toCharArray());
+    }
+
+    @Provides
+    RetryConfig provideRetryConfig() {
+        // Create retry handler with our custom defaults
+        return RetryConfig.custom()
+                .maxAttempts(this.bbClientConfiguration.getRetryCount())
+                .build();
     }
 
     /**

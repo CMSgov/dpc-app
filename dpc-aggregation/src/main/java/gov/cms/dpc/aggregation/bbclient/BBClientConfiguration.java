@@ -16,6 +16,9 @@ public class BBClientConfiguration {
     @JsonProperty("timeouts")
     private TimeoutConfiguration timeouts = new TimeoutConfiguration();
 
+    @NotEmpty
+    private Integer retryCount;
+
     @Valid
     @NotNull
     @JsonProperty("keyStore")
@@ -39,6 +42,14 @@ public class BBClientConfiguration {
 
     public void setServerBaseUrl(String serverBaseUrl) {
         this.serverBaseUrl = serverBaseUrl;
+    }
+
+    public Integer getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(Integer retryCount) {
+        this.retryCount = retryCount;
     }
 
     public static class TimeoutConfiguration {

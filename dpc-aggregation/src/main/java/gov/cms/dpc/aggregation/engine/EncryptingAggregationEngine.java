@@ -3,9 +3,11 @@ package gov.cms.dpc.aggregation.engine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import io.github.resilience4j.retry.RetryConfig;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.crypto.Cipher;
@@ -43,8 +45,8 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      * @param config - the configuration for the engine
      */
     @Inject
-    public EncryptingAggregationEngine(BlueButtonClient bbclient, JobQueue queue, Config config) {
-        super(bbclient, queue, config);
+    public EncryptingAggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath String exportPath, Config config) {
+        super(bbclient, queue, exportPath, RetryConfig.ofDefaults());
 
         symmetricCipher = config.getString("encryption.symmetricCipher");
         asymmetricCipher = config.getString("encryption.asymmetricCipher");

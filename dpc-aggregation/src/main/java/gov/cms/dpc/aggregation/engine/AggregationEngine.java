@@ -2,8 +2,8 @@ package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
@@ -39,21 +39,24 @@ public class AggregationEngine implements Runnable {
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
     private final FhirContext context;
+    private final RetryConfig retryConfig;
     private Disposable subscribe;
 
     /**
      * Create an engine
      *
-     * @param bbclient - the BlueButton client to use
-     * @param queue    - the Job queue that will direct the work done
-     * @param config   - the configuration for the engine
+     * @param bbclient    - the BlueButton client to use
+     * @param queue       - the Job queue that will direct the work done
+     * @param exportPath  - The {@link ExportPath} to use for writing the output files
+     * @param retryConfig - {@link RetryConfig} injected config for setting up retry handler
      */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, Config config) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath String exportPath, RetryConfig retryConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.context = FhirContext.forDstu3();
-        this.exportPath = config.getString("exportPath");
+        this.exportPath = exportPath;
+        this.retryConfig = retryConfig;
     }
 
     /**
@@ -195,9 +198,7 @@ public class AggregationEngine implements Runnable {
      * @return - {@link Observable} of {@link String} to pass back to reactive loop
      */
     private Observable<String> fetchResource(String identifier, ResourceType resourceType, IParser parser) {
-        // Create retry handler
-        RetryConfig config = RetryConfig.ofDefaults();
-        Retry retry = Retry.of("testName", config);
+        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
         RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
 
         return Observable.fromCallable(() -> {
