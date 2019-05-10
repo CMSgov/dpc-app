@@ -77,11 +77,6 @@
             <groupId>com.hubspot.dropwizard</groupId>
             <artifactId>dropwizard-guicier</artifactId>
         </dependency>
-        <!--No longer shipped with Java 11, so we need to include it manually-->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>

@@ -20,6 +20,7 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -184,6 +185,6 @@ class BlueButtonClientTest {
             throw new MissingResourceException("Cannot find sample requests", BlueButtonClientTest.class.getName(), path);
         }
 
-        return new String(sampleData.readAllBytes());
+        return new String(sampleData.readAllBytes(), StandardCharsets.UTF_8);
     }
 }

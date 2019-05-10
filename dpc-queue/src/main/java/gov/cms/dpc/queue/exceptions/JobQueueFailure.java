@@ -4,6 +4,8 @@ import java.util.UUID;
 
 public class JobQueueFailure extends RuntimeException {
 
+    public static final long serialVersionUID = 42L;
+
     public JobQueueFailure(UUID jobID, String message) {
         super(String.format("Operation on Job: %s failed for reason: %s", jobID, message));
     }

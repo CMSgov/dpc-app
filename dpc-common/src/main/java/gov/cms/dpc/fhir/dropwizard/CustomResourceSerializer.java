@@ -10,6 +10,8 @@ import java.io.IOException;
 
 public class CustomResourceSerializer extends StdSerializer<Resource> {
 
+    public static final long serialVersionUID = 42L;
+
     private final FhirContext context;
 
     public CustomResourceSerializer(FhirContext ctx) {

@@ -1,9 +1,13 @@
 package gov.cms.dpc.common.utils;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,13 +33,15 @@ public class SeedProcessor {
      * Processes the provided attribution file and groups the patients by provider ID
      *
      * @return - {@link Map} of Provider IDs and a {@link List} of {@link Pair} of providerID and patientID
+     * @throws IOException - throws if unable to read the input file
      */
     public Map<String, List<Pair<String, String>>> extractProviderMap() throws IOException {
         List<Pair<String, String>> providerPairs = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.is))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.is, StandardCharsets.UTF_8))) {
             for (String line; (line = reader.readLine()) != null; ) {
-                final String[] splits = line.split(",");
+                // We can ignore this, because it's not worth pulling in Guava just for this.
+                final String[] splits = line.split(",", -1);
 
                 providerPairs.add(Pair.of(splits[1], splits[0]));
             }

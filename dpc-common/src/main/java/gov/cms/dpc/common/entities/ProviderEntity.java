@@ -90,7 +90,7 @@ public class ProviderEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ProviderEntity)) return false;
         ProviderEntity that = (ProviderEntity) o;
         return Objects.equals(providerID, that.providerID) &&
                 Objects.equals(providerNPI, that.providerNPI) &&

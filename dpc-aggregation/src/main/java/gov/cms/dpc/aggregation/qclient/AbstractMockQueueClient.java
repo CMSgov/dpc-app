@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public abstract class AbstractMockQueueClient implements JobQueue {
+    @Override
     public void submitJob(UUID jobId, JobModel data) {
         // TODO
 
@@ -18,10 +19,12 @@ public abstract class AbstractMockQueueClient implements JobQueue {
         return Optional.of(JobStatus.COMPLETED);
     }
 
+    @Override
     public Optional<JobModel> getJob(UUID jobID) {
         return Optional.empty();
     }
 
+    @Override
     public void completeJob(UUID uuid, JobStatus jobStatus) {
         // TODO
     }
@@ -30,6 +33,7 @@ public abstract class AbstractMockQueueClient implements JobQueue {
         // TODO
     }
 
+    @Override
     public long queueSize() {
         // TODO
         return -1;
