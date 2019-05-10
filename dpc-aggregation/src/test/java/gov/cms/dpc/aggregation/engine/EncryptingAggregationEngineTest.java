@@ -11,6 +11,7 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -103,14 +104,48 @@ class EncryptingAggregationEngineTest {
         var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
         var metadataFilePath = engine.formOutputMetadataPath(jobId, ResourceType.Patient);
 
-        assertTrue(Files.exists(Path.of(outputFilePath)));
-        assertTrue(Files.exists(Path.of(metadataFilePath)));
+        assertTrue(Files.exists(Path.of(outputFilePath)), "Output file doesn't exist in tmp");
+        assertTrue(Files.exists(Path.of(metadataFilePath)), "Encrypt metadata doesn't exist");
 
         // Attempt to decrypt result
         String cleartext = decryptTmpFile(Path.of(metadataFilePath), Path.of(outputFilePath));
         IBaseResource result = FhirContext.forDstu3().newJsonParser().parseResource(cleartext);
 
         assertTrue(result instanceof Patient);
+    }
+
+    /**
+     * Test if the engine writes encrypted error files to the Tmp filesystem
+     */
+    @Test
+    void shouldWriteEncryptedErrorFilesTest() throws GeneralSecurityException, IOException {
+        // Make a simple job with one resource type
+        final var jobId = UUID.randomUUID();
+        JobModel job = new JobModel(jobId,
+                Collections.singletonList(ResourceType.Patient),
+                TEST_PROVIDER_ID,
+                Collections.singletonList("-1"), // Invalid patient id
+                rsaPublicKey
+        );
+
+        // Do the job
+        queue.submitJob(jobId, job);
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+
+        // Look at the result
+        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
+        var errorFilePath = engine.formErrorFilePath(jobId, ResourceType.Patient);
+        var metadataFilePath = engine.formErrorMetadataPath(jobId, ResourceType.Patient);
+
+        assertTrue(Files.exists(Path.of(errorFilePath)), "Error file is missing");
+        assertTrue(Files.exists(Path.of(metadataFilePath)), "Error metadata file is missing");
+
+        // Attempt to decrypt result
+        String cleartext = decryptTmpFile(Path.of(metadataFilePath), Path.of(errorFilePath));
+        IBaseResource result = FhirContext.forDstu3().newJsonParser().parseResource(cleartext);
+
+        assertTrue(result instanceof OperationOutcome);
     }
 
     /**

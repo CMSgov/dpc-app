@@ -59,8 +59,17 @@ public class EncryptingAggregationEngine extends AggregationEngine {
         return String.format("%s/%s.ndjson.enc", exportPath, JobModel.outputFileName(jobID, resourceType));
     }
 
+    @Override
+    public String formErrorFilePath(UUID jobID, ResourceType resourceType) {
+        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.errorFileName(jobID, resourceType));
+    }
+
     public String formOutputMetadataPath(UUID jobID, ResourceType resourceType) {
         return String.format("%s/%s-metadata.json", exportPath, JobModel.outputFileName(jobID, resourceType));
+    }
+
+    public String formErrorMetadataPath(UUID jobID, ResourceType resourceType) {
+        return String.format("%s/%s-metadata.json", exportPath, JobModel.errorFileName(jobID, resourceType));
     }
 
     /**
@@ -80,19 +89,33 @@ public class EncryptingAggregationEngine extends AggregationEngine {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/", -1)[0]);
             keyGenerator.init(keyBits);
             SecretKey secretKey = keyGenerator.generateKey();
+            SecretKey errorSecretKey = keyGenerator.generateKey();
 
             // Generate IV
             byte[] iv =  new byte[ivBits / 8];
             secureRandom.nextBytes(iv);
+            byte[] errorIV = new byte[ivBits / 8];
+            secureRandom.nextBytes(errorIV);
 
+            // Generate Cipher
             Cipher aesCipher = Cipher.getInstance(symmetricCipher);
             aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
+            Cipher errorAESCipher = Cipher.getInstance(symmetricCipher);
+            errorAESCipher.init(Cipher.ENCRYPT_MODE, errorSecretKey, new GCMParameterSpec(gcmTagLength, errorIV));
 
-            try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);) {
-                super.workResource(cipherOutputStream, errorWriter, job, jobResult);
+            try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);
+            CipherOutputStream cipherErrorStream = new CipherOutputStream(errorWriter, errorAESCipher)) {
+                super.workResource(cipherOutputStream, cipherErrorStream, job, jobResult);
             }
 
-            saveEncryptionMetadata(job, jobResult, secretKey, iv);
+            try(final FileOutputStream metadataWriter = new FileOutputStream(formOutputMetadataPath(job.getJobID(), jobResult.getResourceType()))) {
+                saveEncryptionMetadata(metadataWriter, job, jobResult, secretKey, iv);
+            }
+            if (jobResult.getErrorCount() > 0) {
+                try(final FileOutputStream metadataWriter = new FileOutputStream(formErrorMetadataPath(job.getJobID(), jobResult.getResourceType()))) {
+                    saveEncryptionMetadata(metadataWriter, job, jobResult, errorSecretKey, errorIV);
+                }
+            }
 
             // Ideally, we explicitly remove key material (with secretKey.destroy();) from memory when we're done.
             // Unfortunately, calling secretKey.destroy(); will throw DestroyFailedException
@@ -126,7 +149,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      * @param aesSecretKey - the {@link SecretKey} used in the symmetric encryption algorithm to encrypt the data
      * @param iv - a raw byte array corresponding to the iv used by the symmetric encryption algorithm to encrypt the data
      */
-    private void saveEncryptionMetadata(JobModel job, JobResult jobResult, SecretKey aesSecretKey, byte[] iv) {
+    private void saveEncryptionMetadata(OutputStream writer, JobModel job, JobResult jobResult, SecretKey aesSecretKey, byte[] iv) {
 
         try {
 
@@ -153,11 +176,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
             metadata.put("AsymmetricProperties", asymmetricMetadata);
 
             String json = new ObjectMapper().writeValueAsString(metadata);
-
-            try(final FileOutputStream writer = new FileOutputStream(formOutputMetadataPath(job.getJobID(), jobResult.getResourceType()))) {
-                writer.write(json.getBytes(StandardCharsets.UTF_8));
-            }
-
+            writer.write(json.getBytes(StandardCharsets.UTF_8));
         } catch(GeneralSecurityException | IOException ex) {
             throw new JobQueueFailure(job.getJobID(), ex);
         }
