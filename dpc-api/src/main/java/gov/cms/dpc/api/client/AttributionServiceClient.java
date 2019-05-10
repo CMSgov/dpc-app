@@ -98,7 +98,7 @@ public class AttributionServiceClient implements AttributionEngine {
     @Override
     public void assertHealthy() {
         final Invocation invocation = this.client
-                .path("/healthy")
+                .path("/_healthy")
                 .request()
                 .buildGet();
 
