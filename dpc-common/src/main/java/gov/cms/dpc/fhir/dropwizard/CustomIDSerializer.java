@@ -1,6 +1,5 @@
 package gov.cms.dpc.fhir.dropwizard;
 
-import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
@@ -10,15 +9,14 @@ import java.io.IOException;
 
 public class CustomIDSerializer extends StdSerializer<IdType> {
 
-    private final FhirContext context;
+    public static final long serialVersionUID = 42L;
 
-    public CustomIDSerializer(FhirContext ctx) {
-        this(null, ctx);
+    public CustomIDSerializer() {
+        this(null);
     }
 
-    protected CustomIDSerializer(Class<IdType> t, FhirContext ctx) {
+    protected CustomIDSerializer(Class<IdType> t) {
         super(t);
-        this.context = ctx;
     }
 
 

@@ -41,7 +41,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         if (!providerExists(FHIRExtractors.getProviderNPI(provider))) {
             return Optional.empty();
         }
-        final Query query = namedQuery("findByProvider")
+        final Query<ProviderEntity> query = namedQuery("findByProvider")
                 .setParameter("id", FHIRExtractors.getProviderNPI(provider));
 
         final ProviderEntity providerEntity = uniqueResult(query);
@@ -73,9 +73,9 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter((resource -> resource.getResourceType() == ResourceType.Patient))
+                .filter(resource -> resource.getResourceType() == ResourceType.Patient)
                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
-                .map((pEntity) -> new AttributionRelationship(provider, pEntity))
+                .map(pEntity -> new AttributionRelationship(provider, pEntity))
                 .forEach(this.rDAO::addAttributionRelationship);
     }
 
@@ -103,7 +103,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     }
 
     private boolean providerExists(String providerNPI) {
-        final Query query = namedQuery("getProvider");
+        final Query<ProviderEntity> query = namedQuery("getProvider");
         query.setParameter("provID", providerNPI);
         return uniqueResult(query) != null;
     }

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -37,7 +38,7 @@ public class ExpireAttributions extends Job {
         attribute.injectMembers(this);
         logger.debug("Expiration threshold: {} days", expirationThreshold.toDays());
         // Calculate the expiration date (e.g. all relationships created BEFORE this time will be removed
-        this.expirationTemporal = OffsetDateTime.now().minus(this.expirationThreshold);
+        this.expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC).minus(this.expirationThreshold);
     }
 
     @Override

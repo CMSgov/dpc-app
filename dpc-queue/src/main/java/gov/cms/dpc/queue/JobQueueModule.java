@@ -8,12 +8,8 @@ import io.dropwizard.Configuration;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends DropwizardAwareModule<T> {
-
-    private static final Logger logger = LoggerFactory.getLogger(JobQueueModule.class);
 
     private final boolean inMemory;
     private Config config;

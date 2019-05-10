@@ -40,7 +40,6 @@ class EncryptingAggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private static final String RSA_PRIVATE_KEY_PATH = "test_rsa_private_key.der";
     private static final String RSA_PUBLIC_KEY_PATH = "test_rsa_public_key.der";
-    private BlueButtonClient bbclient;
     private JobQueue queue;
     private EncryptingAggregationEngine engine;
     private RSAPublicKey rsaPublicKey;
@@ -56,7 +55,7 @@ class EncryptingAggregationEngineTest {
     @BeforeEach
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
-        bbclient = new MockBlueButtonClient();
+        BlueButtonClient bbclient = new MockBlueButtonClient();
         engine = new EncryptingAggregationEngine(bbclient, queue, config);
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
@@ -143,6 +142,7 @@ class EncryptingAggregationEngineTest {
      * @throws GeneralSecurityException - Occurs whenever there's a problem initializing the cipher or decrypting data
      * @throws IOException - Occurs when there's a problem reading the metadata/data files
      */
+    @SuppressWarnings("unchecked")
     private String decryptTmpFile(Path metadataPath, Path dataPath) throws GeneralSecurityException, IOException {
         byte[] metadataRaw = Files.readAllBytes(metadataPath);
         Map<String,Object> metadataActual = new ObjectMapper().readValue(metadataRaw, new TypeReference<Map<String,Object>>(){});
@@ -152,12 +152,12 @@ class EncryptingAggregationEngineTest {
         assertTrue(metadataActual.containsKey("AsymmetricProperties"));
 
         // Read json properties into local variables
-        Map symmetricProperties =  (Map) metadataActual.get("SymmetricProperties");
+        Map<String, Object> symmetricProperties = (Map<String, Object>) metadataActual.get("SymmetricProperties");
         String symmetricCipher = (String) symmetricProperties.get("Cipher");
         byte[] encryptedSymmetricKey = Base64.getDecoder().decode((String) symmetricProperties.get("EncryptedKey"));
         byte[] symmetricIv = Base64.getDecoder().decode((String) symmetricProperties.get("InitializationVector"));
         int gcmTagLength = (int) symmetricProperties.get("TagLength");
-        Map asymmetricProperties = (Map) metadataActual.get("AsymmetricProperties");
+        Map<String, Object> asymmetricProperties = (Map<String, Object>) metadataActual.get("AsymmetricProperties");
         String asymmetricCipher = (String) asymmetricProperties.get("Cipher");
         byte[] asymmetricPublicKey = Base64.getDecoder().decode((String) asymmetricProperties.get("PublicKey"));
 
@@ -173,14 +173,14 @@ class EncryptingAggregationEngineTest {
         Cipher aesCipher = Cipher.getInstance(symmetricCipher);
         aesCipher.init(
                 Cipher.DECRYPT_MODE,
-                new SecretKeySpec(aesSecretKeyRaw, symmetricCipher.split("/")[0]),
+                new SecretKeySpec(aesSecretKeyRaw, symmetricCipher.split("/", -1)[0]),
                 new GCMParameterSpec(gcmTagLength, symmetricIv)
         );
 
         // Configure a CipherInputStream with a properly initialized aesCipher to read the encrypted data
         try(
                 final FileInputStream reader  = new FileInputStream(dataPath.toString());
-                final CipherInputStream cipherReader = new CipherInputStream(reader, aesCipher);
+                final CipherInputStream cipherReader = new CipherInputStream(reader, aesCipher)
         ) {
             return new String(cipherReader.readAllBytes(), StandardCharsets.UTF_8);
         }
