@@ -9,10 +9,7 @@ import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
+import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.inject.Inject;
 import java.io.FileOutputStream;
@@ -21,6 +18,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -82,8 +80,6 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      */
     @Override
     protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
-        SecureRandom secureRandom = new SecureRandom();
-
         try {
             // Generate Key
             KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/", -1)[0]);
@@ -92,28 +88,20 @@ public class EncryptingAggregationEngine extends AggregationEngine {
             SecretKey errorSecretKey = keyGenerator.generateKey();
 
             // Generate IV
-            byte[] iv =  new byte[ivBits / 8];
-            secureRandom.nextBytes(iv);
-            byte[] errorIV = new byte[ivBits / 8];
-            secureRandom.nextBytes(errorIV);
+            byte[] iv =  generateIV();
+            byte[] errorIV = generateIV();
 
-            // Generate Cipher
-            Cipher aesCipher = Cipher.getInstance(symmetricCipher);
-            aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
-            Cipher errorAESCipher = Cipher.getInstance(symmetricCipher);
-            errorAESCipher.init(Cipher.ENCRYPT_MODE, errorSecretKey, new GCMParameterSpec(gcmTagLength, errorIV));
-
-            try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);
-            CipherOutputStream cipherErrorStream = new CipherOutputStream(errorWriter, errorAESCipher)) {
+            try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, formCipher(secretKey, iv));
+            CipherOutputStream cipherErrorStream = new CipherOutputStream(errorWriter, formCipher(errorSecretKey, errorIV))) {
                 super.workResource(cipherOutputStream, cipherErrorStream, job, jobResult);
             }
 
             try(final FileOutputStream metadataWriter = new FileOutputStream(formOutputMetadataPath(job.getJobID(), jobResult.getResourceType()))) {
-                saveEncryptionMetadata(metadataWriter, job, jobResult, secretKey, iv);
+                saveEncryptionMetadata(metadataWriter, job, secretKey, iv);
             }
             if (jobResult.getErrorCount() > 0) {
                 try(final FileOutputStream metadataWriter = new FileOutputStream(formErrorMetadataPath(job.getJobID(), jobResult.getResourceType()))) {
-                    saveEncryptionMetadata(metadataWriter, job, jobResult, errorSecretKey, errorIV);
+                    saveEncryptionMetadata(metadataWriter, job, errorSecretKey, errorIV);
                 }
             }
 
@@ -142,14 +130,14 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      *     }
      * }
      *
-     * This metadata is saved to a json file named [outputFileName]-metadata.json on the tmp filesystem
+     * This metadata is saved to a stream in JSON format
      *
+     * @param writer - the stream to write the json
      * @param job - the current job pulled from the queue
-     * @param jobResult - The per resource-type result of the job
      * @param aesSecretKey - the {@link SecretKey} used in the symmetric encryption algorithm to encrypt the data
      * @param iv - a raw byte array corresponding to the iv used by the symmetric encryption algorithm to encrypt the data
      */
-    private void saveEncryptionMetadata(OutputStream writer, JobModel job, JobResult jobResult, SecretKey aesSecretKey, byte[] iv) {
+    private void saveEncryptionMetadata(OutputStream writer, JobModel job, SecretKey aesSecretKey, byte[] iv) {
 
         try {
 
@@ -180,5 +168,28 @@ public class EncryptingAggregationEngine extends AggregationEngine {
         } catch(GeneralSecurityException | IOException ex) {
             throw new JobQueueFailure(job.getJobID(), ex);
         }
+    }
+
+    /**
+     * Generate a random initialization vector
+     * @return vector to use
+     */
+    private byte[] generateIV() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] iv =  new byte[ivBits / 8];
+        secureRandom.nextBytes(iv);
+        return iv;
+    }
+
+    /**
+     * Form a cipher
+     * @param secretKey - Secret key to use
+     * @param iv - initialization vector
+     * @return new cipher
+     */
+    private Cipher formCipher(SecretKey secretKey, byte[] iv) throws GeneralSecurityException {
+        final var aesCipher = Cipher.getInstance(symmetricCipher);
+        aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
+        return aesCipher;
     }
 }
