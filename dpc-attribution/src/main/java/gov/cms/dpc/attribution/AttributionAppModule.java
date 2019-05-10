@@ -12,17 +12,13 @@ import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
-import org.jooq.DSLContext;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
-import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
 import java.time.Duration;
 
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
@@ -71,12 +67,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    DSLContext provideDSL(ManagedDataSource dataSource) {
-        final Settings settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
-        try {
-            return DSL.using(dataSource.getConnection(), settings);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    Settings provideSettings() {
+        return new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
     }
 }

@@ -3,7 +3,11 @@ package gov.cms.dpc.attribution.jobs;
 import com.google.inject.Injector;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.Attributions;
+import gov.cms.dpc.attribution.exceptions.AttributionException;
+import io.dropwizard.db.ManagedDataSource;
 import org.jooq.DSLContext;
+import org.jooq.conf.Settings;
+import org.jooq.impl.DSL;
 import org.knowm.sundial.Job;
 import org.knowm.sundial.SundialJobScheduler;
 import org.knowm.sundial.annotations.CronTrigger;
@@ -12,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +31,9 @@ public class ExpireAttributions extends Job {
     private static final Logger logger = LoggerFactory.getLogger(ExpireAttributions.class);
 
     @Inject
-    private DSLContext context;
+    private ManagedDataSource dataSource;
+    @Inject
+    private Settings settings;
     @Inject
     private Duration expirationThreshold;
     private OffsetDateTime expirationTemporal;
@@ -45,14 +52,14 @@ public class ExpireAttributions extends Job {
         // Find all the jobs and remove them
         logger.debug("Removing attribution relationships created before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
-        try {
+        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
             final int removed = context
                     .delete(Attributions.ATTRIBUTIONS)
                     .where(Attributions.ATTRIBUTIONS.CREATED_AT.le(this.expirationTemporal))
                     .execute();
             logger.debug("Expired {} attribution relationships.", removed);
-        } finally {
-            context.close();
+        } catch (SQLException e) {
+            throw new AttributionException("Unable to open connection to database.", e);
         }
     }
 }
