@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -121,5 +122,15 @@ public class JobResult {
     @Override
     public int hashCode() {
         return Objects.hash(jobResultID, count, errorCount);
+    }
+
+    @Override
+    public String toString() {
+        return "JobResult{" +
+                "jobID=" + jobResultID.jobID +
+                ", resourceType=" + jobResultID.resourceType +
+                ", count='" + count + '\'' +
+                ", errorCount=" + errorCount +
+                '}';
     }
 }
