@@ -2,8 +2,6 @@ package gov.cms.dpc.api.health;
 
 import com.codahale.metrics.health.HealthCheck;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,8 +12,6 @@ import javax.inject.Singleton;
 @Singleton
 public class AttributionHealthCheck extends HealthCheck {
 
-    private static final Logger logger = LoggerFactory.getLogger(AttributionHealthCheck.class);
-
     private final AttributionEngine engine;
 
     @Inject
@@ -24,12 +20,11 @@ public class AttributionHealthCheck extends HealthCheck {
     }
 
     @Override
-    protected Result check() throws Exception {
+    protected Result check() {
         try {
             engine.assertHealthy();
             return Result.healthy();
         } catch (Exception e) {
-            logger.error("Attribution service failed healthcheck", e);
             return Result.unhealthy(e.getMessage());
         }
     }

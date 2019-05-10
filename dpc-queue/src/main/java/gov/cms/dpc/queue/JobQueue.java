@@ -62,7 +62,7 @@ public interface JobQueue {
      * This is accomplished by
      * throws if not healthy
      */
-    void isHealthy();
+    void assertHealthy();
 }
 
 

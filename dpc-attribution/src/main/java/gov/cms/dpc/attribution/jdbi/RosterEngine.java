@@ -30,6 +30,7 @@ import static gov.cms.dpc.attribution.dao.tables.Providers.PROVIDERS;
 
 public class RosterEngine implements AttributionEngine {
 
+    static final String CONNECTION_MESSAGE = "Unable to open connection to database";
     private static final Logger logger = LoggerFactory.getLogger(RosterEngine.class);
 
     private final ManagedDataSource dataSource;
@@ -167,7 +168,7 @@ public class RosterEngine implements AttributionEngine {
                     .from(ATTRIBUTIONS)
                     .fetchOptional();
         } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database", e);
+            throw new AttributionException(CONNECTION_MESSAGE, e);
         }
     }
 }

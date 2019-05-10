@@ -7,7 +7,6 @@ import gov.cms.dpc.queue.models.JobModel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -29,6 +28,9 @@ import java.util.function.Consumer;
 public class DistributedQueue implements JobQueue {
 
     private static final Logger logger = LoggerFactory.getLogger(DistributedQueue.class);
+    public static final String CLUSTER_NOT_RESPONDING = "Redis cluster is not responding to pings.";
+    public static final String REDIS_UNHEALTHY = "Redis cluster is unhealthy";
+    public static final String DB_UNHEALTHY = "Database cluster is not responding";
 
     private final RedissonClient client;
     private final Queue<UUID> queue;
@@ -155,15 +157,15 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
-    public void isHealthy() {
+    public void assertHealthy() {
         // Redisson first
 
         try {
             if (!this.client.getNodesGroup().pingAll()) {
-                throw new JobQueueUnhealthy("Redis cluster is not responding to pings.");
+                throw new JobQueueUnhealthy(CLUSTER_NOT_RESPONDING);
             }
         } catch (Exception e) {
-            throw new JobQueueUnhealthy("Redis cluster is unhealthy", e);
+            throw new JobQueueUnhealthy(REDIS_UNHEALTHY, e);
         }
 
         // Now the DB
@@ -173,7 +175,7 @@ public class DistributedQueue implements JobQueue {
                 @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery(healthQuery);
                 healthCheck.getFirstResult();
             } catch (Exception e) {
-                throw new JobQueueUnhealthy("Database cluster is not responding", e);
+                throw new JobQueueUnhealthy(DB_UNHEALTHY, e);
             }
         }
     }

@@ -20,9 +20,9 @@ public class JobQueueHealthCheck extends HealthCheck {
     }
 
     @Override
-    protected Result check() throws Exception {
+    public Result check() {
         try {
-            this.queue.isHealthy();
+            this.queue.assertHealthy();
             return Result.healthy();
         } catch (Exception e) {
             return Result.unhealthy(e.getMessage());
