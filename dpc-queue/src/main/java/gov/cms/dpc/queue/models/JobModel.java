@@ -166,6 +166,10 @@ public class JobModel implements Serializable  {
         return jobResults.stream().map(JobResult::getResourceType).collect(Collectors.toList());
     }
 
+    public Optional<JobResult> getJobResult(ResourceType forResourceType) {
+        return jobResults.stream().filter(result -> result.getResourceType().equals(forResourceType)).findFirst();
+    }
+
     public void setJobResults(List<JobResult> jobResults) {
             this.jobResults = jobResults;
     }
@@ -233,7 +237,6 @@ public class JobModel implements Serializable  {
     public void setCompleteTime(OffsetDateTime completeTime) {
         this.completeTime = completeTime;
     }
-
 
     @Override
     public boolean equals(Object o) {

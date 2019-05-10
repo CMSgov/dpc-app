@@ -98,16 +98,16 @@ public class QueueTest {
         // Check the status of the job
         final UUID firstJob = getSetFirst(jobSet);
         final Optional<JobModel> job = queue.getJob(firstJob);
-        assertAll(() -> assertTrue(job.isPresent(), "Should have a matching status"),
-                () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be queue"));
+        assertAll(() -> assertTrue(job.isPresent(), "Should be present in the queue."),
+                () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be in queue"));
 
         // Work the job
         Optional<Pair<UUID, JobModel>> workJob = queue.workJob();
-        assertTrue(workJob.isPresent(), "Should have job to work");
+        assertTrue(workJob.isPresent(), "Should have a job to work");
 
         // Check that the status is RUNNING
         final Optional<JobModel> runningJob = queue.getJob(workJob.get().getLeft());
-        assertAll(() -> assertTrue(runningJob.isPresent(), "Should have Job status"),
+        assertAll(() -> assertTrue(runningJob.isPresent(), "Should have a status"),
                 () -> assertEquals(JobStatus.RUNNING, runningJob.get().getStatus(), "Job should be running"));
 
         // Complete the job
@@ -115,7 +115,7 @@ public class QueueTest {
 
         // Check that the status is COMPLETED and with resource types
         final Optional<JobModel> completedJob = queue.getJob(workJob.get().getLeft());
-        assertAll(() -> assertTrue(completedJob.isPresent(), "Should have job"),
+        assertAll(() -> assertTrue(completedJob.isPresent(), "Should have a job"),
                 () -> assertEquals(JobStatus.COMPLETED, completedJob.get().getStatus(), "Job should be completed"),
                 () -> assertNotNull(job.get().getJobResults()));
 
@@ -125,7 +125,7 @@ public class QueueTest {
 
         // Try to work again last job again, this should return no job
         var emptyJob = queue.workJob();
-        assertTrue(emptyJob.isEmpty(), "the queue should not have ANY ready items");
+        assertTrue(emptyJob.isEmpty(), "The queue should not have ANY ready items");
 
         // Fail the second job and check its status
         final var secondJob = workJob.get().getRight();
@@ -148,24 +148,29 @@ public class QueueTest {
         queue.submitJob(jobID, jobSubmission);
 
         // Retrieve the job with both resources
-        final var actualJob = queue.workJob();
-        assertTrue(actualJob.isPresent());
-        final var actualResults = actualJob.get().getRight().getJobResults();
+        final var workJob = queue.workJob();
+        assertTrue(workJob.isPresent(), "Job is missing from the queue after a submission");
+        final var actualJob = workJob.get().getRight();
+        final var actualResults = actualJob.getJobResults();
         final var expectedResults =  List.of(new JobResult(jobID, ResourceType.Patient), new JobResult(jobID, ResourceType.ExplanationOfBenefit));
         assertTrue(actualResults.containsAll(expectedResults), "Didn't find the resources types expected.");
 
+        // Fake work
+        actualJob.getJobResult(ResourceType.Patient).ifPresent(result -> result.incrementCount());
+        actualJob.getJobResult(ResourceType.ExplanationOfBenefit).ifPresent(result -> result.incrementErrorCount());
+
         // Complete job
-        queue.completeJob(jobSubmission.getJobID(), JobStatus.COMPLETED, jobSubmission.getJobResults());
+        queue.completeJob(actualJob.getJobID(), JobStatus.COMPLETED, actualJob.getJobResults());
     }
 
     public void testMissingJob(JobQueue queue) {
         UUID jobID = UUID.randomUUID();
 
         // Check that things are empty
-        assertAll(() -> assertTrue(queue.workJob().isEmpty(), "Should not have job to work"),
+        assertAll(() -> assertTrue(queue.workJob().isEmpty(), "Should not have a job to work"),
                 () -> assertEquals(0, queue.queueSize(), "Should have an empty queue"));
 
-        assertTrue(queue.getJob(jobID).isEmpty(), "Should not be able to get missing job");
+        assertTrue(queue.getJob(jobID).isEmpty(), "Should not be able to get a missing job");
         assertThrows(JobQueueFailure.class, () -> queue.completeJob(jobID, JobStatus.FAILED, List.of()), "Should error when completing a job which does not exist");
     }
 
