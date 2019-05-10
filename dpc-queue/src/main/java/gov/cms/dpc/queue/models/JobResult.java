@@ -99,7 +99,7 @@ public class JobResult {
         return errorCount;
     }
 
-    public void setErrorCount(int count) {
+    public void setErrorCount(int errorCount) {
         this.errorCount = errorCount;
     }
 
