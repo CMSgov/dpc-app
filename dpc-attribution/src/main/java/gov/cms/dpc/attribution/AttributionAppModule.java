@@ -16,15 +16,11 @@ import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
+@SuppressWarnings("rawtypes") // Until we merge DPC-104
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
-
-    private static final Logger logger = LoggerFactory.getLogger(AttributionAppModule.class);
-
 
     AttributionAppModule() {
     }

@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -101,7 +102,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         // Read the file back in and parse the patients
         final IParser parser = ctx.newJsonParser();
 
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(tempFile))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(tempFile, StandardCharsets.UTF_8))) {
             final List<T> entries = bufferedReader.lines()
                     .map((line) -> clazz.cast(parser.parseResource(line)))
                     .collect(Collectors.toList());

@@ -39,7 +39,7 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
         final String patientMPI = FHIRExtractors.getPatientMPI(patient);
         logger.debug("Looking up attribution between {} and {}", providerNPI, patientMPI);
 
-        final Query query = namedQuery("findRelationship");
+        final Query<AttributionRelationship> query = namedQuery("findRelationship");
         query.setParameter("provID", providerNPI);
         query.setParameter("patID", patientMPI);
 

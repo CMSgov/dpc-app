@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +47,6 @@ public class RosterEngine implements AttributionEngine {
 
         final String providerNPI = FHIRExtractors.getProviderNPI(provider);
 
-        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
 
             if (!context.fetchExists(context.selectOne().from(PROVIDERS).where(PROVIDERS.PROVIDER_ID.eq(providerNPI)))) {
                 return Optional.empty();

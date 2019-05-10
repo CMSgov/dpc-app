@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.Queue;
@@ -43,8 +44,8 @@ public class DistributedQueue implements JobQueue {
 
     @Override
     public void submitJob(UUID jobID, JobModel data) {
-        assert (jobID == data.getJobID() && data.getStatus() == JobStatus.QUEUED);
-        final OffsetDateTime submitTime = OffsetDateTime.now();
+        assert (jobID.equals(data.getJobID()) && data.getStatus() == JobStatus.QUEUED);
+        final OffsetDateTime submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         logger.debug("Adding jobID {} to the queue at {} with for provider {}.",
                 jobID, submitTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 data.getProviderID());
@@ -101,7 +102,7 @@ public class DistributedQueue implements JobQueue {
         if (jobID == null) {
             return Optional.empty();
         }
-        final OffsetDateTime startTime = OffsetDateTime.now();
+        final OffsetDateTime startTime = OffsetDateTime.now(ZoneOffset.UTC);
         final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
             // Verify that the job is in progress, otherwise fail
             if (job.getStatus() != JobStatus.QUEUED) {
@@ -111,19 +112,20 @@ public class DistributedQueue implements JobQueue {
             job.setStatus(JobStatus.RUNNING);
             job.setStartTime(startTime);
         });
+        //noinspection OptionalGetWithoutIsPresent
         final var delay = Duration.between(updatedJob.getSubmitTime().get(), updatedJob.getStartTime().get());
         logger.debug("Started job {} at {}, waited in queue for {} seconds",
                 jobID,
                 startTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 delay.toSeconds());
 
-        return Optional.of(new Pair(jobID, updatedJob));
+        return Optional.of(new Pair<>(jobID, updatedJob));
     }
 
     @Override
     public void completeJob(UUID jobID, JobStatus status) {
         assert (status == JobStatus.COMPLETED || status == JobStatus.FAILED);
-        final OffsetDateTime completionTime = OffsetDateTime.now();
+        final OffsetDateTime completionTime = OffsetDateTime.now(ZoneOffset.UTC);
         final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
             // Verify that the job is running
             if (job.getStatus() != JobStatus.RUNNING) {

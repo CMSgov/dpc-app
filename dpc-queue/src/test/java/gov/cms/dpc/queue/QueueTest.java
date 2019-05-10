@@ -170,27 +170,6 @@ public class QueueTest {
         return set.stream().findFirst().orElseThrow(() -> new IllegalStateException("Cannot get first from empty array"));
     }
 
-    private static class TestJob implements Statisable {
-
-        private final String data;
-        private JobStatus status;
-
-        TestJob(String data) {
-            this.data = data;
-            this.status = JobStatus.QUEUED;
-        }
-
-        @Override
-        public JobStatus getStatus() {
-            return this.status;
-        }
-
-        @Override
-        public void setStatus(JobStatus status) {
-            this.status = status;
-        }
-    }
-
     private static JobModel buildModel(UUID id) {
         return buildModel(id, ResourceType.Patient);
     }
