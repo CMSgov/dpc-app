@@ -153,13 +153,13 @@ public class AggregationEngine implements Runnable {
 
     private void pollQueue() {
         subscribe = Observable.fromCallable(this.queue::workJob)
-                .doOnNext(job -> logger.trace("Awaiting job from queue"))
+                .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
+                .map(Optional::get)
                 .repeatWhen(completed -> {
                     logger.debug("No job, retrying in 2 seconds");
                     return completed.delay(2, TimeUnit.SECONDS);
                 })
-                .map(Optional::get)
                 .doOnError(e -> logger.error("Error", e))
                 .subscribe(this::workExportJob);
     }
