@@ -7,6 +7,7 @@ import gov.cms.dpc.queue.models.JobModel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -169,7 +170,7 @@ public class DistributedQueue implements JobQueue {
         try (final Session session = this.factory.openSession()) {
 
             try {
-                final Query healthCheck = session.createSQLQuery(healthQuery);
+                @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery(healthQuery);
                 healthCheck.getFirstResult();
             } catch (Exception e) {
                 throw new JobQueueUnhealthy("Database cluster is not responding", e);

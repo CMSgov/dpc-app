@@ -7,6 +7,7 @@ import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.redisson.api.Node;
 import org.redisson.api.NodesGroup;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisTimeoutException;
@@ -14,13 +15,15 @@ import org.redisson.client.RedisTimeoutException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("rawtypes")
 public class QueueHealthTest {
 
     private RedissonClient client = mock(RedissonClient.class);
-    final SessionFactory factory = mock(SessionFactory.class);
     private Session session = mock(Session.class);
-    private NodesGroup nGroup = mock(NodesGroup.class);
+    @SuppressWarnings("unchecked")
+    private NodesGroup<Node> nGroup = mock(NodesGroup.class);
     private NativeQuery query = mock(NativeQuery.class);
+    private final SessionFactory factory = mock(SessionFactory.class);
 
     @BeforeEach
     void setupQueueDependencies() {

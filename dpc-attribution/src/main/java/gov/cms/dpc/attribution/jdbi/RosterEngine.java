@@ -46,15 +46,14 @@ public class RosterEngine implements AttributionEngine {
     public Optional<List<String>> getAttributedPatientIDs(Practitioner provider) {
 
         final String providerNPI = FHIRExtractors.getProviderNPI(provider);
-
-
+        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
             if (!context.fetchExists(context.selectOne().from(PROVIDERS).where(PROVIDERS.PROVIDER_ID.eq(providerNPI)))) {
                 return Optional.empty();
             }
             final List<String> beneficiaryIDs = context.select()
                     .from(PROVIDERS)
                     .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
-                    .join(PATIENTS).on((ATTRIBUTIONS.PATIENT_ID).eq(PATIENTS.ID))
+                    .join(PATIENTS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID))
                     .where(PROVIDERS.PROVIDER_ID.eq(providerNPI))
                     .fetch().getValues(PATIENTS.BENEFICIARY_ID);
 
@@ -81,7 +80,7 @@ public class RosterEngine implements AttributionEngine {
                 final AttributionsRecord attr = new AttributionsRecord();
                 attr.setProviderId(providerRecord.getId());
                 attr.setPatientId(patientRecord.getId());
-                attr.setCreatedAt(OffsetDateTime.now());
+                attr.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
 
                 final int updated = ctx.executeInsert(attr);
                 if (updated != 1) {
@@ -99,7 +98,7 @@ public class RosterEngine implements AttributionEngine {
             context.transaction(config -> {
 
                 final DSLContext ctx = DSL.using(config);
-                RosterUtils.submitAttributionBundle(attributionBundle, ctx, OffsetDateTime.now());
+                RosterUtils.submitAttributionBundle(attributionBundle, ctx, OffsetDateTime.now(ZoneOffset.UTC));
             });
         } catch (SQLException e) {
             throw new AttributionException("Unable to open connection to database", e);
@@ -122,7 +121,7 @@ public class RosterEngine implements AttributionEngine {
                 final String patientMPI = FHIRExtractors.getPatientMPI(patient);
                 final Result<AttributionsRecord> attributionsRecords = ctx.selectFrom(ATTRIBUTIONS
                         .join(PROVIDERS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
-                        .join(PATIENTS).on((ATTRIBUTIONS.PATIENT_ID).eq(PATIENTS.ID)))
+                        .join(PATIENTS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID)))
                         .where(PROVIDERS.PROVIDER_ID.eq(providerNPI).and(PATIENTS.BENEFICIARY_ID.eq(patientMPI)))
                         .fetchInto(ATTRIBUTIONS);
 
