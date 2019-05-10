@@ -225,7 +225,7 @@ public class AggregationEngine implements Runnable {
     protected void writeResource(JobModel job, JobResult jobResult, OutputStream mainWriter, OutputStream errorWriter, IParser parser, Resource resource) {
         try {
             final String str = parser.encodeResourceToString(resource);
-            if (resource.getResourceType() == ResourceType.OperationOutcome) {
+            if (ResourceType.OperationOutcome.equals(resource.getResourceType())) {
                 logger.debug("Writing {} to error file", str);
                 errorWriter.write(str.getBytes(StandardCharsets.UTF_8));
                 errorWriter.write(DELIM);
