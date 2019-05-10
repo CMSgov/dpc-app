@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.health;
+package gov.cms.dpc.queue.health;
 
 import com.codahale.metrics.health.HealthCheck;
 import gov.cms.dpc.queue.JobQueue;
@@ -11,6 +11,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class JobQueueHealthCheck extends HealthCheck {
+
     private final JobQueue queue;
 
     @Inject
@@ -20,7 +21,11 @@ public class JobQueueHealthCheck extends HealthCheck {
 
     @Override
     protected Result check() throws Exception {
-        this.queue.isHealthy();
-        return Result.healthy();
+        try {
+            this.queue.isHealthy();
+            return Result.healthy();
+        } catch (Exception e) {
+            return Result.unhealthy(e.getMessage());
+        }
     }
 }

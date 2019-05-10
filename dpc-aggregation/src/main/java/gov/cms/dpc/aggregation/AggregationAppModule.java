@@ -7,41 +7,37 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BBClientConfiguration;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
-import gov.cms.dpc.aggregation.health.BlueButtonHealthCheck;
-import gov.cms.dpc.aggregation.health.JobQueueHealthCheck;
 import gov.cms.dpc.aggregation.engine.EncryptingAggregationEngine;
+import gov.cms.dpc.aggregation.health.BlueButtonHealthCheck;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 
-import javax.crypto.Cipher;
 import javax.inject.Singleton;
-import java.io.OutputStream;
 import java.util.List;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
 
     AggregationAppModule() {
-
+        // Not used
     }
 
     @Override
     public void configure(Binder binder) {
         binder.requestStaticInjection(DPCHibernateBundle.class);
 
-        if(
+        if (
                 getConfiguration().getConfig().hasPath("encryption.enabled") &&
-                getConfiguration().getConfig().getBoolean("encryption.enabled")
-        )  {
+                        getConfiguration().getConfig().getBoolean("encryption.enabled")
+        ) {
             binder.bind(AggregationEngine.class).to(EncryptingAggregationEngine.class);
-        } else  {
+        } else {
             binder.bind(AggregationEngine.class);
         }
 
         binder.bind(Aggregation.class).asEagerSingleton();
 
         // Healthchecks
-        binder.bind(JobQueueHealthCheck.class);
         binder.bind(BlueButtonHealthCheck.class);
     }
 

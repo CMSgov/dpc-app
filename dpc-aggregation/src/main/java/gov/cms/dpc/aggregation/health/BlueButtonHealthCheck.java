@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 @Singleton
 public class BlueButtonHealthCheck extends HealthCheck {
 
+    static final String INVALID_MESSAGE = "BlueButton endpoint returned invalid FHIR Metadata";
     private final BlueButtonClient client;
 
     @Inject
@@ -25,11 +26,15 @@ public class BlueButtonHealthCheck extends HealthCheck {
     @Override
     protected Result check() {
         // We can do the simplest sanity check on the capabilities statement, is it active or not?
-        final CapabilityStatement capabilityStatement = client.requestCapabilityStatement();
+        try {
+            final CapabilityStatement capabilityStatement = client.requestCapabilityStatement();
 
-        if (capabilityStatement.getStatus() == Enumerations.PublicationStatus.ACTIVE) {
-            return Result.healthy();
+            if (capabilityStatement.getStatus() == Enumerations.PublicationStatus.ACTIVE) {
+                return Result.healthy();
+            }
+            return Result.unhealthy(INVALID_MESSAGE);
+        } catch (Exception e) {
+            return Result.unhealthy(e.getMessage());
         }
-        return Result.unhealthy("BlueButton endpoint returned invalid FHIR Metadata");
     }
 }
