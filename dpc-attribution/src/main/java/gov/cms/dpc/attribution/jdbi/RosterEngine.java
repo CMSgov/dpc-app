@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class RosterEngine implements AttributionEngine {
         final List<String> beneficiaryIDs = context.select()
                 .from(PROVIDERS)
                 .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
-                .join(PATIENTS).on((ATTRIBUTIONS.PATIENT_ID).eq(PATIENTS.ID))
+                .join(PATIENTS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID))
                 .where(PROVIDERS.PROVIDER_ID.eq(providerNPI))
                 .fetch().getValues(PATIENTS.BENEFICIARY_ID);
 
@@ -71,7 +72,7 @@ public class RosterEngine implements AttributionEngine {
             final AttributionsRecord attr = new AttributionsRecord();
             attr.setProviderId(providerRecord.getId());
             attr.setPatientId(patientRecord.getId());
-            attr.setCreatedAt(OffsetDateTime.now());
+            attr.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
 
             final int updated = ctx.executeInsert(attr);
             if (updated != 1) {
@@ -85,7 +86,7 @@ public class RosterEngine implements AttributionEngine {
         context.transaction(config -> {
 
             final DSLContext ctx = DSL.using(config);
-            RosterUtils.submitAttributionBundle(attributionBundle, ctx, OffsetDateTime.now());
+            RosterUtils.submitAttributionBundle(attributionBundle, ctx, OffsetDateTime.now(ZoneOffset.UTC));
         });
     }
 
@@ -104,7 +105,7 @@ public class RosterEngine implements AttributionEngine {
             final String patientMPI = FHIRExtractors.getPatientMPI(patient);
             final Result<AttributionsRecord> attributionsRecords = ctx.selectFrom(ATTRIBUTIONS
                     .join(PROVIDERS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
-                    .join(PATIENTS).on((ATTRIBUTIONS.PATIENT_ID).eq(PATIENTS.ID)))
+                    .join(PATIENTS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID)))
                     .where(PROVIDERS.PROVIDER_ID.eq(providerNPI).and(PATIENTS.BENEFICIARY_ID.eq(patientMPI)))
                     .fetchInto(ATTRIBUTIONS);
 

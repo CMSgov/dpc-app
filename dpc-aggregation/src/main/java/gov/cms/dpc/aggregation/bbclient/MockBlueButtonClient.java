@@ -19,11 +19,13 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     }
 
+    @Override
     public Patient requestPatientFromServer(String patientID) {
         final var path = SAMPLE_PATIENT_PATH_PREFIX + patientID + ".xml";
         return requestFromServer(Patient.class, path);
     }
 
+    @Override
     public Bundle requestEOBBundleFromServer(String patientID) {
         final var path = SAMPLE_EOB_PATH_PREFIX + patientID + ".xml";
         return requestFromServer(Bundle.class, path);

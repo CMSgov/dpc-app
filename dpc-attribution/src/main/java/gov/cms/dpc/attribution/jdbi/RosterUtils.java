@@ -55,7 +55,7 @@ public class RosterUtils {
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .filter((resource -> resource.getResourceType() == ResourceType.Patient))
+                .filter(resource -> resource.getResourceType() == ResourceType.Patient)
                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
                 .forEach(patientEntity -> RosterUtils.createUpdateAttributionRelationship(ctx, patientEntity, providerRecord, creationTimestamp));
     }

@@ -26,6 +26,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
      * @return {@link Patient} A FHIR Patient resource
      * @throws ResourceNotFoundException when no such patient with the provided ID exists
      */
+    @Override
     public Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientID, client.getServerBase());
         return client.read().resource(Patient.class).withId(patientID).execute();
@@ -49,6 +50,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
      * @return {@link Bundle} Containing a number (possibly 0) of {@link ExplanationOfBenefit} objects
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
+    @Override
     public Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException {
         // TODO: need to implement some kind of pagination? EOB bundles can be HUGE
         logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", patientID, client.getServerBase());

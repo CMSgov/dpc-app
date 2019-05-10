@@ -28,6 +28,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @POST
     @FHIR
+    @Override
     public Response submitRoster(Bundle providerBundle) {
         logger.debug("API request to submit roster");
         this.engine.addAttributionRelationships(providerBundle);

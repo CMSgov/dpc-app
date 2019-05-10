@@ -36,13 +36,13 @@ public class AttributionRelationship {
     private OffsetDateTime created;
 
     public AttributionRelationship() {
-        this.created = OffsetDateTime.now();
+        this.created = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
     public AttributionRelationship(ProviderEntity provider, PatientEntity patient) {
         this.provider = provider;
         this.patient = patient;
-        this.created = OffsetDateTime.now();
+        this.created = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
     public AttributionRelationship(ProviderEntity provider, PatientEntity patient, OffsetDateTime created) {
@@ -92,7 +92,7 @@ public class AttributionRelationship {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof AttributionRelationship)) return false;
         AttributionRelationship that = (AttributionRelationship) o;
         return Objects.equals(attributionID, that.attributionID) &&
                 Objects.equals(provider, that.provider) &&

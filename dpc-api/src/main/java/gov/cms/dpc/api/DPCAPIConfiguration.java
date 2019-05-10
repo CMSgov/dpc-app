@@ -32,6 +32,7 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @NotNull
     private String attributionURL;
 
+    @Override
     public DataSourceFactory getDatabase() {
         return database;
     }

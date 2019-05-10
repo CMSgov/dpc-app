@@ -76,7 +76,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
 
         try {
             // Generate Key
-            KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/")[0]);
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/", -1)[0]);
             keyGenerator.init(keyBits);
             SecretKey secretKey = keyGenerator.generateKey();
 

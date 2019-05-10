@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public class MockEmptyQueueClient extends AbstractMockQueueClient {
 
+    @Override
     public Optional<Pair<UUID, JobModel>> workJob() {
         return Optional.empty();
     }

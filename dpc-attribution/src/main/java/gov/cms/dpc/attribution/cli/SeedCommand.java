@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.MissingResourceException;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
@@ -86,7 +87,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static OffsetDateTime generateTimestamp(Namespace namespace) {
         final String timestamp = namespace.getString("timestamp");
         if (timestamp == null) {
-            return OffsetDateTime.now();
+            return OffsetDateTime.now(ZoneOffset.UTC);
         }
         return OffsetDateTime.parse(timestamp.trim());
     }

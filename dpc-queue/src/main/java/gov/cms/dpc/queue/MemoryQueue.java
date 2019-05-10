@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,8 +30,8 @@ public class MemoryQueue implements JobQueue {
 
     @Override
     public synchronized void submitJob(UUID jobID, JobModel job) {
-        assert(jobID == job.getJobID() && job.getStatus() == JobStatus.QUEUED);
-        job.setSubmitTime(OffsetDateTime.now());
+        assert(jobID.equals(job.getJobID()) && job.getStatus() == JobStatus.QUEUED);
+        job.setSubmitTime(OffsetDateTime.now(ZoneOffset.UTC));
         logger.debug("Submitting job: {}", jobID);
         this.queue.put(jobID, job);
     }
@@ -58,7 +59,7 @@ public class MemoryQueue implements JobQueue {
             assert(job.getSubmitTime().isPresent());
 
             job.setStatus(JobStatus.RUNNING);
-            job.setStartTime(OffsetDateTime.now());
+            job.setStartTime(OffsetDateTime.now(ZoneOffset.UTC));
             this.queue.replace(key, job);
 
             final var queueDuration = Duration.between(job.getSubmitTime().get(), job.getStartTime().get());
@@ -81,7 +82,7 @@ public class MemoryQueue implements JobQueue {
         assert(job.getStartTime().isPresent());
 
         job.setStatus(status);
-        job.setCompleteTime(OffsetDateTime.now());
+        job.setCompleteTime(OffsetDateTime.now(ZoneOffset.UTC));
         this.queue.replace(jobID, job);
 
         final var workDuration = Duration.between(job.getStartTime().get(), job.getCompleteTime().get());

@@ -15,6 +15,7 @@ import javax.ws.rs.ext.Provider;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 @Provider
 @FHIR
@@ -35,7 +36,7 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
     @Override
     public BaseResource readFrom(Class<BaseResource> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
         final IParser parser = ctx.newJsonParser();
-        return (BaseResource) parser.parseResource(new InputStreamReader(entityStream));
+        return (BaseResource) parser.parseResource(new InputStreamReader(entityStream, StandardCharsets.UTF_8));
     }
 
     @Override
@@ -52,6 +53,6 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
     @Override
     public void writeTo(BaseResource baseResource, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
         final IParser parser = ctx.newJsonParser();
-        parser.encodeResourceToWriter(baseResource, new OutputStreamWriter(entityStream));
+        parser.encodeResourceToWriter(baseResource, new OutputStreamWriter(entityStream, StandardCharsets.UTF_8));
     }
 }
