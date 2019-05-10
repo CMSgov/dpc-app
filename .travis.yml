@@ -18,10 +18,6 @@ before_install:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
-# Setup the postgres database for testing
-#before_script:
-#  - psql -c 'create database dpc_attribution;' -U postgres
-
 script:
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -Perror-prone -B -V
   - mvn test -B -V
@@ -41,7 +37,7 @@ script:
   - mvn test -Pintegration-tests -pl dpc-api
   - mvn jacoco:report
   - |
-    for module in dpc-aggregation dpc-api dpc-attribution dpc-queue
+    for module in dpc-api
     do
       JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
     done

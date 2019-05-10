@@ -1,9 +1,12 @@
 package gov.cms.dpc.aggregation.bbclient;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigRenderOptions;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;
@@ -44,9 +47,9 @@ class BlueButtonClientTest {
 
     @BeforeAll
     public static void setupBlueButtonClient() throws IOException {
-        final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule());
+        conf = getTestConfig();
+        final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
-        conf  = injector.getInstance(Config.class);
 
         mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));
         createMockServerExpectation("/v1/fhir/metadata", HttpStatus.OK_200, getRawXML(METADATA_PATH), List.of());
@@ -159,6 +162,20 @@ class BlueButtonClientTest {
                         .withBody(payload)
                         .withDelay(TimeUnit.SECONDS, 1)
                 );
+    }
+
+    private static BBClientConfiguration getClientConfig() {
+        final String options = getTestConfig().getConfig("bbclient").root().render(ConfigRenderOptions.concise());
+
+        try {
+            return new ObjectMapper().readValue(options, BBClientConfiguration.class);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static Config getTestConfig() {
+        return ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
     }
 
     private static String getRawXML(String path) throws IOException {

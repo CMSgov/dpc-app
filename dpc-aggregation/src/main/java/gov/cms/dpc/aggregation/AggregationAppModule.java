@@ -5,9 +5,11 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.aggregation.bbclient.BBClientConfiguration;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.EncryptingAggregationEngine;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 
 import javax.crypto.Cipher;
@@ -49,8 +51,19 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
+    @ExportPath
+    public String provideExportPath() {
+        return getConfiguration().getExportPath();
+    }
+
+    @Provides
     @AdditionalPaths
     public List<String> provideAdditionalPaths() {
         return List.of("gov.cms.dpc.queue.models");
+    }
+
+    @Provides
+    public BBClientConfiguration provideClientConfig() {
+        return this.getConfiguration().getClientConfiguration();
     }
 }
