@@ -130,36 +130,38 @@ class AggregationEngineTest {
      */
     @Test
     void badPatientIDTest() {
-        final List<String> patientIDs = new ArrayList<>(Arrays.asList(MockBlueButtonClient.TEST_PATIENT_IDS));
+        final List<String> patientIDs = new ArrayList<>(MockBlueButtonClient.TEST_PATIENT_IDS);
         // Add bad patient ID
         patientIDs.add("-1");
+        assertEquals(3, patientIDs.size());
 
-        final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var jobID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 patientIDs);
 
         // Do the job
-        queue.submitJob(jobId, job);
+        queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
+        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobID).get().getStatus()));
 
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServer(idCaptor.capture());
         Mockito.verify(bbclient, atLeastOnce()).requestEOBBundleFromServer(idCaptor.capture());
         assertEquals(6, idCaptor.getAllValues().stream().filter(value -> value.equals("-1")).count(), "Should have been called 6 times for both methods");
+
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJob(jobID).isPresent());
         final var actual = queue.getJob(jobID).get();
         var expectedErrorPath = engine.formErrorFilePath(jobID, ResourceType.Patient);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(1, actual.getJobResults().size()),
-                () -> assertEquals(1, actual.getJobResults().get(0).getErrorCount()),
-                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected error file"));
+                () -> assertEquals(2, actual.getJobResults().size(), "expected 2 resource types"),
+                () -> assertEquals(1, actual.getJobResults().get(0).getErrorCount(), "expected 1 bad patient-id"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 }

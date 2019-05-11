@@ -264,7 +264,7 @@ public class JobModel implements Serializable  {
     public String toString() {
         return "JobModel{" +
                 "jobID=" + jobID +
-                "jobResult=" + jobResults +
+                ", jobResult=" + jobResults +
                 ", providerID='" + providerID + '\'' +
                 ", patients=" + patients +
                 ", status=" + status +

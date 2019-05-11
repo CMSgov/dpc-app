@@ -4,11 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.Pair;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import io.github.resilience4j.retry.Retry;
@@ -27,13 +27,10 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.security.interfaces.RSAPrivateKey;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.security.interfaces.RSAPrivateKey;
 
 public class AggregationEngine implements Runnable {
 
@@ -45,6 +42,7 @@ public class AggregationEngine implements Runnable {
     private final BlueButtonClient bbclient;
     private final FhirContext context;
     private final RetryConfig retryConfig;
+    private final IParser jsonParser;
     private Disposable subscribe;
 
     /**
@@ -62,6 +60,7 @@ public class AggregationEngine implements Runnable {
         this.context = FhirContext.forDstu3();
         this.exportPath = exportPath;
         this.retryConfig = retryConfig;
+        this.jsonParser = this.context.newJsonParser();
     }
 
     /**
@@ -72,7 +71,6 @@ public class AggregationEngine implements Runnable {
         // Run loop
         logger.info("Starting aggregation engine with exportPath:\"{}\"", exportPath);
         this.pollQueue();
-
     }
 
     /**
@@ -101,6 +99,32 @@ public class AggregationEngine implements Runnable {
      */
     public String formErrorFilePath(UUID jobID, ResourceType resourceType) {
         return String.format("%s/%s.ndjson", exportPath, JobModel.errorFileName(jobID, resourceType));
+    }
+
+    /**
+     * The main run-loop of the engine
+     */
+    private void pollQueue() {
+        subscribe = Observable.fromCallable(this.queue::workJob)
+                .doOnNext(job -> logger.trace("Polling queue for job"))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .repeatWhen(completed -> {
+                    logger.debug("No job, retrying in 2 seconds");
+                    return completed.delay(2, TimeUnit.SECONDS);
+                })
+                .doOnError(e -> logger.error("Error", e))
+                .subscribe(this::workExportJob);
+    }
+
+    /**
+     * Wrapper method for dispatching the job and handling any errors that would cause the job to fail
+     *
+     * @param workPair - job {@link Pair} with {@link UUID} or {@link JobModel}
+     */
+    private void workExportJob(Pair<UUID, JobModel> workPair) {
+        final JobModel model = workPair.getRight();
+        completeJob(model);
     }
 
     /**
@@ -160,71 +184,23 @@ public class AggregationEngine implements Runnable {
      * @param jobResult - the result of the work on the resource type.
      */
     protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
-        final IParser parser = context.newJsonParser();
-
         Observable.fromIterable(job.getPatients())
-                .flatMap(patient -> this.fetchResource(patient, resourceType, parser))
+                .flatMap(patient -> this.fetchResource(job.getJobID(), patient, jobResult.getResourceType()))
                 .subscribeOn(Schedulers.io())
-                // If an error gets signaled, log it and send an empty observable, signalling that we should continue processing the next patient
-                .doOnError(e -> logger.error("Error: ", e))
-                .onErrorResumeNext(Observable.empty())
-                .blockingSubscribe(str -> {
-                    try {
-                        logger.trace("Writing {}.", str);
-                        writer.write(str.getBytes(StandardCharsets.UTF_8));
-                        writer.write(DELIM);
-                    } catch (IOException e) {
-                        throw new JobQueueFailure(job.getJobID(), e);
-                    }
-                });
-        final var resourceType = jobResult.getResourceType();
-        job.getPatients()
-                .stream()
-                .map(patientId -> requestResource(job, resourceType, patientId))
-                .forEach(resource -> writeResource(job, jobResult, writer, errorWriter, parser, resource));
+                .blockingSubscribe(resource -> writeResource(jobResult, writer, errorWriter, resource));
     }
-
-    /**
-     * Request a resource from Blue Button
-     *
-     * @param job - The context for this request
-     * @param resourceType - The type of resource to request
-     * @param patientId - The patient
-     * @return the resource requested or a operation outcome when an error occurs
-     */
-    protected Resource requestResource(JobModel job, ResourceType resourceType, String patientId) {
-        try {
-            switch (resourceType) {
-                case Patient:
-                    return this.bbclient.requestPatientFromServer(patientId);
-                case ExplanationOfBenefit:
-                    return this.bbclient.requestEOBBundleFromServer(patientId);
-                default:
-                    throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
-            }
-        } catch (ResourceNotFoundException ex) {
-            final var details = "Patient not found in Blue Button";
-            return formOperationOutcome(patientId, details);
-        } catch (BaseServerResponseException ex) {
-            final var details = String.format("Blue Button error: HTTP status: %s", ex.getStatusCode());
-            return formOperationOutcome(patientId, details);
-        }
-    }
-
 
     /**
      * Write the resource into the appropriate streams.
      *
-     * @param job - the context for this work
-     * @param jobResult - the resource type that is being written
+     * @param jobResult - increment counts in this result
      * @param mainWriter - the main stream for successful resources
-     * @param errorWriter - the error stream for operational outcomes
-     * @param parser - the serializer to use should be Json
+     * @param errorWriter - the error stream for operational outcome resources
      * @param resource - the resource to write out
      */
-    protected void writeResource(JobModel job, JobResult jobResult, OutputStream mainWriter, OutputStream errorWriter, IParser parser, Resource resource) {
+    protected void writeResource(JobResult jobResult, OutputStream mainWriter, OutputStream errorWriter, Resource resource) {
         try {
-            final String str = parser.encodeResourceToString(resource);
+            final String str = jsonParser.encodeResourceToString(resource);
             if (ResourceType.OperationOutcome.equals(resource.getResourceType())) {
                 logger.debug("Writing {} to error file", str);
                 errorWriter.write(str.getBytes(StandardCharsets.UTF_8));
@@ -237,8 +213,50 @@ public class AggregationEngine implements Runnable {
                 jobResult.incrementCount();
             }
         } catch (IOException e) {
-            throw new JobQueueFailure(job.getJobID(), e);
+            throw new JobQueueFailure(jobResult.getJobResultID().getJobID(), e);
         }
+    }
+
+    /**
+     * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to Resource. The
+     * resource may be a type requested or it may be an operational outcome;
+     *
+     * @param jobID - {@link UUID} jobID
+     * @param patientID   - {@link String} patient ID
+     * @param resourceType - {@link ResourceType} to fetch from BlueButton
+     * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
+     */
+    private Observable<Resource> fetchResource(UUID jobID, String patientID, ResourceType resourceType) {
+        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
+        RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
+
+        return Observable.fromCallable(() -> {
+            logger.debug("Fetching patient {} from Blue Button", patientID);
+            switch (resourceType) {
+                case Patient:
+                    return this.bbclient.requestPatientFromServer(patientID);
+                case ExplanationOfBenefit:
+                    return this.bbclient.requestEOBBundleFromServer(patientID);
+                default:
+                    throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
+            }
+        })
+        // Turn errors into retries
+        .compose(retryTransformer)
+        // Turn errors into Operational outcomes
+        .onErrorReturn(ex -> {
+            String details;
+            if (ex instanceof ResourceNotFoundException) {
+                details = "Patient not found in Blue Button";
+            } else if (ex instanceof BaseServerResponseException) {
+                final var serverException = (BaseServerResponseException)ex;
+                details = String.format("Blue Button error: HTTP status: %s", serverException.getStatusCode());
+            } else {
+                details = String.format("Internal error: %s", ex.getMessage());
+            }
+            logger.error("Error fetching from Blue Button", ex);
+            return formOperationOutcome(patientID, details);
+        });
     }
 
     /**
@@ -248,7 +266,7 @@ public class AggregationEngine implements Runnable {
      * @param details - The details to put into the outcome
      * @return an operation outcome
      */
-    protected OperationOutcome formOperationOutcome(String patientID, String details) {
+    private OperationOutcome formOperationOutcome(String patientID, String details) {
         final var location = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
         final var outcome = new OperationOutcome();
         outcome.addIssue()
@@ -257,71 +275,5 @@ public class AggregationEngine implements Runnable {
                 .setDetails(new CodeableConcept().setText(details))
                 .setLocation(location);
         return outcome;
-    }
-
-    private void pollQueue() {
-        subscribe = Observable.fromCallable(this.queue::workJob)
-                .doOnNext(job -> logger.trace("Polling queue for job"))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .repeatWhen(completed -> {
-                    logger.debug("No job, retrying in 2 seconds");
-                    return completed.delay(2, TimeUnit.SECONDS);
-                })
-                .doOnError(e -> logger.error("Error", e))
-                .subscribe(this::workExportJob);
-    }
-
-    /**
-     * Wrapper method for dispatching the job and handling any errors that would cause the job to fail
-     *
-     * @param workPair - job {@link Pair} with {@link UUID} or {@link JobModel}
-     */
-    private void workExportJob(Pair<UUID, JobModel> workPair) {
-        final JobModel model = workPair.getRight();
-        final UUID jobID = workPair.getLeft();
-        logger.debug("Has job {}. Working.", jobID);
-        List<String> attributedBeneficiaries = model.getPatients();
-
-        if (!attributedBeneficiaries.isEmpty()) {
-            logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-            try {
-                this.completeJob(model);
-            } catch (Exception e) {
-                logger.error("Cannot process job {}", jobID, e);
-                this.queue.completeJob(jobID, JobStatus.FAILED);
-            }
-        } else {
-            logger.error("Cannot execute Job {} with no beneficiaries", jobID);
-            this.queue.completeJob(jobID, JobStatus.FAILED);
-        }
-    }
-
-    /**
-     * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to a String
-     *
-     * @param identifier   - {@link String} patient ID
-     * @param resourceType - {@link ResourceType} to fetch from BlueButton
-     * @param parser       - {@link IParser} FHIR parser to use for JSON conversion
-     * @return - {@link Observable} of {@link String} to pass back to reactive loop
-     */
-    private Observable<String> fetchResource(String identifier, ResourceType resourceType, IParser parser) {
-        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-        RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
-
-        return Observable.fromCallable(() -> {
-            switch (resourceType) {
-                case Patient:
-                    return this.bbclient.requestPatientFromServer(identifier);
-                case ExplanationOfBenefit:
-                    return this.bbclient.requestEOBBundleFromServer(identifier);
-                default:
-                    throw new IllegalArgumentException("Unexpected resource type: " + resourceType.toString());
-            }
-        })
-                .compose(retryTransformer)
-                .doOnNext(p -> logger.debug("Fetching {}", p))
-                .doOnError(e -> logger.error("Error fetching from BB.", e))
-                .map(parser::encodeResourceToString);
     }
 }

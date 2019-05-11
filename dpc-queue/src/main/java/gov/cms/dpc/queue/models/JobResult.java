@@ -129,7 +129,7 @@ public class JobResult {
         return "JobResult{" +
                 "jobID=" + jobResultID.jobID +
                 ", resourceType=" + jobResultID.resourceType +
-                ", count='" + count + '\'' +
+                ", count=" + count +
                 ", errorCount=" + errorCount +
                 '}';
     }
