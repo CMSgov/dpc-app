@@ -145,9 +145,10 @@
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
                     <to>
-                        <image>${jib.ecr.root}</image>
+                        <image>${jib.ecr.root}/dpc-attribution</image>
                         <tags>
-                            <tag>dpc-attribution</tag>
+                            <tag>latest</tag>
+                            <tag>${project.version}</tag>
                         </tags>
                     </to>
                     <container>

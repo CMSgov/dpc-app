@@ -34,7 +34,7 @@
         <pgsql.version>42.2.5</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
-        <jib.ecr.root>430398651479.dkr.ecr.us-east-1.amazonaws.com/dpc</jib.ecr.root>
+        <jib.ecr.root>430398651479.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
     </properties>
 
     <dependencyManagement>

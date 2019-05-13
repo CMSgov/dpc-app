@@ -174,9 +174,10 @@
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
                     <to>
-                        <image>${jib.ecr.root}</image>
+                        <image>${jib.ecr.root}/dpc-aggregation</image>
                         <tags>
-                            <tag>dpc-aggregation</tag>
+                            <tag>latest</tag>
+                            <tag>${project.version}</tag>
                         </tags>
                     </to>
                     <extraDirectory>
