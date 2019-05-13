@@ -153,13 +153,6 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <to>
-                        <image>${jib.ecr.root}/dpc-api</image>
-                        <tags>
-                            <tag>latest</tag>
-                            <tag>${project.version}</tag>
-                        </tags>
-                    </to>
                     <container>
                         <args>
                             <arg>server</arg>
