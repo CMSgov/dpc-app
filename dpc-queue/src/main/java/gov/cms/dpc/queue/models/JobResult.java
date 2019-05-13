@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity(name = "job_result")
 public class JobResult {
-    public static long serialVersionUID = 1L;
+    public static final long serialVersionUID = 1L;
 
     @Embeddable
     public static class JobResultID implements Serializable {
