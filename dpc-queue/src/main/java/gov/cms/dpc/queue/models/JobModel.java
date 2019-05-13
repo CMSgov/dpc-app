@@ -37,6 +37,14 @@ public class JobModel implements Serializable  {
         return validResourceTypes.contains(type);
     }
 
+
+    /**
+     * Useful for lambdas
+     */
+    public interface FileNameSupplier {
+        String getFileName(UUID jobID, ResourceType resourceType);
+    }
+
     /**
      * Form a file name for passed in parameters.
      *

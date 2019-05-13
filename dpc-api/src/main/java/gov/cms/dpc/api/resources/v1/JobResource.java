@@ -84,20 +84,12 @@ public class JobResource extends AbstractJobResource {
         }).orElse(Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build());
     }
 
-    interface CountSupplier {
-        int getCount(JobResult result);
-    }
-
-    interface FileNameSupplier {
-        String getFileName(UUID jobID, ResourceType resourceType);
-    }
-
     /**
      * Form a list of output entries that are erring
      *
      * @return the output list for the response
      */
-    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, CountSupplier countSupplier, FileNameSupplier fileNameSupplier) {
+    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, JobResult.CountSupplier countSupplier, JobModel.FileNameSupplier fileNameSupplier) {
         return job.getJobResults().stream()
                 .filter(jobResult -> countSupplier.getCount(jobResult) > 0)
                 .map(jobResult -> {

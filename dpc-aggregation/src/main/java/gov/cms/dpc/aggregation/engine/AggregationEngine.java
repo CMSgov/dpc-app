@@ -140,15 +140,13 @@ public class AggregationEngine implements Runnable {
         List<String> attributedBeneficiaries = job.getPatients();
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
 
-        try {
-            for (var jobResult : job.getJobResults()) {
-                completeResource(job, jobResult);
-            }
-            this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
-        } catch (Exception e) {
-            logger.error("Cannot process job {}", jobID, e);
-            this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
-        }
+        Observable.fromIterable(job.getJobResults())
+                .subscribe(jobResult -> completeResource(job, jobResult),
+                        error -> {
+                            logger.error("Cannot process job {}", jobID, error);
+                            this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
+                        },
+                        () -> this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults()));
     }
 
     /**
@@ -160,7 +158,7 @@ public class AggregationEngine implements Runnable {
      */
     protected void completeResource(JobModel job, JobResult jobResult) throws IOException {
         final var resourceType = jobResult.getResourceType();
-        final var jobID = jobResult.getJobResultID().getJobID();
+        final var jobID = jobResult.getJobID();
 
         if (!JobModel.isValidResourceType(resourceType)) {
             throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
@@ -169,22 +167,8 @@ public class AggregationEngine implements Runnable {
         try (final var writer = new ByteArrayOutputStream(); final var errorWriter = new ByteArrayOutputStream()) {
             // Process the job for the specified resource type
             workResource(writer, errorWriter, job, jobResult);
-
-            // Write our file if resources are present
-            if (jobResult.getCount() > 0) {
-                try (final var outputFile = new FileOutputStream(formOutputFilePath(jobID, resourceType))) {
-                    outputFile.write(writer.toByteArray());
-                    outputFile.flush();
-                }
-            }
-
-            // Write our errors if present
-            if (jobResult.getErrorCount() > 0) {
-                try (final var errorFile = new FileOutputStream(formErrorFilePath(jobID, resourceType))) {
-                    errorFile.write(errorWriter.toByteArray());
-                    errorFile.flush();
-                }
-            }
+            writeToFile(writer.toByteArray(), formOutputFilePath(jobID, resourceType));
+            writeToFile(errorWriter.toByteArray(), formErrorFilePath(jobID, resourceType));
         }
     }
 
@@ -230,7 +214,7 @@ public class AggregationEngine implements Runnable {
             writer.write(str.getBytes(StandardCharsets.UTF_8));
             writer.write(DELIM);
         } catch (IOException e) {
-            throw new JobQueueFailure(jobResult.getJobResultID().getJobID(), e);
+            throw new JobQueueFailure(jobResult.getJobID(), e);
         }
     }
 
@@ -260,7 +244,7 @@ public class AggregationEngine implements Runnable {
         })
         // Turn errors into retries
         .compose(retryTransformer)
-        // Turn errors into Operational outcomes
+        // Turn errors into OperationalOutcomes
         .onErrorReturn(ex -> {
             logger.error("Error fetching from Blue Button", ex);
             return formOperationOutcome(patientID, ex);
@@ -293,5 +277,22 @@ public class AggregationEngine implements Runnable {
                 .setDetails(new CodeableConcept().setText(details))
                 .setLocation(location);
         return outcome;
+    }
+
+    /**
+     * Write a array of bytes to a file. Name the file according to the supplied name
+     *
+     * @param bytes - Bytes to write
+     * @param fileName - The fileName to write too
+     * @throws IOException
+     */
+    private void writeToFile(byte[] bytes, String fileName) throws IOException {
+        if (bytes.length == 0) {
+            return;
+        }
+        try (final var outputFile = new FileOutputStream(fileName)) {
+            outputFile.write(bytes);
+            outputFile.flush();
+        }
     }
 }

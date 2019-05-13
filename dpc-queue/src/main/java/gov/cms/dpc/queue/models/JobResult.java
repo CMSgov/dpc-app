@@ -61,10 +61,6 @@ public class JobResult {
     @Column(name = "error_count")
     private int errorCount;
 
-    public JobResultID getJobResultID() {
-        return jobResultID;
-    }
-
     public JobResult() {
         // for hibernate
     }
@@ -75,8 +71,16 @@ public class JobResult {
         this.errorCount = 0;
     }
 
+    public JobResultID getJobResultID() {
+        return jobResultID;
+    }
+
     public void setJobResultID(JobResultID jobResultID) {
         this.jobResultID = jobResultID;
+    }
+
+    public UUID getJobID() {
+        return jobResultID.getJobID();
     }
 
     public ResourceType getResourceType() {
@@ -133,4 +137,12 @@ public class JobResult {
                 ", errorCount=" + errorCount +
                 '}';
     }
+
+    /**
+     * Useful for lambdas
+     */
+    public interface CountSupplier {
+        int getCount(JobResult result);
+    }
+
 }

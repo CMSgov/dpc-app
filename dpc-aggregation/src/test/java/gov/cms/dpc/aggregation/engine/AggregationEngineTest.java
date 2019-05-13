@@ -105,6 +105,34 @@ class AggregationEngineTest {
     }
 
     /**
+     * Test if the engine can handle a job with no attributions
+     */
+    @Test
+    void emptyJobTest() {
+        // Job with a unsupported resource type
+        final var jobId = UUID.randomUUID();
+        JobModel job = new JobModel(jobId,
+                List.of(ResourceType.Patient),
+                TEST_PROVIDER_ID,
+                List.of());
+
+        // Do the job
+        queue.submitJob(jobId, job);
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+
+        // Look at the result
+        assertFalse(queue.getJob(jobId).isEmpty(), "Unable to retrieve job from queue.");
+        queue.getJob(jobId).ifPresent(retrievedJob -> {
+            assertAll(() -> assertEquals(0, retrievedJob.getJobResults().get(0).getCount()),
+                    () -> assertEquals(0, retrievedJob.getJobResults().get(0).getErrorCount()),
+                    () -> assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus()));
+            assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.Patient))));
+            assertFalse(Files.exists(Path.of(engine.formErrorFilePath(jobId, ResourceType.Patient))));
+        });
+    }
+
+
+    /**
      * Test if the engine can handle a job with bad parameters
      */
     @Test
@@ -121,7 +149,7 @@ class AggregationEngineTest {
         queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
+        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent(), "Unable to retrieve job from queue."),
                 () -> assertEquals(JobStatus.FAILED, queue.getJob(jobId).get().getStatus()));
     }
 
