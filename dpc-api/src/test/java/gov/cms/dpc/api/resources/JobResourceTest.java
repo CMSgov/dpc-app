@@ -94,6 +94,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
+        job.getJobResults().forEach(result -> result.incrementCount());
         queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 
         // Test the response
@@ -128,7 +129,7 @@ public class JobResourceTest {
         queue.submitJob(jobID, job);
         queue.workJob();
         assertEquals(JobModel.validResourceTypes.size(), job.getJobResults().size());
-        job.getJobResults().get(0).incrementErrorCount();
+        job.getJobResults().forEach(result -> result.incrementErrorCount());
         queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 
         // Test the response for ok
@@ -138,8 +139,8 @@ public class JobResourceTest {
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
-        assertAll(() -> assertEquals(2, completion.getOutput().size()),
-                () -> assertEquals(1, completion.getError().size()));
+        assertAll(() -> assertEquals(0, completion.getOutput().size()),
+                () -> assertEquals(2, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
             assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, entry.getType())), entry.getUrl());

@@ -136,16 +136,10 @@ public class AggregationEngine implements Runnable {
     public void completeJob(JobModel job) {
         final UUID jobID = job.getJobID();
         logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
+
         List<String> attributedBeneficiaries = job.getPatients();
-
-        // Guard against an empty bene list
-        if (attributedBeneficiaries.isEmpty()) {
-            logger.error("Cannot execute Job {} with no beneficiaries", jobID);
-            this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
-            return;
-        }
-
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
+
         try {
             for (JobResult jobResult : job.getJobResults()) {
                 final var resourceType = jobResult.getResourceType();
@@ -201,18 +195,22 @@ public class AggregationEngine implements Runnable {
      */
     protected void writeResource(JobResult jobResult, OutputStream mainWriter, OutputStream errorWriter, Resource resource) {
         try {
-            final String str = jsonParser.encodeResourceToString(resource);
+            String description;
+            OutputStream writer;
             if (ResourceType.OperationOutcome.equals(resource.getResourceType())) {
-                logger.debug("Writing {} to error file", str);
-                errorWriter.write(str.getBytes(StandardCharsets.UTF_8));
-                errorWriter.write(DELIM);
+                description = "Writing {} to error file";
+                writer = errorWriter;
                 jobResult.incrementErrorCount();
             } else {
-                logger.debug("Writing {} to file", str);
-                mainWriter.write(str.getBytes(StandardCharsets.UTF_8));
-                mainWriter.write(DELIM);
+                description = "Writing {} to file";
+                writer = mainWriter;
                 jobResult.incrementCount();
             }
+
+            final String str = jsonParser.encodeResourceToString(resource);
+            logger.debug(description, str);
+            writer.write(str.getBytes(StandardCharsets.UTF_8));
+            writer.write(DELIM);
         } catch (IOException e) {
             throw new JobQueueFailure(jobResult.getJobResultID().getJobID(), e);
         }
@@ -246,28 +244,29 @@ public class AggregationEngine implements Runnable {
         .compose(retryTransformer)
         // Turn errors into Operational outcomes
         .onErrorReturn(ex -> {
-            String details;
-            if (ex instanceof ResourceNotFoundException) {
-                details = "Patient not found in Blue Button";
-            } else if (ex instanceof BaseServerResponseException) {
-                final var serverException = (BaseServerResponseException)ex;
-                details = String.format("Blue Button error: HTTP status: %s", serverException.getStatusCode());
-            } else {
-                details = String.format("Internal error: %s", ex.getMessage());
-            }
             logger.error("Error fetching from Blue Button", ex);
-            return formOperationOutcome(patientID, details);
+            return formOperationOutcome(patientID, ex);
         });
     }
 
     /**
-     * Create a OperationId which is an used to create an XPath to resource
+     * Create a OperationalOutcome resource from an exception
      *
-     * @param patientID - the patient id that
-     * @param details - The details to put into the outcome
+     * @param patientID - the id of the patient involved in the error
+     * @param ex - the exception to turn into a Operational Outcome
      * @return an operation outcome
      */
-    private OperationOutcome formOperationOutcome(String patientID, String details) {
+    private OperationOutcome formOperationOutcome(String patientID, Throwable ex) {
+        String details;
+        if (ex instanceof ResourceNotFoundException) {
+            details = "Patient not found in Blue Button";
+        } else if (ex instanceof BaseServerResponseException) {
+            final var serverException = (BaseServerResponseException)ex;
+            details = String.format("Blue Button error: HTTP status: %s", serverException.getStatusCode());
+        } else {
+            details = String.format("Internal error: %s", ex.getMessage());
+        }
+
         final var location = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
         final var outcome = new OperationOutcome();
         outcome.addIssue()

@@ -7,6 +7,7 @@ import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -66,8 +67,8 @@ public class JobResource extends AbstractJobResource {
                     final JobCompletionModel completionModel = new JobCompletionModel(
                             job.getStartTime().get(),
                             String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),
-                            outputList(job),
-                            errorList(job));
+                            formOutputList(job, JobResult::getCount, JobModel::outputFileName),
+                            formOutputList(job, JobResult::getErrorCount, JobModel::errorFileName));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                     break;
                 }
@@ -83,19 +84,12 @@ public class JobResource extends AbstractJobResource {
         }).orElse(Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build());
     }
 
-    /**
-     * Form a list of output entries
-     *
-     * @return the output list for the response
-     */
-    private List<JobCompletionModel.OutputEntry> outputList(JobModel job) {
-        return job.getJobResults().stream()
-                .map(jobResult -> {
-                    final var resourceType = jobResult.getResourceType();
-                    final var url = String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(job.getJobID(), resourceType));
-                    return new JobCompletionModel.OutputEntry(resourceType, url, jobResult.getCount());
-                })
-                .collect(Collectors.toList());
+    interface CountSupplier {
+        int getCount(JobResult result);
+    }
+
+    interface FileNameSupplier {
+        String getFileName(UUID jobID, ResourceType resourceType);
     }
 
     /**
@@ -103,13 +97,13 @@ public class JobResource extends AbstractJobResource {
      *
      * @return the output list for the response
      */
-    private List<JobCompletionModel.OutputEntry> errorList(JobModel job) {
+    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, CountSupplier countSupplier, FileNameSupplier fileNameSupplier) {
         return job.getJobResults().stream()
-                .filter(jobResource -> jobResource.getErrorCount() > 0)
+                .filter(jobResult -> countSupplier.getCount(jobResult) > 0)
                 .map(jobResult -> {
                     final var resourceType = jobResult.getResourceType();
-                    final var url = String.format("%s/Data/%s", this.baseURL, JobModel.errorFileName(job.getJobID(), resourceType));
-                    return new JobCompletionModel.OutputEntry(resourceType, url, jobResult.getErrorCount());
+                    final var url = String.format("%s/Data/%s", this.baseURL, fileNameSupplier.getFileName(job.getJobID(), resourceType));
+                    return new JobCompletionModel.OutputEntry(resourceType, url, countSupplier.getCount(jobResult));
                 })
                 .collect(Collectors.toList());
     }

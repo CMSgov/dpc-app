@@ -28,14 +28,14 @@ public class JobCompletionModel {
          */
         private String url;
 
-        public OutputEntry() {
-            // Jackson Required
-        }
-
         /**
          * The number of resources in the file
          */
         private Integer count;
+
+        public OutputEntry() {
+            // Jackson required
+        }
 
         public OutputEntry(ResourceType type, String url, Integer count) {
             this.type = type;
@@ -72,7 +72,7 @@ public class JobCompletionModel {
     private Map<String, Object> encryptionParameters;
 
     public JobCompletionModel() {
-        // Jackson requireds
+        // Jackson required
     }
 
     public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, List<OutputEntry> error) {
