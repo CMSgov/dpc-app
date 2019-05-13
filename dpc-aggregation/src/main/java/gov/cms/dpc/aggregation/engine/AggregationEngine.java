@@ -141,32 +141,50 @@ public class AggregationEngine implements Runnable {
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
 
         try {
-            for (JobResult jobResult : job.getJobResults()) {
-                final var resourceType = jobResult.getResourceType();
-                if (!JobModel.isValidResourceType(resourceType)) {
-                    throw new JobQueueFailure(job.getJobID(), "Unexpected resource type: " + resourceType.toString());
-                }
-
-                try (final var writer = new FileOutputStream(formOutputFilePath(job.getJobID(), resourceType));
-                    final var errorWriter = new ByteArrayOutputStream()) {
-
-                    // Process the job for the specified resource type
-                    workResource(writer, errorWriter, job, jobResult);
-                    writer.flush();
-
-                    // Write our errors if present
-                    if (jobResult.getErrorCount() > 0) {
-                        try (final var errorFile = new FileOutputStream(formErrorFilePath(job.getJobID(), resourceType))) {
-                            errorFile.write(errorWriter.toByteArray());
-                            errorFile.flush();
-                        }
-                    }
-                }
+            for (var jobResult : job.getJobResults()) {
+                completeResource(job, jobResult);
             }
             this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
         } catch (Exception e) {
             logger.error("Cannot process job {}", jobID, e);
             this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
+        }
+    }
+
+    /**
+     * Handle the file aspects of a resource
+     *
+     * @param job - Job that is executing
+     * @param jobResult - The results for a current resource
+     * @throws IOException - File operation execeptions
+     */
+    protected void completeResource(JobModel job, JobResult jobResult) throws IOException {
+        final var resourceType = jobResult.getResourceType();
+        final var jobID = jobResult.getJobResultID().getJobID();
+
+        if (!JobModel.isValidResourceType(resourceType)) {
+            throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
+        }
+
+        try (final var writer = new ByteArrayOutputStream(); final var errorWriter = new ByteArrayOutputStream()) {
+            // Process the job for the specified resource type
+            workResource(writer, errorWriter, job, jobResult);
+
+            // Write our file if resources are present
+            if (jobResult.getCount() > 0) {
+                try (final var outputFile = new FileOutputStream(formOutputFilePath(jobID, resourceType))) {
+                    outputFile.write(writer.toByteArray());
+                    outputFile.flush();
+                }
+            }
+
+            // Write our errors if present
+            if (jobResult.getErrorCount() > 0) {
+                try (final var errorFile = new FileOutputStream(formErrorFilePath(jobID, resourceType))) {
+                    errorFile.write(errorWriter.toByteArray());
+                    errorFile.flush();
+                }
+            }
         }
     }
 
