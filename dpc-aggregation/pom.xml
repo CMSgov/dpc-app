@@ -173,12 +173,6 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <to>
-                        <image>${jib.ecr.root}</image>
-                        <tags>
-                            <tag>dpc-aggregation</tag>
-                        </tags>
-                    </to>
                     <extraDirectory>
                         <path>${project.basedir}/../bbcerts</path>
                     </extraDirectory>
