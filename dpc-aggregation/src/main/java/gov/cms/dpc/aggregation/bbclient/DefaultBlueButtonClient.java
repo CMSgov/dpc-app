@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation.bbclient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
@@ -69,6 +70,13 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         } else { // Case where patientID does not exist at all
             throw new ResourceNotFoundException("No patient found with ID: " + patientID);
         }
+    }
 
+    @Override
+    public CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException {
+        return client
+                .capabilities()
+                .ofType(CapabilityStatement.class)
+                .execute();
     }
 }

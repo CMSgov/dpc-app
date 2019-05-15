@@ -1,8 +1,8 @@
 package gov.cms.dpc.api.resources.v1;
 
-import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
+import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 import javax.inject.Inject;

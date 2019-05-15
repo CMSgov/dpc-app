@@ -56,4 +56,11 @@ public interface AttributionEngine {
      * @return - {@code true} patient is attributed to the provider. {@code false} patient is not attributed to the provider.
      */
     boolean isAttributed(Practitioner provider, Patient patient);
+
+    /**
+     * Determine if the {@link AttributionEngine} is accessible.
+     * If the engine is accessible, the method will return successfully. Otherwise, it will thrown an error is there's a problem.
+     * Note: This is not a full Healthcheck, which is handled by the dpc-attribution service itself, it just checks for a valid response.
+     */
+    void assertHealthy();
 }

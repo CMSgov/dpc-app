@@ -114,7 +114,8 @@ public class AggregationEngine implements Runnable {
                     return completed.delay(2, TimeUnit.SECONDS);
                 })
                 .doOnError(e -> logger.error("Error", e))
-                .subscribe(this::workExportJob);
+                .subscribe(this::workExportJob,
+                        error -> logger.error("Unable to complete job.", error));
     }
 
     /**
@@ -139,13 +140,16 @@ public class AggregationEngine implements Runnable {
         List<String> attributedBeneficiaries = job.getPatients();
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
 
-        Observable.fromIterable(job.getJobResults())
+        final Disposable iterableSubscriber = Observable.fromIterable(job.getJobResults())
                 .subscribe(jobResult -> completeResource(job, jobResult),
                         error -> {
                             logger.error("Cannot process job {}", jobID, error);
                             this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
                         },
                         () -> this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults()));
+
+        // Kill the subscriber when we exit, otherwise we'll leak resources
+        iterableSubscriber.dispose();
     }
 
     /**
@@ -209,7 +213,7 @@ public class AggregationEngine implements Runnable {
             }
 
             final String str = jsonParser.encodeResourceToString(resource);
-            logger.debug(description, str);
+            logger.trace(description, str);
             writer.write(str.getBytes(StandardCharsets.UTF_8));
             writer.write(DELIM);
         } catch (IOException e) {

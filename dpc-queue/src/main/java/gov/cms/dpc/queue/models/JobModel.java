@@ -2,7 +2,6 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
@@ -40,7 +39,7 @@ public class JobModel implements Serializable  {
     /**
      * Form a file name for passed in parameters.
      *
-     * @param jobID - the jobs id
+     * @param jobID        - the jobs id
      * @param resourceType - the resource type
      * @return a file name
      */
@@ -67,8 +66,10 @@ public class JobModel implements Serializable  {
 
     /**
      * The list of resource types requested
+     *
+     * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
      */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name="jobID")
     private List<JobResult> jobResults;
 
@@ -142,10 +143,15 @@ public class JobModel implements Serializable  {
      */
     public Boolean isValid() {
         switch (status) {
-            case QUEUED: return submitTime != null;
-            case RUNNING: return submitTime  != null && startTime != null;
-            case COMPLETED: case FAILED: return submitTime != null && startTime != null && completeTime != null;
-            default: return false;
+            case QUEUED:
+                return submitTime != null;
+            case RUNNING:
+                return submitTime != null && startTime != null;
+            case COMPLETED:
+            case FAILED:
+                return submitTime != null && startTime != null && completeTime != null;
+            default:
+                return false;
         }
 
     }

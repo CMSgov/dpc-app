@@ -1,10 +1,14 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
+import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobResult;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +30,21 @@ import java.util.function.Consumer;
 public class DistributedQueue implements JobQueue {
 
     private static final Logger logger = LoggerFactory.getLogger(DistributedQueue.class);
+    public static final String CLUSTER_NOT_RESPONDING = "Redis cluster is not responding to pings.";
+    public static final String REDIS_UNHEALTHY = "Redis cluster is unhealthy";
+    public static final String DB_UNHEALTHY = "Database cluster is not responding";
 
+    private final RedissonClient client;
     private final Queue<UUID> queue;
-    private final Session session;
+    private final SessionFactory factory;
+    private final String healthQuery;
 
     @Inject
-    DistributedQueue(RedissonClient client, Session session) {
+    DistributedQueue(RedissonClient client, SessionFactory factory, @HealthCheckQuery String healthQuery) {
+        this.client = client;
         this.queue = client.getQueue("jobqueue");
-        this.session = session;
+        this.factory = factory;
+        this.healthQuery = healthQuery;
     }
 
     @Override
@@ -45,14 +56,16 @@ public class DistributedQueue implements JobQueue {
                 data.getProviderID());
         data.setSubmitTime(submitTime);
         // Persist the job in postgres
-        final Transaction tx = this.session.beginTransaction();
-        try {
-            this.session.persist(data);
-            tx.commit();
-        } catch (Exception e) {
-            logger.error("Cannot add job to database", e);
-            tx.rollback();
-            throw new JobQueueFailure(jobID, e);
+        try (final Session session = this.factory.openSession()) {
+            final Transaction tx = session.beginTransaction();
+            try {
+                session.persist(data);
+                tx.commit();
+            } catch (Exception e) {
+                logger.error("Cannot add job to database", e);
+                tx.rollback();
+                throw new JobQueueFailure(jobID, e);
+            }
         }
         // Add to the redis queue
         // Offer?
@@ -72,16 +85,19 @@ public class DistributedQueue implements JobQueue {
     @Override
     public Optional<JobModel> getJob(UUID jobID) {
         // Get from Postgres
-        final Transaction tx = this.session.beginTransaction();
-        try {
-            final JobModel jobModel = this.session.get(JobModel.class, jobID);
-            if (jobModel == null) {
-                return Optional.empty();
+        try (final Session session = this.factory.openSession()) {
+
+            final Transaction tx = session.beginTransaction();
+            try {
+                final JobModel jobModel = session.get(JobModel.class, jobID);
+                if (jobModel == null) {
+                    return Optional.empty();
+                }
+                session.refresh(jobModel);
+                return Optional.ofNullable(jobModel);
+            } finally {
+                tx.commit();
             }
-            this.session.refresh(jobModel);
-            return Optional.ofNullable(jobModel);
-        } finally {
-            tx.commit();
         }
     }
 
@@ -143,6 +159,30 @@ public class DistributedQueue implements JobQueue {
         return "Redis Queue";
     }
 
+    @Override
+    public void assertHealthy() {
+        // Redisson first
+
+        try {
+            if (!this.client.getNodesGroup().pingAll()) {
+                throw new JobQueueUnhealthy(CLUSTER_NOT_RESPONDING);
+            }
+        } catch (Exception e) {
+            throw new JobQueueUnhealthy(REDIS_UNHEALTHY, e);
+        }
+
+        // Now the DB
+        try (final Session session = this.factory.openSession()) {
+
+            try {
+                @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery(healthQuery);
+                healthCheck.getFirstResult();
+            } catch (Exception e) {
+                throw new JobQueueUnhealthy(DB_UNHEALTHY, e);
+            }
+        }
+    }
+
     /**
      * Fetch the job from the database, call the mutator function to update the job, and save the update in the database.
      *
@@ -151,26 +191,32 @@ public class DistributedQueue implements JobQueue {
      * @return the {@link JobModel} after the a successful
      */
     private JobModel updateModel(UUID jobID, Consumer<JobModel> mutator) {
-        final Transaction tx = this.session.beginTransaction();
-        try {
-            final JobModel jobModel = this.session.get(JobModel.class, jobID);
-            if (jobModel == null) {
-                throw new JobQueueFailure(jobID, "Unable to fetch job from database");
-            }
-            if (!jobModel.isValid()) {
-                throw new JobQueueFailure(jobID, "Job fetched with an invalid values");
-            }
+        try (final Session session = this.factory.openSession()) {
 
-            // Mutate the model
-            mutator.accept(jobModel);
+            final Transaction tx = session.beginTransaction();
+            try {
+                final JobModel jobModel = session.get(JobModel.class, jobID);
+                if (jobModel == null) {
+                    throw new JobQueueFailure(jobID, "Unable to fetch job from database");
+                }
+                if (!jobModel.isValid()) {
+                    throw new JobQueueFailure(jobID, "Job fetched with an invalid values");
+                }
 
-            this.session.update(jobModel);
-            tx.commit();
-            return jobModel;
-        } catch (Exception e) {
-            tx.rollback();
-            logger.error("Unable to update job model", e);
-            throw new JobQueueFailure(jobID, e);
+                // Mutate the model
+                mutator.accept(jobModel);
+                // There seems to be an issue with cascading the updates to the JobResult entity
+                // Clearing the session cache seems to resolve the issue, otherwise we get an EntityExistsException
+                // Not entirely sure why this is happening, but this fix should be simple and performant
+                session.clear();
+                session.update(jobModel);
+                tx.commit();
+                return jobModel;
+            } catch (Exception e) {
+                tx.rollback();
+                logger.error("Unable to update job model", e);
+                throw new JobQueueFailure(jobID, e);
+            }
         }
     }
 }

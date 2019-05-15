@@ -77,9 +77,9 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         final JobCompletionModel jobResponse = ClientUtils.awaitExportResponse(jobLocation, "Trying");
 
 
-        assertNotNull(jobResponse, "Should have Job Response");
-        assertEquals(2, jobResponse.getOutput().size(), "Should have 2 resource files");
-        assertEquals(0, jobResponse.getError().size(), "Should not have any errors");
+        assertAll(() -> assertNotNull(jobResponse, "Should have Job Response"),
+                () -> assertEquals(2, jobResponse.getOutput().size(), "Should have 2 resource files"),
+                () -> assertEquals(0, jobResponse.getError().size(), "Should not have any errors"));
 
         // Validate each of the resources
         validateResourceFile(Patient.class, jobResponse, ResourceType.Patient, 100);

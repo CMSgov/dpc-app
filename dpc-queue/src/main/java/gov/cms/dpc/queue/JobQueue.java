@@ -59,6 +59,13 @@ public interface JobQueue {
      * @return - {@link String} queue type
      */
     String queueType();
+
+    /**
+     * Determines if the underlying queue is healthy or not.
+     * This is accomplished by
+     * throws if not healthy
+     */
+    void assertHealthy();
 }
 
 
