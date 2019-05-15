@@ -205,7 +205,10 @@ public class DistributedQueue implements JobQueue {
 
                 // Mutate the model
                 mutator.accept(jobModel);
-
+                // There seems to be an issue with cascading the updates to the JobResult entity
+                // Clearing the session cache seems to resolve the issue, otherwise we get an EntityExistsException
+                // Not entirely sure why this is happening, but this fix should be simple and performant
+                session.clear();
                 session.update(jobModel);
                 tx.commit();
                 return jobModel;

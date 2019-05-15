@@ -114,7 +114,8 @@ public class AggregationEngine implements Runnable {
                     return completed.delay(2, TimeUnit.SECONDS);
                 })
                 .doOnError(e -> logger.error("Error", e))
-                .subscribe(this::workExportJob);
+                .subscribe(this::workExportJob,
+                        error -> logger.error("Unable to complete job.", error));
     }
 
     /**
