@@ -3,7 +3,9 @@ package gov.cms.dpc.aggregation.qclient;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,8 +26,7 @@ public abstract class AbstractMockQueueClient implements JobQueue {
         return Optional.empty();
     }
 
-    @Override
-    public void completeJob(UUID uuid, JobStatus jobStatus) {
+    public void completeJob(UUID uuid, JobStatus jobStatus, List<JobResult> jobResults) {
         // TODO
     }
 

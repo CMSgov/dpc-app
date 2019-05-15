@@ -1,7 +1,9 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.queue.models.JobResult;
 import gov.cms.dpc.queue.models.JobModel;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,8 +41,9 @@ public interface JobQueue {
      *
      * @param jobID - the job
      * @param status - the new  {@link JobStatus} of the job. Must be `COMPLETED` or `FAILED`.
+     * @param results - The new counts for each job resource type.
      */
-    void completeJob(UUID jobID, JobStatus status);
+    void completeJob(UUID jobID, JobStatus status, List<JobResult> results);
 
     /**
      * Number of items in the queue.
