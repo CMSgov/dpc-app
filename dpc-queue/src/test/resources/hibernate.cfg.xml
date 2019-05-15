@@ -24,6 +24,7 @@
 
         <!-- Annotated entity classes -->
         <mapping class="gov.cms.dpc.queue.models.JobModel"/>
+        <mapping class="gov.cms.dpc.queue.models.JobResult"/>
 
     </session-factory>
 </hibernate-configuration>

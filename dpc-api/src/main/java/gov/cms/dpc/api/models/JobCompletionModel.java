@@ -28,13 +28,19 @@ public class JobCompletionModel {
          */
         private String url;
 
+        /**
+         * The number of resources in the file
+         */
+        private Integer count;
+
         public OutputEntry() {
-            // Jackson Required
+            // Jackson required
         }
 
-        public OutputEntry(ResourceType type, String url) {
+        public OutputEntry(ResourceType type, String url, Integer count) {
             this.type = type;
             this.url = url;
+            this.count = count;
         }
 
         public String getUrl() {
@@ -44,8 +50,11 @@ public class JobCompletionModel {
         public ResourceType getType() {
             return type;
         }
-    }
 
+        public Integer getCount() {
+            return count;
+        }
+    }
 
     /**
      * An instant type that indicates the server's time when the query is run. No resources that have a modified data after this instant should be in the response.
@@ -59,24 +68,25 @@ public class JobCompletionModel {
     private String request;
     private final boolean requiresAccessToken = false;
     private List<OutputEntry> output;
-    // FIXME(rickhawes): DPC-205 will fill in this array.
-    private final List<String> error = new ArrayList<>();
+    private List<OutputEntry> error;
     private Map<String, Object> encryptionParameters;
 
     public JobCompletionModel() {
-        // Jackson requireds
+        // Jackson required
     }
 
-    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output) {
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, List<OutputEntry> error) {
         this.transactionTime = transactionTime;
         this.request = request;
         this.output = output;
+        this.error = error;
     }
 
-    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, Map<String, Object> encryptionParameters) {
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, List<OutputEntry> error, Map<String, Object> encryptionParameters) {
         this.transactionTime = transactionTime;
         this.request = request;
         this.output = output;
+        this.error = error;
         this.encryptionParameters = encryptionParameters;
     }
 
@@ -108,8 +118,12 @@ public class JobCompletionModel {
         this.output = output;
     }
 
-    public List<String> getError() {
+    public List<OutputEntry> getError() {
         return error;
+    }
+
+    public void setError(List<OutputEntry> error) {
+        this.error = error;
     }
 
     public Map<String, Object> getEncryptionParameters() {

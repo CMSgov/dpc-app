@@ -34,7 +34,7 @@
         <pgsql.version>42.2.5</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
-        <jib.ecr.root>430398651479.dkr.ecr.us-east-1.amazonaws.com/dpc</jib.ecr.root>
+        <jib.ecr.root>430398651479.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
     </properties>
 
     <dependencyManagement>
@@ -206,6 +206,24 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <configuration>
+                            <to>
+                                <tags combine.children="override">
+                                    <tag>${project.version}</tag>
+                                </tags>
+                            </to>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -234,11 +252,18 @@
                         <target>${java.version}</target>
                     </configuration>
                 </plugin>
+                <!-- Base configuration for Docker images -->
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>1.0.0</version>
                     <configuration>
+                        <to>
+                            <image>${jib.ecr.root}/${project.artifactId}</image>
+                            <tags>
+                                <tag>latest</tag>
+                            </tags>
+                        </to>
                         <from>
                             <image>openjdk:11-jdk-slim</image>
                         </from>

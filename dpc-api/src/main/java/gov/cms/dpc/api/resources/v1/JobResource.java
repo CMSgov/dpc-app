@@ -7,6 +7,9 @@ import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.suppliers.CountSupplier;
+import gov.cms.dpc.queue.suppliers.FileNameSupplier;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -66,7 +69,8 @@ public class JobResource extends AbstractJobResource {
                     final JobCompletionModel completionModel = new JobCompletionModel(
                             job.getStartTime().get(),
                             String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),
-                            outputList(jobUUID, job.getResourceTypes()));
+                            formOutputList(job, JobResult::getCount, JobModel::formOutputFileName),
+                            formOutputList(job, JobResult::getErrorCount, JobModel::formErrorFileName));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                     break;
                 }
@@ -83,15 +87,17 @@ public class JobResource extends AbstractJobResource {
     }
 
     /**
-     * Form a list of output entries
+     * Form a list of output entries that are erring
      *
      * @return the output list for the response
      */
-    private List<JobCompletionModel.OutputEntry> outputList(UUID jobID, List<ResourceType> resourceTypes) {
-        return resourceTypes.stream()
-                .map(resourceType -> {
-                    final var url = String.format("%s/Data/%s", this.baseURL, JobModel.outputFileName(jobID, resourceType));
-                    return new JobCompletionModel.OutputEntry(resourceType, url);
+    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, CountSupplier countSupplier, FileNameSupplier fileNameSupplier) {
+        return job.getJobResults().stream()
+                .filter(jobResult -> countSupplier.getCount(jobResult) > 0)
+                .map(jobResult -> {
+                    final var resourceType = jobResult.getResourceType();
+                    final var url = String.format("%s/Data/%s", this.baseURL, fileNameSupplier.getFileName(job.getJobID(), resourceType));
+                    return new JobCompletionModel.OutputEntry(resourceType, url, countSupplier.getCount(jobResult));
                 })
                 .collect(Collectors.toList());
     }

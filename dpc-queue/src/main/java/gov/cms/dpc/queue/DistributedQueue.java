@@ -3,6 +3,7 @@ package gov.cms.dpc.queue;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
+import gov.cms.dpc.queue.models.JobResult;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -17,6 +18,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
@@ -57,7 +59,7 @@ public class DistributedQueue implements JobQueue {
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                session.save(data);
+                session.persist(data);
                 tx.commit();
             } catch (Exception e) {
                 logger.error("Cannot add job to database", e);
@@ -126,7 +128,7 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
-    public void completeJob(UUID jobID, JobStatus status) {
+    public void completeJob(UUID jobID, JobStatus status, List<JobResult> jobResults) {
         assert (status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         final OffsetDateTime completionTime = OffsetDateTime.now(ZoneOffset.UTC);
         final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
@@ -137,6 +139,7 @@ public class DistributedQueue implements JobQueue {
             // Set the status and the completion time
             job.setStatus(status);
             job.setCompleteTime(completionTime);
+            job.setJobResults(jobResults);
         });
         final Duration workDuration = Duration.between(updatedJob.getStartTime().get(), updatedJob.getCompleteTime().get());
         logger.debug("Completed job {} at {} with status {} and duration {} seconds",

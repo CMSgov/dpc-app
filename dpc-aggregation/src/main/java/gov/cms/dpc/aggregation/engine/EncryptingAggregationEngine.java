@@ -7,13 +7,11 @@ import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import io.github.resilience4j.retry.RetryConfig;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
+import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.inject.Inject;
 import java.io.FileOutputStream;
@@ -57,11 +55,20 @@ public class EncryptingAggregationEngine extends AggregationEngine {
 
     @Override
     public String formOutputFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.outputFileName(jobID, resourceType));
+        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.formOutputFileName(jobID, resourceType));
+    }
+
+    @Override
+    public String formErrorFilePath(UUID jobID, ResourceType resourceType) {
+        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.formErrorFileName(jobID, resourceType));
     }
 
     public String formOutputMetadataPath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s-metadata.json", exportPath, JobModel.outputFileName(jobID, resourceType));
+        return String.format("%s/%s-metadata.json", exportPath, JobModel.formOutputFileName(jobID, resourceType));
+    }
+
+    public String formErrorMetadataPath(UUID jobID, ResourceType resourceType) {
+        return String.format("%s/%s-metadata.json", exportPath, JobModel.formErrorFileName(jobID, resourceType));
     }
 
     /**
@@ -70,30 +77,34 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      *
      * @param writer - the stream to be wrapped in a {@link CipherOutputStream}
      * @param job - the job to process
-     * @param resourceType - the FHIR resource type to write out
+     * @param jobResult - the per resource-type job results
      */
     @Override
-    protected void workResource(OutputStream writer, JobModel job, ResourceType resourceType) {
-        SecureRandom secureRandom = new SecureRandom();
-
+    protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
         try {
             // Generate Key
             KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/", -1)[0]);
             keyGenerator.init(keyBits);
             SecretKey secretKey = keyGenerator.generateKey();
+            SecretKey errorSecretKey = keyGenerator.generateKey();
 
             // Generate IV
-            byte[] iv =  new byte[ivBits / 8];
-            secureRandom.nextBytes(iv);
+            byte[] iv =  generateIV();
+            byte[] errorIV = generateIV();
 
-            Cipher aesCipher = Cipher.getInstance(symmetricCipher);
-            aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
-
-            try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, aesCipher);) {
-                super.workResource(cipherOutputStream, job, resourceType);
+            try(CipherOutputStream cipherOutputStream = new CipherOutputStream(writer, formCipher(secretKey, iv));
+            CipherOutputStream cipherErrorStream = new CipherOutputStream(errorWriter, formCipher(errorSecretKey, errorIV))) {
+                super.workResource(cipherOutputStream, cipherErrorStream, job, jobResult);
             }
 
-            saveEncryptionMetadata(job, resourceType, secretKey, iv);
+            try(final FileOutputStream metadataWriter = new FileOutputStream(formOutputMetadataPath(job.getJobID(), jobResult.getResourceType()))) {
+                saveEncryptionMetadata(metadataWriter, job, secretKey, iv);
+            }
+            if (jobResult.getErrorCount() > 0) {
+                try(final FileOutputStream metadataWriter = new FileOutputStream(formErrorMetadataPath(job.getJobID(), jobResult.getResourceType()))) {
+                    saveEncryptionMetadata(metadataWriter, job, errorSecretKey, errorIV);
+                }
+            }
 
             // Ideally, we explicitly remove key material (with secretKey.destroy();) from memory when we're done.
             // Unfortunately, calling secretKey.destroy(); will throw DestroyFailedException
@@ -120,14 +131,14 @@ public class EncryptingAggregationEngine extends AggregationEngine {
      *     }
      * }
      *
-     * This metadata is saved to a json file named [outputFileName]-metadata.json on the tmp filesystem
+     * This metadata is saved to a stream in JSON format
      *
+     * @param writer - the stream to write the json
      * @param job - the current job pulled from the queue
-     * @param resourceType - FHIR type of the requested resource
      * @param aesSecretKey - the {@link SecretKey} used in the symmetric encryption algorithm to encrypt the data
      * @param iv - a raw byte array corresponding to the iv used by the symmetric encryption algorithm to encrypt the data
      */
-    private void saveEncryptionMetadata(JobModel job, ResourceType resourceType, SecretKey aesSecretKey, byte[] iv) {
+    private void saveEncryptionMetadata(OutputStream writer, JobModel job, SecretKey aesSecretKey, byte[] iv) {
 
         try {
 
@@ -154,13 +165,32 @@ public class EncryptingAggregationEngine extends AggregationEngine {
             metadata.put("AsymmetricProperties", asymmetricMetadata);
 
             String json = new ObjectMapper().writeValueAsString(metadata);
-
-            try(final FileOutputStream writer = new FileOutputStream(formOutputMetadataPath(job.getJobID(), resourceType))) {
-                writer.write(json.getBytes(StandardCharsets.UTF_8));
-            }
-
+            writer.write(json.getBytes(StandardCharsets.UTF_8));
         } catch(GeneralSecurityException | IOException ex) {
             throw new JobQueueFailure(job.getJobID(), ex);
         }
+    }
+
+    /**
+     * Generate a random initialization vector
+     * @return vector to use
+     */
+    private byte[] generateIV() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] iv =  new byte[ivBits / 8];
+        secureRandom.nextBytes(iv);
+        return iv;
+    }
+
+    /**
+     * Form a cipher
+     * @param secretKey - Secret key to use
+     * @param iv - initialization vector
+     * @return new cipher
+     */
+    private Cipher formCipher(SecretKey secretKey, byte[] iv) throws GeneralSecurityException {
+        final var aesCipher = Cipher.getInstance(symmetricCipher);
+        aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
+        return aesCipher;
     }
 }

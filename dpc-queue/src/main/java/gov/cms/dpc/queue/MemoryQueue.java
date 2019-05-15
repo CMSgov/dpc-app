@@ -1,6 +1,7 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
+import gov.cms.dpc.queue.models.JobResult;
 import gov.cms.dpc.queue.models.JobModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -71,7 +73,7 @@ public class MemoryQueue implements JobQueue {
     }
 
     @Override
-    public synchronized void completeJob(UUID jobID, JobStatus status) {
+    public synchronized void completeJob(UUID jobID, JobStatus status, List<JobResult> jobResults) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
 
         final JobModel job = this.queue.get(jobID);
@@ -83,6 +85,7 @@ public class MemoryQueue implements JobQueue {
 
         job.setStatus(status);
         job.setCompleteTime(OffsetDateTime.now(ZoneOffset.UTC));
+        job.setJobResults(jobResults);
         this.queue.replace(jobID, job);
 
         final var workDuration = Duration.between(job.getStartTime().get(), job.getCompleteTime().get());
