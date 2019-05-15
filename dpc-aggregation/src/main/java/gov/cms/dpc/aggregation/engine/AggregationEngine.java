@@ -213,7 +213,7 @@ public class AggregationEngine implements Runnable {
             }
 
             final String str = jsonParser.encodeResourceToString(resource);
-            logger.debug(description, str);
+            logger.trace(description, str);
             writer.write(str.getBytes(StandardCharsets.UTF_8));
             writer.write(DELIM);
         } catch (IOException e) {
