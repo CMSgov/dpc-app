@@ -4,6 +4,8 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
+import gov.cms.dpc.queue.annotations.HealthCheckQuery;
+import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import io.dropwizard.Configuration;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -33,10 +35,20 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
                     .to(DistributedQueue.class)
                     .in(Scopes.SINGLETON);
         }
+
+        // Bind the healthcheck
+        binder.bind(JobQueueHealthCheck.class);
     }
 
     @Provides
     RedissonClient provideClient() {
         return Redisson.create(config);
+    }
+
+    @Provides
+    @HealthCheckQuery
+    String provideHealthQuery() {
+        // TODO: Eventually, this should get pulled out into the config file
+        return "SELECT 1 from job_queue;";
     }
 }

@@ -4,19 +4,18 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
-import gov.cms.dpc.common.annotations.AdditionalPaths;
-import gov.cms.dpc.common.annotations.ExportPath;
-import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
-import gov.cms.dpc.common.interfaces.AttributionEngine;
-import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.api.annotations.AttributionService;
-import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.api.client.AttributionServiceClient;
+import gov.cms.dpc.api.health.AttributionHealthCheck;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
+import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.common.annotations.AdditionalPaths;
+import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.annotations.ServiceBaseURL;
+import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
+import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.client.JerseyClientBuilder;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +50,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(JobResource.class);
         binder.bind(DataResource.class);
         binder.bind(RosterResource.class);
+
+        // Healthchecks
+        binder.bind(AttributionHealthCheck.class);
     }
 
     @Provides
