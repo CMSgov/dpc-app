@@ -10,7 +10,7 @@ import java.util.Properties;
 public class PropertiesProvider {
 
     private static final String PROPERTIES_FILE = "app.properties";
-    private static final DateTimeFormatter MAVEN_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmm");
+    private static final DateTimeFormatter MAVEN_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
 
     private final Properties properties;
 
