@@ -1,8 +1,10 @@
 package gov.cms.dpc.api.core;
 
 
+import gov.cms.dpc.common.utils.PropertiesProvider;
 import org.hl7.fhir.dstu3.model.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -10,23 +12,24 @@ import java.util.List;
 import static org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 
 public class Capabilities {
+    private static final DateTimeFormatter FHIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private Capabilities() {
-//        Should not use
     }
 
     public static CapabilityStatement buildCapabilities(String baseUri, String version) {
-        DateTimeType releaseDate = DateTimeType.now();
+        final PropertiesProvider pp = new PropertiesProvider();
+
+        DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIR_FORMATTER));
 
         CapabilityStatement capabilityStatement = new CapabilityStatement();
-
         capabilityStatement
                 .setStatus(Enumerations.PublicationStatus.ACTIVE)
                 .setDateElement(releaseDate)
                 .setPublisher("Centers for Medicare and Medicaid Services")
                 // This should track the FHIR version used by BlueButton
                 .setFhirVersion("3.0.1")
-                .setSoftware(generateSoftwareComponent(releaseDate))
+                .setSoftware(generateSoftwareComponent(releaseDate, pp.getBuildVersion()))
                 .setKind(CapabilityStatementKind.CAPABILITY)
                 .setRest(generateRestComponents(baseUri + version))
                 .setAcceptUnknown(UnknownContentCode.NO)
@@ -40,10 +43,10 @@ public class Capabilities {
         return capabilityStatement;
     }
 
-    private static CapabilityStatementSoftwareComponent generateSoftwareComponent(DateTimeType releaseDate) {
+    private static CapabilityStatementSoftwareComponent generateSoftwareComponent(DateTimeType releaseDate, String releaseVersion) {
         return new CapabilityStatementSoftwareComponent()
                 .setName("Data @ Point of Care API")
-                .setVersion("0.0.1")
+                .setVersion(releaseVersion)
                 .setReleaseDateElement(releaseDate);
     }
 
