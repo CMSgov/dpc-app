@@ -174,8 +174,6 @@ public class JobModel implements Serializable  {
         return jobResults.stream().filter(result -> result.getResourceType().equals(forResourceType)).findFirst();
     }
 
-    public void setResourceTypes(List<ResourceType> resourceTypes) {
-        this.resourceTypes = resourceTypes;
     public void setJobResults(List<JobResult> jobResults) {
             this.jobResults = jobResults;
     }
