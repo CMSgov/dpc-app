@@ -62,9 +62,25 @@ public class Capabilities {
         final CapabilityStatementRestOperationComponent metadataResource = new CapabilityStatementRestOperationComponent(new StringType("Metadata"), new Reference(String.format("%s/metadata", baseURI)));
         final CapabilityStatementRestOperationComponent versionResource = new CapabilityStatementRestOperationComponent(new StringType("Version"), new Reference(String.format("%s/_version", baseURI)));
 
-        // Add the Group export paths
-        final CapabilityStatementRestOperationComponent providerExport = new CapabilityStatement.CapabilityStatementRestOperationComponent(new StringType("Provider export"), new Reference(String.format("%s/Group/providerID/$export", baseURI)));
-        serverComponent.setOperation(Arrays.asList(providerExport, metadataResource, versionResource));
+        //  Group resources
+        final CapabilityStatementRestOperationComponent providerExport = new CapabilityStatementRestOperationComponent(new StringType("Provider export"), new Reference(String.format("%s/Group/providerID/$export", baseURI)));
+
+        // Job resources
+        final CapabilityStatementRestOperationComponent jobResource = new CapabilityStatementRestOperationComponent(new StringType("Job Status"), new Reference(String.format("%s/Job/jobID", baseURI)));
+
+        // Roster endpoints
+        final CapabilityStatementRestOperationComponent rosterResource = new CapabilityStatementRestOperationComponent(new StringType("Roster submission and updating"), new Reference(String.format("%s/Bundle", baseURI)));
+
+        // Data endpoints
+        final CapabilityStatementRestOperationComponent dataResource = new CapabilityStatementRestOperationComponent(new StringType("Export file retrieval"), new Reference(String.format("%s/Data/fileID", baseURI)));
+
+        serverComponent.setOperation(Arrays.asList(
+                providerExport,
+                metadataResource,
+                versionResource,
+                jobResource,
+                rosterResource,
+                dataResource));
 
         return Collections.singletonList(serverComponent);
     }
