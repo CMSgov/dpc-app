@@ -8,6 +8,8 @@ import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.suppliers.CountSupplier;
+import gov.cms.dpc.queue.suppliers.FileNameSupplier;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -67,8 +69,8 @@ public class JobResource extends AbstractJobResource {
                     final JobCompletionModel completionModel = new JobCompletionModel(
                             job.getStartTime().get(),
                             String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),
-                            formOutputList(job, JobResult::getCount, JobModel::outputFileName),
-                            formOutputList(job, JobResult::getErrorCount, JobModel::errorFileName));
+                            formOutputList(job, JobResult::getCount, JobModel::formOutputFileName),
+                            formOutputList(job, JobResult::getErrorCount, JobModel::formErrorFileName));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                     break;
                 }
@@ -89,7 +91,7 @@ public class JobResource extends AbstractJobResource {
      *
      * @return the output list for the response
      */
-    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, JobResult.CountSupplier countSupplier, JobModel.FileNameSupplier fileNameSupplier) {
+    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, CountSupplier countSupplier, FileNameSupplier fileNameSupplier) {
         return job.getJobResults().stream()
                 .filter(jobResult -> countSupplier.getCount(jobResult) > 0)
                 .map(jobResult -> {

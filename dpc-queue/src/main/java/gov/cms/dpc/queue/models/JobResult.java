@@ -137,12 +137,4 @@ public class JobResult {
                 ", errorCount=" + errorCount +
                 '}';
     }
-
-    /**
-     * Useful for lambdas
-     */
-    public interface CountSupplier {
-        int getCount(JobResult result);
-    }
-
 }

@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
@@ -89,7 +88,7 @@ public class AggregationEngine implements Runnable {
      * @param resourceType - {@link ResourceType} to append to filename
      */
     public String formOutputFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson", exportPath, JobModel.outputFileName(jobID, resourceType));
+        return String.format("%s/%s.ndjson", exportPath, JobModel.formOutputFileName(jobID, resourceType));
     }
 
     /**
@@ -99,7 +98,7 @@ public class AggregationEngine implements Runnable {
      * @param resourceType
      */
     public String formErrorFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson", exportPath, JobModel.errorFileName(jobID, resourceType));
+        return String.format("%s/%s.ndjson", exportPath, JobModel.formErrorFileName(jobID, resourceType));
     }
 
     /**

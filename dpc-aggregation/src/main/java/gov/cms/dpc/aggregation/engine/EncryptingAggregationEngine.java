@@ -55,20 +55,20 @@ public class EncryptingAggregationEngine extends AggregationEngine {
 
     @Override
     public String formOutputFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.outputFileName(jobID, resourceType));
+        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.formOutputFileName(jobID, resourceType));
     }
 
     @Override
     public String formErrorFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.errorFileName(jobID, resourceType));
+        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.formErrorFileName(jobID, resourceType));
     }
 
     public String formOutputMetadataPath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s-metadata.json", exportPath, JobModel.outputFileName(jobID, resourceType));
+        return String.format("%s/%s-metadata.json", exportPath, JobModel.formOutputFileName(jobID, resourceType));
     }
 
     public String formErrorMetadataPath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s-metadata.json", exportPath, JobModel.errorFileName(jobID, resourceType));
+        return String.format("%s/%s-metadata.json", exportPath, JobModel.formErrorFileName(jobID, resourceType));
     }
 
     /**

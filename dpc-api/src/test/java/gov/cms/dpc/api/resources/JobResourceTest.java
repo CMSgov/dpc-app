@@ -5,9 +5,7 @@ import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import gov.cms.dpc.queue.models.JobResult;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -108,7 +106,7 @@ public class JobResourceTest {
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, entry.getType())), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, entry.getType())), entry.getUrl());
         }
     }
 
@@ -143,11 +141,11 @@ public class JobResourceTest {
                 () -> assertEquals(2, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.outputFileName(jobID, entry.getType())), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, entry.getType())), entry.getUrl());
         }
         for (JobCompletionModel.OutputEntry entry: completion.getError()) {
             assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.errorFileName(jobID, entry.getType())), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formErrorFileName(jobID, entry.getType())), entry.getUrl());
         }
     }
 

@@ -37,14 +37,6 @@ public class JobModel implements Serializable  {
         return validResourceTypes.contains(type);
     }
 
-
-    /**
-     * Useful for lambdas
-     */
-    public interface FileNameSupplier {
-        String getFileName(UUID jobID, ResourceType resourceType);
-    }
-
     /**
      * Form a file name for passed in parameters.
      *
@@ -52,7 +44,7 @@ public class JobModel implements Serializable  {
      * @param resourceType - the resource type
      * @return a file name
      */
-    public static String outputFileName(UUID jobID, ResourceType resourceType) {
+    public static String formOutputFileName(UUID jobID, ResourceType resourceType) {
         return String.format("%s.%s", jobID.toString(), resourceType.getPath());
     }
 
@@ -63,7 +55,7 @@ public class JobModel implements Serializable  {
      * @param resourceType - the resource type
      * @return a file name
      */
-    public static String errorFileName(UUID jobID, ResourceType resourceType) {
+    public static String formErrorFileName(UUID jobID, ResourceType resourceType) {
         return String.format("%s.%s.error", jobID.toString(), resourceType.getPath());
     }
 
