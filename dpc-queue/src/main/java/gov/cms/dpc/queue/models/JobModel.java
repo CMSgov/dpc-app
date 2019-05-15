@@ -66,8 +66,10 @@ public class JobModel implements Serializable  {
 
     /**
      * The list of resource types requested
+     *
+     * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
      */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name="jobID")
     private List<JobResult> jobResults;
 

@@ -10,12 +10,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "job_result")
-public class JobResult {
+public class JobResult implements Serializable {
     public static final long serialVersionUID = 1L;
 
     @Embeddable
     public static class JobResultID implements Serializable {
-        public static long serialVersionUID = 1L;
+        public static final long serialVersionUID = 1L;
 
         private UUID jobID;
 
@@ -114,7 +114,7 @@ public class JobResult {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof JobResult)) return false;
         JobResult other = (JobResult) o;
         return new EqualsBuilder()
                 .append(jobResultID, other.jobResultID)

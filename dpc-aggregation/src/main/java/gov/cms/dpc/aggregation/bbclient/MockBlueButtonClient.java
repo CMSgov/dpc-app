@@ -39,7 +39,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     @Override
     public CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException {
         final var path = SAMPLE_METADATA_PATH_PREFIX + "meta.xml";
-        return requestFromServer(CapabilityStatement.class, path);
+        return requestFromServer(CapabilityStatement.class, path, null);
     }
 
     /**

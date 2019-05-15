@@ -139,13 +139,16 @@ public class AggregationEngine implements Runnable {
         List<String> attributedBeneficiaries = job.getPatients();
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
 
-        Observable.fromIterable(job.getJobResults())
+        final Disposable iterableSubscriber = Observable.fromIterable(job.getJobResults())
                 .subscribe(jobResult -> completeResource(job, jobResult),
                         error -> {
                             logger.error("Cannot process job {}", jobID, error);
                             this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
                         },
                         () -> this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults()));
+
+        // Kill the subscriber when we exit, otherwise we'll leak resources
+        iterableSubscriber.dispose();
     }
 
     /**
