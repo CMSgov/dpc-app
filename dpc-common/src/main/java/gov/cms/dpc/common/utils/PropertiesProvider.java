@@ -3,6 +3,7 @@ package gov.cms.dpc.common.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.MissingResourceException;
 import java.util.Properties;
@@ -26,8 +27,8 @@ public class PropertiesProvider {
         }
     }
 
-    public LocalDateTime getBuildTimestamp() {
-        return LocalDateTime.parse(this.properties.getProperty("application.builddate"), MAVEN_FORMATTER);
+    public OffsetDateTime getBuildTimestamp() {
+        return OffsetDateTime.parse(this.properties.getProperty("application.builddate"), MAVEN_FORMATTER);
     }
 
     public String getBuildVersion() {

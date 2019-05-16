@@ -2,9 +2,9 @@ package gov.cms.dpc.api.core;
 
 
 import gov.cms.dpc.common.utils.PropertiesProvider;
+import gov.cms.dpc.fhir.FHIRFormatters;
 import org.hl7.fhir.dstu3.model.*;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +12,6 @@ import java.util.List;
 import static org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 
 public class Capabilities {
-    private static final DateTimeFormatter FHIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private Capabilities() {
     }
@@ -20,7 +19,7 @@ public class Capabilities {
     public static CapabilityStatement buildCapabilities(String baseUri, String version) {
         final PropertiesProvider pp = new PropertiesProvider();
 
-        DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIR_FORMATTER));
+        DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIRFormatters.DATE_TIME_FORMATTER));
 
         CapabilityStatement capabilityStatement = new CapabilityStatement();
         capabilityStatement
