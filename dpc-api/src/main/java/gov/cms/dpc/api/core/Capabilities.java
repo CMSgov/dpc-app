@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.core;
 
 
+import gov.cms.dpc.common.utils.PropertiesProvider;
+import gov.cms.dpc.fhir.FHIRFormatters;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.util.Arrays;
@@ -12,21 +14,21 @@ import static org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 public class Capabilities {
 
     private Capabilities() {
-//        Should not use
     }
 
     public static CapabilityStatement buildCapabilities(String baseUri, String version) {
-        DateTimeType releaseDate = DateTimeType.now();
+        final PropertiesProvider pp = new PropertiesProvider();
+
+        DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIRFormatters.DATE_TIME_FORMATTER));
 
         CapabilityStatement capabilityStatement = new CapabilityStatement();
-
         capabilityStatement
                 .setStatus(Enumerations.PublicationStatus.ACTIVE)
                 .setDateElement(releaseDate)
                 .setPublisher("Centers for Medicare and Medicaid Services")
                 // This should track the FHIR version used by BlueButton
                 .setFhirVersion("3.0.1")
-                .setSoftware(generateSoftwareComponent(releaseDate))
+                .setSoftware(generateSoftwareComponent(releaseDate, pp.getBuildVersion()))
                 .setKind(CapabilityStatementKind.CAPABILITY)
                 .setRest(generateRestComponents(baseUri + version))
                 .setAcceptUnknown(UnknownContentCode.NO)
@@ -40,10 +42,10 @@ public class Capabilities {
         return capabilityStatement;
     }
 
-    private static CapabilityStatementSoftwareComponent generateSoftwareComponent(DateTimeType releaseDate) {
+    private static CapabilityStatementSoftwareComponent generateSoftwareComponent(DateTimeType releaseDate, String releaseVersion) {
         return new CapabilityStatementSoftwareComponent()
                 .setName("Data @ Point of Care API")
-                .setVersion("0.0.1")
+                .setVersion(releaseVersion)
                 .setReleaseDateElement(releaseDate);
     }
 
@@ -59,9 +61,25 @@ public class Capabilities {
         final CapabilityStatementRestOperationComponent metadataResource = new CapabilityStatementRestOperationComponent(new StringType("Metadata"), new Reference(String.format("%s/metadata", baseURI)));
         final CapabilityStatementRestOperationComponent versionResource = new CapabilityStatementRestOperationComponent(new StringType("Version"), new Reference(String.format("%s/_version", baseURI)));
 
-        // Add the Group export paths
-        final CapabilityStatementRestOperationComponent providerExport = new CapabilityStatement.CapabilityStatementRestOperationComponent(new StringType("Provider export"), new Reference(String.format("%s/Group/providerID/$export", baseURI)));
-        serverComponent.setOperation(Arrays.asList(providerExport, metadataResource, versionResource));
+        //  Group resources
+        final CapabilityStatementRestOperationComponent providerExport = new CapabilityStatementRestOperationComponent(new StringType("Provider export"), new Reference(String.format("%s/Group/providerID/$export", baseURI)));
+
+        // Job resources
+        final CapabilityStatementRestOperationComponent jobResource = new CapabilityStatementRestOperationComponent(new StringType("Job Status"), new Reference(String.format("%s/Job/jobID", baseURI)));
+
+        // Roster endpoints
+        final CapabilityStatementRestOperationComponent rosterResource = new CapabilityStatementRestOperationComponent(new StringType("Roster submission and updating"), new Reference(String.format("%s/Bundle", baseURI)));
+
+        // Data endpoints
+        final CapabilityStatementRestOperationComponent dataResource = new CapabilityStatementRestOperationComponent(new StringType("Export file retrieval"), new Reference(String.format("%s/Data/fileID", baseURI)));
+
+        serverComponent.setOperation(Arrays.asList(
+                providerExport,
+                metadataResource,
+                versionResource,
+                jobResource,
+                rosterResource,
+                dataResource));
 
         return Collections.singletonList(serverComponent);
     }
