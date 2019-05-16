@@ -96,6 +96,7 @@
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
+                <filtering>true</filtering>
             </resource>
         </resources>
         <!--Pull in the attribution seeds so we can use them for the integration tests.-->
