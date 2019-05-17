@@ -10,3 +10,6 @@ dependency-reduced-*.xml
 .project/
 *.project
 *.classpath
+bbcerts/*
+!bbcerts/README.md
+!bbcerts/bb.keystore.enc
