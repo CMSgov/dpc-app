@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class BBClientConfiguration extends Configuration {
+public class BBClientConfiguration {
 
     @NotEmpty
     private String serverBaseUrl;

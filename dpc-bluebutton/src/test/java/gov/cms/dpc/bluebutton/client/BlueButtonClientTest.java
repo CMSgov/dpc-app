@@ -188,7 +188,7 @@ class BlueButtonClientTest {
     }
 
     private static Config getTestConfig() {
-        return ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        return ConfigFactory.load("test.application.conf");
     }
 
     private static String getRawXML(String path) throws IOException {

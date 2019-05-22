@@ -2,7 +2,9 @@ package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -28,7 +30,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.MissingResourceException;
 
-public class BlueButtonClientModule extends DropwizardAwareModule<BBClientConfiguration> {
+public class BlueButtonClientModule extends AbstractModule {
 
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientModule.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
@@ -44,12 +46,12 @@ public class BlueButtonClientModule extends DropwizardAwareModule<BBClientConfig
     }
 
     @Override
-    public void configure(Binder binder) {
+    public void configure() {
         // If the config is null, pull it from Dropwizard
         // This is gross, but necessary in order to get the injection to be handled correctly in both prod/test
-        if (this.bbClientConfiguration == null) {
-            this.bbClientConfiguration = getConfiguration();
-        }
+//        if (this.bbClientConfiguration == null) {
+//            this.bbClientConfiguration = getConfiguration();
+//        }
     }
 
     @Provides
