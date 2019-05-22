@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation.bbclient;
+package gov.cms.dpc.bluebutton.exceptions;
 
 public class BlueButtonClientSetupException extends RuntimeException {
 

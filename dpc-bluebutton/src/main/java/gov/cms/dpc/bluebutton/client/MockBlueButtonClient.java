@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation.bbclient;
+package gov.cms.dpc.bluebutton.client;
 
 
 import ca.uhn.fhir.context.FhirContext;
@@ -10,8 +10,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.MissingResourceException;
 

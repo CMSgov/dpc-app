@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation.health;
 
 import com.codahale.metrics.health.HealthCheck;
-import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Enumerations;
 

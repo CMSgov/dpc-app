@@ -1,12 +1,16 @@
-package gov.cms.dpc.aggregation.bbclient;
+package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
-import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
-import io.github.resilience4j.retry.RetryConfig;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.bluebutton.client.DefaultBlueButtonClient;
+import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
+import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
+import io.dropwizard.Configuration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
@@ -24,7 +28,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.MissingResourceException;
 
-public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
+public class BlueButtonClientModule extends DropwizardAwareModule<BBClientConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientModule.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
@@ -44,7 +48,7 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
         // If the config is null, pull it from Dropwizard
         // This is gross, but necessary in order to get the injection to be handled correctly in both prod/test
         if (this.bbClientConfiguration == null) {
-            this.bbClientConfiguration = getConfiguration().getClientConfiguration();
+            this.bbClientConfiguration = getConfiguration();
         }
     }
 
@@ -80,13 +84,13 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
         return buildMutualTlsClient(keyStore, this.bbClientConfiguration.getKeystore().getDefaultPassword().toCharArray());
     }
 
-    @Provides
-    RetryConfig provideRetryConfig() {
-        // Create retry handler with our custom defaults
-        return RetryConfig.custom()
-                .maxAttempts(this.bbClientConfiguration.getRetryCount())
-                .build();
-    }
+//    @Provides
+//    RetryConfig provideRetryConfig() {
+//        // Create retry handler with our custom defaults
+//        return RetryConfig.custom()
+//                .maxAttempts(this.bbClientConfiguration.getRetryCount())
+//                .build();
+//    }
 
     /**
      * Helper function get the keystore from either the location specified in the Configuration file, or from the JAR resources.

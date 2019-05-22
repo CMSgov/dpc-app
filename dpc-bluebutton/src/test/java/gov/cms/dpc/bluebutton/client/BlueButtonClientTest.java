@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation.bbclient;
+package gov.cms.dpc.bluebutton.client;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +7,8 @@ import com.google.inject.Injector;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
+import gov.cms.dpc.bluebutton.BlueButtonClientModule;
+import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;

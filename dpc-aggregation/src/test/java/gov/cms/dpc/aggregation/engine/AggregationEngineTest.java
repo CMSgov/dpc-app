@@ -2,14 +2,13 @@ package gov.cms.dpc.aggregation.engine;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
-import gov.cms.dpc.aggregation.bbclient.MockBlueButtonClient;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import io.github.resilience4j.retry.RetryConfig;
-import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,10 +19,13 @@ import org.mockito.Mockito;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
 
 class AggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
