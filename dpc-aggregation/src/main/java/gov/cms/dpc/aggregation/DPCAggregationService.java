@@ -2,7 +2,8 @@ package gov.cms.dpc.aggregation;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
-import gov.cms.dpc.bluebutton.BlueButtonClientBundle;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
@@ -26,12 +27,13 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
     @Override
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
+        JerseyGuiceUtils.reset();
         GuiceBundle<DPCAggregationConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
-                .modules(new DPCHibernateModule<>(), new AggregationAppModule(), new JobQueueModule<>())
+                .modules(new DPCHibernateModule<>(), new AggregationAppModule(), new JobQueueModule<>(), new BlueButtonClientModule<>())
+                .enableGuiceEnforcer(false)
                 .build();
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new BlueButtonClientBundle());
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.aggregation"));
     }
 

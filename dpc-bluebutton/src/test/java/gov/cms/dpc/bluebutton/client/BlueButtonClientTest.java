@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
@@ -52,7 +53,7 @@ class BlueButtonClientTest {
     @BeforeAll
     public static void setupBlueButtonClient() throws IOException {
         conf = getTestConfig();
-        final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule(getClientConfig()));
+        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
 
         mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));

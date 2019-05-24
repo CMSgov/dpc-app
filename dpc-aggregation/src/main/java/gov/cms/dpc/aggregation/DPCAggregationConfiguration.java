@@ -30,9 +30,8 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @NotEmpty
     private String exportPath;
 
-    public BBClientConfiguration getClientConfiguration() {
-        return clientConfiguration;
-    }
+    @NotNull
+    private Integer retryCount;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -45,6 +44,14 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     public void setExportPath(String exportPath) {
         this.exportPath = exportPath;
+    }
+
+    public Integer getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(Integer retryCount) {
+        this.retryCount = retryCount;
     }
 
     @Override

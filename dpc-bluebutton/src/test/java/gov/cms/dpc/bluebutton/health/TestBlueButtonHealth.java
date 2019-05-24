@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation.health;
+package gov.cms.dpc.bluebutton.health;
 
 import com.codahale.metrics.health.HealthCheck;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;

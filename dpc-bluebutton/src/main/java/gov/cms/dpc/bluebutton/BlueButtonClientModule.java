@@ -2,9 +2,7 @@ package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
-import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -12,6 +10,7 @@ import gov.cms.dpc.bluebutton.client.DefaultBlueButtonClient;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
+import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
 import io.dropwizard.Configuration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -30,7 +29,12 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.MissingResourceException;
 
-public class BlueButtonClientModule extends AbstractModule {
+/**
+ * Guice module for building and injecting the {@link BlueButtonClient}.
+ *
+ * @param <T> - Dropwizard {@link Configuration} class that implements {@link BlueButtonBundleConfiguration}
+ */
+public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleConfiguration> extends DropwizardAwareModule<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientModule.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
@@ -38,7 +42,7 @@ public class BlueButtonClientModule extends AbstractModule {
     private BBClientConfiguration bbClientConfiguration;
 
     public BlueButtonClientModule() {
-        // Not used
+        this.bbClientConfiguration = null;
     }
 
     public BlueButtonClientModule(BBClientConfiguration config) {
@@ -46,12 +50,13 @@ public class BlueButtonClientModule extends AbstractModule {
     }
 
     @Override
-    public void configure() {
-        // If the config is null, pull it from Dropwizard
-        // This is gross, but necessary in order to get the injection to be handled correctly in both prod/test
-//        if (this.bbClientConfiguration == null) {
-//            this.bbClientConfiguration = getConfiguration();
-//        }
+    public void configure(Binder binder) {
+        if (this.bbClientConfiguration == null) {
+            this.bbClientConfiguration = getConfiguration().getBlueButtonConfiguration();
+        }
+
+        binder.bind(BlueButtonHealthCheck.class);
+
     }
 
     @Provides
@@ -85,14 +90,6 @@ public class BlueButtonClientModule extends AbstractModule {
     public HttpClient provideHttpClient(KeyStore keyStore) {
         return buildMutualTlsClient(keyStore, this.bbClientConfiguration.getKeystore().getDefaultPassword().toCharArray());
     }
-
-//    @Provides
-//    RetryConfig provideRetryConfig() {
-//        // Create retry handler with our custom defaults
-//        return RetryConfig.custom()
-//                .maxAttempts(this.bbClientConfiguration.getRetryCount())
-//                .build();
-//    }
 
     /**
      * Helper function get the keystore from either the location specified in the Configuration file, or from the JAR resources.
