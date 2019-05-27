@@ -2,11 +2,13 @@ package gov.cms.dpc.aggregation.bbclient;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Coverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.StringJoiner;
 
 public class DefaultBlueButtonClient implements BlueButtonClient {
 
@@ -17,7 +19,6 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
     public static String formBeneficiaryID(String fromPatientID) {
         return "Patient/" + fromPatientID;
     }
-
 
     public DefaultBlueButtonClient(IGenericClient client){
         this.client = client;
