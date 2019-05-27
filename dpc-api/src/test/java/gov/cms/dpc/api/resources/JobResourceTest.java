@@ -102,7 +102,7 @@ public class JobResourceTest {
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
-        assertAll(() -> assertEquals(2, completion.getOutput().size()),
+        assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
@@ -138,7 +138,7 @@ public class JobResourceTest {
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(0, completion.getOutput().size()),
-                () -> assertEquals(2, completion.getError().size()));
+                () -> assertEquals(JobModel.validResourceTypes.size(), completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
             assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, entry.getType())), entry.getUrl());
