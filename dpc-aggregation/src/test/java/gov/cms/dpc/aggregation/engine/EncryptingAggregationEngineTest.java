@@ -11,6 +11,7 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import io.github.resilience4j.retry.RetryConfig;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -57,7 +58,7 @@ class EncryptingAggregationEngineTest {
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
         BlueButtonClient bbclient = new MockBlueButtonClient();
-        engine = new EncryptingAggregationEngine(bbclient, queue, config.getString("exportPath"), config);
+        engine = new EncryptingAggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
         final InputStream testPublicKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PUBLIC_KEY_PATH);

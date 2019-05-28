@@ -1,5 +1,6 @@
 package gov.cms.dpc.aggregation.engine;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -42,13 +43,15 @@ public class EncryptingAggregationEngine extends AggregationEngine {
     /**
      * Create an engine
      *
-     * @param bbclient - the BlueButton client to use
-     * @param queue    - the Job queue that will direct the work done
-     * @param config   - the configuration for the engine
+     * @param bbclient    - {@link BlueButtonClient } to use
+     * @param queue       - {@link JobQueue} that will direct the work done
+     * @param context     - {@link FhirContext} for DSTU3 resources
+     * @param exportPath  - The {@link ExportPath} to use for writing the output files
+     * @param retryConfig - {@link RetryConfig} injected config for setting up retry handler
      */
     @Inject
-    public EncryptingAggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath String exportPath, Config config) {
-        super(bbclient, queue, exportPath, RetryConfig.ofDefaults());
+    public EncryptingAggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext context, @ExportPath String exportPath, Config config, RetryConfig retryConfig) {
+        super(bbclient, queue, context, exportPath, retryConfig);
 
         symmetricCipher = config.getString("encryption.symmetricCipher");
         asymmetricCipher = config.getString("encryption.asymmetricCipher");

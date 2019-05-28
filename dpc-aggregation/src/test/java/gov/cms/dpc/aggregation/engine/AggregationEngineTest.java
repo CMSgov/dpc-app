@@ -1,5 +1,6 @@
 package gov.cms.dpc.aggregation.engine;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -44,7 +45,7 @@ class AggregationEngineTest {
     void setupEach() {
         queue = new MemoryQueue();
         bbclient = Mockito.spy(new MockBlueButtonClient());
-        engine = new AggregationEngine(bbclient, queue, config.getString("exportPath"), RetryConfig.ofDefaults());
+        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), RetryConfig.ofDefaults());
     }
 
     /**
