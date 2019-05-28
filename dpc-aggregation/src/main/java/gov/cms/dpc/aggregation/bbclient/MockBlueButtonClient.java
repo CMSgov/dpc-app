@@ -19,6 +19,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     private static final String SAMPLE_EOB_PATH_PREFIX = "bb-test-data/eob/";
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
+    private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     public static final List<String> TEST_PATIENT_IDS = List.of("20140000008325", "20140000009893");
 
@@ -34,6 +35,11 @@ public class MockBlueButtonClient implements BlueButtonClient {
     @Override
     public Bundle requestEOBBundleFromServer(String patientID) {
         return requestFromServer(Bundle.class, SAMPLE_EOB_PATH_PREFIX, patientID);
+    }
+
+    @Override
+    public Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
+        return requestFromServer(Bundle.class, SAMPLE_COVERAGE_PATH_PREFIX, patientID);
     }
 
     @Override

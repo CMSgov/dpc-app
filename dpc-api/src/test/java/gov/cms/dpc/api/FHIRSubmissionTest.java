@@ -152,6 +152,27 @@ public class FHIRSubmissionTest {
                 () -> assertTrue(resources.contains(ResourceType.ExplanationOfBenefit)));
     }
 
+    @Test
+    public void testThreeResourceSubmission() {
+        // A request with parameters ...
+        final WebTarget target = groupResource.client()
+                .target("/Group/1/$export")
+                .queryParam("_type", String.format("%s,%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage));
+        target.request().accept(FHIR_JSON);
+        final Response response = target.request().get();
+        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+                () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
+
+        // Should yield a job with Patient and EOB resources
+        var job = queue.workJob();
+        assertTrue(job.isPresent());
+        var resources = job.get().getRight().getResourceTypes();
+        assertAll(() -> assertEquals(3, resources.size()),
+                () -> assertTrue(resources.contains(ResourceType.Patient)),
+                () -> assertTrue(resources.contains(ResourceType.Coverage)),
+                () -> assertTrue(resources.contains(ResourceType.ExplanationOfBenefit)));
+    }
+
     /**
      * Negative test with a bad type of resource types in the '_type' query parameter
      */
