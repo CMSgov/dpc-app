@@ -20,8 +20,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     public static final List<String> TEST_PATIENT_IDS = List.of("20140000008325", "20140000009893");
 
-    public MockBlueButtonClient(){
-
+    public MockBlueButtonClient() {
+        // Not used
     }
 
     @Override
