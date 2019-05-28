@@ -24,7 +24,9 @@ public class JobModel implements Serializable  {
     /**
      * The list of resource type supported by DCP
      */
-    public static final List<ResourceType> validResourceTypes = List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit);
+    public static final List<ResourceType> validResourceTypes = List.of(ResourceType.Patient,
+            ResourceType.ExplanationOfBenefit,
+            ResourceType.Coverage);
 
     /**
      * Test if the resource type is in the list of resources supported by the DCP

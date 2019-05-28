@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.api.models.JobCompletionModel;
+import gov.cms.dpc.queue.models.JobModel;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -78,13 +79,15 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
 
 
         assertAll(() -> assertNotNull(jobResponse, "Should have Job Response"),
-                () -> assertEquals(2, jobResponse.getOutput().size(), "Should have 2 resource files"),
+                () -> assertEquals(JobModel.validResourceTypes.size(), jobResponse.getOutput().size(), "Should have all resource files"),
                 () -> assertEquals(0, jobResponse.getError().size(), "Should not have any errors"));
 
         // Validate each of the resources
         validateResourceFile(Patient.class, jobResponse, ResourceType.Patient, 100);
         // EOBs are structured as bundles, even though they have the EOB resource type
         validateResourceFile(Bundle.class, jobResponse, ResourceType.ExplanationOfBenefit, 100);
+        // Coverages are structured as bundles of Coverages
+        validateResourceFile(Bundle.class, jobResponse, ResourceType.Coverage, 100);
         assertThrows(IllegalStateException.class, () -> validateResourceFile(Schedule.class, jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
     }
 
