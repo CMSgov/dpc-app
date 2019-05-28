@@ -76,7 +76,7 @@ public class EncryptingAggregationEngine extends AggregationEngine {
     }
 
     /**
-     * Creates and configures a {@link CipherOutputStream} and injects it into the Aggregation engine to override the
+     * Creates and configures a {@link CipherOutputStream} and injects it into the AggregationManager engine to override the
      * generic FileOutputStream
      *
      * @param writer    - the stream to be wrapped in a {@link CipherOutputStream}

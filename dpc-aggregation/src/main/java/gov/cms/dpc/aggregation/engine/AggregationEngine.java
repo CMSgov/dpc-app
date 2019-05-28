@@ -5,28 +5,28 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.bluebutton.client.ManagedBlueButtonClient;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.transformer.RetryTransformer;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import gov.cms.dpc.queue.models.JobResult;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +41,6 @@ public class AggregationEngine implements Runnable {
     final String exportPath;
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
-    private final FhirContext context;
     private final RetryConfig retryConfig;
     private final IParser jsonParser;
     private Disposable subscribe;
@@ -49,19 +48,19 @@ public class AggregationEngine implements Runnable {
     /**
      * Create an engine
      *
-     * @param bbclient    - the BlueButton client to use
-     * @param queue       - the Job queue that will direct the work done
+     * @param bbclient    - {@link BlueButtonClient } to use
+     * @param queue       - {@link JobQueue} that will direct the work done
+     * @param context     - {@link FhirContext} for DSTU3 resources
      * @param exportPath  - The {@link ExportPath} to use for writing the output files
      * @param retryConfig - {@link RetryConfig} injected config for setting up retry handler
      */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, @ExportPath String exportPath, RetryConfig retryConfig) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext context, @ExportPath String exportPath, RetryConfig retryConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
-        this.context = FhirContext.forDstu3();
         this.exportPath = exportPath;
         this.retryConfig = retryConfig;
-        this.jsonParser = this.context.newJsonParser();
+        this.jsonParser = context.newJsonParser();
     }
 
     /**
@@ -95,8 +94,8 @@ public class AggregationEngine implements Runnable {
     /**
      * Form the full file name of an output file
      *
-     * @param jobID
-     * @param resourceType
+     * @param jobID        - {@link UUID} ID of export job
+     * @param resourceType - {@link ResourceType} to append to filename
      */
     public String formErrorFilePath(UUID jobID, ResourceType resourceType) {
         return String.format("%s/%s.ndjson", exportPath, JobModel.formErrorFileName(jobID, resourceType));
@@ -156,7 +155,7 @@ public class AggregationEngine implements Runnable {
     /**
      * Handle the file aspects of a resource
      *
-     * @param job - Job that is executing
+     * @param job       - Job that is executing
      * @param jobResult - The results for a current resource
      * @throws IOException - File operation execeptions
      */
@@ -179,10 +178,10 @@ public class AggregationEngine implements Runnable {
     /**
      * Process a single resourceType. Write a single provider NDJSON file as well as operational errors.
      *
-     * @param writer - the stream to write results
+     * @param writer      - the stream to write results
      * @param errorWriter - the stream to write operational resources
-     * @param job - the job to process
-     * @param jobResult - the result of the work on the resource type.
+     * @param job         - the job to process
+     * @param jobResult   - the result of the work on the resource type.
      */
     protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
         Observable.fromIterable(job.getPatients())
@@ -194,10 +193,10 @@ public class AggregationEngine implements Runnable {
     /**
      * Write the resource into the appropriate streams.
      *
-     * @param jobResult - increment counts in this result
-     * @param mainWriter - the main stream for successful resources
+     * @param jobResult   - increment counts in this result
+     * @param mainWriter  - the main stream for successful resources
      * @param errorWriter - the error stream for operational outcome resources
-     * @param resource - the resource to write out
+     * @param resource    - the resource to write out
      */
     protected void writeResource(JobResult jobResult, OutputStream mainWriter, OutputStream errorWriter, Resource resource) {
         try {
@@ -226,8 +225,8 @@ public class AggregationEngine implements Runnable {
      * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to Resource. The
      * resource may be a type requested or it may be an operational outcome;
      *
-     * @param jobID - {@link UUID} jobID
-     * @param patientID   - {@link String} patient ID
+     * @param jobID        - {@link UUID} jobID
+     * @param patientID    - {@link String} patient ID
      * @param resourceType - {@link ResourceType} to fetch from BlueButton
      * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
      */
@@ -246,20 +245,20 @@ public class AggregationEngine implements Runnable {
                     throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
             }
         })
-        // Turn errors into retries
-        .compose(retryTransformer)
-        // Turn errors into OperationalOutcomes
-        .onErrorReturn(ex -> {
-            logger.error("Error fetching from Blue Button", ex);
-            return formOperationOutcome(patientID, ex);
-        });
+                // Turn errors into retries
+                .compose(retryTransformer)
+                // Turn errors into OperationalOutcomes
+                .onErrorReturn(ex -> {
+                    logger.error("Error fetching from Blue Button", ex);
+                    return formOperationOutcome(patientID, ex);
+                });
     }
 
     /**
      * Create a OperationalOutcome resource from an exception
      *
      * @param patientID - the id of the patient involved in the error
-     * @param ex - the exception to turn into a Operational Outcome
+     * @param ex        - the exception to turn into a Operational Outcome
      * @return an operation outcome
      */
     private OperationOutcome formOperationOutcome(String patientID, Throwable ex) {
@@ -267,7 +266,7 @@ public class AggregationEngine implements Runnable {
         if (ex instanceof ResourceNotFoundException) {
             details = "Patient not found in Blue Button";
         } else if (ex instanceof BaseServerResponseException) {
-            final var serverException = (BaseServerResponseException)ex;
+            final var serverException = (BaseServerResponseException) ex;
             details = String.format("Blue Button error: HTTP status: %s", serverException.getStatusCode());
         } else {
             details = String.format("Internal error: %s", ex.getMessage());
@@ -286,7 +285,7 @@ public class AggregationEngine implements Runnable {
     /**
      * Write a array of bytes to a file. Name the file according to the supplied name
      *
-     * @param bytes - Bytes to write
+     * @param bytes    - Bytes to write
      * @param fileName - The fileName to write too
      * @throws IOException
      */

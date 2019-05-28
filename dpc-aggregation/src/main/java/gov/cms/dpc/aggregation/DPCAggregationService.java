@@ -22,7 +22,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
     @Override
     public String getName() {
-        return "DPC Aggregation Service";
+        return "DPC AggregationManager Service";
     }
 
     @Override
@@ -30,7 +30,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAggregationConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
                 .modules(new DPCHibernateModule<>(), new AggregationAppModule(), new JobQueueModule<>(), new BlueButtonClientModule<>())
-                .enableGuiceEnforcer(false)
                 .build();
 
         bootstrap.addBundle(guiceBundle);
@@ -46,6 +45,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
             // If ENV isn't set, just ignore it.
         }
 
-        logger.info("Starting Aggregation Service in environment: {}", envVar);
+        logger.info("Starting AggregationManager Service in environment: {}", envVar);
     }
 }

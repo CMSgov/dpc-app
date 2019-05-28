@@ -38,9 +38,6 @@ public class AggregationServiceTest {
         assertAll(() -> assertTrue(names.contains("BlueButtonHealthCheck"), "Should have BB health check"));
 
         // Everything should be true
-        checks.runHealthChecks().entrySet().forEach(check -> {
-            assertTrue(check.getValue().isHealthy(), String.format("Healthcheck: %s is not ok.", check.getKey()));
-        });
-
+        checks.runHealthChecks().forEach((key, value) -> assertTrue(value.isHealthy(), String.format("Healthcheck: %s is not ok.", key)));
     }
 }
