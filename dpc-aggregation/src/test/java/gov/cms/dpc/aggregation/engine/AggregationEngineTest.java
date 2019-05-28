@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.nio.file.Files;
@@ -28,6 +30,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.atLeastOnce;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 class AggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private BlueButtonClient bbclient;
@@ -193,6 +196,50 @@ class AggregationEngineTest {
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
                 () -> assertEquals(2, actual.getJobResults().size(), "expected 2 resource types"),
                 () -> assertEquals(1, actual.getJobResults().get(0).getErrorCount(), "expected 1 bad patient-id"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+    }
+
+    @Test
+    void testBlueButtonException() {
+        // Test generic runtime exception
+        testWithThrowable(new RuntimeException("Error!!!!"));
+
+        // Test with FhirSpecificError
+        testWithThrowable(BaseServerResponseException.newInstance(500, "Sorry, can't do it"));
+
+    }
+
+    private void testWithThrowable(Throwable throwable) {
+        Mockito.reset(bbclient);
+        // Override throwing an error on fetching a patient
+        Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString());
+
+        final var jobID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID,
+                Collections.singletonList(ResourceType.Patient),
+                TEST_PROVIDER_ID,
+                Collections.singletonList("1"));
+
+        // Do the job
+        queue.submitJob(jobID, job);
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+
+        // Look at the result
+        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobID).get().getStatus()));
+
+        // Check that the bad ID was called 3 times
+        ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServer(idCaptor.capture());
+        assertEquals(3, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called 3 times to get the patient, but with errors instead");
+
+        // Look at the result. It should have one error, but be successful otherwise.
+        assertTrue(queue.getJob(jobID).isPresent());
+        final var actual = queue.getJob(jobID).get();
+        var expectedErrorPath = engine.formErrorFilePath(jobID, ResourceType.Patient);
+        assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
+                () -> assertEquals(1, actual.getJobResults().size(), "expected a single resource type"),
+                () -> assertEquals(1, actual.getJobResults().get(0).getErrorCount(), "expected 1 bad patient fetch"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 }
