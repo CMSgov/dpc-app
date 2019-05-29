@@ -241,6 +241,8 @@ public class AggregationEngine implements Runnable {
                     return this.bbclient.requestPatientFromServer(patientID);
                 case ExplanationOfBenefit:
                     return this.bbclient.requestEOBBundleFromServer(patientID);
+                case Coverage:
+                    return this.bbclient.requestCoverageFromServer(patientID);
                 default:
                     throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
             }

@@ -43,6 +43,7 @@ class BlueButtonClientTest {
     // Paths to test resources
     private static final String METADATA_PATH = "bb-test-data/meta.xml";
     private static final String SAMPLE_EOB_PATH_PREFIX = "bb-test-data/eob/";
+    private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
     private static final String[] TEST_PATIENT_IDS = {"20140000008325", "20140000009893"};
 
@@ -72,6 +73,13 @@ class BlueButtonClientTest {
                     HttpStatus.OK_200,
                     getRawXML(SAMPLE_EOB_PATH_PREFIX + patientId + ".xml"),
                     Arrays.asList(Parameter.param("patient", patientId))
+            );
+
+            createMockServerExpectation(
+                    "/v1/fhir/Coverage",
+                    HttpStatus.OK_200,
+                    getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
+                    Arrays.asList(Parameter.param("beneficiary", "Patient/" + patientId))
             );
         }
     }
@@ -115,6 +123,14 @@ class BlueButtonClientTest {
                     "EOB bundles returned by the BlueButton client should only contain EOB objects"
             );
         });
+    }
+
+    @Test
+    void shouldGetCoverageFromPatientID() {
+        Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID);
+
+        assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
+        assertEquals(response.getTotal(), 3, "The demo patient should have exactly 3 Coverage");
     }
 
     @Test

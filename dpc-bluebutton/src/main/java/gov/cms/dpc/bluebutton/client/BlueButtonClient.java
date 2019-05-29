@@ -12,5 +12,7 @@ public interface BlueButtonClient {
 
     Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException;
 
+    Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException;
+
     CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException;
 }
