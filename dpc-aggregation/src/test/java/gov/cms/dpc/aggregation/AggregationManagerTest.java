@@ -7,7 +7,7 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.*;
 
-public class AggregationMangerTest {
+public class AggregationManagerTest {
 
     AggregationEngine engine;
 

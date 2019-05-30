@@ -10,9 +10,9 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DefaultBlueButtonClient implements BlueButtonClient {
+public class BlueButtonClientImpl implements BlueButtonClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultBlueButtonClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientImpl.class);
 
     private IGenericClient client;
 
@@ -20,7 +20,7 @@ public class DefaultBlueButtonClient implements BlueButtonClient {
         return "Patient/" + fromPatientID;
     }
 
-    public DefaultBlueButtonClient(IGenericClient client){
+    public BlueButtonClientImpl(IGenericClient client){
         this.client = client;
     }
 

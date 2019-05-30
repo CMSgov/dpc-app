@@ -6,12 +6,12 @@ import javax.inject.Inject;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class ManagedBlueButtonClient implements Managed {
+public class BlueButtonClientManager implements Managed {
 
     private final BlueButtonClient client;
 
     @Inject
-    public ManagedBlueButtonClient(BlueButtonClient client) {
+    public BlueButtonClientManager(BlueButtonClient client) {
         this.client = client;
     }
 

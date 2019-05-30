@@ -6,7 +6,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.bluebutton.client.DefaultBlueButtonClient;
+import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
@@ -61,7 +61,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
 
     @Provides
     public BlueButtonClient provideBlueButtonClient(IGenericClient fhirRestClient) {
-        return new DefaultBlueButtonClient(fhirRestClient);
+        return new BlueButtonClientImpl(fhirRestClient);
     }
 
     @Provides
@@ -102,11 +102,11 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         final InputStream keyStoreStream;
 
         if (this.bbClientConfiguration.getKeystore().getLocation() == null) {
-            keyStoreStream = DefaultBlueButtonClient.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
+            keyStoreStream = BlueButtonClientImpl.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
             if (keyStoreStream == null) {
                 logger.error("KeyStore location is empty, cannot find keyStore {} in resources", KEYSTORE_RESOURCE_KEY);
                 throw new BlueButtonClientSetupException("Unable to get keystore from resources",
-                        new MissingResourceException("", DefaultBlueButtonClient.class.getName(), KEYSTORE_RESOURCE_KEY));
+                        new MissingResourceException("", BlueButtonClientImpl.class.getName(), KEYSTORE_RESOURCE_KEY));
             }
         } else {
             final String keyStorePath = this.bbClientConfiguration.getKeystore().getLocation();
