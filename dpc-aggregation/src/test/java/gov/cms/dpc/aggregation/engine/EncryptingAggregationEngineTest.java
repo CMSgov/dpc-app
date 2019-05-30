@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.aggregation.bbclient.BlueButtonClient;
-import gov.cms.dpc.aggregation.bbclient.MockBlueButtonClient;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -58,7 +58,7 @@ class EncryptingAggregationEngineTest {
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
         BlueButtonClient bbclient = new MockBlueButtonClient();
-        engine = new EncryptingAggregationEngine(bbclient, queue, config.getString("exportPath"), config);
+        engine = new EncryptingAggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
         final InputStream testPublicKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PUBLIC_KEY_PATH);

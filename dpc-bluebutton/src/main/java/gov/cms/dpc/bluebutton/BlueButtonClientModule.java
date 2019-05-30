@@ -1,12 +1,17 @@
-package gov.cms.dpc.aggregation.bbclient;
+package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
-import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
-import io.github.resilience4j.retry.RetryConfig;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
+import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
+import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
+import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
+import io.dropwizard.Configuration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
@@ -24,7 +29,12 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.MissingResourceException;
 
-public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
+/**
+ * Guice module for building and injecting the {@link BlueButtonClient}.
+ *
+ * @param <T> - Dropwizard {@link Configuration} class that implements {@link BlueButtonBundleConfiguration}
+ */
+public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleConfiguration> extends DropwizardAwareModule<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientModule.class);
     // Used to retrieve the keystore from the JAR resources. This path is relative to the Resources root.
@@ -32,7 +42,7 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
     private BBClientConfiguration bbClientConfiguration;
 
     public BlueButtonClientModule() {
-        // Not used
+        this.bbClientConfiguration = null;
     }
 
     public BlueButtonClientModule(BBClientConfiguration config) {
@@ -41,16 +51,17 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
 
     @Override
     public void configure(Binder binder) {
-        // If the config is null, pull it from Dropwizard
-        // This is gross, but necessary in order to get the injection to be handled correctly in both prod/test
         if (this.bbClientConfiguration == null) {
-            this.bbClientConfiguration = getConfiguration().getClientConfiguration();
+            this.bbClientConfiguration = getConfiguration().getBlueButtonConfiguration();
         }
+
+        binder.bind(BlueButtonHealthCheck.class);
+
     }
 
     @Provides
     public BlueButtonClient provideBlueButtonClient(IGenericClient fhirRestClient) {
-        return new DefaultBlueButtonClient(fhirRestClient);
+        return new BlueButtonClientImpl(fhirRestClient);
     }
 
     @Provides
@@ -80,14 +91,6 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
         return buildMutualTlsClient(keyStore, this.bbClientConfiguration.getKeystore().getDefaultPassword().toCharArray());
     }
 
-    @Provides
-    RetryConfig provideRetryConfig() {
-        // Create retry handler with our custom defaults
-        return RetryConfig.custom()
-                .maxAttempts(this.bbClientConfiguration.getRetryCount())
-                .build();
-    }
-
     /**
      * Helper function get the keystore from either the location specified in the Configuration file, or from the JAR resources.
      * If the Config path is set, the helper will try to pull from the absolute file path.
@@ -99,11 +102,11 @@ public class BlueButtonClientModule extends DropwizardAwareModule<DPCAggregation
         final InputStream keyStoreStream;
 
         if (this.bbClientConfiguration.getKeystore().getLocation() == null) {
-            keyStoreStream = DefaultBlueButtonClient.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
+            keyStoreStream = BlueButtonClientImpl.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
             if (keyStoreStream == null) {
                 logger.error("KeyStore location is empty, cannot find keyStore {} in resources", KEYSTORE_RESOURCE_KEY);
                 throw new BlueButtonClientSetupException("Unable to get keystore from resources",
-                        new MissingResourceException("", DefaultBlueButtonClient.class.getName(), KEYSTORE_RESOURCE_KEY));
+                        new MissingResourceException("", BlueButtonClientImpl.class.getName(), KEYSTORE_RESOURCE_KEY));
             }
         } else {
             final String keyStorePath = this.bbClientConfiguration.getKeystore().getLocation();

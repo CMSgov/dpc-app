@@ -1,12 +1,15 @@
-package gov.cms.dpc.aggregation.bbclient;
+package gov.cms.dpc.bluebutton.client;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
+import gov.cms.dpc.bluebutton.BlueButtonClientModule;
+import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;
@@ -51,7 +54,7 @@ class BlueButtonClientTest {
     @BeforeAll
     public static void setupBlueButtonClient() throws IOException {
         conf = getTestConfig();
-        final Injector injector = Guice.createInjector(new TestModule(), new BlueButtonClientModule(getClientConfig()));
+        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
 
         mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));
@@ -202,7 +205,7 @@ class BlueButtonClientTest {
     }
 
     private static Config getTestConfig() {
-        return ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        return ConfigFactory.load("test.application.conf");
     }
 
     private static String getRawXML(String path) throws IOException {
