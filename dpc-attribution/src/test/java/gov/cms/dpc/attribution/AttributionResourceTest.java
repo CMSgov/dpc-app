@@ -210,7 +210,7 @@ public class AttributionResourceTest {
 
         group.setMember(members);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/checkAttributed");
+            final HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/checkUnattributed");
             final ObjectMapper objectMapper = new ObjectMapper();
             final FhirContext ctx = FhirContext.forDstu3();
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(group)));
