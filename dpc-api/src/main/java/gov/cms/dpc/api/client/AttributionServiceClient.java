@@ -8,6 +8,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -93,6 +94,25 @@ public class AttributionServiceClient implements AttributionEngine {
             throw new WebApplicationException(e, HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
         return true;
+    }
+
+    @Override
+    public List<String> checkUnattributed(Group attributionGroup) {
+
+        final Invocation invocation = this.client
+                .path("Group/checkUnattributed")
+                .request(FHIRMediaTypes.FHIR_JSON)
+                .buildPost(Entity.entity(parser.encodeResourceToString(attributionGroup), FHIRMediaTypes.FHIR_JSON));
+
+        try (Response response = invocation.invoke()) {
+            if (!HttpStatus.isSuccess(response.getStatus())) {
+                throw new WebApplicationException(response.getStatusInfo().getReasonPhrase(), HttpStatus.NOT_FOUND_404);
+            }
+
+            return (List<String>) response.readEntity(List.class);
+        } catch (Exception e) {
+            throw new WebApplicationException(e, HttpStatus.INTERNAL_SERVER_ERROR_500);
+        }
     }
 
     @Override

@@ -8,6 +8,7 @@ import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.db.ManagedDataSource;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.jooq.*;
@@ -20,11 +21,8 @@ import javax.inject.Inject;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.dao.tables.Attributions.ATTRIBUTIONS;
 import static gov.cms.dpc.attribution.dao.tables.Patients.PATIENTS;
@@ -68,16 +66,17 @@ public class RosterEngine implements AttributionEngine {
     }
 
     @Override
-    public List<String> checkUnattributed(Practitioner provider, List<Patient> patients) {
+    public List<String> checkUnattributed(Group attributionGroup) {
 
-        final String providerNPI = FHIRExtractors.getProviderNPI(provider);
+        final String providerNPI = FHIRExtractors.getProviderNPIFromGroup(attributionGroup);
         try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
 
             @SuppressWarnings("unchecked") final Table<Record> tempTable = context
                     .select()
-                    .from(values(patients
+                    .from(values(attributionGroup
+                            .getMember()
                             .stream()
-                            .map(FHIRExtractors::getPatientMPI)
+                            .map(FHIRExtractors::getPatientMPIFromGroup)
                             .map(DSL::row).toArray(Row1[]::new))).asTable("v", "id");
             // Create a values table to help the patient IDs we're looking for
 
@@ -97,7 +96,7 @@ public class RosterEngine implements AttributionEngine {
                     .from(tempTable)
                     .leftOuterJoin(attributionTable)
                     .on(tempTableIDReference.eq(beneIDReference))
-                    .where(beneIDReference.isNotNull())
+                    .where(beneIDReference.isNull())
                     .fetch().getValues(tempTableIDReference);
 
             return val;

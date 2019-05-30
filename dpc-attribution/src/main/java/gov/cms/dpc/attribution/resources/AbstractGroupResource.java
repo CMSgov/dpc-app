@@ -1,8 +1,8 @@
 package gov.cms.dpc.attribution.resources;
 
-import gov.cms.dpc.attribution.models.AttributionCheckRequest;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -24,8 +24,9 @@ public abstract class AbstractGroupResource {
     public abstract List<String> getAttributedPatients(String groupID);
 
     @POST
-    @Path("/{groupID}")
-    public abstract List<String> checkUnattributed(AttributionCheckRequest request);
+    @Path("/checkUnattributed")
+    @FHIR
+    public abstract List<String> checkUnattributed(Group attributionGroup);
 
     @GET
     @Path("/{groupID}/{patientID}")

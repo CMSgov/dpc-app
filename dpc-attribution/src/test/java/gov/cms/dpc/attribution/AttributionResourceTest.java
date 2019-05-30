@@ -1,11 +1,10 @@
 package gov.cms.dpc.attribution;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.attribution.models.AttributionCheckRequest;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
-import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,8 +15,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.SharedMethods.UnmarshallResponse;
 import static org.junit.jupiter.api.Assertions.*;
@@ -134,7 +135,7 @@ public class AttributionResourceTest {
 
     @Test
     void testManualAttributionCheck() throws IOException {
-        final List<String> patientIDs = List.of("19990000002901", "19990000002902", "19990000002903");
+        final List<String> patientIDs = new java.util.ArrayList<>(List.of("19990000002901", "19990000002902", "19990000002903"));
         // Check that all patients are attributed
         BiConsumer<HttpResponse, ObjectMapper> consumer = (response, objectMapper) -> {
             assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
@@ -150,7 +151,8 @@ public class AttributionResourceTest {
         };
 
 
-        checkAttributed("0c527d2e-2e8a-4808-b11d-0fa06baf827b", patientIDs, consumer);
+        final String groupID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+        checkAttributed(groupID, patientIDs, consumer);
 
         // Check that one (existing) patient is not attributed
         consumer = (response, objectMapper) -> {
@@ -163,12 +165,12 @@ public class AttributionResourceTest {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            assertAll(() -> assertEquals(1, patients.size(), "Should not have any unattributed patients"),
+            assertAll(() -> assertEquals(1, patients.size(), "Should have one non-attributed patient"),
                     () -> assertTrue(patients.contains("20000000000890"), "Should have specific unattributed patient"));
         };
 
         patientIDs.add("20000000000890");
-        checkAttributed("0c527d2e-2e8a-4808-b11d-0fa06baf827b", patientIDs, consumer);
+        checkAttributed(groupID, patientIDs, consumer);
 
         // Check that an additional (non-existing) patient is not attributed
         consumer = (response, objectMapper) -> {
@@ -187,20 +189,32 @@ public class AttributionResourceTest {
         };
 
         patientIDs.add("-1");
-        checkAttributed("0c527d2e-2e8a-4808-b11d-0fa06baf827b", patientIDs, consumer);
+        checkAttributed(groupID, patientIDs, consumer);
 
     }
 
     private void checkAttributed(String groupID, List<String> patientIDs, BiConsumer<HttpResponse, ObjectMapper> consumer) throws IOException {
         // Verify that all listed patients are attributed.
-        final AttributionCheckRequest acr = new AttributionCheckRequest();
-        acr.setGroupID(groupID);
-        acr.setPatientIDs(patientIDs);
+
+        final Group group = new Group();
+        group.addIdentifier().setValue(groupID);
+
+        final List<Group.GroupMemberComponent> members = patientIDs
+                .stream()
+                .map(pId -> {
+                    final Reference reference = new Reference();
+                    reference.setIdentifier(new Identifier().setValue(pId));
+                    return new Group.GroupMemberComponent().setEntity(reference);
+                })
+                .collect(Collectors.toList());
+
+        group.setMember(members);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf827b");
+            final HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/checkAttributed");
             final ObjectMapper objectMapper = new ObjectMapper();
-            httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(acr)));
-            httpPost.setHeader(HttpHeaders.ACCEPT, "application/json");
+            final FhirContext ctx = FhirContext.forDstu3();
+            httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(group)));
+            httpPost.setHeader(HttpHeaders.ACCEPT, FHIRMediaTypes.FHIR_JSON);
             httpPost.setHeader(HttpHeaders.CONTENT_TYPE, FHIRMediaTypes.FHIR_JSON);
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {

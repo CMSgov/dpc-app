@@ -9,10 +9,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +100,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     }
 
     @Override
-    public List<String> checkUnattributed(Practitioner provider, List<Patient> patients) {
+    public List<String> checkUnattributed(Group attributionGroup) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

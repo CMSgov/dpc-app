@@ -4,6 +4,7 @@ import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRBuilders;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hl7.fhir.dstu3.model.*;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class GroupResource extends AbstractGroupResource {
@@ -60,16 +62,28 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException(String.format("Unable to get attributed patients for provider: %s", providerID), Response.Status.NOT_FOUND);
         }
 
-        // Generate a job ID and submit it to the queue
-        final UUID jobID = UUID.randomUUID();
+        return handleExportSubmission(providerID, attributedBeneficiaries.get(), resourceTypes);
+    }
 
-        // Handle the _type query parameter
-        final var resources = handleTypeQueryParam(resourceTypes);
+    @Override
+    @Path("/{providerID}/$export")
+    @POST // Need this here, since we're using a path param
+    public Response export(Group exportGroup, @PathParam("providerID") String groupID, @QueryParam("_type") String resourceTypes) {
 
-        this.queue.submitJob(jobID, new JobModel(jobID, resources, providerID, attributedBeneficiaries.get()));
+        // Check to see if any of the patients are not attributed to the provider
+        final List<String> unattributedIDs = this.client.checkUnattributed(exportGroup);
+        if (!unattributedIDs.isEmpty()) {
+            Response.status(Response.Status.UNAUTHORIZED).entity("Sorry, no go").build();
+        }
 
-        return Response.status(Response.Status.NO_CONTENT)
-                .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
+        // Get the beneficiary IDs
+        final List<String> beneficiaryIDs = exportGroup
+                .getMember()
+                .stream()
+                .map(FHIRExtractors::getPatientMPIFromGroup)
+                .collect(Collectors.toList());
+
+        return handleExportSubmission(groupID, beneficiaryIDs, resourceTypes);
     }
 
     /**
@@ -88,6 +102,27 @@ public class GroupResource extends AbstractGroupResource {
 
         final HumanName name = new HumanName().setFamily("Doe").addGiven("John");
         return new Patient().addName(name).addIdentifier(new Identifier().setValue("test-id"));
+    }
+
+    /**
+     * Helper method to actually submit the export request with the given beneficiaries
+     *
+     * @param providerID              - {@link String} providerID of request
+     * @param attributedBeneficiaries - {@link String} list of beneficiaries to export
+     * @param resourceTypes           - {@link String} query parameter marking type of resources to export
+     * @return
+     */
+    private Response handleExportSubmission(String providerID, List<String> attributedBeneficiaries, String resourceTypes) {
+        // Generate a job ID and submit it to the queue
+        final UUID jobID = UUID.randomUUID();
+
+        // Handle the _type query parameter
+        final var resources = handleTypeQueryParam(resourceTypes);
+
+        this.queue.submitJob(jobID, new JobModel(jobID, resources, providerID, attributedBeneficiaries));
+
+        return Response.status(Response.Status.NO_CONTENT)
+                .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
 
     /**

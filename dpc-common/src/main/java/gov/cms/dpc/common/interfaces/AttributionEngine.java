@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.interfaces;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -57,16 +58,16 @@ public interface AttributionEngine {
      */
     boolean isAttributed(Practitioner provider, Patient patient);
 
-    /**
-     * For a list of {@link Patient} determine which ones are NOT attributed to the given {@link Practitioner}.
-     * This is used to trigger the attribution inference process and determine if a given export request should be allowed to proceed.ß
-     * An empty {@link List} indicates that all of the given patients are attributed
-     *
-     * @param provider - {@link Practitioner} to determine attribution relationship
-     * @param patients - {@link List} of {@link Patient} to verify if they are attributed to the given provider
-     * @return - {@link List} of {@link Patient} that are NOT attributed to the given {@link Practitioner}
-     */
-    List<String> checkUnattributed(Practitioner provider, List<Patient> patients);
+//    /**
+//     * For a list of {@link Patient} determine which ones are NOT attributed to the given {@link Practitioner}.
+//     * This is used to trigger the attribution inference process and determine if a given export request should be allowed to proceed.ß
+//     * An empty {@link List} indicates that all of the given patients are attributed
+//     *
+//     * @param provider - {@link Practitioner} to determine attribution relationship
+//     * @param patients - {@link List} of {@link Patient} to verify if they are attributed to the given provider
+//     * @return - {@link List} of {@link Patient} that are NOT attributed to the given {@link Practitioner}
+//     */
+    List<String> checkUnattributed(Group attributionGroup);
 
     /**
      * Determine if the {@link AttributionEngine} is accessible.

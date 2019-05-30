@@ -1,14 +1,12 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import gov.cms.dpc.attribution.models.AttributionCheckRequest;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRBuilders;
-import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Group;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +15,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class GroupResource extends AbstractGroupResource {
 
@@ -61,12 +58,11 @@ public class GroupResource extends AbstractGroupResource {
         return attributedBeneficiaries.get();
     }
 
-    @Path("/{groupID}")
+    @Path("/checkAttributed")
     @POST
     @Override
-    public List<String> checkUnattributed(AttributionCheckRequest request) {
-        final List<Patient> patients = request.getPatientIDs().stream().map(FHIRBuilders::buildPatientFromMBI).collect(Collectors.toList());
-        return engine.checkUnattributed(FHIRBuilders.buildPractitionerFromNPI(request.getGroupID()), patients);
+    public List<String> checkUnattributed(Group attributionGroup) {
+        return engine.checkUnattributed(attributionGroup);
     }
 
     @Path("/{groupID}/{patientID}")
