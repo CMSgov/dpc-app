@@ -103,6 +103,11 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     }
 
     @Override
+    public List<String> checkUnattributed(Practitioner provider, List<Patient> patients) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
     public void assertHealthy() {
         // If we can reach it, it's healthy
     }

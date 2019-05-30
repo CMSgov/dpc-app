@@ -58,6 +58,17 @@ public interface AttributionEngine {
     boolean isAttributed(Practitioner provider, Patient patient);
 
     /**
+     * For a list of {@link Patient} determine which ones are NOT attributed to the given {@link Practitioner}.
+     * This is used to trigger the attribution inference process and determine if a given export request should be allowed to proceed.ß
+     * An empty {@link List} indicates that all of the given patients are attributed
+     *
+     * @param provider - {@link Practitioner} to determine attribution relationship
+     * @param patients - {@link List} of {@link Patient} to verify if they are attributed to the given provider
+     * @return - {@link List} of {@link Patient} that are NOT attributed to the given {@link Practitioner}
+     */
+    List<String> checkUnattributed(Practitioner provider, List<Patient> patients);
+
+    /**
      * Determine if the {@link AttributionEngine} is accessible.
      * If the engine is accessible, the method will return successfully. Otherwise, it will thrown an error is there's a problem.
      * Note: This is not a full Healthcheck, which is handled by the dpc-attribution service itself, it just checks for a valid response.

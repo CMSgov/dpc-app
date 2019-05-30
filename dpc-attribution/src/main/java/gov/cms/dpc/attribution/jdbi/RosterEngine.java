@@ -10,8 +10,7 @@ import io.dropwizard.db.ManagedDataSource;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.jooq.DSLContext;
-import org.jooq.Result;
+import org.jooq.*;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -21,17 +20,21 @@ import javax.inject.Inject;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.dao.tables.Attributions.ATTRIBUTIONS;
 import static gov.cms.dpc.attribution.dao.tables.Patients.PATIENTS;
 import static gov.cms.dpc.attribution.dao.tables.Providers.PROVIDERS;
+import static org.jooq.impl.DSL.values;
 
 public class RosterEngine implements AttributionEngine {
 
-    static final String CONNECTION_MESSAGE = "Unable to open connection to database";
     private static final Logger logger = LoggerFactory.getLogger(RosterEngine.class);
+    private static final String CONNECTION_ERROR = "Unable to open connection to database";
 
     private final ManagedDataSource dataSource;
     private final Settings settings;
@@ -60,7 +63,46 @@ public class RosterEngine implements AttributionEngine {
 
             return Optional.of(beneficiaryIDs);
         } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database", e);
+            throw new AttributionException(CONNECTION_ERROR, e);
+        }
+    }
+
+    @Override
+    public List<String> checkUnattributed(Practitioner provider, List<Patient> patients) {
+
+        final String providerNPI = FHIRExtractors.getProviderNPI(provider);
+        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
+
+            @SuppressWarnings("unchecked") final Table<Record> tempTable = context
+                    .select()
+                    .from(values(patients
+                            .stream()
+                            .map(FHIRExtractors::getPatientMPI)
+                            .map(DSL::row).toArray(Row1[]::new))).asTable("v", "id");
+            // Create a values table to help the patient IDs we're looking for
+
+            // Patients attributed to the given provider
+            final SelectConditionStep<Record1<String>> attributionTable = context.select(PATIENTS.BENEFICIARY_ID)
+                    .from(PATIENTS)
+                    .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID))
+                    .join(PROVIDERS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
+                    .where(PROVIDERS.PROVIDER_ID.eq(providerNPI));
+
+            //  Field references, with type information
+            final Field<String> beneIDReference = attributionTable.field("BENEFICIARY_ID", String.class);
+            final Field<String> tempTableIDReference = tempTable.field("id", String.class);
+
+            final List<String> val = context
+                    .select()
+                    .from(tempTable)
+                    .leftOuterJoin(attributionTable)
+                    .on(tempTableIDReference.eq(beneIDReference))
+                    .where(beneIDReference.isNotNull())
+                    .fetch().getValues(tempTableIDReference);
+
+            return val;
+        } catch (SQLException e) {
+            throw new AttributionException(CONNECTION_ERROR, e);
         }
     }
 
@@ -89,7 +131,7 @@ public class RosterEngine implements AttributionEngine {
                 }
             });
         } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database", e);
+            throw new AttributionException(CONNECTION_ERROR, e);
         }
     }
 
@@ -102,7 +144,7 @@ public class RosterEngine implements AttributionEngine {
                 RosterUtils.submitAttributionBundle(attributionBundle, ctx, OffsetDateTime.now(ZoneOffset.UTC));
             });
         } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database", e);
+            throw new AttributionException(CONNECTION_ERROR, e);
         }
     }
 
@@ -141,7 +183,7 @@ public class RosterEngine implements AttributionEngine {
                 }
             });
         } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database", e);
+            throw new AttributionException(CONNECTION_ERROR, e);
         }
     }
 
@@ -157,7 +199,7 @@ public class RosterEngine implements AttributionEngine {
                             .and(PROVIDERS.PROVIDER_ID
                                     .eq(FHIRExtractors.getProviderNPI(provider)))));
         } catch (SQLException e) {
-            throw new AttributionException("Unable to open connection to database", e);
+            throw new AttributionException(CONNECTION_ERROR, e);
         }
     }
 
@@ -168,7 +210,7 @@ public class RosterEngine implements AttributionEngine {
                     .from(ATTRIBUTIONS)
                     .fetchOptional();
         } catch (SQLException e) {
-            throw new AttributionException(CONNECTION_MESSAGE, e);
+            throw new AttributionException(CONNECTION_ERROR, e);
         }
     }
 }
