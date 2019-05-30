@@ -1,6 +1,7 @@
-package gov.cms.dpc.aggregation.bbclient;
+package gov.cms.dpc.bluebutton.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.Configuration;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -9,15 +10,16 @@ import javax.validation.constraints.NotNull;
 public class BBClientConfiguration {
 
     @NotEmpty
+    @JsonProperty("healthcheck")
+    private String HealthcheckName = "BlueButtonHealthCheck";
+
+    @NotEmpty
     private String serverBaseUrl;
 
     @Valid
     @NotNull
     @JsonProperty("timeouts")
     private TimeoutConfiguration timeouts = new TimeoutConfiguration();
-
-    @NotEmpty
-    private Integer retryCount;
 
     @Valid
     @NotNull
@@ -44,12 +46,12 @@ public class BBClientConfiguration {
         this.serverBaseUrl = serverBaseUrl;
     }
 
-    public Integer getRetryCount() {
-        return retryCount;
+    public String getHealthcheckName() {
+        return HealthcheckName;
     }
 
-    public void setRetryCount(Integer retryCount) {
-        this.retryCount = retryCount;
+    public void setHealthcheckName(String healthcheckName) {
+        HealthcheckName = healthcheckName;
     }
 
     public static class TimeoutConfiguration {

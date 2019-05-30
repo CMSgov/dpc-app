@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation.bbclient;
+package gov.cms.dpc.bluebutton.client;
 
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
