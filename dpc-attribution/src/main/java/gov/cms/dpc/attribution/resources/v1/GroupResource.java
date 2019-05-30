@@ -58,7 +58,8 @@ public class GroupResource extends AbstractGroupResource {
         return attributedBeneficiaries.get();
     }
 
-    @Path("/checkAttributed")
+    @Path("/checkUnattributed")
+    @FHIR
     @POST
     @Override
     public List<String> checkUnattributed(Group attributionGroup) {

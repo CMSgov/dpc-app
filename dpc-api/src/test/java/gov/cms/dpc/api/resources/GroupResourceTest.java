@@ -6,6 +6,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.SchemaBaseValidator;
+import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import gov.cms.dpc.api.AbstractApplicationTest;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,13 +17,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.hl7.fhir.dstu3.model.Group;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -90,6 +92,47 @@ public class GroupResourceTest extends AbstractApplicationTest {
             assertAll(() -> assertEquals(1, oo.getIssue().size(), "Should have 1 issue"),
                     () -> assertEquals(OperationOutcome.IssueSeverity.FATAL, oo.getIssueFirstRep().getSeverity(), "Should be fatal"),
                     () -> assertEquals("Should fail", oo.getIssueFirstRep().getDetails().getText(), "Should have matching error"));
+        }
+    }
+
+    @Test
+    void testGroupPost() throws IOException {
+        final Group group = new Group();
+        group.addIdentifier().setValue("8D80925A-027E-43DD-8AED-9A501CC4CD91");
+        group.setType(Group.GroupType.PERSON);
+        group.setActual(true);
+        // Add some patients
+        final Patient p1 = new Patient();
+        p1.addIdentifier().setValue("20000000000890");
+        p1.addName().addGiven("Tester 1").setFamily("Patient");
+        p1.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
+        final Patient p2 = new Patient();
+        p2.addIdentifier().setValue("20000000000889");
+        p2.addName().addGiven("Tester 2").setFamily("Patient");
+        p2.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
+
+        group.addMember().setEntity(new Reference().setIdentifier(p2.getIdentifierFirstRep()));
+        group.addMember().setEntity(new Reference().setIdentifier(p2.getIdentifierFirstRep()));
+
+        // Post it
+
+        final FhirValidator validator = ctx.newValidator();
+
+        final SchemaBaseValidator val1 = new SchemaBaseValidator(ctx);
+        final SchematronBaseValidator val2 = new SchematronBaseValidator(ctx);
+        validator.registerValidatorModule(val1);
+        validator.registerValidatorModule(val2);
+
+        final HttpPost post = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/1/$export");
+        final IParser parser = ctx.newJsonParser();
+        post.setEntity(new StringEntity(parser.encodeResourceToString(group)));
+
+        final CloseableHttpClient client = HttpClients.createDefault();
+
+        try (CloseableHttpResponse response = client.execute(post)) {
+            assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode(), "Should have passed");
+            final OperationOutcome outcome = (OperationOutcome) parser.parseResource(EntityUtils.toString(response.getEntity()));
+            assertEquals(2, outcome.getIssue().size(), "Should have 2 401s");
         }
     }
 }

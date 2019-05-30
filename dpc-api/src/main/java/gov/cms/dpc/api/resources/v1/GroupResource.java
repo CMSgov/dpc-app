@@ -27,7 +27,7 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
     // The delimiter for the '_types' list query param.
-    public static final String LIST_DELIM = ",";
+    static final String LIST_DELIM = ",";
 
     private final JobQueue queue;
     private final AttributionEngine client;
@@ -72,8 +72,10 @@ public class GroupResource extends AbstractGroupResource {
 
         // Check to see if any of the patients are not attributed to the provider
         final List<String> unattributedIDs = this.client.checkUnattributed(exportGroup);
+        // If any patients are not attributed to the provider, generate a method outcome that tells them so
         if (!unattributedIDs.isEmpty()) {
-            Response.status(Response.Status.UNAUTHORIZED).entity("Sorry, no go").build();
+            final OperationOutcome operationOutcome = generateOutcome(unattributedIDs);
+            return Response.status(Response.Status.UNAUTHORIZED).entity(operationOutcome).build();
         }
 
         // Get the beneficiary IDs
@@ -162,5 +164,22 @@ public class GroupResource extends AbstractGroupResource {
         return JobModel.validResourceTypes.stream()
                 .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
                 .findFirst();
+    }
+
+    private static OperationOutcome generateOutcome(List<String> patientIDs) {
+        final OperationOutcome operationOutcome = new OperationOutcome();
+        patientIDs
+                .stream()
+                .map(pID -> {
+                    final var location = List.of(new StringType("Patient"), new StringType("id"), new StringType(pID));
+                    return new OperationOutcome.OperationOutcomeIssueComponent()
+                            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                            .setCode(OperationOutcome.IssueType.FORBIDDEN)
+                            .setDetails(new CodeableConcept().setText(String.format("Patient %s is not attributed to provider.", pID)))
+                            .setLocation(location);
+                })
+                .forEach(operationOutcome::addIssue);
+
+        return operationOutcome;
     }
 }
