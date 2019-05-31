@@ -33,6 +33,7 @@ import java.util.Map;
 public class ClientUtils {
 
     public static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
+    public static final String ATTRIBUTION_CSV = "test_associations.csv";
     private static final Logger logger = LoggerFactory.getLogger(ClientUtils.class);
 
     private ClientUtils() {

@@ -52,11 +52,7 @@ public class RosterEngine implements AttributionEngine {
             if (!context.fetchExists(context.selectOne().from(PROVIDERS).where(PROVIDERS.PROVIDER_ID.eq(providerNPI)))) {
                 return Optional.empty();
             }
-            final List<String> beneficiaryIDs = context.select()
-                    .from(PROVIDERS)
-                    .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
-                    .join(PATIENTS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID))
-                    .where(PROVIDERS.PROVIDER_ID.eq(providerNPI))
+            final List<String> beneficiaryIDs = generateAttributionTableQuery(context, providerNPI)
                     .fetch().getValues(PATIENTS.BENEFICIARY_ID);
 
             return Optional.of(beneficiaryIDs);
@@ -81,25 +77,19 @@ public class RosterEngine implements AttributionEngine {
             // Create a values table to help the patient IDs we're looking for
 
             // Patients attributed to the given provider
-            final SelectConditionStep<Record1<String>> attributionTable = context.select(PATIENTS.BENEFICIARY_ID)
-                    .from(PATIENTS)
-                    .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID))
-                    .join(PROVIDERS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
-                    .where(PROVIDERS.PROVIDER_ID.eq(providerNPI));
+            final SelectConditionStep<Record1<String>> attributionTable = generateAttributionTableQuery(context, providerNPI);
 
             //  Field references, with type information
             final Field<String> beneIDReference = attributionTable.field("BENEFICIARY_ID", String.class);
             final Field<String> tempTableIDReference = tempTable.field("id", String.class);
 
-            final List<String> val = context
+            return context
                     .select()
                     .from(tempTable)
                     .leftOuterJoin(attributionTable)
                     .on(tempTableIDReference.eq(beneIDReference))
                     .where(beneIDReference.isNull())
                     .fetch().getValues(tempTableIDReference);
-
-            return val;
         } catch (SQLException e) {
             throw new AttributionException(CONNECTION_ERROR, e);
         }
@@ -211,5 +201,21 @@ public class RosterEngine implements AttributionEngine {
         } catch (SQLException e) {
             throw new AttributionException(CONNECTION_ERROR, e);
         }
+    }
+
+    /**
+     * Generate the SQL JOIN between the {@link gov.cms.dpc.attribution.dao.tables.Providers} table and the {@link gov.cms.dpc.attribution.dao.tables.Patients} table.
+     * This JOIN returns all the patients associated to the givne provider, using the {@link gov.cms.dpc.attribution.dao.tables.Attributions} table.
+     *
+     * @param ctx        - {@link DSLContext} JOOQ context to use
+     * @param providerID - {@link String} provider ID (NPI)
+     * @return - table select resource
+     */
+    private static SelectConditionStep<Record1<String>> generateAttributionTableQuery(DSLContext ctx, String providerID) {
+        return ctx.select(PATIENTS.BENEFICIARY_ID)
+                .from(PATIENTS)
+                .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID))
+                .join(PROVIDERS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
+                .where(PROVIDERS.PROVIDER_ID.eq(providerID));
     }
 }

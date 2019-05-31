@@ -1,6 +1,5 @@
 package gov.cms.dpc.api;
 
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
@@ -11,22 +10,18 @@ import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.queue.models.JobModel;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.stream.Collectors;
 
+import static gov.cms.dpc.api.client.ClientUtils.ATTRIBUTION_CSV;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EndToEndRequestTest extends AbstractApplicationTest {
-
-
-    private static final String CSV = "test_associations.csv";
 
     /**
      * This test verifies the E2E flow of the application.
@@ -57,9 +52,9 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
 
 //         Now, submit the roster and try again.
 
-        final InputStream resource = EndToEndRequestTest.class.getClassLoader().getResourceAsStream(CSV);
+        final InputStream resource = EndToEndRequestTest.class.getClassLoader().getResourceAsStream(ATTRIBUTION_CSV);
         if (resource == null) {
-            throw new MissingResourceException("Can not find seeds file", EndToEndRequestTest.class.getName(), CSV);
+            throw new MissingResourceException("Can not find seeds file", EndToEndRequestTest.class.getName(), ATTRIBUTION_CSV);
         }
 
         final IGenericClient rosterClient = ctx.newRestfulGenericClient(getBaseURL());
@@ -91,27 +86,5 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
         assertThrows(IllegalStateException.class, () -> validateResourceFile(Schedule.class, jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
     }
 
-    private <T extends IBaseResource> void validateResourceFile(Class<T> clazz, JobCompletionModel response, ResourceType resourceType, int expectedSize) throws IOException {
-        final String fileID = response
-                .getOutput()
-                .stream()
-                .filter(output -> output.getType() == resourceType)
-                .map(JobCompletionModel.OutputEntry::getUrl)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Should have at least 1 patient resource"));
-
-        final File tempFile = ClientUtils.fetchExportedFiles(fileID);
-
-        // Read the file back in and parse the patients
-        final IParser parser = ctx.newJsonParser();
-
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(tempFile, StandardCharsets.UTF_8))) {
-            final List<T> entries = bufferedReader.lines()
-                    .map((line) -> clazz.cast(parser.parseResource(line)))
-                    .collect(Collectors.toList());
-
-            assertEquals(expectedSize, entries.size(), String.format("Should have %d entries in the resource", expectedSize));
-        }
-    }
 }
 
