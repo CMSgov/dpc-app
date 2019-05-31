@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
+import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.SessionFactory;
@@ -20,8 +21,8 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
     private static final Logger logger = LoggerFactory.getLogger(RelationshipDAO.class);
 
     @Inject
-    public RelationshipDAO(SessionFactory sessionFactory) {
-        super(sessionFactory);
+    public RelationshipDAO(DPCManagedSessionFactory sessionFactory) {
+        super(sessionFactory.getSessionFactory());
     }
 
     /**

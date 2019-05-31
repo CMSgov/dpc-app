@@ -11,6 +11,7 @@ import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
+import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
@@ -52,7 +53,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle hibernateModule, SessionFactory factory) {
+    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle hibernateModule, DPCManagedSessionFactory factory) {
         return new UnitOfWorkAwareProxyFactory(hibernateModule)
                 .create(RelationshipDAO.class, SessionFactory.class, factory);
     }
