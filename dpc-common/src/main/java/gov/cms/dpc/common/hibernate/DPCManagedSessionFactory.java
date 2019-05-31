@@ -25,6 +25,12 @@ public class DPCManagedSessionFactory implements Managed {
         this.sessionFactory.close();
     }
 
+    /**
+     * Get the underlying {@link SessionFactory} that this resource manages
+     * The caller is responsible for cleaning up any generated {@link org.hibernate.Session} resources, but the application takes care of the factory.
+     *
+     * @return - {@link SessionFactory} managed by this resource
+     */
     public SessionFactory getSessionFactory() {
         return this.sessionFactory;
     }
