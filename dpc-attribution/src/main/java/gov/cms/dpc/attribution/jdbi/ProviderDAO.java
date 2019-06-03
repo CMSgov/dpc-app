@@ -4,6 +4,7 @@ import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
+import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
@@ -29,8 +30,8 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     private final RelationshipDAO rDAO;
 
     @Inject
-    public ProviderDAO(SessionFactory factory) {
-        super(factory);
+    public ProviderDAO(DPCManagedSessionFactory factory) {
+        super(factory.getSessionFactory());
         this.rDAO = new RelationshipDAO(factory);
     }
 

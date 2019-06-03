@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
@@ -53,7 +54,7 @@ public class QueueTest {
                         // Create the session factory
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
-                        return new DistributedQueue(client, sessionFactory, "SELECT 1");
+                        return new DistributedQueue(client, new DPCManagedSessionFactory(sessionFactory), "SELECT 1");
                     } else {
                         throw new IllegalArgumentException("I'm not that kind of queue");
                     }
