@@ -1,11 +1,7 @@
 package gov.cms.dpc.fhir;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Helper class for extracting various features from FHIR resources

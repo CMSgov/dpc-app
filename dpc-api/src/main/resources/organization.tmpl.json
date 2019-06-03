@@ -24,8 +24,6 @@
     }
   ],
   "address": {
-    "line": [
-      "Test Address 1"
-    ]
+    "text": "Test Address Washington, DC 2008"
   }
 }
