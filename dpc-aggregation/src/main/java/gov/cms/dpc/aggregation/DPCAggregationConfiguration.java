@@ -33,6 +33,8 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @NotNull
     private Integer retryCount;
 
+    private Integer resourcesPerFileCount;
+
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -52,6 +54,10 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     public void setRetryCount(Integer retryCount) {
         this.retryCount = retryCount;
+    }
+
+    public Integer getResourcesPerFileCount() {
+        return resourcesPerFileCount;
     }
 
     @Override

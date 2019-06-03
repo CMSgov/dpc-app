@@ -10,6 +10,8 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;
@@ -127,10 +129,11 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetCoverageFromPatientID() {
-        Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID);
+        final Observable<Coverage> response = bbc.requestCoverageFromServer(TEST_PATIENT_ID);
 
         assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
-        assertEquals(response.getTotal(), 3, "The demo patient should have exactly 3 Coverage");
+        final var list = response.toList().blockingGet();
+        assertEquals(3, list.size(), "The demo patient should have exactly 3 Coverage");
     }
 
     @Test

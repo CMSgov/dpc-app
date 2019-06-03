@@ -1,14 +1,22 @@
 package gov.cms.dpc.bluebutton.client;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import io.reactivex.Observable;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.stream.Collectors;
 
 public class BlueButtonClientImpl implements BlueButtonClient {
 
@@ -58,7 +66,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     public Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException {
         // TODO: need to implement some kind of pagination? EOB bundles can be HUGE. DPC-234
         logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", patientID, client.getServerBase());
-        Bundle ret = client.search()
+        final Bundle ret = client.search()
                 .forResource(ExplanationOfBenefit.class)
                 .where(ExplanationOfBenefit.PATIENT.hasId(patientID))
                 .returnBundle(Bundle.class)
@@ -89,19 +97,24 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
     @Override
-    public Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
+    public Observable<Coverage> requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", patientID, client.getServerBase());
-        Bundle ret = client.search()
+        final Bundle bundle = client.search()
                 .forResource(Coverage.class)
                 .where(Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientID)))
                 .returnBundle(Bundle.class)
                 .execute();
 
-        if(!ret.hasEntry()) {
+        if(!bundle.hasEntry()) {
             // Case where patientID does not exist at all
             throw new ResourceNotFoundException("No patient found with ID: " + patientID);
         }
-        return ret;
+
+        final List<Coverage> list = bundle.getEntry()
+                .stream()
+                .map(bundleEntryComponent -> (Coverage)bundleEntryComponent.getResource())
+                .collect(Collectors.toList());
+        return Observable.fromIterable(list);
     }
 
     @Override
