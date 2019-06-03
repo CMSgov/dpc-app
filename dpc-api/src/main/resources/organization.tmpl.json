@@ -1,0 +1,31 @@
+{
+  "resourceType": "Organization",
+  "identifier": [
+    {
+      "value": "test-org-npi"
+    }
+  ],
+  "name": "Template Provider Organization",
+  "contact": [
+    {
+      "name": {
+        "text": "Test Organization Contact"
+      },
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "555-555-5555"
+        },
+        {
+          "system": "email",
+          "value": "contact@organization.test"
+        }
+      ]
+    }
+  ],
+  "address": {
+    "line": [
+      "Test Address 1"
+    ]
+  }
+}
