@@ -46,7 +46,6 @@ public class MethodOutcomeHandler implements MessageBodyWriter<MethodOutcome> {
 
     @Override
     public void writeTo(MethodOutcome methodOutcome, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
-//        mapper.write
         mapper.writeValue(entityStream, methodOutcome);
     }
 }

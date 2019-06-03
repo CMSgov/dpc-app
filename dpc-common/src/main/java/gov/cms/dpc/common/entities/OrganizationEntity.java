@@ -3,6 +3,7 @@ package gov.cms.dpc.common.entities;
 import ca.uhn.fhir.parser.DataFormatException;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRConvertable;
+import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+@Entity(name = "organizations")
 public class OrganizationEntity implements Serializable, FHIRConvertable<OrganizationEntity, Organization> {
     public static final long serialVersionUID = 42L;
 
@@ -26,7 +28,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     private OrganizationID organizationID;
 
     @NotEmpty
-    @Column(name = "id")
+    @Column(name = "organization_name")
     private String organizationName;
 
     @NotEmpty
@@ -38,6 +40,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     private String contactName;
 
     @NotEmpty
+    @Email
     @Column(name = "contact_email")
     private String contactEmail;
 
@@ -45,7 +48,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @Column(name = "contact_phone")
     private String contactPhone;
 
-    OrganizationEntity() {
+    public OrganizationEntity() {
         // Not used
     }
 
@@ -138,20 +141,17 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         entity.setOrganizationAddress(resource.getAddressFirstRep().getLine().get(0).toString());
         // Find contact info
         entity.setContactName(findContactType(resource,
-                Organization.OrganizationContactComponent::hasName).toString());
+                Organization.OrganizationContactComponent::hasName).getName().getText());
 
-        entity.setContactPhone(findContactType(resource,
+        // Find a contact that has email or phone contact values
+        // This will need to get refactored into something more robust
+        final Organization.OrganizationContactComponent contactType = findContactType(resource,
                 (contact) -> (contact.hasTelecom()
                         && contact.getTelecom().stream()
-                        .anyMatch(tel -> tel.getSystem() == ContactPoint.ContactPointSystem.PHONE))).toString());
+                        .anyMatch(tel -> tel.getSystem() == ContactPoint.ContactPointSystem.EMAIL || tel.getSystem() == ContactPoint.ContactPointSystem.PHONE)));
 
-        entity.setContactEmail(findContactType(resource,
-                (contact) -> (contact.hasTelecom()
-                        && contact.getTelecom().stream()
-                        .anyMatch(tel -> tel.getSystem() == ContactPoint.ContactPointSystem.EMAIL))).toString());
-
-        entity.setOrganizationAddress(resource.getAddressFirstRep().getText());
-
+        entity.setContactPhone(extractContactValue(contactType, ContactPoint.ContactPointSystem.PHONE));
+        entity.setContactEmail(extractContactValue(contactType, ContactPoint.ContactPointSystem.EMAIL));
         return entity;
     }
 
@@ -164,8 +164,16 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     public static class OrganizationID implements Serializable {
         public static final long serialVersionUID = 42L;
 
-        private final DPCIdentifierSystem system;
-        private final String value;
+        @Column(name = "id_system")
+        private DPCIdentifierSystem system;
+
+        @NotEmpty
+        @Column(name = "id_value")
+        private String value;
+
+        public OrganizationID() {
+            // Hibernate Required
+        }
 
         public OrganizationID(DPCIdentifierSystem system, String value) {
             this.system = system;
@@ -176,8 +184,16 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
             return system;
         }
 
+        public void setSystem(DPCIdentifierSystem system) {
+            this.system = system;
+        }
+
         public String getValue() {
             return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
         }
     }
 
@@ -186,7 +202,19 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
                 .getContact()
                 .stream()
                 .filter(predicate)
-                .findAny()
+                .findFirst()
                 .orElseThrow(() -> new DataFormatException("Cannot find required contact type for organization"));
+    }
+
+    private static String extractContactValue(Organization.OrganizationContactComponent component, ContactPoint.ContactPointSystem system) {
+        final Optional<ContactPoint> first = component
+                .getTelecom()
+                .stream()
+                .filter(tel -> tel.getSystem() == system)
+                .findFirst();
+
+        return first
+                .orElseThrow(() -> new DataFormatException(String.format("Cannot find contact type: %s", system)))
+                .getValue();
     }
 }

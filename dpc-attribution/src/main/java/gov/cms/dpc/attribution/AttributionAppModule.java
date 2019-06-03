@@ -4,6 +4,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.health.RosterEngineHealthCheck;
+import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterEngine;
@@ -32,7 +33,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(ProviderDAO.class);
         binder.bind(AttributionEngine.class).to(RosterEngine.class);
         binder.bind(V1AttributionResource.class);
-        binder.bind(OrganizationResource.class);
+        binder.bind(OrganizationDAO.class);
         binder.bind(TruncateDatabase.class);
 
         // Healthchecks
@@ -55,9 +56,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate) {
+    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao) {
         return new UnitOfWorkAwareProxyFactory(hibernate)
-                .create(OrganizationResource.class);
+                .create(OrganizationResource.class, OrganizationDAO.class, dao);
     }
 
     @Provides

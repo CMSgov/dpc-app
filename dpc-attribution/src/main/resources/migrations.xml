@@ -78,4 +78,38 @@
         <modifyDataType tableName="attributions" columnName="created_at" newDataType="TIMESTAMP WITH TIME ZONE"/>
     </changeSet>
 
+    <changeSet id="add-organization-table" author="nickrobison-usds">
+        <createTable tableName="ORGANIZATIONS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_system" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_value" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_line" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_email" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_phone" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="ORGANIZATIONS" indexName="organization_idx">
+            <column name="id_system"/>
+            <column name="id_value"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
