@@ -13,7 +13,7 @@ public interface BlueButtonClient {
 
     Bundle requestEOBFromServer(String patientID) throws ResourceNotFoundException;
 
-    Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException;
+    Observable<Coverage> requestCoverageFromServer(String patientID) throws ResourceNotFoundException;
 
     Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException;
 

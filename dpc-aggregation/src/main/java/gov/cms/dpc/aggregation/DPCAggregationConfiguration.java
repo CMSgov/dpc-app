@@ -39,6 +39,8 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Min(10)
     private int resourcesPerFileCount = 1000;
 
+    private Integer resourcesPerFileCount;
+
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
