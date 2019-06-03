@@ -16,6 +16,7 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.transformer.RetryTransformer;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import org.hl7.fhir.dstu3.model.*;
@@ -231,6 +232,10 @@ public class AggregationEngine implements Runnable {
      * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
      */
     private Observable<Resource> fetchResource(UUID jobID, String patientID, ResourceType resourceType) {
+        if (resourceType == ResourceType.Coverage) {
+            return fetchResource2(jobID, patientID, resourceType);
+        }
+
         Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
         RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
 
@@ -241,8 +246,6 @@ public class AggregationEngine implements Runnable {
                     return this.bbclient.requestPatientFromServer(patientID);
                 case ExplanationOfBenefit:
                     return this.bbclient.requestEOBBundleFromServer(patientID);
-                case Coverage:
-                    return this.bbclient.requestCoverageFromServer(patientID);
                 default:
                     throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
             }
@@ -256,6 +259,15 @@ public class AggregationEngine implements Runnable {
                 });
     }
 
+    private Observable<Resource> fetchResource2(UUID jobID, String patientID, ResourceType resourceType) {
+        logger.debug("Fetching patient {} from Blue Button", patientID);
+        switch (resourceType) {
+            case Coverage:
+                return this.bbclient.requestCoverageFromServer(patientID).cast(Resource.class);
+            default:
+                return Observable.error(new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString()));
+        }
+    }
     /**
      * Create a OperationalOutcome resource from an exception
      *

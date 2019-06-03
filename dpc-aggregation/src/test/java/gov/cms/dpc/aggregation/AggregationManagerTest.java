@@ -19,7 +19,19 @@ class AggregationManagerTest {
     }
 
     @Test
+<<<<<<< HEAD
     void testShutdown() {
+=======
+    public void testStartup() {
+        new AggregationManager(engine).start();
+        // Should not have interacted with the engine.
+        //verifyZeroInteractions(engine);
+    }
+
+    @Test
+    public void testShutdown() {
+        final AggregationEngine engine = mock(AggregationEngine.class);
+>>>>>>> Made requestCoverageFromServer return an Observable
         new AggregationManager(engine).stop();
         verify(engine).stop();
     }
