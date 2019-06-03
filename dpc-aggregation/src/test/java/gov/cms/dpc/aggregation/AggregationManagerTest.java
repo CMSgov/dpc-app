@@ -5,11 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-public class AggregationManagerTest {
+class AggregationManagerTest {
 
-    AggregationEngine engine;
+    private AggregationEngine engine;
 
     @BeforeEach
     void setup() {
@@ -18,17 +19,8 @@ public class AggregationManagerTest {
     }
 
     @Test
-    public void testStartup() {
-        new AggregationManager(engine).start();
-        // Should not have interacted with the engine.
-        verifyZeroInteractions(engine);
-    }
-
-    @Test
-    public void testShutdown() {
-        final AggregationEngine engine = mock(AggregationEngine.class);
+    void testShutdown() {
         new AggregationManager(engine).stop();
-
         verify(engine).stop();
     }
 }

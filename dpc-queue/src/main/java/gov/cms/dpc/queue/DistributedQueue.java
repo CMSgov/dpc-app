@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
@@ -40,10 +41,10 @@ public class DistributedQueue implements JobQueue {
     private final String healthQuery;
 
     @Inject
-    DistributedQueue(RedissonClient client, SessionFactory factory, @HealthCheckQuery String healthQuery) {
+    DistributedQueue(RedissonClient client, DPCManagedSessionFactory factory, @HealthCheckQuery String healthQuery) {
         this.client = client;
         this.queue = client.getQueue("jobqueue");
-        this.factory = factory;
+        this.factory = factory.getSessionFactory();
         this.healthQuery = healthQuery;
     }
 

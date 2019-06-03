@@ -7,7 +7,6 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
-import org.hibernate.SessionFactory;
 
 import javax.inject.Singleton;
 
@@ -25,8 +24,8 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
 
     @Provides
     @Singleton
-    @SuppressWarnings({"CloseableProvides", "rawtypes", "unchecked"}) // Until we merge DPC-233 and DPC-104
-    SessionFactory getSessionFactory(DPCHibernateBundle hibernate) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    DPCManagedSessionFactory getSessionFactory(DPCHibernateBundle hibernate) {
         // This is necessary because the session factory doesn't load on its own.
         // I'm really not sure how to fix this, I think it's due to the interaction with the Proxy Factory
         try {
@@ -34,7 +33,7 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        return hibernate.getSessionFactory();
+        return new DPCManagedSessionFactory(hibernate.getSessionFactory());
     }
 
     @Provides
