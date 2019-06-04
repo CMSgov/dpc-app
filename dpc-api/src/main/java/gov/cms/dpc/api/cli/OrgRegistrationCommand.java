@@ -2,7 +2,6 @@ package gov.cms.dpc.api.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import io.dropwizard.cli.Command;
@@ -60,10 +59,14 @@ public class OrgRegistrationCommand extends Command {
     void registerOrganization(Organization organization, String attributionService) {
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
-        final MethodOutcome outcome = client
-                .create()
-                .resource(organization)
-                .encodedJson()
-                .execute();
+        try {
+            client
+                    .create()
+                    .resource(organization)
+                    .encodedJson()
+                    .execute();
+        } catch (Exception e) {
+            System.out.println(String.format("Error: Unable to register organization. %s", e.getMessage()));
+        }
     }
 }

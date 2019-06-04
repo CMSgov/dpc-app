@@ -2,6 +2,7 @@
   "resourceType": "Organization",
   "identifier": [
     {
+      "system": "http://hl7.org/fhir/sid/us-npi",
       "value": "test-org-npi"
     }
   ],
@@ -24,6 +25,8 @@
     }
   ],
   "address": {
-    "text": "Test Address Washington, DC 2008"
+    "text": [
+      "Test Address Washington, DC 2008"
+    ]
   }
 }
