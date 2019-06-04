@@ -1,6 +1,5 @@
 package gov.cms.dpc.bluebutton.client;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
@@ -92,7 +91,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
     @Override
-    public Observable<Coverage> requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
+    public Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", patientID, client.getServerBase());
         return fetchBundle(Coverage.class, Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientID)), patientID);
     }
