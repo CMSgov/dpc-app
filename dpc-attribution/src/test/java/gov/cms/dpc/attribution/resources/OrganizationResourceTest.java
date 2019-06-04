@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrganizationResourceTest extends AbstractAttributionTest {
@@ -37,6 +39,25 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+            }
+        }
+    }
+
+    @Test
+    void testInvalidOrganization() throws IOException {
+
+        // Read in the test file
+        final Organization resource = new Organization();
+        resource.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
+
+
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getServerURL() + "/Organization");
+            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+            httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(resource)));
+
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatusLine().getStatusCode(), "Should have succeeded"));
             }
         }
     }

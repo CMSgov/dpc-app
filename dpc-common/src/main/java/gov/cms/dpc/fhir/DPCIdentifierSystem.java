@@ -18,11 +18,15 @@ public enum DPCIdentifierSystem {
         this.system = system;
     }
 
+    public String getSystem() {
+        return system;
+    }
+
     /**
      * Enum from string representation of System value.
      * @param system - {@link String} representation of Identifier system
      * @return - {@link DPCIdentifierSystem} matching input string
-     * @throws {@link IllegalArgumentException} if input cannot be matched against known systems
+     * @throws IllegalArgumentException if input cannot be matched against known systems
      */
     public static DPCIdentifierSystem fromString(String system) {
         for(final DPCIdentifierSystem id : DPCIdentifierSystem.values()) {

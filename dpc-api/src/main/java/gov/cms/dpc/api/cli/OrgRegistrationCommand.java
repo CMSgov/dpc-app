@@ -66,7 +66,7 @@ public class OrgRegistrationCommand extends Command {
                     .encodedJson()
                     .execute();
         } catch (Exception e) {
-            System.out.println(String.format("Error: Unable to register organization. %s", e.getMessage()));
+            System.err.println(String.format("Unable to register organization. %s", e.getMessage()));
         }
     }
 }
