@@ -27,14 +27,6 @@ public class BBClientConfiguration {
     @JsonProperty("keyStore")
     private KeystoreConfiguration keystore = new KeystoreConfiguration();
 
-    @Min(1)
-    @Max(5)
-    private int retryCount = 2;
-
-    @Min(5)
-    @Max(1000)
-    private int resourcesPerRequests = 10;
-
     public TimeoutConfiguration getTimeouts() {
         return timeouts;
     }
@@ -61,14 +53,6 @@ public class BBClientConfiguration {
 
     public void setHealthcheckName(String healthcheckName) {
         this.healthcheckName = healthcheckName;
-    }
-
-    public int getRetryCount() {
-        return retryCount;
-    }
-
-    public int getResourcesPerRequests() {
-        return resourcesPerRequests;
     }
 
     public static class TimeoutConfiguration {

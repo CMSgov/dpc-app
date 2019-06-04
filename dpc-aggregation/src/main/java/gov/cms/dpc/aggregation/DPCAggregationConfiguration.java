@@ -12,6 +12,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.redisson.config.Config;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
@@ -30,10 +32,16 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @NotEmpty
     private String exportPath;
 
-    @NotNull
-    private Integer retryCount;
+    @Min(1)
+    @Max(5)
+    private Integer retryCount = 3;
 
-    private Integer resourcesPerFileCount;
+    @Min(10)
+    private int resourcesPerFileCount = 1000;
+
+    @Min(5)
+    @Max(1000)
+    private int resourcesPerRequests = 100;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -56,9 +64,11 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         this.retryCount = retryCount;
     }
 
-    public Integer getResourcesPerFileCount() {
+    public int getResourcesPerFileCount() {
         return resourcesPerFileCount;
     }
+
+    public int getResourcesPerRequests() { return resourcesPerRequests; }
 
     @Override
     public Config getQueueConfig() {
