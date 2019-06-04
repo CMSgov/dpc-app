@@ -16,7 +16,6 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.transformer.RetryTransformer;
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import org.hl7.fhir.dstu3.model.*;
@@ -232,10 +231,6 @@ public class AggregationEngine implements Runnable {
      * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
      */
     private Observable<Resource> fetchResource(UUID jobID, String patientID, ResourceType resourceType) {
-        if (resourceType == ResourceType.Coverage) {
-            return fetchResource2(jobID, patientID, resourceType);
-        }
-
         Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
         RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
 
@@ -245,29 +240,22 @@ public class AggregationEngine implements Runnable {
                 case Patient:
                     return this.bbclient.requestPatientFromServer(patientID);
                 case ExplanationOfBenefit:
-                    return this.bbclient.requestEOBBundleFromServer(patientID);
+                    return this.bbclient.requestEOBFromServer(patientID);
+                case Coverage:
+                    return this.bbclient.requestCoverageFromServer(patientID);
                 default:
                     throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
             }
         })
-                // Turn errors into retries
-                .compose(retryTransformer)
-                // Turn errors into OperationalOutcomes
-                .onErrorReturn(ex -> {
-                    logger.error("Error fetching from Blue Button", ex);
-                    return formOperationOutcome(patientID, ex);
-                });
+            // Turn errors into retries
+            .compose(retryTransformer)
+            // Turn after-retry errors into OperationalOutcomes
+            .onErrorReturn(ex -> {
+                logger.error("Error fetching from Blue Button", ex);
+                return formOperationOutcome(patientID, ex);
+            });
     }
 
-    private Observable<Resource> fetchResource2(UUID jobID, String patientID, ResourceType resourceType) {
-        logger.debug("Fetching patient {} from Blue Button", patientID);
-        switch (resourceType) {
-            case Coverage:
-                return this.bbclient.requestCoverageFromServer(patientID).cast(Resource.class);
-            default:
-                return Observable.error(new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString()));
-        }
-    }
     /**
      * Create a OperationalOutcome resource from an exception
      *
@@ -299,9 +287,9 @@ public class AggregationEngine implements Runnable {
     /**
      * Write a array of bytes to a file. Name the file according to the supplied name
      *
-     * @param bytes    - Bytes to write
+     * @param bytes - Bytes to write
      * @param fileName - The fileName to write too
-     * @throws IOException
+     * @throws IOException - If the write fails
      */
     private void writeToFile(byte[] bytes, String fileName) throws IOException {
         if (bytes.length == 0) {

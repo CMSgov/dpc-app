@@ -2,17 +2,18 @@ package gov.cms.dpc.bluebutton.client;
 
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import io.reactivex.Observable;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 
 public interface BlueButtonClient {
 
     Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException;
 
-    Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException;
+    Bundle requestEOBFromServer(String patientID) throws ResourceNotFoundException;
 
-    Observable<Coverage> requestCoverageFromServer(String patientID) throws ResourceNotFoundException;
+    Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException;
 
     CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException;
 }

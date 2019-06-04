@@ -10,8 +10,6 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;
@@ -27,7 +25,7 @@ import org.mockserver.model.Parameter;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +52,7 @@ class BlueButtonClientTest {
     private static Config conf;
 
     @BeforeAll
-    public static void setupBlueButtonClient() throws IOException {
+    private static void setupBlueButtonClient() throws IOException {
         conf = getTestConfig();
         final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
@@ -74,20 +72,20 @@ class BlueButtonClientTest {
                     "/v1/fhir/ExplanationOfBenefit",
                     HttpStatus.OK_200,
                     getRawXML(SAMPLE_EOB_PATH_PREFIX + patientId + ".xml"),
-                    Arrays.asList(Parameter.param("patient", patientId))
+                    Collections.singletonList(Parameter.param("patient", patientId))
             );
 
             createMockServerExpectation(
                     "/v1/fhir/Coverage",
                     HttpStatus.OK_200,
                     getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
-                    Arrays.asList(Parameter.param("beneficiary", "Patient/" + patientId))
+                    Collections.singletonList(Parameter.param("beneficiary", "Patient/" + patientId))
             );
         }
     }
 
     @AfterAll
-    public static void tearDown() {
+    private static void tearDown() {
         mockServer.stop();
     }
 
@@ -108,32 +106,29 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetEOBFromPatientID() {
-        Bundle response = bbc.requestEOBBundleFromServer(TEST_PATIENT_ID);
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
-        assertEquals(response.getTotal(), 32, "The demo patient should have exactly 32 EOBs");
+        assertEquals(32, response.getTotal(), "The demo patient should have exactly 32 EOBs");
     }
 
     @Test
     void shouldReturnBundleContainingOnlyEOBs() {
-        Bundle response = bbc.requestEOBBundleFromServer(TEST_PATIENT_ID);
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID);
 
-        response.getEntry().forEach((entry) -> {
-            assertEquals(
-                    entry.getResource().getResourceType(),
-                    ResourceType.ExplanationOfBenefit,
-                    "EOB bundles returned by the BlueButton client should only contain EOB objects"
-            );
-        });
+        response.getEntry().forEach((entry) -> assertEquals(
+                entry.getResource().getResourceType(),
+                ResourceType.ExplanationOfBenefit,
+                "EOB bundles returned by the BlueButton client should only contain EOB objects"
+        ));
     }
 
     @Test
     void shouldGetCoverageFromPatientID() {
-        final Observable<Coverage> response = bbc.requestCoverageFromServer(TEST_PATIENT_ID);
+        final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID);
 
         assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
-        final var list = response.toList().blockingGet();
-        assertEquals(3, list.size(), "The demo patient should have exactly 3 Coverage");
+        assertEquals(3, response.getTotal(), "The demo patient should have exactly 3 Coverage");
     }
 
     @Test
@@ -147,24 +142,21 @@ class BlueButtonClientTest {
 
     @Test
     void shouldHandlePatientsWithOnlyOneEOB() {
-        Bundle response = bbc.requestEOBBundleFromServer(TEST_SINGLE_EOB_PATIENT_ID);
-
-        assertEquals(response.getTotal(), 1, "This demo patient should have exactly 1 EOB");
+        final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID);
+        assertEquals(1, response.getTotal(), "This demo patient should have exactly 1 EOB");
     }
 
     @Test
     void shouldThrowExceptionWhenResourceNotFound() {
         assertThrows(
-                ResourceNotFoundException.class, () -> {
-                    bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID);
-                },
+                ResourceNotFoundException.class,
+                () -> bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID),
                 "BlueButton client should throw exceptions when asked to retrieve a non-existent patient"
         );
 
         assertThrows(
-                ResourceNotFoundException.class, () -> {
-                    bbc.requestEOBBundleFromServer(TEST_NONEXISTENT_PATIENT_ID);
-                },
+                ResourceNotFoundException.class,
+                () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID),
                 "BlueButton client should throw exceptions when asked to retrieve EOBs for a non-existent patient"
         );
     }

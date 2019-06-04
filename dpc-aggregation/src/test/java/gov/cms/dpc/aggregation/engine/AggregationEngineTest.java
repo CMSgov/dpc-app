@@ -104,7 +104,7 @@ class AggregationEngineTest {
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
-        JobModel.validResourceTypes.stream().forEach(resourceType -> {
+        JobModel.validResourceTypes.forEach(resourceType -> {
             var outputFilePath = engine.formOutputFilePath(jobId, resourceType);
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
@@ -186,8 +186,11 @@ class AggregationEngineTest {
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServer(idCaptor.capture());
-        Mockito.verify(bbclient, atLeastOnce()).requestEOBBundleFromServer(idCaptor.capture());
-        assertEquals(6, idCaptor.getAllValues().stream().filter(value -> value.equals("-1")).count(), "Should have been called 6 times for both methods");
+        Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture());
+        var values = idCaptor.getAllValues();
+        assertEquals(6,
+                idCaptor.getAllValues().stream().filter(value -> value.equals("-1")).count(),
+                "Should be 6 invalid ids, 3 retries per method x 2 method calls x 1 bad-id");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJob(jobID).isPresent());
