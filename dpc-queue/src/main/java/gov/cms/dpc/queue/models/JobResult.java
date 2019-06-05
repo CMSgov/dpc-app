@@ -5,7 +5,6 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 

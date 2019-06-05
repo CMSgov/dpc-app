@@ -2,6 +2,7 @@ package gov.cms.dpc.api.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.api.converters.OffsetDateTimeToStringConverter;
+import gov.cms.dpc.queue.models.JobResult;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.time.OffsetDateTime;
