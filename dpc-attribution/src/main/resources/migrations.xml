@@ -92,24 +92,80 @@
             <column name="organization_name" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="address_line" type="VARCHAR">
+            <column name="address_use" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="contact_name" type="VARCHAR">
+            <column name="address_type" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="contact_email" type="VARCHAR">
+            <column name="line1" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="contact_phone" type="VARCHAR">
-                <constraints nullable="false"/>
-            </column>
+            <column name="line2" type="VARCHAR"/>
+            <column name="city" type="VARCHAR"/>
+            <column name="district" type="VARCHAR"/>
+            <column name="state" type="VARCHAR"/>
+            <column name="postal_code" type="VARCHAR"/>
+            <column name="country" type="VARCHAR"/>
         </createTable>
 
         <createIndex tableName="ORGANIZATIONS" indexName="organization_idx">
             <column name="id_system"/>
             <column name="id_value"/>
         </createIndex>
+
+        <createTable tableName="ORGANIZATION_CONTACTS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID"/>
+<!--            <column name="purpose" type="VARCHAR">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+            <column name="name_use" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="given" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="family" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prefix" type="VARCHAR"/>
+            <column name="suffix" type="VARCHAR"/>
+            <column name="contact_system" type="VARCHAR">
+<!--                <constraints nullable="false"/>-->
+            </column>
+            <column name="contact_use" type="VARCHAR">
+<!--                <constraints nullable="false"/>-->
+            </column>
+            <column name="contact_value" type="VARCHAR">
+<!--                <constraints nullable="false"/>-->
+            </column>
+            <column name="rank" type="INTEGER"/>
+            <column name="address_use" type="VARCHAR">
+<!--                <constraints nullable="false"/>-->
+            </column>
+            <column name="address_type" type="VARCHAR">
+<!--                <constraints nullable="false"/>-->
+            </column>
+            <column name="line1" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line2" type="VARCHAR"/>
+            <column name="city" type="VARCHAR"/>
+            <column name="district" type="VARCHAR"/>
+            <column name="state" type="VARCHAR"/>
+            <column name="postal_code" type="VARCHAR"/>
+            <column name="country" type="VARCHAR"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="ORGANIZATION_CONTACTS"
+                baseColumnNames="organization_id"
+                constraintName="fk_organization_ids"
+                referencedTableName="ORGANIZATIONS"
+                referencedColumnNames="id"/>
     </changeSet>
 
 </databaseChangeLog>

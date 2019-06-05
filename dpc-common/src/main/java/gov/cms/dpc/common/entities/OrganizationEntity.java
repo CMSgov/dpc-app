@@ -3,17 +3,21 @@ package gov.cms.dpc.common.entities;
 import ca.uhn.fhir.parser.DataFormatException;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRConvertable;
-import org.hibernate.validator.constraints.Email;
+import gov.cms.dpc.fhir.converters.AddressConverter;
+import gov.cms.dpc.fhir.converters.ContactElementConverter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Entity(name = "organizations")
 public class OrganizationEntity implements Serializable, FHIRConvertable<OrganizationEntity, Organization> {
@@ -31,22 +35,13 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @Column(name = "organization_name")
     private String organizationName;
 
-    @NotEmpty
-    @Column(name = "address_line")
-    private String organizationAddress;
+    @Valid
+    @Embedded
+    private AddressEntity organizationAddress;
 
-    @NotEmpty
-    @Column(name = "contact_name")
-    private String contactName;
-
-    @NotEmpty
-    @Email
-    @Column(name = "contact_email")
-    private String contactEmail;
-
-    @NotEmpty
-    @Column(name = "contact_phone")
-    private String contactPhone;
+//    @Valid
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
+    private List<ContactEntity> contacts;
 
     public OrganizationEntity() {
         // Not used
@@ -76,36 +71,20 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         this.organizationName = organizationName;
     }
 
-    public String getOrganizationAddress() {
+    public AddressEntity getOrganizationAddress() {
         return organizationAddress;
     }
 
-    public void setOrganizationAddress(String organizationAddress) {
+    public void setOrganizationAddress(AddressEntity organizationAddress) {
         this.organizationAddress = organizationAddress;
     }
 
-    public String getContactName() {
-        return contactName;
+    public List<ContactEntity> getContacts() {
+        return contacts;
     }
 
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
-    }
-
-    public String getContactEmail() {
-        return contactEmail;
-    }
-
-    public void setContactEmail(String contactEmail) {
-        this.contactEmail = contactEmail;
-    }
-
-    public String getContactPhone() {
-        return contactPhone;
-    }
-
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
+    public void setContacts(List<ContactEntity> contacts) {
+        this.contacts = contacts;
     }
 
     @Override
@@ -138,20 +117,16 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
                 identifier.get().getValue()));
 
         entity.setOrganizationName(resource.getName());
-        entity.setOrganizationAddress(resource.getAddressFirstRep().getLine().get(0).toString());
-        // Find contact info
-        entity.setContactName(findContactType(resource,
-                Organization.OrganizationContactComponent::hasName).getName().getText());
+        entity.setOrganizationAddress(AddressConverter.convert(resource.getAddressFirstRep()));
 
-        // Find a contact that has email or phone contact values
-        // This will need to get refactored into something more robust
-        final Organization.OrganizationContactComponent contactType = findContactType(resource,
-                (contact) -> (contact.hasTelecom()
-                        && contact.getTelecom().stream()
-                        .anyMatch(tel -> tel.getSystem() == ContactPoint.ContactPointSystem.EMAIL || tel.getSystem() == ContactPoint.ContactPointSystem.PHONE)));
+        // Add all contact info
+        final List<ContactEntity> contacts = resource
+                .getContact()
+                .stream()
+                .map(ContactElementConverter::convert)
+                .collect(Collectors.toList());
+        entity.setContacts(contacts);
 
-        entity.setContactPhone(extractContactValue(contactType, ContactPoint.ContactPointSystem.PHONE));
-        entity.setContactEmail(extractContactValue(contactType, ContactPoint.ContactPointSystem.EMAIL));
         return entity;
     }
 

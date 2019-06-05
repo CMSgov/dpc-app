@@ -27,11 +27,14 @@
   "telecom": [
     {
       "system": "phone",
+      "use": "work",
       "value": "022-655 6780"
     }
   ],
   "address": [
     {
+      "use": "work",
+      "type": "both",
       "line": [
         "West Wing, floor 5"
       ]
@@ -51,23 +54,31 @@
         ]
       },
       "name": {
-        "text": "mr. F. de Hond"
+        "use": "usual",
+        "family": "de Hond",
+        "given": ["F."],
+        "prefix": ["mr."]
       },
       "telecom": [
         {
           "system": "phone",
+          "use": "work",
           "value": "022-655 7654"
         },
         {
           "system": "email",
+          "use": "work",
           "value": "KNO@burgersumc.nl"
         },
         {
           "system": "fax",
+          "use": "work",
           "value": "022-655 0998"
         }
       ],
       "address": {
+        "use": "work",
+        "type": "both",
         "line": [
           "West Wing, floor 5"
         ]

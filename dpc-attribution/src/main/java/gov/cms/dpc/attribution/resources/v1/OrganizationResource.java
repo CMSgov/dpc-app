@@ -3,7 +3,6 @@ package gov.cms.dpc.attribution.resources.v1;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import io.dropwizard.hibernate.UnitOfWork;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return Response.ok().build();
         } catch (Exception e) {
             logger.error("Error: ", e);
-            return Response.status(HttpStatus.INTERNAL_SERVER_ERROR_500).entity(e).build();
+            throw e;
         }
 
     }

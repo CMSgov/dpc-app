@@ -57,7 +57,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(resource)));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatusLine().getStatusCode(), "Should have succeeded"));
+                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
         }
     }
