@@ -3,23 +3,29 @@ package gov.cms.dpc.common.entities;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.UUID;
 
-@Embeddable
+@Entity(name = "contact_telecoms")
 public class ContactPointEntity implements Serializable {
     public static final long serialVersionUID = 42L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
+    private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "contact_id", nullable = false)
+    private ContactEntity contactEntity;
+
     @NotNull
-    @Column(name = "contact_system")
     private ContactPoint.ContactPointSystem system;
     @NotNull
-    @Column(name = "contact_use")
     private ContactPoint.ContactPointUse use;
     @NotEmpty
-    @Column(name = "contact_value")
     private String value;
     private Integer rank;
 
@@ -57,5 +63,21 @@ public class ContactPointEntity implements Serializable {
 
     public void setRank(Integer rank) {
         this.rank = rank;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public ContactEntity getContactEntity() {
+        return contactEntity;
+    }
+
+    public void setContactEntity(ContactEntity contactEntity) {
+        this.contactEntity = contactEntity;
     }
 }

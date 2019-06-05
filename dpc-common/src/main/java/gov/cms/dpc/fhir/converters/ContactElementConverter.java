@@ -23,6 +23,9 @@ public class ContactElementConverter {
                 .stream()
                 .map(ContactPointConverter::convert)
                 .collect(Collectors.toList());
+
+        // Set the entity reference
+        collect.forEach(contact -> contact.setContactEntity(entity));
         entity.setTelecom(collect);
         entity.setAddress(AddressConverter.convert(element.getAddress()));
         return entity;

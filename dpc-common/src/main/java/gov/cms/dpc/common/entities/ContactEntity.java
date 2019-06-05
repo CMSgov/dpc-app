@@ -1,10 +1,7 @@
 package gov.cms.dpc.common.entities;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-
 import javax.persistence.*;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
@@ -19,14 +16,11 @@ public class ContactEntity implements Serializable {
     private UUID id;
     @ManyToOne
     private OrganizationEntity organization;
-//    @NotNull
-//    private CodeableConcept purpose;
     @Valid
     @Embedded
     private NameEntity name;
-    @Valid
-    @ElementCollection
-    @Transient
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "contactEntity", orphanRemoval = true)
     private List<ContactPointEntity> telecom;
     @Valid
     @Embedded
@@ -51,14 +45,6 @@ public class ContactEntity implements Serializable {
     public void setOrganization(OrganizationEntity organization) {
         this.organization = organization;
     }
-
-//    public CodeableConcept getPurpose() {
-//        return purpose;
-//    }
-//
-//    public void setPurpose(CodeableConcept purpose) {
-//        this.purpose = purpose;
-//    }
 
     public NameEntity getName() {
         return name;

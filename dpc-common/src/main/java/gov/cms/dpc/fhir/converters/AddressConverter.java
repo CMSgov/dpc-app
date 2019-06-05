@@ -24,12 +24,14 @@ public class AddressConverter {
 
         entity.setLine1(stringType.getValue());
         if (lines.size() > 1) {
-            final String line2 = lines.subList(1, lines.size() - 1).stream().map(StringType::getValue).collect(Collectors.joining(" "));
+            final String line2 = lines.subList(1, lines.size()).stream().map(StringType::getValue).collect(Collectors.joining(" "));
             entity.setLine2(line2);
         }
         entity.setCity(datatype.getCity());
         entity.setCountry(datatype.getCountry());
         entity.setDistrict(datatype.getDistrict());
+        entity.setState(datatype.getState());
+        entity.setPostalCode(datatype.getPostalCode());
         entity.setCountry(datatype.getCountry());
         return entity;
     }

@@ -36,8 +36,12 @@
       "use": "work",
       "type": "both",
       "line": [
+        "7500 Security Boulevard",
         "West Wing, floor 5"
-      ]
+      ],
+      "city": "Baltimore",
+      "state": "MD",
+      "postalCode": "21244"
     }
   ],
   "partOf": {

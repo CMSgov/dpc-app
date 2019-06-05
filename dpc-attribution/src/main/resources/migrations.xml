@@ -83,7 +83,7 @@
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="id_system" type="VARCHAR">
+            <column name="id_system" type="TINYINT">
                 <constraints nullable="false"/>
             </column>
             <column name="id_value" type="VARCHAR">
@@ -92,10 +92,10 @@
             <column name="organization_name" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="address_use" type="VARCHAR">
+            <column name="address_use" type="TINYINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="address_type" type="VARCHAR">
+            <column name="address_type" type="TINYINT">
                 <constraints nullable="false"/>
             </column>
             <column name="line1" type="VARCHAR">
@@ -109,7 +109,7 @@
             <column name="country" type="VARCHAR"/>
         </createTable>
 
-        <createIndex tableName="ORGANIZATIONS" indexName="organization_idx">
+        <createIndex tableName="ORGANIZATIONS" indexName="organization_idx" unique="true">
             <column name="id_system"/>
             <column name="id_value"/>
         </createIndex>
@@ -119,10 +119,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="organization_id" type="UUID"/>
-<!--            <column name="purpose" type="VARCHAR">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
-            <column name="name_use" type="VARCHAR">
+            <column name="name_use" type="TINYINT">
                 <constraints nullable="false"/>
             </column>
             <column name="given" type="VARCHAR">
@@ -133,21 +130,11 @@
             </column>
             <column name="prefix" type="VARCHAR"/>
             <column name="suffix" type="VARCHAR"/>
-            <column name="contact_system" type="VARCHAR">
-<!--                <constraints nullable="false"/>-->
+            <column name="address_use" type="TINYINT">
+                <constraints nullable="false"/>
             </column>
-            <column name="contact_use" type="VARCHAR">
-<!--                <constraints nullable="false"/>-->
-            </column>
-            <column name="contact_value" type="VARCHAR">
-<!--                <constraints nullable="false"/>-->
-            </column>
-            <column name="rank" type="INTEGER"/>
-            <column name="address_use" type="VARCHAR">
-<!--                <constraints nullable="false"/>-->
-            </column>
-            <column name="address_type" type="VARCHAR">
-<!--                <constraints nullable="false"/>-->
+            <column name="address_type" type="TINYINT">
+                <constraints nullable="false"/>
             </column>
             <column name="line1" type="VARCHAR">
                 <constraints nullable="false"/>
@@ -165,6 +152,30 @@
                 baseColumnNames="organization_id"
                 constraintName="fk_organization_ids"
                 referencedTableName="ORGANIZATIONS"
+                referencedColumnNames="id"/>
+
+        <createTable tableName="CONTACT_TELECOMS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="contact_id" type="UUID"/>
+            <column name="system" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="use" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rank" type="TINYINT"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="CONTACT_TELECOMS"
+                baseColumnNames="contact_id"
+                constraintName="fk_org_contact_telecoms"
+                referencedTableName="ORGANIZATION_CONTACTS"
                 referencedColumnNames="id"/>
     </changeSet>
 

@@ -39,7 +39,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @Embedded
     private AddressEntity organizationAddress;
 
-//    @Valid
+    @Valid
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<ContactEntity> contacts;
 
@@ -125,6 +125,8 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
                 .stream()
                 .map(ContactElementConverter::convert)
                 .collect(Collectors.toList());
+        // Add the entity reference
+        contacts.forEach(contact -> contact.setOrganization(entity));
         entity.setContacts(contacts);
 
         return entity;
