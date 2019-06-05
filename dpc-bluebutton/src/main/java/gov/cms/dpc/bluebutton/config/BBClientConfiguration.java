@@ -22,6 +22,10 @@ public class BBClientConfiguration {
     @JsonProperty("timeouts")
     private TimeoutConfiguration timeouts = new TimeoutConfiguration();
 
+    @Min(10)
+    @Max(1000)
+    private int resourcesCount = 100;
+
     @Valid
     @NotNull
     @JsonProperty("keyStore")
@@ -30,6 +34,8 @@ public class BBClientConfiguration {
     public TimeoutConfiguration getTimeouts() {
         return timeouts;
     }
+
+    public int getResourcesCount() { return resourcesCount; }
 
     public KeystoreConfiguration getKeystore() {
         return keystore;

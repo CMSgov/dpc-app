@@ -39,10 +39,6 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Min(10)
     private int resourcesPerFileCount = 1000;
 
-    @Min(5)
-    @Max(1000)
-    private int resourcesPerRequests = 100;
-
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -67,8 +63,6 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     public int getResourcesPerFileCount() {
         return resourcesPerFileCount;
     }
-
-    public int getResourcesPerRequests() { return resourcesPerRequests; }
 
     @Override
     public Config getQueueConfig() {
