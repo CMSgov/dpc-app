@@ -1,11 +1,13 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.inject.Inject;
+import java.util.List;
 
 public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
 
@@ -14,8 +16,10 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         super(factory.getSessionFactory());
     }
 
-    public void registerOrganization(Organization resource) {
+    public void registerOrganization(Organization resource, List<EndpointEntity> endpoints) {
         final OrganizationEntity entity = new OrganizationEntity().fromFHIR(resource);
+        endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
+        entity.setEndpoints(endpoints);
         persist(entity);
     }
 }

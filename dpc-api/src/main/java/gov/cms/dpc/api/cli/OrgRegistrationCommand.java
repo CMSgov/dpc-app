@@ -8,6 +8,7 @@ import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import java.io.File;
@@ -47,22 +48,22 @@ public class OrgRegistrationCommand extends Command {
         System.out.println("Registering Organization");
 
         // Read the file and parser it
-        Organization organization;
+        Bundle organization;
         try (FileInputStream fileInputStream = new FileInputStream(new File(namespace.getString(ORG_FILE)))) {
             final IParser parser = ctx.newJsonParser();
-            organization = (Organization) parser.parseResource(fileInputStream);
+            organization = (Bundle) parser.parseResource(fileInputStream);
         }
 
         registerOrganization(organization, namespace.getString(ATTR_HOSTNAME));
     }
 
-    void registerOrganization(Organization organization, String attributionService) {
-        final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
+    void registerOrganization(Bundle organization, String attributionService) {
+        final IGenericClient client = ctx.newRestfulGenericClient(attributionService + "/Organization");
 
         try {
             client
-                    .create()
-                    .resource(organization)
+                    .transaction()
+                    .withBundle(organization)
                     .encodedJson()
                     .execute();
         } catch (Exception e) {

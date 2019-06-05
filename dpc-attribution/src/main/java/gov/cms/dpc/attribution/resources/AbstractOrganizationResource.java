@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.ws.rs.POST;
@@ -16,5 +17,5 @@ public abstract class AbstractOrganizationResource {
 
     @POST
     @FHIR
-    public abstract Response createOrganization(Organization organization);
+    public abstract Response createOrganization(Bundle bundle);
 }

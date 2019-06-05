@@ -43,6 +43,10 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<ContactEntity> contacts;
 
+    @Valid
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
+    private List<EndpointEntity> endpoints;
+
     public OrganizationEntity() {
         // Not used
     }
@@ -85,6 +89,14 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     public void setContacts(List<ContactEntity> contacts) {
         this.contacts = contacts;
+    }
+
+    public List<EndpointEntity> getEndpoints() {
+        return endpoints;
+    }
+
+    public void setEndpoints(List<EndpointEntity> endpoints) {
+        this.endpoints = endpoints;
     }
 
     @Override

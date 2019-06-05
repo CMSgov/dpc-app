@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.converters;
 
 import gov.cms.dpc.common.entities.AddressEntity;
+import gov.cms.dpc.fhir.exceptions.DataTranslationException;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.StringType;
 
@@ -20,6 +21,9 @@ public class AddressConverter {
 
         // Get the first line and then concat any additional lines
         final List<StringType> lines = datatype.getLine();
+        if (lines.isEmpty()) {
+            throw new DataTranslationException(Address.class, "Address line", "Must have at least one address line");
+        }
         final StringType stringType = lines.get(0);
 
         entity.setLine1(stringType.getValue());

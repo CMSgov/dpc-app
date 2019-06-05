@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterEngine;
+import gov.cms.dpc.attribution.resources.v1.EndpointResource;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.OrganizationResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
@@ -35,6 +36,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(V1AttributionResource.class);
         binder.bind(OrganizationDAO.class);
         binder.bind(TruncateDatabase.class);
+        binder.bind(EndpointResource.class);
 
         // Healthchecks
         binder.bind(RosterEngineHealthCheck.class);
