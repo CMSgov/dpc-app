@@ -5,11 +5,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +43,15 @@ public class MockBlueButtonClient implements BlueButtonClient {
     @Override
     public Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
         return loadBundle(SAMPLE_COVERAGE_PATH_PREFIX, patientID);
+    }
+
+    @Override
+    public Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException {
+        final String link = bundle.getLink(Bundle.LINK_NEXT).getUrl();
+        final List<NameValuePair> params = URLEncodedUtils.parse(link, Charset.forName("UTF-8"));
+        final var patient = params.stream().filter(pair -> pair.getName().equals("patient")).findFirst().get().getValue();
+        final var startIndex = params.stream().filter(pair -> pair.getName().equals("startIndex")).findFirst().get().getValue();
+        return loadBundle(SAMPLE_EOB_PATH_PREFIX, patient + "_" + startIndex);
     }
 
     @Override
