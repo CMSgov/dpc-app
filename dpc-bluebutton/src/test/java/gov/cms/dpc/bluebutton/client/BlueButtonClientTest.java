@@ -83,6 +83,7 @@ class BlueButtonClientTest {
             );
         }
 
+        // Create mocks for pages of the results
         for(String startIndex: List.of("10", "20", "30")) {
             createMockServerExpectation(
                 "/v1/fhir/ExplanationOfBenefit",
