@@ -191,8 +191,59 @@ public class AggregationEngine implements Runnable {
     protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
         Observable.fromIterable(job.getPatients())
                 .flatMap(patient -> this.fetchResource(job.getJobID(), patient, jobResult.getResourceType()))
+                .flatMap(this::unpackBundles)
                 .subscribeOn(Schedulers.io())
                 .blockingSubscribe(resource -> writeResource(jobResult, writer, errorWriter, resource));
+    }
+
+    /**
+     * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to Resource. The
+     * resource may be a type requested or it may be an operational outcome;
+     *
+     * @param jobID        - {@link UUID} jobID
+     * @param patientID    - {@link String} patient ID
+     * @param resourceType - {@link ResourceType} to fetch from BlueButton
+     * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
+     */
+    private Observable<Resource> fetchResource(UUID jobID, String patientID, ResourceType resourceType) {
+        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
+        RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
+
+        return Observable.fromCallable(() -> {
+            logger.debug("Fetching patient {} from Blue Button", patientID);
+            switch (resourceType) {
+                case Patient:
+                    return this.bbclient.requestPatientFromServer(patientID);
+                case ExplanationOfBenefit:
+                    return this.bbclient.requestEOBFromServer(patientID);
+                case Coverage:
+                    return this.bbclient.requestCoverageFromServer(patientID);
+                default:
+                    throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
+            }
+        })
+                // Turn errors into retries
+                .compose(retryTransformer)
+                // Turn after-retry errors into OperationalOutcomes
+                .onErrorReturn(ex -> {
+                    logger.error("Error fetching from Blue Button", ex);
+                    return formOperationOutcome(patientID, ex);
+                });
+    }
+
+    /**
+     * Check for bundle resources. Unpack bundle resources into their constituent resources, otherwise do nothing.
+     * @param resource - The resource to examine and possibly unpack
+     * @return A stream of resources
+     */
+    private Observable<Resource> unpackBundles(Resource resource) {
+        if (resource.getResourceType() == ResourceType.Bundle) {
+            Bundle bundle = (Bundle)resource;
+            Resource[] entries = bundle.getEntry().stream().map(Bundle.BundleEntryComponent::getResource).toArray(Resource[]::new);
+            return Observable.fromArray(entries);
+        } else {
+            return Observable.just(resource);
+        }
     }
 
     /**
@@ -224,41 +275,6 @@ public class AggregationEngine implements Runnable {
         } catch (IOException e) {
             throw new JobQueueFailure(jobResult.getJobID(), e);
         }
-    }
-
-    /**
-     * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to Resource. The
-     * resource may be a type requested or it may be an operational outcome;
-     *
-     * @param jobID        - {@link UUID} jobID
-     * @param patientID    - {@link String} patient ID
-     * @param resourceType - {@link ResourceType} to fetch from BlueButton
-     * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
-     */
-    private Observable<Resource> fetchResource(UUID jobID, String patientID, ResourceType resourceType) {
-        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-        RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
-
-        return Observable.fromCallable(() -> {
-            logger.debug("Fetching patient {} from Blue Button", patientID);
-            switch (resourceType) {
-                case Patient:
-                    return this.bbclient.requestPatientFromServer(patientID);
-                case ExplanationOfBenefit:
-                    return this.bbclient.requestEOBFromServer(patientID);
-                case Coverage:
-                    return this.bbclient.requestCoverageFromServer(patientID);
-                default:
-                    throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
-            }
-        })
-            // Turn errors into retries
-            .compose(retryTransformer)
-            // Turn after-retry errors into OperationalOutcomes
-            .onErrorReturn(ex -> {
-                logger.error("Error fetching from Blue Button", ex);
-                return formOperationOutcome(patientID, ex);
-            });
     }
 
     /**
