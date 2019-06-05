@@ -62,7 +62,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
 
     @Provides
     public BlueButtonClient provideBlueButtonClient(IGenericClient fhirRestClient) {
-        return new BlueButtonClientImpl(fhirRestClient);
+        return new BlueButtonClientImpl(fhirRestClient, this.bbClientConfiguration);
     }
 
     @Provides

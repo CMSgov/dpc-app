@@ -82,6 +82,17 @@ class BlueButtonClientTest {
                     Collections.singletonList(Parameter.param("beneficiary", "Patient/" + patientId))
             );
         }
+
+        for(String startIndex: List.of("10", "20", "30")) {
+            createMockServerExpectation(
+                "/v1/fhir/ExplanationOfBenefit",
+                HttpStatus.OK_200,
+                getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_" + startIndex + ".xml"),
+                List.of(Parameter.param("patient", TEST_PATIENT_ID),
+                        Parameter.param("count", "10"),
+                        Parameter.param("startIndex", startIndex))
+            );
+        }
     }
 
     @AfterAll
@@ -110,6 +121,26 @@ class BlueButtonClientTest {
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertEquals(32, response.getTotal(), "The demo patient should have exactly 32 EOBs");
+    }
+
+    @Test
+    void shouldNotHaveNextBundle() {
+        Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID);
+
+        assertNotNull(response, "The demo patient should have a non-null EOB bundle");
+        assertEquals(1, response.getTotal(), "The demo patient should have exactly 1 EOBs");
+        assertNull(response.getLink(Bundle.LINK_NEXT), "Should have no next link since all the resources are in the bundle");
+    }
+
+    @Test
+    void shouldHaveNextBundle() {
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID);
+
+        assertNotNull(response, "The demo patient should have a non-null EOB bundle");
+        assertNotNull(response.getLink(Bundle.LINK_NEXT), "Should have no next link since all the resources are in the bundle");
+        Bundle nextResponse = bbc.requestNextBundleFromServer(response);
+        assertNotNull(nextResponse, "Should have a next bundle");
+        assertEquals(10, nextResponse.getEntry().size());
     }
 
     @Test

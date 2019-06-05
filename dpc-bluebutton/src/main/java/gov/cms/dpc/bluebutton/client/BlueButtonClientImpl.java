@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -20,12 +21,15 @@ public class BlueButtonClientImpl implements BlueButtonClient {
 
     private IGenericClient client;
 
+    private BBClientConfiguration config;
+
     public static String formBeneficiaryID(String fromPatientID) {
         return "Patient/" + fromPatientID;
     }
 
-    public BlueButtonClientImpl(IGenericClient client){
+    public BlueButtonClientImpl(IGenericClient client, BBClientConfiguration config) {
         this.client = client;
+        this.config = config;
     }
 
     /**
@@ -93,6 +97,16 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     }
 
     @Override
+    public Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException {
+        var nextURL = bundle.getLink(Bundle.LINK_NEXT).getUrl();
+        logger.debug("Attempting to fetch next bundle from url: {}", nextURL);
+        return client
+                .loadPage()
+                .next(bundle)
+                .execute();
+    }
+
+    @Override
     public CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException {
         return client
                 .capabilities()
@@ -101,7 +115,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     }
 
     /**
-     * Read multiple FHIR Resource from a returned Bundle from BlueButton. Does paging.
+     * Read a FHIR Bundle from BlueButton. Limits the returned size by resourcesPerRequest.
      *
      * @param resourceClass - FHIR Resource class
      * @param criterion - For the resource class the correct criterion that matches the patientID
@@ -114,6 +128,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         final Bundle bundle = client.search()
                 .forResource(resourceClass)
                 .where(criterion)
+                .count(config.getResourcesCount())
                 .returnBundle(Bundle.class)
                 .execute();
 
