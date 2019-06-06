@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -191,7 +192,8 @@ public class AggregationEngine implements Runnable {
     protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
         Observable.fromIterable(job.getPatients())
                 .flatMap(patient -> this.fetchResource(job.getJobID(), patient, jobResult.getResourceType()))
-                .flatMap(this::unpackBundles)
+                .concatMap(this::fetchAllNextBundles)
+                .concatMap(this::unpackBundles)
                 .subscribeOn(Schedulers.io())
                 .blockingSubscribe(resource -> writeResource(jobResult, writer, errorWriter, resource));
     }
@@ -232,18 +234,42 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
+     * Check for bundle resources. Fetch the all the next bundles if there is one, otherwise do nothing.
+     * @param resource - The resource to examine and possibly unpack
+     * @return A stream of resources
+     */
+    private Observable<Resource> fetchAllNextBundles(Resource resource) {
+        if (resource.getResourceType() != ResourceType.Bundle) {
+            return Observable.just(resource);
+        }
+        final var bundles = new ArrayList<Resource>();
+        bundles.add(resource);
+        for(var bundle = (Bundle)resource; bundle.getLink(Bundle.LINK_NEXT) != null;) {
+            Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
+            final var decorated = Retry.decorateFunction(retry , this.bbclient::requestNextBundleFromServer);
+            try {
+                bundle = decorated.apply(bundle);
+                bundles.add(bundle);
+            } catch(Exception ex){
+                logger.error("Error fetching the next bundle from Blue Button", ex);
+               return Observable.just(formOperationOutcome(ex));
+            }
+        }
+        return Observable.fromArray(bundles.toArray(Resource[]::new));
+    }
+
+    /**
      * Check for bundle resources. Unpack bundle resources into their constituent resources, otherwise do nothing.
      * @param resource - The resource to examine and possibly unpack
      * @return A stream of resources
      */
     private Observable<Resource> unpackBundles(Resource resource) {
-        if (resource.getResourceType() == ResourceType.Bundle) {
-            Bundle bundle = (Bundle)resource;
-            Resource[] entries = bundle.getEntry().stream().map(Bundle.BundleEntryComponent::getResource).toArray(Resource[]::new);
-            return Observable.fromArray(entries);
-        } else {
+        if (resource.getResourceType() != ResourceType.Bundle) {
             return Observable.just(resource);
         }
+        final Bundle bundle = (Bundle)resource;
+        final Resource[] entries = bundle.getEntry().stream().map(Bundle.BundleEntryComponent::getResource).toArray(Resource[]::new);
+        return Observable.fromArray(entries);
     }
 
     /**
@@ -278,7 +304,7 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Create a OperationalOutcome resource from an exception
+     * Create a OperationalOutcome resource from an exception with a patient
      *
      * @param patientID - the id of the patient involved in the error
      * @param ex        - the exception to turn into a Operational Outcome
@@ -302,6 +328,29 @@ public class AggregationEngine implements Runnable {
                 .setCode(OperationOutcome.IssueType.EXCEPTION)
                 .setDetails(new CodeableConcept().setText(details))
                 .setLocation(location);
+        return outcome;
+    }
+
+    /**
+     * Create a OperationalOutcome resource from an exception
+     *
+     * @param ex        - the exception to turn into a Operational Outcome
+     * @return an operation outcome
+     */
+    private OperationOutcome formOperationOutcome(Throwable ex) {
+        String details;
+        if (ex instanceof BaseServerResponseException) {
+            final var serverException = (BaseServerResponseException) ex;
+            details = String.format("Blue Button error: HTTP status: %s", serverException.getStatusCode());
+        } else {
+            details = String.format("Internal error: %s", ex.getMessage());
+        }
+
+        final var outcome = new OperationOutcome();
+        outcome.addIssue()
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setCode(OperationOutcome.IssueType.EXCEPTION)
+                .setDetails(new CodeableConcept().setText(details));
         return outcome;
     }
 
