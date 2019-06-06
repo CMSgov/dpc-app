@@ -37,7 +37,7 @@ class AttributionResourceTest extends AbstractAttributionTest {
             }
 
             // Check is attributed
-            final HttpGet isAttributed = new HttpGet(getServerURL() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254/19990000002901");
+            final HttpGet isAttributed = new HttpGet(getServerURL() + "/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254/19990000002901");
             isAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (final CloseableHttpResponse response = client.execute(isAttributed)) {
@@ -45,7 +45,7 @@ class AttributionResourceTest extends AbstractAttributionTest {
             }
 
             // Remove some benes
-            final HttpDelete httpRemove = new HttpDelete(getServerURL() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254/19990000002901");
+            final HttpDelete httpRemove = new HttpDelete(getServerURL() + "/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254/19990000002901");
             httpRemove.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (CloseableHttpResponse response = client.execute(httpRemove)) {
@@ -61,7 +61,7 @@ class AttributionResourceTest extends AbstractAttributionTest {
 
 //             Check not attributed
 
-            final HttpGet notAttributed = new HttpGet(getServerURL() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254/19990000002901");
+            final HttpGet notAttributed = new HttpGet(getServerURL() + "/Group/0c527d2e-2e8a-4808-b11d-0fa06baf8254/19990000002901");
             notAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (CloseableHttpResponse response = client.execute(notAttributed)) {
@@ -94,7 +94,7 @@ class AttributionResourceTest extends AbstractAttributionTest {
     void testUnknownProvider() throws IOException {
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + "/v1/Group/0c527d2e-2e8a-4808-b11d-0fa06baf827b");
+            final HttpGet httpGet = new HttpGet(getServerURL() + "Group/0c527d2e-2e8a-4808-b11d-0fa06baf827b");
             httpGet.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {

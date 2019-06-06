@@ -3,7 +3,10 @@ package gov.cms.dpc.attribution;
 import ca.uhn.fhir.context.FhirContext;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
+import org.junit.After;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 public class AbstractAttributionTest {
@@ -11,15 +14,15 @@ public class AbstractAttributionTest {
 
     protected FhirContext ctx = FhirContext.forDstu3();
 
-    @BeforeEach
-    public void initDB() throws Exception {
+    @BeforeAll
+    public static void initDB() throws Exception {
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate");
         APPLICATION.getApplication().run("seed");
     }
 
-    @AfterEach
-    public void shutdown() {
+    @AfterAll
+    public static void shutdown() {
         APPLICATION.after();
     }
 

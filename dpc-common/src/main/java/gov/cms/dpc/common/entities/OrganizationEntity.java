@@ -6,7 +6,6 @@ import gov.cms.dpc.fhir.FHIRConvertable;
 import gov.cms.dpc.fhir.converters.AddressConverter;
 import gov.cms.dpc.fhir.converters.ContactElementConverter;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 
@@ -16,7 +15,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Entity(name = "organizations")
@@ -184,26 +182,5 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         public void setValue(String value) {
             this.value = value;
         }
-    }
-
-    private static Organization.OrganizationContactComponent findContactType(Organization resource, Predicate<Organization.OrganizationContactComponent> predicate) {
-        return resource
-                .getContact()
-                .stream()
-                .filter(predicate)
-                .findFirst()
-                .orElseThrow(() -> new DataFormatException("Cannot find required contact type for organization"));
-    }
-
-    private static String extractContactValue(Organization.OrganizationContactComponent component, ContactPoint.ContactPointSystem system) {
-        final Optional<ContactPoint> first = component
-                .getTelecom()
-                .stream()
-                .filter(tel -> tel.getSystem() == system)
-                .findFirst();
-
-        return first
-                .orElseThrow(() -> new DataFormatException(String.format("Cannot find contact type: %s", system)))
-                .getValue();
     }
 }

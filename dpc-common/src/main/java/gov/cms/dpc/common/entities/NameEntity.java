@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 @Embeddable
 public class NameEntity implements Serializable {
-    public static long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     @NotNull
     @Column(name = "name_use")

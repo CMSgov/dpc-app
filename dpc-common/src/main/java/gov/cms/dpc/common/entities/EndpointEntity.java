@@ -1,6 +1,5 @@
 package gov.cms.dpc.common.entities;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
@@ -142,6 +141,4 @@ public class EndpointEntity implements Serializable {
             this.code = code;
         }
     }
-
-
 }

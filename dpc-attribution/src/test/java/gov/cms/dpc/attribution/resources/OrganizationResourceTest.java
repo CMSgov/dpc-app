@@ -9,6 +9,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
         // Read in the test file
         final InputStream inputStream = OrganizationResourceTest.class.getClassLoader().getResourceAsStream("test_org.json");
-        final Organization resource = (Organization) ctx.newJsonParser().parseResource(inputStream);
+        final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
 
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {

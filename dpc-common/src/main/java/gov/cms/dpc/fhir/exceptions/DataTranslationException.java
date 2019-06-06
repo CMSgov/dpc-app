@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.exceptions;
 
 public class DataTranslationException extends RuntimeException {
+    public static final long serialVersionUID = 42L;
 
     private final Class<?> clazz;
     private final String element;

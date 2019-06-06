@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Entity(name = "organization_contacts")
 public class ContactEntity implements Serializable {
-    public static long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
