@@ -2,14 +2,15 @@ package gov.cms.dpc.bluebutton.client;
 
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -20,6 +21,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     public static final List<String> TEST_PATIENT_IDS = List.of("20140000008325", "20140000009893");
+
+    private final IParser parser = FhirContext.forDstu3().newXmlParser();
 
     public MockBlueButtonClient() {
         // Not used
@@ -42,11 +45,19 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     @Override
     public Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException {
-        final String link = bundle.getLink(Bundle.LINK_NEXT).getUrl();
-        final List<NameValuePair> params = URLEncodedUtils.parse(link, Charset.forName("UTF-8"));
+        // This is code is very specific to the bb-test-data directory and its contents
+        final var nextLink = bundle.getLink(Bundle.LINK_NEXT).getUrl();
+        final var nextUrl = URI.create(nextLink);
+        final var params = URLEncodedUtils.parse(nextUrl.getQuery(), Charset.forName("UTF-8"));
         final var patient = params.stream().filter(pair -> pair.getName().equals("patient")).findFirst().orElseThrow().getValue();
         final var startIndex = params.stream().filter(pair -> pair.getName().equals("startIndex")).findFirst().orElseThrow().getValue();
-        return loadBundle(SAMPLE_EOB_PATH_PREFIX, patient + "_" + startIndex);
+        var path = SAMPLE_EOB_PATH_PREFIX + patient + "_" + startIndex + ".xml";
+
+        try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path)) {
+            return parser.parseResource(Bundle.class, sampleData);
+        } catch(IOException ex) {
+            throw new ResourceNotFoundException("No patient found with ID: " + patient);
+        }
     }
 
     @Override
@@ -64,7 +75,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
      */
     private Bundle loadBundle(String pathPrefix, String patientID) {
         try(InputStream sampleData = loadResource(pathPrefix, patientID)) {
-            final var parser = FhirContext.forDstu3().newXmlParser();
             return parser.parseResource(Bundle.class, sampleData);
         } catch(IOException ex) {
             throw new ResourceNotFoundException("No patient found with ID: " + patientID);
@@ -80,7 +90,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
      */
     private <T extends IBaseResource> T loadOne(Class<T> resourceClass, String pathPrefix, String patientID) {
         try(InputStream sampleData = loadResource(pathPrefix, patientID)) {
-            final var parser = FhirContext.forDstu3().newXmlParser();
             return parser.parseResource(resourceClass, sampleData);
         } catch(IOException ex) {
             throw new ResourceNotFoundException("No patient found with ID: " + patientID);
