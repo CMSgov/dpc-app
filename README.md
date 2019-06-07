@@ -8,9 +8,12 @@ Data @ The Point of Care
 Building DPC
 ---
 
-1. Run `mvn clean install` to build your application.
-This will also construct the *Docker* images for the API and Aggregation services.
+1. Run `mvn clean install` to build and test the application.
+This will also construct the *Docker* images for the various services.
 To skip the Docker build pass `-Djib.skip=True`
+
+> Note: DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions.
+In addition, some of upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date.  
 
 Required services
 ---
@@ -66,8 +69,8 @@ Once the JARs are built, they can be run in two ways.
 
 1. Executed using *Docker Compose* `docker-compose up`
 1. Manually by running each of the JARs
-    1. `java -jar target/dpc-attribution-0.1.0.jar server`
-    1. `java -jar target/dpc-web-0.1.0.jar server`
+    1. `java -jar dpc-attribution/target/dpc-attribution-0.3.0-SNAPSHOT.jar server`
+    1. `java -jar dpc-attribution/target/dpc-web-0.3.0-SNAPSHOT.jar server`
     
     By default, the services will attempt to load a `local.application.conf` file from the current execution directory. 
     This can be overriden in two ways.
@@ -77,18 +80,23 @@ Once the JARs are built, they can be run in two ways.
     ***Note**: Manually specifying a config file will disable the normal configuration merging process. 
     This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed.* 
 
-1. To check that your application is running enter url `http://localhost:8080/v1/Group/1`, it should return a *404* error.
+1. You can check that the application is running by requesting the FHIR `CapabilitiesStatement`, which will return a json formatted FHIR resource.
+    ```bash
+    curl -H "Accept: application/fhir+json" http://localhost:8080/v1/CapabilitiesStatement
+    ```
 
 Seeding the database
 ---
 
-In order to successfully test the application, there needs to be initial data loaded into the attribution database.
+By default, DPC initially starts with an empty attribution database, this means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton.
+
+In order to successfully test and demonstrate the application, there needs to be initial data loaded into the attribution database.
 We provide a small CSV [file](src/main/resources/test_associations.csv) which associates some fake providers with valid patients from the BlueButton sandbox.
 The database can be automatically migrated and seeded by running the following commands, before starting the Attribution service. 
 
 ```bash
-java -jar target/dpc-attribution-0.1.0.jar db migrate
-java -jar target/dpc-attribution-0.1.0.jar seed
+java -jar dpc-attribution/target/dpc-attribution-0.1.0.jar db migrate
+java -jar dpc-attribution/target/dpc-attribution-0.1.0.jar seed
 ``` 
 
 Testing the Application
@@ -118,7 +126,7 @@ This request fails because the provider is not registered with the application a
 The recommended method for testing the Services is with the [Postman](https://www.getpostman.com) application.
 This allows easy visualization of responses, as well as simplifies adding the necessary HTTP Headers. 
 
-***Note:** the CURL command strips off the trailing `$export` from any request URIs, which makes it impossible to correctly test the initial data export request.*
+> Note: the CURL command strips off the trailing `$export` from any request URIs, which makes it impossible to correctly test the initial data export request.
 
 Steps for testing the data export:
 
