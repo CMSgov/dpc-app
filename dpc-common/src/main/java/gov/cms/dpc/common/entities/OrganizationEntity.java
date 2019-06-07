@@ -106,8 +106,8 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
                 .getIdentifier()
                 .stream()
                 // Don't support UNKNOWN systems for now, only things we can use
-                .filter(id -> {
-                    final String system = id.getSystem();
+                .filter(resourceID -> {
+                    final String system = resourceID.getSystem();
                     // If it's null, we can use it
                     try {
                         final DPCIdentifierSystem idSys = DPCIdentifierSystem.fromString(system);
@@ -130,14 +130,14 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         entity.setOrganizationAddress(AddressConverter.convert(resource.getAddressFirstRep()));
 
         // Add all contact info
-        final List<ContactEntity> contacts = resource
+        final List<ContactEntity> contactEntities = resource
                 .getContact()
                 .stream()
                 .map(ContactElementConverter::convert)
                 .collect(Collectors.toList());
         // Add the entity reference
-        contacts.forEach(contact -> contact.setOrganization(entity));
-        entity.setContacts(contacts);
+        contactEntities.forEach(contact -> contact.setOrganization(entity));
+        entity.setContacts(contactEntities);
 
         return entity;
     }

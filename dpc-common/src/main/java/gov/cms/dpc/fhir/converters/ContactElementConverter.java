@@ -15,7 +15,6 @@ public class ContactElementConverter {
 
     public static ContactEntity convert(Organization.OrganizationContactComponent element) {
         final ContactEntity entity = new ContactEntity();
-//        entity.setPurpose(element.getPurpose());
         entity.setName(HumanNameConverter.convert(element.getName()));
 
         final List<ContactPointEntity> collect = element

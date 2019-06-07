@@ -114,7 +114,9 @@ public class EndpointEntity implements Serializable {
     }
 
     @Embeddable
-    public static class ConnectionType {
+    public static class ConnectionType implements Serializable {
+
+        public static final long serialVersionUID = 42L;
 
         @NotEmpty
         private String system;
