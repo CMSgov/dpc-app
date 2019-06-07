@@ -29,7 +29,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     void testBasicRegistration() throws IOException {
 
         // Read in the test file
-        final InputStream inputStream = OrganizationResourceTest.class.getClassLoader().getResourceAsStream("test_org.json");
+        final InputStream inputStream = OrganizationResourceTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
         final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
 
 

@@ -95,10 +95,18 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>${project.basedir}/../src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>src/main/resources</directory>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
+                <artifactId>maven-shade-plugin</artifactIources>
+           <configuration>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
                     <transformers>
                         <transformer
