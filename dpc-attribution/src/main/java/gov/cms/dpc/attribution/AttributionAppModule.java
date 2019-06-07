@@ -16,6 +16,8 @@ import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.macaroons.MacaroonsBakery;
+import gov.cms.dpc.macaroons.ServerLocation;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
@@ -58,9 +60,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao) {
+    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao, MacaroonsBakery bakery) {
         return new UnitOfWorkAwareProxyFactory(hibernate)
-                .create(OrganizationResource.class, OrganizationDAO.class, dao);
+                .create(OrganizationResource.class, new Class<?>[] {OrganizationDAO.class, MacaroonsBakery.class}, new Object[] {dao, bakery});
     }
 
     @Provides
@@ -77,5 +79,11 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     Settings provideSettings() {
         return new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
+    }
+
+    @Provides
+    @ServerLocation
+    String provideServerLocation() {
+        return getEnvironment().getApplicationContext().getServer().getURI().toString();
     }
 }

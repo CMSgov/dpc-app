@@ -3,7 +3,9 @@ package gov.cms.dpc.macaroons;
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
+import gov.cms.dpc.macaroons.store.IRootKeyStore;
 
+import javax.inject.Inject;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
@@ -14,13 +16,16 @@ public class MacaroonsBakery {
     public static final Charset CAVEAT_CHARSET = Charset.forName("UTF-8");
 
     private final String location;
+    private final IRootKeyStore store;
 
-    public MacaroonsBakery(String location) {
+    @Inject
+    public MacaroonsBakery(@ServerLocation String location, IRootKeyStore store) {
         this.location = location;
+        this.store = store;
     }
 
     public Macaroon createMacaroon(List<MacaroonCaveat> caveats) {
-        final MacaroonsBuilder builder = new MacaroonsBuilder(location, "test-secret", "test-identifier");
+        final MacaroonsBuilder builder = new MacaroonsBuilder(location, store.create(), "test-identifier");
 
         addCaveats(builder, caveats);
 

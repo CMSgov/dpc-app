@@ -1,9 +1,11 @@
 package gov.cms.dpc.macaroons;
 
 import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,7 +17,7 @@ class BakeryTest {
 
     @BeforeAll
     static void setup() {
-        bakery = new MacaroonsBakery("http://localhost");
+        bakery = new MacaroonsBakery("http://localhost", new MemoryRootKeyStore(new SecureRandom()));
     }
 
     @Test
