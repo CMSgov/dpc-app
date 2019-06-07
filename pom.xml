@@ -373,6 +373,9 @@
                                 <requireMavenVersion>
                                     <version>[3.0.0,4.0.0)</version>
                                 </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>[11]</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
