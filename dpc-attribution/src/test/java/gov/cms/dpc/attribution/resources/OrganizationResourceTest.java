@@ -66,19 +66,35 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testTokenGeneration() throws IOException {
+        String macaroon;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token", ORGANIZATION_ID));
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/create", ORGANIZATION_ID));
+
+
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should not have found organization");
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
+                macaroon = EntityUtils.toString(response.getEntity());
+                // Verify that the first few bytes are correct, to ensure we encoded correctly.
+                assertTrue(macaroon.startsWith("eyJ2IjoyLCJs"), "Should have correct starting string value");
             }
         }
+
+        // Verify that it's correct.
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/verify?token=%s", ORGANIZATION_ID, macaroon));
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
+            }
+        }
+
     }
 
     @Test
     void testUnknownOrgTokenGeneration() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + "/Organization/1/token");
+            final HttpGet httpGet = new HttpGet(getServerURL() + "/Organization/1/toke/create");
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.NOT_FOUND_404, response.getStatusLine().getStatusCode(), "Should not have found organization");

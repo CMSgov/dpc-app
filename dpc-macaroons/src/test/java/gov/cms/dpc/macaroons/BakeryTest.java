@@ -22,14 +22,12 @@ class BakeryTest {
 
     @Test
     void testSerializationDeserialization() {
-        final Macaroon testMacaroon = bakery
-                .createMacaroon(Collections.singletonList(
-                        new MacaroonCaveat("test_id",
-                                MacaroonCaveat.Operator.EQ, "1234")));
+        macaroonSerializationTest(false);
+    }
 
-        final byte[] macaroonBytes = bakery.serializeMacaroon(testMacaroon);
-        final Macaroon mac2 = bakery.deserializeMacaroon(new String(macaroonBytes));
-        assertEquals(testMacaroon, mac2, "Macaroons should be equal");
+    @Test
+    void testBase64EncodeDecode() {
+        macaroonSerializationTest(true);
     }
 
     @Test
@@ -51,5 +49,16 @@ class BakeryTest {
                                 new MacaroonCaveat("http://test.local",
                                         "test_third_id", MacaroonCaveat.Operator.NEQ,
                                         "wrong value"))));
+    }
+
+    private static void macaroonSerializationTest(boolean base64) {
+        final Macaroon testMacaroon = bakery
+                .createMacaroon(Collections.singletonList(
+                        new MacaroonCaveat("test_id",
+                                MacaroonCaveat.Operator.EQ, "1234")));
+
+        final byte[] macaroonBytes = bakery.serializeMacaroon(testMacaroon, base64);
+        final Macaroon mac2 = bakery.deserializeMacaroon(new String(macaroonBytes));
+        assertEquals(testMacaroon, mac2, "Macaroons should be equal");
     }
 }

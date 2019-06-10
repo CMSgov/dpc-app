@@ -8,6 +8,7 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonsBakery;
+import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.BooleanParam;
 import org.eclipse.jetty.http.HttpStatus;
@@ -73,10 +74,10 @@ public class OrganizationResource extends AbstractOrganizationResource {
     }
 
     @GET
-    @Path("/{organizationID}/token")
+    @Path("/{organizationID}/token/create")
     @UnitOfWork
     @Override
-    public Response getOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("refresh") BooleanParam refresh) {
+    public String getOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("refresh") BooleanParam refresh) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
         final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
@@ -90,6 +91,21 @@ public class OrganizationResource extends AbstractOrganizationResource {
         entity.setTokenIDs(Collections.singletonList(macaroon.identifier));
         this.dao.updateOrganization(entity);
 
-        return Response.ok().entity(this.bakery.serializeMacaroon(macaroon)).build();
+        // Return the
+        return new String(this.bakery.serializeMacaroon(macaroon, true));
+    }
+
+    @GET
+    @Path("/{organizationID}/token/verify")
+    public boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
+        final Macaroon macaroon = this.bakery.deserializeMacaroon(token);
+        try {
+            this.bakery.verifyMacaroon(macaroon);
+        } catch (BakeryException e) {
+            logger.error("Macaroon verification failed.", e);
+            return false;
+        }
+
+        return true;
     }
 }

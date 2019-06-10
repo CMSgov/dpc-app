@@ -24,5 +24,5 @@ public abstract class AbstractOrganizationResource {
 
     @GET
     @Path("/{organizationID}/token")
-    public abstract Response getOrganizationToken(UUID organizationID, BooleanParam refresh);
+    public abstract String getOrganizationToken(UUID organizationID, BooleanParam refresh);
 }
