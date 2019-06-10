@@ -8,6 +8,8 @@ import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
 
@@ -20,6 +22,14 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         final OrganizationEntity entity = new OrganizationEntity().fromFHIR(resource);
         endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
         entity.setEndpoints(endpoints);
+        persist(entity);
+    }
+
+    public Optional<OrganizationEntity> fetchOrganization(UUID organizationID) {
+     return Optional.ofNullable(get(organizationID));
+    }
+
+    public void updateOrganization(OrganizationEntity entity) {
         persist(entity);
     }
 }

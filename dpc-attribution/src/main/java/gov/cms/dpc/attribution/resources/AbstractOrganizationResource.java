@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 @Path("/Organization")
 public abstract class AbstractOrganizationResource {
@@ -23,5 +24,5 @@ public abstract class AbstractOrganizationResource {
 
     @GET
     @Path("/{organizationID}/token")
-    public abstract Response getOrganizationToken(String organizationID, BooleanParam refresh);
+    public abstract Response getOrganizationToken(UUID organizationID, BooleanParam refresh);
 }

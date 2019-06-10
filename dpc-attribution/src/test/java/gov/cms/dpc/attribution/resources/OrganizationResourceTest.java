@@ -65,13 +65,23 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    void testMacaroonGeneration() throws IOException {
+    void testTokenGeneration() throws IOException {
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token", ORGANIZATION_ID));
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should not have found organization");
+            }
+        }
+    }
+
+    @Test
+    void testUnknownOrgTokenGeneration() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet httpGet = new HttpGet(getServerURL() + "/Organization/1/token");
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded"),
-                        () -> assertNotEquals("", EntityUtils.toString(response.getEntity()), "Should not have empty string"));
+                assertEquals(HttpStatus.NOT_FOUND_404, response.getStatusLine().getStatusCode(), "Should not have found organization");
             }
         }
     }

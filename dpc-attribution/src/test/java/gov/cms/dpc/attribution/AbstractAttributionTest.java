@@ -12,6 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 public class AbstractAttributionTest {
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
 
+    protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+
     protected FhirContext ctx = FhirContext.forDstu3();
 
     @BeforeAll

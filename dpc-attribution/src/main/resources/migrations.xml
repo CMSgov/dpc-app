@@ -213,4 +213,10 @@
                 referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="add-token-ids" author="nickrobison-usds">
+        <addColumn tableName="ORGANIZATIONS">
+            <column name="token_ids" type="text"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

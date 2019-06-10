@@ -4,6 +4,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
+import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonsBakery;
@@ -18,13 +19,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class OrganizationResource extends AbstractOrganizationResource {
@@ -74,15 +74,21 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @GET
     @Path("/{organizationID}/token")
+    @UnitOfWork
     @Override
-    public Response getOrganizationToken(@PathParam("organizationID") String organizationID, @QueryParam("refresh") BooleanParam refresh) {
+    public Response getOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("refresh") BooleanParam refresh) {
+        final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
+        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
         // Create some caveats
         final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("organization_id", MacaroonCaveat.Operator.EQ, organizationID)
+                new MacaroonCaveat("organization_id", MacaroonCaveat.Operator.EQ, organizationID.toString())
         );
-
         final Macaroon macaroon = this.bakery.createMacaroon(caveats);
+
+        // Add the macaroon ID to the organization and update it
+        entity.setTokenIDs(Collections.singletonList(macaroon.identifier));
+        this.dao.updateOrganization(entity);
 
         return Response.ok().entity(this.bakery.serializeMacaroon(macaroon)).build();
     }
