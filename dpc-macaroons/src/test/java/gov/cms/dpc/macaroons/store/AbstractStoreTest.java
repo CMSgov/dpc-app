@@ -6,19 +6,19 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-abstract class AbstractStoreTest {
+public abstract class AbstractStoreTest {
 
     private final IRootKeyStore store;
 
-    AbstractStoreTest(IRootKeyStore store) {
+    public AbstractStoreTest(IRootKeyStore store) {
         this.store = store;
     }
 
     @Test
     void simpleCreateTest() {
-        final String key = store.create();
-        final String key2 = store.get("0");
-        assertEquals(key, key2, "Keys should be equal");
+        final IDKeyPair idKeyPair = store.create();
+        final String key2 = store.get(idKeyPair.getId());
+        assertEquals(idKeyPair.getKey(), key2, "Keys should be equal");
     }
 
     @Test

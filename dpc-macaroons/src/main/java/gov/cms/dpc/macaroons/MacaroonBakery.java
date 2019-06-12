@@ -2,6 +2,7 @@ package gov.cms.dpc.macaroons;
 
 import com.github.nitram509.jmacaroons.*;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 
 import java.nio.charset.Charset;
@@ -37,7 +38,8 @@ public class MacaroonBakery {
      * @throws UnsupportedOperationException - if a third-party caveat is passed
      */
     public Macaroon createMacaroon(List<MacaroonCaveat> caveats) {
-        final MacaroonsBuilder builder = new MacaroonsBuilder(location, store.create(), "0");
+        final IDKeyPair idKeyPair = store.create();
+        final MacaroonsBuilder builder = new MacaroonsBuilder(location, idKeyPair.getKey(), idKeyPair.getId());
 
         addCaveats(builder, caveats);
 

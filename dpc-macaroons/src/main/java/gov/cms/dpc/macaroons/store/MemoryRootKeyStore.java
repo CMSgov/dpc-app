@@ -23,8 +23,8 @@ public class MemoryRootKeyStore implements IRootKeyStore {
     }
 
     @Override
-    public String create() {
-        return rootKey;
+    public IDKeyPair create() {
+        return new IDKeyPair("0", rootKey);
     }
 
     @Override
