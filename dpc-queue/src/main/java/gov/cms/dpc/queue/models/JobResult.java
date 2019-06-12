@@ -57,9 +57,6 @@ public class JobResult implements Serializable {
     @Column(name = "count")
     private int count;
 
-    @Column(name = "error_count")
-    private int errorCount;
-
     public JobResult() {
         // for hibernate
     }
@@ -67,7 +64,6 @@ public class JobResult implements Serializable {
     public JobResult(UUID jobID, ResourceType resourceType) {
         this.jobResultID = new JobResultID(jobID, resourceType);
         this.count = 0;
-        this.errorCount = 0;
     }
 
     public JobResultID getJobResultID() {
@@ -98,18 +94,6 @@ public class JobResult implements Serializable {
         count = count + 1;
     }
 
-    public int getErrorCount() {
-        return errorCount;
-    }
-
-    public void setErrorCount(int errorCount) {
-        this.errorCount = errorCount;
-    }
-
-    public void incrementErrorCount() {
-        errorCount = errorCount + 1;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -118,13 +102,12 @@ public class JobResult implements Serializable {
         return new EqualsBuilder()
                 .append(jobResultID, other.jobResultID)
                 .append(count, other.count)
-                .append(errorCount, other.errorCount)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobResultID, count, errorCount);
+        return Objects.hash(jobResultID, count);
     }
 
     @Override
@@ -133,7 +116,6 @@ public class JobResult implements Serializable {
                 "jobID=" + jobResultID.jobID +
                 ", resourceType=" + jobResultID.resourceType +
                 ", count=" + count +
-                ", errorCount=" + errorCount +
                 '}';
     }
 }

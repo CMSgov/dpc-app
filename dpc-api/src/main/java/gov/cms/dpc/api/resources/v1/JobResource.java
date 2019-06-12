@@ -94,7 +94,7 @@ public class JobResource extends AbstractJobResource {
                         result.getResourceType(),
                         String.format("%s/Data/%s", this.baseURL, JobModel.formOutputFileName(result.getJobID(), result.getResourceType())),
                         result.getCount()))
-                .filter(entry -> entry.getCount() > 0)
+                .filter(entry -> entry.getType() != ResourceType.OperationOutcome && entry.getCount() > 0)
                 .collect(Collectors.toList());
     }
 
@@ -106,10 +106,11 @@ public class JobResource extends AbstractJobResource {
     private List<JobCompletionModel.OutputEntry> formErrorOutputList(JobModel job) {
         return job.getJobResults().stream()
                 .map(result -> new JobCompletionModel.OutputEntry(
-                        ResourceType.OperationOutcome,
-                        String.format("%s/Data/%s", this.baseURL, JobModel.formErrorFileName(result.getJobID(), result.getResourceType())),
-                        result.getErrorCount()))
-                .filter(entry -> entry.getCount() > 0)
+                        result.getResourceType(),
+                        String.format("%s/Data/%s", this.baseURL, JobModel.formOutputFileName(result.getJobID(), result.getResourceType())),
+                        result.getCount()))
+                .filter(entry -> entry.getType() == ResourceType.OperationOutcome && entry.getCount() > 0)
                 .collect(Collectors.toList());
+
     }
 }

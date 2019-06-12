@@ -48,7 +48,7 @@ class AggregationEngineTest {
     void setupEach() {
         queue = new MemoryQueue();
         bbclient = Mockito.spy(new MockBlueButtonClient());
-        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), RetryConfig.ofDefaults());
+        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
     }
 
     /**
@@ -81,7 +81,7 @@ class AggregationEngineTest {
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
         var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        var errorFilePath = engine.formErrorFilePath(jobId, ResourceType.Patient);
+        var errorFilePath = engine.formOutputFilePath(jobId, ResourceType.OperationOutcome);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -130,10 +130,10 @@ class AggregationEngineTest {
         assertFalse(queue.getJob(jobId).isEmpty(), "Unable to retrieve job from queue.");
         queue.getJob(jobId).ifPresent(retrievedJob -> {
             assertAll(() -> assertEquals(0, retrievedJob.getJobResults().get(0).getCount()),
-                    () -> assertEquals(0, retrievedJob.getJobResults().get(0).getErrorCount()),
+                    () -> assertEquals(0, retrievedJob.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount()),
                     () -> assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus()));
             assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.Patient))));
-            assertFalse(Files.exists(Path.of(engine.formErrorFilePath(jobId, ResourceType.Patient))));
+            assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.OperationOutcome))));
         });
     }
 
@@ -195,10 +195,10 @@ class AggregationEngineTest {
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJob(jobID).isPresent());
         final var actual = queue.getJob(jobID).get();
-        var expectedErrorPath = engine.formErrorFilePath(jobID, ResourceType.Patient);
+        var expectedErrorPath = engine.formOutputFilePath(jobID, ResourceType.OperationOutcome);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(2, actual.getJobResults().size(), "expected 2 resource types"),
-                () -> assertEquals(1, actual.getJobResults().get(0).getErrorCount(), "expected 1 bad patient-id"),
+                () -> assertEquals(3, actual.getJobResults().size(), "expected 3 (= 2 output + 1 error) resource types"),
+                () -> assertEquals(2, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 2 (= 1 bad patient x 2 resource types)"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
@@ -239,10 +239,10 @@ class AggregationEngineTest {
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJob(jobID).isPresent());
         final var actual = queue.getJob(jobID).get();
-        var expectedErrorPath = engine.formErrorFilePath(jobID, ResourceType.Patient);
+        var expectedErrorPath = engine.formOutputFilePath(jobID, ResourceType.OperationOutcome);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(1, actual.getJobResults().size(), "expected a single resource type"),
-                () -> assertEquals(1, actual.getJobResults().get(0).getErrorCount(), "expected 1 bad patient fetch"),
+                () -> assertEquals(2, actual.getJobResults().size(), "expected a single resource type"),
+                () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 }

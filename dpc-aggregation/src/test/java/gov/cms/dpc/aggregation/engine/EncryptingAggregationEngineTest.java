@@ -43,7 +43,7 @@ class EncryptingAggregationEngineTest {
     private static final String RSA_PRIVATE_KEY_PATH = "test_rsa_private_key.der";
     private static final String RSA_PUBLIC_KEY_PATH = "test_rsa_public_key.der";
     private JobQueue queue;
-    private EncryptingAggregationEngine engine;
+    private AggregationEngine engine;
     private RSAPublicKey rsaPublicKey;
     private RSAPrivateKey rsaPrivateKey;
 
@@ -51,14 +51,17 @@ class EncryptingAggregationEngineTest {
 
     @BeforeAll
     static void setupAll() {
-        config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        // Use the test.conf as the base for config. encrypt.conf will only enable encryption.
+        var baseConfig = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        var overrideConfig = ConfigFactory.parseString("{\"encryption\":{\"enabled\":true}}");
+        config = overrideConfig.withFallback(baseConfig);
     }
 
     @BeforeEach
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
         BlueButtonClient bbclient = new MockBlueButtonClient();
-        engine = new EncryptingAggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
+        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
         final InputStream testPublicKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PUBLIC_KEY_PATH);
@@ -102,8 +105,8 @@ class EncryptingAggregationEngineTest {
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
-        var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
-        var metadataFilePath = engine.formOutputMetadataPath(jobId, ResourceType.Patient);
+        var outputFilePath = engine.formEncryptedOutputFilePath(jobId, ResourceType.Patient);
+        var metadataFilePath = engine.formEncryptedMetadataPath(jobId, ResourceType.Patient);
 
         assertTrue(Files.exists(Path.of(outputFilePath)), "Output file doesn't exist in tmp");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Encrypt metadata doesn't exist");
@@ -136,8 +139,8 @@ class EncryptingAggregationEngineTest {
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
-        var errorFilePath = engine.formErrorFilePath(jobId, ResourceType.Patient);
-        var metadataFilePath = engine.formErrorMetadataPath(jobId, ResourceType.Patient);
+        var errorFilePath = engine.formEncryptedOutputFilePath(jobId, ResourceType.OperationOutcome);
+        var metadataFilePath = engine.formEncryptedMetadataPath(jobId, ResourceType.OperationOutcome);
 
         assertTrue(Files.exists(Path.of(errorFilePath)), "Error file is missing");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Error metadata file is missing");
