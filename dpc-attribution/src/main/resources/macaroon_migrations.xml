@@ -21,7 +21,7 @@
         </createTable>
 
         <createIndex tableName="root_keys" indexName="root_key_expire_idx">
-            <column name="expires"></column>
+            <column name="expires"/>
         </createIndex>
 
         <!--        Add the expiration trigger-->
