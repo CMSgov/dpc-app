@@ -1,19 +1,17 @@
 package gov.cms.dpc.macaroons;
 
-import com.github.nitram509.jmacaroons.Macaroon;
-import com.github.nitram509.jmacaroons.MacaroonVersion;
-import com.github.nitram509.jmacaroons.MacaroonsBuilder;
-import com.github.nitram509.jmacaroons.MacaroonsVerifier;
+import com.github.nitram509.jmacaroons.*;
+import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 
-import javax.inject.Inject;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MacaroonsBakery {
+public class MacaroonBakery {
 
     public static final Charset CAVEAT_CHARSET = Charset.forName("UTF-8");
     private static final Base64.Encoder encoder = Base64.getUrlEncoder();
@@ -21,11 +19,12 @@ public class MacaroonsBakery {
 
     private final String location;
     private final IRootKeyStore store;
+    private final List<String> defaultVerifiers;
 
-    @Inject
-    public MacaroonsBakery(@ServerLocation String location, IRootKeyStore store) {
+    MacaroonBakery(String location, IRootKeyStore store, List<String> defaultVerifiers) {
         this.location = location;
         this.store = store;
+        this.defaultVerifiers = defaultVerifiers;
     }
 
     public Macaroon createMacaroon(List<MacaroonCaveat> caveats) {
@@ -42,13 +41,26 @@ public class MacaroonsBakery {
                 .collect(Collectors.toList());
     }
 
-    public void verifyMacaroon(Macaroon macaroon) {
+    public Macaroon addCaveats(Macaroon macaroon, MacaroonCaveat... caveats) {
+        final MacaroonsBuilder builder = MacaroonsBuilder.modify(macaroon);
+        addCaveats(builder, Arrays.asList(caveats));
+
+        return builder.getMacaroon();
+    }
+
+    public void verifyMacaroon(Macaroon macaroon, String... caveatVerifiers) {
         final MacaroonsVerifier verifier = new MacaroonsVerifier(macaroon);
-        verifier.satisfyExact("organization_id = 0c527d2e-2e8a-4808-b11d-0fa06baf8254");
+        // Add the default caveats and the provided ones
+        this.defaultVerifiers.forEach(verifier::satisfyExact);
+        Arrays.stream(caveatVerifiers).forEach(verifier::satisfyExact);
 
         // Get the macaroon secret from the store
         final String secret = this.store.get(macaroon.identifier);
-        verifier.assertIsValid(secret);
+        try {
+            verifier.assertIsValid(secret);
+        } catch (MacaroonValidationException e) {
+            throw new BakeryException(e.getMessage());
+        }
     }
 
     public byte[] serializeMacaroon(Macaroon macaroon, boolean base64Encode) {
@@ -81,5 +93,27 @@ public class MacaroonsBakery {
                     }
                     builder.add_first_party_caveat(caveat.getCaveatText());
                 });
+    }
+
+    public static class MacaroonBakeryBuilder {
+
+        private final List<String> caveatVerifiers;
+        private final String serverLocation;
+        private final IRootKeyStore rootKeyStore;
+
+        public MacaroonBakeryBuilder(String serverLocation, IRootKeyStore keyStore) {
+            this.caveatVerifiers = new ArrayList<>();
+            this.serverLocation = serverLocation;
+            this.rootKeyStore = keyStore;
+        }
+
+        public MacaroonBakeryBuilder addDefaultVerifier(String caveatVerifier) {
+            this.caveatVerifiers.add(caveatVerifier);
+            return this;
+        }
+
+        public MacaroonBakery build() {
+            return new MacaroonBakery(this.serverLocation, this.rootKeyStore, this.caveatVerifiers);
+        }
     }
 }

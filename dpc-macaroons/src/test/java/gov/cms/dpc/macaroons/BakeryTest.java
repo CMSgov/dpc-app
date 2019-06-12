@@ -1,6 +1,7 @@
 package gov.cms.dpc.macaroons;
 
 import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BakeryTest {
 
-    private static MacaroonsBakery bakery;
+    private static MacaroonBakery bakery;
 
     @BeforeAll
     static void setup() {
-        bakery = new MacaroonsBakery("http://localhost", new MemoryRootKeyStore(new SecureRandom()));
+        bakery = new MacaroonBakery("http://localhost", new MemoryRootKeyStore(new SecureRandom()), Collections.emptyList());
     }
 
     @Test
@@ -60,5 +61,25 @@ class BakeryTest {
         final byte[] macaroonBytes = bakery.serializeMacaroon(testMacaroon, base64);
         final Macaroon mac2 = bakery.deserializeMacaroon(new String(macaroonBytes));
         assertEquals(testMacaroon, mac2, "Macaroons should be equal");
+    }
+
+    @Test
+    void testDefaultCaveatChecking() {
+        final MacaroonBakery caveatBakery = new MacaroonBakery.MacaroonBakeryBuilder("http://test.local", new MemoryRootKeyStore(new SecureRandom()))
+                .addDefaultVerifier("test_id = 1234")
+                .build();
+
+        final Macaroon macaroon = caveatBakery
+                .createMacaroon(Collections.singletonList(
+                        new MacaroonCaveat("test_id",
+                                MacaroonCaveat.Operator.EQ, "1234")));
+
+        caveatBakery.verifyMacaroon(macaroon);
+
+        // Add an additional caveat and try to validate again, which should fail
+        final Macaroon macaroon1 = caveatBakery.addCaveats(macaroon, new MacaroonCaveat("expires", MacaroonCaveat.Operator.LT, "now"));
+
+        assertThrows(BakeryException.class, () -> caveatBakery.verifyMacaroon(macaroon1));
+
     }
 }

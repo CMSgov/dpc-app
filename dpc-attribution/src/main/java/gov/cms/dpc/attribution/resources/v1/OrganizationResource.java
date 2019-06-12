@@ -6,8 +6,8 @@ import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
+import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
-import gov.cms.dpc.macaroons.MacaroonsBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.params.BooleanParam;
@@ -32,10 +32,10 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
     private final OrganizationDAO dao;
-    private final MacaroonsBakery bakery;
+    private final MacaroonBakery bakery;
 
     @Inject
-    OrganizationResource(OrganizationDAO dao, MacaroonsBakery bakery) {
+    OrganizationResource(OrganizationDAO dao, MacaroonBakery bakery) {
         this.dao = dao;
         this.bakery = bakery;
     }
@@ -100,7 +100,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     public boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
         final Macaroon macaroon = this.bakery.deserializeMacaroon(token);
         try {
-            this.bakery.verifyMacaroon(macaroon);
+            this.bakery.verifyMacaroon(macaroon, String.format("organization_id = %s", organizationID.toString()));
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed.", e);
             return false;

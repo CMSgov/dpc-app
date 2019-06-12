@@ -17,8 +17,8 @@ public class BakeryModule extends PrivateModule {
     protected void configure() {
         bind(IRootKeyStore.class).to(MemoryRootKeyStore.class);
         expose(IRootKeyStore.class);
-        bind(MacaroonsBakery.class);
-        expose(MacaroonsBakery.class);
+        bind(MacaroonBakery.class);
+        expose(MacaroonBakery.class);
     }
 
     @Provides

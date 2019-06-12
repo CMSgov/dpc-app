@@ -16,8 +16,7 @@ import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import gov.cms.dpc.macaroons.MacaroonsBakery;
-import gov.cms.dpc.macaroons.ServerLocation;
+import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
@@ -25,7 +24,8 @@ import org.jooq.conf.Settings;
 
 import java.time.Duration;
 
-@SuppressWarnings("rawtypes") // Until we merge DPC-104
+@SuppressWarnings("rawtypes")
+        // Until we merge DPC-104
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
     AttributionAppModule() {
@@ -60,9 +60,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao, MacaroonsBakery bakery) {
+    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao, MacaroonBakery bakery) {
         return new UnitOfWorkAwareProxyFactory(hibernate)
-                .create(OrganizationResource.class, new Class<?>[] {OrganizationDAO.class, MacaroonsBakery.class}, new Object[] {dao, bakery});
+                .create(OrganizationResource.class, new Class<?>[]{OrganizationDAO.class, MacaroonBakery.class}, new Object[]{dao, bakery});
     }
 
     @Provides
@@ -79,11 +79,5 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     Settings provideSettings() {
         return new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
-    }
-
-    @Provides
-    @ServerLocation
-    String provideServerLocation() {
-        return getEnvironment().getApplicationContext().getServer().getURI().toString();
     }
 }
