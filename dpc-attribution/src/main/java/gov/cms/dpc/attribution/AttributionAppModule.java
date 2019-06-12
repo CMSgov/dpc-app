@@ -13,6 +13,7 @@ import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.OrganizationResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
+import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
@@ -25,6 +26,7 @@ import org.jooq.conf.Settings;
 
 import javax.inject.Singleton;
 import java.time.Duration;
+import java.util.List;
 
 @SuppressWarnings("rawtypes")
         // Until we merge DPC-104
@@ -35,6 +37,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
     @Override
     public void configure(Binder binder) {
+        binder.requestStaticInjection(DPCHibernateBundle.class);
         binder.bind(ProviderDAO.class);
         binder.bind(AttributionEngine.class).to(RosterEngine.class);
         binder.bind(V1AttributionResource.class);
@@ -88,5 +91,16 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     MacaroonBakery providerBakery(IRootKeyStore store) {
         return new MacaroonBakery.MacaroonBakeryBuilder(getConfiguration().getPublicServerURL(), store)
                 .build();
+    }
+
+    @Provides
+    SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
+        return factory.getSessionFactory();
+    }
+
+    @Provides
+    @AdditionalPaths
+    List<String> provideAdditionalPaths() {
+        return List.of("gov.cms.dpc.macaroons.store.hibernate.entities");
     }
 }

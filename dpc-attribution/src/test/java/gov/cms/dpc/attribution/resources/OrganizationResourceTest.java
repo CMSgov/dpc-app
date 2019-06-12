@@ -31,7 +31,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
         // Read in the test file
         final InputStream inputStream = OrganizationResourceTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
-        final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
+        final Bundle resource  = (Bundle) ctx.newJsonParser().parseResource(inputStream);
 
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {

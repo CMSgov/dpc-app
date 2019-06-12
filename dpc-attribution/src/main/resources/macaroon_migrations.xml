@@ -1,0 +1,47 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+    <changeSet id="create-rootkey-table" author="nickrobison-usds">
+        <createTable tableName="root_keys">
+            <column name="id" type="VARCHAR">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="key" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="root_keys" indexName="root_key_expire_idx">
+            <column name="expires"></column>
+        </createIndex>
+
+        <!--        Add the expiration trigger-->
+        <createProcedure>
+            <![CDATA[
+            CREATE OR REPLACE FUNCTION expire_root_keys() RETURNS trigger
+            LANGUAGE plpgsql
+            AS $$
+            BEGIN
+            DELETE FROM root_keys WHERE expires < NOW();
+            RETURN NEW;
+            END;
+            $$;
+            ]]>
+        </createProcedure>
+
+        <createProcedure>
+            CREATE TRIGGER root_key_expiration_trigger
+            BEFORE INSERT ON root_keys
+            EXECUTE PROCEDURE expire_root_keys();
+        </createProcedure>
+    </changeSet>
+</databaseChangeLog>
