@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution;
 
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
 import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -26,6 +27,11 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @JsonProperty("sundial")
     private SundialConfiguration sundial = new SundialConfiguration();
 
+    @Valid
+    @NotNull
+    @JsonProperty("tokens")
+    private TokenPolicy tokenPolicy = new TokenPolicy();
+    
     @NotEmpty
     private String publicServerURL;
 
@@ -52,5 +58,13 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setPublicServerURL(String publicServerURL) {
         this.publicServerURL = publicServerURL;
+    }
+
+    public TokenPolicy getTokenPolicy() {
+        return tokenPolicy;
+    }
+
+    public void setTokenPolicy(TokenPolicy tokenPolicy) {
+        this.tokenPolicy = tokenPolicy;
     }
 }

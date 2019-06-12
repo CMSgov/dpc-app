@@ -20,9 +20,9 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class OrganizationResourceTest extends AbstractAttributionTest {
+class OrganizationRegistrationTest extends AbstractAttributionTest {
 
-    private OrganizationResourceTest() {
+    private OrganizationRegistrationTest() {
         // Not used
     }
 
@@ -30,7 +30,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     void testBasicRegistration() throws IOException {
 
         // Read in the test file
-        final InputStream inputStream = OrganizationResourceTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
+        final InputStream inputStream = OrganizationRegistrationTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
         final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
 
 

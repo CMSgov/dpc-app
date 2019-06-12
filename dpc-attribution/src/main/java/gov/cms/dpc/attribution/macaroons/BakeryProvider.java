@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.macaroons;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
+import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 
@@ -22,11 +23,12 @@ public class BakeryProvider implements Provider<MacaroonBakery> {
 
     @Override
     public MacaroonBakery get() {
+        final TokenPolicy tokenPolicy = this.configuration.getTokenPolicy();
         return new MacaroonBakery.MacaroonBakeryBuilder(configuration.getPublicServerURL(), store)
-                .addDefaultCaveatSupplier(new VersionCaveatSupplier())
-                .addDefaultCaveatSupplier(new ExpirationCaveatSupplier())
-                .addDefaultVerifier(new VersionCaveatVerifier())
-                .addDefaultVerifier(new ExpirationCaveatVerifier())
+                .addDefaultCaveatSupplier(new VersionCaveatSupplier(tokenPolicy))
+                .addDefaultCaveatSupplier(new ExpirationCaveatSupplier(tokenPolicy))
+                .addDefaultVerifier(new VersionCaveatVerifier(tokenPolicy))
+                .addDefaultVerifier(new ExpirationCaveatVerifier(tokenPolicy))
                 .build();
     }
 }
