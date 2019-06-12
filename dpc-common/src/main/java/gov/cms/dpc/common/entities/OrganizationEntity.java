@@ -132,10 +132,9 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
                 // Don't support UNKNOWN systems for now, only things we can use
                 .filter(resourceID -> {
                     final String system = resourceID.getSystem();
-                    // If it's null, we can use   it
                     try {
                         final DPCIdentifierSystem idSys = DPCIdentifierSystem.fromString(system);
-                        // MPI does not work
+                        // MBI does not work, so filter it out
                         return idSys != DPCIdentifierSystem.MBI;
                     } catch (Exception e) {
                         return false;
@@ -168,6 +167,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     @Override
     public Organization toFHIR() {
+        // TODO: Add support for generating FHIR directly (DPC-276)
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
