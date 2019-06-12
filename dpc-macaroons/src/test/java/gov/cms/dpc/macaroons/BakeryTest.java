@@ -68,7 +68,7 @@ class BakeryTest {
     void testDefaultCaveatChecking() {
 
         final CaveatVerifier verifier = caveat -> {
-            if (caveat.getCaveatText().equals("test_id = 1234")) {
+            if (caveat.toString().equals("test_id = 1234")) {
                 return Optional.empty();
             }
             return Optional.of("Caveat is not satisfied");

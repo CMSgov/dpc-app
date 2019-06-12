@@ -95,7 +95,7 @@ public class MacaroonBakery {
         // Convert the String checks into a caveat wrapper by generating a lambda which handles teh actual checking
         final List<CaveatWrapper> verifiers = Arrays.stream(exactVerifiers)
                 .map(ev -> new CaveatWrapper((caveat) -> {
-                    if (caveat.getCaveatText().equals(ev)) {
+                    if (caveat.toString().equals(ev)) {
                         return Optional.empty();
                     }
                     return Optional.of("Caveat is not satisfied");
@@ -157,12 +157,11 @@ public class MacaroonBakery {
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {
         caveats
                 .forEach(caveat -> {
-                    // We'll need to expand this to support third-party caveats, at some point
+                    // TODO: Eventually we'll need to support third-party caveats
                     if (caveat.isThirdParty()) {
-                        // TODO: Eventually we'll need to support third-party caveats
                         throw new UnsupportedOperationException("We do not currently support third-party caveats");
                     }
-                    builder.add_first_party_caveat(caveat.getCaveatText());
+                    builder.add_first_party_caveat(caveat.toString());
                 });
     }
 

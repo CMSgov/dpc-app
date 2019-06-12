@@ -148,7 +148,8 @@ public class MacaroonCaveat {
      *
      * @return - {@link String} formatted caveat id
      */
-    public String getCaveatText() {
+    @Override
+    public String toString() {
         return String.format("%s %s %s", this.getKey(), this.getOp().getOp(), this.getValue());
     }
 
