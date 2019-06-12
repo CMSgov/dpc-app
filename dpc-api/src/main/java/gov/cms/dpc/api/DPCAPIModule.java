@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.annotations.AttributionService;
+import gov.cms.dpc.api.cli.DemoCommand;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.health.AttributionHealthCheck;
 import gov.cms.dpc.api.resources.TestResource;

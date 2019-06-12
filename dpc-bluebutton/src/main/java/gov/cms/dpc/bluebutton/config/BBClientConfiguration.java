@@ -1,7 +1,6 @@
 package gov.cms.dpc.bluebutton.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.Configuration;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -11,7 +10,7 @@ public class BBClientConfiguration {
 
     @NotEmpty
     @JsonProperty("healthcheck")
-    private String HealthcheckName = "BlueButtonHealthCheck";
+    private String healthcheckName = "BlueButtonHealthCheck";
 
     @NotEmpty
     private String serverBaseUrl;
@@ -47,11 +46,11 @@ public class BBClientConfiguration {
     }
 
     public String getHealthcheckName() {
-        return HealthcheckName;
+        return healthcheckName;
     }
 
     public void setHealthcheckName(String healthcheckName) {
-        HealthcheckName = healthcheckName;
+        this.healthcheckName = healthcheckName;
     }
 
     public static class TimeoutConfiguration {

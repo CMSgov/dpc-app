@@ -78,4 +78,139 @@
         <modifyDataType tableName="attributions" columnName="created_at" newDataType="TIMESTAMP WITH TIME ZONE"/>
     </changeSet>
 
+    <changeSet id="add-organization-table" author="nickrobison-usds">
+        <createTable tableName="ORGANIZATIONS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_system" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_value" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_use" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_type" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line1" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line2" type="VARCHAR"/>
+            <column name="city" type="VARCHAR"/>
+            <column name="district" type="VARCHAR"/>
+            <column name="state" type="VARCHAR"/>
+            <column name="postal_code" type="VARCHAR"/>
+            <column name="country" type="VARCHAR"/>
+        </createTable>
+
+        <createIndex tableName="ORGANIZATIONS" indexName="organization_idx" unique="true">
+            <column name="id_system"/>
+            <column name="id_value"/>
+        </createIndex>
+
+        <createTable tableName="ORGANIZATION_CONTACTS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID"/>
+            <column name="name_use" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="given" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="family" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prefix" type="VARCHAR"/>
+            <column name="suffix" type="VARCHAR"/>
+            <column name="address_use" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_type" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line1" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line2" type="VARCHAR"/>
+            <column name="city" type="VARCHAR"/>
+            <column name="district" type="VARCHAR"/>
+            <column name="state" type="VARCHAR"/>
+            <column name="postal_code" type="VARCHAR"/>
+            <column name="country" type="VARCHAR"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="ORGANIZATION_CONTACTS"
+                baseColumnNames="organization_id"
+                constraintName="fk_organization_ids"
+                referencedTableName="ORGANIZATIONS"
+                referencedColumnNames="id"/>
+
+        <createTable tableName="CONTACT_TELECOMS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="contact_id" type="UUID"/>
+            <column name="system" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="use" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rank" type="TINYINT"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="CONTACT_TELECOMS"
+                baseColumnNames="contact_id"
+                constraintName="fk_org_contact_telecoms"
+                referencedTableName="ORGANIZATION_CONTACTS"
+                referencedColumnNames="id"/>
+
+        <createTable tableName="ORGANIZATION_ENDPOINTS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID"/>
+            <column name="status" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="system" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="validation_status" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="validation_message" type="VARCHAR"/>
+
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="ORGANIZATION_ENDPOINTS"
+                baseColumnNames="organization_id"
+                constraintName="fk_org_endpoints"
+                referencedTableName="ORGANIZATIONS"
+                referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>
