@@ -221,11 +221,12 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
+                        <configuration combine.children="append">
                             <showWarnings>true</showWarnings>
                             <compilerArgs>
                                 <arg>-XDcompilePolicy=simple</arg>
-                                <arg>-Xplugin:ErrorProne</arg>
+                                <!--All ErrorProne configuration options need to be included in a single arg line-->
+                                <arg>-Xplugin:ErrorProne -XepExcludedPaths:.*/target/generated-sources/.*</arg>
                                 <arg>-Xlint:all</arg>
                                 <arg>-Werror</arg>
                             </compilerArgs>
@@ -282,10 +283,6 @@
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.6.1</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
                 </plugin>
                 <!-- Base configuration for Docker images -->
                 <plugin>
@@ -353,7 +350,7 @@
                         </goals>
                         <configuration>
                             <!--Exclude generated sources, such as Jooq-->
-                            <excludePackageNames>gov.cms.dpc.attribution.dao</excludePackageNames>
+                            <excludePackageNames>gov.cms.dpc.attribution.daFo</excludePackageNames>
                         </configuration>
                     </execution>
                 </executions>

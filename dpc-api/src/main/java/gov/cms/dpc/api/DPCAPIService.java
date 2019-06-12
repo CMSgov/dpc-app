@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.cli.DemoCommand;
+import gov.cms.dpc.api.cli.OrgRegistrationCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.queue.JobQueueModule;
@@ -37,6 +38,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
         bootstrap.addCommand(new DemoCommand());
+        bootstrap.addCommand(new OrgRegistrationCommand());
     }
 
     @Override

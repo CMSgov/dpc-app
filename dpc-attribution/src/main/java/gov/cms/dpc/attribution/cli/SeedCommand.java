@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
+import gov.cms.dpc.attribution.dao.tables.Organizations;
 import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
@@ -73,6 +74,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             // Truncate everything
             context.truncate(Patients.PATIENTS).cascade().execute();
             context.truncate(Providers.PROVIDERS).cascade().execute();
+            context.truncate(Organizations.ORGANIZATIONS).cascade().execute();
 
             this.seedProcessor
                     .extractProviderMap()

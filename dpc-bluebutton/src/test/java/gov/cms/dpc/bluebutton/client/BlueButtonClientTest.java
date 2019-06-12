@@ -54,7 +54,7 @@ class BlueButtonClientTest {
     @BeforeAll
     public static void setupBlueButtonClient() throws IOException {
         conf = getTestConfig();
-        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule(getClientConfig()));
+        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
 
         mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));

@@ -4,10 +4,13 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.health.RosterEngineHealthCheck;
+import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterEngine;
+import gov.cms.dpc.attribution.resources.v1.EndpointResource;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
+import gov.cms.dpc.attribution.resources.v1.OrganizationResource;
 import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
@@ -31,7 +34,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(ProviderDAO.class);
         binder.bind(AttributionEngine.class).to(RosterEngine.class);
         binder.bind(V1AttributionResource.class);
+        binder.bind(OrganizationDAO.class);
         binder.bind(TruncateDatabase.class);
+        binder.bind(EndpointResource.class);
 
         // Healthchecks
         binder.bind(RosterEngineHealthCheck.class);
@@ -50,6 +55,12 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     GroupResource provideAttributionResource(DPCHibernateBundle hibernateModule, AttributionEngine engine) {
         return new UnitOfWorkAwareProxyFactory(hibernateModule)
                 .create(GroupResource.class, AttributionEngine.class, engine);
+    }
+
+    @Provides
+    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(hibernate)
+                .create(OrganizationResource.class, OrganizationDAO.class, dao);
     }
 
     @Provides

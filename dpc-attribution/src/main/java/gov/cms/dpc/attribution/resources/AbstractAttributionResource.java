@@ -12,6 +12,12 @@ public abstract class AbstractAttributionResource {
     @Path("/Group")
     public abstract AbstractGroupResource groupOperations();
 
+    @Path("/Organization")
+    public abstract AbstractOrganizationResource orgOperations();
+
+    @Path("/Endpoint")
+    public abstract AbstractEndpointResource endpointOperations();
+
     @GET
     @Path("/_healthy")
     public boolean checkHealth() {
