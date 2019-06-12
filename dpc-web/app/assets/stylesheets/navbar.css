@@ -1,0 +1,16 @@
+.navbar-brand {
+  padding-right: 10rem;
+}
+
+.navbar-bottom-panel {
+  padding-bottom: 5%;
+  padding-top: 3rem;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  margin-bottom: 3rem;
+
+  font-size: 2.5rem;
+
+  background-color: #1C304A;
+  color: #00CFFF
+}
