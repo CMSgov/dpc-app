@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterEngine;
+import gov.cms.dpc.attribution.macaroons.BakeryProvider;
 import gov.cms.dpc.attribution.resources.v1.EndpointResource;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.attribution.resources.v1.OrganizationResource;
@@ -18,13 +19,11 @@ import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.macaroons.MacaroonBakery;
-import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 
-import javax.inject.Singleton;
 import java.time.Duration;
 import java.util.List;
 
@@ -44,6 +43,8 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(OrganizationDAO.class);
         binder.bind(TruncateDatabase.class);
         binder.bind(EndpointResource.class);
+
+        binder.bind(MacaroonBakery.class).toProvider(BakeryProvider.class);
 
         // Healthchecks
         binder.bind(RosterEngineHealthCheck.class);
@@ -84,13 +85,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     Settings provideSettings() {
         return new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
-    }
-
-    @Provides
-    @Singleton
-    MacaroonBakery providerBakery(IRootKeyStore store) {
-        return new MacaroonBakery.MacaroonBakeryBuilder(getConfiguration().getPublicServerURL(), store)
-                .build();
     }
 
     @Provides

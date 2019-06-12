@@ -18,14 +18,16 @@ public class MacaroonBakery {
     private final String location;
     private final IRootKeyStore store;
     private final List<CaveatWrapper> defaultVerifiers;
+    private final List<CaveatSupplier> defaultSuppliers;
 
-    MacaroonBakery(String location, IRootKeyStore store, List<CaveatVerifier> defaultVerifiers) {
+    MacaroonBakery(String location, IRootKeyStore store, List<CaveatVerifier> defaultVerifiers, List<CaveatSupplier> defaultSuppliers) {
         this.location = location;
         this.store = store;
         this.defaultVerifiers = defaultVerifiers
                 .stream()
                 .map(CaveatWrapper::new)
                 .collect(Collectors.toList());
+        this.defaultSuppliers = defaultSuppliers;
     }
 
     /**
@@ -41,7 +43,13 @@ public class MacaroonBakery {
         final IDKeyPair idKeyPair = store.create();
         final MacaroonsBuilder builder = new MacaroonsBuilder(location, idKeyPair.getKey(), idKeyPair.getId());
 
-        addCaveats(builder, caveats);
+        List<MacaroonCaveat> defaultCaveats = this.defaultSuppliers
+                .stream()
+                .map(CaveatSupplier::get)
+                .collect(Collectors.toList());
+        defaultCaveats.addAll(caveats);
+
+        addCaveats(builder, defaultCaveats);
 
         return builder.getMacaroon();
     }
@@ -188,9 +196,10 @@ public class MacaroonBakery {
      */
     public static class MacaroonBakeryBuilder {
 
-        private final List<CaveatVerifier> caveatVerifiers;
         private final String serverLocation;
         private final IRootKeyStore rootKeyStore;
+        private final List<CaveatVerifier> caveatVerifiers;
+        private final List<CaveatSupplier> caveatSuppliers;
 
         /**
          * Default parameters for {@link MacaroonBakery}
@@ -199,9 +208,22 @@ public class MacaroonBakery {
          * @param keyStore       - {@link IRootKeyStore} to use for handling {@link Macaroon} secret keys
          */
         public MacaroonBakeryBuilder(String serverLocation, IRootKeyStore keyStore) {
-            this.caveatVerifiers = new ArrayList<>();
             this.serverLocation = serverLocation;
             this.rootKeyStore = keyStore;
+            this.caveatVerifiers = new ArrayList<>();
+            this.caveatSuppliers = new ArrayList<>();
+        }
+
+        /**
+         * Add a {@link CaveatSupplier} which will be applied to every {@link MacaroonCaveat} being created
+         * Note: These caveats will NOT be added to any {@link Macaroon} which is cloned from an existing {@link Macaroon}
+         *
+         * @param caveatSupplier - {@link CaveatSupplier} which generates caveat
+         * @return - {@link MacaroonBakeryBuilder}
+         */
+        public MacaroonBakeryBuilder addDefaultCaveatSupplier(CaveatSupplier caveatSupplier) {
+            this.caveatSuppliers.add(caveatSupplier);
+            return this;
         }
 
         /**
@@ -221,7 +243,10 @@ public class MacaroonBakery {
          * @return - {@link MacaroonBakery}
          */
         public MacaroonBakery build() {
-            return new MacaroonBakery(this.serverLocation, this.rootKeyStore, this.caveatVerifiers);
+            return new MacaroonBakery(this.serverLocation,
+                    this.rootKeyStore,
+                    this.caveatVerifiers,
+                    this.caveatSuppliers);
         }
     }
 }

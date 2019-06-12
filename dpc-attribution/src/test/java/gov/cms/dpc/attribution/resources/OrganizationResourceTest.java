@@ -31,7 +31,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
         // Read in the test file
         final InputStream inputStream = OrganizationResourceTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
-        final Bundle resource  = (Bundle) ctx.newJsonParser().parseResource(inputStream);
+        final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
 
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -84,7 +84,9 @@ class OrganizationResourceTest extends AbstractAttributionTest {
             final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/verify?token=%s", ORGANIZATION_ID, macaroon));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
+                final String entity = EntityUtils.toString(response.getEntity());
+                assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization"),
+                        () -> assertEquals("true", entity, "Should be valid"));
             }
         }
 
@@ -98,26 +100,28 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         }
 
         // Pass refresh, which should work
-//        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-//            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/create?refresh=true", ORGANIZATION_ID));
-//
-//
-//            try (CloseableHttpResponse response = client.execute(httpGet)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
-//                final String m2 = EntityUtils.toString(response.getEntity());
-//                // Verify that the first few bytes are correct, to ensure we encoded correctly.
-//                assertNotEquals(macaroon, m2, "Should have different starting value");
-//            }
-//        }
-//
-//        // Verify that it's correct.
-//        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-//            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/verify?token=%s", ORGANIZATION_ID, macaroon));
-//
-//            try (CloseableHttpResponse response = client.execute(httpGet)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
-//            }
-//        }
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/create?refresh=true", ORGANIZATION_ID));
+
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
+                final String m2 = EntityUtils.toString(response.getEntity());
+                // Verify that the first few bytes are correct, to ensure we encoded correctly.
+                assertNotEquals(macaroon, m2, "Should have different starting value");
+            }
+        }
+
+        // Verify that it's correct.
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/verify?token=%s", ORGANIZATION_ID, macaroon));
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                final String entity = EntityUtils.toString(response.getEntity());
+                assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization"),
+                        () -> assertEquals("true", entity, "Should be valid"));
+            }
+        }
     }
 
     @Test

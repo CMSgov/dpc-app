@@ -75,6 +75,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             context.truncate(Patients.PATIENTS).cascade().execute();
             context.truncate(Providers.PROVIDERS).cascade().execute();
             context.truncate(Organizations.ORGANIZATIONS).cascade().execute();
+            context.truncate("root_keys").cascade();
 
             this.seedProcessor
                     .extractProviderMap()

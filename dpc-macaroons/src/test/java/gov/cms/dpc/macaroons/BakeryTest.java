@@ -19,7 +19,7 @@ class BakeryTest {
 
     @BeforeAll
     static void setup() {
-        bakery = new MacaroonBakery("http://localhost", new MemoryRootKeyStore(new SecureRandom()), Collections.emptyList());
+        bakery = new MacaroonBakery("http://localhost", new MemoryRootKeyStore(new SecureRandom()), Collections.emptyList(), Collections.emptyList());
     }
 
     @Test
@@ -91,6 +91,33 @@ class BakeryTest {
 
         // Add a verifier and try again
         caveatBakery.verifyMacaroon(macaroon1, "expires < now");
+    }
 
+    @Test
+    void testDefaultCaveatSuppliers() {
+
+        final MacaroonCaveat test_caveat = new MacaroonCaveat("test_caveat", MacaroonCaveat.Operator.EQ, "1");
+        final CaveatSupplier testSupplier = () -> test_caveat;
+        final CaveatVerifier testVerifier = (caveat) -> {
+            if (caveat.getKey().equals("test_caveat")) {
+                assertEquals(caveat, test_caveat, "Caveats should match");
+            }
+            return Optional.empty();
+        };
+
+        final MacaroonBakery caveatBakery = new MacaroonBakery.MacaroonBakeryBuilder("http://test.local", new MemoryRootKeyStore(new SecureRandom()))
+                .addDefaultCaveatSupplier(testSupplier)
+                .addDefaultVerifier(testVerifier)
+                .build();
+
+        final Macaroon macaroon = caveatBakery
+                .createMacaroon(Collections.singletonList(
+                        new MacaroonCaveat("test_id",
+                                MacaroonCaveat.Operator.EQ, "1234")));
+
+        final List<MacaroonCaveat> macCaveats = bakery.getCaveats(macaroon);
+        assertEquals(2, macCaveats.size(), "Should have two caveats");
+
+        caveatBakery.verifyMacaroon(macaroon, "test_id = 1234");
     }
 }
