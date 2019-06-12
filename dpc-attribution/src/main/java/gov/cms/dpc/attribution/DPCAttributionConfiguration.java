@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
 import io.dropwizard.db.DataSourceFactory;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 import javax.validation.Valid;
@@ -25,6 +26,9 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @JsonProperty("sundial")
     private SundialConfiguration sundial = new SundialConfiguration();
 
+    @NotEmpty
+    private String publicServerURL;
+
     @Override
     public DataSourceFactory getDatabase() {
         return database;
@@ -40,5 +44,13 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setExpirationThreshold(int expirationThreshold) {
         this.expirationThreshold = Duration.ofDays(expirationThreshold);
+    }
+
+    public String getPublicServerURL() {
+        return publicServerURL;
+    }
+
+    public void setPublicServerURL(String publicServerURL) {
+        this.publicServerURL = publicServerURL;
     }
 }

@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class MacaroonCaveat {
 
     // Regex for matching key, op and value from a given caveat string
-    private static final Pattern caveatPattern = Pattern.compile("([a-zA-Z0-9_]*)\\s([=><!]{1,2})\\s([a-zA-Z0-9_]*[^\\s])");
+    private static final Pattern caveatPattern = Pattern.compile("([a-zA-Z0-9_]*)\\s([=><!]{1,2})\\s(.*)");
 
     public enum Operator {
         /**

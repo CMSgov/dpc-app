@@ -17,11 +17,13 @@ import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 
+import javax.inject.Singleton;
 import java.time.Duration;
 
 @SuppressWarnings("rawtypes")
@@ -79,5 +81,12 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     Settings provideSettings() {
         return new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
+    }
+
+    @Provides
+    @Singleton
+    MacaroonBakery providerBakery(IRootKeyStore store) {
+        return new MacaroonBakery.MacaroonBakeryBuilder(getConfiguration().getPublicServerURL(), store)
+                .build();
     }
 }
