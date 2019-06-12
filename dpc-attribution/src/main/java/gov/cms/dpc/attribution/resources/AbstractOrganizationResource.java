@@ -5,12 +5,12 @@ import io.dropwizard.jersey.params.BooleanParam;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @Path("/Organization")
 public abstract class AbstractOrganizationResource {
 
@@ -23,6 +23,10 @@ public abstract class AbstractOrganizationResource {
     public abstract Response createOrganization(Bundle bundle);
 
     @GET
-    @Path("/{organizationID}/token")
-    public abstract String getOrganizationToken(UUID organizationID, BooleanParam refresh);
+    @Path("/{organizationID}/token/create")
+    public abstract String getOrganizationToken(UUID organizationID, Optional<BooleanParam> refresh);
+
+    @GET
+    @Path("/{organizationID}/token/verify")
+    public abstract boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token);
 }

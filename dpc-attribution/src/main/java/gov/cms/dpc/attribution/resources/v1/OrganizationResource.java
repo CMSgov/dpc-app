@@ -77,10 +77,17 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Path("/{organizationID}/token/create")
     @UnitOfWork
     @Override
-    public String getOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("refresh") BooleanParam refresh) {
+    public String getOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("refresh") Optional<BooleanParam> refresh) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
         final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
+
+        // If they already have a token, we don't want to overwrite it, unless they explicitly ask for it.
+        boolean shouldRefresh = refresh.orElseGet(() -> new BooleanParam("false")).get();
+        if (!entity.getTokenIDs().isEmpty() && !shouldRefresh) {
+            throw new WebApplicationException("Token already exists, pass 'refresh' to overwrite", Response.Status.NOT_ACCEPTABLE);
+        }
+
         // Create some caveats
         final List<MacaroonCaveat> caveats = List.of(
                 new MacaroonCaveat("organization_id", MacaroonCaveat.Operator.EQ, organizationID.toString())
@@ -91,10 +98,11 @@ public class OrganizationResource extends AbstractOrganizationResource {
         entity.setTokenIDs(Collections.singletonList(macaroon.identifier));
         this.dao.updateOrganization(entity);
 
-        // Return the
+        // Return the base64 encoded Macaroon
         return new String(this.bakery.serializeMacaroon(macaroon, true));
     }
 
+    @Override
     @GET
     @Path("/{organizationID}/token/verify")
     public boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
