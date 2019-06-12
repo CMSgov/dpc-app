@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
  * Defines the data necessary to generate a Macaroon caveat.
  * This will always include a Key (e.g. user_id), an Operation (e.g '=') and a Value (e.g. user123).
  * It may optionally include a location (defined as any non-empty string value) which makes it a third-party caveat
+ * <p/>
+ * The underlying string format is \"{caveat key} {operator} {caveat value}\"
  */
 public class MacaroonCaveat {
 
@@ -167,9 +169,13 @@ public class MacaroonCaveat {
 
     static MacaroonCaveat parseFromPacket(CaveatPacket packet) {
         final String packetValue = packet.getValueAsText();
-        final Matcher matcher = caveatPattern.matcher(packetValue);
+        return parseFromString(packetValue);
+    }
+
+    static MacaroonCaveat parseFromString(String caveatValue) {
+        final Matcher matcher = caveatPattern.matcher(caveatValue);
         if (!matcher.matches() || matcher.groupCount() != 3) {
-            throw new IllegalArgumentException(String.format("Cannot parse caveat: %s", packetValue));
+            throw new IllegalArgumentException(String.format("Cannot parse caveat: %s", caveatValue));
         }
         return new MacaroonCaveat(matcher.group(1), Operator.fromString(matcher.group(2)), matcher.group(3));
     }

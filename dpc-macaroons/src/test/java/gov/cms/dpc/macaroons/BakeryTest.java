@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,8 +66,15 @@ class BakeryTest {
 
     @Test
     void testDefaultCaveatChecking() {
+
+        final CaveatVerifier verifier = caveat -> {
+            if (caveat.getCaveatText().equals("test_id = 1234")) {
+                return Optional.empty();
+            }
+            return Optional.of("Caveat is not satisfied");
+        };
         final MacaroonBakery caveatBakery = new MacaroonBakery.MacaroonBakeryBuilder("http://test.local", new MemoryRootKeyStore(new SecureRandom()))
-                .addDefaultVerifier("test_id = 1234")
+                .addDefaultVerifier(verifier)
                 .build();
 
         final Macaroon macaroon = caveatBakery
@@ -80,6 +88,9 @@ class BakeryTest {
         final Macaroon macaroon1 = caveatBakery.addCaveats(macaroon, new MacaroonCaveat("expires", MacaroonCaveat.Operator.LT, "now"));
 
         assertThrows(BakeryException.class, () -> caveatBakery.verifyMacaroon(macaroon1));
+
+        // Add a verifier and try again
+        caveatBakery.verifyMacaroon(macaroon1, "expires < now");
 
     }
 }
