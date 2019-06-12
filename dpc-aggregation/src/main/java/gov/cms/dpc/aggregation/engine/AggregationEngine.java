@@ -13,6 +13,7 @@ import io.github.resilience4j.retry.RetryConfig;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
@@ -24,6 +25,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.CipherOutputStream;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +48,7 @@ public class AggregationEngine implements Runnable {
     private final FhirContext fhirContext;
     private final int resourcesPerFile;
     private Disposable subscribe;
+    private boolean encryptionEnabled;
 
     /**
      * Create an engine
