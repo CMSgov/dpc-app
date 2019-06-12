@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.typesafe.config.Config;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
@@ -14,37 +15,41 @@ import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
-import io.github.resilience4j.retry.transformer.RetryTransformer;
+import io.reactivex.Emitter;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.Subject;
+import io.reactivex.subjects.UnicastSubject;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.CipherOutputStream;
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public class AggregationEngine implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
     private static final char DELIM = '\n';
 
-    final String exportPath;
+    private final String exportPath;
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
     private final RetryConfig retryConfig;
+    private final Config config;
     private final IParser jsonParser;
+    private final int resourcesPerFile;
     private Disposable subscribe;
+    private boolean encryptionEnabled;
 
     /**
      * Create an engine
@@ -56,12 +61,15 @@ public class AggregationEngine implements Runnable {
      * @param retryConfig - {@link RetryConfig} injected config for setting up retry handler
      */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext context, @ExportPath String exportPath, RetryConfig retryConfig) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext context, @ExportPath String exportPath, Config config, RetryConfig retryConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.exportPath = exportPath;
+        this.config = config;
         this.retryConfig = retryConfig;
         this.jsonParser = context.newJsonParser();
+        this.resourcesPerFile = config.hasPath("resourcesPerFile") ? config.getInt("resourcesPerFile") : 1000;
+        this.encryptionEnabled = config.hasPath("encryption.enabled") && config.getBoolean("encryption.enabled");
     }
 
     /**
@@ -92,14 +100,12 @@ public class AggregationEngine implements Runnable {
         return String.format("%s/%s.ndjson", exportPath, JobModel.formOutputFileName(jobID, resourceType));
     }
 
-    /**
-     * Form the full file name of an output file
-     *
-     * @param jobID        - {@link UUID} ID of export job
-     * @param resourceType - {@link ResourceType} to append to filename
-     */
-    public String formErrorFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson", exportPath, JobModel.formErrorFileName(jobID, resourceType));
+    public String formEncryptedOutputFilePath(UUID jobID, ResourceType resourceType) {
+        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.formOutputFileName(jobID, resourceType));
+    }
+
+    public String formEncryptedMetadataPath(UUID jobID, ResourceType resourceType) {
+        return String.format("%s/%s-metadata.json", exportPath, JobModel.formOutputFileName(jobID, resourceType));
     }
 
     /**
@@ -141,61 +147,33 @@ public class AggregationEngine implements Runnable {
         List<String> attributedBeneficiaries = job.getPatients();
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
 
-        // A job resource per resource type
-        final Disposable resourceSubscriber = Observable.fromIterable(job.getJobResults())
-                .subscribe(
-                    // onNext
-                    jobResult -> completeResource(job, jobResult),
-                    // onError
-                    error -> {
-                        logger.error("Cannot process job {}", jobID, error);
-                        this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
-                    },
-                    // onComplete
-                    () -> this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults()));
+        final Subject<Resource> errorSubject = UnicastSubject.<Resource>create().toSerialized();
+        errorSubject.buffer(resourcesPerFile).subscribe(new BatchWritingObserver(job, ResourceType.OperationOutcome));
 
-        // Kill the subscriber when we exit, otherwise we'll leak resources
-        resourceSubscriber.dispose();
+        Observable.fromIterable(job.getResourceTypes()).blockingSubscribe(
+            // onNext
+            resourceType -> completeResource(job, resourceType, errorSubject),
+            // onError
+            error -> {
+                logger.error("Cannot process job {}", jobID, error);
+                errorSubject.onComplete();
+                this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
+            },
+            // onComplete
+            () -> {
+                errorSubject.onComplete();
+                this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
+            });
+
     }
 
-    /**
-     * Handle the file aspects of a resource
-     *
-     * @param job       - Job that is executing
-     * @param jobResult - The results for a current resource
-     * @throws IOException - File operation execeptions
-     */
-    protected void completeResource(JobModel job, JobResult jobResult) throws IOException {
-        final var resourceType = jobResult.getResourceType();
-        final var jobID = jobResult.getJobID();
-
-        if (!JobModel.isValidResourceType(resourceType)) {
-            throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
-        }
-
-        try (final var writer = new ByteArrayOutputStream(); final var errorWriter = new ByteArrayOutputStream()) {
-            // Process the job for the specified resource type
-            workResource(writer, errorWriter, job, jobResult);
-            writeToFile(writer.toByteArray(), formOutputFilePath(jobID, resourceType));
-            writeToFile(errorWriter.toByteArray(), formErrorFilePath(jobID, resourceType));
-        }
-    }
-
-    /**
-     * Process a single resourceType. Write a single provider NDJSON file as well as operational errors.
-     *
-     * @param writer      - the stream to write results
-     * @param errorWriter - the stream to write operational resources
-     * @param job         - the job to process
-     * @param jobResult   - the result of the work on the resource type.
-     */
-    protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
+    private void completeResource(JobModel job, ResourceType resourceType, Subject<Resource> errorSubject) {
         Observable.fromIterable(job.getPatients())
-                .flatMap(patient -> this.fetchResource(job.getJobID(), patient, jobResult.getResourceType()))
-                .concatMap(this::fetchAllNextBundles)
+                .flatMap(patient -> this.fetchResources(job.getJobID(), patient, resourceType, errorSubject))
                 .concatMap(this::unpackBundles)
+                .buffer(resourcesPerFile)
                 .subscribeOn(Schedulers.io())
-                .blockingSubscribe(resource -> writeResource(jobResult, writer, errorWriter, resource));
+                .blockingSubscribe(new BatchWritingObserver(job, resourceType));
     }
 
     /**
@@ -207,59 +185,81 @@ public class AggregationEngine implements Runnable {
      * @param resourceType - {@link ResourceType} to fetch from BlueButton
      * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
      */
-    private Observable<Resource> fetchResource(UUID jobID, String patientID, ResourceType resourceType) {
-        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-        RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
+    private Observable<Resource> fetchResources(UUID jobID, String patientID, ResourceType resourceType, Subject<Resource> errorSubject) {
+        return Observable.create(emitter -> {
+            try {
+                // replace with a switch expression in Java 12
+                Function<String, Resource> bbMethod;
+                switch (resourceType) {
+                    case Patient:
+                        bbMethod = this.bbclient::requestPatientFromServer;
+                        break;
+                    case ExplanationOfBenefit:
+                        bbMethod = this.bbclient::requestEOBFromServer;
+                        break;
+                    case Coverage:
+                        bbMethod = this.bbclient::requestCoverageFromServer;
+                        break;
+                    default:
+                        throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
+                }
 
-        return Observable.fromCallable(() -> {
-            logger.debug("Fetching patient {} from Blue Button", patientID);
-            switch (resourceType) {
-                case Patient:
-                    return this.bbclient.requestPatientFromServer(patientID);
-                case ExplanationOfBenefit:
-                    return this.bbclient.requestEOBFromServer(patientID);
-                case Coverage:
-                    return this.bbclient.requestCoverageFromServer(patientID);
-                default:
-                    throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
+                // Fetch the resource in a retry loop
+                Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
+                final var fetchFirstDecorated = Retry.decorateFunction(retry, bbMethod);
+                final Resource firstResource = fetchFirstDecorated.apply(patientID);
+                emitter.onNext(firstResource);
+
+                // If this is a bundle, fetch the next bundles
+                if (firstResource.getResourceType() == ResourceType.Bundle) {
+                    fetchAllNextBundles(emitter, (Bundle)firstResource, resourceType, patientID, errorSubject);
+                }
+
+                // All done
+                emitter.onComplete();
+            } catch (JobQueueFailure ex) {
+                // Fatal for this job
+                emitter.onError(ex);
+            } catch(Exception ex){
+                // Per patient errors are not fatal for the job, just turn them into operation outcomes
+                logger.error("Error fetching from Blue Button for a patient", ex);
+                errorSubject.onNext(formOperationOutcome(resourceType, patientID, ex));
+                emitter.onComplete();
             }
-        })
-                // Turn errors into retries
-                .compose(retryTransformer)
-                // Turn after-retry errors into OperationalOutcomes
-                .onErrorReturn(ex -> {
-                    logger.error("Error fetching from Blue Button", ex);
-                    return formOperationOutcome(patientID, ex);
-                });
+        });
     }
 
     /**
-     * Check for bundle resources. Fetch the all the next bundles if there is one, otherwise do nothing.
-     * @param resource - The resource to examine and possibly unpack
-     * @return A stream of resources
+     *  Fetch the all the next bundles if there are any.
+     *
+     * @param emitter to write the bundles to
+     * @param firstBundle to get the next link
+     * @param resourceType that we are fetching
+     * @param patientID for this patient
+     * @param errorSubject write operational error here
      */
-    private Observable<Resource> fetchAllNextBundles(Resource resource) {
-        if (resource.getResourceType() != ResourceType.Bundle) {
-            return Observable.just(resource);
-        }
-        final var bundles = new ArrayList<Resource>();
-        bundles.add(resource);
-        for(var bundle = (Bundle)resource; bundle.getLink(Bundle.LINK_NEXT) != null;) {
+    private void fetchAllNextBundles(Emitter<Resource> emitter,
+                                     Bundle firstBundle,
+                                     ResourceType resourceType,
+                                     String patientID,
+                                     Subject<Resource> errorSubject) {
+        for (var bundle = firstBundle; bundle.getLink(Bundle.LINK_NEXT) != null; ) {
             Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-            final var decorated = Retry.decorateFunction(retry , this.bbclient::requestNextBundleFromServer);
+            final var decorated = Retry.decorateFunction(retry, this.bbclient::requestNextBundleFromServer);
             try {
                 bundle = decorated.apply(bundle);
-                bundles.add(bundle);
-            } catch(Exception ex){
+                emitter.onNext(bundle);
+            } catch (Exception ex) {
+                errorSubject.onNext(formOperationOutcome(resourceType, patientID, ex));
                 logger.error("Error fetching the next bundle from Blue Button", ex);
-               return Observable.just(formOperationOutcome(ex));
             }
         }
-        return Observable.fromArray(bundles.toArray(Resource[]::new));
     }
 
     /**
-     * Check for bundle resources. Unpack bundle resources into their constituent resources, otherwise do nothing.
+     * Check for bundle resources. Unpack bundle resources into their constituent resources, otherwise do nothing. Used
+     * in conjuction with flatMap or concatMap operators.
+     *
      * @param resource - The resource to examine and possibly unpack
      * @return A stream of resources
      */
@@ -272,30 +272,79 @@ public class AggregationEngine implements Runnable {
         return Observable.fromArray(entries);
     }
 
+    private class BatchWritingObserver implements Observer<List<Resource>> {
+        private ResourceType resourceType;
+        private UUID jobID;
+        private JobModel jobModel;
+        private JobResult jobResult;
+
+        BatchWritingObserver(JobModel jobModel, ResourceType resourceType) {
+            this.resourceType = resourceType;
+            this.jobID = jobModel.getJobID();
+            this.jobModel = jobModel;
+            this.jobResult = jobModel.getJobResult(resourceType).orElseThrow();
+        }
+
+        @Override
+        public void onSubscribe(Disposable disposable) { }
+
+        @Override
+        public void onNext(List<Resource> resources) {
+            try {
+                final var byteStream = new ByteArrayOutputStream();
+
+                OutputStream writer = byteStream;
+                String outputPath = formOutputFilePath(jobID, resourceType);
+                if (encryptionEnabled) {
+                    outputPath = formEncryptedOutputFilePath(jobID, resourceType);
+                    var metadataPath = formEncryptedMetadataPath(jobID, resourceType);
+                    try(final CipherBuilder cipherBuilder = new CipherBuilder(config);
+                        final FileOutputStream metadataWriter = new FileOutputStream(metadataPath)) {
+                        cipherBuilder.generateKeyMaterial();
+                        writer = new CipherOutputStream(writer, cipherBuilder.formCipher());
+                        final String json = cipherBuilder.getMetadata(jobModel.getRsaPublicKey());
+                        metadataWriter.write(json.getBytes(StandardCharsets.UTF_8));
+                    }
+                }
+
+                for (var resource: resources) {
+                    writeResource(jobResult, writer, resource);
+                }
+                writer.flush();
+                writer.close();
+                writeToFile(byteStream.toByteArray(), outputPath);
+            } catch(IOException ex) {
+                throw new JobQueueFailure(jobModel.getJobID(), "IO error writing a resource", ex);
+            } catch(SecurityException ex) {
+                throw new JobQueueFailure(jobModel.getJobID(), "Error encrypting a resource", ex);
+            } catch(Exception ex) {
+                throw new JobQueueFailure(jobModel.getJobID(), "General failure consuming a resource", ex);
+            }
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            throw new JobQueueFailure(jobModel.getJobID(), "Error generating a resource", throwable);
+        }
+
+        @Override
+        public void onComplete() {
+            logger.info("Finished writing all {} resources", resourceType.toString());
+        }
+    }
+
     /**
      * Write the resource into the appropriate streams.
      *
      * @param jobResult   - increment counts in this result
-     * @param mainWriter  - the main stream for successful resources
-     * @param errorWriter - the error stream for operational outcome resources
+     * @param writer  - the main stream for successful resources
      * @param resource    - the resource to write out
      */
-    protected void writeResource(JobResult jobResult, OutputStream mainWriter, OutputStream errorWriter, Resource resource) {
+    protected void writeResource(JobResult jobResult, OutputStream writer, Resource resource) {
         try {
-            String description;
-            OutputStream writer;
-            if (ResourceType.OperationOutcome.equals(resource.getResourceType())) {
-                description = "Writing {} to error file";
-                writer = errorWriter;
-                jobResult.incrementErrorCount();
-            } else {
-                description = "Writing {} to file";
-                writer = mainWriter;
-                jobResult.incrementCount();
-            }
-
+            jobResult.incrementCount();
             final String str = jsonParser.encodeResourceToString(resource);
-            logger.trace(description, str);
+            logger.trace("Writing to file on thread {} : {}", Thread.currentThread().getName(), str);
             writer.write(str.getBytes(StandardCharsets.UTF_8));
             writer.write(DELIM);
         } catch (IOException e) {
@@ -306,51 +355,29 @@ public class AggregationEngine implements Runnable {
     /**
      * Create a OperationalOutcome resource from an exception with a patient
      *
+     * @param resourceType - the resource type that was trying to be fetched
      * @param patientID - the id of the patient involved in the error
      * @param ex        - the exception to turn into a Operational Outcome
      * @return an operation outcome
      */
-    private OperationOutcome formOperationOutcome(String patientID, Throwable ex) {
+    private OperationOutcome formOperationOutcome(ResourceType resourceType, String patientID, Throwable ex) {
         String details;
         if (ex instanceof ResourceNotFoundException) {
-            details = "Patient not found in Blue Button";
+            details = String.format("%s resource not found in Blue Button for id: %s", resourceType.toString(), patientID);
         } else if (ex instanceof BaseServerResponseException) {
             final var serverException = (BaseServerResponseException) ex;
-            details = String.format("Blue Button error: HTTP status: %s", serverException.getStatusCode());
+            details = String.format("Blue Button error fetching %s resource. HTTP return code: %s", resourceType.toString(), serverException.getStatusCode());
         } else {
             details = String.format("Internal error: %s", ex.getMessage());
         }
 
-        final var location = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
+        final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
         final var outcome = new OperationOutcome();
         outcome.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                 .setCode(OperationOutcome.IssueType.EXCEPTION)
                 .setDetails(new CodeableConcept().setText(details))
-                .setLocation(location);
-        return outcome;
-    }
-
-    /**
-     * Create a OperationalOutcome resource from an exception
-     *
-     * @param ex        - the exception to turn into a Operational Outcome
-     * @return an operation outcome
-     */
-    private OperationOutcome formOperationOutcome(Throwable ex) {
-        String details;
-        if (ex instanceof BaseServerResponseException) {
-            final var serverException = (BaseServerResponseException) ex;
-            details = String.format("Blue Button error: HTTP status: %s", serverException.getStatusCode());
-        } else {
-            details = String.format("Internal error: %s", ex.getMessage());
-        }
-
-        final var outcome = new OperationOutcome();
-        outcome.addIssue()
-                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                .setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setDetails(new CodeableConcept().setText(details));
+                .setLocation(patientLocation);
         return outcome;
     }
 

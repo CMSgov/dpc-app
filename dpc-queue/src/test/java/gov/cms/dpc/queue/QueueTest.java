@@ -158,7 +158,7 @@ public class QueueTest {
 
         // Fake work
         actualJob.getJobResult(ResourceType.Patient).ifPresent(result -> result.incrementCount());
-        actualJob.getJobResult(ResourceType.ExplanationOfBenefit).ifPresent(result -> result.incrementErrorCount());
+        actualJob.getJobResult(ResourceType.OperationOutcome).ifPresent(result -> result.incrementCount());
 
         // Complete job
         queue.completeJob(actualJob.getJobID(), JobStatus.COMPLETED, actualJob.getJobResults());

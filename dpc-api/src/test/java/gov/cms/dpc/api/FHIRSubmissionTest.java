@@ -124,9 +124,9 @@ public class FHIRSubmissionTest {
         final var job = queue.workJob();
         assertTrue(job.isPresent());
         final var jobID = job.get().getLeft();
-        final var resources = job.get().getRight().getJobResults();
+        final var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 1),
-                () -> assertTrue(resources.contains(new JobResult(jobID, ResourceType.Patient))));
+                () -> assertTrue(resources.contains(ResourceType.Patient)));
     }
 
     /**
@@ -204,7 +204,7 @@ public class FHIRSubmissionTest {
         // Should yield a job with all resource types
         var job = queue.workJob();
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getJobResults();
+        var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()));
     }
 }

@@ -2,12 +2,12 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import javax.validation.constraints.NotNull;
 import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -49,15 +49,13 @@ public class JobModel implements Serializable  {
         return String.format("%s.%s", jobID.toString(), resourceType.getPath());
     }
 
-    /**
-     * Form a error file name for passed in parameters.
-     *
-     * @param jobID - the jobs id
-     * @param resourceType - the resource type
-     * @return a file name
-     */
-    public static String formErrorFileName(UUID jobID, ResourceType resourceType) {
-        return String.format("%s.%s.error", jobID.toString(), resourceType.getPath());
+    static private List<JobResult> formJobResultsList(UUID jobID, List<ResourceType> types) {
+        final var jobResults = types
+                .stream()
+                .map(resourceType -> new JobResult(jobID, resourceType))
+                .collect(Collectors.toCollection(ArrayList::new));
+        jobResults.add(new JobResult(jobID, ResourceType.OperationOutcome));
+        return jobResults;
     }
 
     /**
@@ -87,6 +85,13 @@ public class JobModel implements Serializable  {
     @Convert(converter = StringListConverter.class)
     @Column(name = "patients", columnDefinition = "text")
     private List<String> patients;
+
+    /**
+     * The list of resources for this job. Set at job creation.
+     */
+    @Convert(converter = ResourceTypeListConverter.class)
+    @Column(name = "resource_types")
+    private List<ResourceType> resourceTypes;
 
     /**
      * The current status of this job
@@ -123,7 +128,8 @@ public class JobModel implements Serializable  {
 
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
-        this.jobResults = resourceTypes.stream().map(resourceType -> new JobResult(jobID, resourceType)).collect(Collectors.toList());
+        this.resourceTypes = resourceTypes;
+        this.jobResults = formJobResultsList(jobID, resourceTypes);
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -131,7 +137,8 @@ public class JobModel implements Serializable  {
 
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
         this.jobID = jobID;
-        this.jobResults = resourceTypes.stream().map(resourceType -> new JobResult(jobID, resourceType)).collect(Collectors.toList());
+        this.resourceTypes = resourceTypes;
+        this.jobResults = formJobResultsList(jobID, resourceTypes);
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -171,7 +178,7 @@ public class JobModel implements Serializable  {
     }
 
     public List<ResourceType> getResourceTypes() {
-        return jobResults.stream().map(JobResult::getResourceType).collect(Collectors.toList());
+        return resourceTypes;
     }
 
     public Optional<JobResult> getJobResult(ResourceType forResourceType) {
@@ -282,4 +289,6 @@ public class JobModel implements Serializable  {
                 ", completeTime=" + completeTime +
                 '}';
     }
+
+
 }

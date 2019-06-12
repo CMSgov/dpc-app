@@ -7,6 +7,7 @@ import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
@@ -105,9 +106,8 @@ public class JobResourceTest {
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
-                () -> assertEquals(0, completion.getError().size()));
+                () -> assertEquals(1, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
             assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, entry.getType())), entry.getUrl());
         }
     }
@@ -128,8 +128,8 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        assertEquals(1, job.getJobResults().size());
-        job.getJobResults().forEach(JobResult::incrementErrorCount);
+        assertEquals(2, job.getJobResults().size());
+        job.getJobResult(ResourceType.OperationOutcome).orElseThrow().incrementCount();
         queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 
         // Test the response for ok
@@ -143,7 +143,7 @@ public class JobResourceTest {
                 () -> assertEquals(1, completion.getError().size()));
         JobCompletionModel.OutputEntry entry = completion.getError().get(0);
         assertEquals(ResourceType.OperationOutcome, entry.getType());
-        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formErrorFileName(jobID, ResourceType.Patient)), entry.getUrl());
+        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, ResourceType.OperationOutcome)), entry.getUrl());
     }
 
     /**
