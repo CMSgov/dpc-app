@@ -17,7 +17,6 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.reactivex.Emitter;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.Subject;
@@ -30,6 +29,7 @@ import javax.crypto.CipherOutputStream;
 import javax.inject.Inject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -148,32 +148,43 @@ public class AggregationEngine implements Runnable {
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
 
         final Subject<Resource> errorSubject = UnicastSubject.<Resource>create().toSerialized();
-        errorSubject.buffer(resourcesPerFile).subscribe(new BatchWritingObserver(job, ResourceType.OperationOutcome));
+        final Observable<JobResult> errorResult = errorSubject
+                .buffer(resourcesPerFile)
+                .map(batch -> writeBatch(job, ResourceType.OperationOutcome, batch));
 
-        Observable.fromIterable(job.getResourceTypes()).blockingSubscribe(
-            // onNext
-            resourceType -> completeResource(job, resourceType, errorSubject),
-            // onError
-            error -> {
-                logger.error("Cannot process job {}", jobID, error);
-                errorSubject.onComplete();
-                this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
-            },
-            // onComplete
-            () -> {
-                errorSubject.onComplete();
-                this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
-            });
+        Observable.fromIterable(job.getResourceTypes())
+                .flatMap(resourceType -> completeResource(job, resourceType, errorSubject))
+                .doFinally(errorSubject::onComplete)
+                .concatWith(errorResult)
+                .blockingSubscribe(
+                        // onNext
+                        job::addJobResult,
+                        // onError
+                        error -> {
+                            logger.error("Cannot process job {}", jobID, error);
+                            this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
+                        },
+                        // onComplete
+                        () -> {
+                            this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
+                        });
 
     }
 
-    private void completeResource(JobModel job, ResourceType resourceType, Subject<Resource> errorSubject) {
-        Observable.fromIterable(job.getPatients())
+    /**
+     * Fetch and write a specific resource type
+     * @param job context
+     * @param resourceType to process
+     * @param errorSubject to record errors from Blue Button
+     * @return A new job result observable
+     */
+    private Observable<JobResult> completeResource(JobModel job, ResourceType resourceType, Subject<Resource> errorSubject) {
+        return Observable.fromIterable(job.getPatients())
                 .flatMap(patient -> this.fetchResources(job.getJobID(), patient, resourceType, errorSubject))
+                .subscribeOn(Schedulers.io())
                 .concatMap(this::unpackBundles)
                 .buffer(resourcesPerFile)
-                .subscribeOn(Schedulers.io())
-                .blockingSubscribe(new BatchWritingObserver(job, resourceType));
+                .map(batch -> writeBatch(job, resourceType, batch));
     }
 
     /**
@@ -205,6 +216,7 @@ public class AggregationEngine implements Runnable {
                 }
 
                 // Fetch the resource in a retry loop
+                logger.debug("Fetching {} from BlueButton on thread {} for {}", resourceType.toString(), Thread.currentThread().getName(), jobID);
                 Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
                 final var fetchFirstDecorated = Retry.decorateFunction(retry, bbMethod);
                 final Resource firstResource = fetchFirstDecorated.apply(patientID);
@@ -221,6 +233,7 @@ public class AggregationEngine implements Runnable {
                 // Fatal for this job
                 emitter.onError(ex);
             } catch(Exception ex){
+                // Otherwise, capture the BB error.
                 // Per patient errors are not fatal for the job, just turn them into operation outcomes
                 logger.error("Error fetching from Blue Button for a patient", ex);
                 errorSubject.onNext(formOperationOutcome(resourceType, patientID, ex));
@@ -247,6 +260,7 @@ public class AggregationEngine implements Runnable {
             Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
             final var decorated = Retry.decorateFunction(retry, this.bbclient::requestNextBundleFromServer);
             try {
+                logger.debug("Fetching next {} from BlueButton on thread {}", resourceType.toString(), Thread.currentThread().getName());
                 bundle = decorated.apply(bundle);
                 emitter.onNext(bundle);
             } catch (Exception ex) {
@@ -272,83 +286,66 @@ public class AggregationEngine implements Runnable {
         return Observable.fromArray(entries);
     }
 
-    private class BatchWritingObserver implements Observer<List<Resource>> {
-        private ResourceType resourceType;
-        private UUID jobID;
-        private JobModel jobModel;
-        private JobResult jobResult;
+    /**
+     * Write a batch of resources to a file. Encrypt if the encryption is enabled.
+     *
+     * @param job context
+     * @param resourceType to write
+     * @param batch is the list of resources to write
+     * @return The JobResult associated with this file
+     */
+    private JobResult writeBatch(JobModel job, ResourceType resourceType, List<Resource> batch) {
+        try {
+            final var jobID = job.getJobID();
+            final var jobResult = new JobResult(jobID, resourceType);
+            final var byteStream = new ByteArrayOutputStream();
 
-        BatchWritingObserver(JobModel jobModel, ResourceType resourceType) {
-            this.resourceType = resourceType;
-            this.jobID = jobModel.getJobID();
-            this.jobModel = jobModel;
-            this.jobResult = jobModel.getJobResult(resourceType).orElseThrow();
-        }
-
-        @Override
-        public void onSubscribe(Disposable disposable) { }
-
-        @Override
-        public void onNext(List<Resource> resources) {
-            try {
-                final var byteStream = new ByteArrayOutputStream();
-
-                OutputStream writer = byteStream;
-                String outputPath = formOutputFilePath(jobID, resourceType);
-                if (encryptionEnabled) {
-                    outputPath = formEncryptedOutputFilePath(jobID, resourceType);
-                    var metadataPath = formEncryptedMetadataPath(jobID, resourceType);
-                    try(final CipherBuilder cipherBuilder = new CipherBuilder(config);
-                        final FileOutputStream metadataWriter = new FileOutputStream(metadataPath)) {
-                        cipherBuilder.generateKeyMaterial();
-                        writer = new CipherOutputStream(writer, cipherBuilder.formCipher());
-                        final String json = cipherBuilder.getMetadata(jobModel.getRsaPublicKey());
-                        metadataWriter.write(json.getBytes(StandardCharsets.UTF_8));
-                    }
-                }
-
-                for (var resource: resources) {
-                    writeResource(jobResult, writer, resource);
-                }
-                writer.flush();
-                writer.close();
-                writeToFile(byteStream.toByteArray(), outputPath);
-            } catch(IOException ex) {
-                throw new JobQueueFailure(jobModel.getJobID(), "IO error writing a resource", ex);
-            } catch(SecurityException ex) {
-                throw new JobQueueFailure(jobModel.getJobID(), "Error encrypting a resource", ex);
-            } catch(Exception ex) {
-                throw new JobQueueFailure(jobModel.getJobID(), "General failure consuming a resource", ex);
+            OutputStream writer = byteStream;
+            String outputPath = formOutputFilePath(jobID, resourceType);
+            if (encryptionEnabled) {
+                outputPath = formEncryptedOutputFilePath(jobID, resourceType);
+                writer = formCipherStream(writer, job, resourceType);
             }
-        }
 
-        @Override
-        public void onError(Throwable throwable) {
-            throw new JobQueueFailure(jobModel.getJobID(), "Error generating a resource", throwable);
-        }
+            for (var resource: batch) {
+                jobResult.incrementCount();
+                final String str = jsonParser.encodeResourceToString(resource);
+                writer.write(str.getBytes(StandardCharsets.UTF_8));
+                writer.write(DELIM);
+            }
+            writer.flush();
+            writer.close();
+            writeToFile(byteStream.toByteArray(), outputPath);
 
-        @Override
-        public void onComplete() {
-            logger.info("Finished writing all {} resources", resourceType.toString());
+            logger.debug("Finished writing to '{}' on thread {}", outputPath, Thread.currentThread().getName());
+            return jobResult;
+        } catch(IOException ex) {
+            throw new JobQueueFailure(job.getJobID(), "IO error writing a resource", ex);
+        } catch(SecurityException ex) {
+            throw new JobQueueFailure(job.getJobID(), "Error encrypting a resource", ex);
+        } catch(Exception ex) {
+            throw new JobQueueFailure(job.getJobID(), "General failure consuming a resource", ex);
         }
     }
 
     /**
-     * Write the resource into the appropriate streams.
+     * Build an encrypting stream that contains an inner stream.
      *
-     * @param jobResult   - increment counts in this result
-     * @param writer  - the main stream for successful resources
-     * @param resource    - the resource to write out
+     * @param writer is the inner stream to write to
+     * @param job is the context including the RSA key
+     * @param resourceType is the type of resource being written
+     * @return a output stream to write to
+     * @throws GeneralSecurityException if there is something wrong with the encryption config
+     * @throws IOException if there is something wrong with the file io.
      */
-    protected void writeResource(JobResult jobResult, OutputStream writer, Resource resource) {
-        try {
-            jobResult.incrementCount();
-            final String str = jsonParser.encodeResourceToString(resource);
-            logger.trace("Writing to file on thread {} : {}", Thread.currentThread().getName(), str);
-            writer.write(str.getBytes(StandardCharsets.UTF_8));
-            writer.write(DELIM);
-        } catch (IOException e) {
-            throw new JobQueueFailure(jobResult.getJobID(), e);
+    private OutputStream formCipherStream(OutputStream writer, JobModel job, ResourceType resourceType) throws GeneralSecurityException, IOException {
+        final var metadataPath = formEncryptedMetadataPath(job.getJobID(), resourceType);
+        try(final CipherBuilder cipherBuilder = new CipherBuilder(config);
+            final FileOutputStream metadataWriter = new FileOutputStream(metadataPath)) {
+            cipherBuilder.generateKeyMaterial();
+            final String json = cipherBuilder.getMetadata(job.getRsaPublicKey());
+            metadataWriter.write(json.getBytes(StandardCharsets.UTF_8));
+            return new CipherOutputStream(writer, cipherBuilder.formCipher());
         }
     }
 
