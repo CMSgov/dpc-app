@@ -49,15 +49,6 @@ public class JobModel implements Serializable  {
         return String.format("%s.%s", jobID.toString(), resourceType.getPath());
     }
 
-    static private List<JobResult> formJobResultsList(UUID jobID, List<ResourceType> types) {
-        final var jobResults = types
-                .stream()
-                .map(resourceType -> new JobResult(jobID, resourceType))
-                .collect(Collectors.toCollection(ArrayList::new));
-        jobResults.add(new JobResult(jobID, ResourceType.OperationOutcome));
-        return jobResults;
-    }
-
     /**
      * The unique job identifier
      */

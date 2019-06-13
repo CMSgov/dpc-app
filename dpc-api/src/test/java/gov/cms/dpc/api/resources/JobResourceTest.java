@@ -95,8 +95,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        JobModel.validResourceTypes.forEach(resourceType -> { job.addJobResult(new JobResult(jobID, resourceType)); });
-        job.getJobResults().forEach(JobResult::incrementCount);
+        JobModel.validResourceTypes.forEach(resourceType -> { job.addJobResult(new JobResult(jobID, resourceType, 0, 1)); });
         queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 
         // Test the response
@@ -129,8 +128,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        job.addJobResult(new JobResult(jobID, ResourceType.OperationOutcome));
-        job.getJobResult(ResourceType.OperationOutcome).orElseThrow().incrementCount();
+        job.addJobResult(new JobResult(jobID, ResourceType.OperationOutcome, 0, 1));
         queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 
         // Test the response for ok

@@ -108,9 +108,11 @@ public class QueueTest {
         assertTrue(workJob.isPresent(), "Should have a job to work");
 
         // Check that the status is RUNNING
-        final Optional<JobModel> runningJob = queue.getJob(workJob.get().getLeft());
+        final UUID firstID = workJob.get().getLeft();
+        final Optional<JobModel> runningJob = queue.getJob(firstID);
         assertAll(() -> assertTrue(runningJob.isPresent(), "Should have a status"),
                 () -> assertEquals(JobStatus.RUNNING, runningJob.get().getStatus(), "Job should be running"));
+        runningJob.orElseThrow().addJobResult(new JobResult(firstID, ResourceType.Patient, 0, 1));
 
         // Complete the job
         queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, runningJob.get().getJobResults());
@@ -151,12 +153,9 @@ public class QueueTest {
 
         // Retrieve the job with both resources
         final var workJob = queue.workJob().orElseThrow().getRight();
-        workJob.addJobResult(new JobResult(jobID, ResourceType.Patient));
-        workJob.addJobResult(new JobResult(jobID, ResourceType.ExplanationOfBenefit));
+        workJob.addJobResult(new JobResult(jobID, ResourceType.Patient, 0, 1));
+        workJob.addJobResult(new JobResult(jobID, ResourceType.ExplanationOfBenefit, 0, 1));
 
-        // Fake work
-        workJob.getJobResult(ResourceType.Patient).ifPresent(result -> result.incrementCount());
-        workJob.getJobResult(ResourceType.OperationOutcome).ifPresent(result -> result.incrementCount());
 
         // Complete job
         queue.completeJob(workJob.getJobID(), JobStatus.COMPLETED, workJob.getJobResults());
