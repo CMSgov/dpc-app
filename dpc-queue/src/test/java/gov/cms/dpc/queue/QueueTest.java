@@ -150,19 +150,25 @@ public class QueueTest {
         queue.submitJob(jobID, jobSubmission);
 
         // Retrieve the job with both resources
-        final var workJob = queue.workJob();
-        assertTrue(workJob.isPresent(), "Job is missing from the queue after a submission");
-        final var actualJob = workJob.get().getRight();
-        final var actualResults = actualJob.getJobResults();
-        final var expectedResults =  List.of(new JobResult(jobID, ResourceType.Patient), new JobResult(jobID, ResourceType.ExplanationOfBenefit));
-        assertTrue(actualResults.containsAll(expectedResults), "Didn't find the resources types expected.");
+        final var workJob = queue.workJob().orElseThrow().getRight();
+        workJob.addJobResult(new JobResult(jobID, ResourceType.Patient));
+        workJob.addJobResult(new JobResult(jobID, ResourceType.ExplanationOfBenefit));
 
         // Fake work
-        actualJob.getJobResult(ResourceType.Patient).ifPresent(result -> result.incrementCount());
-        actualJob.getJobResult(ResourceType.OperationOutcome).ifPresent(result -> result.incrementCount());
+        workJob.getJobResult(ResourceType.Patient).ifPresent(result -> result.incrementCount());
+        workJob.getJobResult(ResourceType.OperationOutcome).ifPresent(result -> result.incrementCount());
 
         // Complete job
-        queue.completeJob(actualJob.getJobID(), JobStatus.COMPLETED, actualJob.getJobResults());
+        queue.completeJob(workJob.getJobID(), JobStatus.COMPLETED, workJob.getJobResults());
+
+        // Get the job and check its values
+        final var actualJob = queue.getJob(jobID);
+        assertTrue(actualJob.isPresent());
+        actualJob.ifPresent(job -> {
+            assertEquals(JobStatus.COMPLETED, job.getStatus());
+            assertEquals(2, job.getJobResults().size());
+            assertEquals(1, job.getJobResult(ResourceType.Patient).orElseThrow().getCount());
+        });
     }
 
     public void testMissingJob(JobQueue queue) {

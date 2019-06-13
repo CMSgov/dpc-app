@@ -129,7 +129,7 @@ public class JobModel implements Serializable  {
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
-        this.jobResults = formJobResultsList(jobID, resourceTypes);
+        this.jobResults = new ArrayList<JobResult>();
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -138,7 +138,7 @@ public class JobModel implements Serializable  {
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
-        this.jobResults = formJobResultsList(jobID, resourceTypes);
+        this.jobResults = new ArrayList<JobResult>();
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -173,12 +173,12 @@ public class JobModel implements Serializable  {
         this.jobID = jobID;
     }
 
-    public List<JobResult> getJobResults() {
-        return jobResults;
-    }
-
     public List<ResourceType> getResourceTypes() {
         return resourceTypes;
+    }
+
+    public List<JobResult> getJobResults() {
+        return jobResults;
     }
 
     public Optional<JobResult> getJobResult(ResourceType forResourceType) {
@@ -187,6 +187,10 @@ public class JobModel implements Serializable  {
 
     public void setJobResults(List<JobResult> jobResults) {
             this.jobResults = jobResults;
+    }
+
+    public void addJobResult(JobResult result) {
+        jobResults.add(result);
     }
 
     public String getProviderID() {
