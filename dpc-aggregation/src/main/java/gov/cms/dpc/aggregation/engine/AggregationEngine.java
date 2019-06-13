@@ -297,7 +297,7 @@ public class AggregationEngine implements Runnable {
     private JobResult writeBatch(JobModel job, ResourceType resourceType, List<Resource> batch) {
         try {
             final var jobID = job.getJobID();
-            final var jobResult = new JobResult(jobID, resourceType);
+            final var jobResult = new JobResult(jobID, resourceType, 0, batch.size());
             final var byteStream = new ByteArrayOutputStream();
 
             OutputStream writer = byteStream;
@@ -308,7 +308,6 @@ public class AggregationEngine implements Runnable {
             }
 
             for (var resource: batch) {
-                jobResult.incrementCount();
                 final String str = jsonParser.encodeResourceToString(resource);
                 writer.write(str.getBytes(StandardCharsets.UTF_8));
                 writer.write(DELIM);
