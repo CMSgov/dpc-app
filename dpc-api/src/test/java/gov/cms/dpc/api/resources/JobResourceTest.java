@@ -95,6 +95,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
+        JobModel.validResourceTypes.forEach(resourceType -> { job.addJobResult(new JobResult(jobID, resourceType)); });
         job.getJobResults().forEach(JobResult::incrementCount);
         queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 
@@ -106,7 +107,7 @@ public class JobResourceTest {
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
-                () -> assertEquals(1, completion.getError().size()));
+                () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, entry.getType())), entry.getUrl());
         }
@@ -128,7 +129,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        assertEquals(2, job.getJobResults().size());
+        job.addJobResult(new JobResult(jobID, ResourceType.OperationOutcome));
         job.getJobResult(ResourceType.OperationOutcome).orElseThrow().incrementCount();
         queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
 

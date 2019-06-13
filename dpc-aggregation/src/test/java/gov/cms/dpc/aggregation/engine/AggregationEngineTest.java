@@ -77,11 +77,11 @@ class AggregationEngineTest {
         queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
-        var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
+        final var completeJob = queue.getJob(jobId).orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        final var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        var errorFilePath = engine.formOutputFilePath(jobId, ResourceType.OperationOutcome);
+        final var errorFilePath = engine.formOutputFilePath(jobId, ResourceType.OperationOutcome);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -129,9 +129,8 @@ class AggregationEngineTest {
         // Look at the result
         assertFalse(queue.getJob(jobId).isEmpty(), "Unable to retrieve job from queue.");
         queue.getJob(jobId).ifPresent(retrievedJob -> {
-            assertAll(() -> assertEquals(0, retrievedJob.getJobResults().get(0).getCount()),
-                    () -> assertEquals(0, retrievedJob.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount()),
-                    () -> assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus()));
+            assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus());
+            assertEquals(0, retrievedJob.getJobResults().size());
             assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.Patient))));
             assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.OperationOutcome))));
         });
@@ -241,7 +240,7 @@ class AggregationEngineTest {
         final var actual = queue.getJob(jobID).get();
         var expectedErrorPath = engine.formOutputFilePath(jobID, ResourceType.OperationOutcome);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(2, actual.getJobResults().size(), "expected a single resource type"),
+                () -> assertEquals(1, actual.getJobResults().size(), "expected just a operational outcome"),
                 () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
