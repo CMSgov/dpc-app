@@ -4,6 +4,7 @@ import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import gov.cms.dpc.macaroons.store.hibernate.entities.RootKeyEntity;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -25,6 +26,10 @@ import java.util.UUID;
  */
 public class HibernateKeyStore implements IRootKeyStore {
 
+    // Valid chars, which can be encoded as UTF-8
+    private static final String VALID_PW_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+{}[]|:;<>?,./";
+    private static final int ROOT_KEY_LENGTH = 24;
+
     private final SessionFactory factory;
     private final SecureRandom random;
 
@@ -37,14 +42,12 @@ public class HibernateKeyStore implements IRootKeyStore {
     @Override
     public IDKeyPair create() {
         final UUID id = UUID.randomUUID();
-        final byte[] key = new byte[24];
-        this.random.nextBytes(key);
+        final String rootKey = this.generateRootKey();
 
         final RootKeyEntity entity = new RootKeyEntity();
         final String idString = id.toString();
         entity.setId(idString);
-        final String keyString = new String(key, StandardCharsets.UTF_8);
-        entity.setRootKey(keyString);
+        entity.setRootKey(rootKey);
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         entity.setCreated(now);
         // TODO: Make this configurable. DPC-284
@@ -61,7 +64,7 @@ public class HibernateKeyStore implements IRootKeyStore {
             }
         }
 
-        return new IDKeyPair(idString, keyString);
+        return new IDKeyPair(idString, rootKey);
     }
 
     @Override
@@ -74,5 +77,15 @@ public class HibernateKeyStore implements IRootKeyStore {
 
             return entity.getRootKey();
         }
+    }
+
+    /**
+     * Securely generate a random password string
+     * Borrowing from: https://stackoverflow.com/questions/29756660/create-random-password-using-java-securerandom-class
+     *
+     * @return - {@link String} root key
+     */
+    private String generateRootKey() {
+        return RandomStringUtils.random(ROOT_KEY_LENGTH, 0, VALID_PW_CHARS.length(), false, false, VALID_PW_CHARS.toCharArray(), this.random);
     }
 }
