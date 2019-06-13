@@ -88,6 +88,8 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
+    // We can suppress this because the SessionFactory is managed
+    @SuppressWarnings("CloseableProvides")
     SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
         return factory.getSessionFactory();
     }

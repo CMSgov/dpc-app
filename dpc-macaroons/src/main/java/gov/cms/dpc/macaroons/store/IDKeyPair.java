@@ -1,6 +1,9 @@
 package gov.cms.dpc.macaroons.store;
 
-public class IDKeyPair  {
+/**
+ * Simple wrapper class for returning both a Macaroon ID and Root Key
+ */
+public class IDKeyPair {
 
     private final String id;
     private final String key;

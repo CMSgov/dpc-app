@@ -6,6 +6,9 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 
 import java.util.Optional;
 
+/**
+ * Implementation of {@link CaveatVerifier} which verifies that token version meets a minimum threshold
+ */
 public class VersionCaveatVerifier implements CaveatVerifier {
 
     private final int minimumVersion;

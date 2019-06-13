@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  * Defines the data necessary to generate a Macaroon caveat.
  * This will always include a Key (e.g. user_id), an Operation (e.g '=') and a Value (e.g. user123).
  * It may optionally include a location (defined as any non-empty string value) which makes it a third-party caveat
- * <p/>
+ * <p>
  * The underlying string format is \"{caveat key} {operator} {caveat value}\"
  */
 public class MacaroonCaveat {
@@ -117,7 +117,7 @@ public class MacaroonCaveat {
     /**
      * Get the caveat comparison operator
      *
-     * @return
+     * @return - {@link Operator}
      */
     public Operator getOp() {
         return op;
@@ -156,7 +156,7 @@ public class MacaroonCaveat {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof MacaroonCaveat)) return false;
         MacaroonCaveat that = (MacaroonCaveat) o;
         return location.equals(that.location) &&
                 key.equals(that.key) &&

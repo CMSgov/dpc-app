@@ -9,12 +9,20 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import javax.inject.Inject;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+/**
+ * DB backed {@link IRootKeyStore} using Hibernate as the underlying ORM
+ * This KeyStore generates a new RootKey for each ID that's passed in.
+ * By default, it generates RootKeys that are valid for 1 year, but that will eventually be changed
+ * This store assumes that the required tables and triggers are already setup.
+ * Currently, we do the migration in the dpc-attribution module, but that will probably need to be improved.
+ */
 public class HibernateKeyStore implements IRootKeyStore {
 
     private final SessionFactory factory;
@@ -35,10 +43,11 @@ public class HibernateKeyStore implements IRootKeyStore {
         final RootKeyEntity entity = new RootKeyEntity();
         final String idString = id.toString();
         entity.setId(idString);
-        final String keyString = new String(key);
+        final String keyString = new String(key, StandardCharsets.UTF_8);
         entity.setRootKey(keyString);
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         entity.setCreated(now);
+        // TODO: Make this configurable. DPC-284
         entity.setExpires(now.plus(1, ChronoUnit.YEARS));
 
         try (final Session session = this.factory.openSession()) {

@@ -4,11 +4,12 @@ import gov.cms.dpc.macaroons.exceptions.BakeryException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 /**
  * Simple wrapper class around a fixed {@link String} root key.
- * Incredibly
+ * Incredibly simplistic, only good for testing
  */
 @Singleton
 public class MemoryRootKeyStore implements IRootKeyStore {
@@ -19,7 +20,7 @@ public class MemoryRootKeyStore implements IRootKeyStore {
     public MemoryRootKeyStore(SecureRandom random) {
         final byte[] keyBytes = new byte[24];
         random.nextBytes(keyBytes);
-        this.rootKey = new String(keyBytes);
+        this.rootKey = new String(keyBytes, StandardCharsets.UTF_8);
     }
 
     @Override

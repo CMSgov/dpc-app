@@ -6,9 +6,16 @@ import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * {@link Macaroon} bakery (factory) which abstracts most of the interactions with Macaroons.
+ * <p>
+ * This provides a simpler interface for handling creation/verification/delegation
+ * It currently does NOT support third-party caveats. Which will come in DPC-286
+ */
 public class MacaroonBakery {
 
     public static final Charset CAVEAT_CHARSET = Charset.forName("UTF-8");
@@ -129,11 +136,11 @@ public class MacaroonBakery {
     }
 
     /**
-     * Convert the {@link Macaroon} to a {@link MacaroonCaveat##CAVEAT_CHARSET} byte format.
+     * Convert the {@link Macaroon} to the underlying byte format.
      * Optionally, the Macaroon can be base64 (URL-safe) encoded before returning.
      *
      * @param macaroon     - {@link Macaroon} to serialize
-     * @param base64Encode - {@code true} Macaroon bytes are base64 (URL-safe) encoded. {@link false} Macaroon bytes are returned directly
+     * @param base64Encode - {@code true} Macaroon bytes are base64 (URL-safe) encoded. {@code false} Macaroon bytes are returned directly
      * @return - Macaroon byte array
      */
     public byte[] serializeMacaroon(Macaroon macaroon, boolean base64Encode) {
@@ -161,7 +168,7 @@ public class MacaroonBakery {
         } else {
             decodedString = serializedString.getBytes(CAVEAT_CHARSET);
         }
-        return MacaroonsBuilder.deserialize(new String(decodedString));
+        return MacaroonsBuilder.deserialize(new String(decodedString, StandardCharsets.UTF_8));
     }
 
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {

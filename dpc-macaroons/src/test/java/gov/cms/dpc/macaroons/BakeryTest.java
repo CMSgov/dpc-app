@@ -6,6 +6,7 @@ import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +61,7 @@ class BakeryTest {
                                 MacaroonCaveat.Operator.EQ, "1234")));
 
         final byte[] macaroonBytes = bakery.serializeMacaroon(testMacaroon, base64);
-        final Macaroon mac2 = bakery.deserializeMacaroon(new String(macaroonBytes));
+        final Macaroon mac2 = bakery.deserializeMacaroon(new String(macaroonBytes, StandardCharsets.UTF_8));
         assertEquals(testMacaroon, mac2, "Macaroons should be equal");
     }
 

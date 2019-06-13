@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -99,7 +100,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         this.dao.updateOrganization(entity);
 
         // Return the base64 encoded Macaroon
-        return new String(this.bakery.serializeMacaroon(macaroon, true));
+        return new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8);
     }
 
     @Override

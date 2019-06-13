@@ -115,15 +115,15 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
         // If we have an ID, and it parses, use it
         final String idString = resource.getId();
-        UUID organizationID;
+        UUID orgID;
         if (idString == null) {
-            organizationID = UUID.randomUUID();
+            orgID = UUID.randomUUID();
         } else {
 //             If we have an ID, we need to strip off the ID header, since we already know the resource type
-            organizationID = UUID.fromString(idString.replace("Organization/", ""));
+            orgID = UUID.fromString(idString.replace("Organization/", ""));
         }
 
-        entity.setId(organizationID);
+        entity.setId(orgID);
 
         // Find the first Organization ID that we can use
         final Optional<Identifier> identifier = resource

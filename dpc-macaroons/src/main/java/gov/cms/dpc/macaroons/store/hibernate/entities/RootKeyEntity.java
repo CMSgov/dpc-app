@@ -8,6 +8,9 @@ import javax.persistence.Id;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
+/**
+ * Hibernate model for persisting root keys
+ */
 @Entity(name = "root_keys")
 public class RootKeyEntity implements Serializable {
 
