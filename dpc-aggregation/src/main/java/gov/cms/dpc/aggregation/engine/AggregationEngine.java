@@ -1,6 +1,8 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class AggregationEngine implements Runnable {
@@ -56,18 +59,18 @@ public class AggregationEngine implements Runnable {
      *
      * @param bbclient    - {@link BlueButtonClient } to use
      * @param queue       - {@link JobQueue} that will direct the work done
-     * @param context     - {@link FhirContext} for DSTU3 resources
+     * @param fhirContext - {@link FhirContext} for DSTU3 resources
      * @param exportPath  - The {@link ExportPath} to use for writing the output files
      * @param retryConfig - {@link RetryConfig} injected config for setting up retry handler
      */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext context, @ExportPath String exportPath, Config config, RetryConfig retryConfig) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, Config config, RetryConfig retryConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.exportPath = exportPath;
         this.config = config;
         this.retryConfig = retryConfig;
-        this.jsonParser = context.newJsonParser();
+        this.jsonParser = fhirContext.newJsonParser();
         this.resourcesPerFile = config.hasPath("resourcesPerFile") ? config.getInt("resourcesPerFile") : 1000;
         this.encryptionEnabled = config.hasPath("encryption.enabled") && config.getBoolean("encryption.enabled");
     }
@@ -90,22 +93,23 @@ public class AggregationEngine implements Runnable {
         this.subscribe.dispose();
     }
 
-    /**
+   /**
      * Form the full file name of an output file
-     *
      * @param jobID        - {@link UUID} ID of export job
      * @param resourceType - {@link ResourceType} to append to filename
+     * @param sequence     - batch sequence number
+     * @return return the path
      */
-    public String formOutputFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson", exportPath, JobModel.formOutputFileName(jobID, resourceType));
+    public String formOutputFilePath(UUID jobID, ResourceType resourceType, int sequence) {
+        return String.format("%s/%s.ndjson", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
     }
 
-    public String formEncryptedOutputFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson.enc", exportPath, JobModel.formOutputFileName(jobID, resourceType));
+    public String formEncryptedOutputFilePath(UUID jobID, ResourceType resourceType, int sequence) {
+        return String.format("%s/%s.ndjson.enc", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
     }
 
-    public String formEncryptedMetadataPath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s-metadata.json", exportPath, JobModel.formOutputFileName(jobID, resourceType));
+    public String formEncryptedMetadataPath(UUID jobID, ResourceType resourceType, int sequence) {
+        return String.format("%s/%s-metadata.json", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
     }
 
     /**
@@ -147,10 +151,11 @@ public class AggregationEngine implements Runnable {
         List<String> attributedBeneficiaries = job.getPatients();
         logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
 
+        final AtomicInteger errorCounter = new AtomicInteger();
         final Subject<Resource> errorSubject = UnicastSubject.<Resource>create().toSerialized();
         final Observable<JobResult> errorResult = errorSubject
                 .buffer(resourcesPerFile)
-                .map(batch -> writeBatch(job, ResourceType.OperationOutcome, batch));
+                .map(batch -> writeBatch(job, ResourceType.OperationOutcome, errorCounter, batch));
 
         Observable.fromIterable(job.getResourceTypes())
                 .flatMap(resourceType -> completeResource(job, resourceType, errorSubject))
@@ -179,12 +184,13 @@ public class AggregationEngine implements Runnable {
      * @return A new job result observable
      */
     private Observable<JobResult> completeResource(JobModel job, ResourceType resourceType, Subject<Resource> errorSubject) {
+        final AtomicInteger counter = new AtomicInteger();
         return Observable.fromIterable(job.getPatients())
                 .flatMap(patient -> this.fetchResources(job.getJobID(), patient, resourceType, errorSubject))
                 .subscribeOn(Schedulers.io())
                 .concatMap(this::unpackBundles)
                 .buffer(resourcesPerFile)
-                .map(batch -> writeBatch(job, resourceType, batch));
+                .map(batch -> writeBatch(job, resourceType, counter, batch));
     }
 
     /**
@@ -216,7 +222,7 @@ public class AggregationEngine implements Runnable {
                 }
 
                 // Fetch the resource in a retry loop
-                logger.debug("Fetching {} from BlueButton on thread {} for {}", resourceType.toString(), Thread.currentThread().getName(), jobID);
+                logger.debug("Fetching {} from BlueButton for {}", resourceType.toString(), jobID);
                 Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
                 final var fetchFirstDecorated = Retry.decorateFunction(retry, bbMethod);
                 final Resource firstResource = fetchFirstDecorated.apply(patientID);
@@ -292,18 +298,19 @@ public class AggregationEngine implements Runnable {
      * @param job context
      * @param resourceType to write
      * @param batch is the list of resources to write
+     * @param counter
      * @return The JobResult associated with this file
      */
-    private JobResult writeBatch(JobModel job, ResourceType resourceType, List<Resource> batch) {
+    private JobResult writeBatch(JobModel job, ResourceType resourceType, AtomicInteger counter, List<Resource> batch) {
         try {
             final var jobID = job.getJobID();
-            final var jobResult = new JobResult(jobID, resourceType, 0, batch.size());
             final var byteStream = new ByteArrayOutputStream();
+            final var sequence = counter.getAndIncrement();
 
             OutputStream writer = byteStream;
-            String outputPath = formOutputFilePath(jobID, resourceType);
+            String outputPath = formOutputFilePath(jobID, resourceType, sequence);
             if (encryptionEnabled) {
-                outputPath = formEncryptedOutputFilePath(jobID, resourceType);
+                outputPath = formEncryptedOutputFilePath(jobID, resourceType, 0);
                 writer = formCipherStream(writer, job, resourceType);
             }
 
@@ -316,8 +323,8 @@ public class AggregationEngine implements Runnable {
             writer.close();
             writeToFile(byteStream.toByteArray(), outputPath);
 
-            logger.debug("Finished writing to '{}' on thread {}", outputPath, Thread.currentThread().getName());
-            return jobResult;
+            logger.debug("Finished writing to '{}'", outputPath);
+            return new JobResult(jobID, resourceType, sequence, batch.size());
         } catch(IOException ex) {
             throw new JobQueueFailure(job.getJobID(), "IO error writing a resource", ex);
         } catch(SecurityException ex) {
@@ -338,7 +345,7 @@ public class AggregationEngine implements Runnable {
      * @throws IOException if there is something wrong with the file io.
      */
     private OutputStream formCipherStream(OutputStream writer, JobModel job, ResourceType resourceType) throws GeneralSecurityException, IOException {
-        final var metadataPath = formEncryptedMetadataPath(job.getJobID(), resourceType);
+        final var metadataPath = formEncryptedMetadataPath(job.getJobID(), resourceType, 0);
         try(final CipherBuilder cipherBuilder = new CipherBuilder(config);
             final FileOutputStream metadataWriter = new FileOutputStream(metadataPath)) {
             cipherBuilder.generateKeyMaterial();

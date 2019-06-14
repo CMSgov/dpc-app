@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.nio.file.Files;
@@ -38,6 +38,7 @@ class AggregationEngineTest {
     private AggregationEngine engine;
 
     static private Config config;
+    static private FhirContext fhirContext = FhirContext.forDstu3();
 
     @BeforeAll
     static void setupAll() {
@@ -46,9 +47,10 @@ class AggregationEngineTest {
 
     @BeforeEach
     void setupEach() {
+        fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         queue = new MemoryQueue();
-        bbclient = Mockito.spy(new MockBlueButtonClient());
-        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
+        bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
+        engine = new AggregationEngine(bbclient, queue, fhirContext, config.getString("exportPath"), config, RetryConfig.ofDefaults());
     }
 
     /**
@@ -79,9 +81,9 @@ class AggregationEngineTest {
         // Look at the result
         final var completeJob = queue.getJob(jobId).orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
+        final var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = engine.formOutputFilePath(jobId, ResourceType.OperationOutcome);
+        final var errorFilePath = engine.formOutputFilePath(jobId, ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -105,7 +107,7 @@ class AggregationEngineTest {
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
         JobModel.validResourceTypes.forEach(resourceType -> {
-            var outputFilePath = engine.formOutputFilePath(jobId, resourceType);
+            var outputFilePath = engine.formOutputFilePath(jobId, resourceType, 0);
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
     }
@@ -131,8 +133,8 @@ class AggregationEngineTest {
         queue.getJob(jobId).ifPresent(retrievedJob -> {
             assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus());
             assertEquals(0, retrievedJob.getJobResults().size());
-            assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.Patient))));
-            assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.OperationOutcome))));
+            assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.Patient, 0))));
+            assertFalse(Files.exists(Path.of(engine.formOutputFilePath(jobId, ResourceType.OperationOutcome, 0))));
         });
     }
 
@@ -194,11 +196,19 @@ class AggregationEngineTest {
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJob(jobID).isPresent());
         final var actual = queue.getJob(jobID).get();
-        var expectedErrorPath = engine.formOutputFilePath(jobID, ResourceType.OperationOutcome);
+        var expectedErrorPath = engine.formOutputFilePath(jobID, ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
                 () -> assertEquals(3, actual.getJobResults().size(), "expected 3 (= 2 output + 1 error) resource types"),
                 () -> assertEquals(2, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 2 (= 1 bad patient x 2 resource types)"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+    }
+
+    /**
+     * Test that the engine can handle more resources than can fit in a single batch
+     */
+    @Test
+    void testMultipleBatches() {
+       config = ConfigFactory.parseString("{}").withFallback(config);
     }
 
     @Test
@@ -238,7 +248,7 @@ class AggregationEngineTest {
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJob(jobID).isPresent());
         final var actual = queue.getJob(jobID).get();
-        var expectedErrorPath = engine.formOutputFilePath(jobID, ResourceType.OperationOutcome);
+        var expectedErrorPath = engine.formOutputFilePath(jobID, ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
                 () -> assertEquals(1, actual.getJobResults().size(), "expected just a operational outcome"),
                 () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),

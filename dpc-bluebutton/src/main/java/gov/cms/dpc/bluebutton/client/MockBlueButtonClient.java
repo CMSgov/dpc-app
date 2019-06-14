@@ -2,6 +2,7 @@ package gov.cms.dpc.bluebutton.client;
 
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -21,11 +22,13 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     public static final List<String> TEST_PATIENT_IDS = List.of("20140000008325", "20140000009893");
+    public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("20140000008325", "20140000009893", "-1");
 
-    private final IParser parser = FhirContext.forDstu3().newXmlParser();
+    private final IParser parser;
 
-    public MockBlueButtonClient() {
-        // Not used
+    public MockBlueButtonClient(FhirContext fhirContext) {
+        fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+        parser = fhirContext.newXmlParser();
     }
 
     @Override

@@ -65,6 +65,18 @@ public class JobResult implements Serializable {
         }
     }
 
+    /**
+     * Form a file name for passed in parameters.
+     *
+     * @param jobID        - the jobs id
+     * @param resourceType - the resource type
+     * @param sequence     - the sequence
+     * @return a file name
+     */
+    public static String formOutputFileName(UUID jobID, ResourceType resourceType, int sequence) {
+        return String.format("%s-%s.%s", jobID.toString(), sequence, resourceType.getPath());
+    }
+
     @EmbeddedId
     private JobResultID jobResultID;
 
@@ -90,6 +102,10 @@ public class JobResult implements Serializable {
 
     public ResourceType getResourceType() {
         return jobResultID.getResourceType();
+    }
+
+    public int getSequence() {
+        return jobResultID.sequence;
     }
 
     public int getCount() {

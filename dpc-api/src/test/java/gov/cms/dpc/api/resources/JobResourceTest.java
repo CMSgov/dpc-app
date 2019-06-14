@@ -108,7 +108,7 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, entry.getType())), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobResult.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
         }
     }
 
@@ -142,7 +142,7 @@ public class JobResourceTest {
                 () -> assertEquals(1, completion.getError().size()));
         JobCompletionModel.OutputEntry entry = completion.getError().get(0);
         assertEquals(ResourceType.OperationOutcome, entry.getType());
-        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, ResourceType.OperationOutcome)), entry.getUrl());
+        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobResult.formOutputFileName(jobID, ResourceType.OperationOutcome, 0)), entry.getUrl());
     }
 
     /**

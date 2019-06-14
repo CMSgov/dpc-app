@@ -48,6 +48,7 @@ class EncryptingAggregationEngineTest {
     private RSAPrivateKey rsaPrivateKey;
 
     static private Config config;
+    static private FhirContext fhirContext = FhirContext.forDstu3();
 
     @BeforeAll
     static void setupAll() {
@@ -60,7 +61,7 @@ class EncryptingAggregationEngineTest {
     @BeforeEach
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
-        BlueButtonClient bbclient = new MockBlueButtonClient();
+        BlueButtonClient bbclient = new MockBlueButtonClient(fhirContext);
         engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
@@ -104,9 +105,9 @@ class EncryptingAggregationEngineTest {
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
-        var outputFilePath = engine.formEncryptedOutputFilePath(jobId, ResourceType.Patient);
-        var metadataFilePath = engine.formEncryptedMetadataPath(jobId, ResourceType.Patient);
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).orElseThrow().getStatus()));
+        var outputFilePath = engine.formEncryptedOutputFilePath(jobId, ResourceType.Patient, 0);
+        var metadataFilePath = engine.formEncryptedMetadataPath(jobId, ResourceType.Patient, 0);
 
         assertTrue(Files.exists(Path.of(outputFilePath)), "Output file doesn't exist in tmp");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Encrypt metadata doesn't exist");
@@ -138,9 +139,9 @@ class EncryptingAggregationEngineTest {
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
-        var errorFilePath = engine.formEncryptedOutputFilePath(jobId, ResourceType.OperationOutcome);
-        var metadataFilePath = engine.formEncryptedMetadataPath(jobId, ResourceType.OperationOutcome);
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).orElseThrow().getStatus()));
+        var errorFilePath = engine.formEncryptedOutputFilePath(jobId, ResourceType.OperationOutcome, 0);
+        var metadataFilePath = engine.formEncryptedMetadataPath(jobId, ResourceType.OperationOutcome, 0);
 
         assertTrue(Files.exists(Path.of(errorFilePath)), "Error file is missing");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Error metadata file is missing");
