@@ -24,7 +24,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.CipherOutputStream;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,6 @@ public class AggregationEngine implements Runnable {
     private final FhirContext fhirContext;
     private final int resourcesPerFile;
     private Disposable subscribe;
-    private boolean encryptionEnabled;
 
     /**
      * Create an engine
