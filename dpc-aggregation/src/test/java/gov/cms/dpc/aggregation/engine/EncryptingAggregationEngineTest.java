@@ -49,6 +49,7 @@ class EncryptingAggregationEngineTest {
 
     static private Config config;
     static private FhirContext fhirContext = FhirContext.forDstu3();
+    static private String exportPath;
 
     @BeforeAll
     static void setupAll() {
@@ -56,6 +57,7 @@ class EncryptingAggregationEngineTest {
         var baseConfig = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         var overrideConfig = ConfigFactory.parseString("{\"encryption\":{\"enabled\":true}}");
         config = overrideConfig.withFallback(baseConfig);
+        exportPath = config.getString("exportPath");
     }
 
     @BeforeEach
@@ -106,8 +108,8 @@ class EncryptingAggregationEngineTest {
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).orElseThrow().getStatus()));
-        var outputFilePath = engine.formEncryptedOutputFilePath(jobId, ResourceType.Patient, 0);
-        var metadataFilePath = engine.formEncryptedMetadataPath(jobId, ResourceType.Patient, 0);
+        var outputFilePath = ResourceWriter.formEncryptedOutputFilePath(exportPath, jobId, ResourceType.Patient, 0);
+        var metadataFilePath = ResourceWriter.formEncryptedMetadataPath(exportPath, jobId, ResourceType.Patient, 0);
 
         assertTrue(Files.exists(Path.of(outputFilePath)), "Output file doesn't exist in tmp");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Encrypt metadata doesn't exist");
@@ -140,8 +142,8 @@ class EncryptingAggregationEngineTest {
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).orElseThrow().getStatus()));
-        var errorFilePath = engine.formEncryptedOutputFilePath(jobId, ResourceType.OperationOutcome, 0);
-        var metadataFilePath = engine.formEncryptedMetadataPath(jobId, ResourceType.OperationOutcome, 0);
+        var errorFilePath = ResourceWriter.formEncryptedOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
+        var metadataFilePath = ResourceWriter.formEncryptedMetadataPath(exportPath, jobId, ResourceType.OperationOutcome, 0);
 
         assertTrue(Files.exists(Path.of(errorFilePath)), "Error file is missing");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Error metadata file is missing");

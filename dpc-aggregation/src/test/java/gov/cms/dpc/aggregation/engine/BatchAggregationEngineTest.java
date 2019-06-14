@@ -30,12 +30,14 @@ class BatchAggregationEngineTest {
 
     static private Config config;
     static private FhirContext fhirContext = FhirContext.forDstu3();
+    static private String exportPath;
 
     @BeforeAll
     static void setupAll() {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         var backingConfig = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         config = ConfigFactory.parseString("{\"resourcesPerFile\":10}").withFallback(backingConfig);
+        exportPath = config.getString("exportPath");
     }
 
     @BeforeEach
@@ -70,9 +72,9 @@ class BatchAggregationEngineTest {
                 () -> assertEquals(2, completeJob.getJobResults().get(3).getCount()));
 
         // Look at the output files
-        final var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = engine.formOutputFilePath(jobId, ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -97,9 +99,9 @@ class BatchAggregationEngineTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
         // Look at the output files
-        final var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = engine.formOutputFilePath(jobId, ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -128,9 +130,9 @@ class BatchAggregationEngineTest {
                 () -> assertTrue(completeJob.getJobResult(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
         // Look at the output files
-        final var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.ExplanationOfBenefit, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = engine.formOutputFilePath(jobId, ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 }
