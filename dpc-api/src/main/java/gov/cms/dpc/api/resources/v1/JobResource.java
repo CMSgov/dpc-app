@@ -7,6 +7,7 @@ import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class JobResource extends AbstractJobResource {
         return job.getJobResults().stream()
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
-                        String.format("%s/Data/%s", this.baseURL, JobModel.formOutputFileName(result.getJobID(), result.getResourceType())),
+                        String.format("%s/Data/%s", this.baseURL, JobResult.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
                         result.getCount()))
                 .filter(entry -> entry.getType() != ResourceType.OperationOutcome && entry.getCount() > 0)
                 .collect(Collectors.toList());
@@ -107,7 +108,7 @@ public class JobResource extends AbstractJobResource {
         return job.getJobResults().stream()
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
-                        String.format("%s/Data/%s", this.baseURL, JobModel.formOutputFileName(result.getJobID(), result.getResourceType())),
+                        String.format("%s/Data/%s", this.baseURL, JobResult.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
                         result.getCount()))
                 .filter(entry -> entry.getType() == ResourceType.OperationOutcome && entry.getCount() > 0)
                 .collect(Collectors.toList());
