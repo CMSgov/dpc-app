@@ -108,7 +108,8 @@ class ResourceFetcher {
      * @param firstBundle to get the next link
      */
     private void fetchAllNextBundles(Emitter<Resource> emitter, String patientID, Bundle firstBundle) {
-        for (var bundle = firstBundle; bundle.getLink(Bundle.LINK_NEXT) != null; ) {
+        var bundle = firstBundle;
+        while(bundle.getLink(Bundle.LINK_NEXT) != null) {
             Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
             final var decorated = Retry.decorateFunction(retry, blueButtonClient::requestNextBundleFromServer);
             try {
