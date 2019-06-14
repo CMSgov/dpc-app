@@ -111,10 +111,10 @@ public class QueueTest {
         final Optional<JobModel> runningJob = queue.getJob(firstID);
         assertAll(() -> assertTrue(runningJob.isPresent(), "Should have a status"),
                 () -> assertEquals(JobStatus.RUNNING, runningJob.get().getStatus(), "Job should be running"));
-        runningJob.orElseThrow().addJobResult(new JobResult(firstID, ResourceType.Patient, 0, 1));
+        final var results = List.of(new JobResult(firstID, ResourceType.Patient, 0, 1));
 
         // Complete the job
-        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, runningJob.get().getJobResults());
+        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, results);
 
         // Check that the status is COMPLETED and with resource types
         final Optional<JobModel> completedJob = queue.getJob(workJob.get().getLeft());
@@ -132,7 +132,7 @@ public class QueueTest {
 
         // Fail the second job and check its status
         final var secondJob = workJob.get().getRight();
-        queue.completeJob(secondJob.getJobID(), JobStatus.FAILED, secondJob.getJobResults());
+        queue.completeJob(secondJob.getJobID(), JobStatus.FAILED, List.of());
 //        jobSet.remove(workJob.get().getLeft());
 
         Optional<JobModel> failedJob = queue.getJob(workJob.get().getLeft());
@@ -152,12 +152,11 @@ public class QueueTest {
 
         // Retrieve the job with both resources
         final var workJob = queue.workJob().orElseThrow().getRight();
-        workJob.addJobResult(new JobResult(jobID, ResourceType.Patient, 0, 1));
-        workJob.addJobResult(new JobResult(jobID, ResourceType.ExplanationOfBenefit, 0, 1));
-
+        final var results = List.of(new JobResult(jobID, ResourceType.Patient, 0, 1),
+                new JobResult(jobID, ResourceType.ExplanationOfBenefit, 0, 1));
 
         // Complete job
-        queue.completeJob(workJob.getJobID(), JobStatus.COMPLETED, workJob.getJobResults());
+        queue.completeJob(workJob.getJobID(), JobStatus.COMPLETED, results);
 
         // Get the job and check its values
         final var actualJob = queue.getJob(jobID);
