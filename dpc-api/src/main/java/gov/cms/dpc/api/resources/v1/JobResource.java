@@ -67,8 +67,8 @@ public class JobResource extends AbstractJobResource {
                     final JobCompletionModel completionModel = new JobCompletionModel(
                             job.getStartTime().orElseThrow(),
                             String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),
-                            formOutputList(job),
-                            formErrorOutputList(job));
+                            formOutputList(job, false),
+                            formOutputList(job, true));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                     break;
                 }
@@ -87,31 +87,18 @@ public class JobResource extends AbstractJobResource {
     /**
      * Form a list of output entries for the output file
      * @param job - The job with its job result list
+     * @param forOperationalOutcomes - Only return operational outcomes if true, don't include them otherwise
      * @return the list of OutputEntry
      */
-    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job) {
+    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, boolean forOperationalOutcomes) {
         return job.getJobResults().stream()
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
                         String.format("%s/Data/%s", this.baseURL, JobResult.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
                         result.getCount()))
-                .filter(entry -> entry.getType() != ResourceType.OperationOutcome && entry.getCount() > 0)
+                .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ forOperationalOutcomes)
+                        && entry.getCount() > 0)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Form a list of output entries for the error output file
-     * @param job - The job with its job result list
-     * @return the list of OutputEntry
-     */
-    private List<JobCompletionModel.OutputEntry> formErrorOutputList(JobModel job) {
-        return job.getJobResults().stream()
-                .map(result -> new JobCompletionModel.OutputEntry(
-                        result.getResourceType(),
-                        String.format("%s/Data/%s", this.baseURL, JobResult.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
-                        result.getCount()))
-                .filter(entry -> entry.getType() == ResourceType.OperationOutcome && entry.getCount() > 0)
-                .collect(Collectors.toList());
-
-    }
 }

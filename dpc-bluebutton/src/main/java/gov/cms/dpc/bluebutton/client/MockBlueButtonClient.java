@@ -59,7 +59,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path)) {
             return parser.parseResource(Bundle.class, sampleData);
         } catch(IOException ex) {
-            throw new ResourceNotFoundException("No patient found with ID: " + patient);
+            throw new ResourceNotFoundException("Missing next bundle");
         }
     }
 
@@ -80,7 +80,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
         try(InputStream sampleData = loadResource(pathPrefix, patientID)) {
             return parser.parseResource(Bundle.class, sampleData);
         } catch(IOException ex) {
-            throw new ResourceNotFoundException("No patient found with ID: " + patientID);
+            throw formNoPatientException(patientID);
         }
     }
 
@@ -95,7 +95,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
         try(InputStream sampleData = loadResource(pathPrefix, patientID)) {
             return parser.parseResource(resourceClass, sampleData);
         } catch(IOException ex) {
-            throw new ResourceNotFoundException("No patient found with ID: " + patientID);
+            throw formNoPatientException(patientID);
         }
     }
 
@@ -108,9 +108,13 @@ public class MockBlueButtonClient implements BlueButtonClient {
      */
     private InputStream loadResource(String pathPrefix, String patientID) throws ResourceNotFoundException {
         if (!TEST_PATIENT_IDS.contains(patientID)) {
-            throw new ResourceNotFoundException("No patient found with ID: " + patientID);
+            throw formNoPatientException(patientID);
         }
         final var path = pathPrefix + patientID + ".xml";
         return MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path);
+    }
+
+    private ResourceNotFoundException formNoPatientException(String patientID) {
+        return new ResourceNotFoundException("No patient found with ID: " + patientID);
     }
 }
