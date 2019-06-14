@@ -1,11 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ParserOptions;
-import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.typesafe.config.Config;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.ExportPath;
@@ -15,9 +11,7 @@ import gov.cms.dpc.queue.Pair;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
-import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
-import io.reactivex.Emitter;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -38,8 +32,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
+/**
+ * The top level of the Aggregation Engine
+ */
 public class AggregationEngine implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
@@ -101,15 +97,15 @@ public class AggregationEngine implements Runnable {
      * @param sequence     - batch sequence number
      * @return return the path
      */
-    public String formOutputFilePath(UUID jobID, ResourceType resourceType, int sequence) {
+    String formOutputFilePath(UUID jobID, ResourceType resourceType, int sequence) {
         return String.format("%s/%s.ndjson", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
     }
 
-    public String formEncryptedOutputFilePath(UUID jobID, ResourceType resourceType, int sequence) {
+    String formEncryptedOutputFilePath(UUID jobID, ResourceType resourceType, int sequence) {
         return String.format("%s/%s.ndjson.enc", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
     }
 
-    public String formEncryptedMetadataPath(UUID jobID, ResourceType resourceType, int sequence) {
+    String formEncryptedMetadataPath(UUID jobID, ResourceType resourceType, int sequence) {
         return String.format("%s/%s-metadata.json", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
     }
 
@@ -145,7 +141,7 @@ public class AggregationEngine implements Runnable {
      *
      * @param job - the job to execute
      */
-    public void completeJob(JobModel job) {
+    void completeJob(JobModel job) {
         final UUID jobID = job.getJobID();
         logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
 
@@ -168,11 +164,12 @@ public class AggregationEngine implements Runnable {
                         results::add,
                         // onError
                         error -> {
-                            logger.error("Cannot process job {}", jobID, error);
+                            logger.error("FAILED job {}", jobID, error);
                             this.queue.completeJob(jobID, JobStatus.FAILED, List.of());
                         },
                         // onComplete
                         () -> {
+                            logger.info("COMPLETED job {}", jobID);
                             this.queue.completeJob(jobID, JobStatus.COMPLETED, results);
                         });
 
@@ -190,7 +187,7 @@ public class AggregationEngine implements Runnable {
         final var fetcher = new ResourceFetcher(bbclient, retryConfig, job.getJobID(), resourceType, errorSubject);
         return Observable.fromIterable(job.getPatients())
                 .subscribeOn(Schedulers.io())
-                .flatMap(patient -> fetcher.fetchResources(patient))
+                .flatMap(fetcher::fetchResources)
                 .concatMap(fetcher::unpackBundles)
                 .buffer(resourcesPerFile)
                 .map(batch -> writeBatch(job, resourceType, counter, batch));
@@ -211,13 +208,8 @@ public class AggregationEngine implements Runnable {
             final var byteStream = new ByteArrayOutputStream();
             final var sequence = counter.getAndIncrement();
 
-            OutputStream writer = byteStream;
-            String outputPath = formOutputFilePath(jobID, resourceType, sequence);
-            if (encryptionEnabled) {
-                outputPath = formEncryptedOutputFilePath(jobID, resourceType, sequence);
-                writer = formCipherStream(writer, job, resourceType, sequence);
-            }
-
+            OutputStream writer = encryptionEnabled ? formCipherStream(byteStream, job, resourceType, sequence): byteStream;
+            String outputPath = encryptionEnabled ? formEncryptedOutputFilePath(jobID, resourceType, sequence): formOutputFilePath(jobID, resourceType, sequence);
             for (var resource: batch) {
                 final String str = jsonParser.encodeResourceToString(resource);
                 writer.write(str.getBytes(StandardCharsets.UTF_8));
