@@ -186,112 +186,14 @@ public class AggregationEngine implements Runnable {
      * @return A new job result observable
      */
     private Observable<JobResult> completeResource(JobModel job, ResourceType resourceType, Subject<Resource> errorSubject) {
-        final AtomicInteger counter = new AtomicInteger();
+        final var counter = new AtomicInteger();
+        final var fetcher = new ResourceFetcher(bbclient, retryConfig, job.getJobID(), resourceType, errorSubject);
         return Observable.fromIterable(job.getPatients())
-                .flatMap(patient -> this.fetchResources(job.getJobID(), patient, resourceType, errorSubject))
                 .subscribeOn(Schedulers.io())
-                .concatMap(this::unpackBundles)
+                .flatMap(patient -> fetcher.fetchResources(patient))
+                .concatMap(fetcher::unpackBundles)
                 .buffer(resourcesPerFile)
                 .map(batch -> writeBatch(job, resourceType, counter, batch));
-    }
-
-    /**
-     * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to Resource. The
-     * resource may be a type requested or it may be an operational outcome;
-     *
-     * @param jobID        - {@link UUID} jobID
-     * @param patientID    - {@link String} patient ID
-     * @param resourceType - {@link ResourceType} to fetch from BlueButton
-     * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
-     */
-    private Observable<Resource> fetchResources(UUID jobID, String patientID, ResourceType resourceType, Subject<Resource> errorSubject) {
-        return Observable.create(emitter -> {
-            try {
-                // replace with a switch expression in Java 12
-                Function<String, Resource> bbMethod;
-                switch (resourceType) {
-                    case Patient:
-                        bbMethod = this.bbclient::requestPatientFromServer;
-                        break;
-                    case ExplanationOfBenefit:
-                        bbMethod = this.bbclient::requestEOBFromServer;
-                        break;
-                    case Coverage:
-                        bbMethod = this.bbclient::requestCoverageFromServer;
-                        break;
-                    default:
-                        throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
-                }
-
-                // Fetch the resource in a retry loop
-                logger.debug("Fetching {} from BlueButton for {}", resourceType.toString(), jobID);
-                Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-                final var fetchFirstDecorated = Retry.decorateFunction(retry, bbMethod);
-                final Resource firstResource = fetchFirstDecorated.apply(patientID);
-                emitter.onNext(firstResource);
-
-                // If this is a bundle, fetch the next bundles
-                if (firstResource.getResourceType() == ResourceType.Bundle) {
-                    fetchAllNextBundles(emitter, (Bundle)firstResource, resourceType, patientID, errorSubject);
-                }
-
-                // All done
-                emitter.onComplete();
-            } catch (JobQueueFailure ex) {
-                // Fatal for this job
-                emitter.onError(ex);
-            } catch(Exception ex){
-                // Otherwise, capture the BB error.
-                // Per patient errors are not fatal for the job, just turn them into operation outcomes
-                logger.error("Error fetching from Blue Button for a patient", ex);
-                errorSubject.onNext(formOperationOutcome(resourceType, patientID, ex));
-                emitter.onComplete();
-            }
-        });
-    }
-
-    /**
-     *  Fetch the all the next bundles if there are any.
-     *
-     * @param emitter to write the bundles to
-     * @param firstBundle to get the next link
-     * @param resourceType that we are fetching
-     * @param patientID for this patient
-     * @param errorSubject write operational error here
-     */
-    private void fetchAllNextBundles(Emitter<Resource> emitter,
-                                     Bundle firstBundle,
-                                     ResourceType resourceType,
-                                     String patientID,
-                                     Subject<Resource> errorSubject) {
-        for (var bundle = firstBundle; bundle.getLink(Bundle.LINK_NEXT) != null; ) {
-            Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-            final var decorated = Retry.decorateFunction(retry, this.bbclient::requestNextBundleFromServer);
-            try {
-                logger.debug("Fetching next {} from BlueButton on thread {}", resourceType.toString(), Thread.currentThread().getName());
-                bundle = decorated.apply(bundle);
-                emitter.onNext(bundle);
-            } catch (Exception ex) {
-                errorSubject.onNext(formOperationOutcome(resourceType, patientID, ex));
-                logger.error("Error fetching the next bundle from Blue Button", ex);
-            }
-        }
-    }
-
-    /**
-     * Check for bundle resources. Unpack bundle resources into their constituent resources, otherwise do nothing. Used
-     * in conjuction with flatMap or concatMap operators.
-     *
-     * @param resource - The resource to examine and possibly unpack
-     * @return A stream of resources
-     */
-    private Observable<Resource> unpackBundles(Resource resource) {
-        if (resource.getResourceType() != ResourceType.Bundle) {
-            return Observable.just(resource);
-        }
-        final Bundle bundle = (Bundle)resource;
-        final Resource[] entries = bundle.getEntry().stream().map(Bundle.BundleEntryComponent::getResource).toArray(Resource[]::new);
-        return Observable.fromArray(entries);
     }
 
     /**
@@ -356,35 +258,6 @@ public class AggregationEngine implements Runnable {
             metadataWriter.write(json.getBytes(StandardCharsets.UTF_8));
             return new CipherOutputStream(writer, cipherBuilder.formCipher());
         }
-    }
-
-    /**
-     * Create a OperationalOutcome resource from an exception with a patient
-     *
-     * @param resourceType - the resource type that was trying to be fetched
-     * @param patientID - the id of the patient involved in the error
-     * @param ex        - the exception to turn into a Operational Outcome
-     * @return an operation outcome
-     */
-    private OperationOutcome formOperationOutcome(ResourceType resourceType, String patientID, Throwable ex) {
-        String details;
-        if (ex instanceof ResourceNotFoundException) {
-            details = String.format("%s resource not found in Blue Button for id: %s", resourceType.toString(), patientID);
-        } else if (ex instanceof BaseServerResponseException) {
-            final var serverException = (BaseServerResponseException) ex;
-            details = String.format("Blue Button error fetching %s resource. HTTP return code: %s", resourceType.toString(), serverException.getStatusCode());
-        } else {
-            details = String.format("Internal error: %s", ex.getMessage());
-        }
-
-        final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
-        final var outcome = new OperationOutcome();
-        outcome.addIssue()
-                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                .setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setDetails(new CodeableConcept().setText(details))
-                .setLocation(patientLocation);
-        return outcome;
     }
 
     /**

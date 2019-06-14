@@ -18,31 +18,38 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * Class to build the CipherWriter and it associated key materials.
+ */
 public class CipherBuilder implements AutoCloseable {
-    private Config config;
     private SecretKey secretKey = null;
     private byte[] iv;
+    private final String symmetricCipher;
+    private final String asymmetricCipher;
+    private final int keyBits;
+    private final int ivBits;
+    private final int gcmTagLength;
 
     /**
      * Create ciphers according to the passed in config
      */
-    public CipherBuilder(Config config) {
-        this.config = config;
+    CipherBuilder(Config config) {
+        symmetricCipher = config.getString("encryption.symmetricCipher");
+        keyBits = config.getInt("encryption.keyBits");
+        ivBits = config.getInt("encryption.ivBits");
+        gcmTagLength = config.getInt("encryption.gcmTagLength");
+        asymmetricCipher = config.getString("encryption.asymmetricCipher");
     }
 
     /**
-     * Generate the keyMaterials needed to form a cipher
+     * Generate the keyMaterials needed to form a cipher. Should be called first.
      *
      * @throws GeneralSecurityException for config errors
      */
-    public void generateKeyMaterial() throws GeneralSecurityException {
+    void generateKeyMaterial() throws GeneralSecurityException {
         if (secretKey != null) {
             this.close();
         }
-        String symmetricCipher = config.getString("encryption.symmetricCipher");
-        int keyBits = config.getInt("encryption.keyBits");
-        int ivBits = config.getInt("encryption.ivBits");
 
         KeyGenerator keyGenerator = KeyGenerator.getInstance(symmetricCipher.split("/", -1)[0]);
         keyGenerator.init(keyBits);
@@ -59,11 +66,10 @@ public class CipherBuilder implements AutoCloseable {
      * @return a one use cipher
      * @throws GeneralSecurityException on configuration errors
      */
-    public Cipher formCipher() throws GeneralSecurityException {
+    Cipher formCipher() throws GeneralSecurityException {
         assert(secretKey != null);
-        String symmetricCipher = config.getString("encryption.symmetricCipher");
         final var aesCipher = Cipher.getInstance(symmetricCipher);
-        int gcmTagLength = config.getInt("encryption.gcmTagLength");
+
         aesCipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(gcmTagLength, iv));
         return aesCipher;
     }
@@ -88,8 +94,7 @@ public class CipherBuilder implements AutoCloseable {
      * @throws GeneralSecurityException for config errors
      * @throws IOException for JSON errors
      */
-    public String getMetadata(byte[] rsaPublicKey) throws GeneralSecurityException, IOException {
-        String asymmetricCipher = config.getString("encryption.asymmetricCipher");
+    String getMetadata(byte[] rsaPublicKey) throws GeneralSecurityException, IOException {
         KeyFactory rsaKeyFactory = KeyFactory.getInstance("RSA");
         Cipher rsaCipher = Cipher.getInstance(asymmetricCipher);
         rsaCipher.init(
@@ -101,8 +106,6 @@ public class CipherBuilder implements AutoCloseable {
         Map<String, Object> symmetricMetadata = new HashMap<>();
         Map<String, Object> asymmetricMetadata = new HashMap<>();
 
-        String symmetricCipher = config.getString("encryption.symmetricCipher");
-        int gcmTagLength = config.getInt("encryption.gcmTagLength");
         symmetricMetadata.put("Cipher", symmetricCipher);
         symmetricMetadata.put("EncryptedKey", Base64.getEncoder().encodeToString(rsaCipher.doFinal(secretKey.getEncoded())));
         symmetricMetadata.put("InitializationVector", Base64.getEncoder().encodeToString(iv));
