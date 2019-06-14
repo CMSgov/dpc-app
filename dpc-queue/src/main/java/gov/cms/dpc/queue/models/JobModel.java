@@ -166,11 +166,8 @@ public class JobModel implements Serializable  {
     }
 
     public void setJobResults(List<JobResult> jobResults) {
-            this.jobResults = jobResults;
-    }
-
-    public void addJobResult(JobResult result) {
-        jobResults.add(result);
+        this.jobResults.clear();
+        this.jobResults.addAll(jobResults);
     }
 
     public String getProviderID() {
@@ -245,6 +242,7 @@ public class JobModel implements Serializable  {
         return new EqualsBuilder()
                 .append(jobID, other.jobID)
                 .append(jobResults, other.jobResults)
+                .append(resourceTypes, other.resourceTypes)
                 .append(providerID, other.providerID)
                 .append(patients, other.patients)
                 .append(submitTime, other.submitTime)
@@ -256,18 +254,19 @@ public class JobModel implements Serializable  {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobID, jobResults, providerID, patients, status, submitTime, startTime, completeTime);
+        return Objects.hash(jobID, resourceTypes, jobResults, providerID, patients, status, submitTime, startTime, completeTime);
     }
 
     @Override
     public String toString() {
         return "JobModel{" +
                 "jobID=" + jobID +
-                ", jobResult=" + jobResults +
+                ", resourceTypes=" + resourceTypes.toString() +
                 ", providerID='" + providerID + '\'' +
                 ", patients=" + patients +
                 ", status=" + status +
                 ", rsaPublicKey=" + Arrays.toString(rsaPublicKey) +
+                ", jobResult=" + jobResults +
                 ", submitTime=" + submitTime +
                 ", startTime=" + startTime +
                 ", completeTime=" + completeTime +

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,8 +96,11 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        JobModel.validResourceTypes.forEach(resourceType -> { job.addJobResult(new JobResult(jobID, resourceType, 0, 1)); });
-        queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
+        final var results = JobModel.validResourceTypes
+                .stream()
+                .map(resourceType -> new JobResult(jobID, resourceType, 0, 1))
+                .collect(Collectors.toList());
+        queue.completeJob(jobID, JobStatus.COMPLETED, results);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -128,8 +132,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        job.addJobResult(new JobResult(jobID, ResourceType.OperationOutcome, 0, 1));
-        queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
+        queue.completeJob(jobID, JobStatus.COMPLETED, List.of(new JobResult(jobID, ResourceType.OperationOutcome, 0, 1)));
 
         // Test the response for ok
         final var resource = new JobResource(queue, TEST_BASEURL);

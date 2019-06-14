@@ -32,6 +32,7 @@ import javax.inject.Inject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -157,21 +158,22 @@ public class AggregationEngine implements Runnable {
                 .buffer(resourcesPerFile)
                 .map(batch -> writeBatch(job, ResourceType.OperationOutcome, errorCounter, batch));
 
+        final var results = new ArrayList<JobResult>();
         Observable.fromIterable(job.getResourceTypes())
                 .flatMap(resourceType -> completeResource(job, resourceType, errorSubject))
                 .doFinally(errorSubject::onComplete)
                 .concatWith(errorResult)
                 .blockingSubscribe(
                         // onNext
-                        job::addJobResult,
+                        results::add,
                         // onError
                         error -> {
                             logger.error("Cannot process job {}", jobID, error);
-                            this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
+                            this.queue.completeJob(jobID, JobStatus.FAILED, List.of());
                         },
                         // onComplete
                         () -> {
-                            this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
+                            this.queue.completeJob(jobID, JobStatus.COMPLETED, results);
                         });
 
     }
@@ -298,7 +300,7 @@ public class AggregationEngine implements Runnable {
      * @param job context
      * @param resourceType to write
      * @param batch is the list of resources to write
-     * @param counter
+     * @param counter is general counter for batch number
      * @return The JobResult associated with this file
      */
     private JobResult writeBatch(JobModel job, ResourceType resourceType, AtomicInteger counter, List<Resource> batch) {
@@ -310,8 +312,8 @@ public class AggregationEngine implements Runnable {
             OutputStream writer = byteStream;
             String outputPath = formOutputFilePath(jobID, resourceType, sequence);
             if (encryptionEnabled) {
-                outputPath = formEncryptedOutputFilePath(jobID, resourceType, 0);
-                writer = formCipherStream(writer, job, resourceType);
+                outputPath = formEncryptedOutputFilePath(jobID, resourceType, sequence);
+                writer = formCipherStream(writer, job, resourceType, sequence);
             }
 
             for (var resource: batch) {
@@ -340,12 +342,13 @@ public class AggregationEngine implements Runnable {
      * @param writer is the inner stream to write to
      * @param job is the context including the RSA key
      * @param resourceType is the type of resource being written
+     * @param sequence is the batch sequence being written
      * @return a output stream to write to
      * @throws GeneralSecurityException if there is something wrong with the encryption config
      * @throws IOException if there is something wrong with the file io.
      */
-    private OutputStream formCipherStream(OutputStream writer, JobModel job, ResourceType resourceType) throws GeneralSecurityException, IOException {
-        final var metadataPath = formEncryptedMetadataPath(job.getJobID(), resourceType, 0);
+    private OutputStream formCipherStream(OutputStream writer, JobModel job, ResourceType resourceType, int sequence) throws GeneralSecurityException, IOException {
+        final var metadataPath = formEncryptedMetadataPath(job.getJobID(), resourceType, sequence);
         try(final CipherBuilder cipherBuilder = new CipherBuilder(config);
             final FileOutputStream metadataWriter = new FileOutputStream(metadataPath)) {
             cipherBuilder.generateKeyMaterial();
