@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Implements a distributed {@link JobQueue} using Redis and Postgres
@@ -50,11 +50,10 @@ public class DistributedQueue implements JobQueue {
     @Override
     public void submitJob(UUID jobID, JobModel data) {
         assert (jobID.equals(data.getJobID()) && data.getStatus() == JobStatus.QUEUED);
-        final OffsetDateTime submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         logger.debug("Adding jobID {} to the queue at {} with for provider {}.",
-                jobID, submitTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                jobID,
+                data.getSubmitTime().orElseThrow().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 data.getProviderID());
-        data.setSubmitTime(submitTime);
         // Persist the job in postgres
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
@@ -94,7 +93,7 @@ public class DistributedQueue implements JobQueue {
                     return Optional.empty();
                 }
                 session.refresh(jobModel);
-                return Optional.ofNullable(jobModel);
+                return Optional.of(jobModel);
             } finally {
                 tx.commit();
             }
@@ -108,17 +107,8 @@ public class DistributedQueue implements JobQueue {
             return Optional.empty();
         }
         final OffsetDateTime startTime = OffsetDateTime.now(ZoneOffset.UTC);
-        final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
-            // Verify that the job is in progress, otherwise fail
-            if (job.getStatus() != JobStatus.QUEUED) {
-                throw new JobQueueFailure(jobID, String.format("Cannot work job in state: %s", job.getStatus()));
-            }
-            // Update the status and start time
-            job.setStatus(JobStatus.RUNNING);
-            job.setStartTime(startTime);
-        });
-        //noinspection OptionalGetWithoutIsPresent
-        final var delay = Duration.between(updatedJob.getSubmitTime().get(), updatedJob.getStartTime().get());
+        final JobModel updatedJob = updateModel(jobID, JobModel::makeRunningJob);
+        final var delay = Duration.between(updatedJob.getSubmitTime().orElseThrow(), updatedJob.getStartTime().orElseThrow());
         logger.debug("Started job {} at {}, waited in queue for {} seconds",
                 jobID,
                 startTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
@@ -131,17 +121,8 @@ public class DistributedQueue implements JobQueue {
     public void completeJob(UUID jobID, JobStatus status, List<JobResult> jobResults) {
         assert (status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         final OffsetDateTime completionTime = OffsetDateTime.now(ZoneOffset.UTC);
-        final JobModel updatedJob = updateModel(jobID, (JobModel job) -> {
-            // Verify that the job is running
-            if (job.getStatus() != JobStatus.RUNNING) {
-                throw new JobQueueFailure(jobID, String.format("Cannot complete job in state: %s", job.getStatus()));
-            }
-            // Set the status and the completion time
-            job.setStatus(status);
-            job.setCompleteTime(completionTime);
-            job.setJobResults(jobResults);
-        });
-        final Duration workDuration = Duration.between(updatedJob.getStartTime().get(), updatedJob.getCompleteTime().get());
+        final JobModel updatedJob = updateModel(jobID, job -> job.makeFinishedJob(status, jobResults));
+        final Duration workDuration = Duration.between(updatedJob.getStartTime().orElseThrow(), updatedJob.getCompleteTime().orElseThrow());
         logger.debug("Completed job {} at {} with status {} and duration {} seconds",
                 jobID,
                 completionTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
@@ -190,7 +171,7 @@ public class DistributedQueue implements JobQueue {
      * @param mutator - Function called to update the job. If the mutator throws, rollback the transaction.
      * @return the {@link JobModel} after the a successful
      */
-    private JobModel updateModel(UUID jobID, Consumer<JobModel> mutator) {
+    private JobModel updateModel(UUID jobID, Function<JobModel, JobModel> mutator) {
         try (final Session session = this.factory.openSession()) {
 
             final Transaction tx = session.beginTransaction();
@@ -204,14 +185,12 @@ public class DistributedQueue implements JobQueue {
                 }
 
                 // Mutate the model
-                mutator.accept(jobModel);
-                // There seems to be an issue with cascading the updates to the JobResult entity
-                // Clearing the session cache seems to resolve the issue, otherwise we get an EntityExistsException
-                // Not entirely sure why this is happening, but this fix should be simple and performant
-                session.clear();
-                session.update(jobModel);
+                final var updatedJob = mutator.apply(jobModel);
+                session.evict(jobModel);
+                session.merge(updatedJob);
                 tx.commit();
-                return jobModel;
+
+                return updatedJob;
             } catch (Exception e) {
                 tx.rollback();
                 logger.error("Unable to update job model", e);
