@@ -96,7 +96,7 @@ public class JobResource extends AbstractJobResource {
                         result.getResourceType(),
                         String.format("%s/Data/%s", this.baseURL, JobResult.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
                         result.getCount()))
-                .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ forOperationalOutcomes)
+                .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)
                 .collect(Collectors.toList());
     }
