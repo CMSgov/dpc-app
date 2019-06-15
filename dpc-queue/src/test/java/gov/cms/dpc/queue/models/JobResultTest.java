@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.UUID;
 
-public class JobResultTest {
+class JobResultTest {
     @Test
     void testEqual() {
         final var jobID = UUID.randomUUID();
