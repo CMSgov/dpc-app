@@ -5,6 +5,7 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.checkerframework.checker.units.qual.C;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
@@ -19,7 +20,7 @@ import java.util.*;
  * the results of the requests.
  */
 @Entity(name = "job_queue")
-public class JobModel implements Serializable {
+public class JobModel implements Serializable, Cloneable {
     public static final long serialVersionUID = 42L;
 
     /**
@@ -111,7 +112,7 @@ public class JobModel implements Serializable {
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
-        this.jobResults = new ArrayList<>();
+        this.jobResults = List.of();
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -121,12 +122,34 @@ public class JobModel implements Serializable {
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
-        this.jobResults = new ArrayList<>();
+        this.jobResults = List.of();
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
         this.rsaPublicKey = pubKey.getEncoded();
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
+    private JobModel(UUID jobID,
+                     List<ResourceType> resourceTypes,
+                     String providerID,
+                     List<String> patients,
+                     JobStatus status,
+                     List<JobResult> results,
+                     byte[] pubKey,
+                     OffsetDateTime submitTime,
+                     OffsetDateTime startTime,
+                     OffsetDateTime completeTime) {
+        this.jobID = jobID;
+        this.resourceTypes = resourceTypes;
+        this.providerID = providerID;
+        this.patients = patients;
+        this.status = status;
+        this.jobResults = results;
+        this.rsaPublicKey = pubKey;
+        this.submitTime = submitTime;
+        this.startTime = startTime;
+        this.completeTime = completeTime;
     }
 
     /**
@@ -206,13 +229,16 @@ public class JobModel implements Serializable {
         if (this.status != JobStatus.QUEUED) {
             throw new JobQueueFailure(jobID, String.format("Cannot run job. JobStatus: %s", this.status));
         }
-        var runningJob = new JobModel(jobID, resourceTypes, providerID, patients);
-        runningJob.status = JobStatus.RUNNING;
-        runningJob.rsaPublicKey = rsaPublicKey;
-        runningJob.jobResults = jobResults;
-        runningJob.submitTime = submitTime;
-        runningJob.startTime = OffsetDateTime.now(ZoneOffset.UTC);;
-        return runningJob;
+        return new JobModel(jobID,
+                resourceTypes,
+                providerID,
+                patients,
+                JobStatus.RUNNING,
+                jobResults,
+                rsaPublicKey,
+                submitTime,
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null);
     }
 
     /**
@@ -228,15 +254,16 @@ public class JobModel implements Serializable {
         if (this.status != JobStatus.RUNNING) {
             throw new JobQueueFailure(jobID, String.format("Cannot complete. JobStatus: %s", this.status));
         }
-        var runningJob = new JobModel(jobID, resourceTypes, providerID, patients);
-        runningJob.status = status;
-        runningJob.rsaPublicKey = rsaPublicKey;
-        runningJob.jobResults.clear();
-        runningJob.jobResults.addAll(results);
-        runningJob.submitTime = submitTime;
-        runningJob.startTime = startTime;
-        runningJob.completeTime = OffsetDateTime.now(ZoneOffset.UTC);
-        return runningJob;
+        return new JobModel(jobID,
+                resourceTypes,
+                providerID,
+                patients,
+                status,
+                List.copyOf(results),
+                rsaPublicKey,
+                submitTime,
+                startTime,
+                OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
@@ -254,12 +281,13 @@ public class JobModel implements Serializable {
                 .append(startTime, other.startTime)
                 .append(completeTime, other.completeTime)
                 .append(status, other.status)
+                .append(rsaPublicKey, other.rsaPublicKey)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobID, resourceTypes, jobResults, providerID, patients, status, submitTime, startTime, completeTime);
+        return Objects.hash(jobID, resourceTypes, jobResults, providerID, patients, status, submitTime, startTime, completeTime, rsaPublicKey);
     }
 
     @Override
@@ -276,5 +304,10 @@ public class JobModel implements Serializable {
                 ", startTime=" + startTime +
                 ", completeTime=" + completeTime +
                 '}';
+    }
+
+    @Override
+    public JobModel clone() {
+        return new JobModel(jobID,resourceTypes, providerID, patients, status, jobResults, rsaPublicKey, submitTime, startTime, completeTime);
     }
 }
