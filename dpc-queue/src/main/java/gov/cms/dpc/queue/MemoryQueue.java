@@ -33,7 +33,6 @@ public class MemoryQueue implements JobQueue {
     @Override
     public synchronized void submitJob(UUID jobID, JobModel job) {
         assert(jobID.equals(job.getJobID()) && job.getStatus() == JobStatus.QUEUED);
-        job.setSubmitTime(OffsetDateTime.now(ZoneOffset.UTC));
         logger.debug("Submitting job: {}", jobID);
         this.queue.put(jobID, job);
     }
@@ -58,16 +57,13 @@ public class MemoryQueue implements JobQueue {
         if (first.isPresent()) {
             final UUID key = first.get().getKey();
             final JobModel job = first.get().getValue();
-            assert(job.getSubmitTime().isPresent());
+            final var runningJob = job.makeRunningJob();
+            this.queue.replace(key, runningJob);
 
-            job.setStatus(JobStatus.RUNNING);
-            job.setStartTime(OffsetDateTime.now(ZoneOffset.UTC));
-            this.queue.replace(key, job);
-
-            final var queueDuration = Duration.between(job.getSubmitTime().get(), job.getStartTime().get());
+            final var queueDuration = Duration.between(runningJob.getSubmitTime().orElseThrow(), runningJob.getStartTime().orElseThrow());
             logger.debug("Starting to work job {}. {} seconds of queue time.", key, queueDuration.toMillis() / 1000.0);
 
-            return Optional.of(new Pair<>(key, job));
+            return Optional.of(new Pair<>(key, runningJob));
         }
         return Optional.empty();
     }
@@ -75,21 +71,15 @@ public class MemoryQueue implements JobQueue {
     @Override
     public synchronized void completeJob(UUID jobID, JobStatus status, List<JobResult> jobResults) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
-
         final JobModel job = this.queue.get(jobID);
         if (job == null) {
             throw new JobQueueFailure(jobID, "Job does not exist in queue");
         }
-        assert(job.getStatus() == JobStatus.RUNNING);
-        assert(job.getStartTime().isPresent());
+        final var finishedJob = job.makeFinishedJob(status, jobResults);
+        this.queue.replace(jobID, finishedJob);
 
-        job.setStatus(status);
-        job.setCompleteTime(OffsetDateTime.now(ZoneOffset.UTC));
-        job.setJobResults(jobResults);
-        this.queue.replace(jobID, job);
-
-        final var workDuration = Duration.between(job.getStartTime().get(), job.getCompleteTime().get());
-        logger.debug("Completed job {} with status {} and duration {} seconds", jobID, status, workDuration.toMillis()/1000.0);
+        final var workDuration = Duration.between(finishedJob.getStartTime().orElseThrow(), finishedJob.getCompleteTime().orElseThrow());
+        logger.debug("Completed job {} with status {} and duration {} seconds", jobID, status, workDuration.toMillis() / 1000.0);
     }
 
     @Override
