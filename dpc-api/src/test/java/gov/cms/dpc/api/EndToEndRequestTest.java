@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EndToEndRequestTest extends AbstractApplicationTest {
+class EndToEndRequestTest extends AbstractApplicationTest {
 
 
     private static final String CSV = "test_associations.csv";
@@ -38,7 +38,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
      * 5. Verifies that the downloaded file contains the necessary number of patients (100)
      */
     @Test
-    public void simpleRequestWorkflow() throws IOException, InterruptedException {
+    void simpleRequestWorkflow() throws IOException, InterruptedException {
 
         // Submit an export request for a provider which is not known to the system.
         final IGenericClient exportClient = ctx.newRestfulGenericClient(getBaseURL());
