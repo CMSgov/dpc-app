@@ -79,15 +79,15 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
 
 
         assertAll(() -> assertNotNull(jobResponse, "Should have Job Response"),
-                () -> assertEquals(JobModel.validResourceTypes.size(), jobResponse.getOutput().size(), "Should have all resource files"),
+                () -> assertTrue(JobModel.validResourceTypes.size() <= jobResponse.getOutput().size(), "Should have at least one resource file per resource"),
                 () -> assertEquals(0, jobResponse.getError().size(), "Should not have any errors"));
 
         // Validate each of the resources
         validateResourceFile(Patient.class, jobResponse, ResourceType.Patient, 100);
         // EOBs are structured as bundles, even though they have the EOB resource type
-        validateResourceFile(Bundle.class, jobResponse, ResourceType.ExplanationOfBenefit, 100);
+        validateResourceFile(ExplanationOfBenefit.class, jobResponse, ResourceType.ExplanationOfBenefit, 1000);
         // Coverages are structured as bundles of Coverages
-        validateResourceFile(Bundle.class, jobResponse, ResourceType.Coverage, 100);
+        validateResourceFile(Coverage.class, jobResponse, ResourceType.Coverage, 300);
         assertThrows(IllegalStateException.class, () -> validateResourceFile(Schedule.class, jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
     }
 
