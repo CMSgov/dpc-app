@@ -1,0 +1,23 @@
+.sidenav {
+  position: sticky;
+  top: $spacer-5;
+  list-style: none;
+  padding: 0;
+}
+
+.sidenav__item {
+  font-size: $h4-font-size;
+  margin-bottom: $spacer-2;
+}
+
+.sidenav__link:visited,
+.sidenav__link:link {
+  color: #666;
+  text-decoration: none;
+}
+
+.sidenav__link:hover {
+  color: #000;
+  border-left: 3px solid blue;
+  padding-left: $spacer-1;
+}

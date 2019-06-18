@@ -68,6 +68,7 @@ echo dpc-website > .rbenv-gemsets
 
 3. `gem install bundler --no-document`
 4. Run `bundle install`
+5. Run `npm install`
 
 ### Credentials
 The database is password encrypted. Additionally, sensitive information exists that mist also be encrypted in the credentials file. In order to build the database and run the application, you'll need a copy of the `master.key` file. TBD: contact information for this file.
