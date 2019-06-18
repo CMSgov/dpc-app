@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="mt-5 col-sm-3">
+    <ul class="nav flex-column sticky-top sidenav">
+      <li class="nav-item">
+        <a class="nav-link pt-0 pb-0 mb-3" href="#getting-started">Getting Started</a>
+        <a class="nav-link pt-0 pb-0 mb-3" href="#learned">What We've Learned</a>
+        <a class="nav-link pt-0 pb-0" href="#about-data">About the Data</a>
+      </li>
+    </ul>
+  </div>
+  <div class="col-sm-9">
+    <h2>Overview</h2>
+    <%= render partial: 'overview' %>
+
+    <h3 id="getting-started">Getting Started</h3>
+    <%= render partial: 'getting_started' %>
+
+    <h3 id="learned">What We've Learned</h3>
+    <%= render partial: 'learned' %>
+
+    <h3 id="about-data">About the Data</h3>
+    <%= render partial: 'about_data' %>
+  </div>
+</div>
+
+
