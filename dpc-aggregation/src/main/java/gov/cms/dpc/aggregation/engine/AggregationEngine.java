@@ -10,9 +10,14 @@ import gov.cms.dpc.queue.Pair;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import io.github.resilience4j.retry.RetryConfig;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.exceptions.UndeliverableException;
+import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.Subject;
 import io.reactivex.subjects.UnicastSubject;
 import org.hl7.fhir.dstu3.model.*;
@@ -80,11 +85,11 @@ public class AggregationEngine implements Runnable {
         this.subscribe.dispose();
     }
 
-
     /**
      * The main run-loop of the engine
      */
     private void pollQueue() {
+        setGlobalErrorHandler();
         subscribe = Observable.fromCallable(this.queue::workJob)
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
@@ -93,9 +98,7 @@ public class AggregationEngine implements Runnable {
                     logger.debug("No job, retrying in 2 seconds");
                     return completed.delay(2, TimeUnit.SECONDS);
                 })
-                .doOnError(e -> logger.error("Error", e))
-                .subscribe(this::workExportJob,
-                        error -> logger.error("Unable to complete job.", error));
+                .subscribe(this::workExportJob, error -> logger.error("Unable to complete job.", error));
     }
 
     /**
@@ -115,55 +118,79 @@ public class AggregationEngine implements Runnable {
      */
     void completeJob(JobModel job) {
         final UUID jobID = job.getJobID();
-        logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
+        try {
+            logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
+            logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
-        List<String> attributedBeneficiaries = job.getPatients();
-        logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-
-        final var writer = new ResourceWriter(fhirContext, config, exportPath, job, ResourceType.OperationOutcome);
-        final var errorCounter = new AtomicInteger();
-        final var errorSubject = UnicastSubject.<Resource>create().toSerialized();
-        final Observable<JobResult> errorResult = errorSubject
-                .buffer(resourcesPerFile)
-                .map(batch -> writer.writeBatch(errorCounter, batch));
-
-        final var results = new ArrayList<JobResult>();
-        Observable.fromIterable(job.getResourceTypes())
-                .flatMap(resourceType -> completeResource(job, resourceType, errorSubject))
-                .doFinally(errorSubject::onComplete)
-                .concatWith(errorResult)
-                .blockingSubscribe(
-                        // onNext
-                        results::add,
-                        // onError
-                        error -> {
-                            logger.error("FAILED job {}", jobID, error);
-                            this.queue.completeJob(jobID, JobStatus.FAILED, List.of());
-                        },
-                        // onComplete
-                        () -> {
-                            logger.info("COMPLETED job {}", jobID);
-                            this.queue.completeJob(jobID, JobStatus.COMPLETED, results);
-                        });
-
+            final var errorCounter = new AtomicInteger();
+            final var results = Flowable.fromIterable(job.getResourceTypes())
+                    .flatMap(resourceType -> completeResource(job, resourceType, errorCounter))
+                    .toList()
+                    .blockingGet();
+            logger.info("COMPLETED job {}", jobID);
+            this.queue.completeJob(jobID, JobStatus.COMPLETED, results);
+        } catch(Exception error) {
+            logger.error("FAILED job {}", jobID, error);
+            this.queue.completeJob(jobID, JobStatus.FAILED, List.of());
+        }
     }
 
     /**
      * Fetch and write a specific resource type
      * @param job context
      * @param resourceType to process
-     * @param errorSubject to record errors from Blue Button
+     * @param errorCounter to count the OperationalOutcome JobResults
      * @return A new job result observable
      */
-    private Observable<JobResult> completeResource(JobModel job, ResourceType resourceType, Subject<Resource> errorSubject) {
-        final var counter = new AtomicInteger();
-        final var fetcher = new ResourceFetcher(bbclient, retryConfig, job.getJobID(), resourceType, errorSubject);
-        final var writer = new ResourceWriter(fhirContext, config, exportPath, job, resourceType);
-        return Observable.fromIterable(job.getPatients())
-                .subscribeOn(Schedulers.io())
+    private Flowable<JobResult> completeResource(JobModel job, ResourceType resourceType, AtomicInteger errorCounter) {
+        if (job.getPatients().size() == 0) {
+            return Flowable.empty();
+        }
+
+        // Make this flow hot (ie. only called once)
+        final var fetcher = new ResourceFetcher(bbclient, retryConfig, job.getJobID(), resourceType);
+        final var mixedFlow = Flowable.fromIterable(job.getPatients())
+                // Fetch on parallel threads (one per CPU core)
+                .parallel()
+                .runOn(Schedulers.io())
                 .flatMap(fetcher::fetchResources)
-                .concatMap(fetcher::unpackBundles)
+                .sequential()
+                .publish()
+                .autoConnect(2);
+
+        // Batch the non-error resources into files
+        final var counter = new AtomicInteger();
+        final var writer = new ResourceWriter(fhirContext, config, exportPath, job, resourceType);
+        final Flowable<JobResult> resourceFlow = mixedFlow.filter(r -> r.getResourceType() != ResourceType.OperationOutcome)
                 .buffer(resourcesPerFile)
                 .map(batch -> writer.writeBatch(counter, batch));
+
+        // Batch the error resources into files
+        final var errorWriter = new ResourceWriter(fhirContext, config, exportPath, job, ResourceType.OperationOutcome);
+        final Flowable<JobResult> outcomeFlow = mixedFlow.filter(r -> r.getResourceType() == ResourceType.OperationOutcome)
+                .buffer(resourcesPerFile)
+                .map(batch -> errorWriter.writeBatch(errorCounter, batch));
+
+        // Merge the resultant flows
+        return resourceFlow.mergeWith(outcomeFlow);
+    }
+
+    /**
+     * Setup a global handler to catch the UndeliverableException case.
+     */
+    private void setGlobalErrorHandler() {
+        RxJavaPlugins.setErrorHandler(e -> {
+            // Undeliverable Exceptions may happen because of parallel execution. One thread will
+            // throw an exception which will cause the job to fail and (close its consumer).
+            // Another thread will throw an exception as well which will be undeliverable
+            if (e instanceof UndeliverableException) {
+                // Merely log undeliverable exceptions
+                logger.error(e.getMessage());
+            } else {
+                // Forward all others to current thread's uncaught exception handler
+                final var thread = Thread.currentThread();
+                thread.getUncaughtExceptionHandler().uncaughtException(thread, e);
+            }
+        });
     }
 }
