@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Writes files from batches of FHIR Resources
  */
 class ResourceWriter {
-    private static final Logger logger = LoggerFactory.getLogger(ResourceFetcher.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceWriter.class);
     private static final char DELIM = '\n';
 
     private FhirContext fhirContext;
@@ -75,10 +75,10 @@ class ResourceWriter {
         this.jobID = job.getJobID();
         this.resourceType = resourceType;
     }
+
     /**
      * Write a batch of resources to a file. Encrypt if the encryption is enabled.
      *
-
      * @param batch is the list of resources to write
      * @param counter is general counter for batch number
      * @return The JobResult associated with this file
@@ -88,9 +88,10 @@ class ResourceWriter {
             final var byteStream = new ByteArrayOutputStream();
             final var sequence = counter.getAndIncrement();
             final var jsonParser = fhirContext.newJsonParser();
-
             OutputStream writer = encryptionEnabled ? formCipherStream(byteStream, job, resourceType, sequence): byteStream;
             String outputPath = encryptionEnabled ? formEncryptedOutputFilePath(exportPath, jobID, resourceType, sequence): formOutputFilePath(exportPath, jobID, resourceType, sequence);
+
+            logger.debug("Start writing to {}", outputPath);
             for (var resource: batch) {
                 final String str = jsonParser.encodeResourceToString(resource);
                 writer.write(str.getBytes(StandardCharsets.UTF_8));
