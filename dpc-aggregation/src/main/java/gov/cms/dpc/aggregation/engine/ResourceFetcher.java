@@ -6,16 +6,16 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
-import io.reactivex.Emitter;
-import io.reactivex.Observable;
-import io.reactivex.subjects.Subject;
+import io.github.resilience4j.retry.transformer.RetryTransformer;
+import io.reactivex.Flowable;
 import org.hl7.fhir.dstu3.model.*;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 
 /**
  * A resource fetcher will fetch resources of particular type from passed {@link BlueButtonClient}
@@ -26,7 +26,6 @@ class ResourceFetcher {
     private RetryConfig retryConfig;
     private UUID jobID;
     private ResourceType resourceType;
-    private Subject<Resource> errorSubject;
 
     /**
      * Create a context for fetching FHIR resources
@@ -34,115 +33,106 @@ class ResourceFetcher {
      * @param retryConfig - retry parameters
      * @param jobID - the jobID for logging and reporting
      * @param resourceType - the resource type to fetch
-     * @param errorSubject - {@link OperationOutcome}s are put here
      */
     ResourceFetcher(BlueButtonClient blueButtonClient,
                            RetryConfig retryConfig,
                            UUID jobID,
-                           ResourceType resourceType,
-                           Subject<Resource> errorSubject) {
+                           ResourceType resourceType) {
         this.blueButtonClient = blueButtonClient;
         this.retryConfig = retryConfig;
         this.jobID = jobID;
         this.resourceType = resourceType;
-        this.errorSubject = errorSubject;
     }
 
     /**
-     * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to Resource. The
-     * resource may be a type requested or it may be an operational outcome;
-     * @param patientID - the patient to fetch
-     * @return an observable for the resources
+     * Fetch all the resources for a specific patient. If errors are encountered from BlueButton,
+     * a OperationalOutcome resource is used.
+     *
+     * @param patientID to use
+     * @return a flow with all the resources for specific patient
      */
-    Observable<Resource> fetchResources(String patientID) {
-        return Observable.create(emitter -> {
-            try {
-                // Fetch the resource in a retry loop
-                logger.debug("Fetching {} from BlueButton for {}", resourceType.toString(), jobID);
-                Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-                final var fetchFirstDecorated = Retry.decorateFunction(retry, supplyBBMethod());
-                final Resource firstResource = fetchFirstDecorated.apply(patientID);
-                emitter.onNext(firstResource);
-
-                // If this is a bundle, fetch the next bundles
-                if (firstResource.getResourceType() == ResourceType.Bundle) {
-                    fetchAllNextBundles(emitter, patientID, (Bundle)firstResource);
-                }
-
-                // All done
-                emitter.onComplete();
-            } catch (JobQueueFailure ex) {
-                // Fatal for this job
-                emitter.onError(ex);
-            } catch(Exception ex){
-                // Otherwise, capture the BB error.
-                // Per patient errors are not fatal for the job, just turn them into operation outcomes
-                logger.error("Error fetching from Blue Button for a patient", ex);
-                errorSubject.onNext(formOperationOutcome(patientID, ex));
-                emitter.onComplete();
+    Flowable<Resource> fetchResources(String patientID) {
+        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
+        return Flowable.fromCallable(() -> {
+            logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), patientID);
+            final Resource firstFetched = fetchFirst(patientID);
+            if (firstFetched instanceof Bundle) {
+                return fetchAllBundles(patientID, (Bundle)firstFetched);
+            } else {
+                logger.debug("Done fetching {} for {}", resourceType.toString(), patientID);
+                return List.of(firstFetched);
             }
-        });
+        })
+                .compose(RetryTransformer.of(retry))
+                .onErrorResumeNext((Throwable error) -> handleError(patientID, error))
+                .flatMap(Flowable::fromIterable);
     }
 
     /**
-     * Returns the associated blueButtonClient method
-     * @return a method to that fetches a resource
+     * Given a bundle, return a list of resources in the passed in bundle and all
+     * the resources from the next bundles.
+     *
+     * @param patientID to fetch for
+     * @param firstBundle of resources. Included in the result list
+     * @return a list of all the resources in the first bundle and all next bundles
      */
-    private Function<String, Resource> supplyBBMethod() {
+    private List<Resource> fetchAllBundles(String patientID, Bundle firstBundle) {
+        final var resources = new ArrayList<Resource>();
+        firstBundle.getEntry().forEach((entry) -> resources.add(entry.getResource()));
+
+        // Loop until no more next bundles
+        var bundle = firstBundle;
+        while (bundle.getLink(Bundle.LINK_NEXT) != null) {
+            logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), patientID);
+            bundle = blueButtonClient.requestNextBundleFromServer(bundle);
+            bundle.getEntry().forEach((entry) -> resources.add(entry.getResource()));
+        }
+
+        logger.debug("Done fetching bundles {} for {}", resourceType.toString(), patientID);
+        return resources;
+    }
+
+    /**
+     * Turn an error into a flow.
+     * @param patientID the flow
+     * @param error the error
+     * @return a Flowable of list of resources
+     */
+    private Publisher<List<Resource>> handleError(String patientID, Throwable error) {
+        if (error instanceof JobQueueFailure) {
+            // JobQueueFailure is an internal error. Just pass it along as an error.
+            return Flowable.error(error);
+        }
+
+        // Other errors should be turned into OperationalOutcome and just recorded.
+        logger.debug("Turning error into OperationalOutcome");
+        final var operationOutcome = formOperationOutcome(patientID, error);
+        return Flowable.just(List.of(operationOutcome));
+    }
+
+    /**
+     * Based on resourceType, fetch a resource or a bundle of resources.
+     *
+     * @param patientID of the resource to fetch
+     * @return either a single resource or the first bundle of resources
+     */
+    private Resource fetchFirst(String patientID) {
         switch (resourceType) {
             case Patient:
-                return blueButtonClient::requestPatientFromServer;
+                return blueButtonClient.requestPatientFromServer(patientID);
             case ExplanationOfBenefit:
-                return blueButtonClient::requestEOBFromServer;
+                return blueButtonClient.requestEOBFromServer(patientID);
             case Coverage:
-                return blueButtonClient::requestCoverageFromServer;
+                return blueButtonClient.requestCoverageFromServer(patientID);
             default:
                 throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
         }
     }
 
     /**
-     *  Fetch the all the next bundles if there are any.
+     * Create a {@link OperationOutcome} resource from an exception with a patient
      *
-     * @param emitter to write the bundles to
-     * @param firstBundle to get the next link
-     */
-    private void fetchAllNextBundles(Emitter<Resource> emitter, String patientID, Bundle firstBundle) {
-        var bundle = firstBundle;
-        while(bundle.getLink(Bundle.LINK_NEXT) != null) {
-            Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-            final var decorated = Retry.decorateFunction(retry, blueButtonClient::requestNextBundleFromServer);
-            try {
-                logger.debug("Fetching next {} from BlueButton", resourceType.toString());
-                bundle = decorated.apply(bundle);
-                emitter.onNext(bundle);
-            } catch (Exception ex) {
-                errorSubject.onNext(formOperationOutcome(patientID, ex));
-                logger.error("Error fetching the next bundle from Blue Button", ex);
-            }
-        }
-    }
-
-    /**
-     * Check for bundle resources. Unpack bundle resources into their constituent resources, otherwise do nothing. Used
-     * in conjunction with flatMap or concatMap operators.
-     *
-     * @param resource - The resource to examine and possibly unpack
-     * @return A stream of resources
-     */
-    Observable<Resource> unpackBundles(Resource resource) {
-        if (resource.getResourceType() != ResourceType.Bundle) {
-            return Observable.just(resource);
-        }
-        final Bundle bundle = (Bundle)resource;
-        final Resource[] entries = bundle.getEntry().stream().map(Bundle.BundleEntryComponent::getResource).toArray(Resource[]::new);
-        return Observable.fromArray(entries);
-    }
-
-    /**
-     * Create a OperationalOutcome resource from an exception with a patient
-     *
-     * @param ex        - the exception to turn into a Operational Outcome
+     * @param ex - the exception to turn into a Operational Outcome
      * @return an operation outcome
      */
     private OperationOutcome formOperationOutcome(String patientID, Throwable ex) {

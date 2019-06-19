@@ -200,8 +200,8 @@ class AggregationEngineTest {
         final var actual = queue.getJob(jobID).get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(3, actual.getJobResults().size(), "expected 3 (= 2 output + 1 error) resource types"),
-                () -> assertEquals(2, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 2 (= 1 bad patient x 2 resource types)"),
+                () -> assertEquals(4, actual.getJobResults().size(), "expected 4 (= 2 output + 2 error)"),
+                () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 for the one bad patient"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
