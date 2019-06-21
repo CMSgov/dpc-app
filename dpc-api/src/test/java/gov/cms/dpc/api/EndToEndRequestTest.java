@@ -87,7 +87,7 @@ class EndToEndRequestTest extends AbstractApplicationTest {
         // EOBs are structured as bundles, even though they have the EOB resource type
         validateResourceFile(ExplanationOfBenefit.class, jobResponse, ResourceType.ExplanationOfBenefit, 1000);
         // Coverages are structured as bundles of Coverages
-        validateResourceFile(Coverage.class, jobResponse, ResourceType.Coverage, 300);
+        validateResourceFile(Coverage.class, jobResponse, ResourceType.Coverage, 400); // 4 per patient: Medicare parts A-D
         assertThrows(IllegalStateException.class, () -> validateResourceFile(Schedule.class, jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
     }
 
@@ -98,7 +98,7 @@ class EndToEndRequestTest extends AbstractApplicationTest {
                 .filter(output -> output.getType() == resourceType)
                 .map(JobCompletionModel.OutputEntry::getUrl)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Should have at least 1 patient resource"));
+                .orElseThrow(() -> new IllegalStateException("Should have at least 1 resource"));
 
         final File tempFile = ClientUtils.fetchExportedFiles(fileID);
 
@@ -110,7 +110,7 @@ class EndToEndRequestTest extends AbstractApplicationTest {
                     .map((line) -> clazz.cast(parser.parseResource(line)))
                     .collect(Collectors.toList());
 
-            assertEquals(expectedSize, entries.size(), String.format("Should have %d entries in the resource", expectedSize));
+            assertEquals(expectedSize, entries.size(), String.format("Should have %d entries in the ndjson file", expectedSize));
         }
     }
 }
