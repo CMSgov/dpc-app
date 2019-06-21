@@ -151,10 +151,10 @@ public class AggregationEngine implements Runnable {
         final var fetcher = new ResourceFetcher(bbclient, retryConfig, job.getJobID(), resourceType);
         final var mixedFlow = Flowable.fromIterable(job.getPatients())
                 // Fetch on parallel threads (one per CPU core)
-                .parallel()
-                .runOn(Schedulers.io())
+                //.parallel()
+                //.runOn(Schedulers.io())
                 .flatMap(fetcher::fetchResources)
-                .sequential()
+                //.sequential()
                 .publish()
                 .autoConnect(2);
 
