@@ -14,6 +14,7 @@ import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
 import io.dropwizard.Configuration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
@@ -135,7 +136,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         try {
             sslContext = SSLContexts.custom()
                     .loadKeyMaterial(keyStore, keyStorePass)
-                    .loadTrustMaterial(keyStore, null)
+                    .loadTrustMaterial(keyStore, new TrustSelfSignedStrategy())
                     .build();
 
         } catch (KeyManagementException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
