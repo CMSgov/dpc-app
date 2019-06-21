@@ -1,9 +1,0 @@
-.sidenav a.nav-link:visited,
-.sidenav a.nav-link:link {
-  color: #666;
-}
-
-.sidenav a.nav-link:hover {
-  color: #000;
-  border-left: 3px solid blue;
-}
