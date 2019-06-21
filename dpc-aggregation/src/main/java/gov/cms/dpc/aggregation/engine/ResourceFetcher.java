@@ -105,7 +105,7 @@ class ResourceFetcher {
         }
 
         // Other errors should be turned into OperationalOutcome and just recorded.
-        logger.error("Turning error into OperationalOutcome", error);
+        logger.error("Turning error into OperationalOutcome. Error is: ", error);
         final var operationOutcome = formOperationOutcome(patientID, error);
         return Flowable.just(List.of(operationOutcome));
     }
