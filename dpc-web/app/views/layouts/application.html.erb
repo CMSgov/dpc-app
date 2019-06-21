@@ -9,12 +9,12 @@
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
   </head>
 
-  <body>
+  <body class="ds-base">
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
     <!-- content -->
-    <div class="container">
+    <div class="ds-l-container">
       <%= yield %>
     </div>
 

@@ -1,5 +1,8 @@
 {
   "name": "dpc-website",
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+    "@cmsgov/design-system-core": "^2.0.1",
+    "@cmsgov/design-system-layout": "^2.0.1"
+  }
 }
