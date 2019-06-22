@@ -14,7 +14,6 @@ import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
-import io.reactivex.flowables.ConnectableFlowable;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import org.hl7.fhir.dstu3.model.*;
@@ -62,7 +61,7 @@ public class AggregationEngine implements Runnable {
         this.retryConfig = retryConfig;
         this.fhirContext = fhirContext;
         this.resourcesPerFile = config.hasPath("resourcesPerFile") ? config.getInt("resourcesPerFile") : 1000;
-        this.parallelFetches = config.hasPath("parallelFetches") ? config.getBoolean("parallelFetches") : false;
+        this.parallelFetches = config.hasPath("parallelFetches") && config.getBoolean("parallelFetches");
     }
 
     /**
