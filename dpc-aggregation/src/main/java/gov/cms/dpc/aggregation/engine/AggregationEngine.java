@@ -10,22 +10,18 @@ import gov.cms.dpc.queue.Pair;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import io.github.resilience4j.retry.RetryConfig;
-import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
+import io.reactivex.flowables.ConnectableFlowable;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.ReplaySubject;
-import io.reactivex.subjects.Subject;
-import io.reactivex.subjects.UnicastSubject;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +41,7 @@ public class AggregationEngine implements Runnable {
     private final Config config;
     private final FhirContext fhirContext;
     private final int resourcesPerFile;
+    private final boolean parallelFetches;
     private Disposable subscribe;
 
     /**
@@ -65,6 +62,7 @@ public class AggregationEngine implements Runnable {
         this.retryConfig = retryConfig;
         this.fhirContext = fhirContext;
         this.resourcesPerFile = config.hasPath("resourcesPerFile") ? config.getInt("resourcesPerFile") : 1000;
+        this.parallelFetches = config.hasPath("parallelFetches") ? config.getBoolean("parallelFetches") : false;
     }
 
     /**
@@ -149,25 +147,28 @@ public class AggregationEngine implements Runnable {
 
         // Make this flow hot (ie. only called once)
         final var fetcher = new ResourceFetcher(bbclient, retryConfig, job.getJobID(), resourceType);
-        final var mixedFlow = Flowable.fromIterable(job.getPatients())
-                // Fetch on parallel threads (one per CPU core)
-                //.parallel()
-                //.runOn(Schedulers.io())
-                .flatMap(fetcher::fetchResources)
-                //.sequential()
-                .publish()
-                .autoConnect(2);
+        final Flowable<Resource> mixedFlow;
+        if (parallelFetches) {
+            mixedFlow = Flowable.fromIterable(job.getPatients())
+                    .parallel()
+                    .runOn(Schedulers.io())
+                    .flatMap(fetcher::fetchResources)
+                    .sequential();
+        } else {
+            mixedFlow = Flowable.fromIterable(job.getPatients()).flatMap(fetcher::fetchResources);
+        }
+        final var connectableMixedFlow = mixedFlow.publish().autoConnect(2);
 
         // Batch the non-error resources into files
         final var counter = new AtomicInteger();
         final var writer = new ResourceWriter(fhirContext, config, exportPath, job, resourceType);
-        final Flowable<JobResult> resourceFlow = mixedFlow.filter(r -> r.getResourceType() != ResourceType.OperationOutcome)
+        final Flowable<JobResult> resourceFlow = connectableMixedFlow.filter(r -> r.getResourceType() != ResourceType.OperationOutcome)
                 .buffer(resourcesPerFile)
                 .map(batch -> writer.writeBatch(counter, batch));
 
         // Batch the error resources into files
         final var errorWriter = new ResourceWriter(fhirContext, config, exportPath, job, ResourceType.OperationOutcome);
-        final Flowable<JobResult> outcomeFlow = mixedFlow.filter(r -> r.getResourceType() == ResourceType.OperationOutcome)
+        final Flowable<JobResult> outcomeFlow = connectableMixedFlow.filter(r -> r.getResourceType() == ResourceType.OperationOutcome)
                 .buffer(resourcesPerFile)
                 .map(batch -> errorWriter.writeBatch(errorCounter, batch));
 
