@@ -21,7 +21,7 @@ import java.util.*;
  */
 @Entity(name = "job_queue")
 public class JobModel implements Serializable {
-    public static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 43L;
 
     /**
      * The list of resource type supported by DCP

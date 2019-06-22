@@ -205,14 +205,6 @@ class AggregationEngineTest {
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
-    /**
-     * Test that the engine can handle more resources than can fit in a single batch
-     */
-    @Test
-    void testMultipleBatches() {
-       config = ConfigFactory.parseString("{}").withFallback(config);
-    }
-
     @Test
     void testBlueButtonException() {
         // Test generic runtime exception
