@@ -14,9 +14,7 @@ class JobModelTest {
     void testEqual() {
         final var jobID = UUID.randomUUID();
         final var a = new JobModel(jobID, List.of(ResourceType.Patient), "1", List.of("1"));
-        final var b = a.clone();
         final var c = new JobModel(jobID, List.of(ResourceType.ExplanationOfBenefit), "1", List.of("1"));
-        assertTrue(a.equals(b), "expected a to equal b");
         assertFalse(a.equals(c), "expected a to not equal c");
         assertTrue(a.equals(a));
     }
@@ -25,9 +23,7 @@ class JobModelTest {
     void testHash() {
         final var jobID = UUID.randomUUID();
         final var a = new JobModel(jobID, List.of(ResourceType.Patient), "1", List.of("1"));
-        final var b = a.clone();
         final var c = new JobModel(jobID, List.of(ResourceType.ExplanationOfBenefit), "1", List.of("1"));
-        assertEquals(a.hashCode(), b.hashCode(), "expected a to equal b");
         assertNotEquals(a.hashCode(), c.hashCode(), "expected a to not equal c");
     }
 
@@ -35,10 +31,7 @@ class JobModelTest {
     void testCompetedHash() {
         final var jobID = UUID.randomUUID();
         final var a = new JobModel(jobID, List.of(ResourceType.Patient), "1", List.of("1"));
-        final var b = a.clone();
-        final var completedA = a.makeRunningJob().makeFinishedJob(JobStatus.COMPLETED, List.of(new JobResult(jobID, ResourceType.Patient, 0, 1)));
-        final var completedB = completedA.clone();
-        assertEquals(a.hashCode(), b.hashCode(), "expected a to equal b");
-        assertEquals(completedA.hashCode(), completedB.hashCode(), "expected a to equal b");
+        final var completedA = a.makeRunningJob().makeFinishedJob(JobStatus.COMPLETED, List.of(new JobResult(jobID, ResourceType.Patient, 0, 1)));;
+        assertNotEquals(completedA.hashCode(), a.hashCode(), "expected completed to not equal not-completed");
     }
 }

@@ -20,7 +20,7 @@ import java.util.*;
  * the results of the requests.
  */
 @Entity(name = "job_queue")
-public class JobModel implements Serializable, Cloneable {
+public class JobModel implements Serializable {
     public static final long serialVersionUID = 42L;
 
     /**
@@ -130,28 +130,6 @@ public class JobModel implements Serializable, Cloneable {
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
-    private JobModel(UUID jobID,
-                     List<ResourceType> resourceTypes,
-                     String providerID,
-                     List<String> patients,
-                     JobStatus status,
-                     List<JobResult> results,
-                     byte[] pubKey,
-                     OffsetDateTime submitTime,
-                     OffsetDateTime startTime,
-                     OffsetDateTime completeTime) {
-        this.jobID = jobID;
-        this.resourceTypes = resourceTypes;
-        this.providerID = providerID;
-        this.patients = patients;
-        this.status = status;
-        this.jobResults = results;
-        this.rsaPublicKey = pubKey;
-        this.submitTime = submitTime;
-        this.startTime = startTime;
-        this.completeTime = completeTime;
-    }
-
     /**
      * Is the job model fields consistent. Useful before and after serialization.
      *
@@ -229,16 +207,13 @@ public class JobModel implements Serializable, Cloneable {
         if (this.status != JobStatus.QUEUED) {
             throw new JobQueueFailure(jobID, String.format("Cannot run job. JobStatus: %s", this.status));
         }
-        return new JobModel(jobID,
-                resourceTypes,
-                providerID,
-                patients,
-                JobStatus.RUNNING,
-                jobResults,
-                rsaPublicKey,
-                submitTime,
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null);
+        var model = new JobModel(jobID, resourceTypes, providerID, patients);
+        model.status = JobStatus.RUNNING;
+        model.rsaPublicKey = rsaPublicKey;
+        model.submitTime = submitTime;
+        model.startTime = OffsetDateTime.now(ZoneOffset.UTC);
+        model.completeTime = null;
+        return model;
     }
 
     /**
@@ -254,16 +229,14 @@ public class JobModel implements Serializable, Cloneable {
         if (this.status != JobStatus.RUNNING) {
             throw new JobQueueFailure(jobID, String.format("Cannot complete. JobStatus: %s", this.status));
         }
-        return new JobModel(jobID,
-                resourceTypes,
-                providerID,
-                patients,
-                status,
-                List.copyOf(results),
-                rsaPublicKey,
-                submitTime,
-                startTime,
-                OffsetDateTime.now(ZoneOffset.UTC));
+        var model = new JobModel(jobID, resourceTypes, providerID, patients);
+        model.status = status;
+        model.jobResults = List.copyOf(results);
+        model.rsaPublicKey = rsaPublicKey;
+        model.submitTime = submitTime;
+        model.startTime = startTime;
+        model.completeTime = OffsetDateTime.now(ZoneOffset.UTC);
+        return model;
     }
 
     @Override
@@ -313,10 +286,5 @@ public class JobModel implements Serializable, Cloneable {
                 ", startTime=" + startTime +
                 ", completeTime=" + completeTime +
                 '}';
-    }
-
-    @Override
-    public JobModel clone() {
-        return new JobModel(jobID,resourceTypes, providerID, patients, status, jobResults, rsaPublicKey, submitTime, startTime, completeTime);
     }
 }
