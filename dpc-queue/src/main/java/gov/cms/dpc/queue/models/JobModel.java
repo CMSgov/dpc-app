@@ -287,7 +287,16 @@ public class JobModel implements Serializable, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobID, resourceTypes, jobResults, providerID, patients, status, submitTime, startTime, completeTime, rsaPublicKey);
+        return Objects.hash(jobID,
+                resourceTypes,
+                jobResults,
+                providerID,
+                patients,
+                status,
+                submitTime,
+                startTime,
+                completeTime,
+                Arrays.hashCode(rsaPublicKey));
     }
 
     @Override

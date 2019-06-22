@@ -33,7 +33,7 @@ public class ResourceTypeListConverter implements AttributeConverter<List<Resour
             return List.of();
         }
         final var resourceList = new ArrayList<ResourceType>();
-        for (String typeString: dbData.split(LIST_DELIM)) {
+        for (String typeString: dbData.split(LIST_DELIM, -1)) {
             try {
                 final var type = ResourceType.valueOf(typeString);
                 resourceList.add(type);
