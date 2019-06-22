@@ -40,7 +40,7 @@ public class AggregationEngine implements Runnable {
     private final Config config;
     private final FhirContext fhirContext;
     private final int resourcesPerFile;
-    private final boolean parallelFetches;
+    private final boolean parallelRequests;
     private Disposable subscribe;
 
     /**
@@ -61,7 +61,7 @@ public class AggregationEngine implements Runnable {
         this.retryConfig = retryConfig;
         this.fhirContext = fhirContext;
         this.resourcesPerFile = config.hasPath("resourcesPerFile") ? config.getInt("resourcesPerFile") : 1000;
-        this.parallelFetches = config.hasPath("parallelFetches") && config.getBoolean("parallelFetches");
+        this.parallelRequests = config.hasPath("parallelRequests") && config.getBoolean("parallelRequests");
     }
 
     /**
@@ -147,7 +147,7 @@ public class AggregationEngine implements Runnable {
         // Make this flow hot (ie. only called once)
         final var fetcher = new ResourceFetcher(bbclient, retryConfig, job.getJobID(), resourceType);
         final Flowable<Resource> mixedFlow;
-        if (parallelFetches) {
+        if (parallelRequests) {
             mixedFlow = Flowable.fromIterable(job.getPatients())
                     .parallel()
                     .runOn(Schedulers.io())
