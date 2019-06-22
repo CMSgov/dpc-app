@@ -52,7 +52,7 @@ class BlueButtonClientTest {
     private static Config conf;
 
     @BeforeAll
-    private static void setupBlueButtonClient() throws IOException {
+    static void setupBlueButtonClient() throws IOException {
         conf = getTestConfig();
         final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
@@ -97,7 +97,7 @@ class BlueButtonClientTest {
     }
 
     @AfterAll
-    private static void tearDown() {
+    static void tearDown() {
         mockServer.stop();
     }
 

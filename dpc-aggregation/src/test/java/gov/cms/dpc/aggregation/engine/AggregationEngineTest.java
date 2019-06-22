@@ -192,7 +192,7 @@ class AggregationEngineTest {
         Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture());
         var values = idCaptor.getAllValues();
         assertEquals(6,
-                idCaptor.getAllValues().stream().filter(value -> value.equals("-1")).count(),
+                values.stream().filter(value -> value.equals("-1")).count(),
                 "Should be 6 invalid ids, 3 retries per method x 2 method calls x 1 bad-id");
 
         // Look at the result. It should have one error, but be successful otherwise.
