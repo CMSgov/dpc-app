@@ -70,7 +70,7 @@ public class AggregationEngine implements Runnable {
     @Override
     public void run() {
         // Run loop
-        logger.info("Starting aggregation engine with exportPath:\"{}\"", exportPath);
+        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelRequests:{} ", exportPath, resourcesPerFile, parallelRequests);
         this.pollQueue();
     }
 

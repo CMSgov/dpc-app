@@ -2,6 +2,7 @@ package gov.cms.dpc.queue.models;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.util.UUID;
  * A JobResult represents the output of a job. There is a one-to-one relationship with export files.
  * The object is immutable.
  */
+@Immutable
 @Entity(name = "job_result")
 public class JobResult implements Serializable {
     public static final long serialVersionUID = 42L;

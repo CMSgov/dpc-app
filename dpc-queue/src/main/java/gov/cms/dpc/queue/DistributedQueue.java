@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 /**
  * Implements a distributed {@link JobQueue} using Redis and Postgres
@@ -108,7 +108,7 @@ public class DistributedQueue implements JobQueue {
             return Optional.empty();
         }
         final OffsetDateTime startTime = OffsetDateTime.now(ZoneOffset.UTC);
-        final JobModel updatedJob = updateModel(jobID, JobModel::makeRunningJob);
+        final JobModel updatedJob = updateModel(jobID, JobModel::setRunningStatus);
         final var delay = Duration.between(updatedJob.getSubmitTime().orElseThrow(), updatedJob.getStartTime().orElseThrow());
         logger.debug("Started job {} at {}, waited in queue for {} seconds",
                 jobID,
@@ -122,7 +122,7 @@ public class DistributedQueue implements JobQueue {
     public void completeJob(UUID jobID, JobStatus status, List<JobResult> jobResults) {
         assert (status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         final OffsetDateTime completionTime = OffsetDateTime.now(ZoneOffset.UTC);
-        final JobModel updatedJob = updateModel(jobID, job -> job.makeFinishedJob(status, jobResults));
+        final JobModel updatedJob = updateModel(jobID, job -> job.setFinishedStatus(status, jobResults));
         final Duration workDuration = Duration.between(updatedJob.getStartTime().orElseThrow(), updatedJob.getCompleteTime().orElseThrow());
         logger.debug("Completed job {} at {} with status {} and duration {} seconds",
                 jobID,
@@ -172,7 +172,7 @@ public class DistributedQueue implements JobQueue {
      * @param mutator - Function called to update the job. If the mutator throws, rollback the transaction.
      * @return the {@link JobModel} after the a successful
      */
-    private JobModel updateModel(UUID jobID, Function<JobModel, JobModel> mutator) {
+    private JobModel updateModel(UUID jobID, Consumer<JobModel> mutator) {
         try (final Session session = this.factory.openSession()) {
 
             final Transaction tx = session.beginTransaction();
@@ -186,12 +186,11 @@ public class DistributedQueue implements JobQueue {
                 }
 
                 // Mutate the model
-                final var updatedJob = mutator.apply(jobModel);
-                session.evict(jobModel);
-                session.merge(updatedJob);
+                mutator.accept(jobModel);
+                session.saveOrUpdate(jobModel);
                 tx.commit();
 
-                return updatedJob;
+                return jobModel;
             } catch (Exception e) {
                 tx.rollback();
                 logger.error("Unable to update job model", e);

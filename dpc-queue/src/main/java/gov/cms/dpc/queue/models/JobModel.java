@@ -5,7 +5,6 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.checkerframework.checker.units.qual.C;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
@@ -17,7 +16,7 @@ import java.util.*;
 
 /**
  * The JobModel tracks the work done on a bulk export request. It contains the essential details of the request and
- * the results of the requests.
+ * the results of the requests. The job is mutated between QUEUED -> RUNNING -> COMPLETE | FAILED states.
  */
 @Entity(name = "job_queue")
 public class JobModel implements Serializable {
@@ -112,7 +111,7 @@ public class JobModel implements Serializable {
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
-        this.jobResults = List.of();
+        this.jobResults = new ArrayList<>();
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -122,7 +121,7 @@ public class JobModel implements Serializable {
     public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
         this.jobID = jobID;
         this.resourceTypes = resourceTypes;
-        this.jobResults = List.of();
+        this.jobResults = new ArrayList<>();
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -198,45 +197,31 @@ public class JobModel implements Serializable {
     }
 
     /**
-     * Make a JobModel that has a RUNNING status from the current JobModel.
-     * This job should be in the QUEUED state.
-     *
-     * @return the new JobModel in the RUNNING state.
+     * Transition this job to running status. This job should be in the QUEUED state.
      */
-    public JobModel makeRunningJob() {
+    public void setRunningStatus() {
         if (this.status != JobStatus.QUEUED) {
             throw new JobQueueFailure(jobID, String.format("Cannot run job. JobStatus: %s", this.status));
         }
-        var model = new JobModel(jobID, resourceTypes, providerID, patients);
-        model.status = JobStatus.RUNNING;
-        model.rsaPublicKey = rsaPublicKey;
-        model.submitTime = submitTime;
-        model.startTime = OffsetDateTime.now(ZoneOffset.UTC);
-        model.completeTime = null;
-        return model;
+        status = JobStatus.RUNNING;
+        startTime = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
     /**
-     * Make a JobModel that has a COMPLETED or FAILED status from the current JobModel.
+     * Transition this job to a COMPLETED or FAILED status.
      * This job should be in the RUNNING state.
      *
      * @param status - the new status
      * @param results - the job results to add the finished state
-     * @return the new JobModel in a finished state.
      */
-    public JobModel makeFinishedJob(JobStatus status, List<JobResult> results) {
+    public void setFinishedStatus(JobStatus status, List<JobResult> results) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
-        if (this.status != JobStatus.RUNNING) {
+        if (this.status != JobStatus.RUNNING || jobResults.size() != 0) {
             throw new JobQueueFailure(jobID, String.format("Cannot complete. JobStatus: %s", this.status));
         }
-        var model = new JobModel(jobID, resourceTypes, providerID, patients);
-        model.status = status;
-        model.jobResults = List.copyOf(results);
-        model.rsaPublicKey = rsaPublicKey;
-        model.submitTime = submitTime;
-        model.startTime = startTime;
-        model.completeTime = OffsetDateTime.now(ZoneOffset.UTC);
-        return model;
+        this.status = status;
+        jobResults.addAll(results);
+        completeTime = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
     @Override

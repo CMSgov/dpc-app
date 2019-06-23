@@ -28,10 +28,21 @@ class JobModelTest {
     }
 
     @Test
-    void testCompetedHash() {
+    void testStatus() {
+        // Run through the states of a job
         final var jobID = UUID.randomUUID();
-        final var a = new JobModel(jobID, List.of(ResourceType.Patient), "1", List.of("1"));
-        final var completedA = a.makeRunningJob().makeFinishedJob(JobStatus.COMPLETED, List.of(new JobResult(jobID, ResourceType.Patient, 0, 1)));;
-        assertNotEquals(completedA.hashCode(), a.hashCode(), "expected completed to not equal not-completed");
+        final var job = new JobModel(jobID, List.of(ResourceType.Patient), "1", List.of("1"));
+        assertAll(() -> assertEquals(JobStatus.QUEUED, job.getStatus()),
+                () -> assertTrue(job.getSubmitTime().isPresent()),
+                () -> assertTrue(job.getStartTime().isEmpty()));
+
+        job.setRunningStatus();
+        assertAll(() -> assertEquals(JobStatus.RUNNING, job.getStatus()),
+                () -> assertTrue(job.getStartTime().isPresent()),
+                () -> assertTrue(job.getCompleteTime().isEmpty()));
+
+        job.setFinishedStatus(JobStatus.COMPLETED, List.of(new JobResult(jobID, ResourceType.Patient, 0, 1)));
+        assertAll(() -> assertEquals(JobStatus.COMPLETED, job.getStatus()),
+                () -> assertTrue(job.getCompleteTime().isPresent()));
     }
 }

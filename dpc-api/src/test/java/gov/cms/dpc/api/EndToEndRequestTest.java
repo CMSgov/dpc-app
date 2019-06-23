@@ -55,8 +55,7 @@ class EndToEndRequestTest extends AbstractApplicationTest {
                 () -> assertEquals("fatal", firstIssue.getSeverity().toCode(), "Should be a fatal error"),
                 () -> assertEquals(1, outcome.getIssue().size(), "Should only have a single error"));
 
-//         Now, submit the roster and try again.
-
+        // Now, submit the roster and try again.
         final InputStream resource = EndToEndRequestTest.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
             throw new MissingResourceException("Can not find seeds file", EndToEndRequestTest.class.getName(), CSV);
