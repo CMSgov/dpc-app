@@ -28,7 +28,7 @@ The `docker-compose` file includes the necessary applications and configurations
 docker-compose up db redis
 ```
 
-By default, the application attempts to connect to the `dpc_atrribution` database on the localhost as the `postgres` user.
+By default, the application attempts to connect to the `dpc_attribution` database on the localhost as the `postgres` user.
 This database needs to be manually created, but table setup and data migration will be handled by the DPC services.
 
 For Redis, we assume the server is running on the localhost, with the default port.
@@ -70,7 +70,7 @@ Once the JARs are built, they can be run in two ways.
 1. Executed using *Docker Compose* `docker-compose up`
 1. Manually by running each of the JARs
     1. `java -jar dpc-attribution/target/dpc-attribution-0.3.0-SNAPSHOT.jar server`
-    1. `java -jar dpc-attribution/target/dpc-web-0.3.0-SNAPSHOT.jar server`
+    1. `java -jar dpc-api/target/dpc-api-0.3.0-SNAPSHOT.jar server`
     
     By default, the services will attempt to load a `local.application.conf` file from the current execution directory. 
     This can be overriden in two ways.
@@ -87,6 +87,8 @@ Once the JARs are built, they can be run in two ways.
 
 Seeding the database
 ---
+
+> Note: This step can be skipped if directly executing the `demo` command in the API service, which seeds the database by default.
 
 By default, DPC initially starts with an empty attribution database, this means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton.
 
@@ -106,7 +108,7 @@ Testing the Application
 The `dpc-api` component contains a `demo` command, which illustrates the basic workflow for submitting an export request and modifying an attribution roster.
 It can be executed with the following command:
 
-`java -jar dpc-api{JAR}.jar demo`
+`java -jar dpc-api/target/dpc-api-0.3.0-SNAPSHOT.jar demo`
 
 *Note:* The demo client expects the entire system (all databases and services) to be running from a new state (no data in the database).
 This is the default when starting the services from the *docker-compose* file. 
