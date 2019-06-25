@@ -1,0 +1,45 @@
+dpc {
+  api {
+    server {
+      registerDefaultExceptionMappers = false
+      applicationConnectors = [{
+        type = http
+        port = 3002
+      }]
+      adminConnectors = [{
+        type = http
+        port = 9911
+      }]
+    }
+  }
+
+  attribution {
+    server {
+      registerDefaultExceptionMappers = false
+      applicationConnectors = [{
+        type = http
+        port = 3500
+      }]
+      adminConnectors = [{
+        type = http
+        port = 9912
+      }]
+    }
+
+    aggregation {
+      bbclient.keyStore.location = "bbcerts/bb.keystore"
+
+      server {
+        registerDefaultExceptionMappers = false
+        applicationConnectors = [{
+          type = http
+          port = 3007
+        }]
+        adminConnectors = [{
+          type = http
+          port = 9913
+        }]
+      }
+    }
+  }
+}

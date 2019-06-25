@@ -21,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.MissingResourceException;
@@ -32,19 +30,10 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
 
-    private final SeedProcessor seedProcessor;
     private final Settings settings;
-
 
     public SeedCommand(Application<DPCAttributionConfiguration> application) {
         super(application, "seed", "Seed the attribution roster");
-        // Get the test seeds
-        final InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV);
-        if (resource == null) {
-            throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
-        }
-        this.seedProcessor = new SeedProcessor(resource);
-
         this.settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
     }
 
@@ -76,12 +65,19 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             context.truncate(Providers.PROVIDERS).cascade().execute();
             context.truncate(Organizations.ORGANIZATIONS).cascade().execute();
 
-            this.seedProcessor
-                    .extractProviderMap()
-                    .entrySet()
-                    .stream()
-                    .map(this.seedProcessor::generateRosterBundle)
-                    .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, creationTimestamp));
+
+            // Get the test seeds
+            try (InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV)) {
+                if (resource == null) {
+                    throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
+                }
+                SeedProcessor
+                        .extractProviderMap(resource)
+                        .entrySet()
+                        .stream()
+                        .map(SeedProcessor::generateRosterBundle)
+                        .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, creationTimestamp));
+            }
             logger.info("Finished loading seeds");
         }
     }
