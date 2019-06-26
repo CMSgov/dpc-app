@@ -1,0 +1,30 @@
+<div class="ds-l-row">
+  <div class="ds-u-margin-top--5 ds-l-col--3">
+    <ul class="sidenav">
+      <li class="sidenav__item">
+        <a class="sidenav__link" href="#getting-started">Getting Started</a>
+      </li>
+      <li class="sidenav__item">
+        <a class="sidenav__link" href="#learned">What We've Learned</a>
+      </li>
+      <li class="sidenav__item">
+        <a class="sidenav__link" href="#about-data">About the Data</a>
+      </li>
+    </ul>
+  </div>
+  <div class="ds-l-col--9 ds-u-margin-top--5">
+    <h2>Overview</h2>
+    <%= render partial: 'overview' %>
+
+    <h3 id="getting-started">Getting Started</h3>
+    <%= render partial: 'getting_started' %>
+
+    <h3 id="learned">What We've Learned</h3>
+    <%= render partial: 'learned' %>
+
+    <h3 id="about-data">About the Data</h3>
+    <%= render partial: 'about_data' %>
+  </div>
+</div>
+
+

@@ -1,0 +1,24 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ * require_tree .
+ * require_self
+ */
+ // In our Gulp Sass task, we've added node_modules to the list of paths that
+// are used to resolve @import declarations, so we omit it from the path below.
+ @import 'normalize.css/normalize';
+ @import '@cmsgov/design-system-core/src/index';
+ @import '@cmsgov/design-system-layout/src/index';
+ @import "rouge";
+ @import "navbar";
+ @import "sidenav";
+

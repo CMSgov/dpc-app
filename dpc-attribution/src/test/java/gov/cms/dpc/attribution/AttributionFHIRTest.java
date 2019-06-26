@@ -43,7 +43,6 @@ public class AttributionFHIRTest {
     private static final String CSV = "test_associations.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static SeedProcessor seedProcessor;
 
     @BeforeAll
     public static void setup() throws Exception {
@@ -58,8 +57,7 @@ public class AttributionFHIRTest {
         }
 
         // Read in the seeds and create the 'Roster' bundle
-        seedProcessor = new SeedProcessor(resource);
-        groupedPairs = seedProcessor.extractProviderMap();
+        groupedPairs = SeedProcessor.extractProviderMap(resource);
     }
 
     @AfterAll
@@ -76,7 +74,7 @@ public class AttributionFHIRTest {
         return groupedPairs
                 .entrySet()
                 .stream()
-                .map(seedProcessor::generateRosterBundle)
+                .map(SeedProcessor::generateRosterBundle)
                 .flatMap((bundle) -> Stream.of(
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));
