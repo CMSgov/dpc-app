@@ -10,7 +10,6 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.dropwizard.jersey.params.BooleanParam;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -23,10 +22,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OrganizationResource extends AbstractOrganizationResource {
@@ -75,28 +71,32 @@ public class OrganizationResource extends AbstractOrganizationResource {
     }
 
     @GET
-    @Path("/{organizationID}/token/create")
+    @Path("/{organizationID}/token")
     @UnitOfWork
     @Override
-    public String getOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("refresh") Optional<BooleanParam> refresh) {
+    public List<String> getOrganizationTokens(@PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
         final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
 
-        // If they already have a token, we don't want to overwrite it, unless they explicitly ask for it.
-        boolean shouldRefresh = refresh.orElseGet(() -> new BooleanParam("false")).get();
-        if (!entity.getTokenIDs().isEmpty() && !shouldRefresh) {
-            throw new WebApplicationException("Token already exists, pass 'refresh' to overwrite", Response.Status.NOT_ACCEPTABLE);
-        }
+        return entity.getTokenIDs();
+    }
 
-        // Create some caveats
-        final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("organization_id", MacaroonCaveat.Operator.EQ, organizationID.toString())
-        );
-        final Macaroon macaroon = this.bakery.createMacaroon(caveats);
+    @POST
+    @Path("/{organizationID}/token")
+    @UnitOfWork
+    @Override
+    public String createOrganizationToken(@PathParam("organizationID") UUID organizationID) {
+        final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
+
+        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
+
+        final Macaroon macaroon = generateMacaroon(organizationID);
 
         // Add the macaroon ID to the organization and update it
-        entity.setTokenIDs(Collections.singletonList(macaroon.identifier));
+        List<String> tokenIDs = new ArrayList<>(entity.getTokenIDs());
+        tokenIDs.add(macaroon.identifier);
+        entity.setTokenIDs(tokenIDs);
         this.dao.updateOrganization(entity);
 
         // Return the base64 encoded Macaroon
@@ -107,7 +107,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @GET
     @Path("/{organizationID}/token/verify")
     public boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
-        final Macaroon macaroon = this.bakery.deserializeMacaroon(token);
+        final Macaroon macaroon = parseToken(token);
         try {
             this.bakery.verifyMacaroon(macaroon, String.format("organization_id = %s", organizationID.toString()));
         } catch (BakeryException e) {
@@ -116,5 +116,20 @@ public class OrganizationResource extends AbstractOrganizationResource {
         }
 
         return true;
+    }
+
+    private Macaroon generateMacaroon(UUID organizationID) {
+        // Create some caveats
+        final List<MacaroonCaveat> caveats = List.of(
+                new MacaroonCaveat("organization_id", MacaroonCaveat.Operator.EQ, organizationID.toString())
+        );
+        return this.bakery.createMacaroon(caveats);
+    }
+
+    private Macaroon parseToken(String token) {
+        if (token == null || Objects.equals(token, "")) {
+            throw new WebApplicationException("Cannot have empty token string", Response.Status.BAD_REQUEST);
+        }
+        return this.bakery.deserializeMacaroon(token);
     }
 }

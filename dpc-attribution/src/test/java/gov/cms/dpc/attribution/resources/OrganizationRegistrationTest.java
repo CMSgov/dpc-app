@@ -33,7 +33,6 @@ class OrganizationRegistrationTest extends AbstractAttributionTest {
         final InputStream inputStream = OrganizationRegistrationTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
         final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
 
-
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getServerURL() + "/Organization");
             httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
@@ -68,47 +67,14 @@ class OrganizationRegistrationTest extends AbstractAttributionTest {
     void testTokenGeneration() throws IOException {
         String macaroon;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/create", ORGANIZATION_ID));
+            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Organization/%s/token", ORGANIZATION_ID));
 
 
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
                 macaroon = EntityUtils.toString(response.getEntity());
                 // Verify that the first few bytes are correct, to ensure we encoded correctly.
                 assertTrue(macaroon.startsWith("eyJ2IjoyLCJs"), "Should have correct starting string value");
-            }
-        }
-
-        // Verify that it's correct.
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/verify?token=%s", ORGANIZATION_ID, macaroon));
-
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
-                final String entity = EntityUtils.toString(response.getEntity());
-                assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization"),
-                        () -> assertEquals("true", entity, "Should be valid"));
-            }
-        }
-
-        // Try to create again
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/create", ORGANIZATION_ID));
-
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.NOT_ACCEPTABLE_406, response.getStatusLine().getStatusCode(), "Should not be able to overwrite token");
-            }
-        }
-
-        // Pass refresh, which should work
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/create?refresh=true", ORGANIZATION_ID));
-
-
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
-                final String m2 = EntityUtils.toString(response.getEntity());
-                // Verify that the first few bytes are correct, to ensure we encoded correctly.
-                assertNotEquals(macaroon, m2, "Should have different starting value");
             }
         }
 
@@ -127,10 +93,21 @@ class OrganizationRegistrationTest extends AbstractAttributionTest {
     @Test
     void testUnknownOrgTokenGeneration() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + "/Organization/1/toke/create");
+            final HttpPost httpPost = new HttpPost(getServerURL() + "/Organization/1/token");
+
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.NOT_FOUND_404, response.getStatusLine().getStatusCode(), "Should not have found organization");
+            }
+        }
+    }
+
+    @Test
+    void testEmptyTokenHandling() throws IOException {
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/verify?token=%s", ORGANIZATION_ID, ""));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.NOT_FOUND_404, response.getStatusLine().getStatusCode(), "Should not have found organization");
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should not be able to verify empty token");
             }
         }
     }

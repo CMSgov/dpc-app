@@ -1,13 +1,12 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
-import io.dropwizard.jersey.params.BooleanParam;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -32,19 +31,26 @@ public abstract class AbstractOrganizationResource {
     public abstract Response createOrganization(Bundle bundle);
 
     /**
-     * Create authentication token for {@link Organization}.
-     * This token is designed to be long-lived and delegatable.
-     * <p>
-     * By default, this method will NOT overwrite any tokens which already exist,
-     * only by passing the refresh query param will any destructive changes take place.
+     * Get authentication token for {@link Organization}.
+     * If no token exists, returns an empty {@link List}
      *
      * @param organizationID - {@link UUID} organization ID
-     * @param refresh        - {@link BooleanParam} {@code true} overwrite any existing tokens. {@code false} do not overwrite any tokens
-     * @return - {@link String} base64 (URL) encoded token
+     * @return - {@link List} {@link String} base64 (URL) encoded token
      */
     @GET
-    @Path("/{organizationID}/token/create")
-    public abstract String getOrganizationToken(UUID organizationID, Optional<BooleanParam> refresh);
+    @Path("/{organizationID}/token")
+    public abstract List<String> getOrganizationTokens(UUID organizationID);
+
+    /**
+     * Create authentication token for {@link Organization}.
+     * This token is designed to be long-lived and delegatable.
+     *
+     * @param organizationID - {@link UUID} organization ID
+     * @return - {@link String} base64 (URL) encoded token
+     */
+    @POST
+    @Path("/{organizationID}/token")
+    public abstract String createOrganizationToken(@PathParam("organizationID") UUID organizationID);
 
     /**
      * Verify that the provided token is valid
