@@ -5,7 +5,7 @@ env:
 
 language: java
 jdk:
-  - oraclejdk11
+  - openjdk11
 
 cache:
   directories:
