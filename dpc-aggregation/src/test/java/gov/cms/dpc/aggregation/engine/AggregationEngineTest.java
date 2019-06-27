@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -11,7 +10,6 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import io.github.resilience4j.retry.RetryConfig;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,13 +35,12 @@ class AggregationEngineTest {
     private JobQueue queue;
     private AggregationEngine engine;
 
-    static private Config config;
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private String exportPath;
 
     @BeforeAll
     static void setupAll() {
-        config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
     }
 
@@ -52,7 +49,8 @@ class AggregationEngineTest {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         queue = new MemoryQueue();
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        engine = new AggregationEngine(bbclient, queue, fhirContext, config.getString("exportPath"), config, RetryConfig.ofDefaults());
+        var operationalConfig = new OperationsConfig(3, 1000, false, exportPath, false);
+        engine = new AggregationEngine(bbclient, queue, fhirContext, operationalConfig);
     }
 
     /**
@@ -78,7 +76,7 @@ class AggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         final var completeJob = queue.getJob(jobId).orElseThrow();
@@ -103,7 +101,7 @@ class AggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
@@ -128,7 +126,7 @@ class AggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertFalse(queue.getJob(jobId).isEmpty(), "Unable to retrieve job from queue.");
@@ -155,7 +153,7 @@ class AggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent(), "Unable to retrieve job from queue."),
@@ -180,7 +178,7 @@ class AggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
@@ -228,7 +226,7 @@ class AggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),

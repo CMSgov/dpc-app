@@ -2,14 +2,12 @@ package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import io.github.resilience4j.retry.RetryConfig;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,23 +26,23 @@ class BatchAggregationEngineTest {
     private JobQueue queue;
     private AggregationEngine engine;
 
-    static private Config config;
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private String exportPath;
+    static private OperationsConfig operationsConfig;
 
     @BeforeAll
     static void setupAll() {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
-        var backingConfig = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
-        config = ConfigFactory.parseString("{\"resourcesPerFile\":10}").withFallback(backingConfig);
+        final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
+        operationsConfig = new OperationsConfig(3, 10, false, exportPath, false);
     }
 
     @BeforeEach
     void setupEach() {
         queue = new MemoryQueue();
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        engine = new AggregationEngine(bbclient, queue, fhirContext, config.getString("exportPath"), config, RetryConfig.ofDefaults());
+        engine = new AggregationEngine(bbclient, queue, fhirContext, operationsConfig);
     }
 
     /**
@@ -61,7 +59,7 @@ class BatchAggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         final var completeJob = queue.getJob(jobId).orElseThrow();
@@ -92,7 +90,7 @@ class BatchAggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         final var completeJob = queue.getJob(jobId).orElseThrow();
@@ -119,7 +117,7 @@ class BatchAggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         final var completeJob = queue.getJob(jobId).orElseThrow();

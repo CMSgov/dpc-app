@@ -1,7 +1,6 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.typesafe.config.Config;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
@@ -29,9 +28,7 @@ class ResourceWriter {
     private static final char DELIM = '\n';
 
     private FhirContext fhirContext;
-    private boolean encryptionEnabled;
-    private Config config;
-    private String exportPath;
+    private OperationsConfig config;
     private JobModel job;
     private UUID jobID;
     private ResourceType resourceType;
@@ -63,14 +60,11 @@ class ResourceWriter {
      * @param resourceType - the resource type to fetch
      */
     ResourceWriter(FhirContext fhirContext,
-                    Config config,
-                    String exportPath,
                     JobModel job,
-                    ResourceType resourceType) {
+                    ResourceType resourceType,
+                    OperationsConfig config) {
         this.fhirContext = fhirContext;
         this.config = config;
-        this.encryptionEnabled = config.hasPath("encryption.enabled") && config.getBoolean("encryption.enabled");
-        this.exportPath = exportPath;
         this.job = job;
         this.jobID = job.getJobID();
         this.resourceType = resourceType;
@@ -88,8 +82,12 @@ class ResourceWriter {
             final var byteStream = new ByteArrayOutputStream();
             final var sequence = counter.getAndIncrement();
             final var jsonParser = fhirContext.newJsonParser();
-            OutputStream writer = encryptionEnabled ? formCipherStream(byteStream, job, resourceType, sequence): byteStream;
-            String outputPath = encryptionEnabled ? formEncryptedOutputFilePath(exportPath, jobID, resourceType, sequence): formOutputFilePath(exportPath, jobID, resourceType, sequence);
+            OutputStream writer = config.isEncryptionEnabled() ?
+                    formCipherStream(byteStream, job, resourceType, sequence):
+                    byteStream;
+            String outputPath = config.isEncryptionEnabled() ?
+                    formEncryptedOutputFilePath(config.getExportPath(), jobID, resourceType, sequence):
+                    formOutputFilePath(config.getExportPath(), jobID, resourceType, sequence);
 
             logger.debug("Start writing to {}", outputPath);
             for (var resource: batch) {
@@ -124,8 +122,8 @@ class ResourceWriter {
      * @throws IOException if there is something wrong with the file io.
      */
     private OutputStream formCipherStream(OutputStream writer, JobModel job, ResourceType resourceType, int sequence) throws GeneralSecurityException, IOException {
-        final var metadataPath = formEncryptedMetadataPath(exportPath, job.getJobID(), resourceType, sequence);
-        try(final CipherBuilder cipherBuilder = new CipherBuilder(config);
+        final var metadataPath = formEncryptedMetadataPath(config.getExportPath(), job.getJobID(), resourceType, sequence);
+        try(final CipherBuilder cipherBuilder = new CipherBuilder();
             final FileOutputStream metadataWriter = new FileOutputStream(metadataPath)) {
             cipherBuilder.generateKeyMaterial();
             final String json = cipherBuilder.getMetadata(job.getRsaPublicKey());

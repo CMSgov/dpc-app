@@ -16,7 +16,7 @@ import java.util.*;
 
 /**
  * The JobModel tracks the work done on a bulk export request. It contains the essential details of the request and
- * the results of the requests. The job is mutated between QUEUED -> RUNNING -> COMPLETE | FAILED states.
+ * the results of the requests. The job is mutated between QUEUED to RUNNING to COMPLETE or FAILED states.
  */
 @Entity(name = "job_queue")
 public class JobModel implements Serializable {

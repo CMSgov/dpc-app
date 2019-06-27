@@ -24,22 +24,26 @@ class ResourceFetcher {
     private static final Logger logger = LoggerFactory.getLogger(ResourceFetcher.class);
     private BlueButtonClient blueButtonClient;
     private RetryConfig retryConfig;
+    private OperationsConfig config;
     private UUID jobID;
     private ResourceType resourceType;
 
     /**
      * Create a context for fetching FHIR resources
      * @param blueButtonClient - client to BlueButton to use
-     * @param retryConfig - retry parameters
      * @param jobID - the jobID for logging and reporting
      * @param resourceType - the resource type to fetch
+     *
      */
     ResourceFetcher(BlueButtonClient blueButtonClient,
-                           RetryConfig retryConfig,
                            UUID jobID,
-                           ResourceType resourceType) {
+                           ResourceType resourceType,
+                    OperationsConfig config) {
         this.blueButtonClient = blueButtonClient;
-        this.retryConfig = retryConfig;
+        this.config = config;
+        this.retryConfig = RetryConfig.custom()
+                .maxAttempts(config.getRetryCount())
+                .build();
         this.jobID = jobID;
         this.resourceType = resourceType;
     }

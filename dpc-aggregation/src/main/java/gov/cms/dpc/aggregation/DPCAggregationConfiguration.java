@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation;
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.typesafe.config.ConfigRenderOptions;
+import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
@@ -34,10 +35,14 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     @Min(1)
     @Max(5)
-    private Integer retryCount = 3;
+    private int retryCount = 3;
 
     @Min(10)
-    private int resourcesPerFileCount = 1000;
+    private int resourcesPerFileCount = 5000;
+
+    private boolean parallelRequestsEnabled = false;
+
+    private boolean encryptionEnabled = false;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -52,7 +57,7 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         this.exportPath = exportPath;
     }
 
-    public Integer getRetryCount() {
+    public int getRetryCount() {
         return retryCount;
     }
 
@@ -60,8 +65,16 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         this.retryCount = retryCount;
     }
 
+    public boolean isEncryptionEnabled() {
+        return encryptionEnabled;
+    }
+
     public int getResourcesPerFileCount() {
         return resourcesPerFileCount;
+    }
+
+    public boolean isParallelRequestsEnabled() {
+        return parallelRequestsEnabled;
     }
 
     @Override
@@ -77,5 +90,9 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
         return this.clientConfiguration;
+    }
+
+    public OperationsConfig getOperationsConfig() {
+        return new OperationsConfig(retryCount, resourcesPerFileCount, parallelRequestsEnabled, exportPath, encryptionEnabled);
     }
 }

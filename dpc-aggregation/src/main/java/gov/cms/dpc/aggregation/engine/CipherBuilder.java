@@ -31,14 +31,23 @@ public class CipherBuilder implements AutoCloseable {
     private final int gcmTagLength;
 
     /**
+     * The following set of symmetric parameters follows NIST SP800-38D and NIST SP800-57
+     * as well as expectations from our web site.
+     */
+    public static final String NIST_SYMMETRIC_CIPHER = "AES/GCM/NoPadding";
+    public static final int NIST_KEY_BITS = 128;
+    public static final int NIST_IV_BITS = 96;
+    public static final int NIST_GCM_TAG_LENGTH = 128;
+
+    /**
      * Create ciphers according to the passed in config
      */
-    CipherBuilder(Config config) {
-        symmetricCipher = config.getString("encryption.symmetricCipher");
-        keyBits = config.getInt("encryption.keyBits");
-        ivBits = config.getInt("encryption.ivBits");
-        gcmTagLength = config.getInt("encryption.gcmTagLength");
-        asymmetricCipher = config.getString("encryption.asymmetricCipher");
+    CipherBuilder() {
+        symmetricCipher = NIST_SYMMETRIC_CIPHER;
+        keyBits = NIST_KEY_BITS;
+        ivBits = NIST_IV_BITS;
+        gcmTagLength = NIST_GCM_TAG_LENGTH;
+        asymmetricCipher = "RSA/ECB/PKCS1Padding"; // Will want to enventually support more types
     }
 
     /**

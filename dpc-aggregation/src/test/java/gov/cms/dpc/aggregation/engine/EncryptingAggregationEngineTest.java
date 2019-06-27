@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -11,7 +10,6 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import io.github.resilience4j.retry.RetryConfig;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -47,24 +45,23 @@ class EncryptingAggregationEngineTest {
     private RSAPublicKey rsaPublicKey;
     private RSAPrivateKey rsaPrivateKey;
 
-    static private Config config;
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private String exportPath;
+    static private OperationsConfig operationsConfig;
 
     @BeforeAll
     static void setupAll() {
         // Use the test.conf as the base for config. encrypt.conf will only enable encryption.
-        var baseConfig = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
-        var overrideConfig = ConfigFactory.parseString("{\"encryption\":{\"enabled\":true}}");
-        config = overrideConfig.withFallback(baseConfig);
+        final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
+        operationsConfig = new OperationsConfig(3, 1000, false, exportPath, true);
     }
 
     @BeforeEach
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
         BlueButtonClient bbclient = new MockBlueButtonClient(fhirContext);
-        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
+        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), operationsConfig);
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
         final InputStream testPublicKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PUBLIC_KEY_PATH);
@@ -103,7 +100,7 @@ class EncryptingAggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
@@ -137,7 +134,7 @@ class EncryptingAggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),

@@ -1,15 +1,12 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.typesafe.config.Config;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
-import io.github.resilience4j.retry.RetryConfig;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -33,14 +30,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
 
-    private final String exportPath;
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
-    private final RetryConfig retryConfig;
-    private final Config config;
+    private final OperationsConfig operationsConfig;
     private final FhirContext fhirContext;
-    private final int resourcesPerFile;
-    private final boolean parallelRequests;
     private Disposable subscribe;
 
     /**
@@ -49,20 +42,15 @@ public class AggregationEngine implements Runnable {
      * @param bbclient    - {@link BlueButtonClient } to use
      * @param queue       - {@link JobQueue} that will direct the work done
      * @param fhirContext - {@link FhirContext} for DSTU3 resources
-     * @param exportPath  - The {@link ExportPath} to use for writing the output files
-     * @param retryConfig - {@link RetryConfig} injected config for setting up retry handler
-     */
+     * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
+      */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, Config config, RetryConfig retryConfig) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext fhirContext, OperationsConfig operationsConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
-        this.exportPath = exportPath;
-        this.config = config;
-        this.retryConfig = retryConfig;
         this.fhirContext = fhirContext;
-        this.resourcesPerFile = config.hasPath("resourcesPerFile") ? config.getInt("resourcesPerFile") : 1000;
-        this.parallelRequests = config.hasPath("parallelRequests") && config.getBoolean("parallelRequests");
-    }
+        this.operationsConfig = operationsConfig;
+   }
 
     /**
      * Run the engine. Part of the Runnable interface.
@@ -70,7 +58,10 @@ public class AggregationEngine implements Runnable {
     @Override
     public void run() {
         // Run loop
-        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelRequests:{} ", exportPath, resourcesPerFile, parallelRequests);
+        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelRequests:{} ",
+                operationsConfig.getExportPath(),
+                operationsConfig.getResourcesPerFileCount(),
+                operationsConfig.isParallelRequestsEnabled());
         this.pollQueue();
     }
 
@@ -95,28 +86,19 @@ public class AggregationEngine implements Runnable {
                     logger.debug("No job, retrying in 2 seconds");
                     return completed.delay(2, TimeUnit.SECONDS);
                 })
-                .subscribe(this::workExportJob, error -> logger.error("Unable to complete job.", error));
-    }
-
-    /**
-     * Wrapper method for dispatching the job and handling any errors that would cause the job to fail
-     *
-     * @param workPair - job {@link Pair} with {@link UUID} or {@link JobModel}
-     */
-    private void workExportJob(Pair<UUID, JobModel> workPair) {
-        final JobModel model = workPair.getRight();
-        completeJob(model);
+                .subscribe(this::completeJob, error -> logger.error("Unable to complete job.", error));
     }
 
     /**
      * Work a single job in the queue to completion
      *
-     * @param job - the job to execute
+     * @param jobPair - the job to execute
      */
-    void completeJob(JobModel job) {
-        final UUID jobID = job.getJobID();
+    void completeJob(Pair<UUID, JobModel> jobPair) {
+        final UUID jobID = jobPair.getLeft();
+        final JobModel job = jobPair.getRight();
         try {
-            logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
+            logger.info("Processing job {}, exporting to: {}.", jobID, this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
             final var errorCounter = new AtomicInteger();
@@ -145,9 +127,9 @@ public class AggregationEngine implements Runnable {
         }
 
         // Make this flow hot (ie. only called once)
-        final var fetcher = new ResourceFetcher(bbclient, retryConfig, job.getJobID(), resourceType);
+        final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), resourceType, operationsConfig);
         final Flowable<Resource> mixedFlow;
-        if (parallelRequests) {
+        if (operationsConfig.isParallelRequestsEnabled()) {
             mixedFlow = Flowable.fromIterable(job.getPatients())
                     .parallel()
                     .runOn(Schedulers.io())
@@ -160,15 +142,15 @@ public class AggregationEngine implements Runnable {
 
         // Batch the non-error resources into files
         final var counter = new AtomicInteger();
-        final var writer = new ResourceWriter(fhirContext, config, exportPath, job, resourceType);
+        final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
         final Flowable<JobResult> resourceFlow = connectableMixedFlow.filter(r -> r.getResourceType() != ResourceType.OperationOutcome)
-                .buffer(resourcesPerFile)
+                .buffer(operationsConfig.getResourcesPerFileCount())
                 .map(batch -> writer.writeBatch(counter, batch));
 
         // Batch the error resources into files
-        final var errorWriter = new ResourceWriter(fhirContext, config, exportPath, job, ResourceType.OperationOutcome);
+        final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
         final Flowable<JobResult> outcomeFlow = connectableMixedFlow.filter(r -> r.getResourceType() == ResourceType.OperationOutcome)
-                .buffer(resourcesPerFile)
+                .buffer(operationsConfig.getResourcesPerFileCount())
                 .map(batch -> errorWriter.writeBatch(errorCounter, batch));
 
         // Merge the resultant flows
