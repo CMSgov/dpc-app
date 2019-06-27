@@ -30,18 +30,24 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @JsonProperty("bbclient")
     private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
+    // The path to the folder that will contain the output files
     @NotEmpty
     private String exportPath;
 
+    // The number of retries per request to Blue Button
     @Min(1)
     @Max(5)
     private int retryCount = 3;
 
+    // The max number of resources that we will place into a single file
     @Min(10)
-    private int resourcesPerFileCount = 5000;
+    @Max(100000) // Keep files under a GB
+    private int resourcesPerFileCount = 10000;
 
+    // Enable parallel BlueButton requests
     private boolean parallelRequestsEnabled = false;
 
+    // Enable file encryption per BCDA
     private boolean encryptionEnabled = false;
 
     @Override

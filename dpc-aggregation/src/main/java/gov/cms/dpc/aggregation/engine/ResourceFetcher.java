@@ -24,7 +24,6 @@ class ResourceFetcher {
     private static final Logger logger = LoggerFactory.getLogger(ResourceFetcher.class);
     private BlueButtonClient blueButtonClient;
     private RetryConfig retryConfig;
-    private OperationsConfig config;
     private UUID jobID;
     private ResourceType resourceType;
 
@@ -40,7 +39,6 @@ class ResourceFetcher {
                            ResourceType resourceType,
                     OperationsConfig config) {
         this.blueButtonClient = blueButtonClient;
-        this.config = config;
         this.retryConfig = RetryConfig.custom()
                 .maxAttempts(config.getRetryCount())
                 .build();

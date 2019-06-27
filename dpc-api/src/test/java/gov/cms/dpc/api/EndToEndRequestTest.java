@@ -83,9 +83,7 @@ class EndToEndRequestTest extends AbstractApplicationTest {
 
         // Validate each of the resources
         validateResourceFile(Patient.class, jobResponse, ResourceType.Patient, 100);
-        // EOBs are structured as bundles, even though they have the EOB resource type
-        validateResourceFile(ExplanationOfBenefit.class, jobResponse, ResourceType.ExplanationOfBenefit, 1000);
-        // Coverages are structured as bundles of Coverages
+        validateResourceFile(ExplanationOfBenefit.class, jobResponse, ResourceType.ExplanationOfBenefit, 3154);
         validateResourceFile(Coverage.class, jobResponse, ResourceType.Coverage, 400); // 4 per patient: Medicare parts A-D
         assertThrows(IllegalStateException.class, () -> validateResourceFile(Schedule.class, jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
     }
