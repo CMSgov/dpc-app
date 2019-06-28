@@ -6,11 +6,10 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
-import gov.cms.dpc.aggregation.engine.EncryptingAggregationEngine;
+import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
-import io.github.resilience4j.retry.RetryConfig;
 
 import javax.inject.Singleton;
 import java.util.List;
@@ -24,16 +23,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Override
     public void configure(Binder binder) {
         binder.requestStaticInjection(DPCHibernateBundle.class);
-
-        if (
-                getConfiguration().getConfig().hasPath("encryption.enabled") &&
-                        getConfiguration().getConfig().getBoolean("encryption.enabled")
-        ) {
-            binder.bind(AggregationEngine.class).to(EncryptingAggregationEngine.class);
-        } else {
-            binder.bind(AggregationEngine.class);
-        }
-
+        binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
     }
 
@@ -61,10 +51,12 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    RetryConfig provideRetryConfig() {
-        // Create retry handler with our custom defaults
-        return RetryConfig.custom()
-                .maxAttempts(getConfiguration().getRetryCount())
-                .build();
+    OperationsConfig provideOperationsConfig() {
+        final var config = getConfiguration();
+        return new OperationsConfig(config.getRetryCount(),
+                config.getResourcesPerFileCount(),
+                config.isParallelRequestsEnabled(),
+                config.getExportPath(),
+                config.isEncryptionEnabled());
     }
 }

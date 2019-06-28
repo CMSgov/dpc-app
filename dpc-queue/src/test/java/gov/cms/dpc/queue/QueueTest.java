@@ -8,7 +8,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +25,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "rawtypes"})
-public class QueueTest {
+class QueueTest {
 
     //    private JobQueue queue;
     private SessionFactory sessionFactory;
@@ -69,12 +68,12 @@ public class QueueTest {
     }
 
     @BeforeEach
-    public void setupQueue() {
+    void setupQueue() {
 
     }
 
     @AfterEach
-    public void shutdown() {
+    void shutdown() {
         try (final Session session = sessionFactory.openSession()) {
 
             final Transaction tx = session.beginTransaction();
@@ -88,7 +87,7 @@ public class QueueTest {
         sessionFactory.close();
     }
 
-    public void testSimpleSubmissionCompletion(JobQueue queue) {
+    void testSimpleSubmissionCompletion(JobQueue queue) {
         // Add a couple of jobs
         final Set<UUID> jobSet = new HashSet<>();
         jobSet.add(UUID.randomUUID());
@@ -106,20 +105,24 @@ public class QueueTest {
         // Work the job
         Optional<Pair<UUID, JobModel>> workJob = queue.workJob();
         assertTrue(workJob.isPresent(), "Should have a job to work");
+        final UUID firstID = workJob.orElseThrow().getLeft();
 
-        // Check that the status is RUNNING
-        final Optional<JobModel> runningJob = queue.getJob(workJob.get().getLeft());
+        // Check that the persisted job is RUNNING
+        final Optional<JobModel> runningJob = queue.getJob(firstID);
         assertAll(() -> assertTrue(runningJob.isPresent(), "Should have a status"),
-                () -> assertEquals(JobStatus.RUNNING, runningJob.get().getStatus(), "Job should be running"));
+                () -> assertEquals(JobStatus.RUNNING, runningJob.orElseThrow().getStatus(), "Job should be running"));
 
         // Complete the job
-        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, runningJob.get().getJobResults());
+        final var results = List.of(new JobResult(firstID, ResourceType.Patient, 0, 1));
+        queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, results);
 
-        // Check that the status is COMPLETED and with resource types
-        final Optional<JobModel> completedJob = queue.getJob(workJob.get().getLeft());
-        assertAll(() -> assertTrue(completedJob.isPresent(), "Should have a job"),
-                () -> assertEquals(JobStatus.COMPLETED, completedJob.get().getStatus(), "Job should be completed"),
-                () -> assertNotNull(job.get().getJobResults()));
+        // Check that the status is COMPLETED and with JobResults
+        final Optional<JobModel> completedOptional = queue.getJob(workJob.get().getLeft());
+        completedOptional.ifPresent(completedJob -> {
+            assertEquals(JobStatus.COMPLETED, completedJob.getStatus());
+            assertEquals(1, completedJob.getJobResults().size());
+            assertTrue(completedJob.getJobResult(ResourceType.Patient).isPresent());
+        });
 
         // Work the second job
         workJob = queue.workJob();
@@ -131,41 +134,43 @@ public class QueueTest {
 
         // Fail the second job and check its status
         final var secondJob = workJob.get().getRight();
-        queue.completeJob(secondJob.getJobID(), JobStatus.FAILED, secondJob.getJobResults());
-//        jobSet.remove(workJob.get().getLeft());
+        queue.completeJob(secondJob.getJobID(), JobStatus.FAILED, List.of());
 
+        // Check its persisted status
         Optional<JobModel> failedJob = queue.getJob(workJob.get().getLeft());
         assertAll(() -> assertTrue(failedJob.isPresent(), "Should have job in the queue"),
-                () -> assertEquals(JobStatus.FAILED, failedJob.get().getStatus(), "Job should have failed"));
+                () -> assertEquals(JobStatus.FAILED, failedJob.orElseThrow().getStatus(), "Job should have failed"),
+                () -> assertEquals(0, failedJob.orElseThrow().getJobResults().size(), "FAILED jobs should have empty results"));
 
-        // Remove some jobs
-//        queue.removeJob(workJob.get().getLeft());
-        assertEquals(0, queue.queueSize(), "Not have any jobs in the queue");
+        // After working two jobs the queue should be empty
+        assertEquals(0, queue.queueSize(), "Worked all jobs in the queue, but the queue is not empty");
     }
 
-    public void testPatientAndEOBSubmission(JobQueue queue) {
+    void testPatientAndEOBSubmission(JobQueue queue) {
         // Add a job with a EOB resource
         final var jobID = UUID.randomUUID();
         final var jobSubmission = QueueTest.buildModel(jobID, ResourceType.Patient, ResourceType.ExplanationOfBenefit);
         queue.submitJob(jobID, jobSubmission);
 
         // Retrieve the job with both resources
-        final var workJob = queue.workJob();
-        assertTrue(workJob.isPresent(), "Job is missing from the queue after a submission");
-        final var actualJob = workJob.get().getRight();
-        final var actualResults = actualJob.getJobResults();
-        final var expectedResults =  List.of(new JobResult(jobID, ResourceType.Patient), new JobResult(jobID, ResourceType.ExplanationOfBenefit));
-        assertTrue(actualResults.containsAll(expectedResults), "Didn't find the resources types expected.");
-
-        // Fake work
-        actualJob.getJobResult(ResourceType.Patient).ifPresent(result -> result.incrementCount());
-        actualJob.getJobResult(ResourceType.ExplanationOfBenefit).ifPresent(result -> result.incrementErrorCount());
+        final var workJob = queue.workJob().orElseThrow().getRight();
+        final var results = List.of(new JobResult(jobID, ResourceType.Patient, 0, 1),
+                new JobResult(jobID, ResourceType.ExplanationOfBenefit, 0, 1));
 
         // Complete job
-        queue.completeJob(actualJob.getJobID(), JobStatus.COMPLETED, actualJob.getJobResults());
+        queue.completeJob(workJob.getJobID(), JobStatus.COMPLETED, results);
+
+        // Get the job and check its values
+        final var actualJob = queue.getJob(jobID);
+        assertTrue(actualJob.isPresent());
+        actualJob.ifPresent(job -> {
+            assertEquals(JobStatus.COMPLETED, job.getStatus());
+            assertEquals(2, job.getJobResults().size());
+            assertEquals(1, job.getJobResult(ResourceType.Patient).orElseThrow().getCount());
+        });
     }
 
-    public void testMissingJob(JobQueue queue) {
+    void testMissingJob(JobQueue queue) {
         UUID jobID = UUID.randomUUID();
 
         // Check that things are empty

@@ -62,7 +62,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
 
     @Provides
     public BlueButtonClient provideBlueButtonClient(IGenericClient fhirRestClient) {
-        return new BlueButtonClientImpl(fhirRestClient);
+        return new BlueButtonClientImpl(fhirRestClient, this.bbClientConfiguration);
     }
 
     @Provides
@@ -134,6 +134,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         final SSLContext sslContext;
 
         try {
+            // BlueButton FHIR servers have a self-signed cert and require a client cert
             sslContext = SSLContexts.custom()
                     .loadKeyMaterial(keyStore, keyStorePass)
                     .loadTrustMaterial(keyStore, new TrustSelfSignedStrategy())

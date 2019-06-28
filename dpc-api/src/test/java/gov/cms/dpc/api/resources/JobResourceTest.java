@@ -5,11 +5,15 @@ import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -92,8 +96,11 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        job.getJobResults().forEach(result -> result.incrementCount());
-        queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
+        final var results = JobModel.validResourceTypes
+                .stream()
+                .map(resourceType -> new JobResult(jobID, resourceType, 0, 1))
+                .collect(Collectors.toList());
+        queue.completeJob(jobID, JobStatus.COMPLETED, results);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -105,8 +112,7 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, entry.getType())), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobResult.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
         }
     }
 
@@ -121,14 +127,12 @@ public class JobResourceTest {
 
         // Setup a completed job with one error
         final var job = new JobModel(jobID,
-                JobModel.validResourceTypes,
+                List.of(ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        assertEquals(JobModel.validResourceTypes.size(), job.getJobResults().size());
-        job.getJobResults().forEach(result -> result.incrementErrorCount());
-        queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults());
+        queue.completeJob(jobID, JobStatus.COMPLETED, List.of(new JobResult(jobID, ResourceType.OperationOutcome, 0, 1)));
 
         // Test the response for ok
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -138,15 +142,10 @@ public class JobResourceTest {
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(0, completion.getOutput().size()),
-                () -> assertEquals(JobModel.validResourceTypes.size(), completion.getError().size()));
-        for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formOutputFileName(jobID, entry.getType())), entry.getUrl());
-        }
-        for (JobCompletionModel.OutputEntry entry: completion.getError()) {
-            assertTrue(JobModel.validResourceTypes.contains(entry.getType()), "Invalid resource type");
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobModel.formErrorFileName(jobID, entry.getType())), entry.getUrl());
-        }
+                () -> assertEquals(1, completion.getError().size()));
+        JobCompletionModel.OutputEntry entry = completion.getError().get(0);
+        assertEquals(ResourceType.OperationOutcome, entry.getType());
+        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobResult.formOutputFileName(jobID, ResourceType.OperationOutcome, 0)), entry.getUrl());
     }
 
     /**
