@@ -4,16 +4,19 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.gclient.IDeleteTyped;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class PractitionerResourceTest extends AbstractAttributionTest {
+class PractitionerResourceTest extends AbstractAttributionTest {
 
     private PractitionerResourceTest() {
         // Not used
@@ -23,16 +26,14 @@ public class PractitionerResourceTest extends AbstractAttributionTest {
     void testPractitionerReadWrite() {
 
         final Practitioner practitioner = createPractitionerResource();
-
         final IGenericClient client = createFHIRClient();
-
-        final MethodOutcome outcome = client
+        final MethodOutcome mo = client
                 .create()
                 .resource(practitioner)
                 .encodedJson()
                 .execute();
 
-        final Practitioner pract2 = (Practitioner) outcome.getResource();
+        final Practitioner pract2 = (Practitioner) mo.getResource();
 
         // Try to directly access
 
@@ -44,6 +45,31 @@ public class PractitionerResourceTest extends AbstractAttributionTest {
                 .execute();
 
         assertTrue(pract2.equalsDeep(pract3), "Created and fetched resources should be identical");
+
+        // Delete it and make sure it's gone.
+
+        final IBaseOperationOutcome oo = client
+                .delete()
+                .resource(pract3)
+                .encodedJson()
+                .execute();
+
+        final IReadExecutable<Practitioner> deletedRead = client
+                .read()
+                .resource(Practitioner.class)
+                .withId(pract3.getId())
+                .encodedJson();
+
+        assertThrows(ResourceNotFoundException.class, deletedRead::execute, "Should not be able to find the provider");
+
+
+        // Try to delete it again
+        final IDeleteTyped deleteOp = client
+                .delete()
+                .resource(pract3)
+                .encodedJson();
+
+        assertThrows(ResourceNotFoundException.class, deleteOp::execute, "Should not be able to find the provider");
     }
 
     @Test

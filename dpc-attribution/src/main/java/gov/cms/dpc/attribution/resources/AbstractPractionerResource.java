@@ -4,9 +4,11 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("/Practitioner")
@@ -25,4 +27,7 @@ public abstract class AbstractPractionerResource {
 
     @GET
     public abstract Practitioner getProvider(UUID providerID);
+
+    @DELETE
+    public abstract Response deleteProvider(UUID providerID);
 }

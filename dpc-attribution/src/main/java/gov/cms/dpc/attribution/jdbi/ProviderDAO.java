@@ -46,7 +46,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         return Optional.ofNullable(get(providerID));
     }
 
-    public List<ProviderEntity> getProviders(String providerID) {
+    public List<ProviderEntity> getProviders(String providerNPI) {
 
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
@@ -56,13 +56,23 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
 
         // If we've provided an NPI, use it as a query restriction.
         // Otherwise, return everything
-        if (providerID != null && !providerID.isEmpty()) {
+        if (providerNPI != null && !providerNPI.isEmpty()) {
             query.where(builder
                     .equal(root.get("providerNPI"),
-                            providerID));
+                            providerNPI));
         }
 
         return this.list(query);
+    }
+
+    public void deleteProvider(UUID providerID) {
+
+        final ProviderEntity provider = this.get(providerID);
+        if (provider == null) {
+            throw new IllegalArgumentException(String.format("Cannot find provider %s", providerID));
+        }
+
+        this.currentSession().remove(provider);
     }
 
     @Override

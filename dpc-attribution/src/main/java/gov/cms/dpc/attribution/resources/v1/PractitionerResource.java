@@ -63,4 +63,18 @@ public class PractitionerResource extends AbstractPractionerResource {
 
         return providerEntity.toFHIR();
     }
+
+    @DELETE
+    @Path("/{providerID}")
+    @UnitOfWork
+    @Override
+    public Response deleteProvider(@PathParam("providerID") UUID providerID) {
+        try {
+            this.dao.deleteProvider(providerID);
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(String.format("Provider '%s' is not registered", providerID), Response.Status.NOT_FOUND);
+        }
+
+        return Response.ok().build();
+    }
 }
