@@ -2,32 +2,41 @@ package gov.cms.dpc.queue.models;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A JobResult represents the output of a job. There is a one-to-one relationship with export files.
+ * The object is immutable.
+ */
+@Immutable
 @Entity(name = "job_result")
 public class JobResult implements Serializable {
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 42L;
 
     @Embeddable
     public static class JobResultID implements Serializable {
-        public static final long serialVersionUID = 1L;
+        public static final long serialVersionUID = 3L;
 
         private UUID jobID;
 
         @Column(name = "resource_type")
         private ResourceType resourceType;
 
+        @Column(name = "sequence")
+        private int sequence;
+
         public JobResultID() {
         }
 
-        public JobResultID(UUID jobID, ResourceType resourceType) {
-            this.resourceType = resourceType;
+        public JobResultID(UUID jobID, ResourceType resourceType, int sequence) {
             this.jobID = jobID;
+            this.resourceType = resourceType;
+            this.sequence = sequence;
         }
 
         public ResourceType getResourceType() {
@@ -38,18 +47,36 @@ public class JobResult implements Serializable {
             return jobID;
         }
 
+        public int getSequence() {
+            return sequence;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof JobResultID)) return false;
             JobResultID other = (JobResultID) o;
-            return Objects.equals(jobID, other.jobID) && Objects.equals(resourceType, other.resourceType);
+            return Objects.equals(jobID, other.jobID)
+                    && Objects.equals(resourceType, other.resourceType)
+                    && Objects.equals(sequence, other.sequence);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(jobID, resourceType);
+            return Objects.hash(jobID, resourceType, sequence);
         }
+    }
+
+    /**
+     * Form a file name for passed in parameters.
+     *
+     * @param jobID        - the jobs id
+     * @param resourceType - the resource type
+     * @param sequence     - the sequence
+     * @return a file name
+     */
+    public static String formOutputFileName(UUID jobID, ResourceType resourceType, int sequence) {
+        return String.format("%s-%s.%s", jobID.toString(), sequence, resourceType.getPath());
     }
 
     @EmbeddedId
@@ -58,25 +85,17 @@ public class JobResult implements Serializable {
     @Column(name = "count")
     private int count;
 
-    @Column(name = "error_count")
-    private int errorCount;
-
     public JobResult() {
         // for hibernate
     }
 
-    public JobResult(UUID jobID, ResourceType resourceType) {
-        this.jobResultID = new JobResultID(jobID, resourceType);
-        this.count = 0;
-        this.errorCount = 0;
+    public JobResult(UUID jobID, ResourceType resourceType, int sequence, int count) {
+        this.jobResultID = new JobResultID(jobID, resourceType, sequence);
+        this.count = count;
     }
 
     public JobResultID getJobResultID() {
         return jobResultID;
-    }
-
-    public void setJobResultID(JobResultID jobResultID) {
-        this.jobResultID = jobResultID;
     }
 
     public UUID getJobID() {
@@ -87,28 +106,12 @@ public class JobResult implements Serializable {
         return jobResultID.getResourceType();
     }
 
+    public int getSequence() {
+        return jobResultID.sequence;
+    }
+
     public int getCount() {
         return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public void incrementCount() {
-        count = count + 1;
-    }
-
-    public int getErrorCount() {
-        return errorCount;
-    }
-
-    public void setErrorCount(int errorCount) {
-        this.errorCount = errorCount;
-    }
-
-    public void incrementErrorCount() {
-        errorCount = errorCount + 1;
     }
 
     @Override
@@ -119,13 +122,12 @@ public class JobResult implements Serializable {
         return new EqualsBuilder()
                 .append(jobResultID, other.jobResultID)
                 .append(count, other.count)
-                .append(errorCount, other.errorCount)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobResultID, count, errorCount);
+        return Objects.hash(jobResultID, count);
     }
 
     @Override
@@ -133,8 +135,8 @@ public class JobResult implements Serializable {
         return "JobResult{" +
                 "jobID=" + jobResultID.jobID +
                 ", resourceType=" + jobResultID.resourceType +
+                ", sequence=" + jobResultID.sequence +
                 ", count=" + count +
-                ", errorCount=" + errorCount +
                 '}';
     }
 }

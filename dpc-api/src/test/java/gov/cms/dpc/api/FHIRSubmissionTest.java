@@ -7,7 +7,6 @@ import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
-import gov.cms.dpc.queue.models.JobResult;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
@@ -31,9 +30,9 @@ import static org.mockito.Mockito.*;
  * Verifies the a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class FHIRSubmissionTest {
-    public static final String TEST_BASE_URL = "http://localhost:3002/v1";
-    public static final String TEST_PROVIDER_ID = "1";
+class FHIRSubmissionTest {
+    private static final String TEST_BASE_URL = "http://localhost:3002/v1";
+    private static final String TEST_PROVIDER_ID = "1";
     private final JobQueue queue = spy(MemoryQueue.class);
     private final AttributionServiceClient client = mock(AttributionServiceClient.class);
     private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client, TEST_BASE_URL)).build();
@@ -49,7 +48,7 @@ public class FHIRSubmissionTest {
 
     // Setup the Attribution service mock with a dummy list of beneficiaries
     @BeforeEach
-    public void resetMocks() {
+    void resetMocks() {
         reset(client);
         reset(queue);
 
@@ -66,7 +65,7 @@ public class FHIRSubmissionTest {
     }
 
     @Test
-    public void testDataRequest() {
+    void testDataRequest() {
         final WebTarget target = groupResource.client().target("/Group/1/$export");
         target.request().accept(FHIR_JSON);
         final Response response = target.request().get();
@@ -110,7 +109,7 @@ public class FHIRSubmissionTest {
      * Test with a resource type in the '_type' query parameter
      */
     @Test
-    public void testOneResourceSubmission() {
+    void testOneResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource.client()
                 .target("/Group/1/$export")
@@ -123,17 +122,16 @@ public class FHIRSubmissionTest {
         // Should yield a job with Patient and EOB resources
         final var job = queue.workJob();
         assertTrue(job.isPresent());
-        final var jobID = job.get().getLeft();
-        final var resources = job.get().getRight().getJobResults();
+        final var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 1),
-                () -> assertTrue(resources.contains(new JobResult(jobID, ResourceType.Patient))));
+                () -> assertTrue(resources.contains(ResourceType.Patient)));
     }
 
     /**
      * Test with a list of resource types in the '_type' query parameter
      */
     @Test
-    public void testTwoResourceSubmission() {
+    void testTwoResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource.client()
                 .target("/Group/1/$export")
@@ -153,7 +151,7 @@ public class FHIRSubmissionTest {
     }
 
     @Test
-    public void testThreeResourceSubmission() {
+    void testThreeResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource.client()
                 .target("/Group/1/$export")
@@ -177,7 +175,7 @@ public class FHIRSubmissionTest {
      * Negative test with a bad type of resource types in the '_type' query parameter
      */
     @Test
-    public void testBadResourceSubmission() {
+    void testBadResourceSubmission() {
         // A request with a bad resource type parameter...
         final WebTarget target = groupResource.client()
                 .target("/Group/1/$export")
@@ -193,7 +191,7 @@ public class FHIRSubmissionTest {
      * Test with no _type parameter
      */
     @Test
-    public void testNoResourceSubmission() {
+    void testNoResourceSubmission() {
         // A request with no resource type parameters...
         final WebTarget target = groupResource.client().target("/Group/1/$export");
         target.request().accept(FHIR_JSON);
@@ -204,7 +202,7 @@ public class FHIRSubmissionTest {
         // Should yield a job with all resource types
         var job = queue.workJob();
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getJobResults();
+        var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()));
     }
 }

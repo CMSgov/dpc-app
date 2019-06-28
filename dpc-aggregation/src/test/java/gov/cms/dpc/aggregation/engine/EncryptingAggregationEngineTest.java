@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -11,7 +10,6 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import io.github.resilience4j.retry.RetryConfig;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -43,22 +41,27 @@ class EncryptingAggregationEngineTest {
     private static final String RSA_PRIVATE_KEY_PATH = "test_rsa_private_key.der";
     private static final String RSA_PUBLIC_KEY_PATH = "test_rsa_public_key.der";
     private JobQueue queue;
-    private EncryptingAggregationEngine engine;
+    private AggregationEngine engine;
     private RSAPublicKey rsaPublicKey;
     private RSAPrivateKey rsaPrivateKey;
 
-    static private Config config;
+    static private FhirContext fhirContext = FhirContext.forDstu3();
+    static private String exportPath;
+    static private OperationsConfig operationsConfig;
 
     @BeforeAll
     static void setupAll() {
-        config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        // Use the test.conf as the base for config. encrypt.conf will only enable encryption.
+        final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        exportPath = config.getString("exportPath");
+        operationsConfig = new OperationsConfig(3, 1000, false, exportPath, true);
     }
 
     @BeforeEach
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
-        BlueButtonClient bbclient = new MockBlueButtonClient();
-        engine = new EncryptingAggregationEngine(bbclient, queue, FhirContext.forDstu3(), config.getString("exportPath"), config, RetryConfig.ofDefaults());
+        BlueButtonClient bbclient = new MockBlueButtonClient(fhirContext);
+        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), operationsConfig);
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
         final InputStream testPublicKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PUBLIC_KEY_PATH);
@@ -97,13 +100,13 @@ class EncryptingAggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
-        var outputFilePath = engine.formOutputFilePath(jobId, ResourceType.Patient);
-        var metadataFilePath = engine.formOutputMetadataPath(jobId, ResourceType.Patient);
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).orElseThrow().getStatus()));
+        var outputFilePath = ResourceWriter.formEncryptedOutputFilePath(exportPath, jobId, ResourceType.Patient, 0);
+        var metadataFilePath = ResourceWriter.formEncryptedMetadataPath(exportPath, jobId, ResourceType.Patient, 0);
 
         assertTrue(Files.exists(Path.of(outputFilePath)), "Output file doesn't exist in tmp");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Encrypt metadata doesn't exist");
@@ -131,13 +134,13 @@ class EncryptingAggregationEngineTest {
 
         // Do the job
         queue.submitJob(jobId, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair.getRight()));
+        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
         assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
-        var errorFilePath = engine.formErrorFilePath(jobId, ResourceType.Patient);
-        var metadataFilePath = engine.formErrorMetadataPath(jobId, ResourceType.Patient);
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).orElseThrow().getStatus()));
+        var errorFilePath = ResourceWriter.formEncryptedOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
+        var metadataFilePath = ResourceWriter.formEncryptedMetadataPath(exportPath, jobId, ResourceType.OperationOutcome, 0);
 
         assertTrue(Files.exists(Path.of(errorFilePath)), "Error file is missing");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Error metadata file is missing");

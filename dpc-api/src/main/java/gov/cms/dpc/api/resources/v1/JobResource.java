@@ -8,8 +8,6 @@ import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
-import gov.cms.dpc.queue.suppliers.CountSupplier;
-import gov.cms.dpc.queue.suppliers.FileNameSupplier;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -67,10 +65,10 @@ public class JobResource extends AbstractJobResource {
                             .map(ResourceType::toString)
                             .collect(Collectors.joining(GroupResource.LIST_DELIM));
                     final JobCompletionModel completionModel = new JobCompletionModel(
-                            job.getStartTime().get(),
+                            job.getStartTime().orElseThrow(),
                             String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),
-                            formOutputList(job, JobResult::getCount, JobModel::formOutputFileName),
-                            formOutputList(job, JobResult::getErrorCount, JobModel::formErrorFileName));
+                            formOutputList(job, false),
+                            formOutputList(job, true));
                     builder = builder.status(HttpStatus.OK_200).entity(completionModel);
                     break;
                 }
@@ -87,18 +85,20 @@ public class JobResource extends AbstractJobResource {
     }
 
     /**
-     * Form a list of output entries that are erring
-     *
-     * @return the output list for the response
+     * Form a list of output entries for the output file
+     * @param job - The job with its job result list
+     * @param forOperationalOutcomes - Only return operational outcomes if true, don't include them otherwise
+     * @return the list of OutputEntry
      */
-    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, CountSupplier countSupplier, FileNameSupplier fileNameSupplier) {
+    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, boolean forOperationalOutcomes) {
         return job.getJobResults().stream()
-                .filter(jobResult -> countSupplier.getCount(jobResult) > 0)
-                .map(jobResult -> {
-                    final var resourceType = jobResult.getResourceType();
-                    final var url = String.format("%s/Data/%s", this.baseURL, fileNameSupplier.getFileName(job.getJobID(), resourceType));
-                    return new JobCompletionModel.OutputEntry(resourceType, url, countSupplier.getCount(jobResult));
-                })
+                .map(result -> new JobCompletionModel.OutputEntry(
+                        result.getResourceType(),
+                        String.format("%s/Data/%s", this.baseURL, JobResult.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
+                        result.getCount()))
+                .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
+                        && entry.getCount() > 0)
                 .collect(Collectors.toList());
     }
+
 }

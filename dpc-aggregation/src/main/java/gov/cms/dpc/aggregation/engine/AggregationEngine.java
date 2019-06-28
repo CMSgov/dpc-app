@@ -1,48 +1,39 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
-import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
-import io.github.resilience4j.retry.transformer.RetryTransformer;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.exceptions.UndeliverableException;
+import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * The top level of the Aggregation Engine
+ */
 public class AggregationEngine implements Runnable {
-
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
-    private static final char DELIM = '\n';
 
-    final String exportPath;
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
-    private final RetryConfig retryConfig;
-    private final IParser jsonParser;
+    private final OperationsConfig operationsConfig;
+    private final FhirContext fhirContext;
     private Disposable subscribe;
 
     /**
@@ -50,18 +41,16 @@ public class AggregationEngine implements Runnable {
      *
      * @param bbclient    - {@link BlueButtonClient } to use
      * @param queue       - {@link JobQueue} that will direct the work done
-     * @param context     - {@link FhirContext} for DSTU3 resources
-     * @param exportPath  - The {@link ExportPath} to use for writing the output files
-     * @param retryConfig - {@link RetryConfig} injected config for setting up retry handler
-     */
+     * @param fhirContext - {@link FhirContext} for DSTU3 resources
+     * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
+      */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext context, @ExportPath String exportPath, RetryConfig retryConfig) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext fhirContext, OperationsConfig operationsConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
-        this.exportPath = exportPath;
-        this.retryConfig = retryConfig;
-        this.jsonParser = context.newJsonParser();
-    }
+        this.fhirContext = fhirContext;
+        this.operationsConfig = operationsConfig;
+   }
 
     /**
      * Run the engine. Part of the Runnable interface.
@@ -69,7 +58,10 @@ public class AggregationEngine implements Runnable {
     @Override
     public void run() {
         // Run loop
-        logger.info("Starting aggregation engine with exportPath:\"{}\"", exportPath);
+        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelRequests:{} ",
+                operationsConfig.getExportPath(),
+                operationsConfig.getResourcesPerFileCount(),
+                operationsConfig.isParallelRequestsEnabled());
         this.pollQueue();
     }
 
@@ -82,29 +74,10 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Form the full file name of an output file
-     *
-     * @param jobID        - {@link UUID} ID of export job
-     * @param resourceType - {@link ResourceType} to append to filename
-     */
-    public String formOutputFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson", exportPath, JobModel.formOutputFileName(jobID, resourceType));
-    }
-
-    /**
-     * Form the full file name of an output file
-     *
-     * @param jobID        - {@link UUID} ID of export job
-     * @param resourceType - {@link ResourceType} to append to filename
-     */
-    public String formErrorFilePath(UUID jobID, ResourceType resourceType) {
-        return String.format("%s/%s.ndjson", exportPath, JobModel.formErrorFileName(jobID, resourceType));
-    }
-
-    /**
      * The main run-loop of the engine
      */
     private void pollQueue() {
+        setGlobalErrorHandler();
         subscribe = Observable.fromCallable(this.queue::workJob)
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
@@ -113,191 +86,93 @@ public class AggregationEngine implements Runnable {
                     logger.debug("No job, retrying in 2 seconds");
                     return completed.delay(2, TimeUnit.SECONDS);
                 })
-                .doOnError(e -> logger.error("Error", e))
-                .subscribe(this::workExportJob,
-                        error -> logger.error("Unable to complete job.", error));
-    }
-
-    /**
-     * Wrapper method for dispatching the job and handling any errors that would cause the job to fail
-     *
-     * @param workPair - job {@link Pair} with {@link UUID} or {@link JobModel}
-     */
-    private void workExportJob(Pair<UUID, JobModel> workPair) {
-        final JobModel model = workPair.getRight();
-        completeJob(model);
+                .subscribe(this::completeJob, error -> logger.error("Unable to complete job.", error));
     }
 
     /**
      * Work a single job in the queue to completion
      *
-     * @param job - the job to execute
+     * @param jobPair - the job to execute
      */
-    public void completeJob(JobModel job) {
-        final UUID jobID = job.getJobID();
-        logger.info("Processing job {}, exporting to: {}.", jobID, this.exportPath);
-
-        List<String> attributedBeneficiaries = job.getPatients();
-        logger.debug("Has {} attributed beneficiaries", attributedBeneficiaries.size());
-
-        final Disposable iterableSubscriber = Observable.fromIterable(job.getJobResults())
-                .subscribe(jobResult -> completeResource(job, jobResult),
-                        error -> {
-                            logger.error("Cannot process job {}", jobID, error);
-                            this.queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
-                        },
-                        () -> this.queue.completeJob(jobID, JobStatus.COMPLETED, job.getJobResults()));
-
-        // Kill the subscriber when we exit, otherwise we'll leak resources
-        iterableSubscriber.dispose();
-    }
-
-    /**
-     * Handle the file aspects of a resource
-     *
-     * @param job       - Job that is executing
-     * @param jobResult - The results for a current resource
-     * @throws IOException - File operation execeptions
-     */
-    protected void completeResource(JobModel job, JobResult jobResult) throws IOException {
-        final var resourceType = jobResult.getResourceType();
-        final var jobID = jobResult.getJobID();
-
-        if (!JobModel.isValidResourceType(resourceType)) {
-            throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
-        }
-
-        try (final var writer = new ByteArrayOutputStream(); final var errorWriter = new ByteArrayOutputStream()) {
-            // Process the job for the specified resource type
-            workResource(writer, errorWriter, job, jobResult);
-            writeToFile(writer.toByteArray(), formOutputFilePath(jobID, resourceType));
-            writeToFile(errorWriter.toByteArray(), formErrorFilePath(jobID, resourceType));
-        }
-    }
-
-    /**
-     * Process a single resourceType. Write a single provider NDJSON file as well as operational errors.
-     *
-     * @param writer      - the stream to write results
-     * @param errorWriter - the stream to write operational resources
-     * @param job         - the job to process
-     * @param jobResult   - the result of the work on the resource type.
-     */
-    protected void workResource(OutputStream writer, OutputStream errorWriter, JobModel job, JobResult jobResult) {
-        Observable.fromIterable(job.getPatients())
-                .flatMap(patient -> this.fetchResource(job.getJobID(), patient, jobResult.getResourceType()))
-                .subscribeOn(Schedulers.io())
-                .blockingSubscribe(resource -> writeResource(jobResult, writer, errorWriter, resource));
-    }
-
-    /**
-     * Write the resource into the appropriate streams.
-     *
-     * @param jobResult   - increment counts in this result
-     * @param mainWriter  - the main stream for successful resources
-     * @param errorWriter - the error stream for operational outcome resources
-     * @param resource    - the resource to write out
-     */
-    protected void writeResource(JobResult jobResult, OutputStream mainWriter, OutputStream errorWriter, Resource resource) {
+    void completeJob(Pair<UUID, JobModel> jobPair) {
+        final UUID jobID = jobPair.getLeft();
+        final JobModel job = jobPair.getRight();
         try {
-            String description;
-            OutputStream writer;
-            if (ResourceType.OperationOutcome.equals(resource.getResourceType())) {
-                description = "Writing {} to error file";
-                writer = errorWriter;
-                jobResult.incrementErrorCount();
-            } else {
-                description = "Writing {} to file";
-                writer = mainWriter;
-                jobResult.incrementCount();
-            }
+            logger.info("Processing job {}, exporting to: {}.", jobID, this.operationsConfig.getExportPath());
+            logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
-            final String str = jsonParser.encodeResourceToString(resource);
-            logger.trace(description, str);
-            writer.write(str.getBytes(StandardCharsets.UTF_8));
-            writer.write(DELIM);
-        } catch (IOException e) {
-            throw new JobQueueFailure(jobResult.getJobID(), e);
+            final var errorCounter = new AtomicInteger();
+            final var results = Flowable.fromIterable(job.getResourceTypes())
+                    .flatMap(resourceType -> completeResource(job, resourceType, errorCounter))
+                    .toList()
+                    .blockingGet();
+            logger.info("COMPLETED job {}", jobID);
+            this.queue.completeJob(jobID, JobStatus.COMPLETED, results);
+        } catch(Exception error) {
+            logger.error("FAILED job {}", jobID, error);
+            this.queue.completeJob(jobID, JobStatus.FAILED, List.of());
         }
     }
 
     /**
-     * Fetches the given resource from the {@link BlueButtonClient} and converts it from FHIR-JSON to Resource. The
-     * resource may be a type requested or it may be an operational outcome;
-     *
-     * @param jobID        - {@link UUID} jobID
-     * @param patientID    - {@link String} patient ID
-     * @param resourceType - {@link ResourceType} to fetch from BlueButton
-     * @return - {@link Observable} of {@link Resource} to pass back to reactive loop.
+     * Fetch and write a specific resource type
+     * @param job context
+     * @param resourceType to process
+     * @param errorCounter to count the OperationalOutcome JobResults
+     * @return A new job result observable
      */
-    private Observable<Resource> fetchResource(UUID jobID, String patientID, ResourceType resourceType) {
-        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
-        RetryTransformer<Resource> retryTransformer = RetryTransformer.of(retry);
+    private Flowable<JobResult> completeResource(JobModel job, ResourceType resourceType, AtomicInteger errorCounter) {
+        if (job.getPatients().size() == 0) {
+            return Flowable.empty();
+        }
 
-        return Observable.fromCallable(() -> {
-            logger.debug("Fetching patient {} from Blue Button", patientID);
-            switch (resourceType) {
-                case Patient:
-                    return this.bbclient.requestPatientFromServer(patientID);
-                case ExplanationOfBenefit:
-                    return this.bbclient.requestEOBBundleFromServer(patientID);
-                case Coverage:
-                    return this.bbclient.requestCoverageFromServer(patientID);
-                default:
-                    throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
-            }
-        })
-                // Turn errors into retries
-                .compose(retryTransformer)
-                // Turn errors into OperationalOutcomes
-                .onErrorReturn(ex -> {
-                    logger.error("Error fetching from Blue Button", ex);
-                    return formOperationOutcome(patientID, ex);
-                });
-    }
-
-    /**
-     * Create a OperationalOutcome resource from an exception
-     *
-     * @param patientID - the id of the patient involved in the error
-     * @param ex        - the exception to turn into a Operational Outcome
-     * @return an operation outcome
-     */
-    private OperationOutcome formOperationOutcome(String patientID, Throwable ex) {
-        String details;
-        if (ex instanceof ResourceNotFoundException) {
-            details = "Patient not found in Blue Button";
-        } else if (ex instanceof BaseServerResponseException) {
-            final var serverException = (BaseServerResponseException) ex;
-            details = String.format("Blue Button error: HTTP status: %s", serverException.getStatusCode());
+        // Make this flow hot (ie. only called once)
+        final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), resourceType, operationsConfig);
+        final Flowable<Resource> mixedFlow;
+        if (operationsConfig.isParallelRequestsEnabled()) {
+            mixedFlow = Flowable.fromIterable(job.getPatients())
+                    .parallel()
+                    .runOn(Schedulers.io())
+                    .flatMap(fetcher::fetchResources)
+                    .sequential();
         } else {
-            details = String.format("Internal error: %s", ex.getMessage());
+            mixedFlow = Flowable.fromIterable(job.getPatients()).flatMap(fetcher::fetchResources);
         }
+        final var connectableMixedFlow = mixedFlow.publish().autoConnect(2);
 
-        final var location = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
-        final var outcome = new OperationOutcome();
-        outcome.addIssue()
-                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                .setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setDetails(new CodeableConcept().setText(details))
-                .setLocation(location);
-        return outcome;
+        // Batch the non-error resources into files
+        final var counter = new AtomicInteger();
+        final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
+        final Flowable<JobResult> resourceFlow = connectableMixedFlow.filter(r -> r.getResourceType() != ResourceType.OperationOutcome)
+                .buffer(operationsConfig.getResourcesPerFileCount())
+                .map(batch -> writer.writeBatch(counter, batch));
+
+        // Batch the error resources into files
+        final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
+        final Flowable<JobResult> outcomeFlow = connectableMixedFlow.filter(r -> r.getResourceType() == ResourceType.OperationOutcome)
+                .buffer(operationsConfig.getResourcesPerFileCount())
+                .map(batch -> errorWriter.writeBatch(errorCounter, batch));
+
+        // Merge the resultant flows
+        return resourceFlow.mergeWith(outcomeFlow);
     }
 
     /**
-     * Write a array of bytes to a file. Name the file according to the supplied name
-     *
-     * @param bytes    - Bytes to write
-     * @param fileName - The fileName to write too
-     * @throws IOException
+     * Setup a global handler to catch the UndeliverableException case.
      */
-    private void writeToFile(byte[] bytes, String fileName) throws IOException {
-        if (bytes.length == 0) {
-            return;
-        }
-        try (final var outputFile = new FileOutputStream(fileName)) {
-            outputFile.write(bytes);
-            outputFile.flush();
-        }
+    private void setGlobalErrorHandler() {
+        RxJavaPlugins.setErrorHandler(e -> {
+            // Undeliverable Exceptions may happen because of parallel execution. One thread will
+            // throw an exception which will cause the job to fail and (close its consumer).
+            // Another thread will throw an exception as well which will be undeliverable
+            if (e instanceof UndeliverableException) {
+                // Merely log undeliverable exceptions
+                logger.error(e.getMessage());
+            } else {
+                // Forward all others to current thread's uncaught exception handler
+                final var thread = Thread.currentThread();
+                thread.getUncaughtExceptionHandler().uncaughtException(thread, e);
+            }
+        });
     }
 }
