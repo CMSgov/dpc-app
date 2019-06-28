@@ -10,19 +10,21 @@ import javax.ws.rs.core.MediaType;
 @Produces("application/fhir+json")
 public abstract class AbstractBaseResource {
 
-    public AbstractBaseResource() {
+    protected AbstractBaseResource() {
 //        Not used
     }
 
-    /**
-     * Returns the current API version
-     *
-     * @return - {@link String} version number
-     */
-    @Path("/version")
-    @Produces(MediaType.TEXT_PLAIN)
-    @GET
-    public abstract String version();
+    @Path("/Bundle")
+    public abstract AbstractRosterResource rosterOperations();
+
+    @Path("/Data")
+    public abstract AbstractDataResource dataOperations();
+
+    @Path("/Group")
+    public abstract AbstractGroupResource groupOperations();
+
+    @Path("/Jobs")
+    public abstract AbstractJobResource jobOperations();
 
     /**
      * Returns the FHIR capabilities statement
@@ -33,15 +35,13 @@ public abstract class AbstractBaseResource {
     @GET
     public abstract CapabilityStatement metadata();
 
-    @Path("/Group")
-    public abstract AbstractGroupResource groupOperations();
-
-    @Path("/Jobs")
-    public abstract AbstractJobResource jobOperations();
-
-    @Path("/Data")
-    public abstract AbstractDataResource dataOperations();
-
-    @Path("/Bundle")
-    public abstract AbstractRosterResource rosterOperations();
+    /**
+     * Returns the current API version
+     *
+     * @return - {@link String} version number
+     */
+    @Path("/version")
+    @Produces(MediaType.TEXT_PLAIN)
+    @GET
+    public abstract String version();
 }

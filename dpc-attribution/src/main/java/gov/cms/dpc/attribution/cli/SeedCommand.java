@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.sql.Connection;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.MissingResourceException;
@@ -58,7 +59,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         // Read in the seeds file and write things
         logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
 
-        try (DSLContext context = DSL.using(dataSource.getConnection(), this.settings)) {
+
+        try (final Connection connection = dataSource.getConnection();
+             DSLContext context = DSL.using(connection, this.settings)) {
 
             // Truncate everything
             context.truncate(Patients.PATIENTS).cascade().execute();

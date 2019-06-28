@@ -1,5 +1,7 @@
 package gov.cms.dpc.api;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
@@ -51,6 +53,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(JobResource.class);
         binder.bind(DataResource.class);
         binder.bind(RosterResource.class);
+        binder.bind(PractitionerResource.class);
 
         // Healthchecks
         binder.bind(AttributionHealthCheck.class);
@@ -94,5 +97,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @AdditionalPaths
     public List<String> provideAdditionalPaths() {
         return List.of("gov.cms.dpc.queue.models");
+    }
+
+    @Provides
+    public IGenericClient provideFHIRClient(FhirContext ctx) {
+        return ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
     }
 }
