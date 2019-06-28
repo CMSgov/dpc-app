@@ -8,7 +8,6 @@ import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
-import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -18,8 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -33,6 +36,33 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     public ProviderDAO(DPCManagedSessionFactory factory) {
         super(factory.getSessionFactory());
         this.rDAO = new RelationshipDAO(factory);
+    }
+
+    public ProviderEntity persistProvider(ProviderEntity provider) {
+        return this.persist(provider);
+    }
+
+    public Optional<ProviderEntity> getProvider(UUID providerID) {
+        return Optional.ofNullable(get(providerID));
+    }
+
+    public List<ProviderEntity> getProviders(String providerID) {
+
+        // Build a selection query to get records from the database
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<ProviderEntity> query = builder.createQuery(ProviderEntity.class);
+        final Root<ProviderEntity> root = query.from(ProviderEntity.class);
+        query.select(root);
+
+        // If we've provided an NPI, use it as a query restriction.
+        // Otherwise, return everything
+        if (!providerID.isEmpty()) {
+            query.where(builder
+                    .equal(root.get("providerNPI"),
+                            providerID));
+        }
+
+        return this.list(query);
     }
 
     @Override

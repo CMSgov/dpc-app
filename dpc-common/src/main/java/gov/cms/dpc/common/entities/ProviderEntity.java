@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
 import org.hibernate.annotations.SQLInsert;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -13,7 +14,8 @@ import java.util.UUID;
 @Entity(name = "providers")
 @NamedQueries(value = {
         @NamedQuery(name = "getProvider", query = "select 1 from providers a where a.providerNPI = :provID"),
-        @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id")
+        @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id"),
+        @NamedQuery(name = "getAllProviders", query = "from providers p")
 })
 @SQLInsert(sql = "INSERT INTO providers(first_name, last_name, provider_id, id) VALUES(?, ?, ?, ?)" +
         " ON CONFLICT (provider_id) DO UPDATE SET last_name = EXCLUDED.last_name," +
@@ -85,6 +87,10 @@ public class ProviderEntity {
 
     public void setAttributedPatients(List<PatientEntity> attributedPatients) {
         this.attributedPatients = attributedPatients;
+    }
+
+    public Practitioner toFHIR() {
+        return ProviderEntityConverter.convert(this);
     }
 
     @Override

@@ -84,6 +84,11 @@
             <artifactId>dropwizard-client</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-client</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
