@@ -38,8 +38,13 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
 
     @Provides
     @Singleton
-    ManagedDataSource provideDataSource() {
-        final DataSourceFactory factory = getConfiguration().getDatabase();
+    ManagedDataSource provideDataSource(DataSourceFactory factory) {
         return factory.build(getEnvironment().metrics(), "tested-things");
+    }
+
+    @Provides
+    @Singleton
+    DataSourceFactory provideFactory() {
+        return getConfiguration().getDatabase();
     }
 }
