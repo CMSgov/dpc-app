@@ -56,7 +56,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
 
         // If we've provided an NPI, use it as a query restriction.
         // Otherwise, return everything
-        if (!providerID.isEmpty()) {
+        if (providerID != null && !providerID.isEmpty()) {
             query.where(builder
                     .equal(root.get("providerNPI"),
                             providerID));

@@ -1,20 +1,17 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractionerResource;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
-import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @FHIR
@@ -27,13 +24,18 @@ public class PractitionerResource extends AbstractPractionerResource {
         this.dao = dao;
     }
 
+    @GET
     @UnitOfWork
     @Override
-    public List<Practitioner> getPractitioners(@QueryParam("id") String providerNPI) {
-        return this.dao.getProviders(providerNPI)
+    // TODO: Migrate this signature to a List<Practitioner> in DPC-302
+    public Bundle getPractitioners(@QueryParam("id") String providerNPI) {
+        final Bundle bundle = new Bundle();
+        this.dao.getProviders(providerNPI)
                 .stream()
                 .map(ProviderEntity::toFHIR)
-                .collect(Collectors.toList());
+                .forEach(provider -> bundle.addEntry().setResource(provider));
+
+        return bundle;
     }
 
     @POST

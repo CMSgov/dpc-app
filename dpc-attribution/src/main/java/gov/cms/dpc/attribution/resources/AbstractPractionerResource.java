@@ -1,12 +1,12 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import java.util.List;
 import java.util.UUID;
 
 @Path("/Practitioner")
@@ -18,7 +18,7 @@ public abstract class AbstractPractionerResource {
     }
 
     @GET
-    public abstract List<Practitioner> getPractitioners(String providerNPI);
+    public abstract Bundle getPractitioners(String providerNPI);
 
     @POST
     public abstract Practitioner submitProvider(Practitioner provider);

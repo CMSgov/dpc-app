@@ -1,7 +1,10 @@
 package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.entities.ProviderEntity;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Practitioner;
+
+import java.sql.Date;
 
 public class ProviderEntityConverter {
 
@@ -19,6 +22,9 @@ public class ProviderEntityConverter {
                 .addGiven(entity.getProviderFirstName());
 
         practitioner.addIdentifier().setValue(entity.getProviderNPI());
+        final Meta meta = new Meta();
+        meta.setLastUpdated(Date.valueOf("1990-01-01"));
+        practitioner.setMeta(meta);
 
         return practitioner;
     }
