@@ -15,14 +15,10 @@
  */
  // In our Gulp Sass task, we've added node_modules to the list of paths that
 // are used to resolve @import declarations, so we omit it from the path below.
+ @import 'normalize.css/normalize';
  @import '@cmsgov/design-system-core/src/index';
  @import '@cmsgov/design-system-layout/src/index';
+ @import "rouge";
  @import "navbar";
  @import "sidenav";
-
-
-body {
-  padding: 0;
-  margin: 0;
-}
 

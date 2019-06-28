@@ -144,6 +144,8 @@
                             </excludes>
                         </filter>
                     </filters>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <finalName>${project.artifactId}</finalName>
                 </configuration>
                 <executions>
                     <execution>
