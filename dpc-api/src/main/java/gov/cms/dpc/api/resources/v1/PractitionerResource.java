@@ -7,7 +7,6 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -62,7 +61,7 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     public Response deleteProvider(UUID providerID) {
-        final IBaseOperationOutcome oo = this.client
+        this.client
                 .delete()
                 .resourceById(new IdType("Practitioner", providerID.toString()))
                 .encodedJson()
