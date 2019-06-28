@@ -25,7 +25,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerReadWrite() {
 
-        final Practitioner practitioner = createPractitionerResource();
+        final Practitioner practitioner = createPractitionerResource("test-npi-1");
         final IGenericClient client = createFHIRClient();
         final MethodOutcome mo = client
                 .create()
@@ -75,7 +75,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerSearch() {
 
-        final Practitioner practitioner = createPractitionerResource();
+        final Practitioner practitioner = createPractitionerResource("test-npi-1");
         final IGenericClient client = createFHIRClient();
 
         final MethodOutcome outcome = client
@@ -109,13 +109,39 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertEquals(1, searchedProviders.getEntry().size(), "Searched should be the same");
     }
 
-    private static Practitioner createPractitionerResource() {
-        final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue("test-npi-1");
-        practitioner.addName()
-                .setFamily("Practitioner").addGiven("Test");
 
-        return practitioner;
+    @Test
+    void testPractitionerUpdate() {
+        final Practitioner practitioner = createPractitionerResource("test-npi-2");
+        final IGenericClient client = createFHIRClient();
+
+        final MethodOutcome outcome = client
+                .create()
+                .resource(practitioner)
+                .encodedJson()
+                .execute();
+
+        final Practitioner pract2 = (Practitioner) outcome.getResource();
+
+        pract2.getNameFirstRep().setFamily("Updated");
+
+        client
+                .update()
+                .resource(pract2)
+                .encodedJson()
+                .execute();
+
+        // Read it back
+
+        final Practitioner pract3 = client
+                .read()
+                .resource(Practitioner.class)
+                .withId(pract2.getId())
+                .encodedJson()
+                .execute();
+
+        assertTrue(pract2.equalsDeep(pract3), "Updated values should match");
+        assertFalse(pract3.equalsDeep(practitioner), "Should not match original");
     }
 
     private IGenericClient createFHIRClient() {
@@ -124,5 +150,14 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(getServerURL());
+    }
+
+    private static Practitioner createPractitionerResource(String NPI) {
+        final Practitioner practitioner = new Practitioner();
+        practitioner.addIdentifier().setValue(NPI);
+        practitioner.addName()
+                .setFamily("Practitioner").addGiven("Test");
+
+        return practitioner;
     }
 }

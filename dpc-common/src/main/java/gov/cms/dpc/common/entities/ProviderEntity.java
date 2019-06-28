@@ -111,8 +111,16 @@ public class ProviderEntity {
     }
 
     public static ProviderEntity fromFHIR(Practitioner resource) {
+        return fromFHIR(resource, null);
+    }
 
+    public static ProviderEntity fromFHIR(Practitioner resource, UUID resourceID) {
         final ProviderEntity provider = new ProviderEntity();
+
+        if (resourceID != null) {
+            // Strip off the Practitioner/ prefix, this should be more flexible
+            provider.setProviderID(resourceID);
+        }
 
         provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));
         final HumanName name = resource.getNameFirstRep();

@@ -13,7 +13,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
-
 @FHIR
 public class PractitionerResource extends AbstractPractionerResource {
 
@@ -76,5 +75,15 @@ public class PractitionerResource extends AbstractPractionerResource {
         }
 
         return Response.ok().build();
+    }
+
+    @PUT
+    @Path("/{providerID}")
+    @UnitOfWork
+    @Override
+    public Practitioner updateProvider(@PathParam("providerID") UUID providerID, Practitioner provider) {
+        final ProviderEntity providerEntity = this.dao.persistProvider(ProviderEntity.fromFHIR(provider, providerID));
+
+        return providerEntity.toFHIR();
     }
 }
