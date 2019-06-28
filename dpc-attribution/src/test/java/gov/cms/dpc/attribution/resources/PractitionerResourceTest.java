@@ -75,12 +75,12 @@ public class PractitionerResourceTest extends AbstractAttributionTest {
         final Bundle searchedProviders = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Patient.IDENTIFIER.exactly().identifier(pract2.getId()))
+                .where(Patient.IDENTIFIER.exactly().identifier(pract2.getIdentifierFirstRep().getValue()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
 
-        assertTrue(providers.equalsDeep(searchedProviders), "Searched should be the same");
+        assertEquals(1, searchedProviders.getEntry().size(), "Searched should be the same");
     }
 
     private static Practitioner createPractitionerResource() {

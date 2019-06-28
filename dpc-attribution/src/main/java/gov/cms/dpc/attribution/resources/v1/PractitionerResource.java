@@ -28,7 +28,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @UnitOfWork
     @Override
     // TODO: Migrate this signature to a List<Practitioner> in DPC-302
-    public Bundle getPractitioners(@QueryParam("id") String providerNPI) {
+    public Bundle getPractitioners(@QueryParam("identifier") String providerNPI) {
         final Bundle bundle = new Bundle();
         this.dao.getProviders(providerNPI)
                 .stream()
