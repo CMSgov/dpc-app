@@ -10,13 +10,16 @@
   </head>
 
   <body class="ds-base">
+
+    <a class="ds-c-skip-nav" href="#main">Skip to main content</a>
+
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
     <!-- content -->
-    <div class="ds-l-container">
+    <section class="ds-l-container" id="main">
       <%= yield %>
-    </div>
+    </section>
 
   </body>
 </html>
