@@ -1,5 +1,6 @@
 package gov.cms.dpc.aggregation.engine;
 
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -80,14 +81,14 @@ class ResourceFetcher {
      */
     private List<Resource> fetchAllBundles(String patientID, Bundle firstBundle) {
         final var resources = new ArrayList<Resource>();
-        firstBundle.getEntry().forEach((entry) -> resources.add(entry.getResource()));
+        addResources(resources, firstBundle);
 
         // Loop until no more next bundles
         var bundle = firstBundle;
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {
             logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), patientID);
             bundle = blueButtonClient.requestNextBundleFromServer(bundle);
-            bundle.getEntry().forEach((entry) -> resources.add(entry.getResource()));
+            addResources(resources, bundle);
         }
 
         logger.debug("Done fetching bundles {} for {}", resourceType.toString(), patientID);
@@ -129,6 +130,22 @@ class ResourceFetcher {
             default:
                 throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
         }
+    }
+
+    /**
+     * Add resources in a bundle to a list
+     *
+     * @param resources - the list to add resources to
+     * @param bundle - the bundle to extract resources from
+     */
+    private void addResources(ArrayList<Resource> resources, Bundle bundle) {
+        bundle.getEntry().forEach((entry) -> {
+            final var resource = entry.getResource();
+            if (resource.getResourceType() != resourceType) {
+                throw new DataFormatException(String.format("Unexepected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
+            }
+            resources.add(resource);
+        });
     }
 
     /**
