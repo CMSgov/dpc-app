@@ -4,18 +4,25 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 public class OrgRegistrationCommand extends Command {
     private static final String ORG_FILE = "org-file";
+    private static final String ORG_ID = "org-id";
     private static final String ATTR_HOSTNAME = "hostname";
     private final FhirContext ctx;
 
@@ -41,6 +48,13 @@ public class OrgRegistrationCommand extends Command {
                 .dest(ATTR_HOSTNAME)
                 .setDefault("http://localhost:3041/v1")
                 .help("Address of the Attribution Service, which handles organization registration");
+
+        subparser
+                .addArgument("--id", "-i")
+                .dest(ORG_ID)
+                .type(String.class)
+                .setDefault("0c527d2e-2e8a-4808-b11d-0fa06baf8254")
+                .help("Organization ID to use for registration");
     }
 
     @Override
@@ -54,10 +68,10 @@ public class OrgRegistrationCommand extends Command {
             organization = (Bundle) parser.parseResource(fileInputStream);
         }
 
-        registerOrganization(organization, namespace.getString(ATTR_HOSTNAME));
+        registerOrganization(organization, namespace.getString(ATTR_HOSTNAME), namespace.getString(ORG_ID));
     }
 
-    void registerOrganization(Bundle organization, String attributionService) {
+    void registerOrganization(Bundle organization, String attributionService, String organizationID) throws IOException {
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService + "/Organization");
 
         try {
@@ -68,6 +82,19 @@ public class OrgRegistrationCommand extends Command {
                     .execute();
         } catch (Exception e) {
             System.err.println(String.format("Unable to register organization. %s", e.getMessage()));
+        }
+
+        // Now, create a token
+
+        try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
+
+            final HttpGet httpGet = new HttpGet(String.format("%s/Organization/%s/token/create", attributionService, organizationID));
+            httpGet.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                final String token = EntityUtils.toString(response.getEntity());
+                System.out.println(String.format("Organization token: %s", token));
+            }
         }
     }
 }

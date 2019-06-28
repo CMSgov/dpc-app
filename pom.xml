@@ -12,6 +12,7 @@
         <module>dpc-attribution</module>
         <module>dpc-common</module>
         <module>dpc-bluebutton</module>
+        <module>dpc-macaroons</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>

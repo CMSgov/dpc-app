@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.entities;
 
 import ca.uhn.fhir.parser.DataFormatException;
+import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRConvertable;
 import gov.cms.dpc.fhir.converters.AddressConverter;
@@ -22,7 +23,6 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     public static final long serialVersionUID = 42L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
@@ -44,6 +44,10 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @Valid
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<EndpointEntity> endpoints;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "token_ids", columnDefinition = "text")
+    private List<String> tokenIDs;
 
     public OrganizationEntity() {
         // Not used
@@ -97,9 +101,29 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         this.endpoints = endpoints;
     }
 
+    public List<String> getTokenIDs() {
+        return tokenIDs;
+    }
+
+    public void setTokenIDs(List<String> tokenIDs) {
+        this.tokenIDs = tokenIDs;
+    }
+
     @Override
     public OrganizationEntity fromFHIR(Organization resource) {
         final OrganizationEntity entity = new OrganizationEntity();
+
+        // If we have an ID, and it parses, use it
+        final String idString = resource.getId();
+        UUID orgID;
+        if (idString == null) {
+            orgID = UUID.randomUUID();
+        } else {
+//             If we have an ID, we need to strip off the ID header, since we already know the resource type
+            orgID = UUID.fromString(idString.replace("Organization/", ""));
+        }
+
+        entity.setId(orgID);
 
         // Find the first Organization ID that we can use
         final Optional<Identifier> identifier = resource
