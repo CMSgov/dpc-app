@@ -65,8 +65,9 @@ public class ClientUtils {
      * @throws IOException - throws if unable to read the file
      */
     public static ICreateTyped createRosterSubmission(IGenericClient client, InputStream resource) throws IOException {
+        final SeedProcessor seedProcessor = new SeedProcessor(resource);
 
-        final Map<String, List<Pair<String, String>>> providerMap = SeedProcessor.extractProviderMap(resource);
+        final Map<String, List<Pair<String, String>>> providerMap = seedProcessor.extractProviderMap();
 
         // Find the entry for the given key (yes, I know this is bad)
         final Map.Entry<String, List<Pair<String, String>>> providerRoster = providerMap
@@ -76,7 +77,7 @@ public class ClientUtils {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Cannot find matching provider"));
 
-        final Bundle providerBundle = SeedProcessor.generateRosterBundle(providerRoster);
+        final Bundle providerBundle = seedProcessor.generateRosterBundle(providerRoster);
 
         // Now, submit the bundle
         // TODO: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.

@@ -106,7 +106,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
+           <configuration>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
                     <transformers>
                         <transformer
@@ -127,8 +127,6 @@
                             </excludes>
                         </filter>
                     </filters>
-                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <finalName>${project.artifactId}</finalName>
                 </configuration>
                 <executions>
                     <execution>

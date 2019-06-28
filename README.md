@@ -3,7 +3,17 @@ Data @ The Point of Care
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
 [![Maintainability](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/maintainability)](https://codeclimate.com/github/CMSgov/dpc-app/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/test_coverage)](https://codeclimate.com/github/CMSgov/dpc-app/test_coverage)  
+[![Test Coverage](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/test_coverage)](https://codeclimate.com/github/CMSgov/dpc-app/test_coverage)
+
+Building DPC
+---
+
+1. Run `mvn clean install` to build and test the application.
+This will also construct the *Docker* images for the various services.
+To skip the Docker build pass `-Djib.skip=True`
+
+> Note: DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions.
+In addition, some of upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date.  
 
 Required services
 ---
@@ -18,13 +28,14 @@ The `docker-compose` file includes the necessary applications and configurations
 docker-compose up db redis
 ```
 
-By default, the application attempts to connect to the `dpc_attribution` database on the localhost as the `postgres` user with an empty password.
+By default, the application attempts to connect to the `dpc_atrribution` database on the localhost as the `postgres` user.
 This database needs to be manually created, but table setup and data migration will be handled by the DPC services.
 
 For Redis, we assume the server is running on the localhost, with the default port.
 
 The defaults can be overridden in the configuration files.
-Common configuration options (such as database connection strings) are stored in a [server.conf](src/main/resources/server.conf) file and included in the various modules via the `include "server.conf"` attribute in module application config files.
+Common configuration options (such as database connection strings) are stored in the `server.conf` file within the `src/main/resources` directory.
+These settings are included in the various modules via the `include "server.conf"` attribute in module application config files.
 See the `dpc-attribution` [application.conf](dpc-attribution/src/main/resources/application.conf) for an example.
 
 Default settings can be overridden either directly in the module configurations, or via an `application.local.conf` file in the project root directory. 
@@ -45,67 +56,37 @@ dpc.attribution {
 }
 ```
 
-> Note: On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory.
+#### Note:
+
+On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory.
 This can create an issue when running tests with IntelliJ which by default sets the working directory to be the module root, which means any local overrides are ignored.
-This can be fixed by setting the working directory to the project root, but needs to done manually.
-
-Building DPC
----
-
-1. Run `mvn clean install` to build and test the application.
-This will also construct the *Docker* images for the various services.
-To skip the Docker build pass `-Djib.skip=True`
-
-> Note: DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions.
-In addition, some of upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date. 
+This can be fixed by setting the working directory to the project root, but needs to done manually. 
 
 Running DPC
 --- 
 
-Once the JARs are built, they can be run in two ways either via `docker compose` or by manually running the JARs.
+Once the JARs are built, they can be run in two ways.
 
-## Running via Docker 
+1. Executed using *Docker Compose* `docker-compose up`
+1. Manually by running each of the JARs
+    1. `java -jar dpc-attribution/target/dpc-attribution-0.3.0-SNAPSHOT.jar server`
+    1. `java -jar dpc-attribution/target/dpc-web-0.3.0-SNAPSHOT.jar server`
+    
+    By default, the services will attempt to load a `local.application.conf` file from the current execution directory. 
+    This can be overriden in two ways.
+    1. Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
+    1. Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
+    
+    ***Note**: Manually specifying a config file will disable the normal configuration merging process. 
+    This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed.* 
 
-The application (along with all required dependencies) can be automatically started with the following command: `docker-compose up`.
-The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
-
-```bash
-docker-compose up {db,redis,dpc-aggregation,dpc-attribution,dpc-api}
-``` 
-
-## Manual JAR execution
-
-Alternatively, the individual services can be manually executing the `server` command for the various services.
-
-> Note: When manually running the individual services you'll need to ensure that there are no listening port collisions.
-By default, each service starts with the same application (8080) and admin (9900) ports. We provide a sample `application.local.conf` file which contains all the necessary configuration options.
-This file can be copied and used directly: `cp application.local.conf.sample application.local.conf`. 
-
-Next start each service in a new terminal window, from within the the `dpc-app` root directory. 
-
-```bash
-java -jar dpc-attribution/target/dpc-attribution.jar server
-java -jar dpc-aggregation/target/dpc-aggregation.jar server
-java -jar dpc-api/target/dpc-api.jar server
-```
-
-By default, the services will attempt to load the `local.application.conf` file from the current execution directory. 
-This can be overriden in two ways.
-1. Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
-1. Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
-
-***Note**: Manually specifying a config file will disable the normal configuration merging process. 
-This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed.* 
-
-1. You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a json formatted FHIR resource.
+1. You can check that the application is running by requesting the FHIR `CapabilitiesStatement`, which will return a json formatted FHIR resource.
     ```bash
     curl -H "Accept: application/fhir+json" http://localhost:3002/v1/metadata
     ```
 
 Seeding the database
 ---
-
-> Note: This step is not required when directly running the `demo` for the `dpc-api` service, which partially seeds the database on first execution.
 
 By default, DPC initially starts with an empty attribution database, this means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton.
 
@@ -114,8 +95,8 @@ We provide a small CSV [file](src/main/resources/test_associations.csv) which as
 The database can be automatically migrated and seeded by running the following commands, before starting the Attribution service. 
 
 ```bash
-java -jar dpc-attribution/target/dpc-attribution.jar db migrate
-java -jar dpc-attribution/target/dpc-attribution.jar seed
+java -jar dpc-attribution/target/dpc-attribution-0.3.0-SNAPSHOT.jar db migrate
+java -jar dpc-attribution/target/dpc-attribution-0.3.0-SNAPSHOT.jar seed
 ``` 
 
 Testing the Application
@@ -125,11 +106,10 @@ Testing the Application
 The `dpc-api` component contains a `demo` command, which illustrates the basic workflow for submitting an export request and modifying an attribution roster.
 It can be executed with the following command:
 
-`java -jar dpc-api/target/dpc-api.jar demo`
+`java -jar dpc-api{JAR}.jar demo`
 
-> Note: The demo client expects the entire system (all databases and services) to be running from a new state (no data in the database).
-This is the default when starting the services from the *docker-compose* file.
-When running the JARs manually, the user will need to ensure that the `dpc_attribution` database is truncated after each run. 
+*Note:* The demo client expects the entire system (all databases and services) to be running from a new state (no data in the database).
+This is the default when starting the services from the *docker-compose* file. 
 
 The demo performs the following actions:
 
