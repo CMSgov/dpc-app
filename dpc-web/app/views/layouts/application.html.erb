@@ -5,18 +5,21 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= stylesheet_link_tag    'application', media: 'all' %>
+    <%= javascript_include_tag 'application' %>
   </head>
 
   <body class="ds-base">
+
+    <a class="ds-c-skip-nav" href="#main">Skip to main content</a>
+
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
     <!-- content -->
-    <div class="ds-l-container">
+    <section class="ds-l-container" id="main">
       <%= yield %>
-    </div>
+    </section>
 
     <%= render partial: 'shared/footer' %>
 
