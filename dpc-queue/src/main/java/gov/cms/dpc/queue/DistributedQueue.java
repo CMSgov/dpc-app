@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue;
 
+import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
@@ -35,9 +36,9 @@ public class DistributedQueue implements JobQueue {
 
     // Statics
     private static final Logger logger = LoggerFactory.getLogger(DistributedQueue.class);
-    private static final String CLUSTER_NOT_RESPONDING = "Redis cluster is not responding to pings.";
-    private static final String REDIS_UNHEALTHY = "Redis cluster is unhealthy";
-    private static final String DB_UNHEALTHY = "Database cluster is not responding";
+    static final String CLUSTER_NOT_RESPONDING = "Redis cluster is not responding to pings.";
+    static final String REDIS_UNHEALTHY = "Redis cluster is unhealthy";
+    static final String DB_UNHEALTHY = "Database cluster is not responding";
 
     // Object variables
     private final RedissonClient client;
@@ -60,9 +61,19 @@ public class DistributedQueue implements JobQueue {
         this.factory = factory.getSessionFactory();
         this.healthQuery = healthQuery;
 
+        // Timers
         this.waitTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "waitTime"));
         this.successTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "successTime"));
         this.failureTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "failureTime"));
+
+        // Gauges
+        final var queueLengthGauge = new CachedGauge<Long>(1, TimeUnit.SECONDS) {
+            @Override
+            protected Long loadValue() {
+                return queueSize();
+            }
+        };
+        metricRegistry.register(MetricRegistry.name(DistributedQueue.class, "queueLength"), queueLengthGauge);
     }
 
     @Override
