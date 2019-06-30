@@ -1,5 +1,7 @@
 package gov.cms.dpc.queue;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -30,22 +33,36 @@ import java.util.function.Consumer;
  */
 public class DistributedQueue implements JobQueue {
 
+    // Statics
     private static final Logger logger = LoggerFactory.getLogger(DistributedQueue.class);
-    public static final String CLUSTER_NOT_RESPONDING = "Redis cluster is not responding to pings.";
-    public static final String REDIS_UNHEALTHY = "Redis cluster is unhealthy";
-    public static final String DB_UNHEALTHY = "Database cluster is not responding";
+    private static final String CLUSTER_NOT_RESPONDING = "Redis cluster is not responding to pings.";
+    private static final String REDIS_UNHEALTHY = "Redis cluster is unhealthy";
+    private static final String DB_UNHEALTHY = "Database cluster is not responding";
 
+    // Object variables
     private final RedissonClient client;
     private final Queue<UUID> queue;
     private final SessionFactory factory;
     private final String healthQuery;
 
+    // Metrics
+    private final Timer waitTimer; // The wait time for a job to start
+    private final Timer successTimer; // The work time a successful job takes
+    private final Timer failureTimer; // The work time a failed job takes
+
     @Inject
-    DistributedQueue(RedissonClient client, DPCManagedSessionFactory factory, @HealthCheckQuery String healthQuery) {
+    DistributedQueue(RedissonClient client,
+                     DPCManagedSessionFactory factory,
+                     @HealthCheckQuery String healthQuery,
+                     MetricRegistry metricRegistry) {
         this.client = client;
         this.queue = client.getQueue("jobqueue");
         this.factory = factory.getSessionFactory();
         this.healthQuery = healthQuery;
+
+        this.waitTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "waitTime"));
+        this.successTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "successTime"));
+        this.failureTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "failureTime"));
     }
 
     @Override
@@ -110,6 +127,7 @@ public class DistributedQueue implements JobQueue {
         final OffsetDateTime startTime = OffsetDateTime.now(ZoneOffset.UTC);
         final JobModel updatedJob = updateModel(jobID, JobModel::setRunningStatus);
         final var delay = Duration.between(updatedJob.getSubmitTime().orElseThrow(), updatedJob.getStartTime().orElseThrow());
+        waitTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
         logger.debug("Started job {} at {}, waited in queue for {} seconds",
                 jobID,
                 startTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
@@ -124,6 +142,11 @@ public class DistributedQueue implements JobQueue {
         final OffsetDateTime completionTime = OffsetDateTime.now(ZoneOffset.UTC);
         final JobModel updatedJob = updateModel(jobID, job -> job.setFinishedStatus(status, jobResults));
         final Duration workDuration = Duration.between(updatedJob.getStartTime().orElseThrow(), updatedJob.getCompleteTime().orElseThrow());
+        if (status == JobStatus.COMPLETED) {
+            successTimer.update(workDuration.toMillis(), TimeUnit.MILLISECONDS);
+        } else {
+            failureTimer.update(workDuration.toMillis(), TimeUnit.MILLISECONDS);
+        }
         logger.debug("Completed job {} at {} with status {} and duration {} seconds",
                 jobID,
                 completionTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),

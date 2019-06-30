@@ -1,8 +1,10 @@
 package gov.cms.dpc.queue;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.Singleton;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;
@@ -50,5 +52,11 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
     String provideHealthQuery() {
         // TODO: Eventually, this should get pulled out into the config file
         return "SELECT 1 from job_queue;";
+    }
+
+    @Provides
+    @Singleton
+    MetricRegistry provideMetricRegistry() {
+        return getEnvironment().metrics();
     }
 }
