@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
@@ -46,6 +47,7 @@ class EncryptingAggregationEngineTest {
     private RSAPrivateKey rsaPrivateKey;
 
     static private FhirContext fhirContext = FhirContext.forDstu3();
+    static private MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
     static private OperationsConfig operationsConfig;
 
@@ -61,7 +63,7 @@ class EncryptingAggregationEngineTest {
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
         BlueButtonClient bbclient = new MockBlueButtonClient(fhirContext);
-        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), operationsConfig);
+        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), metricRegistry, operationsConfig);
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
         final InputStream testPublicKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PUBLIC_KEY_PATH);

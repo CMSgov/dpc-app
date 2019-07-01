@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
+import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.queue.JobQueue;
@@ -27,6 +28,7 @@ class BatchAggregationEngineTest {
     private AggregationEngine engine;
 
     static private FhirContext fhirContext = FhirContext.forDstu3();
+    static private MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
     static private OperationsConfig operationsConfig;
 
@@ -42,7 +44,7 @@ class BatchAggregationEngineTest {
     void setupEach() {
         queue = new MemoryQueue();
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        engine = new AggregationEngine(bbclient, queue, fhirContext, operationsConfig);
+        engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationsConfig);
     }
 
     /**

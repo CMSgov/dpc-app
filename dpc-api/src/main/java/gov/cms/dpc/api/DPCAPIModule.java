@@ -2,6 +2,7 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
@@ -68,6 +69,12 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                 .using(getConfiguration().getHttpClient())
                 .build("attribution-service")
                 .target(getConfiguration().getAttributionURL());
+    }
+
+    @Provides
+    @Singleton
+    public MetricRegistry provideMetricRegistry() {
+        return getEnvironment().metrics();
     }
 
     @Provides

@@ -1,7 +1,10 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.utils.MetricFactory;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
@@ -34,6 +37,8 @@ public class AggregationEngine implements Runnable {
     private final BlueButtonClient bbclient;
     private final OperationsConfig operationsConfig;
     private final FhirContext fhirContext;
+    private final Meter resourceMeter;
+    private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
 
     /**
@@ -45,11 +50,15 @@ public class AggregationEngine implements Runnable {
      * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
       */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext fhirContext, OperationsConfig operationsConfig) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
+
+        final var metricFactory = new MetricFactory(metricRegistry, AggregationEngine.class);
+        resourceMeter = metricFactory.registerMeter("resourceFetched");
+        operationalOutcomeMeter = metricFactory.registerMeter("operationalOutcomes");
    }
 
     /**
@@ -145,12 +154,14 @@ public class AggregationEngine implements Runnable {
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
         final Flowable<JobResult> resourceFlow = connectableMixedFlow.filter(r -> r.getResourceType() != ResourceType.OperationOutcome)
                 .buffer(operationsConfig.getResourcesPerFileCount())
+                .doOnNext(resources -> resourceMeter.mark(resources.size()))
                 .map(batch -> writer.writeBatch(counter, batch));
 
         // Batch the error resources into files
         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
         final Flowable<JobResult> outcomeFlow = connectableMixedFlow.filter(r -> r.getResourceType() == ResourceType.OperationOutcome)
                 .buffer(operationsConfig.getResourcesPerFileCount())
+                .doOnNext(outcomes -> operationalOutcomeMeter.mark(outcomes.size()))
                 .map(batch -> errorWriter.writeBatch(errorCounter, batch));
 
         // Merge the resultant flows
