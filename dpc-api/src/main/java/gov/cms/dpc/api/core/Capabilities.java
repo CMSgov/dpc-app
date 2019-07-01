@@ -16,7 +16,7 @@ public class Capabilities {
     private Capabilities() {
     }
 
-    public static CapabilityStatement buildCapabilities(String baseUri, String version) {
+    public static CapabilityStatement buildCapabilities() {
         final PropertiesProvider pp = new PropertiesProvider();
 
         DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIRFormatters.DATE_TIME_FORMATTER));
@@ -31,8 +31,7 @@ public class Capabilities {
                 .setFhirVersion("3.0.1")
                 .setSoftware(generateSoftwareComponent(releaseDate, pp.getBuildVersion()))
                 .setKind(CapabilityStatementKind.CAPABILITY)
-                .setRest(generateRestComponents(baseUri + version))
-                .setAcceptUnknown(UnknownContentCode.NO)
+                .setRest(generateRestComponents())
                 .setFormat(Arrays.asList(new CodeType("application/json"), new CodeType("application/fhir+json")))
                 .setAcceptUnknown(UnknownContentCode.EXTENSIONS);
 
@@ -51,7 +50,7 @@ public class Capabilities {
                 .setReleaseDateElement(releaseDate);
     }
 
-    private static List<CapabilityStatementRestComponent> generateRestComponents(String baseURI) {
+    private static List<CapabilityStatementRestComponent> generateRestComponents() {
         final CapabilityStatementRestComponent serverComponent = new CapabilityStatementRestComponent();
         serverComponent.setMode(RestfulCapabilityMode.SERVER);
 
@@ -67,6 +66,7 @@ public class Capabilities {
         return Collections.singletonList(serverComponent);
     }
 
+    @SuppressWarnings({"UnusedMethod"}) // Will be expanded with DPC-293
     private static CapabilityStatementRestResourceComponent generateGroupEndpoints() {
         final CapabilityStatementRestResourceComponent group = new CapabilityStatementRestResourceComponent();
         group.setType("Group");

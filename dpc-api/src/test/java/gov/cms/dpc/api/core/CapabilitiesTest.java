@@ -32,7 +32,7 @@ class CapabilitiesTest {
 
     @Test
     void capabilitiesIsValid() {
-        final CapabilityStatement capabilities = Capabilities.buildCapabilities("http://localhost:3002", "/v1");
+        final CapabilityStatement capabilities = Capabilities.buildCapabilities();
         final ValidationResult validationResult = validator.validateWithResult(capabilities);
         assertTrue(validationResult.isSuccessful(), validationResultsToString(validationResult));
     }
