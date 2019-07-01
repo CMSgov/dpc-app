@@ -2,11 +2,13 @@ package gov.cms.dpc.common.entities;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.StringType;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 @Embeddable
 public class NameEntity implements Serializable {
@@ -64,5 +66,17 @@ public class NameEntity implements Serializable {
 
     public void setSuffix(String suffix) {
         this.suffix = suffix;
+    }
+
+    public HumanName toFHIR() {
+        final HumanName name = new HumanName();
+
+        name.setFamily(this.family);
+        name.setPrefix(List.of(new StringType(this.prefix)));
+        name.setSuffix(List.of(new StringType(this.suffix)));
+        name.setGiven(List.of(new StringType(this.given)));
+        name.setUse(this.use);
+
+        return name;
     }
 }

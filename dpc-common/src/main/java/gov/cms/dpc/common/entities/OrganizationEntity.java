@@ -7,12 +7,15 @@ import gov.cms.dpc.fhir.FHIRConvertable;
 import gov.cms.dpc.fhir.converters.AddressConverter;
 import gov.cms.dpc.fhir.converters.ContactElementConverter;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -167,8 +170,30 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     @Override
     public Organization toFHIR() {
-        // TODO: Add support for generating FHIR directly (DPC-276)
-        throw new UnsupportedOperationException("Not implemented yet");
+        // TODO: This will be dramatically improved in the future. (DPC-276)
+
+        final Organization org = new Organization();
+
+        org.setId(this.id.toString());
+        org.addIdentifier(this.organizationID.toFHIR());
+        org.setName(this.organizationName);
+        org.setAddress(Collections.singletonList(this.organizationAddress.toFHIR()));
+
+        final List<Organization.OrganizationContactComponent> contacts = this.contacts
+                .stream()
+                .map(ContactEntity::toFHIR)
+                .collect(Collectors.toList());
+        org.setContact(contacts);
+
+        final List<Reference> endpoints = this
+                .endpoints
+                .stream()
+                .map(ep -> new Reference(new IdType("Endpoint", ep.getId().toString())))
+                .collect(Collectors.toList());
+
+        org.setEndpoint(endpoints);
+
+        return org;
     }
 
     @Embeddable
@@ -205,6 +230,14 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
         public void setValue(String value) {
             this.value = value;
+        }
+
+        public Identifier toFHIR() {
+            final Identifier id = new Identifier();
+            id.setSystem(this.system.getSystem());
+            id.setValue(this.value);
+
+            return id;
         }
     }
 }
