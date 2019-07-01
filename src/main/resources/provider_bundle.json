@@ -91,6 +91,8 @@
         "active": true,
         "address": [
           {
+            "use": "work",
+            "type": "both",
             "city": "CAMBRIDGE",
             "country": "US",
             "line": [
@@ -134,6 +136,8 @@
         "active": true,
         "address": [
           {
+            "use": "work",
+            "type": "both",
             "city": "WORCESTER",
             "country": "US",
             "line": [

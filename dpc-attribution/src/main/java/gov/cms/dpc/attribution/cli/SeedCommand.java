@@ -9,10 +9,12 @@ import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationEndpointsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
+import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
 import gov.cms.dpc.common.entities.AddressEntity;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import io.dropwizard.Application;
@@ -25,6 +27,7 @@ import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.jooq.DSLContext;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
@@ -82,13 +85,14 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             context.truncate("root_keys").cascade();
 
             final FhirContext ctx = FhirContext.forDstu3();
+            final IParser parser = ctx.newJsonParser();
 
+            // Start with the Organizations and their endpoints
             try (final InputStream orgBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(ORGANIZATION_BUNDLE)) {
                 if (orgBundleStream == null) {
                     throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
                 }
                 final OrganizationEntity orgEntity = new OrganizationEntity();
-                final IParser parser = ctx.newJsonParser();
                 final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
                 final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, EndpointConverter::convert);
                 final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class, bundle, orgEntity::fromFHIR);
@@ -97,20 +101,24 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                         .stream()
                         .map(entity -> organizationEntityToRecord(context, entity))
                         .forEach(context::executeInsert);
-
-                // Write the endpoints, then the organizations
                 endpointEntities
                         .stream()
                         .map(entity -> endpointsEntityToRecord(context, entity))
                         .forEach(context::executeInsert);
-
-
             }
 
-            // Start by loading the organizations and providers
+            // Providers next
+            try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
+                final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
+                final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR);
 
+                providers
+                        .stream()
+                        .map(entity -> providersEntityToRecord(context, entity))
+                        .forEach(context::executeInsert);
+            }
 
-            // Get the test seeds
+            // Get the test attribution seeds
             try (InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV)) {
                 if (resource == null) {
                     throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
@@ -167,6 +175,12 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         record.setAddress(entity.getAddress());
         record.setValidationStatus(entity.getValidationStatus().ordinal());
         record.setValidationMessage(entity.getValidationMessage());
+
+        return record;
+    }
+
+    private static ProvidersRecord providersEntityToRecord(DSLContext context, ProviderEntity entity) {
+        final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
 
         return record;
     }

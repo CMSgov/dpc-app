@@ -108,6 +108,12 @@ public class ProviderEntity {
 
         final ProviderEntity provider = new ProviderEntity();
 
+        if (resource.getId() == null) {
+            provider.setProviderID(UUID.randomUUID());
+        } else {
+            provider.setProviderID(FHIRExtractors.getEntityUUID(resource.getId()));
+        }
+
         provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));
         final HumanName name = resource.getNameFirstRep();
         provider.setProviderFirstName(name.getGivenAsSingleString());
