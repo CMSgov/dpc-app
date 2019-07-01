@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources;
 
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Organization;
 
@@ -13,5 +14,5 @@ public abstract class AbstractOrganizationResource {
 
     @GET
     @Path("/{organizationID}")
-    public abstract Organization getOrganization(Organization organization, UUID organizationID);
+    public abstract Organization getOrganization(OrganizationPrincipal principal, UUID organizationID);
 }

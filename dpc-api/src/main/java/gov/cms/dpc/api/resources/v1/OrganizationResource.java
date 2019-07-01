@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.resources.v1;
 
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
+import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.inject.Inject;
@@ -19,7 +21,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @GET
     @Path("/{organizationID}")
     @Override
-    public Organization getOrganization(Organization organization, @PathParam("organizationID") UUID organizationID) {
-        return organization;
+    public Organization getOrganization(@Auth OrganizationPrincipal principal, @PathParam("organizationID") UUID organizationID) {
+        return principal.getOrganization();
     }
 }
