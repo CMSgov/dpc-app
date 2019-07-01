@@ -1,2 +1,3 @@
 class ApiDocumentsController < ApplicationController
+
 end
