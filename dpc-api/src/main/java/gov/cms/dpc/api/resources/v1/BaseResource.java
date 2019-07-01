@@ -56,4 +56,9 @@ public class BaseResource extends AbstractBaseResource {
     public AbstractRosterResource rosterOperations() {
         return this.rr;
     }
+
+    @Override
+    public AbstractOrganizationResource organizationOperations() {
+        return null;
+    }
 }

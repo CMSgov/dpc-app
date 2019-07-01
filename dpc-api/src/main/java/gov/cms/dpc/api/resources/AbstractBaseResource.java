@@ -44,4 +44,7 @@ public abstract class AbstractBaseResource {
 
     @Path("/Bundle")
     public abstract AbstractRosterResource rosterOperations();
+
+    @Path("/Organization")
+    public abstract AbstractOrganizationResource organizationOperations();
 }

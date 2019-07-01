@@ -51,6 +51,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(JobResource.class);
         binder.bind(DataResource.class);
         binder.bind(RosterResource.class);
+        binder.bind(OrganizationResource.class);
 
         // Healthchecks
         binder.bind(AttributionHealthCheck.class);
