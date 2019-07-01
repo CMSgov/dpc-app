@@ -71,6 +71,13 @@ class ResourceWriter {
     }
 
     /**
+     * @return The resourceType of this resource
+     */
+    ResourceType getResourceType() {
+        return resourceType;
+    }
+
+    /**
      * Write a batch of resources to a file. Encrypt if the encryption is enabled.
      *
      * @param batch is the list of resources to write

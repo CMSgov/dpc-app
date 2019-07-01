@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.utils;
 
 import com.codahale.metrics.*;
+import io.dropwizard.metrics.MetricsFactory;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -8,7 +9,7 @@ import java.util.function.Supplier;
 /**
  * Utility class used to register a metric only once
  */
-public class MetricFactory {
+public class MetricMaker {
     private Class<?> klass;
     private MetricRegistry metricRegistry;
 
@@ -18,7 +19,7 @@ public class MetricFactory {
      * @param metricRegistry is expected to be a singleton
      * @param klass to use in names of metrics
      */
-    public MetricFactory(MetricRegistry metricRegistry, Class<?> klass) {
+    public MetricMaker(MetricRegistry metricRegistry, Class<?> klass) {
         this.metricRegistry = metricRegistry;
         this.klass = klass;
     }
@@ -29,10 +30,8 @@ public class MetricFactory {
      * @param name for the timer
      * @return the timer under the passed in name
      */
-    public synchronized Timer registerTimer(String name) {
-        final var metricName = MetricRegistry.name(klass, name);
-        final var timers = metricRegistry.getTimers(MetricFilter.startsWith(metricName));
-        return timers.containsKey(metricName) ? timers.get(metricName) : metricRegistry.timer(metricName);
+    public Timer registerTimer(String name) {
+        return registerMetric(name, Timer::new);
     }
 
     /**
@@ -41,10 +40,8 @@ public class MetricFactory {
      * @param name is unique
      * @return the meter created under the passed in name
      */
-    public synchronized Meter registerMeter(String name) {
-        final var metricName = MetricRegistry.name(klass, name);
-        final var meters = metricRegistry.getMeters(MetricFilter.startsWith(metricName));
-        return meters.containsKey(metricName) ? meters.get(metricName) : metricRegistry.meter(metricName);
+    public Meter registerMeter(String name) {
+        return registerMetric(name, Meter::new);
     }
 
     /**
@@ -62,6 +59,24 @@ public class MetricFactory {
         }
         final var gauge = new CachedGaugeFromSupplier<>(1, TimeUnit.SECONDS, loadSupplier);
         metricRegistry.register(metricName, gauge);
+    }
+
+    /**
+     * Register a metric or retreive a previously registered metric
+     *
+     * @param name of the metric
+     * @param supplier of the new metric if needed
+     * @param <T> The type of metric
+     * @return the register metric
+     */
+    public synchronized <T extends Metric> T registerMetric(String name, MetricRegistry.MetricSupplier<T> supplier) {
+        final var metricName = MetricRegistry.name(klass, name);
+        final var metrics = metricRegistry.getMetrics();
+        if (metrics.containsKey(metricName)) {
+            return (T)metrics.get(metricName);
+        } else {
+            return metricRegistry.register(metricName, supplier.newMetric());
+        }
     }
 
     /**

@@ -1,10 +1,8 @@
 package gov.cms.dpc.queue;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.Singleton;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;

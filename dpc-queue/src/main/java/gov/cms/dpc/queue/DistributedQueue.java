@@ -3,7 +3,7 @@ package gov.cms.dpc.queue;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
-import gov.cms.dpc.common.utils.MetricFactory;
+import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
@@ -62,7 +62,7 @@ public class DistributedQueue implements JobQueue {
         this.healthQuery = healthQuery;
 
         // Metrics
-        final var metricBuilder = new MetricFactory(metricRegistry, DistributedQueue.class);
+        final var metricBuilder = new MetricMaker(metricRegistry, DistributedQueue.class);
         this.waitTimer = metricBuilder.registerTimer("waitTime");
         this.successTimer = metricBuilder.registerTimer("successTime");
         this.failureTimer = metricBuilder.registerTimer("failureTime");
