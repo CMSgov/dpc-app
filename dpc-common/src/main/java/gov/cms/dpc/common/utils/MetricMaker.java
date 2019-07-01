@@ -1,7 +1,6 @@
 package gov.cms.dpc.common.utils;
 
 import com.codahale.metrics.*;
-import io.dropwizard.metrics.MetricsFactory;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -69,7 +68,8 @@ public class MetricMaker {
      * @param <T> The type of metric
      * @return the register metric
      */
-    public synchronized <T extends Metric> T registerMetric(String name, MetricRegistry.MetricSupplier<T> supplier) {
+    @SuppressWarnings({"unchecked"})
+    private synchronized <T extends Metric> T registerMetric(String name, MetricRegistry.MetricSupplier<T> supplier) {
         final var metricName = MetricRegistry.name(klass, name);
         final var metrics = metricRegistry.getMetrics();
         if (metrics.containsKey(metricName)) {
