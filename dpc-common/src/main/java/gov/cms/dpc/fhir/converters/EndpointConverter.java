@@ -32,7 +32,9 @@ public class EndpointConverter {
         entity.setConnectionType(connectionType);
 
         final OrganizationEntity org = new OrganizationEntity();
-        org.setId(FHIRExtractors.getEntityUUID(resource.getManagingOrganization().getReference()));
+        if (resource.hasManagingOrganization()) {
+            org.setId(FHIRExtractors.getEntityUUID(resource.getManagingOrganization().getReference()));
+        }
         entity.setOrganization(org);
 
         return entity;

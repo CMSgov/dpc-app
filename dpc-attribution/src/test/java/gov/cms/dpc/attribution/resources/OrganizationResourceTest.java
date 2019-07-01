@@ -124,7 +124,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .encodedJson();
 
         final InvalidRequestException exception = assertThrows(InvalidRequestException.class, query::execute, "Should fail on empty token");
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, exception.getStatusCode(), "Should be bad request");
+        assertEquals(HttpStatus.BAD_REQUEST_400, exception.getStatusCode(), "Should be bad request");
     }
 
     private IGenericClient buildClient() {

@@ -22,7 +22,6 @@ public class EndpointEntity implements Serializable {
     public static final long serialVersionUID = 42L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
