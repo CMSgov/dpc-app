@@ -35,10 +35,6 @@ class CapabilitiesTest {
         final CapabilityStatement capabilities = Capabilities.buildCapabilities("http://localhost:3002", "/v1");
         final ValidationResult validationResult = validator.validateWithResult(capabilities);
         assertTrue(validationResult.isSuccessful(), validationResultsToString(validationResult));
-
-        // Verify properties
-        assertAll(() -> assertEquals(1, capabilities.getRest().size(), "Should have a single server operation"),
-                () -> assertEquals(6, capabilities.getRest().get(0).getOperation().size(), "Should have six routes"));
     }
 
     private static String validationResultsToString(ValidationResult result) {

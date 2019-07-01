@@ -23,16 +23,18 @@ public class Capabilities {
 
         CapabilityStatement capabilityStatement = new CapabilityStatement();
         capabilityStatement
-                .setStatus(Enumerations.PublicationStatus.ACTIVE)
+                .setStatus(Enumerations.PublicationStatus.DRAFT)
                 .setDateElement(releaseDate)
                 .setPublisher("Centers for Medicare and Medicaid Services")
+                .setVersion(pp.getBuildVersion())
                 // This should track the FHIR version used by BlueButton
                 .setFhirVersion("3.0.1")
                 .setSoftware(generateSoftwareComponent(releaseDate, pp.getBuildVersion()))
                 .setKind(CapabilityStatementKind.CAPABILITY)
                 .setRest(generateRestComponents(baseUri + version))
                 .setAcceptUnknown(UnknownContentCode.NO)
-                .setFormat(Arrays.asList(new CodeType("application/json"), new CodeType("application/fhir+json")));
+                .setFormat(Arrays.asList(new CodeType("application/json"), new CodeType("application/fhir+json")))
+                .setAcceptUnknown(UnknownContentCode.EXTENSIONS);
 
         // Set the narrative
         capabilityStatement.getText().setDivAsString("<div>This is a narrative</div>");
@@ -57,30 +59,40 @@ public class Capabilities {
         final SystemInteractionComponent batchInteraction = new SystemInteractionComponent(new Enumeration<>(new SystemRestfulInteractionEnumFactory(), SystemRestfulInteraction.BATCH));
         serverComponent.setInteraction(Collections.singletonList(batchInteraction));
 
-        // Add the version and metadata endpoints
-        final CapabilityStatementRestOperationComponent metadataResource = new CapabilityStatementRestOperationComponent(new StringType("Metadata"), new Reference(String.format("%s/metadata", baseURI)));
-        final CapabilityStatementRestOperationComponent versionResource = new CapabilityStatementRestOperationComponent(new StringType("Version"), new Reference(String.format("%s/_version", baseURI)));
-
-        //  Group resources
-        final CapabilityStatementRestOperationComponent providerExport = new CapabilityStatementRestOperationComponent(new StringType("Provider export"), new Reference(String.format("%s/Group/providerID/$export", baseURI)));
-
-        // Job resources
-        final CapabilityStatementRestOperationComponent jobResource = new CapabilityStatementRestOperationComponent(new StringType("Job Status"), new Reference(String.format("%s/Job/jobID", baseURI)));
-
-        // Roster endpoints
-        final CapabilityStatementRestOperationComponent rosterResource = new CapabilityStatementRestOperationComponent(new StringType("Roster submission and updating"), new Reference(String.format("%s/Bundle", baseURI)));
-
-        // Data endpoints
-        final CapabilityStatementRestOperationComponent dataResource = new CapabilityStatementRestOperationComponent(new StringType("Export file retrieval"), new Reference(String.format("%s/Data/fileID", baseURI)));
-
-        serverComponent.setOperation(Arrays.asList(
-                providerExport,
-                metadataResource,
-                versionResource,
-                jobResource,
-                rosterResource,
-                dataResource));
+        serverComponent.setResource(List.of(
+//                generateGroupEndpoints(),
+                generatePractitionerEndpoints()
+        ));
 
         return Collections.singletonList(serverComponent);
+    }
+
+    private static CapabilityStatementRestResourceComponent generateGroupEndpoints() {
+        final CapabilityStatementRestResourceComponent group = new CapabilityStatementRestResourceComponent();
+        group.setType("Group");
+
+        // STU3 does not support resource level operations, so we'll just add a document comment for now.
+        group.setDocumentation("Defines the $export operator, which complies with the draft Bulk Data Specification");
+
+        return group;
+    }
+
+    private static CapabilityStatementRestResourceComponent generatePractitionerEndpoints() {
+        final CapabilityStatementRestResourceComponent practitioner = new CapabilityStatementRestResourceComponent();
+        practitioner.setType("Practitioner");
+        practitioner.setVersioning(ResourceVersionPolicy.NOVERSION);
+
+        practitioner.setInteraction(List.of(
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
+        ));
+
+        practitioner.setSearchParam(List.of(
+                new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
+        ));
+
+        return practitioner;
     }
 }
