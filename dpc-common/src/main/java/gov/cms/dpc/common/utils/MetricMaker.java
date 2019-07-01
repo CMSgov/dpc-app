@@ -50,14 +50,8 @@ public class MetricMaker {
      * @param loadSupplier the supplier of the value of the gauge
      * @param <T> is the unit of the guage
      */
-    public synchronized <T> void registerCachedGuage(String name, Supplier<T> loadSupplier) {
-        final var metricName = MetricRegistry.name(klass, name);
-        final var gauges = metricRegistry.getGauges(MetricFilter.startsWith(metricName));
-        if (gauges.containsKey(metricName)) {
-            return;
-        }
-        final var gauge = new CachedGaugeFromSupplier<>(1, TimeUnit.SECONDS, loadSupplier);
-        metricRegistry.register(metricName, gauge);
+    public <T> void registerCachedGuage(String name, Supplier<T> loadSupplier) {
+        registerMetric(name, () -> new CachedGaugeFromSupplier<>(1, TimeUnit.SECONDS, loadSupplier));
     }
 
     /**
