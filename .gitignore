@@ -13,3 +13,4 @@ dependency-reduced-*.xml
 bbcerts/*
 !bbcerts/README.md
 !bbcerts/bb.keystore.enc
+.java-version

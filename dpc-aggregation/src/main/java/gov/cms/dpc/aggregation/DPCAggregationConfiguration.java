@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation;
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.typesafe.config.ConfigRenderOptions;
+import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
@@ -12,6 +13,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.redisson.config.Config;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
@@ -27,11 +30,25 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @JsonProperty("bbclient")
     private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
+    // The path to the folder that will contain the output files
     @NotEmpty
     private String exportPath;
 
-    @NotNull
-    private Integer retryCount;
+    // The number of retries per request to Blue Button
+    @Min(1)
+    @Max(5)
+    private int retryCount = 3;
+
+    // The max number of resources that we will place into a single file
+    @Min(10)
+    @Max(100000) // Keep files under a GB
+    private int resourcesPerFileCount = 10000;
+
+    // Enable parallel BlueButton requests
+    private boolean parallelRequestsEnabled = false;
+
+    // Enable file encryption per BCDA
+    private boolean encryptionEnabled = false;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -46,12 +63,24 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         this.exportPath = exportPath;
     }
 
-    public Integer getRetryCount() {
+    public int getRetryCount() {
         return retryCount;
     }
 
     public void setRetryCount(Integer retryCount) {
         this.retryCount = retryCount;
+    }
+
+    public boolean isEncryptionEnabled() {
+        return encryptionEnabled;
+    }
+
+    public int getResourcesPerFileCount() {
+        return resourcesPerFileCount;
+    }
+
+    public boolean isParallelRequestsEnabled() {
+        return parallelRequestsEnabled;
     }
 
     @Override
@@ -67,5 +96,9 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
         return this.clientConfiguration;
+    }
+
+    public OperationsConfig getOperationsConfig() {
+        return new OperationsConfig(retryCount, resourcesPerFileCount, parallelRequestsEnabled, exportPath, encryptionEnabled);
     }
 }

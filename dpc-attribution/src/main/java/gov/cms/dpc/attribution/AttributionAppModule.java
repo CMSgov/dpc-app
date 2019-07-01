@@ -8,19 +8,27 @@ import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterEngine;
-import gov.cms.dpc.attribution.resources.v1.*;
+import gov.cms.dpc.attribution.macaroons.BakeryProvider;
+import gov.cms.dpc.attribution.resources.v1.EndpointResource;
+import gov.cms.dpc.attribution.resources.v1.GroupResource;
+import gov.cms.dpc.attribution.resources.v1.OrganizationResource;
+import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
+import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 
 import java.time.Duration;
+import java.util.List;
 
-@SuppressWarnings("rawtypes") // Until we merge DPC-104
+@SuppressWarnings("rawtypes")
+        // Until we merge DPC-104
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
     AttributionAppModule() {
@@ -28,6 +36,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
     @Override
     public void configure(Binder binder) {
+        binder.requestStaticInjection(DPCHibernateBundle.class);
         binder.bind(ProviderDAO.class);
         binder.bind(AttributionEngine.class).to(RosterEngine.class);
         binder.bind(V1AttributionResource.class);
@@ -35,6 +44,8 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(TruncateDatabase.class);
         binder.bind(EndpointResource.class);
         binder.bind(PractitionerResource.class);
+
+        binder.bind(MacaroonBakery.class).toProvider(BakeryProvider.class);
 
         // Healthchecks
         binder.bind(RosterEngineHealthCheck.class);
@@ -56,9 +67,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao) {
+    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao, MacaroonBakery bakery) {
         return new UnitOfWorkAwareProxyFactory(hibernate)
-                .create(OrganizationResource.class, OrganizationDAO.class, dao);
+                .create(OrganizationResource.class, new Class<?>[]{OrganizationDAO.class, MacaroonBakery.class}, new Object[]{dao, bakery});
     }
 
     @Provides
@@ -75,5 +86,18 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     Settings provideSettings() {
         return new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
+    }
+
+    @Provides
+    // We can suppress this because the SessionFactory is managed
+    @SuppressWarnings("CloseableProvides")
+    SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
+        return factory.getSessionFactory();
+    }
+
+    @Provides
+    @AdditionalPaths
+    List<String> provideAdditionalPaths() {
+        return List.of("gov.cms.dpc.macaroons.store.hibernate.entities");
     }
 }

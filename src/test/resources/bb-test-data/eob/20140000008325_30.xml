@@ -1,0 +1,762 @@
+<Bundle xmlns="http://hl7.org/fhir">
+   <id value="f51b4138-6378-4636-addf-0715ab852348"/>
+   <meta>
+      <lastUpdated value="2019-03-29T14:07:59.605-04:00"/>
+   </meta>
+   <type value="searchset"/>
+   <total value="32"/>
+   <link>
+      <relation value="self"/>
+      <url value="http://localhost:8083/v1/fhir/ExplanationOfBenefit?patient=20140000008325&amp;count=10&amp;startIndex=30"/>
+   </link>
+   <entry>
+      <resource>
+         <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
+            <id value="pde-7060841642"/>
+            <identifier>
+               <system value="https://bluebutton.cms.gov/resources/variables/pde_id"/>
+               <value value="7060841642"/>
+            </identifier>
+            <identifier>
+               <system value="https://bluebutton.cms.gov/resources/identifier/claim-group"/>
+               <value value="1462832858"/>
+            </identifier>
+            <identifier>
+               <system value="https://bluebutton.cms.gov/resources/variables/rx_srvc_rfrnc_num"/>
+               <value value="98782369121"/>
+            </identifier>
+            <status value="active"/>
+            <type>
+               <coding>
+                  <system value="https://bluebutton.cms.gov/resources/codesystem/eob-type"/>
+                  <code value="PDE"/>
+               </coding>
+               <coding>
+                  <system value="http://hl7.org/fhir/ex-claimtype"/>
+                  <code value="pharmacy"/>
+                  <display value="Pharmacy"/>
+               </coding>
+            </type>
+            <patient>
+               <reference value="Patient/20140000008325"/>
+            </patient>
+            <organization>
+               <identifier>
+                  <system value="http://hl7.org/fhir/sid/us-npi"/>
+                  <value value="999999999999999"/>
+               </identifier>
+            </organization>
+            <facility>
+               <extension url="https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd">
+                  <valueCoding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd"/>
+                     <code value="06"/>
+                     <display value="Mail order pharmacy"/>
+                  </valueCoding>
+               </extension>
+               <identifier>
+                  <system value="http://hl7.org/fhir/sid/us-npi"/>
+                  <value value="999999999999999"/>
+               </identifier>
+            </facility>
+            <information>
+               <sequence value="1"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/daw_prod_slctn_cd"/>
+                     <display value="Dispense as Written (DAW) Product Selection Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/daw_prod_slctn_cd"/>
+                     <code value="0"/>
+                     <display value="No Product Selection Indicated (may also have missing values)"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="2"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/dspnsng_stus_cd"/>
+                     <display value="Dispensing Status Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/dspnsng_stus_cd"/>
+                     <code value="P"/>
+                     <display value="Partial fill"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="3"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd"/>
+                     <display value="Drug Coverage Status Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd"/>
+                     <code value="C"/>
+                     <display value="Covered"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="4"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/rx_orgn_cd"/>
+                     <display value="Prescription Origination Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/rx_orgn_cd"/>
+                     <code value="3"/>
+                     <display value="Electronic"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="5"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd"/>
+                     <display value="Brand-Generic Code Reported by Submitting Plan"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd"/>
+                     <code value="G"/>
+                     <display value="Generic Null/missing"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="6"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd"/>
+                     <display value="Pharmacy service type code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd"/>
+                     <code value="06"/>
+                     <display value="Mail order pharmacy"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="7"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/ptnt_rsdnc_cd"/>
+                     <display value="Patient Residence Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/ptnt_rsdnc_cd"/>
+                     <code value="08"/>
+                     <display value="Psychiatric Facility – Partial Hospitalization"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="8"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/submsn_clr_cd"/>
+                     <display value="Submission clarification code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/submsn_clr_cd"/>
+                     <code value="16"/>
+                     <display value="LTC emergency box (e box) /automated dispensing machine"/>
+                  </coding>
+               </code>
+            </information>
+            <careTeam>
+               <sequence value="2"/>
+               <provider>
+                  <identifier>
+                     <system value="http://hl7.org/fhir/sid/us-npi"/>
+                     <value value="999999999999999"/>
+                  </identifier>
+               </provider>
+               <role>
+                  <coding>
+                     <system value="http://hl7.org/fhir/claimcareteamrole"/>
+                     <code value="primary"/>
+                     <display value="Primary provider"/>
+                  </coding>
+               </role>
+            </careTeam>
+            <insurance>
+               <coverage>
+                  <extension url="https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id">
+                     <valueIdentifier>
+                        <system value="https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id"/>
+                        <value value="99999"/>
+                     </valueIdentifier>
+                  </extension>
+                  <extension url="https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num">
+                     <valueIdentifier>
+                        <system value="https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num"/>
+                        <value value="999"/>
+                     </valueIdentifier>
+                  </extension>
+                  <reference value="Coverage/part-d-20140000008325"/>
+               </coverage>
+            </insurance>
+            <item>
+               <sequence value="1"/>
+               <careTeamLinkId value="2"/>
+               <service>
+                  <coding>
+                     <system value="http://hl7.org/fhir/sid/ndc"/>
+                     <code value="50111043301"/>
+                     <display value="Trazodone Hydrochloride - TRAZODONE HYDROCHLORIDE"/>
+                  </coding>
+               </service>
+               <servicedDate value="2016-06-01"/>
+               <quantity>
+                  <extension url="https://bluebutton.cms.gov/resources/variables/fill_num">
+                     <valueQuantity>
+                        <value value="42"/>
+                     </valueQuantity>
+                  </extension>
+                  <extension url="https://bluebutton.cms.gov/resources/variables/days_suply_num">
+                     <valueQuantity>
+                        <value value="90"/>
+                     </valueQuantity>
+                  </extension>
+                  <value value="90.000"/>
+               </quantity>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/cvrd_d_plan_pd_amt"/>
+                        <display value="Amount paid by Part D plan for the PDE (drug is covered by Part D)"/>
+                     </coding>
+                  </category>
+                  <reason>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd"/>
+                        <code value="C"/>
+                        <display value="Covered"/>
+                     </coding>
+                  </reason>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/gdc_blw_oopt_amt"/>
+                        <display value="Gross Drug Cost Below Part D Out-of-Pocket Threshold (GDCB)"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="30.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/gdc_abv_oopt_amt"/>
+                        <display value="Gross Drug Cost Above Part D Out-of-Pocket Threshold (GDCA)"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/ptnt_pay_amt"/>
+                        <display value="Amount Paid by Patient"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="30.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/othr_troop_amt"/>
+                        <display value="Other True Out-of-Pocket (TrOOP) Amount"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/lics_amt"/>
+                        <display value="Amount paid for the PDE by Part D low income subsidy"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/plro_amt"/>
+                        <display value="Reduction in patient liability due to payments by other payers (PLRO)"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/tot_rx_cst_amt"/>
+                        <display value="Total drug cost (Part D)"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="30.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/rptd_gap_dscnt_num"/>
+                        <display value="Gap Discount Amount"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <detail>
+                  <type>
+                     <coding>
+                        <system value="http://hl7.org/fhir/v3/ActCode"/>
+                        <code value="RXCINV"/>
+                        <display value="Rx compound invoice"/>
+                     </coding>
+                  </type>
+               </detail>
+            </item>
+         </ExplanationOfBenefit>
+      </resource>
+   </entry>
+   <entry>
+      <resource>
+         <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
+            <id value="pde-930361669"/>
+            <identifier>
+               <system value="https://bluebutton.cms.gov/resources/variables/pde_id"/>
+               <value value="930361669"/>
+            </identifier>
+            <identifier>
+               <system value="https://bluebutton.cms.gov/resources/identifier/claim-group"/>
+               <value value="5885220322"/>
+            </identifier>
+            <identifier>
+               <system value="https://bluebutton.cms.gov/resources/variables/rx_srvc_rfrnc_num"/>
+               <value value="59003077475"/>
+            </identifier>
+            <status value="active"/>
+            <type>
+               <coding>
+                  <system value="https://bluebutton.cms.gov/resources/codesystem/eob-type"/>
+                  <code value="PDE"/>
+               </coding>
+               <coding>
+                  <system value="http://hl7.org/fhir/ex-claimtype"/>
+                  <code value="pharmacy"/>
+                  <display value="Pharmacy"/>
+               </coding>
+            </type>
+            <patient>
+               <reference value="Patient/20140000008325"/>
+            </patient>
+            <organization>
+               <identifier>
+                  <system value="http://hl7.org/fhir/sid/us-npi"/>
+                  <value value="999999999999999"/>
+               </identifier>
+            </organization>
+            <facility>
+               <extension url="https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd">
+                  <valueCoding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd"/>
+                     <code value="08"/>
+                     <display value="Specialty care pharmacy"/>
+                  </valueCoding>
+               </extension>
+               <identifier>
+                  <system value="http://hl7.org/fhir/sid/us-npi"/>
+                  <value value="999999999999999"/>
+               </identifier>
+            </facility>
+            <information>
+               <sequence value="1"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/daw_prod_slctn_cd"/>
+                     <display value="Dispense as Written (DAW) Product Selection Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/daw_prod_slctn_cd"/>
+                     <code value="0"/>
+                     <display value="No Product Selection Indicated (may also have missing values)"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="2"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd"/>
+                     <display value="Drug Coverage Status Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd"/>
+                     <code value="C"/>
+                     <display value="Covered"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="3"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/rx_orgn_cd"/>
+                     <display value="Prescription Origination Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/rx_orgn_cd"/>
+                     <code value="3"/>
+                     <display value="Electronic"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="4"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd"/>
+                     <display value="Brand-Generic Code Reported by Submitting Plan"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/brnd_gnrc_cd"/>
+                     <code value="G"/>
+                     <display value="Generic Null/missing"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="5"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd"/>
+                     <display value="Pharmacy service type code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd"/>
+                     <code value="08"/>
+                     <display value="Specialty care pharmacy"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="6"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/ptnt_rsdnc_cd"/>
+                     <display value="Patient Residence Code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/ptnt_rsdnc_cd"/>
+                     <code value="93"/>
+                  </coding>
+               </code>
+            </information>
+            <information>
+               <sequence value="7"/>
+               <category>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/codesystem/information"/>
+                     <code value="https://bluebutton.cms.gov/resources/variables/submsn_clr_cd"/>
+                     <display value="Submission clarification code"/>
+                  </coding>
+               </category>
+               <code>
+                  <coding>
+                     <system value="https://bluebutton.cms.gov/resources/variables/submsn_clr_cd"/>
+                     <code value="18"/>
+                     <display value="LTC patient admit/readmission indicator. This status required new dispensing of medication."/>
+                  </coding>
+               </code>
+            </information>
+            <careTeam>
+               <sequence value="2"/>
+               <provider>
+                  <identifier>
+                     <system value="http://hl7.org/fhir/sid/us-npi"/>
+                     <value value="999999999999999"/>
+                  </identifier>
+               </provider>
+               <role>
+                  <coding>
+                     <system value="http://hl7.org/fhir/claimcareteamrole"/>
+                     <code value="primary"/>
+                     <display value="Primary provider"/>
+                  </coding>
+               </role>
+            </careTeam>
+            <insurance>
+               <coverage>
+                  <extension url="https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id">
+                     <valueIdentifier>
+                        <system value="https://bluebutton.cms.gov/resources/variables/plan_cntrct_rec_id"/>
+                        <value value="99999"/>
+                     </valueIdentifier>
+                  </extension>
+                  <extension url="https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num">
+                     <valueIdentifier>
+                        <system value="https://bluebutton.cms.gov/resources/variables/plan_pbp_rec_num"/>
+                        <value value="999"/>
+                     </valueIdentifier>
+                  </extension>
+                  <reference value="Coverage/part-d-20140000008325"/>
+               </coverage>
+            </insurance>
+            <item>
+               <sequence value="1"/>
+               <careTeamLinkId value="2"/>
+               <service>
+                  <coding>
+                     <system value="http://hl7.org/fhir/sid/ndc"/>
+                     <code value="00603373932"/>
+                  </coding>
+               </service>
+               <servicedDate value="2016-02-01"/>
+               <quantity>
+                  <extension url="https://bluebutton.cms.gov/resources/variables/fill_num">
+                     <valueQuantity>
+                        <value value="69"/>
+                     </valueQuantity>
+                  </extension>
+                  <extension url="https://bluebutton.cms.gov/resources/variables/days_suply_num">
+                     <valueQuantity>
+                        <value value="90"/>
+                     </valueQuantity>
+                  </extension>
+                  <value value="90.000"/>
+               </quantity>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/cvrd_d_plan_pd_amt"/>
+                        <display value="Amount paid by Part D plan for the PDE (drug is covered by Part D)"/>
+                     </coding>
+                  </category>
+                  <reason>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd"/>
+                        <code value="C"/>
+                        <display value="Covered"/>
+                     </coding>
+                  </reason>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/gdc_blw_oopt_amt"/>
+                        <display value="Gross Drug Cost Below Part D Out-of-Pocket Threshold (GDCB)"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="10.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/gdc_abv_oopt_amt"/>
+                        <display value="Gross Drug Cost Above Part D Out-of-Pocket Threshold (GDCA)"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/ptnt_pay_amt"/>
+                        <display value="Amount Paid by Patient"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="10.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/othr_troop_amt"/>
+                        <display value="Other True Out-of-Pocket (TrOOP) Amount"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/lics_amt"/>
+                        <display value="Amount paid for the PDE by Part D low income subsidy"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/plro_amt"/>
+                        <display value="Reduction in patient liability due to payments by other payers (PLRO)"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/tot_rx_cst_amt"/>
+                        <display value="Total drug cost (Part D)"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="10.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+               <adjudication>
+                  <category>
+                     <coding>
+                        <system value="https://bluebutton.cms.gov/resources/codesystem/adjudication"/>
+                        <code value="https://bluebutton.cms.gov/resources/variables/rptd_gap_dscnt_num"/>
+                        <display value="Gap Discount Amount"/>
+                     </coding>
+                  </category>
+                  <amount>
+                     <value value="0.00"/>
+                     <system value="urn:iso:std:iso:4217"/>
+                     <code value="USD"/>
+                  </amount>
+               </adjudication>
+            </item>
+         </ExplanationOfBenefit>
+      </resource>
+   </entry>
+</Bundle>

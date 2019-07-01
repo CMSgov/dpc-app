@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 public class BBClientConfiguration {
@@ -20,6 +22,10 @@ public class BBClientConfiguration {
     @JsonProperty("timeouts")
     private TimeoutConfiguration timeouts = new TimeoutConfiguration();
 
+    @Min(10)
+    @Max(1000)
+    private int resourcesCount = 100;
+
     @Valid
     @NotNull
     @JsonProperty("keyStore")
@@ -28,6 +34,8 @@ public class BBClientConfiguration {
     public TimeoutConfiguration getTimeouts() {
         return timeouts;
     }
+
+    public int getResourcesCount() { return resourcesCount; }
 
     public KeystoreConfiguration getKeystore() {
         return keystore;

@@ -1,14 +1,19 @@
 package gov.cms.dpc.bluebutton.client;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class BlueButtonClientImpl implements BlueButtonClient {
 
@@ -16,12 +21,15 @@ public class BlueButtonClientImpl implements BlueButtonClient {
 
     private IGenericClient client;
 
+    private BBClientConfiguration config;
+
     public static String formBeneficiaryID(String fromPatientID) {
         return "Patient/" + fromPatientID;
     }
 
-    public BlueButtonClientImpl(IGenericClient client){
+    public BlueButtonClientImpl(IGenericClient client, BBClientConfiguration config) {
         this.client = client;
+        this.config = config;
     }
 
     /**
@@ -34,7 +42,11 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientID, client.getServerBase());
-        return client.read().resource(Patient.class).withId(patientID).execute();
+        return client
+                .read()
+                .resource(Patient.class)
+                .withId(patientID)
+                .execute();
     }
 
     /**
@@ -55,20 +67,10 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      * @throws ResourceNotFoundException when the requested patient does not exist
      */
     @Override
-    public Bundle requestEOBBundleFromServer(String patientID) throws ResourceNotFoundException {
+    public Bundle requestEOBFromServer(String patientID) {
         // TODO: need to implement some kind of pagination? EOB bundles can be HUGE. DPC-234
         logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", patientID, client.getServerBase());
-        Bundle ret = client.search()
-                .forResource(ExplanationOfBenefit.class)
-                .where(ExplanationOfBenefit.PATIENT.hasId(patientID))
-                .returnBundle(Bundle.class)
-                .execute();
-
-        if(ret.hasEntry()) {
-            return ret;
-        } else { // Case where patientID does not exist at all
-            throw new ResourceNotFoundException("No patient found with ID: " + patientID);
-        }
+        return fetchBundle(ExplanationOfBenefit.class, ExplanationOfBenefit.PATIENT.hasId(patientID), patientID);
     }
 
     /**
@@ -91,17 +93,17 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", patientID, client.getServerBase());
-        Bundle ret = client.search()
-                .forResource(Coverage.class)
-                .where(Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientID)))
-                .returnBundle(Bundle.class)
-                .execute();
+        return fetchBundle(Coverage.class, Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientID)), patientID);
+    }
 
-        if(!ret.hasEntry()) {
-            // Case where patientID does not exist at all
-            throw new ResourceNotFoundException("No patient found with ID: " + patientID);
-        }
-        return ret;
+    @Override
+    public Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException {
+        var nextURL = bundle.getLink(Bundle.LINK_NEXT).getUrl();
+        logger.debug("Attempting to fetch next bundle from url: {}", nextURL);
+        return client
+                .loadPage()
+                .next(bundle)
+                .execute();
     }
 
     @Override
@@ -110,5 +112,30 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                 .capabilities()
                 .ofType(CapabilityStatement.class)
                 .execute();
+    }
+
+    /**
+     * Read a FHIR Bundle from BlueButton. Limits the returned size by resourcesPerRequest.
+     *
+     * @param resourceClass - FHIR Resource class
+     * @param criterion - For the resource class the correct criterion that matches the patientID
+     * @param patientID - id of patient
+     * @return FHIR Bundle resource
+     */
+    private <T extends IBaseResource> Bundle fetchBundle(Class<T> resourceClass,
+                                                         ICriterion<ReferenceClientParam> criterion,
+                                                         String patientID) {
+        final Bundle bundle = client.search()
+                .forResource(resourceClass)
+                .where(criterion)
+                .count(config.getResourcesCount())
+                .returnBundle(Bundle.class)
+                .execute();
+
+        // Case where patientID does not exist at all
+        if(!bundle.hasEntry()) {
+            throw new ResourceNotFoundException("No patient found with ID: " + patientID);
+        }
+        return bundle;
     }
 }

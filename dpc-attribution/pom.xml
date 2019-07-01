@@ -19,6 +19,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-common</artifactId>
+            <version>0.3.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
         </dependency>
@@ -61,11 +66,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-        <dependency>
-            <groupId>gov.cms.dpc</groupId>
-            <artifactId>dpc-common</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
-        </dependency>
         <!--Testing dependencies-->
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -88,6 +88,12 @@
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-client</artifactId>
             <scope>test</scope>
+		</dependency>
+		<dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-macaroons</artifactId>
+            <version>0.3.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

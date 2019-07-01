@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EndToEndRequestTest extends AbstractApplicationTest {
+class EndToEndRequestTest extends AbstractApplicationTest {
 
 
     private static final String CSV = "test_associations.csv";
@@ -38,7 +38,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
      * 5. Verifies that the downloaded file contains the necessary number of patients (100)
      */
     @Test
-    public void simpleRequestWorkflow() throws IOException, InterruptedException {
+    void simpleRequestWorkflow() throws IOException, InterruptedException {
 
         // Submit an export request for a provider which is not known to the system.
         final IGenericClient exportClient = ctx.newRestfulGenericClient(getBaseURL());
@@ -55,8 +55,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
                 () -> assertEquals("fatal", firstIssue.getSeverity().toCode(), "Should be a fatal error"),
                 () -> assertEquals(1, outcome.getIssue().size(), "Should only have a single error"));
 
-//         Now, submit the roster and try again.
-
+        // Now, submit the roster and try again.
         final InputStream resource = EndToEndRequestTest.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
             throw new MissingResourceException("Can not find seeds file", EndToEndRequestTest.class.getName(), CSV);
@@ -79,15 +78,13 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
 
 
         assertAll(() -> assertNotNull(jobResponse, "Should have Job Response"),
-                () -> assertEquals(JobModel.validResourceTypes.size(), jobResponse.getOutput().size(), "Should have all resource files"),
+                () -> assertTrue(JobModel.validResourceTypes.size() <= jobResponse.getOutput().size(), "Should have at least one resource file per resource"),
                 () -> assertEquals(0, jobResponse.getError().size(), "Should not have any errors"));
 
         // Validate each of the resources
         validateResourceFile(Patient.class, jobResponse, ResourceType.Patient, 100);
-        // EOBs are structured as bundles, even though they have the EOB resource type
-        validateResourceFile(Bundle.class, jobResponse, ResourceType.ExplanationOfBenefit, 100);
-        // Coverages are structured as bundles of Coverages
-        validateResourceFile(Bundle.class, jobResponse, ResourceType.Coverage, 100);
+        validateResourceFile(ExplanationOfBenefit.class, jobResponse, ResourceType.ExplanationOfBenefit, 3154);
+        validateResourceFile(Coverage.class, jobResponse, ResourceType.Coverage, 400); // 4 per patient: Medicare parts A-D
         assertThrows(IllegalStateException.class, () -> validateResourceFile(Schedule.class, jobResponse, ResourceType.Schedule, 0), "Should not have a schedule response");
     }
 
@@ -98,7 +95,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
                 .filter(output -> output.getType() == resourceType)
                 .map(JobCompletionModel.OutputEntry::getUrl)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Should have at least 1 patient resource"));
+                .orElseThrow(() -> new IllegalStateException("Should have at least 1 resource"));
 
         final File tempFile = ClientUtils.fetchExportedFiles(fileID);
 
@@ -110,7 +107,7 @@ public class EndToEndRequestTest extends AbstractApplicationTest {
                     .map((line) -> clazz.cast(parser.parseResource(line)))
                     .collect(Collectors.toList());
 
-            assertEquals(expectedSize, entries.size(), String.format("Should have %d entries in the resource", expectedSize));
+            assertEquals(expectedSize, entries.size(), String.format("Should have %d entries in the ndjson file", expectedSize));
         }
     }
 }

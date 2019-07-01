@@ -6,6 +6,7 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
 import gov.cms.dpc.fhir.FHIRModule;
+import gov.cms.dpc.macaroons.BakeryModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -13,7 +14,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
-import org.knowm.sundial.SundialJobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +36,10 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
-                .modules(new DPCHibernateModule<>(),
-                        new AttributionAppModule(),
-                        new FHIRModule())
+                .modules(new AttributionAppModule(),
+                        new DPCHibernateModule<>(),
+                        new FHIRModule(),
+                        new BakeryModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
