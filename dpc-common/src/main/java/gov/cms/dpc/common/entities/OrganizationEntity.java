@@ -45,9 +45,9 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<EndpointEntity> endpoints;
 
-    @Convert(converter = StringListConverter.class)
-    @Column(name = "token_ids", columnDefinition = "text")
-    private List<String> tokenIDs;
+    @Valid
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
+    private List<TokenEntity> tokens;
 
     public OrganizationEntity() {
         // Not used
@@ -101,12 +101,12 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         this.endpoints = endpoints;
     }
 
-    public List<String> getTokenIDs() {
-        return tokenIDs;
+    public List<TokenEntity> getTokens() {
+        return tokens;
     }
 
-    public void setTokenIDs(List<String> tokenIDs) {
-        this.tokenIDs = tokenIDs;
+    public void setTokens(List<TokenEntity> tokens) {
+        this.tokens = tokens;
     }
 
     @Override
