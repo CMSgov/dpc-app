@@ -11,6 +11,7 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -35,6 +36,17 @@ public class OrganizationResource extends AbstractOrganizationResource {
     OrganizationResource(OrganizationDAO dao, MacaroonBakery bakery) {
         this.dao = dao;
         this.bakery = bakery;
+    }
+
+    @Override
+    @GET
+    @UnitOfWork
+    public Bundle searchAndValidateOrganizations(@QueryParam("_tag") String tokenTag) {
+        if (tokenTag == null) {
+            throw new WebApplicationException("Must have token to query", Response.Status.BAD_REQUEST);
+        }
+
+        return null;
     }
 
     @Override

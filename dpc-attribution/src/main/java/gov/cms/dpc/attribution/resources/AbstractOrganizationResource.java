@@ -17,6 +17,10 @@ public abstract class AbstractOrganizationResource {
         // Not used
     }
 
+    @GET
+    @FHIR
+    public abstract Bundle searchAndValidateOrganizations(String tokenTag);
+
     /**
      * Register a {@link Organization} with the API
      * <p>
