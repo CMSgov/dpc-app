@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
@@ -31,6 +32,12 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Singleton
     public FhirContext provideSTU3Context() {
         return FhirContext.forDstu3();
+    }
+
+    @Provides
+    @Singleton
+    MetricRegistry provideMetricRegistry() {
+        return getEnvironment().metrics();
     }
 
     @Provides

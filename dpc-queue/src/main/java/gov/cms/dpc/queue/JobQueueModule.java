@@ -53,10 +53,4 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
         // TODO: Eventually, this should get pulled out into the config file
         return "SELECT 1 from job_queue;";
     }
-
-    @Provides
-    @Singleton
-    MetricRegistry provideMetricRegistry() {
-        return getEnvironment().metrics();
-    }
 }

@@ -1,9 +1,9 @@
 package gov.cms.dpc.queue;
 
-import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.common.utils.MetricFactory;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
@@ -61,19 +61,12 @@ public class DistributedQueue implements JobQueue {
         this.factory = factory.getSessionFactory();
         this.healthQuery = healthQuery;
 
-        // Timers
-        this.waitTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "waitTime"));
-        this.successTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "successTime"));
-        this.failureTimer = metricRegistry.timer(MetricRegistry.name(DistributedQueue.class, "failureTime"));
-
-        // Gauges
-        final var queueLengthGauge = new CachedGauge<Long>(1, TimeUnit.SECONDS) {
-            @Override
-            protected Long loadValue() {
-                return queueSize();
-            }
-        };
-        metricRegistry.register(MetricRegistry.name(DistributedQueue.class, "queueLength"), queueLengthGauge);
+        // Metrics
+        final var metricBuilder = new MetricFactory(metricRegistry, DistributedQueue.class);
+        this.waitTimer = metricBuilder.registerTimer("waitTime");
+        this.successTimer = metricBuilder.registerTimer("successTime");
+        this.failureTimer = metricBuilder.registerTimer("failureTime");
+        metricBuilder.registerCachedGuage("queueLength", this::queueSize);
     }
 
     @Override
