@@ -16,6 +16,7 @@ import org.jooq.impl.DSL;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.PrintWriter;
+import java.sql.Connection;
 
 /**
  * Admin task for truncating tables in the attribution database
@@ -40,7 +41,8 @@ public class TruncateDatabase extends Task {
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(null, "attribution-seeder");
 
-        try (DSLContext context = DSL.using(dataSource.getConnection(), new Settings().withRenderNameStyle(RenderNameStyle.AS_IS))) {
+        try (final Connection connection = dataSource.getConnection();
+             DSLContext context = DSL.using(connection, new Settings().withRenderNameStyle(RenderNameStyle.AS_IS))) {
 
             // Truncate everything
             context.truncate(Patients.PATIENTS).cascade().execute();

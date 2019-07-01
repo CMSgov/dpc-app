@@ -16,15 +16,13 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractJobResource jr;
     private final AbstractDataResource dr;
     private final AbstractRosterResource rr;
-    private final String baseURL;
 
     @Inject
-    public BaseResource(GroupResource gr, JobResource jr, DataResource dr, RosterResource rr, @ServiceBaseURL String baseURL) {
+    public BaseResource(GroupResource gr, JobResource jr, DataResource dr, RosterResource rr) {
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
         this.rr = rr;
-        this.baseURL = baseURL;
     }
 
     @Override
@@ -34,7 +32,7 @@ public class BaseResource extends AbstractBaseResource {
 
     @Override
     public CapabilityStatement metadata() {
-        return Capabilities.buildCapabilities(this.baseURL, "/v1");
+        return Capabilities.buildCapabilities();
     }
 
     @Override

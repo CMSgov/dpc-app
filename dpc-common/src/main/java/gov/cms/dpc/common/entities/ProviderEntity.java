@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
 import org.hibernate.annotations.SQLInsert;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -13,7 +14,8 @@ import java.util.UUID;
 @Entity(name = "providers")
 @NamedQueries(value = {
         @NamedQuery(name = "getProvider", query = "select 1 from providers a where a.providerNPI = :provID"),
-        @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id")
+        @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id"),
+        @NamedQuery(name = "getAllProviders", query = "from providers p")
 })
 @SQLInsert(sql = "INSERT INTO providers(first_name, last_name, provider_id, id) VALUES(?, ?, ?, ?)" +
         " ON CONFLICT (provider_id) DO UPDATE SET last_name = EXCLUDED.last_name," +
@@ -87,6 +89,10 @@ public class ProviderEntity {
         this.attributedPatients = attributedPatients;
     }
 
+    public Practitioner toFHIR() {
+        return ProviderEntityConverter.convert(this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -105,8 +111,16 @@ public class ProviderEntity {
     }
 
     public static ProviderEntity fromFHIR(Practitioner resource) {
+        return fromFHIR(resource, null);
+    }
 
+    public static ProviderEntity fromFHIR(Practitioner resource, UUID resourceID) {
         final ProviderEntity provider = new ProviderEntity();
+
+        if (resourceID != null) {
+            // Strip off the Practitioner/ prefix, this should be more flexible
+            provider.setProviderID(resourceID);
+        }
 
         provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));
         final HumanName name = resource.getNameFirstRep();
