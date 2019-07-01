@@ -1,0 +1,2 @@
+module ApiDocumentsHelper
+end
