@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Data Point of Care</title>
+    <title>
+      <%= content_for?(:title) ? yield(:title) : 'CMS.gov' %> | Data at the Point of Care
+    </title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -49,6 +51,7 @@
     <div class="ds-l-container">
       <div class="ds-l-row">
         <div class="ds-l-col--12">
+          <h1><%= yield(:title) %></h1>
         </div>
       </div>
     </div>
