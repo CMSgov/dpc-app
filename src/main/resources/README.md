@@ -8,7 +8,8 @@
 ## Organizations
 
 - Modified bundle to be a batch bundle, rather than a search
-- Manually created test FHIR endpoints
+- Manually created (and linked) test FHIR endpoints
+- Added missing (and required) address type/use fields
 
 
 ### Citation

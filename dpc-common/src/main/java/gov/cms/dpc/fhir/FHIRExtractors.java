@@ -3,10 +3,17 @@ package gov.cms.dpc.fhir;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
+import java.util.Objects;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Helper class for extracting various features from FHIR resources
  */
 public class FHIRExtractors {
+
+    private static final Pattern idExtractor = Pattern.compile("/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/?");
 
     private FHIRExtractors() {
         // Not used
@@ -36,5 +43,22 @@ public class FHIRExtractors {
     public static String getPatientMPI(Patient patient) {
         // This should probably find the ID with the correct URI, instead of just pulling the first value
         return patient.getIdentifierFirstRep().getValue();
+    }
+
+    /**
+     * Extracts the UUID from the ID of a given resource.
+     *
+     * @param idString - {@link String} ID to parse
+     * @return - {@link UUID} of resource
+     */
+    public static UUID getEntityUUID(String idString) {
+        final Matcher matcher = idExtractor.matcher(idString);
+        if (!matcher.find() && !(matcher.groupCount() == 1)) {
+            throw new IllegalArgumentException(String.format("Cannot extract string from '%s'", idString));
+        }
+
+        final String id = Objects.requireNonNull(matcher.group(1));
+
+        return UUID.fromString(id);
     }
 }

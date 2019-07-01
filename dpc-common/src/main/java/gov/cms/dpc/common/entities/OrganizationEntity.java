@@ -1,9 +1,9 @@
 package gov.cms.dpc.common.entities;
 
 import ca.uhn.fhir.parser.DataFormatException;
-import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRConvertable;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.AddressConverter;
 import gov.cms.dpc.fhir.converters.ContactElementConverter;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -15,10 +15,9 @@ import org.hl7.fhir.dstu3.model.Reference;
 import javax.persistence.*;
 import javax.validation.Valid;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Entity(name = "organizations")
@@ -123,7 +122,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
             orgID = UUID.randomUUID();
         } else {
 //             If we have an ID, we need to strip off the ID header, since we already know the resource type
-            orgID = UUID.fromString(idString.replace("Organization/", ""));
+            orgID = FHIRExtractors.getEntityUUID(idString);
         }
 
         entity.setId(orgID);
