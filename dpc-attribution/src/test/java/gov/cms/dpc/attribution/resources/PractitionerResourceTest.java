@@ -48,7 +48,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         // Delete it and make sure it's gone.
 
-        final IBaseOperationOutcome oo = client
+        client
                 .delete()
                 .resource(pract3)
                 .encodedJson()
