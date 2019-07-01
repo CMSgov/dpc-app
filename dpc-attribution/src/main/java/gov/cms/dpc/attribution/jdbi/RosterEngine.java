@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -47,7 +48,8 @@ public class RosterEngine implements AttributionEngine {
     public Optional<List<String>> getAttributedPatientIDs(Practitioner provider) {
 
         final String providerNPI = FHIRExtractors.getProviderNPI(provider);
-        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
+
+        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
             if (!context.fetchExists(context.selectOne().from(PROVIDERS).where(PROVIDERS.PROVIDER_ID.eq(providerNPI)))) {
                 return Optional.empty();
             }
@@ -67,7 +69,8 @@ public class RosterEngine implements AttributionEngine {
     @Override
     public void addAttributionRelationship(Practitioner provider, Patient patient) {
 
-        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
+        try (final Connection connection = this.dataSource.getConnection();
+             final DSLContext context = DSL.using(connection, this.settings)) {
             context.transaction(config -> {
                 final DSLContext ctx = DSL.using(config);
 
@@ -95,7 +98,8 @@ public class RosterEngine implements AttributionEngine {
 
     @Override
     public void addAttributionRelationships(Bundle attributionBundle) {
-        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
+        try (final Connection connection = this.dataSource.getConnection();
+             final DSLContext context = DSL.using(connection, this.settings)) {
             context.transaction(config -> {
 
                 final DSLContext ctx = DSL.using(config);
@@ -114,7 +118,8 @@ public class RosterEngine implements AttributionEngine {
         // We'll do it all in a single transaction
 
         // Fetch the relationships, then delete all the things
-        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
+        try (final Connection connection = this.dataSource.getConnection();
+             final DSLContext context = DSL.using(connection, this.settings)) {
             context.transaction(config -> {
 
                 final DSLContext ctx = DSL.using(config);
@@ -147,7 +152,8 @@ public class RosterEngine implements AttributionEngine {
 
     @Override
     public boolean isAttributed(Practitioner provider, Patient patient) {
-        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
+        try (final Connection connection = this.dataSource.getConnection();
+             final DSLContext context = DSL.using(connection, this.settings)) {
             return context.fetchExists(context.selectOne()
                     .from(ATTRIBUTIONS)
                     .join(PATIENTS).on(PATIENTS.ID.eq(ATTRIBUTIONS.PATIENT_ID))
@@ -163,7 +169,8 @@ public class RosterEngine implements AttributionEngine {
 
     @Override
     public void assertHealthy() {
-        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
+        try (final Connection connection = this.dataSource.getConnection();
+             final DSLContext context = DSL.using(connection, this.settings)) {
             context.selectOne()
                     .from(ATTRIBUTIONS)
                     .fetchOptional();

@@ -9,10 +9,7 @@ import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterEngine;
 import gov.cms.dpc.attribution.macaroons.BakeryProvider;
-import gov.cms.dpc.attribution.resources.v1.EndpointResource;
-import gov.cms.dpc.attribution.resources.v1.GroupResource;
-import gov.cms.dpc.attribution.resources.v1.OrganizationResource;
-import gov.cms.dpc.attribution.resources.v1.V1AttributionResource;
+import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
@@ -43,6 +40,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(OrganizationDAO.class);
         binder.bind(TruncateDatabase.class);
         binder.bind(EndpointResource.class);
+        binder.bind(PractitionerResource.class);
 
         binder.bind(MacaroonBakery.class).toProvider(BakeryProvider.class);
 

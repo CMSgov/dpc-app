@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -53,7 +54,7 @@ public class ExpireAttributions extends Job {
         // Find all the jobs and remove them
         logger.debug("Removing attribution relationships created before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
-        try (final DSLContext context = DSL.using(this.dataSource.getConnection(), this.settings)) {
+        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
             final int removed = context
                     .delete(Attributions.ATTRIBUTIONS)
                     .where(Attributions.ATTRIBUTIONS.CREATED_AT.le(this.expirationTemporal))
