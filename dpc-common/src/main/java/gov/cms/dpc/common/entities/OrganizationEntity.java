@@ -178,19 +178,19 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         org.setName(this.organizationName);
         org.setAddress(Collections.singletonList(this.organizationAddress.toFHIR()));
 
-        final List<Organization.OrganizationContactComponent> contacts = this.contacts
+        final List<Organization.OrganizationContactComponent> contactComponents = this.contacts
                 .stream()
                 .map(ContactEntity::toFHIR)
                 .collect(Collectors.toList());
-        org.setContact(contacts);
+        org.setContact(contactComponents);
 
-        final List<Reference> endpoints = this
+        final List<Reference> endpointReferences = this
                 .endpoints
                 .stream()
                 .map(ep -> new Reference(new IdType("Endpoint", ep.getId().toString())))
                 .collect(Collectors.toList());
 
-        org.setEndpoint(endpoints);
+        org.setEndpoint(endpointReferences);
 
         return org;
     }
