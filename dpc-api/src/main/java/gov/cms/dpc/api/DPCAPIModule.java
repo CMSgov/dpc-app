@@ -8,7 +8,10 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.annotations.AttributionService;
-import gov.cms.dpc.api.auth.*;
+import gov.cms.dpc.api.auth.MacaroonsAuthFilter;
+import gov.cms.dpc.api.auth.MacaroonsAuthenticator;
+import gov.cms.dpc.api.auth.MacaroonsAuthorizer;
+import gov.cms.dpc.api.auth.MacaroonsDynamicFeature;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.health.AttributionHealthCheck;
 import gov.cms.dpc.api.resources.TestResource;
@@ -19,7 +22,6 @@ import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
-import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.client.JerseyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,6 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.ext.Provider;
 import java.util.List;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
@@ -114,17 +115,4 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
     }
-
-//    @Provides
-//    MacaroonsAuthFilter provideAuthFilter(MacaroonsAuthenticator authenticator, MacaroonsAuthorizer authorizer) {
-//        return new MacaroonsAuthFilter.Builder<OrganizationPrincipal>()
-//                .setAuthenticator(authenticator)
-//                .setAuthorizer(authorizer)
-//                .buildAuthFilter();
-//    }
-
-//    @Provides
-//    AuthDynamicFeature provideDynamicFilter(MacaroonsAuthFilter authFilter) {
-//        return new AuthDynamicFeature(authFilter);
-//    }
 }
