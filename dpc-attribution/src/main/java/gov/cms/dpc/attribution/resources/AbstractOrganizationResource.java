@@ -34,6 +34,11 @@ public abstract class AbstractOrganizationResource {
     @FHIR
     public abstract Response createOrganization(Bundle bundle);
 
+    @GET
+    @FHIR
+    @Path("/{organizationID}")
+    public abstract Organization getOrganization(UUID organizationID);
+
     /**
      * Get authentication token for {@link Organization}.
      * If no token exists, returns an empty {@link List}

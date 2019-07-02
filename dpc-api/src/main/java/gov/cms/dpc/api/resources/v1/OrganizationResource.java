@@ -1,36 +1,36 @@
 package gov.cms.dpc.api.resources.v1;
 
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
-import gov.cms.dpc.fhir.FHIRExtractors;
-import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
-import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 public class OrganizationResource extends AbstractOrganizationResource {
 
+    private final IGenericClient client;
+
     @Inject
-    OrganizationResource() {
-        // Not used
+    OrganizationResource(IGenericClient client) {
+        this.client = client;
     }
 
     @GET
     @Path("/{organizationID}")
-    @RolesAllowed({"*"})
+    @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
     @Override
-    public Organization getOrganization(@Auth OrganizationPrincipal principal, @PathParam("organizationID") UUID organizationID) {
-        final Organization organization = principal.getOrganization();
-        if (!FHIRExtractors.getEntityUUID(organization.getId()).equals(organizationID)) {
-            throw new WebApplicationException("Unauthorized", Response.Status.UNAUTHORIZED);
-        }
-        return organization;
+    public Organization getOrganization(@PathParam("organizationID") UUID organizationID) {
+        return this.client
+                .read()
+                .resource(Organization.class)
+                .withId(organizationID.toString())
+                .encodedJson()
+                .execute();
     }
 }

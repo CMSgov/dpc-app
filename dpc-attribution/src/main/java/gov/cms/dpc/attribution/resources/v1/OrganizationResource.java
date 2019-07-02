@@ -104,6 +104,16 @@ public class OrganizationResource extends AbstractOrganizationResource {
     }
 
     @GET
+    @Path("/{organizationID}")
+    @UnitOfWork
+    @Override
+    public Organization getOrganization(@PathParam("organizationID") UUID organizationID) {
+        final Optional<OrganizationEntity> orgOptional = this.dao.fetchOrganization(organizationID);
+        final OrganizationEntity organizationEntity = orgOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find organization '%s'", organizationID), Response.Status.NOT_FOUND));
+        return organizationEntity.toFHIR();
+    }
+
+    @GET
     @Path("/{organizationID}/token")
     @UnitOfWork
     @Override
