@@ -11,11 +11,9 @@ import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import java.io.IOException;
 
 /**
@@ -37,15 +35,13 @@ public class MacaroonsAuthFilter extends AuthFilter<String, OrganizationPrincipa
     private PathAuthorizer pa;
 
     @Inject
-    MacaroonsAuthFilter(@AttributionService WebTarget client, MacaroonsAuthorizer authorizer, MacaroonsAuthenticator authenticator) {
-        this.authorizer = authorizer;
-        this.authenticator = authenticator;
+    MacaroonsAuthFilter(@AttributionService WebTarget client) {
         this.client = client;
     }
 
     @Override
     public void filter(final ContainerRequestContext requestContext) throws IOException {
-        // Try to get the
+        // Try to get the Macaroon from the request
         String macaroon = getMacaroon(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
 
         if (macaroon == null) {
@@ -66,12 +62,7 @@ public class MacaroonsAuthFilter extends AuthFilter<String, OrganizationPrincipa
                 .buildGet()
                 .invoke();
 
-//        if (!tokenValid) {
-//            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
-//        }
-
-
-        if (!authenticate(requestContext, macaroon, SecurityContext.BASIC_AUTH)) {
+        if (tokenValid.getStatus() != Response.Status.OK.getStatusCode()) {
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
     }
