@@ -153,13 +153,19 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @GET
     @Path("/{organizationID}/token/verify")
-    public boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
-        return validateMacaroon(organizationID, parseToken(token));
+    public Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
+        final boolean valid = validateMacaroon(organizationID, parseToken(token));
+        if (valid) {
+            return Response.ok().build();
+        }
+
+        return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
     private boolean validateMacaroon(UUID organizationID, Macaroon macaroon) {
         try {
-            this.bakery.verifyMacaroon(macaroon, String.format("organization_id = %s", organizationID.toString()));
+            final String caveatString = String.format("organization_id = %s", organizationID.toString());
+            this.bakery.verifyMacaroon(macaroon, caveatString);
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed.", e);
             return false;

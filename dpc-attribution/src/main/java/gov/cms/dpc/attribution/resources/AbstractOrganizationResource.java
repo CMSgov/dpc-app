@@ -66,9 +66,9 @@ public abstract class AbstractOrganizationResource {
      *
      * @param organizationID - {@link UUID} organization ID
      * @param token          - {@link String} representation of authorization token (optionally base64 encoded)
-     * @return - {@link Boolean} {@code true} token is valid. {@code false} token is not valid
+     * @return - {@link Response} with status {@link Response.Status#OK} if token is valid. {@link Response.Status#UNAUTHORIZED} if token is not valid
      */
     @GET
     @Path("/{organizationID}/token/verify")
-    public abstract boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token);
+    public abstract Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token);
 }
