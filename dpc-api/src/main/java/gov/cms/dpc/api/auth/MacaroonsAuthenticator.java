@@ -22,8 +22,6 @@ public class MacaroonsAuthenticator implements Authenticator<String, Organizatio
     @Override
     public Optional<OrganizationPrincipal> authenticate(String credentials) throws AuthenticationException {
         // Try to search for an organization with the provided credential (token)
-
-        // Search for an organization which has the given token registered
         final Bundle organizations = this.client
                 .search()
                 .forResource(Organization.class)
