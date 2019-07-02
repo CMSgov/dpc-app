@@ -35,7 +35,9 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -76,61 +78,78 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         // Read in the seeds file and write things
         logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
 
-        try (DSLContext context = DSL.using(dataSource.getConnection(), this.settings)) {
+        try (final Connection connection = dataSource.getConnection();
+             DSLContext context = DSL.using(connection, this.settings)) {
 
             // Truncate everything
-            context.truncate(Patients.PATIENTS).cascade().execute();
-            context.truncate(Providers.PROVIDERS).cascade().execute();
-            context.truncate(Organizations.ORGANIZATIONS).cascade().execute();
-            context.truncate("root_keys").cascade();
+            truncateTables(context);
 
             final FhirContext ctx = FhirContext.forDstu3();
             final IParser parser = ctx.newJsonParser();
-
             // Start with the Organizations and their endpoints
-            try (final InputStream orgBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(ORGANIZATION_BUNDLE)) {
-                if (orgBundleStream == null) {
-                    throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
-                }
-                final OrganizationEntity orgEntity = new OrganizationEntity();
-                final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
-                final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, EndpointConverter::convert);
-                final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class, bundle, orgEntity::fromFHIR);
-
-                organizationEntities
-                        .stream()
-                        .map(entity -> organizationEntityToRecord(context, entity))
-                        .forEach(context::executeInsert);
-                endpointEntities
-                        .stream()
-                        .map(entity -> endpointsEntityToRecord(context, entity))
-                        .forEach(context::executeInsert);
-            }
+            seedOrganizationBundle(context, parser);
 
             // Providers next
-            try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
-                final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
-                final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR);
-
-                providers
-                        .stream()
-                        .map(entity -> providersEntityToRecord(context, entity))
-                        .forEach(context::executeInsert);
-            }
+            seedProviderBundle(context, parser);
 
             // Get the test attribution seeds
-            try (InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV)) {
-                if (resource == null) {
-                    throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
-                }
-                SeedProcessor
-                        .extractProviderMap(resource)
-                        .entrySet()
-                        .stream()
-                        .map(SeedProcessor::generateRosterBundle)
-                        .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, creationTimestamp));
-            }
+            seedAttributions(context, creationTimestamp);
+
             logger.info("Finished loading seeds");
+        }
+    }
+
+    private void seedOrganizationBundle(DSLContext context, IParser parser) throws IOException {
+        try (final InputStream orgBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(ORGANIZATION_BUNDLE)) {
+            if (orgBundleStream == null) {
+                throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
+            }
+            final OrganizationEntity orgEntity = new OrganizationEntity();
+            final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
+            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, EndpointConverter::convert);
+            final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class, bundle, orgEntity::fromFHIR);
+
+            organizationEntities
+                    .stream()
+                    .map(entity -> organizationEntityToRecord(context, entity))
+                    .forEach(context::executeInsert);
+            endpointEntities
+                    .stream()
+                    .map(entity -> endpointsEntityToRecord(context, entity))
+                    .forEach(context::executeInsert);
+        }
+    }
+
+    private void truncateTables(DSLContext context) {
+        context.truncate(Patients.PATIENTS).cascade().execute();
+        context.truncate(Providers.PROVIDERS).cascade().execute();
+        context.truncate(Organizations.ORGANIZATIONS).cascade().execute();
+        context.truncate("root_keys").cascade();
+    }
+
+    private void seedProviderBundle(DSLContext context, IParser parser) throws IOException {
+        try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
+            final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
+            final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR);
+
+            providers
+                    .stream()
+                    .map(entity -> providersEntityToRecord(context, entity))
+                    .forEach(context::executeInsert);
+        }
+    }
+
+    private void seedAttributions(DSLContext context, OffsetDateTime creationTimestamp) throws IOException {
+        try (InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV)) {
+            if (resource == null) {
+                throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
+            }
+            SeedProcessor
+                    .extractProviderMap(resource)
+                    .entrySet()
+                    .stream()
+                    .map(SeedProcessor::generateRosterBundle)
+                    .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, creationTimestamp));
         }
     }
 
