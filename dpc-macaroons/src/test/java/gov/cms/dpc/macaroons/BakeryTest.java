@@ -14,7 +14,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BakeryTest {
+class
+BakeryTest {
 
     private static MacaroonBakery bakery;
 
@@ -92,6 +93,9 @@ class BakeryTest {
 
         // Add a verifier and try again
         caveatBakery.verifyMacaroon(macaroon1, "expires < now");
+
+        // Add an incorrect verifier, which should fail
+        assertThrows(BakeryException.class, () -> caveatBakery.verifyMacaroon(macaroon1, "expires < wrong"), "Verification should fail");
     }
 
     @Test

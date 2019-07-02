@@ -45,7 +45,7 @@ public class TokenPolicy {
         @NotNull
         private Integer currentVersion;
 
-        VersionPolicy() {
+        public VersionPolicy() {
             // Jackson required
         }
 
@@ -67,6 +67,10 @@ public class TokenPolicy {
     }
 
     public static class ExpirationPolicy {
+
+        public ExpirationPolicy() {
+            // Jackson required
+        }
 
         @NotNull
         private Integer expirationOffset;
