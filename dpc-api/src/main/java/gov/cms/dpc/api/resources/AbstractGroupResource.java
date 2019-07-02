@@ -7,6 +7,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 @FHIR
@@ -19,5 +21,8 @@ public abstract class AbstractGroupResource {
 
     @Path("/{providerID}/$export")
     @GET
-    public abstract Response export(@PathParam("providerID") String groupID, @QueryParam("_type") String resourceTypes);
+    public abstract Response export(@Context HttpHeaders headers,
+                                       @PathParam("providerID") String groupID,
+                                       @QueryParam("_type") String resourceTypes,
+                                       @QueryParam("_since") String since);
 }
