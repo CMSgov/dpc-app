@@ -10,6 +10,10 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import javax.inject.Inject;
 import java.util.Optional;
 
+/**
+ * Implementation of {@link Authenticator} which matches an {@link Organization} to the given Macaroon (base64 encoded string
+ * If no {@link Organization} is found, this returns an empty optional, which signifies and authorization failure.
+ */
 public class MacaroonsAuthenticator implements Authenticator<String, OrganizationPrincipal> {
 
     private final IGenericClient client;

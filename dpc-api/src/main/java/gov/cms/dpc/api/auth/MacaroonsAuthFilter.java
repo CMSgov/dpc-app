@@ -1,8 +1,6 @@
 package gov.cms.dpc.api.auth;
 
 import io.dropwizard.auth.AuthFilter;
-import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.Authorizer;
 import org.apache.http.HttpHeaders;
 
 import javax.annotation.Nullable;
@@ -12,12 +10,18 @@ import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.ext.Provider;
 import java.io.IOException;
-import java.security.Principal;
 
+/**
+ * {@link AuthFilter} implementation which extracts the Macaroon (base64 encoded) from the request.
+ * Once extracted, it passes it down along the authn/authz chain.
+ * <p>
+ * This assumes that the Macaroon is either passed via the {@link HttpHeaders#AUTHORIZATION} header
+ * in the form 'Bearer {macaroon-values}'.
+ * <p>
+ * Or, directly via the 'token' query param (e.g. no Bearer prefix)
+ */
 @Priority(Priorities.AUTHENTICATION)
-@Provider
 public class MacaroonsAuthFilter extends AuthFilter<String, OrganizationPrincipal> {
 
     private static final String BEARER_PREFIX = "Bearer";
