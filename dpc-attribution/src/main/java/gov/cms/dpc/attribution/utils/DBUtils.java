@@ -11,6 +11,10 @@ public class DBUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DBUtils.class);
 
+    private DBUtils() {
+        // Not used
+    }
+
     /**
      * Truncate all data in a specific {@link Schema}
      *
