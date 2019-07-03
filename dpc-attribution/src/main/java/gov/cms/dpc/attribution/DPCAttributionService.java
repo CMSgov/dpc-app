@@ -82,23 +82,27 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     private void migrateDatabase(DPCAttributionConfiguration configuration, Environment environment) throws SQLException {
-        logger.info("Migrating Database Schema");
-        final ManagedDataSource dataSource = createMigrationDataSource(configuration, environment);
+        if (configuration.getMigrationEnabled()) {
+            logger.info("Migrating Database Schema");
+            final ManagedDataSource dataSource = createMigrationDataSource(configuration, environment);
 
-        try (final Connection connection = dataSource.getConnection()) {
-            final JdbcConnection conn = new JdbcConnection(connection);
+            try (final Connection connection = dataSource.getConnection()) {
+                final JdbcConnection conn = new JdbcConnection(connection);
 
-            final Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn);
-            final Liquibase liquibase = new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), database);
-            liquibase.update("");
-        } catch (LiquibaseException e) {
-            throw new IllegalStateException("Unable to migrate database", e);
-        } finally {
-            try {
-                dataSource.stop();
-            } catch (Exception e) {
-                logger.error("Unable to stop migration datasource", e);
+                final Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn);
+                final Liquibase liquibase = new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), database);
+                liquibase.update("");
+            } catch (LiquibaseException e) {
+                throw new IllegalStateException("Unable to migrate database", e);
+            } finally {
+                try {
+                    dataSource.stop();
+                } catch (Exception e) {
+                    logger.error("Unable to stop migration datasource", e);
+                }
             }
+        } else {
+            logger.info("Skipping Database Migration");
         }
     }
 
