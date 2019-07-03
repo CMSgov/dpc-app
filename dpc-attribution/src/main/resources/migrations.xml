@@ -221,5 +221,7 @@
 
     <!--    Create the root table for the macaroons-->
     <include file="macaroon_migrations.xml"/>
+    <!--    Setup required tables for Job Queue-->
+    <include file="queue_migrations.xml"/>
 
 </databaseChangeLog>
