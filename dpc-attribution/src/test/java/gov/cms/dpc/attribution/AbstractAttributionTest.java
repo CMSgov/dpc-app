@@ -16,7 +16,6 @@ public abstract class AbstractAttributionTest {
     @BeforeAll
     public static void initDB() throws Exception {
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "migrate");
         APPLICATION.getApplication().run("seed");
     }
 
