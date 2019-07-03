@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -73,7 +75,7 @@ class FHIRSubmissionTest {
     void testDataRequest() {
         final WebTarget target = groupResource.client().target("/Group/1/$export");
         final Response response = target.request()
-                .accept(FHIR_JSON).header(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC)
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
@@ -121,7 +123,7 @@ class FHIRSubmissionTest {
                 .target("/Group/1/$export")
                 .queryParam("_type", ResourceType.Patient);
         final Response response = target.request()
-                .accept(FHIR_JSON).header(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC)
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
@@ -144,7 +146,7 @@ class FHIRSubmissionTest {
                 .target("/Group/1/$export")
                 .queryParam("_type", String.format("%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit));
         final Response response = target.request()
-                .accept(FHIR_JSON).header(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC)
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
@@ -165,7 +167,7 @@ class FHIRSubmissionTest {
                 .target("/Group/1/$export")
                 .queryParam("_type", String.format("%s,%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage));
         final Response response = target.request()
-                .accept(FHIR_JSON).header(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC)
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
@@ -204,7 +206,7 @@ class FHIRSubmissionTest {
         // A request with no resource type parameters...
         final WebTarget target = groupResource.client().target("/Group/1/$export");
         final Response response = target.request()
-                .accept(FHIR_JSON).header(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC)
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));

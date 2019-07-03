@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.dpc.api.models.JobCompletionModel;
-import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -30,6 +29,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 
 /**
  * Shared methods for testing export jobs
@@ -58,7 +60,7 @@ public class ClientUtils {
         final var addPreferInterceptor = new IClientInterceptor()  {
             @Override
             public void interceptRequest(IHttpRequest iHttpRequest) {
-                iHttpRequest.addHeader(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC);
+                iHttpRequest.addHeader(PREFER_HEADER, PREFER_RESPOND_ASYNC);
             }
 
             @Override

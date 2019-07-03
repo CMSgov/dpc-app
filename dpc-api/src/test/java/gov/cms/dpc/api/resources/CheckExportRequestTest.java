@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,7 +19,7 @@ class CheckExportRequestTest {
     void testCheckExportRequestWithValid() {
         final var headers = new MultivaluedHashMap<String, String>();
         headers.add(HttpHeader.ACCEPT.toString(), FHIR_JSON);
-        headers.add(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC);
+        headers.add(PREFER_HEADER, PREFER_RESPOND_ASYNC);
 
         // A valid request
         final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, ResourceType.Patient.toString(), null, null);
@@ -28,7 +30,7 @@ class CheckExportRequestTest {
     void testCheckExportRequestWithInvalidOutputFormat() {
         final var headers = new MultivaluedHashMap<String, String>();
         headers.add(HttpHeader.ACCEPT.toString(), FHIR_JSON);
-        headers.add(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC);
+        headers.add(PREFER_HEADER, PREFER_RESPOND_ASYNC);
 
         // A valid request
         final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, ResourceType.Patient.toString(), "foo", null);
@@ -39,7 +41,7 @@ class CheckExportRequestTest {
     void testCheckExportRequestWithoutTypes() {
         final var headers = new MultivaluedHashMap<String, String>();
         headers.add(HttpHeader.ACCEPT.toString(), FHIR_JSON);
-        headers.add(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC);
+        headers.add(PREFER_HEADER, PREFER_RESPOND_ASYNC);
 
         // A valid request
         final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, null, null, null);
@@ -51,7 +53,7 @@ class CheckExportRequestTest {
         final var headers = new MultivaluedHashMap<String, String>();
         headers.add(HttpHeader.ACCEPT.toString(), FHIR_JSON);
         headers.add(HttpHeader.ACCEPT.toString(), MediaType.APPLICATION_JSON);
-        headers.add(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC);
+        headers.add(PREFER_HEADER, PREFER_RESPOND_ASYNC);
         final var resourceTypes = ResourceType.Patient.toString() + GroupResource.LIST_DELIM + ResourceType.ExplanationOfBenefit.toString();
 
         // A valid request with multiple

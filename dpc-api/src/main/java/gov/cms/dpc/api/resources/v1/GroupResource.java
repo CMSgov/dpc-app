@@ -30,6 +30,8 @@ import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 
 
 public class GroupResource extends AbstractGroupResource {
@@ -38,8 +40,6 @@ public class GroupResource extends AbstractGroupResource {
 
     // The delimiter for the '_types' list query param.
     public static final String LIST_DELIM = ",";
-    public static final String PREFER_RESPOND_ASYNC = "respond-async";
-    public static final String PREFER_HEADER = "Prefer";
 
     private final JobQueue queue;
     private final AttributionEngine client;
@@ -203,7 +203,6 @@ public class GroupResource extends AbstractGroupResource {
         final var outcomeString = fhirContext.newJsonParser().encodeResourceToString(outcome);
         return Response.status(status).entity(outcomeString).type(FHIR_JSON).build();
     }
-
 
     /**
      * Convert a single resource type in a query param into a {@link ResourceType}.
