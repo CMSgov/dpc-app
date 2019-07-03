@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
+import com.codahale.metrics.MetricRegistry;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
@@ -29,7 +30,10 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAggregationConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
-                .modules(new DPCHibernateModule<>(), new AggregationAppModule(), new JobQueueModule<>(), new BlueButtonClientModule<>())
+                .modules(new DPCHibernateModule<>(),
+                        new AggregationAppModule(),
+                        new JobQueueModule<>(),
+                        new BlueButtonClientModule<>())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
