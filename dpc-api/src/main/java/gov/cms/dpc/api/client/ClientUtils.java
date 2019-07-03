@@ -63,7 +63,7 @@ public class ClientUtils {
 
             @Override
             public void interceptResponse(IHttpResponse iHttpResponse) {
-
+                return; // for code climate
             }
         };
         exportClient.registerInterceptor(addPreferInterceptor);

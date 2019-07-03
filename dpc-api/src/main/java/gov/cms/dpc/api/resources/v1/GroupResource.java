@@ -162,7 +162,7 @@ public class GroupResource extends AbstractGroupResource {
 
         // _since
         if (StringUtils.isNotEmpty(since)) {
-            issues.add(formNotSupportedIssue("'_since' query parameter is not supported"));
+            issues.add(formNotSupportedIssue("'_since' query parameter is not implemented"));
         }
 
         // _type
