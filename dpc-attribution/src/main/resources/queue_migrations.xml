@@ -33,7 +33,7 @@
 
         <addForeignKeyConstraint baseTableName="JOB_RESULT" baseColumnNames="jobID" constraintName="fk_job_id_results"
                                  referencedTableName="JOB_QUEUE"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="jobID"/>
     </changeSet>
     
 </databaseChangeLog>
