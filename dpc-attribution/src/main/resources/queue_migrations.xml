@@ -3,10 +3,10 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-    
+
     <changeSet id="create-job-queue-table" author="nickrobison-usds">
         <createTable tableName="JOB_QUEUE">
-            <column name="jobID" type="UUID">
+            <column name="jobid" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="provider_id" type="VARCHAR(50)"/>
@@ -20,20 +20,20 @@
         </createTable>
 
         <createTable tableName="JOB_RESULT">
-            <column name="jobID" type="UUID">
+            <column name="jobid" type="UUID">
                 <constraints nullable="false"/>
             </column>
             <column name="resource_type" type="INTEGER"/>
             <column name="sequence" type="INTEGER"/>
             <column name="count" type="INTEGER"/>
         </createTable>
-        
-        <addPrimaryKey tableName="JOB_RESULT"
-                       columnNames="jobID, resource_type, sequence"/>
 
-        <addForeignKeyConstraint baseTableName="JOB_RESULT" baseColumnNames="jobID" constraintName="fk_job_id_results"
+        <addPrimaryKey tableName="JOB_RESULT"
+                       columnNames="jobid, resource_type, sequence"/>
+
+        <addForeignKeyConstraint baseTableName="JOB_RESULT" baseColumnNames="jobid" constraintName="fk_job_id_results"
                                  referencedTableName="JOB_QUEUE"
-                                 referencedColumnNames="jobID"/>
+                                 referencedColumnNames="jobid"/>
     </changeSet>
-    
+
 </databaseChangeLog>
