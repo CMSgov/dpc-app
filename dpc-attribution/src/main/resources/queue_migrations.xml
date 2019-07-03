@@ -6,7 +6,7 @@
     
     <changeSet id="create-job-queue-table" author="nickrobison-usds">
         <createTable tableName="JOB_QUEUE">
-            <column name="id" type="UUID">
+            <column name="jobID" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="provider_id" type="VARCHAR(50)"/>
