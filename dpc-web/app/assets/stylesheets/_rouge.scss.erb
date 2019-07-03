@@ -1,0 +1,9 @@
+// app/assets/stylesheets/_rouge.scss.erb
+<%= Rouge::Themes::Github.render(:scope => '.highlight') %>
+
+.highlight {
+  border-radius: 4px;
+  background: #f2f2f2;
+  margin-bottom: $spacer-1;
+  padding: $spacer-1;
+}
