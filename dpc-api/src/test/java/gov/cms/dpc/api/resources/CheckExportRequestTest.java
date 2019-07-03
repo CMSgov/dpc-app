@@ -20,10 +20,20 @@ class CheckExportRequestTest {
         headers.add(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC);
 
         // A valid request
-        final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, ResourceType.Patient.toString(), null);
+        final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, ResourceType.Patient.toString(), null, null);
         assertTrue(optionalOperationOutcome.isEmpty(), "Expected all parameters to be valid ");
     }
 
+    @Test
+    void testCheckExportRequestWithInvalidOutputFormat() {
+        final var headers = new MultivaluedHashMap<String, String>();
+        headers.add(HttpHeader.ACCEPT.toString(), FHIR_JSON);
+        headers.add(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC);
+
+        // A valid request
+        final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, ResourceType.Patient.toString(), "foo", null);
+        assertTrue(optionalOperationOutcome.isPresent(), "Expected an operationOutcome");
+    }
 
     @Test
     void testCheckExportRequestWithoutTypes() {
@@ -32,7 +42,7 @@ class CheckExportRequestTest {
         headers.add(GroupResource.PREFER_HEADER, GroupResource.PREFER_RESPOND_ASYNC);
 
         // A valid request
-        final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, null, null);
+        final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, null, null, null);
         assertTrue(optionalOperationOutcome.isEmpty(), "Expected all parameters to be valid ");
     }
 
@@ -45,7 +55,7 @@ class CheckExportRequestTest {
         final var resourceTypes = ResourceType.Patient.toString() + GroupResource.LIST_DELIM + ResourceType.ExplanationOfBenefit.toString();
 
         // A valid request with multiple
-        final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, resourceTypes, null);
+        final var optionalOperationOutcome = GroupResource.checkExportRequest(headers, resourceTypes, null,null);
         assertTrue(optionalOperationOutcome.isEmpty(), "Expected all parameters to be valid ");
     }
 
@@ -54,7 +64,7 @@ class CheckExportRequestTest {
         final var headers = new MultivaluedHashMap<String, String>();
 
         // A valid request
-        final var optionalResponse = GroupResource.checkExportRequest(headers, ResourceType.Account.toString(), null);
+        final var optionalResponse = GroupResource.checkExportRequest(headers, ResourceType.Account.toString(), null,null);
         assertTrue(optionalResponse.isPresent(), "Expected a response");
         optionalResponse.ifPresent(outcome -> {
             assertEquals(3, outcome.getIssue().size());

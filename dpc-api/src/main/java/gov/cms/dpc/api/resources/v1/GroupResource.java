@@ -9,6 +9,7 @@ import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import jodd.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 
 
 public class GroupResource extends AbstractGroupResource {
@@ -59,6 +61,8 @@ public class GroupResource extends AbstractGroupResource {
      *
      * @param providerID    {@link String} ID of provider to retrieve data for
      * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}
+     * @param outputFormat - Optional outputFormats parameter
+     * @param since - Optional since parameter
      * @return - {@link OperationOutcome} specifying whether or not the request was successful.
      */
     @Override
@@ -69,11 +73,12 @@ public class GroupResource extends AbstractGroupResource {
     public Response export(@Context HttpHeaders headers,
                            @PathParam("providerID") String providerID,
                            @QueryParam("_type") String resourceTypes,
+                           @QueryParam("_outputFormat") String outputFormat,
                            @QueryParam("_since") String since) {
         logger.debug("Exporting data for provider: {}", providerID);
 
         // Check the parameters
-        final Optional<OperationOutcome> requestOutcome = checkExportRequest(headers.getRequestHeaders(), resourceTypes, since);
+        final Optional<OperationOutcome> requestOutcome = checkExportRequest(headers.getRequestHeaders(), resourceTypes, outputFormat, since);
         if (requestOutcome.isPresent()) {
             return formErrorResponse(HttpStatus.BAD_REQUEST_400, requestOutcome.get());
         }
@@ -145,7 +150,7 @@ public class GroupResource extends AbstractGroupResource {
      * @param since list to check (must be null)
      * @return a optional {@link Response} with a BAD_REQUEST status
      */
-    public static Optional<OperationOutcome> checkExportRequest(MultivaluedMap<String, String> headers, String resourceTypes, String since) {
+    public static Optional<OperationOutcome> checkExportRequest(MultivaluedMap<String, String> headers, String resourceTypes, String outputFormat, String since) {
         var issues = new ArrayList<OperationOutcome.OperationOutcomeIssueComponent>();
 
         // Accept
@@ -163,6 +168,11 @@ public class GroupResource extends AbstractGroupResource {
         // _since
         if (StringUtils.isNotEmpty(since)) {
             issues.add(formNotSupportedIssue("'_since' query parameter is not implemented"));
+        }
+
+        // _outputFormat
+        if (StringUtil.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
+            issues.add(formNotSupportedIssue("'_outputFormat' query parameter must be 'application/fhir+ndjson'"));
         }
 
         // _type

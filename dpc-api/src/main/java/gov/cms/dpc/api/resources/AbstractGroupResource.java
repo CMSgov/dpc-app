@@ -24,5 +24,6 @@ public abstract class AbstractGroupResource {
     public abstract Response export(@Context HttpHeaders headers,
                                        @PathParam("providerID") String groupID,
                                        @QueryParam("_type") String resourceTypes,
+                                       @QueryParam("_outputFormat") String outputFormat,
                                        @QueryParam("_since") String since);
 }
