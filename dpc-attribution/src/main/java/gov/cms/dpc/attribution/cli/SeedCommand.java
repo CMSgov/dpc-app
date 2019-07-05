@@ -1,10 +1,8 @@
 package gov.cms.dpc.attribution.cli;
 
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.dao.tables.Organizations;
-import gov.cms.dpc.attribution.dao.tables.Patients;
-import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
+import gov.cms.dpc.attribution.utils.DBUtils;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
@@ -59,17 +57,16 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         // Read in the seeds file and write things
         logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
 
-
         try (final Connection connection = dataSource.getConnection();
              DSLContext context = DSL.using(connection, this.settings)) {
 
             // Truncate everything
-            context.truncate(Patients.PATIENTS).cascade().execute();
-            context.truncate(Providers.PROVIDERS).cascade().execute();
-            context.truncate(Organizations.ORGANIZATIONS).cascade().execute();
-            context.truncate("root_keys").cascade();
+            DBUtils.truncateAllTables(context, "public");
+        }
 
 
+        try (final Connection connection = dataSource.getConnection();
+             DSLContext context = DSL.using(connection, this.settings)) {
             // Get the test seeds
             try (InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV)) {
                 if (resource == null) {
