@@ -2,9 +2,8 @@ package gov.cms.dpc.attribution.tasks;
 
 import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.dao.tables.Attributions;
-import gov.cms.dpc.attribution.dao.tables.Patients;
-import gov.cms.dpc.attribution.dao.tables.Providers;
+import gov.cms.dpc.attribution.dao.Public;
+import gov.cms.dpc.attribution.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.servlets.tasks.Task;
@@ -16,6 +15,7 @@ import org.jooq.impl.DSL;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.PrintWriter;
+import java.sql.Connection;
 
 /**
  * Admin task for truncating tables in the attribution database
@@ -40,12 +40,11 @@ public class TruncateDatabase extends Task {
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(null, "attribution-seeder");
 
-        try (DSLContext context = DSL.using(dataSource.getConnection(), new Settings().withRenderNameStyle(RenderNameStyle.AS_IS))) {
+        try (final Connection connection = dataSource.getConnection();
+             DSLContext context = DSL.using(connection, new Settings().withRenderNameStyle(RenderNameStyle.AS_IS))) {
 
-            // Truncate everything
-            context.truncate(Patients.PATIENTS).cascade().execute();
-            context.truncate(Providers.PROVIDERS).cascade().execute();
-            context.truncate(Attributions.ATTRIBUTIONS).cascade().execute();
+            DBUtils.truncateAllTables(context, "public");
         }
     }
+
 }

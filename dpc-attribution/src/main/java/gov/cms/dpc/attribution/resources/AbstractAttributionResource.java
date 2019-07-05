@@ -18,6 +18,9 @@ public abstract class AbstractAttributionResource {
     @Path("/Endpoint")
     public abstract AbstractEndpointResource endpointOperations();
 
+    @Path("/Practitioner")
+    public abstract AbstractPractionerResource providerOperations();
+
     @GET
     @Path("/_healthy")
     public boolean checkHealth() {

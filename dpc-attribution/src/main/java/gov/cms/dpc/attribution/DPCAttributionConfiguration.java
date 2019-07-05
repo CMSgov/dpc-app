@@ -17,6 +17,8 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @Valid
     private Duration expirationThreshold;
 
+    private Boolean migrationEnabled;
+
     @Valid
     @NotNull
     @JsonProperty("database")
@@ -66,5 +68,13 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setTokenPolicy(TokenPolicy tokenPolicy) {
         this.tokenPolicy = tokenPolicy;
+    }
+
+    public Boolean getMigrationEnabled() {
+        return migrationEnabled;
+    }
+
+    public void setMigrationEnabled(Boolean migrationEnabled) {
+        this.migrationEnabled = migrationEnabled;
     }
 }

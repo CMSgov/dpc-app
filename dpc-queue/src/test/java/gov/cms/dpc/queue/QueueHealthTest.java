@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue;
 
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheck;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
@@ -28,6 +29,7 @@ public class QueueHealthTest {
     @SuppressWarnings("unchecked")
     private NodesGroup<Node> nGroup = mock(NodesGroup.class);
     private NativeQuery query = mock(NativeQuery.class);
+    private MetricRegistry metrics = new MetricRegistry();
 
     @BeforeEach
     void setupQueueDependencies() {
@@ -52,7 +54,7 @@ public class QueueHealthTest {
         when(query.getFirstResult())
                 .thenReturn(1);
 
-        final DistributedQueue queue = new DistributedQueue(client, managedSessionFactory, "SELECT 1 from job_queue");
+        final DistributedQueue queue = new DistributedQueue(client, managedSessionFactory, "SELECT 1 from job_queue", metrics);
         assertDoesNotThrow(queue::assertHealthy, "Queue should be healthy");
 
         // Healthcheck should pass
@@ -67,7 +69,7 @@ public class QueueHealthTest {
                     throw new RedisTimeoutException("");
                 });
 
-        final DistributedQueue queue = new DistributedQueue(client, managedSessionFactory, "SELECT 1 from job_queue");
+        final DistributedQueue queue = new DistributedQueue(client, managedSessionFactory, "SELECT 1 from job_queue", metrics);
         final JobQueueUnhealthy unhealthy = assertThrows(JobQueueUnhealthy.class, queue::assertHealthy, "Queue should fail due to redis");
         assertEquals(RedisTimeoutException.class, unhealthy.getCause().getClass(), "Should have thrown timeout exception");
 
@@ -82,7 +84,7 @@ public class QueueHealthTest {
         when(nGroup.pingAll())
                 .thenReturn(false);
 
-        final DistributedQueue queue = new DistributedQueue(client, managedSessionFactory, "SELECT 1 from job_queue");
+        final DistributedQueue queue = new DistributedQueue(client, managedSessionFactory, "SELECT 1 from job_queue", metrics);
         final JobQueueUnhealthy unhealthy = assertThrows(JobQueueUnhealthy.class, queue::assertHealthy, "Queue should fail due to redis");
         assertNotEquals(RedisTimeoutException.class, unhealthy.getCause().getClass(), "Should not have thrown timeout exception");
 

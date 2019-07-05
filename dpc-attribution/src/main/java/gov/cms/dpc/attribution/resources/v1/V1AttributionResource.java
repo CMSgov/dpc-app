@@ -1,9 +1,6 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import gov.cms.dpc.attribution.resources.AbstractAttributionResource;
-import gov.cms.dpc.attribution.resources.AbstractEndpointResource;
-import gov.cms.dpc.attribution.resources.AbstractGroupResource;
-import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
+import gov.cms.dpc.attribution.resources.*;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
@@ -14,12 +11,14 @@ public class V1AttributionResource extends AbstractAttributionResource {
     private final GroupResource gr;
     private final OrganizationResource or;
     private final EndpointResource er;
+    private final PractitionerResource pr;
 
     @Inject
-    public V1AttributionResource(GroupResource gr, OrganizationResource or, EndpointResource er) {
+    public V1AttributionResource(GroupResource gr, OrganizationResource or, EndpointResource er, PractitionerResource pr) {
         this.gr = gr;
         this.or = or;
         this.er = er;
+        this.pr = pr;
     }
 
     @Override
@@ -35,5 +34,10 @@ public class V1AttributionResource extends AbstractAttributionResource {
     @Override
     public AbstractEndpointResource endpointOperations() {
         return this.er;
+    }
+
+    @Override
+    public AbstractPractionerResource providerOperations() {
+        return this.pr;
     }
 }

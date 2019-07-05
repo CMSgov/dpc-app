@@ -3,6 +3,7 @@ package gov.cms.dpc.api;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
@@ -64,6 +65,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(MacaroonsAuthenticator.class);
         binder.bind(MacaroonsAuthFilter.class);
         binder.bind(MacaroonsDynamicFeature.class);
+        binder.bind(PractitionerResource.class);
 
         // Healthchecks
         binder.bind(AttributionHealthCheck.class);
@@ -78,6 +80,12 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                 .using(getConfiguration().getHttpClient())
                 .build("attribution-service")
                 .target(getConfiguration().getAttributionURL());
+    }
+
+    @Provides
+    @Singleton
+    public MetricRegistry provideMetricRegistry() {
+        return getEnvironment().metrics();
     }
 
     @Provides
@@ -108,8 +116,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     public List<String> provideAdditionalPaths() {
         return List.of("gov.cms.dpc.queue.models");
     }
-
-    @Provides
     @Singleton
     public IGenericClient provideFHIRClient(FhirContext ctx) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);

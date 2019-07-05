@@ -5,6 +5,8 @@ import com.google.inject.Inject;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
@@ -38,9 +40,12 @@ public class DPCHibernateBundle<T extends Configuration & IDPCDatabase> extends 
     @AdditionalPaths
     private static List<String> additionalPaths;
 
+    private final DataSourceFactory factory;
+
     @Inject
-    public DPCHibernateBundle() {
+    public DPCHibernateBundle(DataSourceFactory factory) {
         super(applicationEntities(), new SessionFactoryFactory());
+        this.factory = factory;
     }
 
     private static ImmutableList<Class<?>> applicationEntities() {
@@ -71,6 +76,6 @@ public class DPCHibernateBundle<T extends Configuration & IDPCDatabase> extends 
 
     @Override
     public PooledDataSourceFactory getDataSourceFactory(T configuration) {
-        return configuration.getDatabase();
+        return this.factory;
     }
 }

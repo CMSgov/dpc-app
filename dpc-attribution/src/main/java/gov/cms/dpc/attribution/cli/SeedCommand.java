@@ -15,6 +15,7 @@ import gov.cms.dpc.common.entities.AddressEntity;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.attribution.utils.DBUtils;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import io.dropwizard.Application;
@@ -82,20 +83,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
              DSLContext context = DSL.using(connection, this.settings)) {
 
             // Truncate everything
-            truncateTables(context);
-
-            final FhirContext ctx = FhirContext.forDstu3();
-            final IParser parser = ctx.newJsonParser();
-            // Start with the Organizations and their endpoints
-            seedOrganizationBundle(context, parser);
-
-            // Providers next
-            seedProviderBundle(context, parser);
-
-            // Get the test attribution seeds
-            seedAttributions(context, creationTimestamp);
-
-            logger.info("Finished loading seeds");
+            DBUtils.truncateAllTables(context, "public");
         }
     }
 

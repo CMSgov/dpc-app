@@ -1,7 +1,10 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.Pair;
@@ -14,6 +17,7 @@ import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import org.hl7.fhir.dstu3.model.*;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +38,8 @@ public class AggregationEngine implements Runnable {
     private final BlueButtonClient bbclient;
     private final OperationsConfig operationsConfig;
     private final FhirContext fhirContext;
+    private final Meter resourceMeter;
+    private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
 
     /**
@@ -45,11 +51,15 @@ public class AggregationEngine implements Runnable {
      * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
       */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext fhirContext, OperationsConfig operationsConfig) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
+
+        final var metricFactory = new MetricMaker(metricRegistry, AggregationEngine.class);
+        resourceMeter = metricFactory.registerMeter("resourceFetched");
+        operationalOutcomeMeter = metricFactory.registerMeter("operationalOutcomes");
    }
 
     /**
@@ -143,18 +153,30 @@ public class AggregationEngine implements Runnable {
         // Batch the non-error resources into files
         final var counter = new AtomicInteger();
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-        final Flowable<JobResult> resourceFlow = connectableMixedFlow.filter(r -> r.getResourceType() != ResourceType.OperationOutcome)
-                .buffer(operationsConfig.getResourcesPerFileCount())
-                .map(batch -> writer.writeBatch(counter, batch));
+        final Flowable<JobResult> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, counter, resourceMeter));
 
         // Batch the error resources into files
         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-        final Flowable<JobResult> outcomeFlow = connectableMixedFlow.filter(r -> r.getResourceType() == ResourceType.OperationOutcome)
-                .buffer(operationsConfig.getResourcesPerFileCount())
-                .map(batch -> errorWriter.writeBatch(errorCounter, batch));
+        final Flowable<JobResult> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorCounter, operationalOutcomeMeter));
 
         // Merge the resultant flows
         return resourceFlow.mergeWith(outcomeFlow);
+    }
+
+    /**
+     * This part of the flow chain buffers resources and writes them in batches to a file
+     *
+     * @param writer - the writer to use
+     * @param counter - the sequence counter
+     * @param meter - a meter on the number of resources
+     * @return a transformed flow
+     */
+    private Publisher<JobResult> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger counter, Meter meter) {
+        return upstream
+                .filter(r -> r.getResourceType() == writer.getResourceType())
+                .buffer(operationsConfig.getResourcesPerFileCount())
+                .doOnNext(outcomes -> meter.mark(outcomes.size()))
+                .map(batch -> writer.writeBatch(counter, batch));
     }
 
     /**

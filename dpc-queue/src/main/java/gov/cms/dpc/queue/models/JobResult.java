@@ -22,6 +22,7 @@ public class JobResult implements Serializable {
     public static class JobResultID implements Serializable {
         public static final long serialVersionUID = 3L;
 
+        @Column(name = "jobid")
         private UUID jobID;
 
         @Column(name = "resource_type")

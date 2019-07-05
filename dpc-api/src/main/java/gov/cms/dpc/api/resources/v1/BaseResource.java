@@ -42,7 +42,7 @@ public class BaseResource extends AbstractBaseResource {
 
     @Override
     public CapabilityStatement metadata() {
-        return Capabilities.buildCapabilities(this.baseURL, "/v1");
+        return Capabilities.buildCapabilities();
     }
 
     @Override
