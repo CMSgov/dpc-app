@@ -44,6 +44,7 @@ public class JobModel implements Serializable {
      * The unique job identifier
      */
     @Id
+    @Column(name = "jobid")
     private UUID jobID;
 
     /**
@@ -52,7 +53,7 @@ public class JobModel implements Serializable {
      * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name="jobID")
+    @JoinColumn(name="jobid")
     private List<JobResult> jobResults;
 
     /**
