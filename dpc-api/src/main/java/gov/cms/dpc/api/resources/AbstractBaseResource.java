@@ -35,17 +35,9 @@ public abstract class AbstractBaseResource {
     @GET
     public abstract CapabilityStatement metadata();
 
-    @Path("/Group")
-    public abstract AbstractGroupResource groupOperations();
-
-    @Path("/Jobs")
-    public abstract AbstractJobResource jobOperations();
-
-    @Path("/Data")
-    public abstract AbstractDataResource dataOperations();
-
     @Path("/Organization")
     public abstract AbstractOrganizationResource organizationOperations();
+
     /**
      * Returns the current API version
      *

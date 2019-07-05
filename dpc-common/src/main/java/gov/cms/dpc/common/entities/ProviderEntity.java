@@ -23,7 +23,6 @@ import java.util.UUID;
 public class ProviderEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID providerID;
 
