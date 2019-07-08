@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.ExportPath;
@@ -28,9 +29,10 @@ public class DataResource extends AbstractDataResource {
 
 
     @Override
-    @Timed
     @Path("/{fileID}/")
     @GET
+    @Timed
+    @ExceptionMetered
     public Response export(@PathParam("fileID") String fileID) {
         final StreamingOutput fileStream = outputStream -> {
             final java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", fileLocation, fileID));

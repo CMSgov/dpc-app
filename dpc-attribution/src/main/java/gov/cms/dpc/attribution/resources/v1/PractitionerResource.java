@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractionerResource;
@@ -28,6 +29,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @UnitOfWork
     @Override
     @Timed
+    @ExceptionMetered
     // TODO: Migrate this signature to a List<Practitioner> in DPC-302
     public Bundle getPractitioners(@QueryParam("identifier") String providerNPI) {
         final Bundle bundle = new Bundle();
@@ -44,6 +46,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @UnitOfWork
     @Override
     @Timed
+    @ExceptionMetered
     public Practitioner submitProvider(Practitioner provider) {
 
         final ProviderEntity entity = ProviderEntity.fromFHIR(provider);
@@ -57,6 +60,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @UnitOfWork
     @Override
     @Timed
+    @ExceptionMetered
     public Practitioner getProvider(@PathParam("providerID") UUID providerID) {
         final ProviderEntity providerEntity = this.dao
                 .getProvider(providerID)
@@ -72,6 +76,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @UnitOfWork
     @Override
     @Timed
+    @ExceptionMetered
     public Response deleteProvider(@PathParam("providerID") UUID providerID) {
         try {
             this.dao.deleteProvider(providerID);
@@ -87,6 +92,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @UnitOfWork
     @Override
     @Timed
+    @ExceptionMetered
     public Practitioner updateProvider(@PathParam("providerID") UUID providerID, Practitioner provider) {
         final ProviderEntity providerEntity = this.dao.persistProvider(ProviderEntity.fromFHIR(provider, providerID));
 

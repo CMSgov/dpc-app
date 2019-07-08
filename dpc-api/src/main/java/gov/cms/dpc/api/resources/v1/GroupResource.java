@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
-import ca.uhn.fhir.context.FhirContext;
+import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -50,9 +50,10 @@ public class GroupResource extends AbstractGroupResource {
      * @return - {@link org.hl7.fhir.dstu3.model.OperationOutcome} specifying whether or not the request was successful.
      */
     @Override
-    @Timed
-    @Path("/{providerID}/$export")
     @GET // Need this here, since we're using a path param
+    @Path("/{providerID}/$export")
+    @Timed
+    @ExceptionMetered
     public Response export(@PathParam("providerID") String providerID, @QueryParam("_type") String resourceTypes) {
         logger.debug("Exporting data for provider: {}", providerID);
 
