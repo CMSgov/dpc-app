@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Date;
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PatientValidation {
 
@@ -61,11 +61,17 @@ class PatientValidation {
 
         patient.setId("test-patient");
         patient.addName().setFamily("Patient").addGiven("Test");
-        patient.addName().setFamily("Other");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
 
         assertTrue(result.isSuccessful(), "Should have passed");
+
+        // Add a bad name
+        patient.addName().setFamily("Missing");
+        final ValidationResult r2 = fhirValidator.validateWithResult(patient);
+
+        assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
+                () -> assertEquals(1, r2.getMessages().size(), "Should have a single failure"));
     }
 }
