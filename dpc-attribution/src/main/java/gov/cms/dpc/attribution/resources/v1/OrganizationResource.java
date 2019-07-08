@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
@@ -39,6 +40,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @Override
     @UnitOfWork
+    @Timed
     public Response createOrganization(Bundle transactionBundle) {
 
         final Optional<Organization> organization = transactionBundle
@@ -74,6 +76,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Path("/{organizationID}/token")
     @UnitOfWork
     @Override
+    @Timed
     public List<String> getOrganizationTokens(@PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
@@ -86,6 +89,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Path("/{organizationID}/token")
     @UnitOfWork
     @Override
+    @Timed
     public String createOrganizationToken(@PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
@@ -106,6 +110,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @GET
     @Path("/{organizationID}/token/verify")
+    @Timed
     public boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
         final Macaroon macaroon = parseToken(token);
         try {

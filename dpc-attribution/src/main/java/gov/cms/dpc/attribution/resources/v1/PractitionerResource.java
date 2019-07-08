@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractionerResource;
 import gov.cms.dpc.common.entities.ProviderEntity;
@@ -26,6 +27,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @GET
     @UnitOfWork
     @Override
+    @Timed
     // TODO: Migrate this signature to a List<Practitioner> in DPC-302
     public Bundle getPractitioners(@QueryParam("identifier") String providerNPI) {
         final Bundle bundle = new Bundle();
@@ -41,6 +43,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @FHIR
     @UnitOfWork
     @Override
+    @Timed
     public Practitioner submitProvider(Practitioner provider) {
 
         final ProviderEntity entity = ProviderEntity.fromFHIR(provider);
@@ -53,6 +56,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Path("/{providerID}")
     @UnitOfWork
     @Override
+    @Timed
     public Practitioner getProvider(@PathParam("providerID") UUID providerID) {
         final ProviderEntity providerEntity = this.dao
                 .getProvider(providerID)
@@ -67,6 +71,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Path("/{providerID}")
     @UnitOfWork
     @Override
+    @Timed
     public Response deleteProvider(@PathParam("providerID") UUID providerID) {
         try {
             this.dao.deleteProvider(providerID);
@@ -81,6 +86,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Path("/{providerID}")
     @UnitOfWork
     @Override
+    @Timed
     public Practitioner updateProvider(@PathParam("providerID") UUID providerID, Practitioner provider) {
         final ProviderEntity providerEntity = this.dao.persistProvider(ProviderEntity.fromFHIR(provider, providerID));
 

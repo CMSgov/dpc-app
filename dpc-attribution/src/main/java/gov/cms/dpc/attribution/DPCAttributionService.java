@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
+import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
@@ -79,6 +80,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) throws DatabaseException, SQLException {
         migrateDatabase(configuration, environment);
+        final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
+        environment.jersey().getResourceConfig().register(listener);
     }
 
     private void migrateDatabase(DPCAttributionConfiguration configuration, Environment environment) throws SQLException {

@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.resources.AbstractPractionerResource;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -23,6 +24,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
+    @Timed
     public Bundle getPractitioners(String providerNPI) {
         return this.client
                 .search()
@@ -35,6 +37,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
+    @Timed
     public Practitioner submitProvider(Practitioner provider) {
         final MethodOutcome outcome = this.client
                 .create()
@@ -50,6 +53,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
+    @Timed
     public Practitioner getProvider(UUID providerID) {
         return this.client
                 .read()
@@ -60,6 +64,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
+    @Timed
     public Response deleteProvider(UUID providerID) {
         this.client
                 .delete()
@@ -71,6 +76,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
+    @Timed
     public Practitioner updateProvider(UUID providerID, Practitioner provider) {
         return null;
     }

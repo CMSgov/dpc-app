@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -39,9 +40,10 @@ public class JobResource extends AbstractJobResource {
         this.baseURL = baseURL;
     }
 
+    @Override
+    @Timed
     @Path("/{jobID}")
     @GET
-    @Override
     public Response checkJobStatus(@PathParam("jobID") String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
         final Optional<JobModel> maybeJob = this.queue.getJob(jobUUID);

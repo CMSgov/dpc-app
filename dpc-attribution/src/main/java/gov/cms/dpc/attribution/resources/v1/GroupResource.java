@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRBuilders;
@@ -29,6 +30,7 @@ public class GroupResource extends AbstractGroupResource {
     @POST
     @FHIR
     @Override
+    @Timed
     public Response submitRoster(Bundle providerBundle) {
         logger.debug("API request to submit roster");
         this.engine.addAttributionRelationships(providerBundle);
@@ -36,9 +38,11 @@ public class GroupResource extends AbstractGroupResource {
         return Response.ok().build();
     }
 
+
     @Path("/{groupID}")
     @GET
     @Override
+    @Timed
     public List<String> getAttributedPatients(@PathParam("groupID") String groupID) {
         logger.debug("API request to retrieve attributed patients for {}", groupID);
 
@@ -60,6 +64,7 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{groupID}/{patientID}")
     @GET
     @Override
+    @Timed
     public boolean isAttributed(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
         logger.debug("API request to determine attribution between {} and {}", groupID, patientID);
         final boolean attributed = engine.isAttributed(
@@ -74,6 +79,7 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{groupID}/{patientID}")
     @PUT
     @Override
+    @Timed
     public void attributePatient(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
         logger.debug("API request to add attribution between {} and {}", groupID, patientID);
         try {
@@ -89,6 +95,7 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{groupID}/{patientID}")
     @Override
     @DELETE
+    @Timed
     public void removeAttribution(@PathParam("groupID") String groupID, @PathParam("patientID") String patientID) {
         logger.debug("API request to remove attribution between {} and {}", groupID, patientID);
         try {
