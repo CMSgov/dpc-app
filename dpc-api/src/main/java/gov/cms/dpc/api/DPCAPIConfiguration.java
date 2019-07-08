@@ -32,7 +32,7 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @NotNull
     private String attributionURL;
 
-    private boolean encryptionDisabled;
+    private boolean authenticationDisabled;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -67,12 +67,12 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
         this.exportPath = exportPath;
     }
 
-    public boolean isEncryptionDisabled() {
-        return encryptionDisabled;
+    public boolean isAuthenticationDisabled() {
+        return authenticationDisabled;
     }
 
-    public void setEncryptionDisabled(boolean encryptionDisabled) {
-        this.encryptionDisabled = encryptionDisabled;
+    public void setAuthenticationDisabled(boolean authenticationDisabled) {
+        this.authenticationDisabled = authenticationDisabled;
     }
 
     @Override

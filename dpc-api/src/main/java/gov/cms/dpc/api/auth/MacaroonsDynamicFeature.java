@@ -32,7 +32,7 @@ public class MacaroonsDynamicFeature implements DynamicFeature {
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
 
         // If encryption is disabled via config, skip it.
-        if (this.config.isEncryptionDisabled()) {
+        if (this.config.isAuthenticationDisabled()) {
             return;
         }
 
