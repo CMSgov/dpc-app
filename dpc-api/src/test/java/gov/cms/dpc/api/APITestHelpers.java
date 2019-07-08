@@ -63,6 +63,7 @@ public class APITestHelpers {
         return macaroon;
     }
 
+    // TODO: Remove as part of DPC-373
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL,String macaroon) {
         final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
         client.registerInterceptor(new MacaroonsInterceptor(macaroon));
