@@ -24,6 +24,67 @@
         "min": 1
       },
       {
+        "id": "Patient.telecom",
+        "path": "Patient.telecom",
+        "definition": "Patient contact point",
+        "slicing": [
+          {
+            "discriminator": [
+              {
+                "type": "value",
+                "path": "system"
+              }
+            ],
+            "rules": "open"
+          }
+        ],
+        "min": 1
+      },
+      {
+        "path": "Patient.telecom",
+        "name": "MobilePhone",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "path": "Patient.telecom.system",
+        "min": 1,
+        "fixedCode": "sms"
+      },
+      {
+        "path": "Patient.telecom.value",
+        "min": 1
+      },
+      {
+        "path": "Patient.telecom.use",
+        "min": 1
+      },
+      {
+        "path": "Patient.telecom",
+        "name": "Email",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "path": "Patient.telecom.system",
+        "min": 1,
+        "fixedCode": "email"
+      },
+      {
+        "path": "Patient.telecom.value",
+        "min": 1
+      },
+      {
+        "path": "Patient.telecom.use",
+        "min": 1
+      },
+      {
+        "id": "Patient.gender",
+        "path": "Patient.gender",
+        "definition": "Gender",
+        "min": "1"
+      },
+      {
         "id": "Patient.birthDate",
         "path": "Patient.birthDate",
         "definition": "Birth date",
