@@ -116,6 +116,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     public List<String> provideAdditionalPaths() {
         return List.of("gov.cms.dpc.queue.models");
     }
+
+    @Provides
     @Singleton
     public IGenericClient provideFHIRClient(FhirContext ctx) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
