@@ -1,0 +1,34 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "dpc-patient",
+  "url": "https://dpc.cms.gov/fhir/StructureDefinitions/dpc-patient",
+  "name": "DPC Patient Definition",
+  "status": "draft",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Patient",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Patient.name",
+        "path": "Patient.name",
+        "definition": "Patient name",
+        "min": 1
+      },
+      {
+        "id": "Patient.name.given",
+        "path": "Patient.name.given",
+        "definition": "Patient given name",
+        "min": 1
+      },
+      {
+        "id": "Patient.birthDate",
+        "path": "Patient.birthDate",
+        "definition": "Birth date",
+        "min": 1
+      }
+    ]
+  }
+}
