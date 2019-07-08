@@ -17,7 +17,7 @@ public class MatchablePatient {
         final StructureDefinition matcheablePatient = new StructureDefinition();
         matcheablePatient.setId("dpc-patient");
         matcheablePatient.setName("Matcheable Patient");
-        matcheablePatient.setKind(StructureDefinition.StructureDefinitionKind.LOGICAL);
+        matcheablePatient.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
         matcheablePatient.setType("Patient");
         matcheablePatient.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Patient");
         matcheablePatient.setUrl("http://test.gov/patient");
@@ -28,16 +28,43 @@ public class MatchablePatient {
 
         final StructureDefinition.StructureDefinitionDifferentialComponent dbDiff = new StructureDefinition.StructureDefinitionDifferentialComponent();
 
+        final ElementDefinition patientElement = new ElementDefinition();
+        patientElement.setDefinition("Patient");
+        patientElement.setId("Patient");
+        patientElement.setPath("Patient");
+        patientElement.setMin(1);
+        patientElement.setMax("1");
+
         final ElementDefinition birthDayElement = new ElementDefinition();
         birthDayElement.setDefinition("Birth date");
         birthDayElement.setId("Patient.birthDate");
         birthDayElement.setPath("Patient.birthDate");
         birthDayElement.setMin(1);
-        birthDayElement.setMax("1");
+//        birthDayElement.setMax("1");
 
+//        dbDiff.addElement(birthDayElement);
+
+
+        // We need a name as well
+        final ElementDefinition nameElement = new ElementDefinition();
+        nameElement.setDefinition("Patient name");
+        nameElement.setId("Patient.name");
+        nameElement.setPath("Patient.name");
+        nameElement.setMin(1);
+
+        // First and last
+        final ElementDefinition givenElement = new ElementDefinition();
+        givenElement.setDefinition("Patient given name");
+        givenElement.setId("Patient.name.given");
+        givenElement.setPath("Patient.name.given");
+        givenElement.setMin(1);
+
+        dbDiff.addElement(nameElement);
+        dbDiff.addElement(givenElement);
         dbDiff.addElement(birthDayElement);
 
         matcheablePatient.setDifferential(dbDiff);
+
 
         // Snapshot
 //

@@ -60,7 +60,8 @@ class PatientValidation {
         patient.setMeta(meta);
 
         patient.setId("test-patient");
-//        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.addName().setFamily("Other");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
