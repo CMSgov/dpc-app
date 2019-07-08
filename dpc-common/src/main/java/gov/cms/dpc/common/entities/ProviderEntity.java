@@ -116,10 +116,10 @@ public class ProviderEntity {
     public static ProviderEntity fromFHIR(Practitioner resource, UUID resourceID) {
         final ProviderEntity provider = new ProviderEntity();
 
-        if (resource.getId() == null) {
+        if (resourceID == null) {
             provider.setProviderID(UUID.randomUUID());
         } else {
-            provider.setProviderID(FHIRExtractors.getEntityUUID(resource.getId()));
+            provider.setProviderID(resourceID);
         }
 
         provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));

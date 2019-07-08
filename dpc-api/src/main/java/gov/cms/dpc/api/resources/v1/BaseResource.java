@@ -18,21 +18,18 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractDataResource dr;
     private final AbstractRosterResource rr;
     private final AbstractOrganizationResource or;
-    private final String baseURL;
 
     @Inject
     public BaseResource(GroupResource gr,
                         JobResource jr,
                         DataResource dr,
                         RosterResource rr,
-                        OrganizationResource or,
-                        @ServiceBaseURL String baseURL) {
+                        OrganizationResource or) {
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
         this.rr = rr;
         this.or = or;
-        this.baseURL = baseURL;
     }
 
     @Override

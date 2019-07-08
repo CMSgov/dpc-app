@@ -5,17 +5,16 @@ import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.OrganizationEndpoints;
 import gov.cms.dpc.attribution.dao.tables.Organizations;
-import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationEndpointsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
+import gov.cms.dpc.attribution.utils.DBUtils;
 import gov.cms.dpc.common.entities.AddressEntity;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
-import gov.cms.dpc.attribution.utils.DBUtils;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import io.dropwizard.Application;
@@ -84,6 +83,19 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
             // Truncate everything
             DBUtils.truncateAllTables(context, "public");
+
+            final FhirContext ctx = FhirContext.forDstu3();
+            final IParser parser = ctx.newJsonParser();
+            // Start with the Organizations and their endpoints
+            seedOrganizationBundle(context, parser);
+
+            // Providers next
+            seedProviderBundle(context, parser);
+
+            // Get the test attribution seeds
+            seedAttributions(context, creationTimestamp);
+
+            logger.info("Finished loading seeds");
         }
     }
 
@@ -106,13 +118,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     .map(entity -> endpointsEntityToRecord(context, entity))
                     .forEach(context::executeInsert);
         }
-    }
-
-    private void truncateTables(DSLContext context) {
-        context.truncate(Patients.PATIENTS).cascade().execute();
-        context.truncate(Providers.PROVIDERS).cascade().execute();
-        context.truncate(Organizations.ORGANIZATIONS).cascade().execute();
-        context.truncate("root_keys").cascade();
     }
 
     private void seedProviderBundle(DSLContext context, IParser parser) throws IOException {

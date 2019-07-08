@@ -94,8 +94,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        // We expect that the existing seeds already exist, so this means we have 4 + 1 providers
-        assertEquals(5, providers.getEntry().size(), "Should have one provider");
+        // We expect that the existing seeds already exist, so this means we have 8 + 1 providers
+        assertEquals(9, providers.getEntry().size(), "Should have all 9 providers provider");
 
         // Try to search for the provider, we should get the same results
         final Bundle searchedProviders = client
