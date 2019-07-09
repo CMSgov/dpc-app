@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.definitions.DefinitionConstants;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
@@ -55,6 +56,7 @@ class PatientValidation {
         patient.setBirthDate(Date.valueOf("1990-01-01"));
         patient.setMultipleBirth(new BooleanType(false));
         patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
 
@@ -75,6 +77,7 @@ class PatientValidation {
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setMultipleBirth(new BooleanType(false));
         patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
 
@@ -90,6 +93,7 @@ class PatientValidation {
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
         patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
         final Executable singleWarning = () -> assertEquals(ResultSeverityEnum.WARNING, result.getMessages().get(0).getSeverity(), "Should have warning message");
@@ -117,6 +121,7 @@ class PatientValidation {
         patient.setBirthDate(Date.valueOf("1990-01-01"));
         patient.setMultipleBirth(new BooleanType(false));
         patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5500");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
@@ -125,6 +130,30 @@ class PatientValidation {
         patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.SMS).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
         final ValidationResult r2 = fhirValidator.validateWithResult(patient);
         assertTrue(r2.isSuccessful(), "Should have passed");
+    }
+
+    @Test
+    void testIdentifier() {
+        final Patient patient = generateFakePatient();
+        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.setBirthDate(Date.valueOf("1990-01-01"));
+        patient.setMultipleBirth(new BooleanType(false));
+        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
+
+        final ValidationResult result = fhirValidator.validateWithResult(patient);
+        assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
+                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
+
+        // Add an NPI
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-npi");
+
+        final ValidationResult r2 = fhirValidator.validateWithResult(patient);
+        assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
+                () -> assertEquals(2, r2.getMessages().size(), "Should have two failures for ID slice"));
+
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
+        final ValidationResult r3 = fhirValidator.validateWithResult(patient);
+        assertTrue(r3.isSuccessful(), "Should have passed");
     }
 
     Patient generateFakePatient() {
