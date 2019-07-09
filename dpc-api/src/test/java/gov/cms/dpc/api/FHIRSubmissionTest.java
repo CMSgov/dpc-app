@@ -1,6 +1,5 @@
 package gov.cms.dpc.api;
 
-import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
@@ -41,7 +40,6 @@ class FHIRSubmissionTest {
     private static final String TEST_PROVIDER_ID = "1";
     private final JobQueue queue = spy(MemoryQueue.class);
     private final AttributionServiceClient client = mock(AttributionServiceClient.class);
-    private static final FhirContext fhirContext = FhirContext.forDstu3();
     private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client, TEST_BASE_URL)).build();
     private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue, TEST_BASE_URL)).build();
 
