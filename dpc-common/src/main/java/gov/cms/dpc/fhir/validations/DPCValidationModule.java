@@ -18,12 +18,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class ValidationModule implements IValidationSupport {
+public class DPCValidationModule implements IValidationSupport {
 
     private final Map<String, StructureDefinition> structureMap;
 
     @Inject
-    ValidationModule(FhirContext ctx) {
+    DPCValidationModule(FhirContext ctx) {
         try {
             this.structureMap = parseBundledDefinitions(ctx);
         } catch (IOException e) {

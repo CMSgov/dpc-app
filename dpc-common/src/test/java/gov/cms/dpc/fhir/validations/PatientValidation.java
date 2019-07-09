@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -23,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PatientValidation {
 
     private static FhirValidator fhirValidator;
-    private static ValidationModule dpcModule;
+    private static DPCValidationModule dpcModule;
     private static FhirContext ctx;
 
     @BeforeAll
@@ -37,7 +36,7 @@ class PatientValidation {
         fhirValidator.registerValidatorModule(instanceValidator);
 
 
-        dpcModule = new ValidationModule(ctx);
+        dpcModule = new DPCValidationModule(ctx);
         final ValidationSupportChain chain = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
         instanceValidator.setValidationSupport(chain);
     }
