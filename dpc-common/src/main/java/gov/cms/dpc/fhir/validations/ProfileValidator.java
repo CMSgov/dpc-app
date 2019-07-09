@@ -4,7 +4,6 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.dstu3.model.StringType;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
@@ -15,10 +14,6 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
     private static final String VALIDATION_CONSTANT = "{gov.cms.dpc.fhir.validations.ProfileValidator.";
     private final FhirValidator validator;
     private String profileURI;
-
-    public ProfileValidator() {
-        this.validator = null;
-    }
 
     @Inject
     public ProfileValidator(FhirValidator validator) {
@@ -35,8 +30,14 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
         // Disable default error messages, as we want to generate our own
         context.disableDefaultConstraintViolation();
 
+        final boolean hasProfile = value
+                .getMeta()
+                .getProfile()
+                .stream()
+                .anyMatch(pred -> pred.getValueAsString().equals(profileURI));
+
         // Check to ensure that the resource has the necessary profile
-        if (value.getMeta().getProfile().contains(new StringType(this.profileURI))) {
+        if (hasProfile) {
             final ValidationResult result = this.validator.validateWithResult(value);
 
             if (result.isSuccessful()) {

@@ -14,6 +14,8 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
+import javax.validation.Validator;
+
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     public static void main(final String[] args) throws Exception {
@@ -44,6 +46,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     @Override
     public void run(final DPCAPIConfiguration configuration,
                     final Environment environment) {
-        // Not used yet
+        // Not used
     }
 }

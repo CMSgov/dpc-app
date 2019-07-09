@@ -10,12 +10,17 @@ import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.MethodOutcomeHandler;
-import gov.cms.dpc.fhir.validations.DPCValidationModule;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import gov.cms.dpc.fhir.validations.*;
+import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
+import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
+import gov.cms.dpc.fhir.validations.dropwizard.ValidationConfigurationContextResolver;
 
 import javax.inject.Singleton;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorFactory;
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
+import java.util.Set;
 
 public class FHIRModule extends AbstractModule {
 
@@ -32,9 +37,13 @@ public class FHIRModule extends AbstractModule {
         bind(FHIRExceptionHandler.class);
         bind(FHIRValidationExceptionHandler.class);
         bind(FHIRRequestFeature.class);
+        bind(InjectingConstraintValidatorFactory.class);
+        bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
+        bind(ValidationConfigurationContextResolver.class);
 
         // Validator
-        bind(DPCValidationModule.class).in(Scopes.SINGLETON);
+        bind(FHIRProfileValidator.class);
+        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
     }
 
     @Provides
@@ -44,17 +53,14 @@ public class FHIRModule extends AbstractModule {
     }
 
     @Provides
-    @Singleton
-    FhirValidator provideValidator(FhirContext ctx, DPCValidationModule dpcModule) {
-        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
-        final FhirValidator fhirValidator = ctx.newValidator();
-        fhirValidator.setValidateAgainstStandardSchematron(true);
-        fhirValidator.setValidateAgainstStandardSchema(true);
-        fhirValidator.registerValidatorModule(instanceValidator);
+    public ValidatorFactory provideValidatorFactory(InjectingConstraintValidatorFactory factory) {
+        return Validation.byDefaultProvider()
+                .configure().constraintValidatorFactory(factory)
+                .buildValidatorFactory();
+    }
 
-        final ValidationSupportChain chain = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
-        instanceValidator.setValidationSupport(chain);
-
-        return fhirValidator;
+    @Provides
+    Set<ConstraintValidator> provideValidators(FhirValidator validator) {
+        return Set.of(new ProfileValidator(validator));
     }
 }

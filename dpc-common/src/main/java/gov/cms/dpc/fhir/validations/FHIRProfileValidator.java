@@ -18,12 +18,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class DPCValidationModule implements IValidationSupport {
+public class FHIRProfileValidator implements IValidationSupport {
 
     private final Map<String, StructureDefinition> structureMap;
 
     @Inject
-    DPCValidationModule(FhirContext ctx) {
+    public FHIRProfileValidator(FhirContext ctx) {
         try {
             this.structureMap = parseBundledDefinitions(ctx);
         } catch (IOException e) {
@@ -127,7 +127,9 @@ public class DPCValidationModule implements IValidationSupport {
 
     private StructureDefinition mergeDiff(FhirContext ctx, DefaultProfileValidationSupport defaultValidation, ProfileUtilities utils, StructureDefinition diffStruct) {
         final StructureDefinition baseStructure = defaultValidation.fetchStructureDefinition(ctx, diffStruct.getBaseDefinition());
-        utils.generateSnapshot(baseStructure, diffStruct, "", "");
+        if (baseStructure != null) {
+            utils.generateSnapshot(baseStructure, diffStruct, "", "");
+        }
 
         return diffStruct;
     }
