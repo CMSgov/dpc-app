@@ -67,7 +67,7 @@ public class JobResource extends AbstractJobResource {
                     assert(job.getCompleteTime().isPresent());
                     final String resourceQueryParam = job.getResourceTypes().stream()
                             .map(ResourceType::toString)
-                            .collect(Collectors.joining(GroupResource.LIST_DELIM));
+                            .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
                     final JobCompletionModel completionModel = new JobCompletionModel(
                             job.getStartTime().orElseThrow(),
                             String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),

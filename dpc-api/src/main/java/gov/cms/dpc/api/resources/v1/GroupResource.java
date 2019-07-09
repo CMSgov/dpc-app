@@ -32,7 +32,7 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
     // The delimiter for the '_types' list query param.
-    public static final String LIST_DELIM = ",";
+    static final String LIST_DELIMITER = ",";
 
     private final JobQueue queue;
     private final AttributionEngine client;
@@ -120,7 +120,7 @@ public class GroupResource extends AbstractGroupResource {
         }
 
         final var resources = new ArrayList<ResourceType>();
-        for (String queryResource : resourcesListParam.split(LIST_DELIM, -1)) {
+        for (String queryResource : resourcesListParam.split(LIST_DELIMITER, -1)) {
             final var foundResourceType = matchResourceType(queryResource);
             if (foundResourceType.isEmpty()) {
                 throw new BadRequestException(String.format("Unsupported resource name in the '_type' query parameter: %s", queryResource));
@@ -142,7 +142,7 @@ public class GroupResource extends AbstractGroupResource {
             throw new BadRequestException("'_since' is not supported");
         }
 
-        // _outputFormat
+        // _outputFormat only supports FHIR_NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
         }
