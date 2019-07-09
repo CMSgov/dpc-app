@@ -4,6 +4,10 @@ package gov.cms.dpc.fhir;
  * Common constants for FHIR end-points
  */
 public class FHIRHeaders {
+    private FHIRHeaders() {
+        // Private to block creation
+    }
+
     /**
      * Header required for $export operations
      */
