@@ -42,7 +42,7 @@ class FHIRSubmissionTest {
     private final JobQueue queue = spy(MemoryQueue.class);
     private final AttributionServiceClient client = mock(AttributionServiceClient.class);
     private static final FhirContext fhirContext = FhirContext.forDstu3();
-    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client, TEST_BASE_URL, fhirContext)).build();
+    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client, TEST_BASE_URL)).build();
     private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue, TEST_BASE_URL)).build();
 
 
