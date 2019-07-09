@@ -2,6 +2,7 @@ package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.validations.definitions.DefinitionConstants;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -11,6 +12,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.sql.Date;
 
@@ -51,7 +53,8 @@ class PatientValidation {
         final Patient patient = generateFakePatient();
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
-        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("test@example.com");
+        patient.setMultipleBirth(new BooleanType(false));
+        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
 
@@ -70,7 +73,8 @@ class PatientValidation {
 
         final Patient patient = generateFakePatient();
         patient.addName().setFamily("Patient").addGiven("Test");
-        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("test@example.com");
+        patient.setMultipleBirth(new BooleanType(false));
+        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
 
@@ -85,16 +89,20 @@ class PatientValidation {
         final Patient patient = generateFakePatient();
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
-        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("test@example.com");
+        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
-        assertTrue(result.isSuccessful(), "Should have passed");
+        final Executable singleWarning = () -> assertEquals(ResultSeverityEnum.WARNING, result.getMessages().get(0).getSeverity(), "Should have warning message");
+        assertAll(() -> assertTrue(result.isSuccessful(), "Should have passed with warning"),
+                () -> assertEquals(1, result.getMessages().size(), "Should have a single warning message"),
+                singleWarning);
 
         // Add a boolean birth order
         patient.setMultipleBirth(new BooleanType(true));
         final ValidationResult r2 = fhirValidator.validateWithResult(patient);
-        assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(1, r2.getMessages().size(), "Should have a single failure"));
+        assertAll(() -> assertTrue(r2.isSuccessful(), "Should have failed validation"),
+                () -> assertEquals(1, r2.getMessages().size(), "Should have a single failure"),
+                singleWarning);
 
         patient.setMultipleBirth(new IntegerType(2));
         final ValidationResult r3 = fhirValidator.validateWithResult(patient);
@@ -107,7 +115,8 @@ class PatientValidation {
         final Patient patient = generateFakePatient();
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
-//        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5500");
+        patient.setMultipleBirth(new BooleanType(false));
+        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5500");
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),

@@ -22,6 +22,12 @@
             "human": "Must have an sms-capable phone",
             "expression": "Patient.telecom.where(system = 'phone' and use = 'mobile').exists() or telecom.where(system = 'sms').exists()",
             "source": "dpc-patient"
+          },
+          {
+            "key": "birth-1",
+            "severity": "warning",
+            "human": "If patient is part of multiple-birth, must specify birth order",
+            "expression": "Patient.multipleBirth.exists() and ((Patient.multipleBirthBoolean = false) or (Patient.multipleBirthInteger > 0))"
           }
         ]
       },
