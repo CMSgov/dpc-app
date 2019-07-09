@@ -28,7 +28,7 @@
             "severity": "warning",
             "human": "If patient is part of multiple-birth, must specify birth order",
             "expression": "Patient.multipleBirth.exists() and ((Patient.multipleBirthBoolean = false) or (Patient.multipleBirthInteger > 0))"
-          }
+          },
         ]
       },
       {
@@ -82,6 +82,42 @@
         "id": "Patient.birthDate",
         "path": "Patient.birthDate",
         "definition": "Birth date",
+        "min": 1
+      },
+      {
+        "id": "Patient.address",
+        "path": "Patient.address",
+        "definition": "Address",
+        "min": 1
+      },
+      {
+        "id": "Patient.address.text",
+        "path": "Patient.address.text",
+        "definition": "Cannot have text representation",
+        "max": "0"
+      },
+      {
+        "id": "Patient.address.line",
+        "path": "Patient.address.line",
+        "definition": "Address line",
+        "min": 1
+      },
+      {
+        "id": "Patient.address.city",
+        "path": "Patient.address.city",
+        "definition": "Address city",
+        "min": 1
+      },
+      {
+        "id": "Patient.address.state",
+        "path": "Patient.address.state",
+        "definition": "Address state",
+        "min": 1
+      },
+      {
+        "id": "Patient.address.postalCode",
+        "path": "Patient.address.postalCode",
+        "definition": "Address postal code",
         "min": 1
       }
     ]
