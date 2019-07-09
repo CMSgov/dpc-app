@@ -66,7 +66,7 @@ public class DistributedQueue implements JobQueue {
         this.waitTimer = metricBuilder.registerTimer("waitTime");
         this.successTimer = metricBuilder.registerTimer("successTime");
         this.failureTimer = metricBuilder.registerTimer("failureTime");
-        metricBuilder.registerCachedGuage("queueLength", this::queueSize);
+        metricBuilder.registerCachedGauge("queueLength", this::queueSize);
     }
 
     @Override
