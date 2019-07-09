@@ -107,11 +107,11 @@ class PatientValidation {
         final Patient patient = generateFakePatient();
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
-        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5500");
+//        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5500");
 
-//        final ValidationResult result = fhirValidator.validateWithResult(patient);
-//        assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
-//                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
+        final ValidationResult result = fhirValidator.validateWithResult(patient);
+        assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
+                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
         patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.SMS).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
         final ValidationResult r2 = fhirValidator.validateWithResult(patient);

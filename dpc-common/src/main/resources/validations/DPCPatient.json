@@ -12,6 +12,20 @@
   "differential": {
     "element": [
       {
+        "id": "Patient",
+        "path": "Patient",
+        "name": "DPC Patient",
+        "constraint": [
+          {
+            "key": "tel-1",
+            "severity": "error",
+            "human": "Must have an sms-capable phone",
+            "expression": "Patient.telecom.where(system = 'phone' and use = 'mobile').exists() or telecom.where(system = 'sms').exists()",
+            "source": "dpc-patient"
+          }
+        ]
+      },
+      {
         "id": "Patient.name",
         "path": "Patient.name",
         "definition": "Patient name",
@@ -21,61 +35,6 @@
         "id": "Patient.name.given",
         "path": "Patient.name.given",
         "definition": "Patient given name",
-        "min": 1
-      },
-      {
-        "id": "Patient.telecom",
-        "path": "Patient.telecom",
-        "definition": "Patient contact point",
-        "slicing": [
-          {
-            "discriminator": [
-              {
-                "type": "value",
-                "path": "system"
-              }
-            ],
-            "rules": "open"
-          }
-        ],
-        "min": 1
-      },
-      {
-        "path": "Patient.telecom",
-        "name": "MobilePhone",
-        "min": 0,
-        "max": "1"
-      },
-      {
-        "path": "Patient.telecom.system",
-        "min": 1,
-        "fixedCode": "sms"
-      },
-      {
-        "path": "Patient.telecom.value",
-        "min": 1
-      },
-      {
-        "path": "Patient.telecom.use",
-        "min": 1
-      },
-      {
-        "path": "Patient.telecom",
-        "name": "Email",
-        "min": 0,
-        "max": "1"
-      },
-      {
-        "path": "Patient.telecom.system",
-        "min": 1,
-        "fixedCode": "email"
-      },
-      {
-        "path": "Patient.telecom.value",
-        "min": 1
-      },
-      {
-        "path": "Patient.telecom.use",
         "min": 1
       },
       {
