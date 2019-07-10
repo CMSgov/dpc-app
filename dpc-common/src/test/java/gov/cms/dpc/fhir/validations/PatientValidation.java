@@ -45,7 +45,10 @@ class PatientValidation {
     void definitionIsValid() {
         final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(ctx, DefinitionConstants.DPC_PATIENT_URI.toString());
         final ValidationResult result = fhirValidator.validateWithResult(patientDefinition);
-        assertTrue(result.isSuccessful(), "Should be a valid structure definition");
+        // There should be a single failure, but we know about it.
+        // This needs to stay until https://github.com/jamesagnew/hapi-fhir/pull/1375 lands in upstream.
+        assertAll(() -> assertEquals(1, result.getMessages().size(), "Should have a single failure"),
+                () -> assertEquals("URI values cannot have whitespace", result.getMessages().get(0).getMessage(), "Should have URI failure"));
     }
 
     @Test
