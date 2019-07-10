@@ -39,8 +39,8 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
         return database;
     }
 
-    DPCAPIConfiguration() {
-//        Not used;
+    public DPCAPIConfiguration() {
+        // Jackson required
     }
 
     public JerseyClientConfiguration getHttpClient() {

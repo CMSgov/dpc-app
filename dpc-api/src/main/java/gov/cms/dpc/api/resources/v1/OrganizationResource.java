@@ -17,7 +17,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     private final IGenericClient client;
 
     @Inject
-    OrganizationResource(IGenericClient client) {
+    public OrganizationResource(IGenericClient client) {
         this.client = client;
     }
 

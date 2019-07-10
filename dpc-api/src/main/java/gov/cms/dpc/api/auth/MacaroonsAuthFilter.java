@@ -48,6 +48,10 @@ public class MacaroonsAuthFilter extends AuthFilter<String, OrganizationPrincipa
             macaroon = requestContext.getUriInfo().getQueryParameters().getFirst(TOKEN_URI_PARAM);
         }
 
+        if (macaroon == null) {
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
+
         // We need to verify that the Macaroon is valid
         final String pathValue = requestContext.getUriInfo().getPathParameters().getFirst(this.pa.pathParam());
         if (pathValue == null) {
