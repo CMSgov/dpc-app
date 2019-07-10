@@ -33,7 +33,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The top level of the Aggregation Engine
+ * The top level of the Aggregation Engine. {@link ResourceFetcher} does the fetching from
+ * BlueButton and {@link ResourceWriter} does the writing.
+ *
+ * Implementation Notes:
+ * - There is a single flow that does the work for a job
+ * - It starts with an iteration of resource types in a job and produces a series of JobResult for that resource type
+ * - The flow is mainly sequential, with parallel sections for I/O operations.
+ * - Because the flow has parallel parts JobResults can be produced out sequence and errors can happen on separate branches.
  */
 public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
@@ -49,7 +56,7 @@ public class AggregationEngine implements Runnable {
     private Disposable subscribe;
 
     /**
-     * Create an engine
+     * Create an engine. Most likely this will be a singleton.
      *
      * @param bbclient    - {@link BlueButtonClient } to use
      * @param queue       - {@link JobQueue} that will direct the work done
@@ -92,7 +99,7 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Stop the engine
+     * Stop the engine.
      */
     public void stop() {
         logger.info("Shutting down aggregation engine");
@@ -100,7 +107,7 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * The main run-loop of the engine
+     * The main run-loop of the engine.
      */
     private void pollQueue() {
         subscribe = Observable.fromCallable(this.queue::workJob)
@@ -115,7 +122,7 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Work a single job in the queue to completion
+     * Work a single job in the queue to completion.
      *
      * @param jobPair - the job to execute
      */
@@ -130,7 +137,8 @@ public class AggregationEngine implements Runnable {
             final var results = Flowable.fromIterable(job.getResourceTypes())
                     .flatMap(resourceType -> completeResource(job, resourceType, errorCounter))
                     .toList()
-                    .blockingGet();
+                    .blockingGet(); // Wait on the main thread until completion
+
             logger.info("COMPLETED job {}", jobID);
             this.queue.completeJob(jobID, JobStatus.COMPLETED, results);
         } catch(Exception error) {
@@ -151,7 +159,7 @@ public class AggregationEngine implements Runnable {
             return Flowable.empty();
         }
 
-        // Make this flow hot (ie. only called once)
+        // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), resourceType, operationsConfig);
         final Flowable<Resource> mixedFlow;
         if (operationsConfig.isParallelEnabled()) {
@@ -198,14 +206,16 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Setup a global handler to catch the UndeliverableException case.
+     * Setup a global handler to catch the UndeliverableException case. Can be called from anywhere.
      */
     static void setGlobalErrorHandler() {
         RxJavaPlugins.setErrorHandler(AggregationEngine::errorHandler);
     }
 
     /**
-     * Global error handler
+     * Global error handler. Needed to catch undeliverable exceptions.
+     * 
+     * See: https://github.com/ReactiveX/RxJava/wiki/What's-different-in-2.0#error-handling
      *
      * @param e is the exception thrown
      */
