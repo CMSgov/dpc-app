@@ -44,15 +44,17 @@ class AggregationEngineTest {
     static void setupAll() {
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
+        AggregationEngine.setGlobalErrorHandler();
+        fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
     }
 
     @BeforeEach
     void setupEach() {
-        fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         queue = new MemoryQueue();
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(3, 1000, false, exportPath, false);
+        var operationalConfig = new OperationsConfig(3, 1000, true, exportPath, false);
         engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        AggregationEngine.setGlobalErrorHandler();
     }
 
     /**

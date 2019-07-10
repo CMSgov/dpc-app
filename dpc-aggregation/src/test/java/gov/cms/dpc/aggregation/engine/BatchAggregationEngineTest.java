@@ -37,7 +37,9 @@ class BatchAggregationEngineTest {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        operationsConfig = new OperationsConfig(3, 10, false, exportPath, false);
+        operationsConfig = new OperationsConfig(3, 10, true, exportPath, false);
+        AggregationEngine.setGlobalErrorHandler();
+        fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
     }
 
     @BeforeEach

@@ -16,12 +16,14 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,6 +50,7 @@ public class AggregationEngine implements Runnable {
      * @param bbclient    - {@link BlueButtonClient } to use
      * @param queue       - {@link JobQueue} that will direct the work done
      * @param fhirContext - {@link FhirContext} for DSTU3 resources
+     * @param metricRegistry - {@link MetricRegistry} for metrics
      * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
       */
     @Inject
@@ -72,6 +75,7 @@ public class AggregationEngine implements Runnable {
                 operationsConfig.getExportPath(),
                 operationsConfig.getResourcesPerFileCount(),
                 operationsConfig.isParallelRequestsEnabled());
+        setGlobalErrorHandler();
         this.pollQueue();
     }
 
@@ -87,7 +91,6 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine
      */
     private void pollQueue() {
-        setGlobalErrorHandler();
         subscribe = Observable.fromCallable(this.queue::workJob)
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
@@ -182,19 +185,40 @@ public class AggregationEngine implements Runnable {
     /**
      * Setup a global handler to catch the UndeliverableException case.
      */
-    private void setGlobalErrorHandler() {
-        RxJavaPlugins.setErrorHandler(e -> {
-            // Undeliverable Exceptions may happen because of parallel execution. One thread will
-            // throw an exception which will cause the job to fail and (close its consumer).
-            // Another thread will throw an exception as well which will be undeliverable
-            if (e instanceof UndeliverableException) {
-                // Merely log undeliverable exceptions
-                logger.error(e.getMessage());
-            } else {
-                // Forward all others to current thread's uncaught exception handler
-                final var thread = Thread.currentThread();
-                thread.getUncaughtExceptionHandler().uncaughtException(thread, e);
-            }
-        });
+    static void setGlobalErrorHandler() {
+        RxJavaPlugins.setErrorHandler(AggregationEngine::errorHandler);
+    }
+
+    /**
+     * Global error handler
+     *
+     * @param e is the exception thrown
+     */
+    static void errorHandler(Throwable e) {
+        // Undeliverable Exceptions may happen because of parallel execution. One thread will
+        // throw an exception which will cause the job to fail and (close its consumer).
+        // Another thread will throw an exception as well which will be undeliverable
+        if (e instanceof UndeliverableException) {
+            e = e.getCause();
+        }
+        if (e instanceof IOException) {
+            // Expected: network problem or API that throws on cancellation
+            return;
+        }
+        if (e instanceof InterruptedException) {
+            // Expected: some blocking code was interrupted by a dispose call
+            return;
+        }
+        if ((e instanceof NullPointerException) || (e instanceof IllegalArgumentException)) {
+            // that's likely a bug in the application
+            Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+            return;
+        }
+        if (e instanceof IllegalStateException) {
+            // that's a bug in RxJava or in a custom operator
+            Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+            return;
+        }
+        logger.warn("Undeliverable exception received: ", e);
     }
 }
