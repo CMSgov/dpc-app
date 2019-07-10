@@ -37,6 +37,21 @@ class TestResourceTest {
     private static ResourceExtension RESOURCES = buildResource();
 
     @Test
+    void testNonProfiledPatient() {
+        final Patient patient = generateFakePatient();
+        // Override metadata to remove profile
+        patient.setMeta(new Meta());
+        final FhirContext ctx = FhirContext.forDstu3();
+        final IParser parser = ctx.newJsonParser();
+        final String patientString = parser.encodeResourceToString(patient);
+        final Response response = RESOURCES.target("/")
+                .request(FHIRMediaTypes.FHIR_JSON)
+                .post(Entity.entity(patientString, FHIRMediaTypes.FHIR_JSON));
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatus(), "Should have failed");
+    }
+
+    @Test
     void testInvalidPatient() {
         final Patient patient = generateFakePatient();
         final FhirContext ctx = FhirContext.forDstu3();
