@@ -80,4 +80,16 @@ public class ContactPointEntity implements Serializable {
     public void setContactEntity(ContactEntity contactEntity) {
         this.contactEntity = contactEntity;
     }
+
+    public ContactPoint toFHIR() {
+        final ContactPoint cp = new ContactPoint();
+        cp.setSystem(this.system);
+        cp.setUse(this.use);
+        cp.setValue(this.value);
+
+        if (this.rank != null) {
+            cp.setRank(this.rank);
+        }
+        return cp;
+    }
 }

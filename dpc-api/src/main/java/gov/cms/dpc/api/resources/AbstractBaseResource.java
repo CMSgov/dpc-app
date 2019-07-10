@@ -35,6 +35,9 @@ public abstract class AbstractBaseResource {
     @GET
     public abstract CapabilityStatement metadata();
 
+    @Path("/Organization")
+    public abstract AbstractOrganizationResource organizationOperations();
+
     /**
      * Returns the current API version
      *
