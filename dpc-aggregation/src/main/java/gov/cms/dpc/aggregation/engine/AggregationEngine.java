@@ -64,12 +64,14 @@ public class AggregationEngine implements Runnable {
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
 
+        // Thread pools
         final var cpuCount = Runtime.getRuntime().availableProcessors();
-        final var fetchPool = Executors.newFixedThreadPool((int)Math.round(cpuCount * 2.5));
-        fetchScheduler = Schedulers.from(fetchPool);
-        final var writePool = Executors.newFixedThreadPool((int)Math.round(cpuCount * 0.5));
-        writeScheduler = Schedulers.from(writePool);
+        final int fetchCount = Math.max((int)(cpuCount * operationsConfig.getFetchThreadFactor()),1);
+        fetchScheduler = Schedulers.from(Executors.newFixedThreadPool(fetchCount));
+        final int writeCount = Math.max((int)(cpuCount * operationsConfig.getWriteThreadFactor()),1);
+        writeScheduler = Schedulers.from(Executors.newFixedThreadPool(writeCount));
 
+        // Metrics
         final var metricFactory = new MetricMaker(metricRegistry, AggregationEngine.class);
         resourceMeter = metricFactory.registerMeter("resourceFetched");
         operationalOutcomeMeter = metricFactory.registerMeter("operationalOutcomes");
@@ -81,10 +83,10 @@ public class AggregationEngine implements Runnable {
     @Override
     public void run() {
         // Run loop
-        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelRequests:{} ",
+        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelEnabled:{} ",
                 operationsConfig.getExportPath(),
                 operationsConfig.getResourcesPerFileCount(),
-                operationsConfig.isParallelRequestsEnabled());
+                operationsConfig.isParallelEnabled());
         setGlobalErrorHandler();
         this.pollQueue();
     }
@@ -152,7 +154,7 @@ public class AggregationEngine implements Runnable {
         // Make this flow hot (ie. only called once)
         final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), resourceType, operationsConfig);
         final Flowable<Resource> mixedFlow;
-        if (operationsConfig.isParallelRequestsEnabled()) {
+        if (operationsConfig.isParallelEnabled()) {
             mixedFlow = Flowable.fromIterable(job.getPatients())
                     .parallel()
                     .runOn(fetchScheduler)
@@ -207,7 +209,7 @@ public class AggregationEngine implements Runnable {
      *
      * @param e is the exception thrown
      */
-    static void errorHandler(Throwable e) {
+    private static void errorHandler(Throwable e) {
         // Undeliverable Exceptions may happen because of parallel execution. One thread will
         // throw an exception which will cause the job to fail and (close its consumer).
         // Another thread will throw an exception as well which will be undeliverable

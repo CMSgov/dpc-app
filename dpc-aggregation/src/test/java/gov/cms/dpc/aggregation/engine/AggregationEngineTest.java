@@ -52,7 +52,7 @@ class AggregationEngineTest {
     void setupEach() {
         queue = new MemoryQueue();
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(3, 1000, true, exportPath, false);
+        var operationalConfig = new OperationsConfig(1000, exportPath);
         engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
         AggregationEngine.setGlobalErrorHandler();
     }

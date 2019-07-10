@@ -60,10 +60,13 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     OperationsConfig provideOperationsConfig() {
         final var config = getConfiguration();
-        return new OperationsConfig(config.getRetryCount(),
-                config.getResourcesPerFileCount(),
-                config.isParallelRequestsEnabled(),
+
+        return new OperationsConfig(config.getResourcesPerFileCount(),
                 config.getExportPath(),
-                config.isEncryptionEnabled());
+                config.getRetryCount(),
+                config.isEncryptionEnabled(),
+                config.isParallelEnabled(),
+                config.getWriteThreadFactor(),
+                config.getFetchThreadFactor());
     }
 }

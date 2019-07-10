@@ -57,7 +57,7 @@ class EncryptingAggregationEngineTest {
         // Use the test.conf as the base for config. encrypt.conf will only enable encryption.
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        operationsConfig = new OperationsConfig(3, 1000, true, exportPath, true);
+        operationsConfig = new OperationsConfig(1000, exportPath, 3, true, true, 0.5f, 2.5f);
         AggregationEngine.setGlobalErrorHandler();
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
     }
