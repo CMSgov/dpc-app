@@ -5,7 +5,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
     <changeSet id="create-rootkey-table" author="nickrobison-usds">
-        <createTable tableName="root_keys">
+        <createTable tableName="ROOT_KEYS">
             <column name="id" type="VARCHAR">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -20,7 +20,7 @@
             </column>
         </createTable>
 
-        <createIndex tableName="root_keys" indexName="root_key_expire_idx">
+        <createIndex tableName="ROOT_KEYS" indexName="root_key_expire_idx">
             <column name="expires"/>
         </createIndex>
 
@@ -31,7 +31,7 @@
             LANGUAGE plpgsql
             AS $$
             BEGIN
-            DELETE FROM root_keys WHERE expires < NOW();
+            DELETE FROM ROOT_KEYS WHERE expires < NOW();
             RETURN NEW;
             END;
             $$;
@@ -40,7 +40,7 @@
 
         <createProcedure>
             CREATE TRIGGER root_key_expiration_trigger
-            BEFORE INSERT ON root_keys
+            BEFORE INSERT ON ROOT_KEYS
             EXECUTE PROCEDURE expire_root_keys();
         </createProcedure>
     </changeSet>

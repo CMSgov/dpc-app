@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 /**
- * Implementation of {@link CaveatSupplier} which generates an expiration caveat based on the provided {@link gov.cms.dpc.attribution.config.TokenPolicy.ExpirationPolicy}
+ * Implementation of {@link CaveatSupplier} which generates an expiration caveat based on the provided {@link TokenPolicy.ExpirationPolicy}
  */
 public class ExpirationCaveatSupplier implements CaveatSupplier {
 

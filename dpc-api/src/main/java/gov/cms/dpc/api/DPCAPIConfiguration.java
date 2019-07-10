@@ -32,13 +32,15 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @NotNull
     private String attributionURL;
 
+    private boolean authenticationDisabled;
+
     @Override
     public DataSourceFactory getDatabase() {
         return database;
     }
 
-    DPCAPIConfiguration() {
-//        Not used;
+    public DPCAPIConfiguration() {
+        // Jackson required
     }
 
     public JerseyClientConfiguration getHttpClient() {
@@ -63,6 +65,14 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     public void setExportPath(String exportPath) {
         this.exportPath = exportPath;
+    }
+
+    public boolean isAuthenticationDisabled() {
+        return authenticationDisabled;
+    }
+
+    public void setAuthenticationDisabled(boolean authenticationDisabled) {
+        this.authenticationDisabled = authenticationDisabled;
     }
 
     @Override

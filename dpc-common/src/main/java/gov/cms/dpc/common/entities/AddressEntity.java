@@ -2,11 +2,13 @@ package gov.cms.dpc.common.entities;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Address;
+import org.hl7.fhir.dstu3.model.StringType;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 @Embeddable
 public class AddressEntity implements Serializable {
@@ -103,5 +105,20 @@ public class AddressEntity implements Serializable {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public Address toFHIR() {
+        final Address address = new Address();
+
+        address.setCity(this.city);
+        address.setCountry(this.country);
+        address.setDistrict(this.district);
+        address.setPostalCode(this.postalCode);
+        address.setState(this.state);
+        address.setUse(this.use);
+        address.setType(this.type);
+        address.setLine(List.of(new StringType(this.line1), new StringType(this.line2)));
+
+        return address;
     }
 }

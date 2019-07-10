@@ -6,6 +6,8 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 
 import java.util.Optional;
 
+import static gov.cms.dpc.attribution.macaroons.VerifierConstants.NO_MATCH;
+
 /**
  * Implementation of {@link CaveatVerifier} which verifies that token version meets a minimum threshold
  */
@@ -25,7 +27,8 @@ public class VersionCaveatVerifier implements CaveatVerifier {
             if (tokenVersion < minimumVersion) {
                 return Optional.of(String.format("Token version '%d' is not supported. Minimum is: %s", tokenVersion, minimumVersion));
             }
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of(NO_MATCH);
     }
 }

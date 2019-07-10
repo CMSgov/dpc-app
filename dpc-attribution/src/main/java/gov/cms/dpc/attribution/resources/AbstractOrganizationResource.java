@@ -17,6 +17,10 @@ public abstract class AbstractOrganizationResource {
         // Not used
     }
 
+    @GET
+    @FHIR
+    public abstract Bundle searchAndValidateOrganizations(String tokenTag);
+
     /**
      * Register a {@link Organization} with the API
      * <p>
@@ -29,6 +33,11 @@ public abstract class AbstractOrganizationResource {
     @POST
     @FHIR
     public abstract Response createOrganization(Bundle bundle);
+
+    @GET
+    @FHIR
+    @Path("/{organizationID}")
+    public abstract Organization getOrganization(UUID organizationID);
 
     /**
      * Get authentication token for {@link Organization}.
@@ -57,9 +66,9 @@ public abstract class AbstractOrganizationResource {
      *
      * @param organizationID - {@link UUID} organization ID
      * @param token          - {@link String} representation of authorization token (optionally base64 encoded)
-     * @return - {@link Boolean} {@code true} token is valid. {@code false} token is not valid
+     * @return - {@link Response} with status {@link Response.Status#OK} if token is valid. {@link Response.Status#UNAUTHORIZED} if token is not valid
      */
     @GET
     @Path("/{organizationID}/token/verify")
-    public abstract boolean verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token);
+    public abstract Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token);
 }

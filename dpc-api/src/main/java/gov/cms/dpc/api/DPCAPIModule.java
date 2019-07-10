@@ -2,13 +2,17 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.annotations.AttributionService;
-import gov.cms.dpc.api.cli.DemoCommand;
+import gov.cms.dpc.api.auth.MacaroonsAuthFilter;
+import gov.cms.dpc.api.auth.MacaroonsAuthenticator;
+import gov.cms.dpc.api.auth.MacaroonsAuthorizer;
+import gov.cms.dpc.api.auth.MacaroonsDynamicFeature;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.health.AttributionHealthCheck;
 import gov.cms.dpc.api.resources.TestResource;
@@ -54,6 +58,13 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(JobResource.class);
         binder.bind(DataResource.class);
         binder.bind(RosterResource.class);
+        binder.bind(OrganizationResource.class);
+
+        // Auth
+        binder.bind(MacaroonsAuthorizer.class);
+        binder.bind(MacaroonsAuthenticator.class);
+        binder.bind(MacaroonsAuthFilter.class);
+        binder.bind(MacaroonsDynamicFeature.class);
         binder.bind(PractitionerResource.class);
 
         // Healthchecks
@@ -107,7 +118,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
+    @Singleton
     public IGenericClient provideFHIRClient(FhirContext ctx) {
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
     }
 }

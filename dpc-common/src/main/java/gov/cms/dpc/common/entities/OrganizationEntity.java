@@ -1,21 +1,23 @@
 package gov.cms.dpc.common.entities;
 
 import ca.uhn.fhir.parser.DataFormatException;
-import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRConvertable;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.AddressConverter;
 import gov.cms.dpc.fhir.converters.ContactElementConverter;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import java.io.Serializable;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Entity(name = "organizations")
@@ -45,9 +47,9 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<EndpointEntity> endpoints;
 
-    @Convert(converter = StringListConverter.class)
-    @Column(name = "token_ids", columnDefinition = "text")
-    private List<String> tokenIDs;
+    @Valid
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
+    private List<TokenEntity> tokens;
 
     public OrganizationEntity() {
         // Not used
@@ -101,12 +103,12 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         this.endpoints = endpoints;
     }
 
-    public List<String> getTokenIDs() {
-        return tokenIDs;
+    public List<TokenEntity> getTokens() {
+        return tokens;
     }
 
-    public void setTokenIDs(List<String> tokenIDs) {
-        this.tokenIDs = tokenIDs;
+    public void setTokens(List<TokenEntity> tokens) {
+        this.tokens = tokens;
     }
 
     @Override
@@ -120,7 +122,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
             orgID = UUID.randomUUID();
         } else {
 //             If we have an ID, we need to strip off the ID header, since we already know the resource type
-            orgID = UUID.fromString(idString.replace("Organization/", ""));
+            orgID = FHIRExtractors.getEntityUUID(idString);
         }
 
         entity.setId(orgID);
@@ -167,8 +169,30 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     @Override
     public Organization toFHIR() {
-        // TODO: Add support for generating FHIR directly (DPC-276)
-        throw new UnsupportedOperationException("Not implemented yet");
+        // TODO: This will be dramatically improved in the future. (DPC-276)
+
+        final Organization org = new Organization();
+
+        org.setId(this.id.toString());
+        org.addIdentifier(this.organizationID.toFHIR());
+        org.setName(this.organizationName);
+        org.setAddress(Collections.singletonList(this.organizationAddress.toFHIR()));
+
+        final List<Organization.OrganizationContactComponent> contactComponents = this.contacts
+                .stream()
+                .map(ContactEntity::toFHIR)
+                .collect(Collectors.toList());
+        org.setContact(contactComponents);
+
+        final List<Reference> endpointReferences = this
+                .endpoints
+                .stream()
+                .map(ep -> new Reference(new IdType("Endpoint", ep.getId().toString())))
+                .collect(Collectors.toList());
+
+        org.setEndpoint(endpointReferences);
+
+        return org;
     }
 
     @Embeddable
@@ -205,6 +229,14 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
         public void setValue(String value) {
             this.value = value;
+        }
+
+        public Identifier toFHIR() {
+            final Identifier id = new Identifier();
+            id.setSystem(this.system.getSystem());
+            id.setValue(this.value);
+
+            return id;
         }
     }
 }
