@@ -12,6 +12,7 @@ import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,6 +44,8 @@ public class AggregationEngine implements Runnable {
     private final FhirContext fhirContext;
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
+    private final Scheduler fetchScheduler;
+    private final Scheduler writeScheduler;
     private Disposable subscribe;
 
     /**
@@ -59,6 +63,12 @@ public class AggregationEngine implements Runnable {
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
+
+        final var cpuCount = Runtime.getRuntime().availableProcessors();
+        final var fetchPool = Executors.newFixedThreadPool((int)Math.round(cpuCount * 2.5));
+        fetchScheduler = Schedulers.from(fetchPool);
+        final var writePool = Executors.newFixedThreadPool((int)Math.round(cpuCount * 0.5));
+        writeScheduler = Schedulers.from(writePool);
 
         final var metricFactory = new MetricMaker(metricRegistry, AggregationEngine.class);
         resourceMeter = metricFactory.registerMeter("resourceFetched");
@@ -145,7 +155,7 @@ public class AggregationEngine implements Runnable {
         if (operationsConfig.isParallelRequestsEnabled()) {
             mixedFlow = Flowable.fromIterable(job.getPatients())
                     .parallel()
-                    .runOn(Schedulers.io())
+                    .runOn(fetchScheduler)
                     .flatMap(fetcher::fetchResources)
                     .sequential();
         } else {
@@ -179,7 +189,10 @@ public class AggregationEngine implements Runnable {
                 .filter(r -> r.getResourceType() == writer.getResourceType())
                 .buffer(operationsConfig.getResourcesPerFileCount())
                 .doOnNext(outcomes -> meter.mark(outcomes.size()))
-                .map(batch -> writer.writeBatch(counter, batch));
+                .parallel()
+                .runOn(writeScheduler)
+                .map(batch -> writer.writeBatch(counter, batch))
+                .sequential();
     }
 
     /**
