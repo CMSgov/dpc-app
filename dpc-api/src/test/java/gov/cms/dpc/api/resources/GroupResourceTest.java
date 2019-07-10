@@ -5,7 +5,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.api.AbstractApplicationTest;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -46,7 +46,7 @@ public class GroupResourceTest extends AbstractApplicationTest {
                 .useHttpGet();
 
         // Execute using fhir+xml (which we don't support)
-        assertThrows(UnclassifiedServerFailureException.class, () -> execute.encodedXml().execute(), "Should not accept XML encoding");
+        assertThrows(InvalidRequestException.class, () -> execute.encodedXml().execute(), "Should not accept XML encoding");
     }
 
     @Test

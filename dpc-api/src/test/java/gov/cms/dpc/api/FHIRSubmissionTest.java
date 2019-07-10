@@ -1,12 +1,12 @@
 package gov.cms.dpc.api;
 
-import gov.cms.dpc.queue.models.JobModel;
-import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.queue.JobStatus;
-import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
+import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.MemoryQueue;
+import gov.cms.dpc.queue.models.JobModel;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
@@ -20,8 +20,13 @@ import org.mockito.Mockito;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -67,8 +72,9 @@ class FHIRSubmissionTest {
     @Test
     void testDataRequest() {
         final WebTarget target = groupResource.client().target("/Group/1/$export");
-        target.request().accept(FHIR_JSON);
-        final Response response = target.request().get();
+        final Response response = target.request()
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
+                .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
@@ -114,8 +120,9 @@ class FHIRSubmissionTest {
         final WebTarget target = groupResource.client()
                 .target("/Group/1/$export")
                 .queryParam("_type", ResourceType.Patient);
-        target.request().accept(FHIR_JSON);
-        final Response response = target.request().get();
+        final Response response = target.request()
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
+                .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
@@ -136,8 +143,9 @@ class FHIRSubmissionTest {
         final WebTarget target = groupResource.client()
                 .target("/Group/1/$export")
                 .queryParam("_type", String.format("%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit));
-        target.request().accept(FHIR_JSON);
-        final Response response = target.request().get();
+        final Response response = target.request()
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
+                .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
@@ -156,8 +164,9 @@ class FHIRSubmissionTest {
         final WebTarget target = groupResource.client()
                 .target("/Group/1/$export")
                 .queryParam("_type", String.format("%s,%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage));
-        target.request().accept(FHIR_JSON);
-        final Response response = target.request().get();
+        final Response response = target.request()
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
+                .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
@@ -194,8 +203,9 @@ class FHIRSubmissionTest {
     void testNoResourceSubmission() {
         // A request with no resource type parameters...
         final WebTarget target = groupResource.client().target("/Group/1/$export");
-        target.request().accept(FHIR_JSON);
-        final Response response = target.request().get();
+        final Response response = target.request()
+                .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
+                .get();
         assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
@@ -205,4 +215,5 @@ class FHIRSubmissionTest {
         var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()));
     }
+
 }
