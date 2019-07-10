@@ -41,7 +41,7 @@ class EndToEndRequestTest extends AbstractApplicationTest {
     void simpleRequestWorkflow() throws IOException, InterruptedException {
 
         // Submit an export request for a provider which is not known to the system.
-        final IGenericClient exportClient = ctx.newRestfulGenericClient(getBaseURL());
+        final IGenericClient exportClient = ClientUtils.createExportClient(ctx, getBaseURL());
 
         final IOperationUntypedWithInput<Parameters> exportOperation = ClientUtils.createExportOperation(exportClient, ClientUtils.PROVIDER_ID);
 
