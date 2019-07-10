@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import gov.cms.dpc.api.auth.AuthenticationTest;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -36,7 +35,7 @@ public class APITestHelpers {
         // Register an organization, and a token
         // Read in the test file
         String macaroon;
-        try (InputStream inputStream = AuthenticationTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json")) {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json")) {
             final IParser parser = ctx.newJsonParser();
             final Bundle orgBundle = (Bundle) parser.parseResource(inputStream);
             final String bundleString = parser.encodeResourceToString(orgBundle);
@@ -65,7 +64,7 @@ public class APITestHelpers {
     }
 
     // TODO: Remove as part of DPC-373
-    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL,String macaroon) {
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon) {
         final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
         client.registerInterceptor(new MacaroonsInterceptor(macaroon));
 

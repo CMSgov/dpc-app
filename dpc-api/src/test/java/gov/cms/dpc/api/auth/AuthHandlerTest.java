@@ -27,14 +27,14 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class AuthenticationTest {
+public class AuthHandlerTest {
     private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
     private static final String TEST_MACAROON = "eyJ2IjoyLCJsIjoiaHR0cHM6Ly9kcGMuY21zLmdvdiIsImkiOiI3YzRhMzk1NS03ZWRjLTRjOWUtOGRjYS0wZjdjMjcwNzIwNzQiLCJjIjpbeyJpNjQiOiJaSEJqWDIxaFkyRnliMjl1WDNabGNuTnBiMjRnUFNBeCJ9LHsiaTY0IjoiWlhod2FYSmxjeUE5SURJd01qQXRNRGN0TVRCVU1UUTZNVGM2TXpNdU9EYzJOalF6V2cifSx7Imk2NCI6ImIzSm5ZVzVwZW1GMGFXOXVYMmxrSUQwZ01HTTFNamRrTW1VdE1tVTRZUzAwT0RBNExXSXhNV1F0TUdaaE1EWmlZV1k0TWpVMCJ9XSwiczY0Ijoic0ZvSlFGNGk5VHZuSnRHVEhUb1ZFblJwc3hzZmdJZjhDdWtpYy0xWE14ZyJ9";
 
     private static final ArgumentCaptor<String> requestPath = ArgumentCaptor.forClass(String.class);
     private static final ResourceExtension RESOURCE = buildAuthResource();
 
-    private AuthenticationTest() {
+    private AuthHandlerTest() {
         // Not used
     }
 
