@@ -1,10 +1,12 @@
 package gov.cms.dpc.api.resources.v1;
 
-import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.queue.JobStatus;
-import gov.cms.dpc.common.annotations.APIV1;
+import com.codahale.metrics.annotation.ExceptionMetered;
+import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
+import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
@@ -39,9 +41,11 @@ public class JobResource extends AbstractJobResource {
         this.baseURL = baseURL;
     }
 
+    @Override
     @Path("/{jobID}")
     @GET
-    @Override
+    @Timed
+    @ExceptionMetered
     public Response checkJobStatus(@PathParam("jobID") String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
         final Optional<JobModel> maybeJob = this.queue.getJob(jobUUID);

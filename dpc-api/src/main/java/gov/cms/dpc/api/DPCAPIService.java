@@ -1,6 +1,7 @@
 package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
+import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.cli.DemoCommand;
@@ -42,6 +43,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     @Override
     public void run(final DPCAPIConfiguration configuration,
                     final Environment environment) {
-        // Not used
+        final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
+        environment.jersey().getResourceConfig().register(listener);
     }
 }

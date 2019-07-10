@@ -2,6 +2,9 @@ package gov.cms.dpc.common.utils;
 
 import com.codahale.metrics.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -34,6 +37,20 @@ public class MetricMaker {
     }
 
     /**
+     * Register a list of timers.
+     *
+     * @param names is a list of timer names
+     * @return a map of timers associated with the passed in names
+     */
+    public Map<String, Timer> registerTimers(List<String> names) {
+        final var map = new HashMap<String, Timer>();
+        for (String name: names) {
+            map.put(name, registerTimer(name + "Timer"));
+        }
+        return map;
+    }
+
+    /**
      * Register a meter
      *
      * @param name is unique
@@ -44,18 +61,33 @@ public class MetricMaker {
     }
 
     /**
-     * Register a cached gauge. A cached guage uses cached values to limit the number of polls of the supplier.
+     * Register a list of meters.
+     *
+     * @param names is a list of meter names
+     * @return a map of meters associated with the passed in names
+     */
+    public Map<String, Meter> registerMeters(List<String> names) {
+        final var map = new HashMap<String, Meter>();
+        for (String name: names) {
+            map.put(name, registerMeter(name + "Meter"));
+        }
+        return map;
+    }
+
+
+    /**
+     * Register a cached gauge. A cached gauge uses cached values to limit the number of polls of the supplier.
      *
      * @param name is unit
      * @param loadSupplier the supplier of the value of the gauge
-     * @param <T> is the unit of the guage
+     * @param <T> is the unit of the gauge
      */
-    public <T> void registerCachedGuage(String name, Supplier<T> loadSupplier) {
+    public <T> void registerCachedGauge(String name, Supplier<T> loadSupplier) {
         registerMetric(name, () -> new CachedGaugeFromSupplier<>(1, TimeUnit.SECONDS, loadSupplier));
     }
 
     /**
-     * Register a metric or retreive a previously registered metric
+     * Register a metric or retrieve a previously registered metric
      *
      * @param name of the metric
      * @param supplier of the new metric if needed
