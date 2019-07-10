@@ -7,7 +7,8 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
-import gov.cms.dpc.fhir.validations.*;
+import gov.cms.dpc.fhir.validations.FHIRProfileValidator;
+import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.definitions.DefinitionConstants;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
@@ -29,7 +30,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class TestResourceTest {
+class TestResourceTest {
 
     private static final FhirContext ctx = FhirContext.forDstu3();
 
@@ -99,7 +100,7 @@ public class TestResourceTest {
         return address;
     }
 
-    public static Validator provideValidator(InjectingConstraintValidatorFactory factory) {
+    static Validator provideValidator(InjectingConstraintValidatorFactory factory) {
         return Validation.byDefaultProvider()
                 .configure().constraintValidatorFactory(factory)
                 .buildValidatorFactory().getValidator();
@@ -117,8 +118,6 @@ public class TestResourceTest {
                 .addProvider(FHIRExceptionHandler.class)
                 .addResource(new TestResource())
                 .setValidator(provideValidator(constraintFactory))
-//                .addResource(new ValidationConfigurationContextResolver(
-//                        constraintFactory, provideValidatorFactory(constraintFactory)))
                 .build();
     }
 }

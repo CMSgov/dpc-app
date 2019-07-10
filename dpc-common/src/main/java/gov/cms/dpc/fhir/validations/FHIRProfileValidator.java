@@ -81,7 +81,7 @@ public class FHIRProfileValidator implements IValidationSupport {
 
     private Map<String, StructureDefinition> parseBundledDefinitions(FhirContext ctx) throws IOException {
 
-        final Map<String, StructureDefinition> structureMap = new HashMap<>();
+        final Map<String, StructureDefinition> definitionMap = new HashMap<>();
 
         // Generate a validator to pull the base definitions from.
         final DefaultProfileValidationSupport defaultValidation = new DefaultProfileValidationSupport();
@@ -96,9 +96,9 @@ public class FHIRProfileValidator implements IValidationSupport {
                 .stream()
                 .map(resourceName -> toStructureDefinition(parser, prefix + resourceName))
                 .map(diffStructure -> mergeDiff(ctx, defaultValidation, profileUtilities, diffStructure))
-                .forEach(structure -> structureMap.put(structure.getUrl(), structure));
+                .forEach(structure -> definitionMap.put(structure.getUrl(), structure));
 
-        return structureMap;
+        return definitionMap;
     }
 
     private List<String> getResourceList(String name) throws IOException {
