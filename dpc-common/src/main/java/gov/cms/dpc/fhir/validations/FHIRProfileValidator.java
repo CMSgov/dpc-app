@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -10,6 +11,8 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
@@ -18,17 +21,26 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
+/**
+ * DPC specific implementation of FHIR's {@link IValidationSupport}, which allows us to load our own {@link StructureDefinition}s from the JAR.
+ */
 public class FHIRProfileValidator implements IValidationSupport {
+
+    private static final Logger logger = LoggerFactory.getLogger(FHIRProfileValidator.class);
 
     private final Map<String, StructureDefinition> structureMap;
 
-    @Inject
-    public FHIRProfileValidator(FhirContext ctx) {
+    public FHIRProfileValidator(FhirContext ctx, String resourcePrefix) {
         try {
-            this.structureMap = parseBundledDefinitions(ctx);
+            this.structureMap = parseBundledDefinitions(ctx, resourcePrefix);
         } catch (IOException e) {
             throw new IllegalStateException("Unable to read structure definitions", e);
         }
+    }
+
+    @Inject
+    public FHIRProfileValidator(FhirContext ctx) {
+        this(ctx, "validations/");
     }
 
     @Override
@@ -79,7 +91,9 @@ public class FHIRProfileValidator implements IValidationSupport {
         return null;
     }
 
-    private Map<String, StructureDefinition> parseBundledDefinitions(FhirContext ctx) throws IOException {
+    private Map<String, StructureDefinition> parseBundledDefinitions(FhirContext ctx, String resourcePrefix) throws IOException {
+
+        logger.info("Loading profiles from: {}", resourcePrefix);
 
         final Map<String, StructureDefinition> definitionMap = new HashMap<>();
 
@@ -91,10 +105,10 @@ public class FHIRProfileValidator implements IValidationSupport {
         final ProfileUtilities profileUtilities = new ProfileUtilities(hapiWorkerContext, new ArrayList<>(), null);
 
         final IParser parser = ctx.newJsonParser();
-        final String prefix = "validations/";
-        getResourceList(prefix)
+        getResourceList(resourcePrefix)
                 .stream()
-                .map(resourceName -> toStructureDefinition(parser, prefix + resourceName))
+                .map(resourceName -> toStructureDefinition(parser, resourcePrefix + resourceName))
+                .filter(Objects::nonNull)
                 .map(diffStructure -> mergeDiff(ctx, defaultValidation, profileUtilities, diffStructure))
                 .forEach(structure -> definitionMap.put(structure.getUrl(), structure));
 
@@ -103,11 +117,17 @@ public class FHIRProfileValidator implements IValidationSupport {
 
     private List<String> getResourceList(String name) throws IOException {
         final List<String> filenames = new ArrayList<>();
-        try (final InputStream pathStream = getClass().getClassLoader().getResourceAsStream(name);
-             final BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(pathStream)))) {
+        try (final InputStream pathStream = this.getClass().getClassLoader().getResourceAsStream(name);
+             final BufferedReader br = new BufferedReader(new InputStreamReader(maybeNull(name, pathStream)))) {
             String resource;
             while ((resource = br.readLine()) != null) {
-                filenames.add(resource);
+                // If the file doesn't end json or xml, it can't possibly be FHIR resource, so ignore it.
+                if (resource.endsWith("json") || resource.endsWith("xml")) {
+                    filenames.add(resource);
+                } else {
+                    logger.debug("Ignoring: {}", resource);
+                }
+
             }
         }
 
@@ -115,11 +135,17 @@ public class FHIRProfileValidator implements IValidationSupport {
     }
 
     private StructureDefinition toStructureDefinition(IParser parser, String structurePath) {
-        try (InputStream stream = getClass().getClassLoader().getResourceAsStream(structurePath)) {
+        logger.info("Loading profile: {}", structurePath);
+        try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream(structurePath)) {
             if (stream == null) {
-                throw new MissingResourceException("Cannot load structure definition", getClass().getName(), structurePath);
+                throw new MissingResourceException("Cannot load structure definition", this.getClass().getName(), structurePath);
             }
-            return parser.parseResource(StructureDefinition.class, stream);
+            try {
+                return parser.parseResource(StructureDefinition.class, stream);
+            } catch (DataFormatException e) {
+                logger.error("Unable to parse profile: {}", structurePath, e);
+                return null;
+            }
         } catch (IOException e) {
             throw new IllegalStateException("For some reason, can't read.", e);
         }
@@ -132,6 +158,13 @@ public class FHIRProfileValidator implements IValidationSupport {
         }
 
         return diffStruct;
+    }
+
+    private static InputStream maybeNull(String path, InputStream stream) {
+        if (stream == null) {
+            throw new MissingResourceException("Cannot find path for profiles", FHIRProfileValidator.class.getName(), path);
+        }
+        return stream;
     }
 
 }

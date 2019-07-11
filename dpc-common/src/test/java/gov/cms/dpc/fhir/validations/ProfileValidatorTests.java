@@ -1,0 +1,37 @@
+package gov.cms.dpc.fhir.validations;
+
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.MissingResourceException;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ProfileValidatorTests {
+
+    private final FhirContext ctx = FhirContext.forDstu3();
+
+    @Test
+    void testBasicLoading() {
+        final FHIRProfileValidator fhirProfileValidator = new FHIRProfileValidator(ctx);
+
+        final List<StructureDefinition> definitions = fhirProfileValidator.fetchAllStructureDefinitions(ctx);
+
+        assertEquals(1, definitions.size(), "Should not have malformed or invalid resources");
+    }
+
+    @Test
+    void testLoadingBadResources() {
+        final FHIRProfileValidator fhirProfileValidator = new FHIRProfileValidator(ctx, "bad_validations/");
+
+        final List<StructureDefinition> definitions = fhirProfileValidator.fetchAllStructureDefinitions(ctx);
+        assertTrue(definitions.isEmpty(), "Should not have parsed anything");
+    }
+
+    @Test
+    void testBadPrefix() {
+        assertThrows(MissingResourceException.class, () -> new FHIRProfileValidator(ctx, "nothing/"));
+    }
+}
