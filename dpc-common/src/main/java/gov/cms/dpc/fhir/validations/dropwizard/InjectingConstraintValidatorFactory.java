@@ -15,10 +15,10 @@ import java.util.Set;
 public class InjectingConstraintValidatorFactory implements ConstraintValidatorFactory {
 
     private final ConstraintValidatorFactory delegate;
-    private final Set<ConstraintValidator> validators;
+    private final Set<ConstraintValidator<?, ?>> validators;
 
     @Inject
-    public InjectingConstraintValidatorFactory(Set<ConstraintValidator> validators) {
+    public InjectingConstraintValidatorFactory(Set<ConstraintValidator<?, ?>> validators) {
         this.validators = validators;
         this.delegate = new ConstraintValidatorFactoryImpl();
     }

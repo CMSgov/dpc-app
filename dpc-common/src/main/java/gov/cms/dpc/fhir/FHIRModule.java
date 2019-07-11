@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 
+import static gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
+
 public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends DropwizardAwareModule<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(FHIRModule.class);
@@ -40,9 +42,10 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(FHIRRequestFeature.class);
 
         // Validator
-        if (getConfiguration().getFHIRConfiguration().getValidation().isEnabled()) {
+        final FHIRValidationConfiguration validationConfig = getConfiguration().getFHIRConfiguration().getValidation();
+        if (validationConfig.isEnabled()) {
             logger.info("Enabling FHIR resource validation");
-            binder.install(new FHIRValidationModule());
+            binder.install(new FHIRValidationModule(validationConfig));
         } else {
             logger.info("Not enabling FHIR resource validation");
         }

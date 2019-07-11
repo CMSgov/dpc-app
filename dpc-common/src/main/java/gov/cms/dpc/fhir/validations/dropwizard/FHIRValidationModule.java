@@ -2,12 +2,14 @@ package gov.cms.dpc.fhir.validations.dropwizard;
 
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
+import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
-import gov.cms.dpc.fhir.validations.ProfileValidator;
 
+import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorFactory;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
@@ -17,17 +19,19 @@ import java.util.Set;
  */
 public class FHIRValidationModule extends AbstractModule {
 
-    public FHIRValidationModule() {
-        // Not used
+    private final FHIRValidationConfiguration config;
+
+    public FHIRValidationModule(FHIRValidationConfiguration config) {
+        this.config = config;
     }
 
 
     @Override
     protected void configure() {
 
-        TypeLiteral<Set<ProfileValidator>> constraintType = new TypeLiteral<>() {
+        TypeLiteral<Set<ConstraintValidator<?, ?>>> constraintType = new TypeLiteral<>() {
         };
-        
+
         bind(constraintType).toProvider(ConstraintValidationProvider.class);
         bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
         bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
@@ -36,5 +40,10 @@ public class FHIRValidationModule extends AbstractModule {
 
         bind(DPCProfileSupport.class);
         bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
+    }
+
+    @Provides
+    FHIRValidationConfiguration provideValidationConfig() {
+        return this.config;
     }
 }
