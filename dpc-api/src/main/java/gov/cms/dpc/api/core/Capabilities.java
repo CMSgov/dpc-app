@@ -99,7 +99,7 @@ public class Capabilities {
 
     private static CapabilityStatementRestResourceComponent generateStructureDefinitionEndpoints() {
         final CapabilityStatementRestResourceComponent definitions = new CapabilityStatementRestResourceComponent();
-        definitions.setType("Practitioner");
+        definitions.setType("StructureDefinition");
         definitions.setVersioning(ResourceVersionPolicy.NOVERSION);
 
         definitions.setInteraction(List.of(
