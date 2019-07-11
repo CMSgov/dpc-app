@@ -4,6 +4,7 @@
   "dependencies": {
     "@cmsgov/design-system-core": "^2.0.1",
     "@cmsgov/design-system-layout": "^2.0.1",
-    "normalize.css": "^8.0.1"
+    "normalize.css": "^8.0.1",
+    "svg4everybody": "^2.1.9"
   }
 }
