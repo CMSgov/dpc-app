@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class APITestHelpers {
+    public static String BASE_URL = "https://dpc.cms.gov/fhir";
     public static String ATTRIBUTION_URL = "http://localhost:3500/v1";
     public static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 

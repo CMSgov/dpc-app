@@ -1,7 +1,7 @@
 {
   "resourceType": "StructureDefinition",
   "id": "dpc-patient",
-  "url": "https://dpc.cms.gov/fhir/StructureDefinitions/dpc-patient",
+  "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-patient",
   "name": "DPC Patient Definition",
   "status": "draft",
   "kind": "resource",
