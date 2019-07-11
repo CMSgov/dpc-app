@@ -19,6 +19,8 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @Valid
     private Duration expirationThreshold;
 
+    private Boolean migrationEnabled;
+
     @Valid
     @NotNull
     @JsonProperty("database")
@@ -83,5 +85,12 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration config) {
         this.fhirConfig = config;
+    }
+    public Boolean getMigrationEnabled() {
+        return migrationEnabled;
+    }
+
+    public void setMigrationEnabled(Boolean migrationEnabled) {
+        this.migrationEnabled = migrationEnabled;
     }
 }

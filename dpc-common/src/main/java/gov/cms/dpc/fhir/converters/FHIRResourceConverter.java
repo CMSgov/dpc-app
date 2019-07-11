@@ -1,20 +1,20 @@
 package gov.cms.dpc.fhir.converters;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.dstu3.model.BaseResource;
 
 /**
- * Converts a FHIR {@link IBaseResource} into a corresponding Java class
+ * Converts a FHIR {@link BaseResource} into a corresponding Java class
  *
- * @param <R> - {@link IBaseResource} to convert
+ * @param <R> - {@link BaseResource} to convert
  * @param <C> - Java class to convert to
  */
 @FunctionalInterface
-public interface FHIRResourceConverter<R extends IBaseResource, C> {
+public interface FHIRResourceConverter<R extends BaseResource, C> {
 
     /**
-     * Convert FHIR {@link IBaseResource} into a corresponding Java class
+     * Convert FHIR {@link BaseResource} into a corresponding Java class
      *
-     * @param resource - {@link IBaseResource} to convert
+     * @param resource - {@link BaseResource} to convert
      * @return - {@link C} Java class to convert to
      * @throws gov.cms.dpc.fhir.exceptions.DataTranslationException if data is missing or invalid
      */

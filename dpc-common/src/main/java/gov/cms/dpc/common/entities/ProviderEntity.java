@@ -23,7 +23,6 @@ import java.util.UUID;
 public class ProviderEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID providerID;
 
@@ -117,8 +116,9 @@ public class ProviderEntity {
     public static ProviderEntity fromFHIR(Practitioner resource, UUID resourceID) {
         final ProviderEntity provider = new ProviderEntity();
 
-        if (resourceID != null) {
-            // Strip off the Practitioner/ prefix, this should be more flexible
+        if (resourceID == null) {
+            provider.setProviderID(UUID.randomUUID());
+        } else {
             provider.setProviderID(resourceID);
         }
 

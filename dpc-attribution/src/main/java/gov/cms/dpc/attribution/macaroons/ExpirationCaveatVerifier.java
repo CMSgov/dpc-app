@@ -10,10 +10,11 @@ import java.util.Optional;
 
 /**
  * Implementation of {@link CaveatVerifier} which verifies that the token is not expired
- * Expiration is determined based on the provided {@link gov.cms.dpc.attribution.config.TokenPolicy.ExpirationPolicy}
+ * Expiration is determined based on the provided {@link TokenPolicy.ExpirationPolicy}
  */
 public class ExpirationCaveatVerifier implements CaveatVerifier {
 
+    static final String CAVEAT_INVALID = "Caveat is expired";
     private final TokenPolicy.ExpirationPolicy expirationPolicy;
 
     ExpirationCaveatVerifier(TokenPolicy policy) {
@@ -29,9 +30,10 @@ public class ExpirationCaveatVerifier implements CaveatVerifier {
             final OffsetDateTime expirationTime = OffsetDateTime.now(ZoneOffset.UTC).plus(expirationPolicy.getExpirationOffset(), expirationPolicy.getExpirationUnit());
             final boolean isBefore = caveatExpiration.isBefore(expirationTime);
             if (!isBefore) {
-                return Optional.of("Caveat is expired");
+                return Optional.of(CAVEAT_INVALID);
             }
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of(VerifierConstants.NO_MATCH);
     }
 }

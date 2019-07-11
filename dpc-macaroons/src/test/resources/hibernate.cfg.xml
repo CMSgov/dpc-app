@@ -19,7 +19,7 @@
         <property name="show_sql">true</property>
 
         <!-- Update database on startup -->
-        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
         <property name="hibernate.connection.autocommit">true</property>
 
         <!-- Annotated entity classes -->

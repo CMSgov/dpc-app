@@ -1,7 +1,11 @@
 package gov.cms.dpc.api.client;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +30,9 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
+import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
+
 /**
  * Shared methods for testing export jobs
  * Used by the {@link gov.cms.dpc.api.cli.DemoCommand} and the EndtoEndRequestTest classes.
@@ -40,14 +47,41 @@ public class ClientUtils {
     }
 
     /**
-     * Helper method for creating an export request using the FHIR client
+     * Helper method to create a FHIR client has the headers setup for export operations.
      *
-     * @param client     - {@link IGenericClient} client to use for request
+     * @param context - FHIR context to use
+     * @param serverBaseURL - the base URL for the FHIR endpoint
+     * @return {@link IGenericClient} for FHIR requests
+     * @see #createExportOperation(IGenericClient, String)
+     */
+    public static IGenericClient createExportClient(FhirContext context, String serverBaseURL) {
+        final IGenericClient exportClient = context.newRestfulGenericClient(serverBaseURL);
+        // Add a header the hard way
+        final var addPreferInterceptor = new IClientInterceptor()  {
+            @Override
+            public void interceptRequest(IHttpRequest iHttpRequest) {
+                iHttpRequest.addHeader(PREFER_HEADER, PREFER_RESPOND_ASYNC);
+            }
+
+            @Override
+            public void interceptResponse(IHttpResponse iHttpResponse) {
+                return; // for code climate
+            }
+        };
+        exportClient.registerInterceptor(addPreferInterceptor);
+        return exportClient;
+    }
+
+    /**
+     * Helper method for creating an export request using the FHIR client.
+     *
+     * @param exportClient - {@link IGenericClient} client to use for the request.
      * @param providerID - {@link String} provider ID to request data for
      * @return - {@link IOperationUntypedWithInput} export request, ready to execute
+     * @see #createExportClient(FhirContext, String)
      */
-    public static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient client, String providerID) {
-        return client
+    public static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient exportClient, String providerID) {
+        return exportClient
                 .operation()
                 .onInstance(new IdDt("Group", providerID))
                 .named("$export")

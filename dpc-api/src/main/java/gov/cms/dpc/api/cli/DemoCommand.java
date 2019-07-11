@@ -89,7 +89,7 @@ public class DemoCommand extends Command {
 
     private IOperationUntypedWithInput<Parameters> createExportOperation(Namespace namespace, String baseURL) {
         // Submit an export request for a provider which is not known to the system.
-        final IGenericClient exportClient = ctx.newRestfulGenericClient(baseURL);
+        final IGenericClient exportClient = ClientUtils.createExportClient(ctx, baseURL);
 
         final String providerID = namespace.getString("provider-id");
 

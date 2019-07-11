@@ -221,5 +221,28 @@
 
     <!--    Create the root table for the macaroons-->
     <include file="macaroon_migrations.xml"/>
+    <!--    Setup required tables for Job Queue-->
+    <include file="queue_migrations.xml"/>
+
+    <changeSet id="migrate-token-ids" author="nickrobison-usds">
+        <createTable tableName="ORGANIZATION_TOKENS">
+            <column name="id" type="VARCHAR">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID"/>
+            <column name="type" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="ORGANIZATION_TOKENS"
+                baseColumnNames="organization_id"
+                constraintName="fk_org_tokens"
+                referencedTableName="ORGANIZATIONS"
+                referencedColumnNames="id"/>
+
+        <dropColumn tableName="ORGANIZATIONS" columnName="token_ids"/>
+    </changeSet>
 
 </databaseChangeLog>

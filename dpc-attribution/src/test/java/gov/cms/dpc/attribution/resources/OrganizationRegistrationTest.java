@@ -18,9 +18,12 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OrganizationRegistrationTest extends AbstractAttributionTest {
+
+    private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
 
     private OrganizationRegistrationTest() {
         // Not used
@@ -83,9 +86,7 @@ class OrganizationRegistrationTest extends AbstractAttributionTest {
             final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/verify?token=%s", ORGANIZATION_ID, macaroon));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                final String entity = EntityUtils.toString(response.getEntity());
-                assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization"),
-                        () -> assertEquals("true", entity, "Should be valid"));
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token should be valid");
             }
         }
     }
@@ -108,6 +109,31 @@ class OrganizationRegistrationTest extends AbstractAttributionTest {
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should not be able to verify empty token");
+            }
+        }
+    }
+
+    @Test
+    void testTokenWrongOrg() throws IOException {
+        String macaroon;
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Organization/%s/token", ORGANIZATION_ID));
+
+
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
+                macaroon = EntityUtils.toString(response.getEntity());
+                // Verify that the first few bytes are correct, to ensure we encoded correctly.
+                assertTrue(macaroon.startsWith("eyJ2IjoyLCJs"), "Should have correct starting string value");
+            }
+        }
+
+        // Verify that it's unauthorized.
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Organization/%s/token/verify?token=%s", BAD_ORG_ID, macaroon));
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                assertEquals(HttpStatus.UNAUTHORIZED_401, response.getStatusLine().getStatusCode(), "Should not be valid");
             }
         }
     }

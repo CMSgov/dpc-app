@@ -1,10 +1,14 @@
 package gov.cms.dpc.common.entities;
 
+import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.Organization;
+
 import javax.persistence.*;
 import javax.validation.Valid;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity(name = "organization_contacts")
 public class ContactEntity implements Serializable {
@@ -68,5 +72,21 @@ public class ContactEntity implements Serializable {
 
     public void setAddress(AddressEntity address) {
         this.address = address;
+    }
+
+    public Organization.OrganizationContactComponent toFHIR() {
+        final Organization.OrganizationContactComponent contactComponent = new Organization.OrganizationContactComponent();
+
+        contactComponent.setName(this.name.toFHIR());
+
+        final List<ContactPoint> cps = this.telecom
+                .stream()
+                .map(ContactPointEntity::toFHIR)
+                .collect(Collectors.toList());
+
+        contactComponent.setTelecom(cps);
+        contactComponent.setAddress(this.address.toFHIR());
+
+        return contactComponent;
     }
 }

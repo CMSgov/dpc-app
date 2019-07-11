@@ -2,6 +2,7 @@ package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
@@ -61,8 +62,8 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     }
 
     @Provides
-    public BlueButtonClient provideBlueButtonClient(IGenericClient fhirRestClient) {
-        return new BlueButtonClientImpl(fhirRestClient, this.bbClientConfiguration);
+    public BlueButtonClient provideBlueButtonClient(IGenericClient fhirRestClient, MetricRegistry registry) {
+        return new BlueButtonClientImpl(fhirRestClient, this.bbClientConfiguration, registry);
     }
 
     @Provides
