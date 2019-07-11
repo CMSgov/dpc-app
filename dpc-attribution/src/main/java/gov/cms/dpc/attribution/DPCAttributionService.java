@@ -6,6 +6,7 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
 import gov.cms.dpc.fhir.FHIRModule;
+import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.macaroons.BakeryModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -38,7 +39,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
                 .modules(new AttributionAppModule(),
                         new DPCHibernateModule<>(),
-                        new FHIRModule(),
+                        new FHIRModule<>(),
                         new BakeryModule())
                 .build();
 

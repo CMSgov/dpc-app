@@ -63,6 +63,15 @@
             <version>0.3.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+        <!--        Validations use the R4 validator, even for STU3 resources-->
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+        </dependency>
         <!--Test resources-->
         <dependency>
             <groupId>io.dropwizard</groupId>

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
@@ -122,8 +123,12 @@ class TestResourceTest {
     }
 
     private static ResourceExtension buildResource() {
+        final DPCFHIRConfiguration.FHIRValidationConfiguration config = new DPCFHIRConfiguration.FHIRValidationConfiguration();
+        config.setEnabled(true);
+        config.setSchematronValidation(true);
+        config.setSchemaValidation(true);
         final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
-                Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, new FHIRProfileValidator(ctx)).get())));
+                Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, new FHIRProfileValidator(ctx), config).get())));
 
         return ResourceExtension
                 .builder()

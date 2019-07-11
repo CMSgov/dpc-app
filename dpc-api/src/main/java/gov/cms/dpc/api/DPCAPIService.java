@@ -33,7 +33,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAPIConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
-                .modules(new DPCHibernateModule<>(), new DPCAPIModule(), new JobQueueModule<>(), new FHIRModule())
+                .modules(new DPCHibernateModule<>(), new DPCAPIModule(), new JobQueueModule<>(), new FHIRModule<>())
                 .build();
 
         bootstrap.addBundle(guiceBundle);

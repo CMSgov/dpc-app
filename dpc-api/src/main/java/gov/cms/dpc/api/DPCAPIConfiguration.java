@@ -4,6 +4,8 @@ import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.typesafe.config.ConfigRenderOptions;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
+import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
+import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.queue.DPCQueueConfig;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
@@ -14,7 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
-public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, DPCQueueConfig {
+public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, DPCQueueConfig, IDPCFHIRConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -31,6 +33,11 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @NotEmpty
     @NotNull
     private String attributionURL;
+
+    @Valid
+    @NotNull
+    @JsonProperty("fhir")
+    private DPCFHIRConfiguration fhirConfig;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -73,5 +80,15 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read queue config.", e);
         }
+    }
+
+    @Override
+    public DPCFHIRConfiguration getFHIRConfiguration() {
+        return this.fhirConfig;
+    }
+
+    @Override
+    public void setFHIRConfiguration(DPCFHIRConfiguration config) {
+        this.fhirConfig = config;
     }
 }

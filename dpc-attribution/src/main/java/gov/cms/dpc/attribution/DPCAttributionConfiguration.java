@@ -4,6 +4,8 @@ import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
+import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
+import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
@@ -12,7 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 
-public class DPCAttributionConfiguration extends TypesafeConfiguration implements IDPCDatabase {
+public class DPCAttributionConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
 
     @Valid
     private Duration expirationThreshold;
@@ -31,9 +33,14 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @NotNull
     @JsonProperty("tokens")
     private TokenPolicy tokenPolicy = new TokenPolicy();
-    
+
     @NotEmpty
     private String publicServerURL;
+
+    @Valid
+    @NotNull
+    @JsonProperty("fhir")
+    private DPCFHIRConfiguration fhirConfig;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -66,5 +73,15 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setTokenPolicy(TokenPolicy tokenPolicy) {
         this.tokenPolicy = tokenPolicy;
+    }
+
+    @Override
+    public DPCFHIRConfiguration getFHIRConfiguration() {
+        return this.fhirConfig;
+    }
+
+    @Override
+    public void setFHIRConfiguration(DPCFHIRConfiguration config) {
+        this.fhirConfig = config;
     }
 }
