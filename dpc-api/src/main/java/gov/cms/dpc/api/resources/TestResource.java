@@ -26,7 +26,7 @@ public class TestResource {
     }
 
     @POST
-    public Response testValidations(@Valid @Profiled(profile = "https://dpc.cms.gov/fhir/StructureDefinitions/dpc-patient") Patient patient) {
+    public Response testValidations(@Valid @Profiled(profile = "https://dpc.cms.gov/fhir/StructureDefinition/dpc-patient") Patient patient) {
         return Response.ok().build();
     }
 }
