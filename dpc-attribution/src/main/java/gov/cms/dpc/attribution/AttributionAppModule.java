@@ -41,6 +41,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(TruncateDatabase.class);
         binder.bind(EndpointResource.class);
         binder.bind(PractitionerResource.class);
+        binder.bind(PractitionerRoleResource.class);
 
         binder.bind(MacaroonBakery.class).toProvider(BakeryProvider.class);
 
