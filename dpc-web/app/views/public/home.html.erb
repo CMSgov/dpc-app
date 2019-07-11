@@ -1,30 +1,59 @@
-<div class="ds-l-row">
-  <div class="ds-u-margin-top--5 ds-l-col--3">
-    <ul class="sidenav">
-      <li class="sidenav__item">
-        <a class="sidenav__link" href="#getting-started">Getting Started</a>
-      </li>
-      <li class="sidenav__item">
-        <a class="sidenav__link" href="#learned">What We've Learned</a>
-      </li>
-      <li class="sidenav__item">
-        <a class="sidenav__link" href="#about-data">About the Data</a>
-      </li>
-    </ul>
+
+
+<section class="site-block">
+  <div class="ds-l-container">
+    <div class="site-block-header">
+      <h2 class="site-block-header__heading">How can Data at the Point of Care help providers improve care and reduce burden for doctors and patients?</h2>
+      <div class="site-block-header__description">
+        <p>Tracking down medical history takes valuable time that can otherwise be spent with patients. Data at the point of care will allow providers to:</p>
+      </div>
+    </div>
+    <div class="ds-l-row">
+      <div class="ds-l-col--12 ds-l-md-col--4">
+        <h3>Access medical history for new patients</h3>
+        <p>Avoid having to rely on patient memory to know past diagnoses, procedures, and medications.</p>
+      </div>
+      <div class="ds-l-col--12 ds-l-md-col--4">
+        <h3>Be aware of what other providers are doing for your patients</h3>
+        <p>Learn about any other provider visits, new diagnoses and medications, completed procedures and preventive items, and urgent care, hospital, or ER visits.</p>
+      </div>
+      <div class="ds-l-col--12 ds-l-md-col--4">
+        <h3>Get insight into medication adherence</h3>
+        <p>View medications that were filled at the pharmacy to learn about possible gaps in medication adherence.</p>
+      </div>
+    </div>
   </div>
-  <div class="ds-l-col--9 ds-u-margin-top--5">
-    <h2>Overview</h2>
-    <%= render partial: 'overview' %>
+</section>
 
-    <h3 id="getting-started">Getting Started</h3>
-    <%= render partial: 'getting_started' %>
-
-    <h3 id="learned">What We've Learned</h3>
-    <%= render partial: 'learned' %>
-
-    <h3 id="about-data">About the Data</h3>
-    <%= render partial: 'about_data' %>
+<section class="site-block site-block--alt" id="about-the-pilot">
+  <div class="ds-l-container">
+    <div class="site-block-header">
+      <h2 class="site-block-header__heading">About the pilot</h2>
+      <div class="site-block-header__description">
+        <p>The Data at the Point of Care is a pilot program that aims to enable healthcare providers in delivering high quality care directly to Medicare beneficiaries by making a patient's Medicare claims data available to the provider for treatment needs. The information can be accessed in the existing workflow and without logging into another application or portal.  Claims information can be used to confirm information, fill in gaps in care, and improve patient safety. The Data at the Point of care pilot program includes data from inpatient, outpatient, and pharmacy claims with diagnoses, procedures, preventive tests, medications, hospital admissions, and visit information for outpatient, urgent care, and emergency rooms.</p>
+      </div>
+    </div>
+    <h3>How to get started</h3>
+    <ol>
+      <li>Request access to the pilot on the Request Access Page. Remember, this is a pilot and and the process may move slowly. You can prepare for connection by reviewing the User Guide. </li>
+      <li>You will be contacted when CMS is ready to provide access to the synthetic data for testing.</li>
+      <li>Provide a demo to the Data at the Point of Care team.</li>
+      <li>Receive production credentials and perform initial test and feedback cycle for production data.</li>
+    </ol>
   </div>
-</div>
+</section>
+
+<section class="site-block">
+  <div class="ds-l-container">
+    <div class="site-block-header">
+      <h2 class="site-block-header__heading">About the data</h2>
+      <div class="site-block-header__description">
+        <p>The claims data is provided using the industry-standard HL7 Fast Healthcare Interoperability Resources (FHIR) resources, specifically the Bulk FHIR specification.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 
 
