@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir.validations;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import gov.cms.dpc.fhir.validations.profiles.IProfileLoader;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -22,6 +23,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 /**
  * DPC specific implementation of FHIR's {@link IValidationSupport}, which allows us to load our own {@link StructureDefinition}s from the JAR.
@@ -32,17 +34,9 @@ public class DPCProfileSupport implements IValidationSupport {
 
     private final Map<String, StructureDefinition> structureMap;
 
-    public DPCProfileSupport(FhirContext ctx, String resourcePrefix) {
-        try {
-            this.structureMap = parseBundledDefinitions(ctx, resourcePrefix);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to read structure definitions", e);
-        }
-    }
-
     @Inject
     public DPCProfileSupport(FhirContext ctx) {
-        this(ctx, "validations/");
+        this.structureMap = loadProfiles(ctx);
     }
 
     @Override
@@ -93,9 +87,9 @@ public class DPCProfileSupport implements IValidationSupport {
         return null;
     }
 
-    private Map<String, StructureDefinition> parseBundledDefinitions(FhirContext ctx, String resourcePrefix) throws IOException {
+    private Map<String, StructureDefinition> loadProfiles(FhirContext ctx) {
 
-        logger.info("Loading profiles from: {}", resourcePrefix);
+        logger.info("Loading resource profiles");
 
         final Map<String, StructureDefinition> definitionMap = new HashMap<>();
 
@@ -107,14 +101,23 @@ public class DPCProfileSupport implements IValidationSupport {
         final ProfileUtilities profileUtilities = new ProfileUtilities(hapiWorkerContext, new ArrayList<>(), null);
 
         final IParser parser = ctx.newJsonParser();
-        getResourceList(resourcePrefix)
-                .stream()
-                .map(resourceName -> toStructureDefinition(parser, resourceName))
+
+
+        final Iterator<IProfileLoader> loader = createLoader();
+        Iterable<IProfileLoader> targetStream = () -> loader;
+
+        StreamSupport.stream(targetStream.spliterator(), false)
+                .map(profileLoader -> toStructureDefinition(parser, profileLoader.getPath()))
                 .filter(Objects::nonNull)
                 .map(diffStructure -> mergeDiff(ctx, defaultValidation, profileUtilities, diffStructure))
                 .forEach(structure -> definitionMap.put(structure.getUrl(), structure));
 
         return definitionMap;
+    }
+
+    private Iterator<IProfileLoader> createLoader() {
+        final ServiceLoader<IProfileLoader> loader = ServiceLoader.load(IProfileLoader.class);
+        return loader.iterator();
     }
 
     private List<String> getResourceList(String name) throws IOException {
@@ -149,7 +152,7 @@ public class DPCProfileSupport implements IValidationSupport {
             throw missingResourceException;
         }
 
-        // If we're running from a JAR, use NIO to get the Fileystem path
+        // If we're running from a JAR, use NIO to get the Filesystem path
         if ("jar".equals(uri.getScheme())) {
             try {
                 final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap(), null);
@@ -187,12 +190,4 @@ public class DPCProfileSupport implements IValidationSupport {
 
         return diffStruct;
     }
-
-    private static InputStream maybeNull(String path, InputStream stream) {
-        if (stream == null) {
-            throw new MissingResourceException("Cannot find path for profiles", DPCProfileSupport.class.getName(), path);
-        }
-        return stream;
-    }
-
 }

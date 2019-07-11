@@ -10,7 +10,7 @@ import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
-import gov.cms.dpc.fhir.validations.definitions.DefinitionConstants;
+import gov.cms.dpc.fhir.validations.profiles.DefinitionConstants;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;

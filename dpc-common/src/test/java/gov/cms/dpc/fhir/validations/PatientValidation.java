@@ -5,7 +5,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.validations.definitions.DefinitionConstants;
+import gov.cms.dpc.fhir.validations.profiles.DefinitionConstants;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;

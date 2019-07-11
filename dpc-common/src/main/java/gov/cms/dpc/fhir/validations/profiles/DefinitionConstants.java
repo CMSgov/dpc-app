@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.validations.definitions;
+package gov.cms.dpc.fhir.validations.profiles;
 
 import java.net.URI;
 
