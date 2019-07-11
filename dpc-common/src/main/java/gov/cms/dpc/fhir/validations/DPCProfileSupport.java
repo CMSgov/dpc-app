@@ -18,10 +18,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.*;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -118,51 +114,6 @@ public class DPCProfileSupport implements IValidationSupport {
     private Iterator<IProfileLoader> createLoader() {
         final ServiceLoader<IProfileLoader> loader = ServiceLoader.load(IProfileLoader.class);
         return loader.iterator();
-    }
-
-    private List<String> getResourceList(String name) throws IOException {
-
-        final Path directory = getDirectory(name);
-        final List<String> filenames = new ArrayList<>();
-        final DirectoryStream<Path> paths = Files.newDirectoryStream(directory);
-
-        for (Path path : paths) {
-            // If the file doesn't end json or xml, it can't possibly be FHIR resource, so ignore it.
-            final String pathString = path.toString();
-            if (pathString.endsWith("json") || pathString.endsWith("xml")) {
-                filenames.add(pathString);
-            } else {
-                logger.debug("Ignoring: {}", pathString);
-            }
-
-        }
-        return filenames;
-    }
-
-    private Path getDirectory(String structurePath) {
-        final MissingResourceException missingResourceException = new MissingResourceException("Unable to find path to profiles", this.getClass().getName(), structurePath);
-        final URI uri;
-        try {
-            final URL resource = this.getClass().getClassLoader().getResource(structurePath);
-            if (resource == null) {
-                throw missingResourceException;
-            }
-            uri = resource.toURI();
-        } catch (URISyntaxException e) {
-            throw missingResourceException;
-        }
-
-        // If we're running from a JAR, use NIO to get the Filesystem path
-        if ("jar".equals(uri.getScheme())) {
-            try {
-                final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap(), null);
-                return fileSystem.getPath(structurePath);
-            } catch (IOException e) {
-                throw missingResourceException;
-            }
-        }
-
-        return Paths.get(uri);
     }
 
     private StructureDefinition toStructureDefinition(IParser parser, String structurePath) {
