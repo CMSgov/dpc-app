@@ -6,6 +6,9 @@ import javax.validation.ConstraintValidatorFactory;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 
+/**
+ * Provide our custom {@link ValidatorFactory} that supports injecting resources into our custom {@link javax.validation.ConstraintValidator}
+ */
 public class ValidatorFactoryProvider implements Provider<ValidatorFactory> {
 
     private final ConstraintValidatorFactory factoryProvider;

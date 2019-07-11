@@ -5,7 +5,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.validations.profiles.DefinitionConstants;
+import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
@@ -43,7 +43,7 @@ class PatientValidation {
 
     @Test
     void definitionIsValid() {
-        final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(ctx, DefinitionConstants.DPC_PATIENT_URI.toString());
+        final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(ctx, PatientProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(patientDefinition);
         // There should be a single failure, but we know about it.
         // This needs to stay until https://github.com/jamesagnew/hapi-fhir/pull/1375 lands in upstream.
@@ -198,7 +198,7 @@ class PatientValidation {
 
         final Patient patient = new Patient();
         final Meta meta = new Meta();
-        meta.addProfile(DefinitionConstants.DPC_PATIENT_URI.toString());
+        meta.addProfile(PatientProfile.PROFILE_URI);
 
         patient.setMeta(meta);
 

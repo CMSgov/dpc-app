@@ -1,8 +1,11 @@
 package gov.cms.dpc.fhir.validations.profiles;
 
+/**
+ * Custom patient profile that requires specific data points in order to support patient matching.
+ */
 public class PatientProfile implements IProfileLoader {
 
-    public static String PROFILE_STRING = "https://dpc.cms.gov/fhir/StructureDefinitions/dpc-patient";
+    public static String PROFILE_URI = "https://dpc.cms.gov/fhir/StructureDefinitions/dpc-patient";
 
     @Override
     public String getPath() {
@@ -11,6 +14,6 @@ public class PatientProfile implements IProfileLoader {
 
     @Override
     public String getURI() {
-        return PROFILE_STRING;
+        return PROFILE_URI;
     }
 }

@@ -9,6 +9,10 @@ import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+/**
+ * Hibernate {@link ConstraintValidator} that provides support for running the {@link FhirValidator} against FHIR resources, as part of the normal Dropwizard validation framework.
+ * This requires that the {@link Profiled} annotation be added to the resource.
+ */
 public class ProfileValidator implements ConstraintValidator<Profiled, BaseResource> {
 
     private static final String VALIDATION_CONSTANT = "{gov.cms.dpc.fhir.validations.ProfileValidator.";

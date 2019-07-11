@@ -7,6 +7,11 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorFactory;
 import java.util.Set;
 
+/**
+ * Custom {@link ConstraintValidatorFactory} that allows us to inject services into our custom {@link ConstraintValidator}.
+ * <p>
+ * If a custom validator isn't present, it delegates to the underlying {@link ConstraintValidatorFactory} and tries to load from there.
+ */
 public class InjectingConstraintValidatorFactory implements ConstraintValidatorFactory {
 
     private final ConstraintValidatorFactory delegate;

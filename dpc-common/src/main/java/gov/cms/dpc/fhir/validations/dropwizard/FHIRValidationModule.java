@@ -12,6 +12,9 @@ import javax.validation.ConstraintValidatorFactory;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
 
+/**
+ * Guice module for setting up the required Validation components, if requested by the application
+ */
 public class FHIRValidationModule extends AbstractModule {
 
     public FHIRValidationModule() {
@@ -21,8 +24,10 @@ public class FHIRValidationModule extends AbstractModule {
 
     @Override
     protected void configure() {
+
         TypeLiteral<Set<ProfileValidator>> constraintType = new TypeLiteral<>() {
         };
+        
         bind(constraintType).toProvider(ConstraintValidationProvider.class);
         bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
         bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);

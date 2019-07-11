@@ -23,6 +23,8 @@ import java.util.stream.StreamSupport;
 
 /**
  * DPC specific implementation of FHIR's {@link IValidationSupport}, which allows us to load our own {@link StructureDefinition}s from the JAR.
+ * <p>
+ * Loading is done through Java's {@link ServiceLoader} feature, we declare profiles that implement {@link IProfileLoader} and then place them in the corresponding file under META-INF/services
  */
 public class DPCProfileSupport implements IValidationSupport {
 
@@ -122,14 +124,18 @@ public class DPCProfileSupport implements IValidationSupport {
             if (stream == null) {
                 throw new MissingResourceException("Cannot load structure definition", this.getClass().getName(), structurePath);
             }
-            try {
-                return parser.parseResource(StructureDefinition.class, stream);
-            } catch (DataFormatException e) {
-                logger.error("Unable to parse profile: {}", structurePath, e);
-                return null;
-            }
+            return parseStructureDefinition(parser, structurePath, stream);
         } catch (IOException e) {
             throw new IllegalStateException("For some reason, can't read.", e);
+        }
+    }
+
+    private StructureDefinition parseStructureDefinition(IParser parser, String structurePath, InputStream stream) {
+        try {
+            return parser.parseResource(StructureDefinition.class, stream);
+        } catch (DataFormatException e) {
+            logger.error("Unable to parse profile: {}", structurePath, e);
+            return null;
         }
     }
 

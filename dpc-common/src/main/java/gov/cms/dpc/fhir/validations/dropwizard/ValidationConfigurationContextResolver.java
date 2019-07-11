@@ -8,6 +8,11 @@ import javax.validation.ValidatorFactory;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+/**
+ * Custom {@link ContextResolver} that allows us to override the default Hibernate/Dropwizard settings in order to support injection for our custom {@link javax.validation.ConstraintValidator}
+ * <p>
+ * This should be natively supported in Dropwizard 2.0, but until then, we need this.
+ */
 @Provider
 public class ValidationConfigurationContextResolver implements ContextResolver<ValidationConfig> {
 

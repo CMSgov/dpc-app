@@ -7,6 +7,11 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.Set;
 
+/**
+ * Custom {@link Provider} that creates a {@link Set} of our custom {@link javax.validation.ConstraintValidator}.
+ * <p>
+ * Eventually, this will be moved to a {@link com.google.inject.multibindings.Multibinder}, but for now, we just do things manually.
+ */
 public class ConstraintValidationProvider implements Provider<Set<ProfileValidator>> {
 
     private final FhirValidator validator;
