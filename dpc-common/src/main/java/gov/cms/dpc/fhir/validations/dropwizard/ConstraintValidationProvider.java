@@ -12,6 +12,7 @@ import java.util.Set;
  * Custom {@link Provider} that creates a {@link Set} of our custom {@link javax.validation.ConstraintValidator}.
  * <p>
  * Eventually, this will be moved to a {@link com.google.inject.multibindings.Multibinder}, but for now, we just do things manually.
+ * Handled in DPC-403
  */
 public class ConstraintValidationProvider implements Provider<Set<ConstraintValidator<?, ?>>> {
 

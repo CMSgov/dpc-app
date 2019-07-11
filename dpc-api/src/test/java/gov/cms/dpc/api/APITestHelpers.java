@@ -7,6 +7,15 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
+import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
+import gov.cms.dpc.fhir.validations.DPCProfileSupport;
+import gov.cms.dpc.fhir.validations.ProfileValidator;
+import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
+import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
+import io.dropwizard.testing.junit5.ResourceExtension;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -15,10 +24,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
+import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.Bundle;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,6 +77,45 @@ public class APITestHelpers {
         return macaroon;
     }
 
+    /**
+     * Build Dropwizard test instance with a specific subset of Resources and Providers
+     *
+     * @param ctx        - {@link FhirContext} context to use
+     * @param resources  - {@link List} of resources to add to test instance
+     * @param providers  - {@link List} of providers to add to test instance
+     * @param validation - {@code true} enable custom validation. {@code false} Disable custom validation
+     * @return
+     */
+    public static ResourceExtension buildResourceExtension(FhirContext ctx, List<Object> resources, List<Object> providers, boolean validation) {
+
+        final var builder = ResourceExtension
+                .builder()
+                .setRegisterDefaultExceptionMappers(false)
+                .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
+                .addProvider(new FHIRHandler(ctx))
+                .addProvider(FHIRExceptionHandler.class);
+
+        // Optionally enable validation
+        if (validation) {
+            // Validation config
+            final DPCFHIRConfiguration.FHIRValidationConfiguration config = new DPCFHIRConfiguration.FHIRValidationConfiguration();
+            config.setEnabled(true);
+            config.setSchematronValidation(true);
+            config.setSchemaValidation(true);
+
+            final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
+                    Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, new DPCProfileSupport(ctx), config).get())));
+
+            builder.setValidator(provideValidator(constraintFactory));
+            builder.addProvider(FHIRValidationExceptionHandler.class);
+        }
+
+        resources.forEach(builder::addResource);
+        providers.forEach(builder::addProvider);
+
+        return builder.build();
+    }
+
     // TODO: Remove as part of DPC-373
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon) {
         final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
@@ -88,5 +141,11 @@ public class APITestHelpers {
         public void interceptResponse(IHttpResponse theResponse) {
             // Not used
         }
+    }
+
+    static Validator provideValidator(InjectingConstraintValidatorFactory factory) {
+        return Validation.byDefaultProvider()
+                .configure().constraintValidatorFactory(factory)
+                .buildValidatorFactory().getValidator();
     }
 }

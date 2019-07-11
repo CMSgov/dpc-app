@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
@@ -26,6 +27,8 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.sql.Date;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +38,7 @@ class TestResourceTest {
 
     private static final FhirContext ctx = FhirContext.forDstu3();
 
-    private static ResourceExtension RESOURCES = buildResource();
+    private static ResourceExtension RESOURCES = APITestHelpers.buildResourceExtension(ctx, List.of(new TestResource()), Collections.emptyList(), true);
 
     @Test
     void testNonProfiledPatient() {
@@ -114,30 +117,5 @@ class TestResourceTest {
         address.setCountry("US");
 
         return address;
-    }
-
-    static Validator provideValidator(InjectingConstraintValidatorFactory factory) {
-        return Validation.byDefaultProvider()
-                .configure().constraintValidatorFactory(factory)
-                .buildValidatorFactory().getValidator();
-    }
-
-    private static ResourceExtension buildResource() {
-        final DPCFHIRConfiguration.FHIRValidationConfiguration config = new DPCFHIRConfiguration.FHIRValidationConfiguration();
-        config.setEnabled(true);
-        config.setSchematronValidation(true);
-        config.setSchemaValidation(true);
-        final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
-                Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, new DPCProfileSupport(ctx), config).get())));
-
-        return ResourceExtension
-                .builder()
-                .setRegisterDefaultExceptionMappers(false)
-                .addProvider(new FHIRHandler(ctx))
-                .addProvider(FHIRValidationExceptionHandler.class)
-                .addProvider(FHIRExceptionHandler.class)
-                .addResource(new TestResource())
-                .setValidator(provideValidator(constraintFactory))
-                .build();
     }
 }
