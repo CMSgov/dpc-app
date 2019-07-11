@@ -60,7 +60,8 @@ public class Capabilities {
 
         serverComponent.setResource(List.of(
 //                generateGroupEndpoints(),
-                generatePractitionerEndpoints()
+                generatePractitionerEndpoints(),
+                generateStructureDefinitionEndpoints()
         ));
 
         return Collections.singletonList(serverComponent);
@@ -94,5 +95,17 @@ public class Capabilities {
         ));
 
         return practitioner;
+    }
+
+    private static CapabilityStatementRestResourceComponent generateStructureDefinitionEndpoints() {
+        final CapabilityStatementRestResourceComponent definitions = new CapabilityStatementRestResourceComponent();
+        definitions.setType("Practitioner");
+        definitions.setVersioning(ResourceVersionPolicy.NOVERSION);
+
+        definitions.setInteraction(List.of(
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
+        ));
+
+        return definitions;
     }
 }
