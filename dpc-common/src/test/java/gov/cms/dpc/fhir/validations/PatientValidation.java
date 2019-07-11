@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PatientValidation {
 
     private static FhirValidator fhirValidator;
-    private static FHIRProfileValidator dpcModule;
+    private static DPCProfileSupport dpcModule;
     private static FhirContext ctx;
 
     @BeforeAll
@@ -36,7 +36,7 @@ class PatientValidation {
         fhirValidator.registerValidatorModule(instanceValidator);
 
 
-        dpcModule = new FHIRProfileValidator(ctx);
+        dpcModule = new DPCProfileSupport(ctx);
         final ValidationSupportChain chain = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
         instanceValidator.setValidationSupport(chain);
     }

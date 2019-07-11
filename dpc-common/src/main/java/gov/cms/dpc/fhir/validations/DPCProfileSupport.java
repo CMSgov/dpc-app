@@ -26,13 +26,13 @@ import java.util.*;
 /**
  * DPC specific implementation of FHIR's {@link IValidationSupport}, which allows us to load our own {@link StructureDefinition}s from the JAR.
  */
-public class FHIRProfileValidator implements IValidationSupport {
+public class DPCProfileSupport implements IValidationSupport {
 
-    private static final Logger logger = LoggerFactory.getLogger(FHIRProfileValidator.class);
+    private static final Logger logger = LoggerFactory.getLogger(DPCProfileSupport.class);
 
     private final Map<String, StructureDefinition> structureMap;
 
-    public FHIRProfileValidator(FhirContext ctx, String resourcePrefix) {
+    public DPCProfileSupport(FhirContext ctx, String resourcePrefix) {
         try {
             this.structureMap = parseBundledDefinitions(ctx, resourcePrefix);
         } catch (IOException e) {
@@ -41,7 +41,7 @@ public class FHIRProfileValidator implements IValidationSupport {
     }
 
     @Inject
-    public FHIRProfileValidator(FhirContext ctx) {
+    public DPCProfileSupport(FhirContext ctx) {
         this(ctx, "validations/");
     }
 
@@ -190,7 +190,7 @@ public class FHIRProfileValidator implements IValidationSupport {
 
     private static InputStream maybeNull(String path, InputStream stream) {
         if (stream == null) {
-            throw new MissingResourceException("Cannot find path for profiles", FHIRProfileValidator.class.getName(), path);
+            throw new MissingResourceException("Cannot find path for profiles", DPCProfileSupport.class.getName(), path);
         }
         return stream;
     }

@@ -8,7 +8,7 @@ import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
-import gov.cms.dpc.fhir.validations.FHIRProfileValidator;
+import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.definitions.DefinitionConstants;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
@@ -128,7 +128,7 @@ class TestResourceTest {
         config.setSchematronValidation(true);
         config.setSchemaValidation(true);
         final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
-                Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, new FHIRProfileValidator(ctx), config).get())));
+                Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, new DPCProfileSupport(ctx), config).get())));
 
         return ResourceExtension
                 .builder()

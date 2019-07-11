@@ -2,7 +2,7 @@ package gov.cms.dpc.fhir.validations.dropwizard;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
-import gov.cms.dpc.fhir.validations.FHIRProfileValidator;
+import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
@@ -19,11 +19,11 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
     private static final Logger logger = LoggerFactory.getLogger(FHIRValidatorProvider.class);
 
     private final FhirContext ctx;
-    private final FHIRProfileValidator dpcModule;
+    private final DPCProfileSupport dpcModule;
     private final FHIRValidationConfiguration validationConfiguration;
 
     @Inject
-    public FHIRValidatorProvider(FhirContext ctx, FHIRProfileValidator dpcModule, FHIRValidationConfiguration config) {
+    public FHIRValidatorProvider(FhirContext ctx, DPCProfileSupport dpcModule, FHIRValidationConfiguration config) {
         this.ctx = ctx;
         this.dpcModule = dpcModule;
         this.validationConfiguration = config;

@@ -15,23 +15,23 @@ class ProfileValidatorTests {
 
     @Test
     void testBasicLoading() {
-        final FHIRProfileValidator fhirProfileValidator = new FHIRProfileValidator(ctx);
+        final DPCProfileSupport DPCProfileSupport = new DPCProfileSupport(ctx);
 
-        final List<StructureDefinition> definitions = fhirProfileValidator.fetchAllStructureDefinitions(ctx);
+        final List<StructureDefinition> definitions = DPCProfileSupport.fetchAllStructureDefinitions(ctx);
 
         assertEquals(1, definitions.size(), "Should not have malformed or invalid resources");
     }
 
     @Test
     void testLoadingBadResources() {
-        final FHIRProfileValidator fhirProfileValidator = new FHIRProfileValidator(ctx, "bad_validations/");
+        final DPCProfileSupport DPCProfileSupport = new DPCProfileSupport(ctx, "bad_validations/");
 
-        final List<StructureDefinition> definitions = fhirProfileValidator.fetchAllStructureDefinitions(ctx);
+        final List<StructureDefinition> definitions = DPCProfileSupport.fetchAllStructureDefinitions(ctx);
         assertTrue(definitions.isEmpty(), "Should not have parsed anything");
     }
 
     @Test
     void testBadPrefix() {
-        assertThrows(MissingResourceException.class, () -> new FHIRProfileValidator(ctx, "nothing/"));
+        assertThrows(MissingResourceException.class, () -> new DPCProfileSupport(ctx, "nothing/"));
     }
 }

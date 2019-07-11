@@ -5,7 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
-import gov.cms.dpc.fhir.validations.FHIRProfileValidator;
+import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 
 import javax.validation.ConstraintValidatorFactory;
@@ -29,7 +29,7 @@ public class FHIRValidationModule extends AbstractModule {
         bind(ValidationConfigurationContextResolver.class);
         bind(FHIRValidationExceptionHandler.class);
 
-        bind(FHIRProfileValidator.class);
+        bind(DPCProfileSupport.class);
         bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
     }
 }
