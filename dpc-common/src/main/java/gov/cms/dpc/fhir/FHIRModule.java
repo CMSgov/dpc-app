@@ -1,49 +1,27 @@
 package gov.cms.dpc.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.validation.FhirValidator;
-import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
-import com.google.inject.Scopes;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
+import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.MethodOutcomeHandler;
-import gov.cms.dpc.fhir.validations.*;
-import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
-import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
-import gov.cms.dpc.fhir.validations.dropwizard.ValidationConfigurationContextResolver;
+import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
+import io.dropwizard.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorFactory;
-import javax.validation.Validation;
-import javax.validation.ValidatorFactory;
-import java.util.Set;
 
-public class FHIRModule extends AbstractModule {
+public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends DropwizardAwareModule<T> {
+
+    private static final Logger logger = LoggerFactory.getLogger(FHIRModule.class);
 
     public FHIRModule() {
-//        Not used
-    }
-
-    @Override
-    protected void configure() {
-        // Request/Response handlers
-        bind(FHIRHandler.class);
-        bind(MethodOutcomeHandler.class);
-        // Request/Response handlers
-        bind(FHIRExceptionHandler.class);
-        bind(FHIRValidationExceptionHandler.class);
-        bind(FHIRRequestFeature.class);
-        bind(InjectingConstraintValidatorFactory.class);
-        bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
-        bind(ValidationConfigurationContextResolver.class);
-
-        // Validator
-        bind(FHIRProfileValidator.class);
-        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
+        // Not used
     }
 
     @Provides
@@ -52,15 +30,21 @@ public class FHIRModule extends AbstractModule {
         return FhirContext.forDstu3();
     }
 
-    @Provides
-    public ValidatorFactory provideValidatorFactory(InjectingConstraintValidatorFactory factory) {
-        return Validation.byDefaultProvider()
-                .configure().constraintValidatorFactory(factory)
-                .buildValidatorFactory();
-    }
+    @Override
+    public void configure(Binder binder) {
+        // Request/Response handlers
+        binder.bind(FHIRHandler.class);
+        binder.bind(MethodOutcomeHandler.class);
+        // Request/Response handlers
+        binder.bind(FHIRExceptionHandler.class);
+        binder.bind(FHIRRequestFeature.class);
 
-    @Provides
-    Set<ConstraintValidator> provideValidators(FhirValidator validator) {
-        return Set.of(new ProfileValidator(validator));
+        // Validator
+        if (getConfiguration().getFHIRConfiguration().getValidation().isEnabled()) {
+            logger.info("Enabling FHIR resource validation");
+            binder.install(new FHIRValidationModule());
+        } else {
+            logger.info("Not enabling FHIR resource validation");
+        }
     }
 }
