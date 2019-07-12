@@ -11,10 +11,13 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,7 +49,7 @@ public class OrgRegistrationCommand extends Command {
         subparser
                 .addArgument("--host")
                 .dest(ATTR_HOSTNAME)
-                .setDefault("http://localhost:3041/v1")
+                .setDefault("http://localhost:3500/v1")
                 .help("Address of the Attribution Service, which handles organization registration");
 
         subparser
@@ -72,12 +75,19 @@ public class OrgRegistrationCommand extends Command {
     }
 
     void registerOrganization(Bundle organization, String attributionService, String organizationID) throws IOException {
-        final IGenericClient client = ctx.newRestfulGenericClient(attributionService + "/Organization");
+        final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
+
+        final Parameters parameters = new Parameters();
+
+        parameters
+                .addParameter().setResource(organization);
 
         try {
             client
-                    .transaction()
-                    .withBundle(organization)
+                    .operation()
+                    .onType(Organization.class)
+                    .named("submit")
+                    .withParameters(parameters)
                     .encodedJson()
                     .execute();
         } catch (Exception e) {
@@ -88,10 +98,10 @@ public class OrgRegistrationCommand extends Command {
 
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-            final HttpGet httpGet = new HttpGet(String.format("%s/Organization/%s/token/create", attributionService, organizationID));
-            httpGet.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+            final HttpPost httpPost = new HttpPost(String.format("%s/Organization/%s/token", attributionService, organizationID));
+            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
-            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 final String token = EntityUtils.toString(response.getEntity());
                 System.out.println(String.format("Organization token: %s", token));
             }

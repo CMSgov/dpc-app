@@ -14,10 +14,7 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +73,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    public Response createOrganization(Bundle transactionBundle) {
+    public Response submitOrganization(Parameters parameters) {
+
+        final Parameters.ParametersParameterComponent firstRep = parameters.getParameterFirstRep();
+
+        if (!firstRep.hasResource()) {
+            throw new WebApplicationException("Must submit bundle", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+        final Bundle transactionBundle = (Bundle) firstRep.getResource();
 
         final Optional<Organization> organization = transactionBundle
                 .getEntry()
@@ -99,8 +103,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .collect(Collectors.toList());
 
         try {
-            this.dao.registerOrganization(organization.get(), endpoints);
-            return Response.ok().build();
+            final Organization persistedOrg = this.dao.registerOrganization(organization.get(), endpoints);
+            return Response.status(Response.Status.CREATED).entity(persistedOrg).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
             throw e;

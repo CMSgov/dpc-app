@@ -21,11 +21,13 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         super(factory.getSessionFactory());
     }
 
-    public void registerOrganization(Organization resource, List<EndpointEntity> endpoints) {
+    public Organization registerOrganization(Organization resource, List<EndpointEntity> endpoints) {
         final OrganizationEntity entity = new OrganizationEntity().fromFHIR(resource);
         endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
         entity.setEndpoints(endpoints);
-        persist(entity);
+        final OrganizationEntity persisted = persist(entity);
+
+        return persisted.toFHIR();
     }
 
     public Optional<OrganizationEntity> fetchOrganization(UUID organizationID) {

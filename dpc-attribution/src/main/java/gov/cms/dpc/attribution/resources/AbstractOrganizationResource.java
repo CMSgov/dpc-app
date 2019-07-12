@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.resources;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -31,8 +32,9 @@ public abstract class AbstractOrganizationResource {
      * @return - {@link Response} whether operation succeeded or failed
      */
     @POST
+    @Path("/$submit")
     @FHIR
-    public abstract Response createOrganization(Bundle bundle);
+    public abstract Response submitOrganization(Parameters bundle);
 
     @GET
     @FHIR
