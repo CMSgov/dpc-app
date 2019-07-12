@@ -1,0 +1,9 @@
+.hero {
+  background-color: $color-primary-darkest;
+  color: $color-white;
+  padding: $spacer-7 0;
+
+  a:not(.ds-c-button) {
+    color: $color-primary-alt-light;
+  }
+}
