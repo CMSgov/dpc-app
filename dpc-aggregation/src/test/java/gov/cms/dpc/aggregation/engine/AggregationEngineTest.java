@@ -207,6 +207,36 @@ class AggregationEngineTest {
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
+    /**
+     * Test if a engine can handle parallelEnabled off
+     */
+    @Test
+    void sequentialJobTest() {
+        // Make an engine with parallel threads turned off
+        final var operationalConfig = new OperationsConfig(1000, exportPath, 3, false, false, 0.0f, 0.0f);
+        final var sequentialEngine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        AggregationEngine.setGlobalErrorHandler();
+
+        // Make a simple job with one resource type
+        final var jobId = UUID.randomUUID();
+        JobModel job = new JobModel(jobId,
+                Collections.singletonList(ResourceType.Patient),
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_IDS);
+
+        // Do the job
+        queue.submitJob(jobId, job);
+        queue.workJob().ifPresent(pair -> sequentialEngine.completeJob(pair));
+
+        // Look at the result
+        final var completeJob = queue.getJob(jobId).orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.Patient, 0);
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+    }
+
     @Test
     void testBlueButtonException() {
         // Test generic runtime exception

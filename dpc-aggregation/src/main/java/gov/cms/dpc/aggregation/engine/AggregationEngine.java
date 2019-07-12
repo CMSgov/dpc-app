@@ -195,14 +195,22 @@ public class AggregationEngine implements Runnable {
      * @return a transformed flow
      */
     private Publisher<JobResult> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger counter, Meter meter) {
-        return upstream
-                .filter(r -> r.getResourceType() == writer.getResourceType())
-                .buffer(operationsConfig.getResourcesPerFileCount())
-                .doOnNext(outcomes -> meter.mark(outcomes.size()))
-                .parallel()
-                .runOn(writeScheduler)
-                .map(batch -> writer.writeBatch(counter, batch))
-                .sequential();
+        if (operationsConfig.isParallelEnabled()) {
+            return upstream
+                    .filter(r -> r.getResourceType() == writer.getResourceType())
+                    .buffer(operationsConfig.getResourcesPerFileCount())
+                    .doOnNext(outcomes -> meter.mark(outcomes.size()))
+                    .parallel()
+                    .runOn(writeScheduler)
+                    .map(batch -> writer.writeBatch(counter, batch))
+                    .sequential();
+        } else {
+            return upstream
+                    .filter(r -> r.getResourceType() == writer.getResourceType())
+                    .buffer(operationsConfig.getResourcesPerFileCount())
+                    .doOnNext(outcomes -> meter.mark(outcomes.size()))
+                    .map(batch -> writer.writeBatch(counter, batch));
+        }
     }
 
     /**
