@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=dpc-website_development
+      - POSTGRES_PASSWORD=dpc-safe
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    image: dpc-web:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
