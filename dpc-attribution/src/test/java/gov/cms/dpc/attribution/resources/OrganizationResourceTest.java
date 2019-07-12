@@ -1,10 +1,10 @@
 package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -100,7 +100,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         }
 
         // Now do the search using the FHIR client
-        final IGenericClient client = buildClient();
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 
         final Bundle execute = client
                 .search()
@@ -115,7 +115,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testEmptyTokenSearch() {
-        final IGenericClient client = buildClient();
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 
         final IQuery<Bundle> query = client
                 .search()
@@ -127,8 +127,4 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         assertEquals(HttpStatus.BAD_REQUEST_400, exception.getStatusCode(), "Should be bad request");
     }
 
-    private IGenericClient buildClient() {
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        return ctx.newRestfulGenericClient(getServerURL());
-    }
 }

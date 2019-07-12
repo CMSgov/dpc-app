@@ -8,12 +8,13 @@ import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AttributionTestHelpers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Test;
 
+import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PractitionerResourceTest extends AbstractAttributionTest {
@@ -25,8 +26,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerReadWrite() {
 
-        final Practitioner practitioner = createPractitionerResource("test-npi-1");
-        final IGenericClient client = createFHIRClient();
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-1");
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
         final MethodOutcome mo = client
                 .create()
                 .resource(practitioner)
@@ -75,8 +76,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerSearch() {
 
-        final Practitioner practitioner = createPractitionerResource("test-npi-1");
-        final IGenericClient client = createFHIRClient();
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-1");
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         final MethodOutcome outcome = client
                 .create()
@@ -112,8 +113,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPractitionerUpdate() {
-        final Practitioner practitioner = createPractitionerResource("test-npi-2");
-        final IGenericClient client = createFHIRClient();
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         final MethodOutcome outcome = client
                 .create()
@@ -144,20 +145,4 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertFalse(pract3.equalsDeep(practitioner), "Should not match original");
     }
 
-    private IGenericClient createFHIRClient() {
-        // Upload it
-        final FhirContext ctx = FhirContext.forDstu3();
-
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        return ctx.newRestfulGenericClient(getServerURL());
-    }
-
-    private static Practitioner createPractitionerResource(String NPI) {
-        final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(NPI);
-        practitioner.addName()
-                .setFamily("Practitioner").addGiven("Test");
-
-        return practitioner;
-    }
 }
