@@ -4,7 +4,10 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.PractitionerRole;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
@@ -29,8 +32,4 @@ public abstract class AbstractPractitionerRoleResource {
     @DELETE
     @Path("/{roleID}")
     public abstract Response deletePractitionerRole(UUID roleID);
-
-    @PUT
-    @Path("/{roleID}")
-    public abstract PractitionerRole updatePractitionerRole(UUID roleID, PractitionerRole role);
 }

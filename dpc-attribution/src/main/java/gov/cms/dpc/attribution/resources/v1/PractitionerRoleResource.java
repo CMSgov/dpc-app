@@ -98,11 +98,4 @@ public class PractitionerRoleResource extends AbstractPractitionerRoleResource {
 
         return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find Practitioner role: %s", roleID)).build();
     }
-
-    @Override
-    @PUT
-    @Path("/{roleID}")
-    public PractitionerRole updatePractitionerRole(@PathParam("roleID") UUID roleID, PractitionerRole role) {
-        return null;
-    }
 }
