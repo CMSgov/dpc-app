@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.auth;
 
+import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.core.Capabilities;
@@ -9,7 +10,6 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
-import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +20,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class AuthHandlerTest {
+class AuthHandlerTest {
     private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
     private static final String TEST_MACAROON = "eyJ2IjoyLCJsIjoiaHR0cHM6Ly9kcGMuY21zLmdvdiIsImkiOiI3YzRhMzk1NS03ZWRjLTRjOWUtOGRjYS0wZjdjMjcwNzIwNzQiLCJjIjpbeyJpNjQiOiJaSEJqWDIxaFkyRnliMjl1WDNabGNuTnBiMjRnUFNBeCJ9LHsiaTY0IjoiWlhod2FYSmxjeUE5SURJd01qQXRNRGN0TVRCVU1UUTZNVGM2TXpNdU9EYzJOalF6V2cifSx7Imk2NCI6ImIzSm5ZVzVwZW1GMGFXOXVYMmxrSUQwZ01HTTFNamRrTW1VdE1tVTRZUzAwT0RBNExXSXhNV1F0TUdaaE1EWmlZV1k0TWpVMCJ9XSwiczY0Ijoic0ZvSlFGNGk5VHZuSnRHVEhUb1ZFblJwc3hzZmdJZjhDdWtpYy0xWE14ZyJ9";
 
@@ -93,14 +94,19 @@ public class AuthHandlerTest {
 
         // Setup mocks
         final WebTarget webTarget = mockWebTarget();
-
         final MacaroonsDynamicFeature dynamicFeature = new MacaroonsDynamicFeature(new MacaroonsAuthFilter(webTarget), config);
-        return ResourceExtension.builder()
-                .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
-                .addProvider(dynamicFeature)
-                .addResource(mockOrganizationResource())
-                .addResource(mockBaseResource())
-                .build();
+
+        final FhirContext ctx = FhirContext.forDstu3();
+
+        return APITestHelpers.buildResourceExtension(ctx, List.of(mockOrganizationResource(), mockBaseResource()), List.of(dynamicFeature), false);
+
+
+//        return ResourceExtension.builder()
+//                .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
+//                .addProvider(dynamicFeature)
+//                .addResource()
+//                .addResource()
+//                .build();
     }
 
     private static WebTarget mockWebTarget() {

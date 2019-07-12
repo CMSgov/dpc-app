@@ -30,7 +30,7 @@
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
 
-<!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
+        <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -60,6 +60,22 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-hibernate</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-validation</artifactId>
+            <version>${hapi.fhir.version}</version>
+        </dependency>
+        <!--        Validations use the R4 validator, even for STU3 resources-->
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

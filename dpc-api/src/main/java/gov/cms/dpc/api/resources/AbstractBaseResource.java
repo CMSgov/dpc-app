@@ -26,6 +26,9 @@ public abstract class AbstractBaseResource {
     @Path("/Jobs")
     public abstract AbstractJobResource jobOperations();
 
+    @Path("/StructureDefinition")
+    public abstract AbstractDefinitionResource definitionResourceOperations();
+
     /**
      * Returns the FHIR capabilities statement
      *

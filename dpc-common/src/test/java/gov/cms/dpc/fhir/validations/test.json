@@ -1,0 +1,20 @@
+{
+  "resourceType": "Patient",
+  "id": "test-patient",
+  "meta": {
+    "profile": [
+      "https://dpc.cms.gov/fhir/StructureDefinitions/dpc-patient"
+    ]
+  },
+  "name": [
+    {
+      "family": "Patient",
+      "given": [
+        "Test"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1990-01-01",
+  "multipleBirthBoolean": true
+}

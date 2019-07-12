@@ -2,10 +2,8 @@ package gov.cms.dpc.api.resources.v1;
 
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
-import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
-import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 
@@ -18,18 +16,21 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractDataResource dr;
     private final AbstractRosterResource rr;
     private final AbstractOrganizationResource or;
+    private final AbstractDefinitionResource sdr;
 
     @Inject
     public BaseResource(GroupResource gr,
                         JobResource jr,
                         DataResource dr,
                         RosterResource rr,
-                        OrganizationResource or) {
+                        OrganizationResource or,
+                        DefinitionResource sdr) {
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
         this.rr = rr;
         this.or = or;
+        this.sdr = sdr;
     }
 
     @Override
@@ -50,6 +51,11 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     public AbstractJobResource jobOperations() {
         return this.jr;
+    }
+
+    @Override
+    public AbstractDefinitionResource definitionResourceOperations() {
+        return this.sdr;
     }
 
     @Override
