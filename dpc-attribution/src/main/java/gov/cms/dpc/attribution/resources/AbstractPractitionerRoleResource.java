@@ -23,11 +23,13 @@ public abstract class AbstractPractitionerRoleResource {
     public abstract PractitionerRole submitPractitionerRole(PractitionerRole role);
 
     @GET
+    @Path("/{roleID}")
     public abstract PractitionerRole getPractitionerRole(UUID roleID);
 
     @DELETE
     public abstract Response deletePractitionerRole(UUID roleID);
 
     @PUT
+    @Path("/{roleID}")
     public abstract PractitionerRole updatePractitionerRole(UUID roleID, PractitionerRole role);
 }

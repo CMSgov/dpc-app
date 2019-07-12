@@ -258,7 +258,7 @@
         <!--        Add an index on both the organization and the provider-->
         <createIndex tableName="PROVIDER_ROLES" indexName="provider_roles_orgs_idx">
             <column name="organization_id"/>
-            <column name="Provider_id"/>
+            <column name="provider_id"/>
         </createIndex>
 
         <!--        FK constraints to existing organizations and practitioners-->

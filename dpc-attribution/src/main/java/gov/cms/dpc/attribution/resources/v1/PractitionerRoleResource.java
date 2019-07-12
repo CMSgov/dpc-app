@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.PractitionerRole;
 
 import javax.inject.Inject;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class PractitionerRoleResource extends AbstractPractitionerRoleResource {
     }
 
     @Override
-    public Bundle getPractitionerRoles(String organizationID, String providerID) {
+    public Bundle getPractitionerRoles(@QueryParam("org") String organizationID, @QueryParam("prov") String providerID) {
         return null;
     }
 
@@ -39,8 +40,18 @@ public class PractitionerRoleResource extends AbstractPractitionerRoleResource {
     }
 
     @Override
-    public PractitionerRole getPractitionerRole(UUID roleID) {
-        return null;
+    @GET
+    @Path("/{roleID}")
+    @UnitOfWork
+    @Timed
+    @ExceptionMetered
+    public PractitionerRole getPractitionerRole(@PathParam("roleID") UUID roleID) {
+        final ProviderRoleEntity entity = this.roleDAO.fetchRole(roleID);
+        if (entity == null) {
+            throw new WebApplicationException(String.format("Cannot find role with ID: %s", roleID), Response.Status.NOT_FOUND);
+        }
+
+        return entity.toFHIR();
     }
 
     @Override
@@ -49,7 +60,9 @@ public class PractitionerRoleResource extends AbstractPractitionerRoleResource {
     }
 
     @Override
-    public PractitionerRole updatePractitionerRole(UUID roleID, PractitionerRole role) {
+    @PUT
+    @Path("/{roleID}")
+    public PractitionerRole updatePractitionerRole(@PathParam("roleID") UUID roleID, PractitionerRole role) {
         return null;
     }
 }
