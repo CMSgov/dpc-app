@@ -131,7 +131,7 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJob(jobId).orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(5, completeJob.getJobResults().size()),
+                () -> assertEquals(5, completeJob.getJobResults().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
                 () -> assertTrue(completeJob.getJobResult(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
                 () -> assertTrue(completeJob.getJobResult(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
