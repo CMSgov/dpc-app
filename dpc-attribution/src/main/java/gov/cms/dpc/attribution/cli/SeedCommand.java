@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -124,7 +125,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     }
 
     private void seedProviderBundle(DSLContext context, IParser parser, UUID organizationID) throws IOException {
-        final OffsetDateTime created = OffsetDateTime.now();
+        final LocalDateTime created = OffsetDateTime.now().toLocalDateTime();
         try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
             final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
             final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR);
@@ -134,11 +135,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     .map(entity -> providersEntityToRecord(context, entity))
                     .forEach(record -> {
                         context.executeInsert(record);
-                        final ProviderRolesRecord rolesRecord = new ProviderRolesRecord();
-                        rolesRecord.setId(UUID.randomUUID());
-                        rolesRecord.setOrganizationId(organizationID);
-                        rolesRecord.setProviderId(record.getId());
-                        rolesRecord.setCreatedAt(created.toLocalDateTime());
+                        final ProviderRolesRecord rolesRecord = providerRolesToRecord(record, created, organizationID);
                         context.executeInsert(rolesRecord);
                     });
         }
@@ -207,5 +204,15 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
 
         return record;
+    }
+
+    private static ProviderRolesRecord providerRolesToRecord(ProvidersRecord record, LocalDateTime created, UUID organizationID) {
+        final ProviderRolesRecord rolesRecord = new ProviderRolesRecord();
+        rolesRecord.setId(UUID.randomUUID());
+        rolesRecord.setOrganizationId(organizationID);
+        rolesRecord.setProviderId(record.getId());
+        rolesRecord.setCreatedAt(created);
+
+        return rolesRecord;
     }
 }
