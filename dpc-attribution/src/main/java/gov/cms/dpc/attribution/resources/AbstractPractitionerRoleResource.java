@@ -27,6 +27,7 @@ public abstract class AbstractPractitionerRoleResource {
     public abstract PractitionerRole getPractitionerRole(UUID roleID);
 
     @DELETE
+    @Path("/{roleID}")
     public abstract Response deletePractitionerRole(UUID roleID);
 
     @PUT

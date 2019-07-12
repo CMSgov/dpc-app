@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Entity(name = "provider_roles")
 @Table(name = "provider_roles",
-uniqueConstraints = {@UniqueConstraint(columnNames = {"organization_id", "provider_id"})})
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"organization_id", "provider_id"})})
 public class ProviderRoleEntity implements Serializable {
 
     public static final long serialVersionUID = 42L;
@@ -22,10 +22,10 @@ public class ProviderRoleEntity implements Serializable {
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID roleID;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private OrganizationEntity organization;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private ProviderEntity provider;
 
     @CreationTimestamp
