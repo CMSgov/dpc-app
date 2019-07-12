@@ -48,4 +48,14 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
 
         return list(query);
     }
+
+    public List<OrganizationEntity> searchByIdentifier(String identifier) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<OrganizationEntity> query = builder.createQuery(OrganizationEntity.class);
+        final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
+
+        query.where(builder.equal(root.get("organizationID").get("value"), identifier));
+
+        return list(query);
+    }
 }

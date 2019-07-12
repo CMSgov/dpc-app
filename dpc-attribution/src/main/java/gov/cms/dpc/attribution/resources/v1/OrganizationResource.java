@@ -40,31 +40,21 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @GET
     @UnitOfWork
-    public Bundle searchAndValidateOrganizations(@QueryParam("_tag") String tokenTag) {
-        if (tokenTag == null) {
-            throw new WebApplicationException("Must have token to query", Response.Status.BAD_REQUEST);
+    public Bundle searchOrganizations(@QueryParam("identifier") String identifier, @QueryParam("_tag") String tokenTag) {
+        if (tokenTag != null) {
+            return searchAndValidationByToken(tokenTag);
         }
 
-        final Macaroon macaroon = this.parseTokenTag(tokenTag);
-
-        final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
-
-        if (organizationEntities.isEmpty()) {
-            throw new WebApplicationException("Cannot find organization with registered token", Response.Status.NOT_FOUND);
+        if (identifier == null) {
+            throw new WebApplicationException("Must have either token or Identifier to search", Response.Status.BAD_REQUEST);
         }
 
-        // There should only ever be a single entity per token
-        assert (organizationEntities.size() == 1);
-
-        final OrganizationEntity organizationEntity = organizationEntities.get(0);
-
-        // Validate the token
-        if (!validateMacaroon(organizationEntity.getId(), macaroon)) {
-            throw new WebApplicationException(String.format("Invalid token for organization %s", organizationEntity.getId().toString()), Response.Status.UNAUTHORIZED);
-        }
-
+        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(identifier);
         final Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(organizationEntity.toFHIR());
+        if (!queryList.isEmpty()) {
+            bundle.setTotal(queryList.size());
+            queryList.forEach(org -> bundle.addEntry().setResource(org.toFHIR()));
+        }
 
         return bundle;
     }
@@ -210,5 +200,30 @@ public class OrganizationResource extends AbstractOrganizationResource {
         }
 
         return bakery.deserializeMacaroon(tokenTag.substring(idx + 1));
+    }
+
+    private Bundle searchAndValidationByToken(String token) {
+        final Macaroon macaroon = this.parseTokenTag(token);
+
+        final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
+
+        if (organizationEntities.isEmpty()) {
+            throw new WebApplicationException("Cannot find organization with registered token", Response.Status.NOT_FOUND);
+        }
+
+        // There should only ever be a single entity per token
+        assert (organizationEntities.size() == 1);
+
+        final OrganizationEntity organizationEntity = organizationEntities.get(0);
+
+        // Validate the token
+        if (!validateMacaroon(organizationEntity.getId(), macaroon)) {
+            throw new WebApplicationException(String.format("Invalid token for organization %s", organizationEntity.getId().toString()), Response.Status.UNAUTHORIZED);
+        }
+
+        final Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(organizationEntity.toFHIR());
+
+        return bundle;
     }
 }

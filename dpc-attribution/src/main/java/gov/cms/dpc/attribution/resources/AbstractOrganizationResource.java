@@ -20,7 +20,7 @@ public abstract class AbstractOrganizationResource {
 
     @GET
     @FHIR
-    public abstract Bundle searchAndValidateOrganizations(String tokenTag);
+    public abstract Bundle searchOrganizations(String identifier, String tokenTag);
 
     /**
      * Register a {@link Organization} with the API
