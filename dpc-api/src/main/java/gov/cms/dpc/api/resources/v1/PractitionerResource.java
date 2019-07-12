@@ -4,14 +4,13 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.AbstractPractionerResource;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import io.dropwizard.auth.Auth;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
@@ -26,13 +25,15 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     @Timed
+    @GET
     @ExceptionMetered
-    public Bundle getPractitioners(String providerNPI) {
+    public Bundle getPractitioners(@Auth OrganizationPrincipal organization, String providerNPI) {
         return this.client
                 .search()
                 .forResource(Practitioner.class)
                 .encodedJson()
                 .where(Patient.IDENTIFIER.exactly().identifier(providerNPI))
+                .and(Organization.RES_ID.exactly().identifier(organization.getOrganization().getId()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -41,6 +42,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @Timed
     @ExceptionMetered
+    @POST
     public Practitioner submitProvider(Practitioner provider) {
         final MethodOutcome outcome = this.client
                 .create()
@@ -57,8 +59,10 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     @Timed
+    @GET
+    @Path("/{providerID}")
     @ExceptionMetered
-    public Practitioner getProvider(UUID providerID) {
+    public Practitioner getProvider(@PathParam("providerID") UUID providerID) {
         return this.client
                 .read()
                 .resource(Practitioner.class)
@@ -69,6 +73,7 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     @Timed
+    @DELETE
     @ExceptionMetered
     public Response deleteProvider(UUID providerID) {
         this.client
@@ -82,6 +87,7 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     @Timed
+    @PUT
     @ExceptionMetered
     public Practitioner updateProvider(UUID providerID, Practitioner provider) {
         return null;

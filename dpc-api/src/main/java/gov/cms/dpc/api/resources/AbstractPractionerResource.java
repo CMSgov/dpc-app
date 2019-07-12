@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources;
 
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -17,17 +18,20 @@ public abstract class AbstractPractionerResource {
     }
 
     @GET
-    public abstract Bundle getPractitioners(String providerNPI);
+    public abstract Bundle getPractitioners(OrganizationPrincipal organization, String providerNPI);
 
     @POST
     public abstract Practitioner submitProvider(Practitioner provider);
 
     @GET
+    @Path("/{providerID}")
     public abstract Practitioner getProvider(UUID providerID);
 
     @DELETE
+    @Path("/{providerID}")
     public abstract Response deleteProvider(UUID providerID);
 
     @PUT
+    @Path("/{providerID}")
     public abstract Practitioner updateProvider(UUID providerID, Practitioner provider);
 }

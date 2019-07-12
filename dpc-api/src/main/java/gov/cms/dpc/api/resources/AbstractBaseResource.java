@@ -26,6 +26,12 @@ public abstract class AbstractBaseResource {
     @Path("/Jobs")
     public abstract AbstractJobResource jobOperations();
 
+    @Path("/Organization")
+    public abstract AbstractOrganizationResource organizationOperations();
+
+    @Path("/Practitioner")
+    public abstract AbstractPractionerResource practitionerOperations();
+
     /**
      * Returns the FHIR capabilities statement
      *
@@ -34,9 +40,6 @@ public abstract class AbstractBaseResource {
     @Path("/metadata")
     @GET
     public abstract CapabilityStatement metadata();
-
-    @Path("/Organization")
-    public abstract AbstractOrganizationResource organizationOperations();
 
     /**
      * Returns the current API version
