@@ -21,7 +21,7 @@ public abstract class AbstractPractionerResource {
     public abstract Bundle getPractitioners(OrganizationPrincipal organization, String providerNPI);
 
     @POST
-    public abstract Practitioner submitProvider(Practitioner provider);
+    public abstract Practitioner submitProvider(OrganizationPrincipal organization, Practitioner provider);
 
     @GET
     @Path("/{providerID}")

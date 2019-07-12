@@ -43,7 +43,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     @POST
-    public Practitioner submitProvider(Practitioner provider) {
+    public Practitioner submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
         final MethodOutcome outcome = this.client
                 .create()
                 .resource(provider)
@@ -74,8 +74,9 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @Timed
     @DELETE
+    @Path("/{providerID}")
     @ExceptionMetered
-    public Response deleteProvider(UUID providerID) {
+    public Response deleteProvider(@PathParam("providerID") UUID providerID) {
         this.client
                 .delete()
                 .resourceById(new IdType("Practitioner", providerID.toString()))
@@ -88,8 +89,9 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @Timed
     @PUT
+    @Path("/{providerID}")
     @ExceptionMetered
-    public Practitioner updateProvider(UUID providerID, Practitioner provider) {
+    public Practitioner updateProvider(@PathParam("providerID") UUID providerID, Practitioner provider) {
         return null;
     }
 }

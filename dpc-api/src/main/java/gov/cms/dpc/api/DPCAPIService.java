@@ -4,12 +4,14 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.DemoCommand;
 import gov.cms.dpc.api.cli.OrgRegistrationCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -45,5 +47,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                     final Environment environment) {
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
+
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
     }
 }
