@@ -72,11 +72,16 @@ public class AggregationEngine implements Runnable {
         this.operationsConfig = operationsConfig;
 
         // Thread pools
-        final var cpuCount = Runtime.getRuntime().availableProcessors();
-        final int fetchCount = Math.max((int)(cpuCount * operationsConfig.getFetchThreadFactor()),1);
-        fetchScheduler = Schedulers.from(Executors.newFixedThreadPool(fetchCount));
-        final int writeCount = Math.max((int)(cpuCount * operationsConfig.getWriteThreadFactor()),1);
-        writeScheduler = Schedulers.from(Executors.newFixedThreadPool(writeCount));
+        if (operationsConfig.isParallelEnabled()) {
+            final var cpuCount = Runtime.getRuntime().availableProcessors();
+            final int fetchCount = Math.max((int) (cpuCount * operationsConfig.getFetchThreadFactor()), 1);
+            fetchScheduler = Schedulers.from(Executors.newFixedThreadPool(fetchCount));
+            final int writeCount = Math.max((int) (cpuCount * operationsConfig.getWriteThreadFactor()), 1);
+            writeScheduler = Schedulers.from(Executors.newFixedThreadPool(writeCount));
+        } else {
+            fetchScheduler = null;
+            writeScheduler = null;
+        }
 
         // Metrics
         final var metricFactory = new MetricMaker(metricRegistry, AggregationEngine.class);
