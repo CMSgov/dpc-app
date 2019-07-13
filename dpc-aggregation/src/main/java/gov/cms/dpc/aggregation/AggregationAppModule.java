@@ -11,6 +11,8 @@ import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
+import gov.cms.dpc.queue.models.JobModel;
 
 import javax.inject.Singleton;
 import java.util.List;
@@ -31,7 +33,11 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Singleton
     public FhirContext provideSTU3Context() {
-        return FhirContext.forDstu3();
+        final var fhirContext = FhirContext.forDstu3();
+
+        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
+        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
+        return fhirContext;
     }
 
     @Provides
@@ -60,10 +66,13 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     OperationsConfig provideOperationsConfig() {
         final var config = getConfiguration();
-        return new OperationsConfig(config.getRetryCount(),
-                config.getResourcesPerFileCount(),
-                config.isParallelRequestsEnabled(),
+
+        return new OperationsConfig(config.getResourcesPerFileCount(),
                 config.getExportPath(),
-                config.isEncryptionEnabled());
+                config.getRetryCount(),
+                config.isEncryptionEnabled(),
+                config.isParallelEnabled(),
+                config.getWriteThreadFactor(),
+                config.getFetchThreadFactor());
     }
 }

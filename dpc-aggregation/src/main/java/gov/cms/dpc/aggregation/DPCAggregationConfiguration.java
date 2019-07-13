@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation;
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.typesafe.config.ConfigRenderOptions;
-import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
@@ -44,11 +43,17 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Max(100000) // Keep files under a GB
     private int resourcesPerFileCount = 10000;
 
-    // Enable parallel BlueButton requests
-    private boolean parallelRequestsEnabled = false;
-
     // Enable file encryption per BCDA
     private boolean encryptionEnabled = false;
+
+    // Enable parallel operation
+    private boolean parallelEnabled = false;
+
+    // Number of threads to create for fetching = factor * number of cpu cores
+    private Number fetchThreadFactor = 2.5;
+
+    // Number of threads to create for writing = factor * number of cpu cores
+    private Number writeThreadFactor = 0.5;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -79,8 +84,16 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         return resourcesPerFileCount;
     }
 
-    public boolean isParallelRequestsEnabled() {
-        return parallelRequestsEnabled;
+    public boolean isParallelEnabled() {
+        return parallelEnabled;
+    }
+
+    public float getWriteThreadFactor() {
+        return writeThreadFactor.floatValue();
+    }
+
+    public float getFetchThreadFactor() {
+        return fetchThreadFactor.floatValue();
     }
 
     @Override
@@ -96,9 +109,5 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
         return this.clientConfiguration;
-    }
-
-    public OperationsConfig getOperationsConfig() {
-        return new OperationsConfig(retryCount, resourcesPerFileCount, parallelRequestsEnabled, exportPath, encryptionEnabled);
     }
 }
