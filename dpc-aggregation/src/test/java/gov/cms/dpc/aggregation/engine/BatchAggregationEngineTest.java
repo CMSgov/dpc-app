@@ -5,10 +5,12 @@ import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobResult;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +20,10 @@ import org.mockito.Mockito;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,7 +42,9 @@ class BatchAggregationEngineTest {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        operationsConfig = new OperationsConfig(3, 10, false, exportPath, false);
+        operationsConfig = new OperationsConfig(10, exportPath);
+        AggregationEngine.setGlobalErrorHandler();
+        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
     }
 
     @BeforeEach
@@ -66,10 +73,10 @@ class BatchAggregationEngineTest {
         // Look at the result
         final var completeJob = queue.getJob(jobId).orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        assertAll(
-                () -> assertEquals(4, completeJob.getJobResults().size()),
-                () -> assertEquals(10, completeJob.getJobResults().get(0).getCount()),
-                () -> assertEquals(2, completeJob.getJobResults().get(3).getCount()));
+        final List<JobResult> sorted = completeJob.getJobResults().stream().sorted(Comparator.comparingInt(JobResult::getSequence)).collect(Collectors.toList());
+        assertAll(() -> assertEquals(4, sorted.size()),
+                () -> assertEquals(10, sorted.get(0).getCount()),
+                () -> assertEquals(2, sorted.get(3).getCount()));
 
         // Look at the output files
         final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.ExplanationOfBenefit, 0);
@@ -125,7 +132,7 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJob(jobId).orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(5, completeJob.getJobResults().size()),
+                () -> assertEquals(5, completeJob.getJobResults().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
                 () -> assertTrue(completeJob.getJobResult(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
                 () -> assertTrue(completeJob.getJobResult(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
 

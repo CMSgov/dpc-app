@@ -12,24 +12,35 @@ import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The top level of the Aggregation Engine
+ * The top level of the Aggregation Engine. {@link ResourceFetcher} does the fetching from
+ * BlueButton and {@link ResourceWriter} does the writing.
+ *
+ * Implementation Notes:
+ * - There is a single flow that does the work for a job
+ * - It starts with an iteration of resource types in a job and produces a series of JobResult for that resource type
+ * - The flow is mainly sequential, with parallel sections for I/O operations.
+ * - Because the flow has parallel parts JobResults can be produced out sequence and errors can happen on separate branches.
  */
 public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
@@ -40,14 +51,17 @@ public class AggregationEngine implements Runnable {
     private final FhirContext fhirContext;
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
+    private final Scheduler fetchScheduler;
+    private final Scheduler writeScheduler;
     private Disposable subscribe;
 
     /**
-     * Create an engine
+     * Create an engine. Most likely this will be a singleton.
      *
      * @param bbclient    - {@link BlueButtonClient } to use
      * @param queue       - {@link JobQueue} that will direct the work done
      * @param fhirContext - {@link FhirContext} for DSTU3 resources
+     * @param metricRegistry - {@link MetricRegistry} for metrics
      * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
       */
     @Inject
@@ -57,6 +71,19 @@ public class AggregationEngine implements Runnable {
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
 
+        // Thread pools
+        if (operationsConfig.isParallelEnabled()) {
+            final var cpuCount = Runtime.getRuntime().availableProcessors();
+            final int fetchCount = Math.max((int) (cpuCount * operationsConfig.getFetchThreadFactor()), 1);
+            fetchScheduler = Schedulers.from(Executors.newFixedThreadPool(fetchCount));
+            final int writeCount = Math.max((int) (cpuCount * operationsConfig.getWriteThreadFactor()), 1);
+            writeScheduler = Schedulers.from(Executors.newFixedThreadPool(writeCount));
+        } else {
+            fetchScheduler = null;
+            writeScheduler = null;
+        }
+
+        // Metrics
         final var metricFactory = new MetricMaker(metricRegistry, AggregationEngine.class);
         resourceMeter = metricFactory.registerMeter("resourceFetched");
         operationalOutcomeMeter = metricFactory.registerMeter("operationalOutcomes");
@@ -68,15 +95,16 @@ public class AggregationEngine implements Runnable {
     @Override
     public void run() {
         // Run loop
-        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelRequests:{} ",
+        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelEnabled:{} ",
                 operationsConfig.getExportPath(),
                 operationsConfig.getResourcesPerFileCount(),
-                operationsConfig.isParallelRequestsEnabled());
+                operationsConfig.isParallelEnabled());
+        setGlobalErrorHandler();
         this.pollQueue();
     }
 
     /**
-     * Stop the engine
+     * Stop the engine.
      */
     public void stop() {
         logger.info("Shutting down aggregation engine");
@@ -84,10 +112,9 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * The main run-loop of the engine
+     * The main run-loop of the engine.
      */
     private void pollQueue() {
-        setGlobalErrorHandler();
         subscribe = Observable.fromCallable(this.queue::workJob)
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
@@ -100,7 +127,7 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Work a single job in the queue to completion
+     * Work a single job in the queue to completion.
      *
      * @param jobPair - the job to execute
      */
@@ -115,7 +142,8 @@ public class AggregationEngine implements Runnable {
             final var results = Flowable.fromIterable(job.getResourceTypes())
                     .flatMap(resourceType -> completeResource(job, resourceType, errorCounter))
                     .toList()
-                    .blockingGet();
+                    .blockingGet(); // Wait on the main thread until completion
+
             logger.info("COMPLETED job {}", jobID);
             this.queue.completeJob(jobID, JobStatus.COMPLETED, results);
         } catch(Exception error) {
@@ -136,13 +164,13 @@ public class AggregationEngine implements Runnable {
             return Flowable.empty();
         }
 
-        // Make this flow hot (ie. only called once)
+        // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), resourceType, operationsConfig);
         final Flowable<Resource> mixedFlow;
-        if (operationsConfig.isParallelRequestsEnabled()) {
+        if (operationsConfig.isParallelEnabled()) {
             mixedFlow = Flowable.fromIterable(job.getPatients())
                     .parallel()
-                    .runOn(Schedulers.io())
+                    .runOn(fetchScheduler)
                     .flatMap(fetcher::fetchResources)
                     .sequential();
         } else {
@@ -172,29 +200,63 @@ public class AggregationEngine implements Runnable {
      * @return a transformed flow
      */
     private Publisher<JobResult> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger counter, Meter meter) {
-        return upstream
-                .filter(r -> r.getResourceType() == writer.getResourceType())
-                .buffer(operationsConfig.getResourcesPerFileCount())
-                .doOnNext(outcomes -> meter.mark(outcomes.size()))
-                .map(batch -> writer.writeBatch(counter, batch));
+        if (operationsConfig.isParallelEnabled()) {
+            return upstream
+                    .filter(r -> r.getResourceType() == writer.getResourceType())
+                    .buffer(operationsConfig.getResourcesPerFileCount())
+                    .doOnNext(outcomes -> meter.mark(outcomes.size()))
+                    .parallel()
+                    .runOn(writeScheduler)
+                    .map(batch -> writer.writeBatch(counter, batch))
+                    .sequential();
+        } else {
+            return upstream
+                    .filter(r -> r.getResourceType() == writer.getResourceType())
+                    .buffer(operationsConfig.getResourcesPerFileCount())
+                    .doOnNext(outcomes -> meter.mark(outcomes.size()))
+                    .map(batch -> writer.writeBatch(counter, batch));
+        }
     }
 
     /**
-     * Setup a global handler to catch the UndeliverableException case.
+     * Setup a global handler to catch the UndeliverableException case. Can be called from anywhere.
      */
-    private void setGlobalErrorHandler() {
-        RxJavaPlugins.setErrorHandler(e -> {
-            // Undeliverable Exceptions may happen because of parallel execution. One thread will
-            // throw an exception which will cause the job to fail and (close its consumer).
-            // Another thread will throw an exception as well which will be undeliverable
-            if (e instanceof UndeliverableException) {
-                // Merely log undeliverable exceptions
-                logger.error(e.getMessage());
-            } else {
-                // Forward all others to current thread's uncaught exception handler
-                final var thread = Thread.currentThread();
-                thread.getUncaughtExceptionHandler().uncaughtException(thread, e);
-            }
-        });
+    static void setGlobalErrorHandler() {
+        RxJavaPlugins.setErrorHandler(AggregationEngine::errorHandler);
+    }
+
+    /**
+     * Global error handler. Needed to catch undeliverable exceptions.
+     * 
+     * See: https://github.com/ReactiveX/RxJava/wiki/What's-different-in-2.0#error-handling
+     *
+     * @param e is the exception thrown
+     */
+    private static void errorHandler(Throwable e) {
+        // Undeliverable Exceptions may happen because of parallel execution. One thread will
+        // throw an exception which will cause the job to fail and (close its consumer).
+        // Another thread will throw an exception as well which will be undeliverable
+        if (e instanceof UndeliverableException) {
+            e = e.getCause();
+        }
+        if (e instanceof IOException) {
+            // Expected: network problem or API that throws on cancellation
+            return;
+        }
+        if (e instanceof InterruptedException) {
+            // Expected: some blocking code was interrupted by a dispose call
+            return;
+        }
+        if ((e instanceof NullPointerException) || (e instanceof IllegalArgumentException)) {
+            // that's likely a bug in the application
+            Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+            return;
+        }
+        if (e instanceof IllegalStateException) {
+            // that's a bug in RxJava or in a custom operator
+            Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+            return;
+        }
+        logger.warn("Undeliverable exception received: ", e);
     }
 }

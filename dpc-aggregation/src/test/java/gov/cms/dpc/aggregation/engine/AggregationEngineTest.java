@@ -1,12 +1,12 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -44,15 +44,17 @@ class AggregationEngineTest {
     static void setupAll() {
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
+        AggregationEngine.setGlobalErrorHandler();
+        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
     }
 
     @BeforeEach
     void setupEach() {
-        fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         queue = new MemoryQueue();
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(3, 1000, false, exportPath, false);
+        var operationalConfig = new OperationsConfig(1000, exportPath);
         engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        AggregationEngine.setGlobalErrorHandler();
     }
 
     /**
@@ -203,6 +205,36 @@ class AggregationEngineTest {
                 () -> assertEquals(4, actual.getJobResults().size(), "expected 4 (= 2 output + 2 error)"),
                 () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 for the one bad patient"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+    }
+
+    /**
+     * Test if a engine can handle parallelEnabled off
+     */
+    @Test
+    void sequentialJobTest() {
+        // Make an engine with parallel threads turned off
+        final var operationalConfig = new OperationsConfig(1000, exportPath, 3, false, false, 0.0f, 0.0f);
+        final var sequentialEngine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        AggregationEngine.setGlobalErrorHandler();
+
+        // Make a simple job with one resource type
+        final var jobId = UUID.randomUUID();
+        JobModel job = new JobModel(jobId,
+                Collections.singletonList(ResourceType.Patient),
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_IDS);
+
+        // Do the job
+        queue.submitJob(jobId, job);
+        queue.workJob().ifPresent(pair -> sequentialEngine.completeJob(pair));
+
+        // Look at the result
+        final var completeJob = queue.getJob(jobId).orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.Patient, 0);
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
     @Test
