@@ -43,7 +43,11 @@ class BatchAggregationEngineTest {
         exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(10, exportPath);
         AggregationEngine.setGlobalErrorHandler();
-        fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+
+        // Force HAPI scanning early
+        fhirContext.getResourceDefinition("Patient");
+        fhirContext.getResourceDefinition("Bundle");
+        fhirContext.getResourceDefinition("ExplanationOfBenefit");
     }
 
     @BeforeEach

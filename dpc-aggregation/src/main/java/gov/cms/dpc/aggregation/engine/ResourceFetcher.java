@@ -59,7 +59,7 @@ class ResourceFetcher {
         return Flowable.fromCallable(() -> {
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), patientID);
             final Resource firstFetched = fetchFirst(patientID);
-            if (firstFetched instanceof Bundle) {
+            if (ResourceType.Coverage.equals(resourceType) || ResourceType.ExplanationOfBenefit.equals(resourceType)) {
                 return fetchAllBundles(patientID, (Bundle)firstFetched);
             } else {
                 logger.debug("Done fetching {} for {}", resourceType.toString(), patientID);

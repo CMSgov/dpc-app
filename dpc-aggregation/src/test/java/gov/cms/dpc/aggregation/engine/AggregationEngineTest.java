@@ -1,7 +1,6 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
@@ -45,7 +44,11 @@ class AggregationEngineTest {
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         AggregationEngine.setGlobalErrorHandler();
-        fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+        
+        // Force HAPI scanning early
+        fhirContext.getResourceDefinition("Patient");
+        fhirContext.getResourceDefinition("Bundle");
+        fhirContext.getResourceDefinition("ExplanationOfBenefit");
     }
 
     @BeforeEach
