@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -60,11 +61,7 @@ class EncryptingAggregationEngineTest {
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(1000, exportPath, 3, true, true, 0.5f, 2.5f);
-
-        // Force HAPI scanning early
-        fhirContext.getResourceDefinition("Patient");
-        fhirContext.getResourceDefinition("Bundle");
-        fhirContext.getResourceDefinition("ExplanationOfBenefit");
+        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
     }
 
     @BeforeEach

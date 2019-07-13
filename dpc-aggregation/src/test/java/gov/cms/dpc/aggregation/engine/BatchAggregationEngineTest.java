@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -43,11 +44,7 @@ class BatchAggregationEngineTest {
         exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(10, exportPath);
         AggregationEngine.setGlobalErrorHandler();
-
-        // Force HAPI scanning early
-        fhirContext.getResourceDefinition("Patient");
-        fhirContext.getResourceDefinition("Bundle");
-        fhirContext.getResourceDefinition("ExplanationOfBenefit");
+        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
     }
 
     @BeforeEach

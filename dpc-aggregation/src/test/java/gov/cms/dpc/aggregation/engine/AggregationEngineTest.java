@@ -6,6 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -44,11 +45,7 @@ class AggregationEngineTest {
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         AggregationEngine.setGlobalErrorHandler();
-        
-        // Force HAPI scanning early
-        fhirContext.getResourceDefinition("Patient");
-        fhirContext.getResourceDefinition("Bundle");
-        fhirContext.getResourceDefinition("ExplanationOfBenefit");
+        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
     }
 
     @BeforeEach
