@@ -9,6 +9,7 @@ import java.util.Optional;
 
 /**
  * WARNING: DO NOT USE IN PRODUCTION
+ * This always returns the same {@link Organization} for each request
  */
 public class StaticAuthenticator implements Authenticator<String, OrganizationPrincipal> {
 
@@ -18,7 +19,7 @@ public class StaticAuthenticator implements Authenticator<String, OrganizationPr
 
     @Override
     public Optional<OrganizationPrincipal> authenticate(String credentials) throws AuthenticationException {
-
+        // Return a test organization
         final Organization org = new Organization();
         org.setId("this-is-a-static-test");
         return Optional.of(new OrganizationPrincipal(org));

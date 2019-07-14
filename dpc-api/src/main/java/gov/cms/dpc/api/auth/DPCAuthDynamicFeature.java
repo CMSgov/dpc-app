@@ -3,6 +3,7 @@ package gov.cms.dpc.api.auth;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.auth.AuthDynamicFeature;
 import org.glassfish.jersey.server.model.AnnotatedMethod;
 
@@ -11,6 +12,7 @@ import javax.ws.rs.container.DynamicFeature;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
+import java.lang.annotation.Annotation;
 
 /**
  * Wrapper class which injects the {@link MacaroonsAuthFilter} into the {@link AuthDynamicFeature} provider.
@@ -31,17 +33,23 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
 
-        // If encryption is disabled via config, skip it.
-        if (this.config.isAuthenticationDisabled()) {
-            return;
-        }
-
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
+        final Annotation[][] parameterAnnotations = am.getParameterAnnotations();
 
         // If we're public don't do anything
         if (am.isAnnotationPresent(Public.class)
                 || (resourceInfo.getResourceClass().getAnnotation(Public.class) != null)) {
             return;
+        }
+
+        // Check for any @Auth annotated params
+        for (Annotation[] parameterAnnotation : parameterAnnotations) {
+            for (final Annotation annotation : parameterAnnotation) {
+                if (annotation instanceof Auth) {
+                    context.register(this.filter);
+                    return;
+                }
+            }
         }
 
         // Next, check for any authorization annotations on the class or method.

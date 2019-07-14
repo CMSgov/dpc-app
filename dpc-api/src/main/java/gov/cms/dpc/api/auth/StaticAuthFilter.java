@@ -7,7 +7,6 @@ import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Request;
 import java.io.IOException;
 
 /**
@@ -23,8 +22,7 @@ public class StaticAuthFilter extends DPCAuthFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        final Request request = requestContext.getRequest();
-
+        // We accept everything and pass it along to the authenticator
         this.authenticate(requestContext, "", null);
     }
 
