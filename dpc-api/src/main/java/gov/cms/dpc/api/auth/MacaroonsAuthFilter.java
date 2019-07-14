@@ -26,7 +26,7 @@ import java.io.IOException;
  * Or, directly via the 'token' query param (e.g. no Bearer prefix)
  */
 @Priority(Priorities.AUTHENTICATION)
-public class MacaroonsAuthFilter extends AuthFilter<String, OrganizationPrincipal> {
+public class MacaroonsAuthFilter extends DPCAuthFilter {
 
     private static final String BEARER_PREFIX = "Bearer";
     private static final String TOKEN_URI_PARAM = "token";
@@ -71,7 +71,7 @@ public class MacaroonsAuthFilter extends AuthFilter<String, OrganizationPrincipa
         }
     }
 
-    public void setPathAuthorizer(PathAuthorizer authorizer) {
+    void setPathAuthorizer(PathAuthorizer authorizer) {
         this.pa = authorizer;
     }
 

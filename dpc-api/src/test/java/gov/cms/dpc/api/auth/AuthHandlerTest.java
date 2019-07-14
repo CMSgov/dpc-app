@@ -94,7 +94,7 @@ public class AuthHandlerTest {
         // Setup mocks
         final WebTarget webTarget = mockWebTarget();
 
-        final MacaroonsDynamicFeature dynamicFeature = new MacaroonsDynamicFeature(new MacaroonsAuthFilter(webTarget), config);
+        final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(new MacaroonsAuthFilter(webTarget), config);
         return ResourceExtension.builder()
                 .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
                 .addProvider(dynamicFeature)

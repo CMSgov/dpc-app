@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.DemoCommand;
 import gov.cms.dpc.api.cli.OrgRegistrationCommand;
@@ -32,7 +33,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAPIConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
-                .modules(new DPCHibernateModule<>(), new DPCAPIModule(), new JobQueueModule<>(), new FHIRModule())
+                .modules(new DPCHibernateModule<>(), new AuthModule(), new DPCAPIModule(), new JobQueueModule<>(), new FHIRModule())
                 .build();
 
         bootstrap.addBundle(guiceBundle);

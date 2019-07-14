@@ -17,13 +17,13 @@ import javax.ws.rs.ext.Provider;
  * This way we can avoid authn/authz on public endpoints and dynamically determine when to apply security.
  */
 @Provider
-public class MacaroonsDynamicFeature implements DynamicFeature {
+public class DPCAuthDynamicFeature implements DynamicFeature {
 
-    private final MacaroonsAuthFilter filter;
+    private final DPCAuthFilter filter;
     private final DPCAPIConfiguration config;
 
     @Inject
-    public MacaroonsDynamicFeature(MacaroonsAuthFilter filter, DPCAPIConfiguration config) {
+    public DPCAuthDynamicFeature(DPCAuthFilter filter, DPCAPIConfiguration config) {
         this.filter = filter;
         this.config = config;
     }

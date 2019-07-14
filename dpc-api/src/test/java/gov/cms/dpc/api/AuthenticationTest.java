@@ -8,12 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class AuthenticationTest extends AbstractApplicationTest {
+class AuthenticationTest extends AbstractApplicationTest {
     private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
 
     private AuthenticationTest() {
