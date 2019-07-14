@@ -9,7 +9,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
-@Path("/Practitioner")
+//@Path("/Practitioner")
 @FHIR
 public abstract class AbstractPractionerResource {
 
@@ -17,21 +17,19 @@ public abstract class AbstractPractionerResource {
         // Not used
     }
 
-    @GET
     public abstract Bundle getPractitioners(OrganizationPrincipal organization, String providerNPI);
 
-    @POST
     public abstract Practitioner submitProvider(OrganizationPrincipal organization, Practitioner provider);
 
-    @GET
-    @Path("/{providerID}")
+//    @GET
+//    @Path("/{providerID}")
     public abstract Practitioner getProvider(UUID providerID);
 
-    @DELETE
-    @Path("/{providerID}")
+//    @DELETE
+//    @Path("/{providerID}")
     public abstract Response deleteProvider(UUID providerID);
 
-    @PUT
-    @Path("/{providerID}")
+//    @PUT
+//    @Path("/{providerID}")
     public abstract Practitioner updateProvider(UUID providerID, Practitioner provider);
 }

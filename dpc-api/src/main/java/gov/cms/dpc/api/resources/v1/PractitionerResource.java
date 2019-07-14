@@ -24,8 +24,8 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
-    @Timed
     @GET
+    @Timed
     @ExceptionMetered
     public Bundle getPractitioners(@Auth OrganizationPrincipal organization, String providerNPI) {
         return this.client
@@ -40,27 +40,9 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
-    @Timed
-    @ExceptionMetered
-    @POST
-    public Practitioner submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
-        final MethodOutcome outcome = this.client
-                .create()
-                .resource(provider)
-                .encodedJson()
-                .execute();
-
-        final Practitioner resource = (Practitioner) outcome.getResource();
-        if (resource == null) {
-            throw new WebApplicationException("Unable to submit provider", Response.Status.INTERNAL_SERVER_ERROR);
-        }
-        return resource;
-    }
-
-    @Override
-    @Timed
     @GET
     @Path("/{providerID}")
+    @Timed
     @ExceptionMetered
     public Practitioner getProvider(@PathParam("providerID") UUID providerID) {
         return this.client
@@ -72,9 +54,43 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
+    @POST
     @Timed
+    @ExceptionMetered
+    public Practitioner submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
+         final var test= this.client
+                .create()
+                .resource(provider)
+                .encodedJson();
+
+        final MethodOutcome outcome = test.execute();
+
+        final Practitioner resource = (Practitioner) outcome.getResource();
+        if (resource == null) {
+            throw new WebApplicationException("Unable to submit provider", Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        // Now, submit the Practitioner Role
+        final PractitionerRole role = new PractitionerRole();
+        role.setOrganization(new Reference(organization.getOrganization().getIdElement()));
+        role.setPractitioner(new Reference(resource.getIdElement()));
+
+        final MethodOutcome roled = this.client
+                .create()
+                .resource(role)
+                .encodedJson()
+                .execute();
+
+        if (!roled.getCreated()) {
+            throw new WebApplicationException("Unable to link provider to organization", Response.Status.INTERNAL_SERVER_ERROR);
+        }
+        return resource;
+    }
+
+    @Override
     @DELETE
     @Path("/{providerID}")
+    @Timed
     @ExceptionMetered
     public Response deleteProvider(@PathParam("providerID") UUID providerID) {
         this.client
