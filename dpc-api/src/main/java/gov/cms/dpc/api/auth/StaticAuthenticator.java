@@ -14,7 +14,7 @@ import java.util.Optional;
  */
 public class StaticAuthenticator implements Authenticator<String, OrganizationPrincipal> {
 
-    private static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+
 
     @Inject
     StaticAuthenticator() {
@@ -22,9 +22,10 @@ public class StaticAuthenticator implements Authenticator<String, OrganizationPr
 
     @Override
     public Optional<OrganizationPrincipal> authenticate(String credentials) throws AuthenticationException {
+
         // Return a test organization
         final Organization org = new Organization();
-        org.setId(new IdType("Organization", ORGANIZATION_ID));
+        org.setId(new IdType("Organization", credentials));
         return Optional.of(new OrganizationPrincipal(org));
     }
 }

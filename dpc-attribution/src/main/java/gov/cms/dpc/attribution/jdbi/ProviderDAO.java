@@ -19,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,20 +57,21 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
 
         query.select(root);
 
+        List<Predicate> predicates = new ArrayList<>();
         // Always restrict by Organization
-        query
-                .where(builder
-                        .equal(root.join("organizations").get("id"),
-                                organizationID));
+        predicates.add(builder
+                .equal(root.join("organizations").get("id"),
+                        organizationID));
 
         // If we've provided an NPI, use it as a query restriction.
         // Otherwise, return everything
         if (providerNPI != null && !providerNPI.isEmpty()) {
-            query.where(builder
+            predicates.add(builder
                     .equal(root.get("providerNPI"),
                             providerNPI));
         }
 
+        query.where(predicates.toArray(new Predicate[0]));
         return this.list(query);
     }
 

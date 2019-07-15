@@ -15,6 +15,10 @@ import java.io.IOException;
 @Priority(Priorities.AUTHENTICATION)
 public class StaticAuthFilter extends DPCAuthFilter {
 
+    // Default organization ID to use, if no override is passed
+    private static final String DEFAULT_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+    private static final String ORG_HEADER = "Organization";
+
     @Inject
     StaticAuthFilter(Authenticator<String, OrganizationPrincipal> auth) {
         this.authenticator = auth;
@@ -23,7 +27,9 @@ public class StaticAuthFilter extends DPCAuthFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // We accept everything and pass it along to the authenticator
-        this.authenticate(requestContext, "", null);
+
+        final String orgID = requestContext.getHeaderString(ORG_HEADER);
+        this.authenticate(requestContext, orgID == null ? DEFAULT_ORG_ID : orgID, null);
     }
 
     @Override

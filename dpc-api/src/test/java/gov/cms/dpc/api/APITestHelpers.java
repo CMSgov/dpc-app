@@ -43,7 +43,6 @@ public class APITestHelpers {
 
 
             final Bundle orgBundle = (Bundle) parser.parseResource(inputStream);
-            final String bundleString = parser.encodeResourceToString(orgBundle);
 
             final Parameters parameters = new Parameters();
             parameters.addParameter().setResource(orgBundle);
