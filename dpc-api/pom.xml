@@ -67,11 +67,14 @@
             <version>0.3.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-        <!--Test resources-->
         <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-testing</artifactId>
-            <scope>test</scope>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-client</artifactId>
+        </dependency>
+        <!--        Validations use the R4 validator, even for STU3 resources-->
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
@@ -80,12 +83,13 @@
         <dependency>
             <groupId>com.helger</groupId>
             <artifactId>ph-schematron</artifactId>
+            <scope>compile</scope>
         </dependency>
+        <!--Test resources-->
         <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-client</artifactId>
-            <!--This will need to get flipped back to test, once we fully decouple the aggregtion engine-->
-            <!--<scope>test</scope>-->
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-testing</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

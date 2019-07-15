@@ -32,6 +32,9 @@ public abstract class AbstractBaseResource {
     @Path("/Practitioner")
     public abstract AbstractPractionerResource practitionerOperations();
 
+    @Path("/StructureDefinition")
+    public abstract AbstractDefinitionResource definitionResourceOperations();
+
     /**
      * Returns the FHIR capabilities statement
      *

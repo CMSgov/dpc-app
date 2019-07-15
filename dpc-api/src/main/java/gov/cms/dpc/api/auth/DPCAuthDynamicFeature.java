@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.auth;
 
-import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
 import io.dropwizard.auth.Auth;
@@ -22,12 +21,10 @@ import java.lang.annotation.Annotation;
 public class DPCAuthDynamicFeature implements DynamicFeature {
 
     private final DPCAuthFilter filter;
-    private final DPCAPIConfiguration config;
 
     @Inject
-    public DPCAuthDynamicFeature(DPCAuthFilter filter, DPCAPIConfiguration config) {
+    public DPCAuthDynamicFeature(DPCAuthFilter filter) {
         this.filter = filter;
-        this.config = config;
     }
 
     @Override

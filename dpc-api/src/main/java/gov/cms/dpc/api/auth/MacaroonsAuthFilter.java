@@ -59,12 +59,13 @@ public class MacaroonsAuthFilter extends DPCAuthFilter {
 
         // If we have a path authorizer, do that, otherwise, continue
         if (pa != null) {
-            validatePath(this.pa, macaroon, uriInfo);
+            validatePath(macaroon, uriInfo);
         }
 
         this.authenticate(requestContext, macaroon, null);
     }
 
+    @Override
     void setPathAuthorizer(PathAuthorizer authorizer) {
         this.pa = authorizer;
     }
@@ -88,7 +89,7 @@ public class MacaroonsAuthFilter extends DPCAuthFilter {
         return header.substring(space + 1);
     }
 
-    private void validatePath(PathAuthorizer pa, String macaroon, UriInfo uriInfo) {
+    private void validatePath(String macaroon, UriInfo uriInfo) {
 
         final String pathValue = uriInfo.getPathParameters().getFirst(this.pa.pathParam());
         if (pathValue == null) {

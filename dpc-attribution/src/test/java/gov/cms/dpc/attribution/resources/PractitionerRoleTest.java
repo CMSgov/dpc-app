@@ -106,7 +106,7 @@ class PractitionerRoleTest extends AbstractAttributionTest {
         // Do all the things
         final String organizationID = persistOrganization();
         final String providerID = persistProvider("yet-another-one");
-        final PractitionerRole role = persistRole(organizationID, providerID);
+        persistRole(organizationID, providerID);
 
         final Bundle roleBundle = client
                 .search()

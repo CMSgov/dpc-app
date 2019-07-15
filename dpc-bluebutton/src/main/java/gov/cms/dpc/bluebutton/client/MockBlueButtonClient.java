@@ -24,7 +24,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     public static final List<String> TEST_PATIENT_IDS = List.of("20140000008325", "20140000009893");
-    public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("20140000008325", "20140000009893", "-1");
+    public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", "20140000008325",  "20140000009893", "-3");
 
     private final IParser parser;
 

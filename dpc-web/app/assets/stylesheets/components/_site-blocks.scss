@@ -1,0 +1,16 @@
+.site-block {
+  padding: $spacer-7 0;
+}
+
+.site-block--alt {
+  background-color: $color-gray-lightest;
+}
+
+.site-block-header * {
+  max-width: 77ch;
+}
+
+.site-block-header__heading {
+  font-weight: normal;
+  max-width: 48ch;
+}

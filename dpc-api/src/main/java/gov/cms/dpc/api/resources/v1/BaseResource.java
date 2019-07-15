@@ -17,6 +17,7 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractRosterResource rr;
     private final AbstractOrganizationResource or;
     private final AbstractPractionerResource pr;
+    private final AbstractDefinitionResource sdr;
 
     @Inject
     public BaseResource(GroupResource gr,
@@ -24,13 +25,15 @@ public class BaseResource extends AbstractBaseResource {
                         DataResource dr,
                         RosterResource rr,
                         OrganizationResource or,
-                        PractitionerResource pr) {
+                        PractitionerResource pr,
+                        DefinitionResource sdr) {
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
         this.rr = rr;
         this.or = or;
         this.pr = pr;
+        this.sdr = sdr;
     }
 
     @Override
@@ -51,6 +54,11 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     public AbstractJobResource jobOperations() {
         return this.jr;
+    }
+
+    @Override
+    public AbstractDefinitionResource definitionResourceOperations() {
+        return this.sdr;
     }
 
     @Override

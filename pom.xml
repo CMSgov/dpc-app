@@ -145,6 +145,11 @@
                 <artifactId>hapi-fhir-structures-dstu3</artifactId>
                 <version>${hapi.fhir.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>hapi-fhir-structures-r4</artifactId>
+                <version>${hapi.fhir.version}</version>
+            </dependency>
             <!--Test dependencies-->
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -389,6 +394,8 @@
                         <exclude>gov/cms/dpc/attribution/dao/**/*</exclude>
                         <!-- Exclude the cli commands, which we don't have tests for-->
                         <exclude>gov/cms/dpc/**/cli/**/*</exclude>
+                        <!-- Exclude HL7 parsers, because they're too big-->
+                        <exclude>org/hl7/fhir/r4/formats/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
