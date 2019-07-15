@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -19,10 +20,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,14 +60,15 @@ class EncryptingAggregationEngineTest {
         // Use the test.conf as the base for config. encrypt.conf will only enable encryption.
         final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        operationsConfig = new OperationsConfig(3, 1000, false, exportPath, true);
+        operationsConfig = new OperationsConfig(1000, exportPath, 3, true, true, 0.5f, 2.5f);
+        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
     }
 
     @BeforeEach
     void setupEach() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         queue = new MemoryQueue();
         BlueButtonClient bbclient = new MockBlueButtonClient(fhirContext);
-        engine = new AggregationEngine(bbclient, queue, FhirContext.forDstu3(), metricRegistry, operationsConfig);
+        engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationsConfig);
 
         final InputStream testPrivateKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PRIVATE_KEY_PATH);
         final InputStream testPublicKeyResource = this.getClass().getClassLoader().getResourceAsStream(RSA_PUBLIC_KEY_PATH);

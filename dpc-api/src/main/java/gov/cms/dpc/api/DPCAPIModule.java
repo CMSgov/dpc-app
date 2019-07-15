@@ -59,6 +59,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(DataResource.class);
         binder.bind(RosterResource.class);
         binder.bind(OrganizationResource.class);
+        binder.bind(DefinitionResource.class);
 
         // Auth
         binder.bind(MacaroonsAuthorizer.class);

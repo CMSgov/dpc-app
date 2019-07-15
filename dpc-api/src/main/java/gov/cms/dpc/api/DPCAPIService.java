@@ -13,6 +13,8 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
+import javax.validation.Validator;
+
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     public static void main(final String[] args) throws Exception {
@@ -30,7 +32,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAPIConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
-                .modules(new DPCHibernateModule<>(), new DPCAPIModule(), new JobQueueModule<>(), new FHIRModule())
+                .modules(new DPCHibernateModule<>(), new DPCAPIModule(), new JobQueueModule<>(), new FHIRModule<>())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
