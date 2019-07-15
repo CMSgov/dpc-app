@@ -14,7 +14,7 @@ import javax.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 
 /**
- * Wrapper class which injects the {@link MacaroonsAuthFilter} into the {@link AuthDynamicFeature} provider.
+ * Wrapper class which injects the DPC specific authenticators into the {@link AuthDynamicFeature} provider.
  * This way we can avoid authn/authz on public endpoints and dynamically determine when to apply security.
  */
 @Provider
@@ -31,23 +31,16 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
 
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
-        final Annotation[][] parameterAnnotations = am.getParameterAnnotations();
+
 
         // If we're public don't do anything
-        if (am.isAnnotationPresent(Public.class)
-                || (resourceInfo.getResourceClass().getAnnotation(Public.class) != null)) {
-            return;
-        }
+        if (isPublic(resourceInfo, am))
+            context.register(this.filter);
 
         // Check for any @Auth annotated params
-        for (Annotation[] parameterAnnotation : parameterAnnotations) {
-            for (final Annotation annotation : parameterAnnotation) {
-                if (annotation instanceof Auth) {
-                    context.register(this.filter);
-                    return;
-                }
-            }
-        }
+        if (authAnnotated(am))
+            context.register(this.filter);
+
 
         // Next, check for any authorization annotations on the class or method.
         // This should include all annotations specified in gov.cms.dpc.api.auth.annotations
@@ -58,5 +51,23 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
             this.filter.setPathAuthorizer(am.getAnnotation(PathAuthorizer.class));
             context.register(this.filter);
         }
+    }
+
+    private boolean isPublic(ResourceInfo resourceInfo, AnnotatedMethod am) {
+        return am.isAnnotationPresent(Public.class)
+                || (resourceInfo.getResourceClass().getAnnotation(Public.class) != null);
+    }
+
+    private boolean authAnnotated(AnnotatedMethod am) {
+        final Annotation[][] parameterAnnotations = am.getParameterAnnotations();
+
+        for (Annotation[] parameterAnnotation : parameterAnnotations) {
+            for (final Annotation annotation : parameterAnnotation) {
+                if (annotation instanceof Auth) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

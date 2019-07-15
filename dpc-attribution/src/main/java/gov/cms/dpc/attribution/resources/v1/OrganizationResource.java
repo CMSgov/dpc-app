@@ -83,17 +83,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY_422).entity("Must provide organization to register").build();
         }
 
-        // Build the endpoints
-        final List<EndpointEntity> endpoints = transactionBundle
-                .getEntry()
-                .stream()
-                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Endpoint)
-                .map(entry -> (Endpoint) entry.getResource())
-                .map(EndpointConverter::convert)
-                .collect(Collectors.toList());
-
         try {
-            final Organization persistedOrg = this.dao.registerOrganization(organization.get(), endpoints);
+            final Organization persistedOrg = this.dao.registerOrganization(organization.get(), extractEndpoints(transactionBundle));
             return Response.status(Response.Status.CREATED).entity(persistedOrg).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
@@ -225,5 +216,15 @@ public class OrganizationResource extends AbstractOrganizationResource {
         bundle.addEntry().setResource(organizationEntity.toFHIR());
 
         return bundle;
+    }
+
+    private List<EndpointEntity> extractEndpoints(Bundle transactionBundle) {
+        return transactionBundle
+                .getEntry()
+                .stream()
+                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Endpoint)
+                .map(entry -> (Endpoint) entry.getResource())
+                .map(EndpointConverter::convert)
+                .collect(Collectors.toList());
     }
 }
