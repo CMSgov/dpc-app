@@ -23,7 +23,7 @@ public abstract class AbstractPractitionerRoleResource {
     public abstract Bundle getPractitionerRoles(String organizationID, String providerID);
 
     @POST
-    public abstract PractitionerRole submitPractitionerRole(PractitionerRole role);
+    public abstract Response submitPractitionerRole(PractitionerRole role);
 
     @GET
     @Path("/{roleID}")

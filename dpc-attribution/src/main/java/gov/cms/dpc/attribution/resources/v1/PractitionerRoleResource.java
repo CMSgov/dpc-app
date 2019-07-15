@@ -61,12 +61,12 @@ public class PractitionerRoleResource extends AbstractPractitionerRoleResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    public PractitionerRole submitPractitionerRole(PractitionerRole role) {
+    public Response submitPractitionerRole(PractitionerRole role) {
         final ProviderRoleEntity roleEntity = ProviderRoleEntity.fromFHIR(role);
         final ProviderRoleEntity persistedEntity;
         persistedEntity = this.roleDAO.persistRole(roleEntity);
 
-        return persistedEntity.toFHIR();
+        return Response.status(Response.Status.CREATED).entity(persistedEntity.toFHIR()).build();
     }
 
     @Override

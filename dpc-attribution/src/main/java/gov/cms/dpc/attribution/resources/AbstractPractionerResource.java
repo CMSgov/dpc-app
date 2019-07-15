@@ -20,10 +20,11 @@ public abstract class AbstractPractionerResource {
      * FHIR search endpoint which allows querying providers with a given NPI
      *
      * @param providerNPI - {@link String} NPI to use for querying Provider database
+     * @param organizationID
      * @return - {@link Bundle} of {@link Practitioner} resources matching search parameters
      */
     @GET
-    public abstract Bundle getPractitioners(String providerNPI);
+    public abstract Bundle getPractitioners(String providerNPI, String organizationID);
 
     /**
      * Register {@link Practitioner} with application
@@ -32,7 +33,7 @@ public abstract class AbstractPractionerResource {
      * @return - {@link Practitioner} with additional metadata added by application
      */
     @POST
-    public abstract Practitioner submitProvider(Practitioner provider);
+    public abstract Response submitProvider(Practitioner provider);
 
     /**
      * Fetch specific {@link Practitioner} resource

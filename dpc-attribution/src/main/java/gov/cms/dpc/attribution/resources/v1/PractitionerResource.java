@@ -31,7 +31,8 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     // TODO: Migrate this signature to a List<Practitioner> in DPC-302
-    public Bundle getPractitioners(@QueryParam("identifier") String providerNPI) {
+    public Bundle getPractitioners(@QueryParam("identifier") String providerNPI, @QueryParam("_tag") String organizationTag) {
+        final String[] split = organizationTag.split("|", -1);
         final Bundle bundle = new Bundle();
         this.dao.getProviders(providerNPI)
                 .stream()
@@ -47,12 +48,12 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @Timed
     @ExceptionMetered
-    public Practitioner submitProvider(Practitioner provider) {
+    public Response submitProvider(Practitioner provider) {
 
         final ProviderEntity entity = ProviderEntity.fromFHIR(provider);
         final ProviderEntity persistedEntity = this.dao.persistProvider(entity);
 
-        return persistedEntity.toFHIR();
+        return Response.status(Response.Status.CREATED).entity(persistedEntity.toFHIR()).build();
     }
 
     @GET

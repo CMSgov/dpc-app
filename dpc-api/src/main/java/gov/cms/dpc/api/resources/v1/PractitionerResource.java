@@ -6,6 +6,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.AbstractPractionerResource;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.*;
 
@@ -14,6 +15,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
+@FHIR
 public class PractitionerResource extends AbstractPractionerResource {
 
     private final IGenericClient client;
@@ -27,16 +29,21 @@ public class PractitionerResource extends AbstractPractionerResource {
     @GET
     @Timed
     @ExceptionMetered
-    public Bundle getPractitioners(@Auth OrganizationPrincipal organization, String providerNPI) {
-        return this.client
+    public Bundle getPractitioners(@Auth OrganizationPrincipal organization, @QueryParam("identifier") String providerNPI) {
+        final var request = this.client
                 .search()
                 .forResource(Practitioner.class)
                 .encodedJson()
-                .where(Patient.IDENTIFIER.exactly().identifier(providerNPI))
-                .and(Organization.RES_ID.exactly().identifier(organization.getOrganization().getId()))
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
+                .withTag("organization", organization.getOrganization().getId())
+                .returnBundle(Bundle.class);
+
+        if (providerNPI != null && !providerNPI.equals("")) {
+            return request
+                    .where(Practitioner.IDENTIFIER.exactly().identifier(providerNPI))
+                    .execute();
+        } else {
+            return request.execute();
+        }
     }
 
     @Override
@@ -58,7 +65,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     public Practitioner submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
-         final var test= this.client
+        final var test = this.client
                 .create()
                 .resource(provider)
                 .encodedJson();
