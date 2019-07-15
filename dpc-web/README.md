@@ -47,23 +47,22 @@ Follow the prompts following the installation to start running postgres as a ser
 Assuming you have access to the github repository housing this application (since you are reading this), clone the project using SSH or HTTPS. Change into the directory where you want the website to reside and using the command line. For SSH:
 
 ```SSH
-git clone git@github.cms.gov:dpc/dpc-website.git
+git clone git@github.com:CMSgov/dpc-app.git
 ```
 
 For HTTPS:
 
 ```HTTP
-https://github.cms.gov/dpc/dpc-website.git
+https://github.com/CMSgov/dpc-app.git
 ```
 
 You'll need to
 
-1. Change into the installation directory `dpc-website`
+1. Change into the installation directory `dpc-app/dpc-web`
 2. If you are using rbenv-gemset issue the following
 
 ```Bash
 rbenv gemset create {latest-ruby-version: eg 2.6.2} dpc-website
-echo dpc-website > .rbenv-gemsets
 ```
 
 3. `gem install bundler --no-document`
@@ -71,8 +70,49 @@ echo dpc-website > .rbenv-gemsets
 5. Run `npm install`
 
 ### Credentials
+
 The database is password encrypted. Additionally, sensitive information exists that mist also be encrypted in the credentials file. In order to build the database and run the application, you'll need a copy of the `master.key` file. TBD: contact information for this file.
 
+
+### Running the server
 ```Bash
 rails db:create db:migrate db:seed
+rails server
+```
+
+Note: If you need to change the database configuration, it can be overridden using the `DB_USER`, `DB_PASS`, and `DB_HOST` environment variables.
+
+
+# Running via Docker
+
+The DPC website can also be run via docker. Follow the below steps to build and run the website into a Docker container.
+
+## Build the Docker Container
+
+First, ensure the contents of the `master.key` from the above settings is added to an environment variable `RAILS_MASTER_KEY`. Then, to build the container, simply run the following command:
+
+```Bash
+docker-compose build
+```
+
+After the container is built, initialize the database:
+
+```Bash
+docker-compose run web rails db:migrate db:seed
+```
+
+## Start the Docker Container
+
+The following command will start both the database server and rails server:
+
+```Bash
+docker-compose up
+```
+
+## Stop / Destroy the Docker Container
+
+When you're done, shut down the server with the following command:
+
+```Bash
+docker-compose down
 ```
