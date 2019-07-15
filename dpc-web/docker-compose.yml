@@ -13,6 +13,11 @@ services:
   web:
     build: .
     image: dpc-web:latest
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - RAILS_MASTER_KEY
     ports:
       - "3000:3000"
     depends_on:

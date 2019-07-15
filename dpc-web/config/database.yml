@@ -21,7 +21,8 @@ default: &default
   # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
-development:
+
+development: &development
   <<: *default
   database: dpc-website_development
 
@@ -29,12 +30,12 @@ development:
   # To create additional roles in postgres see `$ createuser --help`.
   # When left blank, postgres will use the default role. This is
   # the same name as the operating system user that initialized the database.
-  username: postgres
+  username: <%= ENV.fetch("DB_USER", nil) %>
 
   # The password associated with the postgres role (username).
-  password: dpc-safe
+  password: <%= ENV.fetch("DB_PASS", Rails.application.credentials.db[:development][:password]) %>
 
-  host: db
+  host: <%= ENV.fetch("DB_HOST", "localhost") %>
 
   # The TCP port the server listens on. Defaults to 5432.
   # If your server runs on a different port number, change accordingly.
@@ -49,12 +50,14 @@ development:
   # Defaults to warning.
   #min_messages: notice
 
+
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
   <<: *default
   database: dpc-website_test
+
 
 # As with config/secrets.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -79,4 +82,4 @@ production:
   <<: *default
   database: dpc-website_production
   username: dpc-website
-  password:
+  password: <%= Rails.application.credentials.db[:production][:password] %>
