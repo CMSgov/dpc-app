@@ -160,6 +160,7 @@ You will need to set the *ACCEPT* header to `application/fhir+json` (per the FHI
 1. Make a *GET* request using the URL provided by the `/Group` endpoint from the previous step.
  Which has this format: `http://localhost:3002/v1/Jobs/{unique UUID of export job}`.
  You will need to ensure that the *ACCEPT* header is set to `application/fhir+json` (per the FHIR bulk spec).
+ You will need to ensure that the *PREFER* header is set to `respond-async`.
  The server should return a *204* response until the job has completed.
  Once the job is complete, the endpoint should return data in the following format (the actual values will be different):
  

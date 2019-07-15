@@ -71,6 +71,12 @@
             <email>richard.m.hawes@omb.eop.gov</email>
             <organization>United States Digital Service</organization>
         </developer>
+        <developer>
+            <id>annie</id>
+            <name>Annie Sullivan</name>
+            <email>anne.e.sullivan@omb.eop.gov</email>
+            <organization>United States Digital Service</organization>
+        </developer>
     </developers>
 
     <dependencyManagement>
