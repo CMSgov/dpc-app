@@ -7,6 +7,8 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 
 public class AttributionTestHelpers {
 
+    public static final String DEFAULT_ORG_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
+
     public static Practitioner createPractitionerResource(String NPI) {
         final Practitioner practitioner = new Practitioner();
         practitioner.addIdentifier().setValue(NPI);

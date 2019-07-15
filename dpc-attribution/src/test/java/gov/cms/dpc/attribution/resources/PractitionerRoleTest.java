@@ -116,7 +116,7 @@ class PractitionerRoleTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(2, roleBundle.getTotal(), "Should have a single role");
+        assertEquals(1, roleBundle.getTotal(), "Should have a single role");
     }
 
     @Test
