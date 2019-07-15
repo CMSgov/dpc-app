@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.*;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -20,8 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class APITestHelpers {
-    public static String ATTRIBUTION_URL = "http://localhost:3500/v1";
+    public static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
+    public static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
 
     private APITestHelpers() {
         // Not used
@@ -125,11 +128,39 @@ public class APITestHelpers {
         return client;
     }
 
+    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws IOException {
+        truncateDatabase();
+        application.before();
+    }
+
+    private static void truncateDatabase() throws IOException {
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost post = new HttpPost(ATTRIBUTION_TRUNCATE_TASK);
+
+            try (CloseableHttpResponse execute = client.execute(post)) {
+                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated database");
+            }
+        }
+    }
+
+    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws IOException {
+        // URI of the API Service Healthcheck
+        final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet healthCheck = new HttpGet(healthURI);
+
+            try (CloseableHttpResponse execute = client.execute(healthCheck)) {
+                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should be healthy");
+            }
+        }
+    }
+
     public static class MacaroonsInterceptor implements IClientInterceptor {
 
-        private final String macaroon;
+        private String macaroon;
 
-        MacaroonsInterceptor(String macaroon) {
+        public MacaroonsInterceptor(String macaroon) {
             this.macaroon = macaroon;
         }
 
@@ -141,6 +172,14 @@ public class APITestHelpers {
         @Override
         public void interceptResponse(IHttpResponse theResponse) {
             // Not used
+        }
+
+        public String getMacaroon() {
+            return macaroon;
+        }
+
+        public void setMacaroon(String macaroon) {
+            this.macaroon = macaroon;
         }
     }
 }

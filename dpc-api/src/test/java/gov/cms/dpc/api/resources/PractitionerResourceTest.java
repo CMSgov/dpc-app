@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.AbstractApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import java.io.IOException;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PractitionerResourceTest extends AbstractApplicationTest {
+class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
     private static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
 
@@ -30,6 +30,10 @@ class PractitionerResourceTest extends AbstractApplicationTest {
         final String macaroon = APITestHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID);
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
         APITestHelpers.setupPractitionerTest(client, parser);
+
+        // Register the Macaroons Interceptor
+        final APITestHelpers.MacaroonsInterceptor interceptor = new APITestHelpers.MacaroonsInterceptor(macaroon);
+        client.registerInterceptor(interceptor);
 
         // Find everything attributed
 
@@ -55,10 +59,9 @@ class PractitionerResourceTest extends AbstractApplicationTest {
         // Create a new org and make sure it has no providers
         final String m2 = APITestHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID);
 
-        // Just grab the second org out of the bundle
-
-
-        client.registerInterceptor(new OrgInterceptor(OTHER_ORG_ID));
+        client.unregisterInterceptor(interceptor);
+        interceptor.setMacaroon(m2);
+        client.registerInterceptor(interceptor);
 
         final Bundle otherPractitioners = client
                 .search()
