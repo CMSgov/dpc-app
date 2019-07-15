@@ -29,18 +29,21 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
 
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
+        // Reset Path authorizer
+        filter.setPathAuthorizer(null);
 
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
 
-
         // If we're public don't do anything
-        if (isPublic(resourceInfo, am))
-            context.register(this.filter);
+        if (isPublic(resourceInfo, am)) {
+            return;
+        }
 
         // Check for any @Auth annotated params
-        if (authAnnotated(am))
+        if (authAnnotated(am)) {
             context.register(this.filter);
-
+            return;
+        }
 
         // Next, check for any authorization annotations on the class or method.
         // This should include all annotations specified in gov.cms.dpc.api.auth.annotations

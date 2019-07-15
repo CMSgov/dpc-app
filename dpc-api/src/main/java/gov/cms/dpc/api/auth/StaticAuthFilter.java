@@ -2,6 +2,8 @@ package gov.cms.dpc.api.auth;
 
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import io.dropwizard.auth.Authenticator;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -23,7 +25,7 @@ public class StaticAuthFilter extends DPCAuthFilter {
     private static final String ORG_HEADER = "Organization";
 
     @Inject
-    StaticAuthFilter(Authenticator<String, OrganizationPrincipal> auth) {
+    StaticAuthFilter(Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
         this.authenticator = auth;
     }
 
@@ -31,8 +33,12 @@ public class StaticAuthFilter extends DPCAuthFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // We accept everything and pass it along to the authenticator
 
-        final String orgID = requestContext.getHeaderString(ORG_HEADER);
-        this.authenticate(requestContext, orgID == null ? DEFAULT_ORG_ID : orgID, null);
+        final String headerString = requestContext.getHeaderString(ORG_HEADER);
+        final String orgID = headerString == null ? DEFAULT_ORG_ID : headerString;
+
+        final Organization org = new Organization();
+        org.setId(new IdType("Organization", orgID));
+        this.authenticate(requestContext, new DPCAuthCredentials(null, org, null, ""), null);
     }
 
     @Override

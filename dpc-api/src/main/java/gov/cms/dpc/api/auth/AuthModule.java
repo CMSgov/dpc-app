@@ -22,7 +22,7 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Override
     public void configure(Binder binder) {
 
-        final var authenticatorTypeLiteral = new TypeLiteral<Authenticator<String, OrganizationPrincipal>>() {
+        final var authenticatorTypeLiteral = new TypeLiteral<Authenticator<DPCAuthCredentials, OrganizationPrincipal>>() {
         };
 
         if (getConfiguration().isAuthenticationDisabled()) {

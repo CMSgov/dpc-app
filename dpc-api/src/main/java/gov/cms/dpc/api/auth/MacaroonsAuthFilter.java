@@ -1,20 +1,19 @@
 package gov.cms.dpc.api.auth;
 
-import gov.cms.dpc.api.annotations.AttributionService;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.annotation.Nullable;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 
@@ -33,11 +32,11 @@ public class MacaroonsAuthFilter extends DPCAuthFilter {
     private static final String BEARER_PREFIX = "Bearer";
     private static final String TOKEN_URI_PARAM = "token";
 
-    private final WebTarget client;
+    private final IGenericClient client;
     private PathAuthorizer pa = null;
 
     @Inject
-    MacaroonsAuthFilter(@AttributionService WebTarget client, Authenticator<String, OrganizationPrincipal> auth) {
+    MacaroonsAuthFilter(IGenericClient client, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
         this.client = client;
         this.authenticator = auth;
     }
@@ -58,11 +57,12 @@ public class MacaroonsAuthFilter extends DPCAuthFilter {
         }
 
         // If we have a path authorizer, do that, otherwise, continue
-        if (pa != null) {
-            validatePath(macaroon, uriInfo);
-        }
+        final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
 
-        this.authenticate(requestContext, macaroon, null);
+        final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
+        if (!authenticated) {
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
     }
 
     @Override
@@ -89,22 +89,32 @@ public class MacaroonsAuthFilter extends DPCAuthFilter {
         return header.substring(space + 1);
     }
 
-    private void validatePath(String macaroon, UriInfo uriInfo) {
+    private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
 
-        final String pathValue = uriInfo.getPathParameters().getFirst(this.pa.pathParam());
-        if (pathValue == null) {
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
-        }
+
         // Make the request
-        final Response tokenValid = this.client
-                .path(String.format("%s/%s/token/verify", this.pa.type().toString(), pathValue))
-                .queryParam("token", macaroon)
-                .request(FHIRMediaTypes.FHIR_JSON)
-                .buildGet()
-                .invoke();
+        final Bundle returnedBundle = this
 
-        if (tokenValid.getStatus() != Response.Status.OK.getStatusCode()) {
+                .client
+                .search()
+                .forResource(Organization.class)
+                .withTag("http://cms.gov/token", macaroon)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        if (returnedBundle.getTotal() == 0) {
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
+
+        String pathValue = null;
+
+        if (this.pa != null) {
+            pathValue = uriInfo.getPathParameters().getFirst(this.pa.pathParam());
+        }
+
+        return new DPCAuthCredentials(macaroon,
+                (Organization) returnedBundle.getEntryFirstRep().getResource(),
+                this.pa, pathValue);
     }
 }

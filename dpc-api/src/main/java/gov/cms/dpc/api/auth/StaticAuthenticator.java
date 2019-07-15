@@ -13,7 +13,7 @@ import java.util.Optional;
  * <p>
  * This {@link Authenticator} injects a test {@link Organization} by constructing a new value with the resource ID passed in as the credential value
  */
-public class StaticAuthenticator implements Authenticator<String, OrganizationPrincipal> {
+public class StaticAuthenticator implements Authenticator<DPCAuthCredentials, OrganizationPrincipal> {
 
 
     @Inject
@@ -21,11 +21,10 @@ public class StaticAuthenticator implements Authenticator<String, OrganizationPr
     }
 
     @Override
-    public Optional<OrganizationPrincipal> authenticate(String credentials) throws AuthenticationException {
+    public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) throws AuthenticationException {
 
         // Return a test organization
-        final Organization org = new Organization();
-        org.setId(new IdType("Organization", credentials));
-        return Optional.of(new OrganizationPrincipal(org));
+
+        return Optional.of(new OrganizationPrincipal(credentials.getOrganization()));
     }
 }
