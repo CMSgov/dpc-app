@@ -26,7 +26,9 @@ public abstract class AbstractOrganizationResource {
      * Register a {@link Organization} with the API
      * <p>
      * We're currently using a {@link Bundle} resource, which allows us to include both the {@link Organization}
-     * as well as any {@link org.hl7.fhir.dstu3.model.Endpoint} resources
+     * as well as any {@link org.hl7.fhir.dstu3.model.Endpoint} resources.
+     * <p>
+     * The {@link Bundle} is submitted as the Resource portion of the {@link Parameters} object.
      *
      * @param bundle - {@link Bundle} to register with system
      * @return - {@link Response} whether operation succeeded or failed
@@ -36,6 +38,12 @@ public abstract class AbstractOrganizationResource {
     @FHIR
     public abstract Response submitOrganization(Parameters bundle);
 
+    /**
+     * Fetch the {@link Organization} with the given ID
+     *
+     * @param organizationID - {@link UUID} of organization
+     * @return - {@link Organization}
+     */
     @GET
     @FHIR
     @Path("/{organizationID}")

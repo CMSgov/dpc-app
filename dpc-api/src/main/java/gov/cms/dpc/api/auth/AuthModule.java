@@ -8,6 +8,13 @@ import io.dropwizard.auth.Authenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * {@link DropwizardAwareModule} for determining which authentication system to use.
+ * if {@link DPCAPIConfiguration#isAuthenticationDisabled()} returns {@code true} then the {@link StaticAuthFilter} is used.
+ * Otherwise, {@link MacaroonsAuthFilter} is loaded.
+ * <p>
+ * The {@link StaticAuthFilter} should ONLY be used for testing
+ */
 public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthModule.class);

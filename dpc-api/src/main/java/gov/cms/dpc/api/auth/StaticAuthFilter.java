@@ -11,6 +11,9 @@ import java.io.IOException;
 
 /**
  * WARNING: DO NOT USE IN PRODUCTION
+ * <p>
+ * This {@link DPCAuthFilter} always succeeds and passes an Organization ID as the credential to the {@link Authenticator}.
+ * By default, it returns {@link StaticAuthFilter#DEFAULT_ORG_ID}, but if the {@link StaticAuthFilter#ORG_HEADER} is specified, the provided value is used instead.
  */
 @Priority(Priorities.AUTHENTICATION)
 public class StaticAuthFilter extends DPCAuthFilter {

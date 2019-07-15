@@ -11,6 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 
+/**
+ * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link gov.cms.dpc.api.auth.StaticAuthFilter}
+ */
 @IntegrationTest
 public class AbstractApplicationTest {
 

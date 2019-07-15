@@ -10,10 +10,10 @@ import java.util.Optional;
 
 /**
  * WARNING: DO NOT USE IN PRODUCTION
- * This always returns the same {@link Organization} for each request
+ * <p>
+ * This {@link Authenticator} injects a test {@link Organization} by constructing a new value with the resource ID passed in as the credential value
  */
 public class StaticAuthenticator implements Authenticator<String, OrganizationPrincipal> {
-
 
 
     @Inject

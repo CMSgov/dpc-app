@@ -11,6 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 
+/**
+ * Abstract test that enables the default token authentication backend.
+ */
 @IntegrationTest
 public class AbstractSecureApplicationTest {
     // Application prefix, which we need in order to correctly override config values.
