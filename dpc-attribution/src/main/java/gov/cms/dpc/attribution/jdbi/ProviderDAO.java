@@ -75,13 +75,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         return this.list(query);
     }
 
-    public void deleteProvider(UUID providerID) {
-
-        final ProviderEntity provider = this.get(providerID);
-        if (provider == null) {
-            throw new IllegalArgumentException(String.format("Cannot find provider %s", providerID));
-        }
-
+    public void deleteProvider(ProviderEntity provider) {
         this.currentSession().remove(provider);
     }
 

@@ -214,6 +214,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
         final Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organizationEntity.toFHIR());
+        bundle.setTotal(1);
 
         return bundle;
     }

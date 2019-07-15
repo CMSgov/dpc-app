@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
@@ -48,6 +49,18 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         assertEquals(1, specificSearch.getTotal(), "Should have a specific provider");
 
+        // Fetch the provider directly
+        final Practitioner foundProvider = (Practitioner) specificSearch.getEntryFirstRep().getResource();
+
+        final Practitioner queriedProvider = client
+                .read()
+                .resource(Practitioner.class)
+                .withId(foundProvider.getIdElement())
+                .encodedJson()
+                .execute();
+
+        assertTrue(foundProvider.equalsDeep(queriedProvider), "Search and GET should be identical");
+
         // Create a new org and make sure it has no providers
         final String m2 = APITestHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID);
 
@@ -67,11 +80,13 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         final Bundle otherSpecificSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("8075963174210588464"))
+                .where(Practitioner.IDENTIFIER.exactly().identifier(foundProvider.getIdentifierFirstRep().getValue()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
 
         assertEquals(0, otherSpecificSearch.getTotal(), "Should have a specific provider");
+
+        // Try to search for our fund provider
     }
 }

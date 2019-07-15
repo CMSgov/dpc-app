@@ -8,6 +8,7 @@ import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -33,7 +34,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     // TODO: Migrate this signature to a List<Practitioner> in DPC-302
-    public Bundle getPractitioners(@QueryParam("identifier") String providerNPI, @QueryParam("_tag") String organizationTag) {
+    public Bundle getPractitioners(@QueryParam("identifier") String providerNPI, @NotEmpty @QueryParam("_tag") String organizationTag) {
         final Bundle bundle = new Bundle();
         final List<ProviderEntity> providers = this.dao.getProviders(providerNPI, splitTag(organizationTag));
 
@@ -64,6 +65,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     public Practitioner getProvider(@PathParam("providerID") UUID providerID) {
+
         final ProviderEntity providerEntity = this.dao
                 .getProvider(providerID)
                 .orElseThrow(() ->
@@ -80,12 +82,9 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     public Response deleteProvider(@PathParam("providerID") UUID providerID) {
-        try {
-            this.dao.deleteProvider(providerID);
-        } catch (IllegalArgumentException e) {
-            throw new WebApplicationException(String.format("Provider '%s' is not registered", providerID), Response.Status.NOT_FOUND);
-        }
 
+        final ProviderEntity provider = this.dao.getProvider(providerID).orElseThrow(() -> new WebApplicationException(String.format("Provider '%s' is not registered", providerID), Response.Status.NOT_FOUND));
+        this.dao.deleteProvider(provider);
         return Response.ok().build();
     }
 
@@ -96,8 +95,8 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     public Practitioner updateProvider(@PathParam("providerID") UUID providerID, Practitioner provider) {
-        final ProviderEntity providerEntity = this.dao.persistProvider(ProviderEntity.fromFHIR(provider, providerID));
 
+        final ProviderEntity providerEntity = this.dao.persistProvider(ProviderEntity.fromFHIR(provider, providerID));
         return providerEntity.toFHIR();
     }
 
@@ -109,5 +108,16 @@ public class PractitionerResource extends AbstractPractionerResource {
         }
 
         return FHIRExtractors.getEntityUUID(split[1]);
+    }
+
+    private void checkAssigned(ProviderEntity providerEntity, UUID organizationID) {
+        final boolean matches = providerEntity
+                .getOrganizations()
+                .stream()
+                .anyMatch(entity -> entity.getId().equals(organizationID));
+
+        if (!matches) {
+            throw new WebApplicationException("Provider is not assigned to Organization", Response.Status.UNAUTHORIZED);
+        }
     }
 }

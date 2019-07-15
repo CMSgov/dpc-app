@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -21,12 +22,12 @@ public abstract class AbstractPractionerResource {
      * <p>
      * An Organization ID is required for this endpoint, which is passed via the `_tag` query parameter.
      *
-     * @param providerNPI    - {@link String} NPI to use for querying Provider database
-     * @param organizationID - {@link String} ID of {@link org.hl7.fhir.dstu3.model.Organization} making the request
+     * @param providerNPI     - {@link String} NPI to use for querying Provider database
+     * @param organizationTag - {@link String} ID of {@link org.hl7.fhir.dstu3.model.Organization} making the request
      * @return - {@link Bundle} of {@link Practitioner} resources matching search parameters
      */
     @GET
-    public abstract Bundle getPractitioners(String providerNPI, String organizationID);
+    public abstract Bundle getPractitioners(String providerNPI, @NotEmpty String organizationTag);
 
     /**
      * Register {@link Practitioner} with application.
