@@ -63,13 +63,15 @@ public class GroupResource extends AbstractGroupResource {
     @Timed
     @ExceptionMetered
     @FHIRAsync
-    @ApiOperation(value = "Begin export request", tags = {"Group", "Bulk Data"})
+    @ApiOperation(value = "Begin export request", tags = {"Group", "Bulk Data"},
+            notes = "FHIR $export operation which initiates a bulk data export for the given Provider")
     @ApiImplicitParams(
             @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", value = "respond-async"))
     @ApiResponses(
             @ApiResponse(code = 204, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
     )
-    public Response export(@PathParam("providerID") String providerID,
+    public Response export(@ApiParam(value = "Provider NPI", required = true)
+                           @PathParam("providerID") String providerID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") String resourceTypes,
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
@@ -106,6 +108,7 @@ public class GroupResource extends AbstractGroupResource {
      * @return - {@link String} test string
      */
     @POST
+    @ApiOperation(value = "FHIR marshall test", hidden = true)
     public Patient marshalTest(Group group) {
 
         if (group.getIdentifierFirstRep().getValue().equals("Group/fail")) {

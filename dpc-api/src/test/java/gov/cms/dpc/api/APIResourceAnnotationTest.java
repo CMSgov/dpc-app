@@ -14,16 +14,13 @@ import javax.ws.rs.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// Ensure that all resources have the appropriate handlers
-public class ResourceAnnotationTest {
+// Ensure that all resources have the appropriate handlers and annotations
+class APIResourceAnnotationTest {
 
     private static Set<Method> methods;
 

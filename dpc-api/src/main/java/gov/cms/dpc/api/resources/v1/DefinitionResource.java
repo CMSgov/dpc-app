@@ -32,7 +32,7 @@ public class DefinitionResource extends AbstractDefinitionResource {
     }
 
     @Override
-    @ApiOperation(value = "Fetch all structure definitions", notes = "Fetch all FHIR structure definitions from the server", response = Bundle.class)
+    @ApiOperation(value = "Fetch all structure definitions", notes = "FHIR endpoint which fetches all structure definitions from the server", response = Bundle.class)
     @FHIR
     public Bundle getStructureDefinitions() {
         final Bundle bundle = new Bundle();
@@ -46,7 +46,7 @@ public class DefinitionResource extends AbstractDefinitionResource {
     @GET
     @Path("/{definitionID}")
     @FHIR
-    @ApiOperation(value = "Fetch specific structure definition", notes = "Fetch specific FHIR structure definition from server.", response = StructureDefinition.class)
+    @ApiOperation(value = "Fetch specific structure definition", notes = "FHIR endpoitn to fetch a specific structure definition from server.", response = StructureDefinition.class)
     public StructureDefinition getStructureDefinition(@PathParam("definitionID") String definitionID) {
         final StructureDefinition definition = this.profileSupport.fetchStructureDefinition(ctx, String.format("%s/StructureDefinition/%s", serverURL, definitionID));
         if (definition == null) {
