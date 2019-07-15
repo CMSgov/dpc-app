@@ -16,7 +16,7 @@ import java.io.IOException;
 public class StaticAuthFilter extends DPCAuthFilter {
 
     // Default organization ID to use, if no override is passed
-    private static final String DEFAULT_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+    private static final String DEFAULT_ORG_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ORG_HEADER = "Organization";
 
     @Inject

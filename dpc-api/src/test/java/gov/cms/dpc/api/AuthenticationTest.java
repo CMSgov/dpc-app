@@ -22,7 +22,7 @@ class AuthenticationTest extends AbstractApplicationTest {
     @Test
     void testBasicAuthentication() throws IOException {
         // Manually setup the required org functions
-        final String macaroon = APITestHelpers.setupOrganizationTest(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser());
+        final String macaroon = APITestHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID);
 
         // Now, try to read the organization, which should succeed
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);

@@ -11,10 +11,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class APITestHelpers {
     public static String ATTRIBUTION_URL = "http://localhost:3500/v1";
-    public static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+    public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
 
     private APITestHelpers() {
         // Not used
@@ -35,17 +32,44 @@ public class APITestHelpers {
         return ctx.newRestfulGenericClient(ATTRIBUTION_URL);
     }
 
-    public static String setupOrganizationTest(IGenericClient client, IParser parser) throws IOException {
+    /**
+     * Register an organization with the Attribution Service
+     * Organizations are pulled from the `organization_bundle.json` file and filtered based on the provided resource ID
+     * @param client - {@link IGenericClient} client to communicate to attribution service
+     * @param parser - {@link IParser} to use for reading {@link Bundle} JSON
+     * @param organizationID - {@link String} organzation ID to filter for
+     * @return - {@link String} Access token generated for the {@link Organization}
+     * @throws IOException
+     */
+    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID) throws IOException {
         // Register an organization, and a token
         // Read in the test file
         String macaroon;
-        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json")) {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("organization_bundle.json")) {
 
 
             final Bundle orgBundle = (Bundle) parser.parseResource(inputStream);
 
+            // Filter the bundle to only return resources for the given Organization
+            final Bundle filteredBundle = new Bundle();
+            orgBundle
+                    .getEntry()
+                    .stream()
+                    .filter(Bundle.BundleEntryComponent::hasResource)
+                    .map(Bundle.BundleEntryComponent::getResource)
+                    .filter(resource -> {
+                        if (resource.getResourceType() == ResourceType.Organization) {
+                            return resource.getIdElement().getIdPart().equals(organizationID);
+                        } else {
+                            return ((Endpoint) resource).getManagingOrganization().getReference().equals("Organization/" + organizationID);
+                        }
+                    })
+                    .forEach(entry -> {
+                        filteredBundle.addEntry().setResource(entry);
+                    });
+
             final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(orgBundle);
+            parameters.addParameter().setResource(filteredBundle);
 
             final Organization organization = client
                     .operation()
@@ -85,13 +109,11 @@ public class APITestHelpers {
                     .stream()
                     .map(Bundle.BundleEntryComponent::getResource)
                     .map(resource -> (Practitioner) resource)
-                    .forEach(practitioner -> {
-                        client
-                                .create()
-                                .resource(practitioner)
-                                .encodedJson()
-                                .execute();
-                    });
+                    .forEach(practitioner -> client
+                            .create()
+                            .resource(practitioner)
+                            .encodedJson()
+                            .execute());
         }
     }
 
