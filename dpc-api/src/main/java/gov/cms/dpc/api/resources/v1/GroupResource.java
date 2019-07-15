@@ -2,7 +2,6 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
@@ -10,6 +9,7 @@ import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -27,6 +27,7 @@ import java.util.UUID;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 
 
+@Api(value = "Group")
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
@@ -52,8 +53,8 @@ public class GroupResource extends AbstractGroupResource {
      *
      * @param providerID    {@link String} ID of provider to retrieve data for
      * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}
-     * @param outputFormat - Optional outputFormats parameter
-     * @param since - Optional since parameter
+     * @param outputFormat  - Optional outputFormats parameter
+     * @param since         - Optional since parameter
      * @return - {@link OperationOutcome} specifying whether or not the request was successful.
      */
     @Override
@@ -62,9 +63,18 @@ public class GroupResource extends AbstractGroupResource {
     @Timed
     @ExceptionMetered
     @FHIRAsync
+    @ApiOperation(value = "Begin export request", tags = {"Group", "Bulk Data"})
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", value = "respond-async"))
+    @ApiResponses(
+            @ApiResponse(code = 204, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
+    )
     public Response export(@PathParam("providerID") String providerID,
+                           @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") String resourceTypes,
+                           @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") String outputFormat,
+                           @ApiParam(value = "Request data that has been updated after the given point. (Not implemented yet)", hidden = true)
                            @QueryParam("_since") String since) {
         logger.debug("Exporting data for provider: {}", providerID);
 
@@ -133,8 +143,9 @@ public class GroupResource extends AbstractGroupResource {
     /**
      * Check the query parameters of the request. If valid, return empty. If not valid,
      * return an error response with an {@link OperationOutcome} in the body.
+     *
      * @param outputFormat param to check
-     * @param since param to check
+     * @param since        param to check
      */
     private static void checkExportRequest(String outputFormat, String since) {
         // _since is unsupported

@@ -12,8 +12,8 @@ import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-
-import javax.validation.Validator;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
@@ -37,6 +37,13 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
+
+        bootstrap.addBundle(new SwaggerBundle<DPCAPIConfiguration>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
+                return dpcapiConfiguration.getSwaggerBundleConfiguration();
+            }
+        });
 
         bootstrap.addCommand(new DemoCommand());
         bootstrap.addCommand(new OrgRegistrationCommand());
