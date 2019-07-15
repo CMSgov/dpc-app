@@ -3,7 +3,10 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.api.resources.AbstractDefinitionResource;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
@@ -14,6 +17,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+@Api(value = "StructureDefinition")
 public class DefinitionResource extends AbstractDefinitionResource {
 
     private final FhirContext ctx;
@@ -28,6 +32,8 @@ public class DefinitionResource extends AbstractDefinitionResource {
     }
 
     @Override
+    @ApiOperation(value = "Fetch all structure definitions", notes = "Fetch all FHIR structure definitions from the server", response = Bundle.class)
+    @FHIR
     public Bundle getStructureDefinitions() {
         final Bundle bundle = new Bundle();
         profileSupport.fetchAllStructureDefinitions(ctx)
@@ -39,6 +45,8 @@ public class DefinitionResource extends AbstractDefinitionResource {
     @Override
     @GET
     @Path("/{definitionID}")
+    @FHIR
+    @ApiOperation(value = "Fetch specific structure definition", notes = "Fetch specific FHIR structure definition from server.", response = StructureDefinition.class)
     public StructureDefinition getStructureDefinition(@PathParam("definitionID") String definitionID) {
         final StructureDefinition definition = this.profileSupport.fetchStructureDefinition(ctx, String.format("%s/StructureDefinition/%s", serverURL, definitionID));
         if (definition == null) {
