@@ -36,6 +36,16 @@ public class ProviderEntity implements Serializable {
     @Column(name = "last_name")
     private String providerLastName;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "provider_roles",
+    joinColumns = {
+            @JoinColumn(name = "provider_id", referencedColumnName = "id")
+    },
+    inverseJoinColumns = {
+            @JoinColumn(name = "organization_id", referencedColumnName = "id")
+    })
+    private List<OrganizationEntity> organizations;
+
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "attributions",
@@ -89,6 +99,14 @@ public class ProviderEntity implements Serializable {
 
     public void setAttributedPatients(List<PatientEntity> attributedPatients) {
         this.attributedPatients = attributedPatients;
+    }
+
+    public List<OrganizationEntity> getOrganizations() {
+        return organizations;
+    }
+
+    public void setOrganizations(List<OrganizationEntity> organizations) {
+        this.organizations = organizations;
     }
 
     public Practitioner toFHIR() {

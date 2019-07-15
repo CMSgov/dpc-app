@@ -33,6 +33,6 @@ class PractitionerResourceTest extends AbstractApplicationTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(1, practitioners.getTotal(), "Should have 1 provider");
+        assertEquals(4, practitioners.getTotal(), "Should have all the providers");
     }
 }

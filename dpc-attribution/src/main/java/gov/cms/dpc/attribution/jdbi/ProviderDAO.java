@@ -46,13 +46,20 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         return Optional.ofNullable(get(providerID));
     }
 
-    public List<ProviderEntity> getProviders(String providerNPI) {
+    public List<ProviderEntity> getProviders(String providerNPI, UUID organizationID) {
 
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<ProviderEntity> query = builder.createQuery(ProviderEntity.class);
         final Root<ProviderEntity> root = query.from(ProviderEntity.class);
+
         query.select(root);
+
+        // Always restrict by Organization
+        query
+                .where(builder
+                        .equal(root.join("organizations").get("id"),
+                                organizationID));
 
         // If we've provided an NPI, use it as a query restriction.
         // Otherwise, return everything
