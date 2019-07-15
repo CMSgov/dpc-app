@@ -4,6 +4,7 @@ import gov.cms.dpc.api.annotations.AttributionService;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.auth.AuthFilter;
+import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
 
 import javax.annotation.Nullable;
@@ -14,6 +15,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 
 /**
@@ -32,11 +34,12 @@ public class MacaroonsAuthFilter extends DPCAuthFilter {
     private static final String TOKEN_URI_PARAM = "token";
 
     private final WebTarget client;
-    private PathAuthorizer pa;
+    private PathAuthorizer pa = null;
 
     @Inject
-    MacaroonsAuthFilter(@AttributionService WebTarget client) {
+    MacaroonsAuthFilter(@AttributionService WebTarget client, Authenticator<String, OrganizationPrincipal> auth) {
         this.client = client;
+        this.authenticator = auth;
     }
 
     @Override
@@ -44,31 +47,22 @@ public class MacaroonsAuthFilter extends DPCAuthFilter {
         // Try to get the Macaroon from the request
         String macaroon = getMacaroon(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
 
-        if (macaroon == null) {
-            macaroon = requestContext.getUriInfo().getQueryParameters().getFirst(TOKEN_URI_PARAM);
-        }
+        final UriInfo uriInfo = requestContext.getUriInfo();
 
         if (macaroon == null) {
+            macaroon = uriInfo.getQueryParameters().getFirst(TOKEN_URI_PARAM);
+        }
+
+        if (macaroon == null) {
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
 
-        // We need to verify that the Macaroon is valid
-        final String pathValue = requestContext.getUriInfo().getPathParameters().getFirst(this.pa.pathParam());
-        if (pathValue == null) {
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        // If we have a path authorizer, do that, otherwise, continue
+        if (pa != null) {
+            validatePath(this.pa, macaroon, uriInfo);
         }
 
-        // Make the request
-        final Response tokenValid = this.client
-                .path(String.format("%s/%s/token/verify", this.pa.type().toString(), pathValue))
-                .queryParam("token", macaroon)
-                .request(FHIRMediaTypes.FHIR_JSON)
-                .buildGet()
-                .invoke();
-
-        if (tokenValid.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
-        }
+        this.authenticate(requestContext, macaroon, null);
     }
 
     void setPathAuthorizer(PathAuthorizer authorizer) {
@@ -92,5 +86,24 @@ public class MacaroonsAuthFilter extends DPCAuthFilter {
         }
 
         return header.substring(space + 1);
+    }
+
+    private void validatePath(PathAuthorizer pa, String macaroon, UriInfo uriInfo) {
+
+        final String pathValue = uriInfo.getPathParameters().getFirst(this.pa.pathParam());
+        if (pathValue == null) {
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
+        // Make the request
+        final Response tokenValid = this.client
+                .path(String.format("%s/%s/token/verify", this.pa.type().toString(), pathValue))
+                .queryParam("token", macaroon)
+                .request(FHIRMediaTypes.FHIR_JSON)
+                .buildGet()
+                .invoke();
+
+        if (tokenValid.getStatus() != Response.Status.OK.getStatusCode()) {
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
     }
 }

@@ -1,10 +1,7 @@
 package gov.cms.dpc.api.resources;
 
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -31,12 +28,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
         APITestHelpers.setupPractitionerTest(client, parser);
 
-        // Register the Macaroons Interceptor
-        final APITestHelpers.MacaroonsInterceptor interceptor = new APITestHelpers.MacaroonsInterceptor(macaroon);
-        client.registerInterceptor(interceptor);
-
         // Find everything attributed
-
         final Bundle practitioners = client
                 .search()
                 .forResource(Practitioner.class)
@@ -59,9 +51,8 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         // Create a new org and make sure it has no providers
         final String m2 = APITestHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID);
 
-        client.unregisterInterceptor(interceptor);
-        interceptor.setMacaroon(m2);
-        client.registerInterceptor(interceptor);
+        // Update the Macaroons interceptor to use the new Organization token
+        ((APITestHelpers.MacaroonsInterceptor) client.getInterceptors().get(0)).setMacaroon(m2);
 
         final Bundle otherPractitioners = client
                 .search()
@@ -83,30 +74,4 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         assertEquals(0, otherSpecificSearch.getTotal(), "Should have a specific provider");
     }
-
-    @Test
-    void testForInvalidOrganization() {
-        // TODO: Should throw 404 when requesting an org that doesn't exist
-    }
-
-    public static class OrgInterceptor implements IClientInterceptor {
-
-        private final String organizationID;
-
-        OrgInterceptor(String organizationID) {
-            this.organizationID = organizationID;
-        }
-
-        @Override
-        public void interceptRequest(IHttpRequest theRequest) {
-            theRequest.addHeader("Organization", this.organizationID);
-        }
-
-        @Override
-        public void interceptResponse(IHttpResponse theResponse) throws IOException {
-            // not used
-        }
-    }
-
-
 }
