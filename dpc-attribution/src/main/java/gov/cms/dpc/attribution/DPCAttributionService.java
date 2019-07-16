@@ -7,7 +7,6 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
 import gov.cms.dpc.fhir.FHIRModule;
-import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.macaroons.BakeryModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
@@ -16,6 +15,8 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -74,6 +75,13 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         };
 
         bootstrap.addBundle(sundialBundle);
+
+        bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
+                return configuration.getSwaggerBundleConfiguration();
+            }
+        });
 
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
     }
