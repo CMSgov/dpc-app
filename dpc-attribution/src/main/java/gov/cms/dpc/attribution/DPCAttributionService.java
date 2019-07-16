@@ -50,38 +50,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         // This is required for Guice to load correctly. Not entirely sure why
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
-        GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
-                .modules(new AttributionAppModule(),
-                        new DPCHibernateModule<>(),
-                        new FHIRModule<>(),
-                        new BakeryModule())
-                .build();
-
-        bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.attribution"));
-        bootstrap.addBundle(new MigrationsBundle<DPCAttributionConfiguration>() {
-            @Override
-            public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
-                logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
-                return configuration.getDatabase();
-            }
-        });
-
-        final SundialBundle<DPCAttributionConfiguration> sundialBundle = new SundialBundle<>() {
-            @Override
-            public SundialConfiguration getSundialConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
-                return dpcAttributionConfiguration.getSundial();
-            }
-        };
-
-        bootstrap.addBundle(sundialBundle);
-
-        bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
-            @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
-                return configuration.getSwaggerBundleConfiguration();
-            }
-        });
+        registerBundles(bootstrap);
 
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
     }
@@ -121,5 +90,38 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     private ManagedDataSource createMigrationDataSource(DPCAttributionConfiguration configuration, Environment environment) {
         final DataSourceFactory dataSourceFactory = configuration.getDatabase();
         return dataSourceFactory.build(environment.metrics(), "migration-ds");
+    }
+
+    private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
+        GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
+                .modules(new AttributionAppModule(),
+                        new DPCHibernateModule<>(),
+                        new FHIRModule<>(),
+                        new BakeryModule())
+                .build();
+        bootstrap.addBundle(guiceBundle);
+        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.attribution"));
+        bootstrap.addBundle(new MigrationsBundle<DPCAttributionConfiguration>() {
+            @Override
+            public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
+                logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
+                return configuration.getDatabase();
+            }
+        });
+
+        final SundialBundle<DPCAttributionConfiguration> sundialBundle = new SundialBundle<>() {
+            @Override
+            public SundialConfiguration getSundialConfiguration(DPCAttributionConfiguration dpcAttributionConfiguration) {
+                return dpcAttributionConfiguration.getSundial();
+            }
+        };
+
+        bootstrap.addBundle(sundialBundle);
+        bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
+                return configuration.getSwaggerBundleConfiguration();
+            }
+        });
     }
 }

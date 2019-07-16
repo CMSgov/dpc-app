@@ -60,7 +60,7 @@ public class APITestHelpers {
                 httpPost.setEntity(new StringEntity(bundleString));
 
                 try (CloseableHttpResponse response = client.execute(httpPost)) {
-                    assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                    assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
                 }
 
                 // Now, create a Macaroon
