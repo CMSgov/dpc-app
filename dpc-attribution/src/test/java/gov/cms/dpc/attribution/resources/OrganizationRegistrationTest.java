@@ -42,7 +42,7 @@ class OrganizationRegistrationTest extends AbstractAttributionTest {
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(resource)));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
         }
     }

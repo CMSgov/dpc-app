@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
@@ -19,7 +20,7 @@ public abstract class AbstractOrganizationResource {
 
     @GET
     @FHIR
-    public abstract Bundle searchAndValidateOrganizations(String tokenTag);
+    public abstract Bundle searchAndValidateOrganizations(@NotEmpty String tokenTag);
 
     /**
      * Register a {@link Organization} with the API
@@ -70,5 +71,5 @@ public abstract class AbstractOrganizationResource {
      */
     @GET
     @Path("/{organizationID}/token/verify")
-    public abstract Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token);
+    public abstract Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @NotEmpty @QueryParam("token") String token);
 }
