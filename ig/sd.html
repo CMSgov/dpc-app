@@ -1,0 +1,224 @@
+---
+# jekyll header
+level: 2
+active: profiles
+template: sd
+layout: fhir-artifact
+type: {{[type]}}
+id: {{[id]}}
+---
+<!-- ============CONTENT CONTENT=============== -->
+
+<!--{% raw %}
+<ul class="nav nav-tabs">
+	<li class="active"><a href="#">Content</a></li>
+	<li><a href="{{[type]}}-{{[id]}}-definitions.html">Detailed Descriptions</a></li>
+	<li><a href="{{[type]}}-{{[id]}}-mappings.html">Mappings</a></li>
+	<li><a href="{{[type]}}-{{[id]}}.xml.html">XML</a></li>
+	<li><a href="{{[type]}}-{{[id]}}.json.html">JSON</a></li>
+	<li><a href="{{[type]}}-{{[id]}}.ttl.html">Turtle</a></li>
+</ul>
+{% endraw %}-->
+
+<!--{% raw %} simpler links to other pages
+<p>
+Formats: <a href="{{[type]}}-{{[id]}}.html">Narrative</a>, <a href="{{[type]}}-{{[id]}}.xml.html">XML</a>, <a href="{{[type]}}-{{[id]}}.json.html">JSON</a>, <a href="{{[type]}}-{{[id]}}.ttl.html">Turtle</a>
+</p>
+
+{% endraw %}-->
+
+<h2><span class="sectioncount">SD.{{ site.data.structuredefinitions.{{[id]}}.index | plus: 1 }}</span> {{[type]}}-{{[id]}}</h2>
+
+<!-- introductiontext here-->
+<a name="introduction"> </a>
+
+{% capture my-include %}{% include {{[id]}}-intro.md id="{{[id]}}" %}{% endcapture %}{{ my-include | markdownify }}
+
+<!-- example here -->
+
+<!--{% raw %}
+<h5>Example: <a href="daf-{{page.code}}-{{page.example}}.html">{{page.tcode}} Example: {{page.example}}</a></h5>
+
+<h5>Example: <a href="{{[title]}}.example.html">{{[title]}} Example</a></h5>
+{% endraw %}-->
+
+<a name="profile"> </a>
+<h3><span class="sectioncount">SD.{{ site.data.structuredefinitions.{{[id]}}.index | plus: 1 }}.1 </span>
+Formal Views of Profile Content</h3>
+
+<p>
+<a href="{{site.data.fhir.path}}profiling.html#representation">Description of Profiles, Differentials, and Snapshots</a>.
+</p>
+
+<p>
+The official URL for this profile is: <code>{{site.data.structuredefinitions.{{[id]}}.url}}</code>
+</p>
+
+<p>
+Published on {{site.data.structuredefinitions.{{[id]}}.date}} as a {{site.data.structuredefinitions.{{[id]}}.status}} by {{site.data.structuredefinitions.{{[id]}}.publisher}}.
+</p>
+
+<p><strong>
+This profile builds on <a href= "{{site.data.structuredefinitions.{{[id]}}.basepath}}">{{site.data.structuredefinitions.{{[id]}}.basename}}</a>
+</strong></p>
+
+<!--{% raw %}
+{% include {{[type]}}-{{[id]}}-header.xhtml %}
+{% endraw %}-->
+
+
+<hr>
+
+<!--  ********remove the tabs editing purposes if status draft ********* -->
+
+<!--{% if site.data.structuredefinitions.{{[id]}}.status == "active" %}-->
+
+<div id="tabs">
+
+<!--  this could be a customizable include -->
+ <ul>
+  {% unless "{{[id]}}" contains "extension" %}<li><a href="#tabs-summ">Text Summary</a></li>{% endunless %}
+  <li><a href="#tabs-diff">Differential Table</a></li>
+  <li><a href="#tabs-snap">Snapshot Table</a></li>
+
+
+  <li><a href="#tabs-xml">XML Template</a></li>
+  <li><a href="#tabs-json">JSON Template</a></li>
+
+  <li><a href="#tabs-all">All</a></li>
+
+ </ul>
+{% unless "{{[id]}}" contains "extension" %}
+ <div id="tabs-summ">
+  <div id="tbl-summ">
+   <div id="tbl-diff-inner">
+     <a name="summary"> </a>
+
+{% include {{[type]}}-{{[id]}}-summary.xhtml %}
+
+
+<!--{% raw %}
+{% capture my-include %}{% include {{[id]}}-summary.md id="{{[id]}}" %}{% endcapture %}{{ my-include | markdownify }}
+{% endraw %}-->
+   </div>
+  </div>
+ </div>
+{% endunless %}
+
+ <div id="tabs-diff">
+  <div id="tbl-diff">
+   <div id="tbl-diff-inner">
+  {% include {{[type]}}-{{[id]}}-diff.xhtml %}
+   </div>
+  </div>
+ </div>
+
+ <div id="tabs-snap">
+  <div id="tbl-snap">
+   <div id="tbl-snap-inner">
+{% include {{[type]}}-{{[id]}}-snapshot.xhtml %}
+   </div>
+  </div>
+ </div>
+
+
+ {% raw %}
+ <div id="tabs-xml">
+  <div id="xml">
+   <div id="xml-inner">
+{% include {{[type]}}-{{[id]}}-pseudo-xml.xhtml %}
+   </div>
+  </div>
+ </div>
+
+ <div id="tabs-json">
+  <div id="json">
+   <div id="json-inner">
+{% include {{[type]}}-{{[id]}}-pseudo-json.xhtml %}
+   </div>
+  </div>
+ </div>
+{% endraw %}
+
+<!--{% endif %}-->
+
+
+ <div id="tabs-all">
+
+{% unless "{{[id]}}" contains "extension" %}
+  <div id="all-tbl-summ">
+
+   <div id="all-tbl-summ-inner">
+     <a name="summary"> </a>
+{% include {{[type]}}-{{[id]}}-summary.xhtml %}
+<!--{% raw %}
+{% capture my-include %}{% include {{[id]}}-summary.md id="{{[id]}}" %}{% endcapture %}{{ my-include | markdownify }}
+{% endraw %}-->
+   </div>
+
+  </div>
+  {% endunless %}
+
+ <div id="all-tbl-diff">
+   <p><b>Differential View</b></p>
+
+   <div id="all-tbl-diff-inner">
+   {% include {{[type]}}-{{[id]}}-diff.xhtml %}
+   </div>
+
+  </div>
+
+  <div id="all-tbl-snap">
+   <p><b>Snapshot View</b></p>
+
+   <div id="all-tbl-snap-inner">
+{% include {{[type]}}-{{[id]}}-snapshot.xhtml %}
+   </div>
+
+  </div>
+
+
+
+  <!--{% raw %}
+  <div id="all-xml">
+   <p><b>XML Template</b></p>
+   <div id="all-xml-inner">
+{% include {{[type]}}-{{[id]}}-pseudo-xml.xhtml %}
+   </div>
+  </div>
+
+  <div id="all-json">
+   <p><b>JSON Template</b></p>
+   <div id="all-json-inner">
+{% include {{[type]}}-{{[id]}}-pseudo-json.xhtml %}
+   </div>
+  </div>
+{% endraw %}-->
+ </div>
+</div>
+
+
+<a name="downloads"> </a>
+<p>Downloads: StructureDefinition: (<a href="{{[type]}}-{{[id]}}.xml" download>XML</a>, <a href="{{[type]}}-{{[id]}}.json" download>JSON</a>), Schema:  <a href="{{[id]}}.sch" download>XML Schematron</a></p>
+
+<p>&nbsp;</p>
+
+
+{% if "{{[id]}}" contains "extension" %}
+
+<hr/>
+
+ See the <a href="capstatements.html"/>Conformance requirements</a> for a complete list of supported RESTful interactions for this IG.</p>
+
+{% else %}
+
+<!-- search text here-->
+<!--<a name="search"> </a>-->
+<!--<h3><span class="sectioncount">SD.{{ site.data.structuredefinitions.{{[id]}}.index | plus: 1 }}.2  </span>Quick Start</h3>-->
+<!--<p>Below is an overview of the required set of RESTful FHIR interactions - for example, search and read operations - for this profile.  See the <a href="capstatements.html"/>Conformance requirements</a> for a complete list of supported RESTful interactions for this IG.</p>-->
+
+{% capture my-include %}{% include {{[id]}}-search.md  id="{{[id]}}" %}{% endcapture %}{{ my-include | markdownify }}
+
+
+{% endif %}
+  <!-- ==============END CONTENT END CONTENT=================== -->

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ImplementationGuide xmlns="http://hl7.org/fhir">
+  <id value="cms-dpc-ig"/>
+  <meta>
+    <versionId value="8"/>
+    <lastUpdated value="2019-07-16T14:49:27.000-04:00"/>
+  </meta>
+  <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
+    <valueString value="/Users/narobison/Developer/dpc-app/ig/source/resources"/>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
+    <valueString value="/Users/narobison/Developer/dpc-app/dpc-common/src/main/resources/validations"/>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
+    <valueString value="/Users/narobison/Developer/dpc-app/dpc-api/src/main/resources"/>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
+    <valueString value="/Users/narobison/Developer/dpc-app/ig/framework"/>
+  </extension>
+  <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
+    <valueString value="/Users/narobison/Developer/dpc-app/ig/source/pages"/>
+  </extension>
+  <url value="https://dpc.cms.gov/ImplementationGuide/cms-dpc-ig"/>
+  <name value="DPCImplementationGuide"/>
+  <status value="draft"/>
+  <experimental value="false"/>
+  <publisher value="Centers for Medicare and Medicaid Services"/>
+  <description value="Draft implementation guide for DPC Application"/>
+  <packageId value="cms-dpc-ig-npm-null"/>
+  <license value="CC0-1.0"/>
+  <fhirVersion value="3.0.1"/>
+  <fhirVersion value="3.0.1"/>
+  <definition>
+    <grouping id="p1">
+      <name value="Profiles in this implementation guide"/>
+    </grouping>
+    <resource>
+      <reference>
+        <reference value="Organization/organization"/>
+        <display value="organization.json"/>
+      </reference>
+      <exampleBoolean value="true"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="Practitioner/practitioner"/>
+        <display value="practitioner.json"/>
+      </reference>
+      <exampleBoolean value="true"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="Group/group"/>
+        <display value="group.json"/>
+      </reference>
+      <exampleBoolean value="true"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="Endpoint/endpoint"/>
+        <display value="endpoint.json"/>
+      </reference>
+      <exampleBoolean value="true"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="StructureDefinition/dpc-profile-patient"/>
+        <display value="DPCPatient.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="CapabilityStatement/dpc-capabilities-statement"/>
+        <display value="capabilities.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <parameter>
+      <code value="generate"/>
+      <value value="xml"/>
+    </parameter>
+    <parameter>
+      <code value="generate"/>
+      <value value="JSON"/>
+    </parameter>
+  </definition>
+</ImplementationGuide>

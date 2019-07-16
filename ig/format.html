@@ -1,0 +1,31 @@
+---
+# jekyll header
+level: 2
+active: format
+layout: fhir-artifact
+type: {{[type]}}
+template: format
+id: {{[id]}}
+fmt: {{[fmt]}}
+---
+
+<!-- ============ CONTENT CONTENT=============== -->
+
+  <!-- ============ default xml or json content for structuredefinition CONTENT CONTENT=============== -->
+  <p>
+  Raw <a href="{{[type]}}-{{[id]}}.{{[fmt]}}" download>{{[fmt]}}</a>
+  </p>
+
+{% include {{[type]}}-{{[name]}}.xhtml %}
+
+<!-- ============ default xml or json content CONTENT CONTENT=============== -->
+
+
+<!-- simple format links
+<p>
+Formats: <a href="{{[type]}}-{{[id]}}.html">Narrative</a>, <a href="{{[type]}}-{{[id]}}.xml.html">XML</a>, <a href="{{[type]}}-{{[id]}}.json.html">JSON</a>, <a href="{{[type]}}-{{[id]}}.ttl.html">Turtle</a>
+</p>
+-->
+
+
+  <!-- ==============END CONTENT END CONTENT=================== -->

@@ -1,0 +1,69 @@
+{
+    "resourceType": "CapabilityStatement",
+    "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">This is a narrative</div>"
+    },
+    "version": "0.3.0-SNAPSHOT",
+    "status": "draft",
+    "date": "2019",
+    "publisher": "Centers for Medicare and Medicaid Services",
+    "kind": "capability",
+    "id": "dpc-capabilities",
+    "software": {
+        "name": "Data @ Point of Care API",
+        "version": "0.3.0-SNAPSHOT",
+        "releaseDate": "2019"
+    },
+    "fhirVersion": "3.0.1",
+    "acceptUnknown": "extensions",
+    "format": [
+        "application/json",
+        "application/fhir+json"
+    ],
+    "rest": [
+        {
+            "mode": "server",
+            "resource": [
+                {
+                    "type": "Practitioner",
+                    "interaction": [
+                        {
+                            "code": "create"
+                        },
+                        {
+                            "code": "update"
+                        },
+                        {
+                            "code": "delete"
+                        },
+                        {
+                            "code": "search-type"
+                        }
+                    ],
+                    "versioning": "no-version",
+                    "searchParam": [
+                        {
+                            "name": "identifier",
+                            "type": "string"
+                        }
+                    ]
+                },
+                {
+                    "type": "StructureDefinition",
+                    "interaction": [
+                        {
+                            "code": "read"
+                        }
+                    ],
+                    "versioning": "no-version"
+                }
+            ],
+            "interaction": [
+                {
+                    "code": "batch"
+                }
+            ]
+        }
+    ]
+}
