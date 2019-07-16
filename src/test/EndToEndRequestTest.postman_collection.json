@@ -352,13 +352,5 @@
 				]
 			}
 		}
-	],
-	"variable": [
-		{
-			"id": "259dcc5c-80f7-4792-9f6a-03b67f4f51fb",
-			"key": "PROVIDER_ID",
-			"value": "8D80925A-027E-43DD-8AED-9A501CC4CD91",
-			"type": "string"
-		}
 	]
 }
