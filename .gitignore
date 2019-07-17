@@ -18,6 +18,7 @@ bbcerts/*
 # Ignore the IG outputs
 ig/output
 ig/generated_output
+.bin/
 
 *.code-workspace
 .factorypath

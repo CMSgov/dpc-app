@@ -1,7 +1,7 @@
 {
 	"tool": "jekyll",
 	"source": "implementationguide/cms-dpc-ig.xml",
-	"npm-name": "cms-dpc-ig-npm-null",
+	"npm-name": "cms-dpc-ig",
 	"license": "CC0-1.0",
 	"paths": {
 		"qa": "generated_output/qa",

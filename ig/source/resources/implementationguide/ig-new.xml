@@ -27,7 +27,7 @@
   <experimental value="false"/>
   <publisher value="Centers for Medicare and Medicaid Services"/>
   <description value="Draft implementation guide for DPC Application"/>
-  <packageId value="cms-dpc-ig-npm-null"/>
+  <packageId value="cms-dpc-ig"/>
   <license value="CC0-1.0"/>
   <fhirVersion value="3.0.1"/>
   <fhirVersion value="3.0.1"/>

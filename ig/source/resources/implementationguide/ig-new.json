@@ -31,7 +31,7 @@
   "experimental" : false,
   "publisher" : "Centers for Medicare and Medicaid Services",
   "description" : "Draft implementation guide for DPC Application",
-  "packageId" : "cms-dpc-ig-npm-null",
+  "packageId" : "cms-dpc-ig",
   "license" : "CC0-1.0",
   "fhirVersion" : ["3.0.1",
   "3.0.1"],
