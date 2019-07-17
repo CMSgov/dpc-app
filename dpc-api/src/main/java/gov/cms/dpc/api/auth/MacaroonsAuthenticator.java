@@ -5,6 +5,9 @@ import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.ResourceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -15,6 +18,8 @@ import java.util.*;
  */
 public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials, OrganizationPrincipal> {
 
+    private static final Logger logger = LoggerFactory.getLogger(MacaroonsAuthenticator.class);
+
     private final IGenericClient client;
 
     @Inject
@@ -24,20 +29,30 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
 
     @Override
     public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) throws AuthenticationException {
+        logger.debug("Performing token authentication");
 
         // If we don't have a path authorizer, just return the principal
         final OrganizationPrincipal principal = new OrganizationPrincipal(credentials.getOrganization());
         if (credentials.getPathAuthorizer() == null) {
+            logger.debug("No path authorizer is present, returning");
             return Optional.of(principal);
         }
 
-        // Now, try to lookup the matching resource
+        // If we're an organization, we just check the org ID against the path value and see if it matches
+        if (credentials.getPathAuthorizer().type() == ResourceType.Organization) {
+            return validateOrganization(principal, credentials);
+        }
+
+        // Otherwise, try to lookup the matching resource
+        logger.debug("Looking up resource {} in path authorizer. With value: {}", credentials.getPathAuthorizer().type(), credentials.getPathAuthorizer().pathParam());
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("identifier", Collections.singletonList(credentials.getPathValue()));
+        searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
         final Bundle bundle = this.client
                 .search()
-                .forResource(credentials.getPathAuthorizer().type().getPath())
+                .forResource(credentials.getPathAuthorizer().type().toString())
                 .whereMap(searchParams)
+//                .withTag("", credentials.getOrganization().getId())
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -45,6 +60,15 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         if (bundle.getTotal() == 0) {
             return Optional.empty();
         }
+
         return Optional.of(principal);
+    }
+
+    private Optional<OrganizationPrincipal> validateOrganization(OrganizationPrincipal principal, DPCAuthCredentials credentials) {
+        final String orgID = credentials.getOrganization().getId();
+        final String pathValue = credentials.getPathValue();
+        logger.debug("Validating Organization {} matches path value: {}", orgID, pathValue);
+        return orgID.equals("Organization/" + pathValue) ?
+                Optional.of(principal) : Optional.empty();
     }
 }

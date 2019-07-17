@@ -12,8 +12,8 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class AuthenticationTest extends AbstractApplicationTest {
-    private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
+class AuthenticationTest extends AbstractSecureApplicationTest {
+    private static final String BAD_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
 
     private AuthenticationTest() {
         // Not used
@@ -23,6 +23,7 @@ class AuthenticationTest extends AbstractApplicationTest {
     void testBasicAuthentication() throws IOException {
         // Manually setup the required org functions
         final String macaroon = APITestHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID);
+        final String m2 = APITestHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), BAD_ORG_ID);
 
         // Now, try to read the organization, which should succeed
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);

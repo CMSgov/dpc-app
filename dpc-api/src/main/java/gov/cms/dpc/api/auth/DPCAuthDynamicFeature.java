@@ -5,6 +5,8 @@ import gov.cms.dpc.api.auth.annotations.Public;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.auth.AuthDynamicFeature;
 import org.glassfish.jersey.server.model.AnnotatedMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.DynamicFeature;
@@ -20,17 +22,17 @@ import java.lang.annotation.Annotation;
 @Provider
 public class DPCAuthDynamicFeature implements DynamicFeature {
 
-    private final DPCAuthFilter filter;
+    private static final Logger logger = LoggerFactory.getLogger(DPCAuthDynamicFeature.class);
+
+    private final AuthFactory factory;
 
     @Inject
-    public DPCAuthDynamicFeature(DPCAuthFilter filter) {
-        this.filter = filter;
+    public DPCAuthDynamicFeature(AuthFactory factory) {
+        this.factory = factory;
     }
 
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
-        // Reset Path authorizer
-        filter.setPathAuthorizer(null);
 
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
 
@@ -41,7 +43,8 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
 
         // Check for any @Auth annotated params
         if (authAnnotated(am)) {
-            context.register(this.filter);
+//            this.filter.setPathAuthorizer(null);
+            context.register(this.factory.createStandardAuthorizer());
             return;
         }
 
@@ -51,8 +54,9 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
         final boolean annotationOnMethod = am.isAnnotationPresent(PathAuthorizer.class);
 
         if (annotationOnClass || annotationOnMethod) {
-            this.filter.setPathAuthorizer(am.getAnnotation(PathAuthorizer.class));
-            context.register(this.filter);
+            logger.warn("Setting path authorizer");
+            final PathAuthorizer pa = am.getAnnotation(PathAuthorizer.class);
+            context.register(this.factory.createPathAuthorizer(pa));
         }
     }
 

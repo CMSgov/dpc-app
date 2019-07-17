@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.auth;
 
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -18,7 +18,7 @@ import java.io.IOException;
  * By default, it returns {@link StaticAuthFilter#DEFAULT_ORG_ID}, but if the {@link StaticAuthFilter#ORG_HEADER} is specified, the provided value is used instead.
  */
 @Priority(Priorities.AUTHENTICATION)
-public class StaticAuthFilter extends DPCAuthFilter {
+public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
 
     // Default organization ID to use, if no override is passed
     private static final String DEFAULT_ORG_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
@@ -40,11 +40,4 @@ public class StaticAuthFilter extends DPCAuthFilter {
         org.setId(new IdType("Organization", orgID));
         this.authenticate(requestContext, new DPCAuthCredentials(null, org, null, ""), null);
     }
-
-    @Override
-    void setPathAuthorizer(PathAuthorizer pa) {
-        // Not used
-    }
-
-
 }

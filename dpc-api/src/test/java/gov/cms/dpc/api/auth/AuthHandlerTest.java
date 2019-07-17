@@ -21,8 +21,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.exceptions.base.MockitoException;
 
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -89,40 +87,12 @@ class AuthHandlerTest {
 
     private static ResourceExtension buildAuthResource() {
         // Setup mocks
-        final WebTarget webTarget = mockWebTarget();
         final IGenericClient client = mockGenericClient();
-        final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(new MacaroonsAuthFilter(client, new MacaroonsAuthenticator(client)));
+        final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(null);
 
         final FhirContext ctx = FhirContext.forDstu3();
 
         return APITestHelpers.buildResourceExtension(ctx, List.of(mockOrganizationResource(), mockBaseResource()), List.of(dynamicFeature), false);
-    }
-
-    private static WebTarget mockWebTarget() {
-        final WebTarget webTarget = mock(WebTarget.class);
-        final Invocation invocation = mock(Invocation.class);
-        final Invocation.Builder builder = mock(Invocation.Builder.class);
-
-        // Simple stubbing to just return the underlying web target
-        // We need these in order to avoid getting an NPE in the AuthFilter
-        // When we make the request, capture
-//        Mockito.when(webTarget.path(requestPath.capture())).thenReturn(webTarget);
-        Mockito.when(webTarget.queryParam(Mockito.anyString(), Mockito.any())).thenReturn(webTarget);
-        Mockito.when(webTarget.request(Mockito.anyString())).thenReturn(builder);
-        Mockito.when(builder.buildGet()).thenReturn(invocation);
-
-        // Now, the actual Mock response
-//        Mockito.when(invocation.invoke()).thenAnswer(answer -> {
-//            // The Organization ID should be captured, but we need to extract it from the path
-//            final String orgID = requestPath.getValue().replace("Organization/", "").replace("/token/verify", "");
-//            if (orgID.equals(APITestHelpers.ORGANIZATION_ID)) {
-//                return Response.status(Response.Status.OK).build();
-//            } else {
-//                return Response.status(Response.Status.UNAUTHORIZED).build();
-//            }
-//        });
-
-        return webTarget;
     }
 
     private static OrganizationResource mockOrganizationResource() {

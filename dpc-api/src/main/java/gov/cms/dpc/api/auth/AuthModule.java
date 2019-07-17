@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 /**
  * {@link DropwizardAwareModule} for determining which authentication system to use.
  * if {@link DPCAPIConfiguration#isAuthenticationDisabled()} returns {@code true} then the {@link StaticAuthFilter} is used.
- * Otherwise, {@link MacaroonsAuthFilter} is loaded.
+ * Otherwise, {@link PathAuthorizationFilter} is loaded.
  * <p>
  * The {@link StaticAuthFilter} should ONLY be used for testing
  */
@@ -28,9 +28,10 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         if (getConfiguration().isAuthenticationDisabled()) {
             logger.warn("AUTHENTICATION IS DISABLED!!! USE ONLY IN DEVELOPMENT");
             binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
-            binder.bind(DPCAuthFilter.class).to(StaticAuthFilter.class);
+//            binder.bind(DPCAuthFilter.class).to(StaticAuthFilter.class);
         } else {
-            binder.bind(DPCAuthFilter.class).to(MacaroonsAuthFilter.class);
+            binder.bind(AuthFactory.class).to(DPCAuthFactory.class);
+//            binder.bind(DPCAuthFilter.class).to(PathAuthorizationFilter.class);
             binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
         }
         binder.bind(DPCAuthDynamicFeature.class);
