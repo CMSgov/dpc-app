@@ -88,7 +88,8 @@ class AuthHandlerTest {
     private static ResourceExtension buildAuthResource() {
         // Setup mocks
         final IGenericClient client = mockGenericClient();
-        final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(null);
+        final DPCAuthFactory factory = new DPCAuthFactory(client, new MacaroonsAuthenticator(client));
+        final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
         final FhirContext ctx = FhirContext.forDstu3();
 

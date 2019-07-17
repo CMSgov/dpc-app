@@ -17,7 +17,13 @@ import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 
 /**
- * Wrapper class around {@link AuthFilter} which is specific to DPC and allows us to persist the {@link PathAuthorizer} annotation from the request resource
+ * {@link AuthFilter} implementation which extracts the Macaroon (base64 encoded) from the request.
+ * Once extracted, it passes it down along the authn/authz chain.
+ * <p>
+ * This assumes that the Macaroon is either passed via the {@link HttpHeaders#AUTHORIZATION} header
+ * in the form 'Bearer {macaroon-values}'.
+ * <p>
+ * Or, directly via the 'token' query param (e.g. no Bearer prefix)
  */
 abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
 

@@ -27,11 +27,11 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
         if (getConfiguration().isAuthenticationDisabled()) {
             logger.warn("AUTHENTICATION IS DISABLED!!! USE ONLY IN DEVELOPMENT");
+            binder.bind(AuthFactory.class).to(StaticAuthFactory.class);
             binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
-//            binder.bind(DPCAuthFilter.class).to(StaticAuthFilter.class);
+
         } else {
             binder.bind(AuthFactory.class).to(DPCAuthFactory.class);
-//            binder.bind(DPCAuthFilter.class).to(PathAuthorizationFilter.class);
             binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
         }
         binder.bind(DPCAuthDynamicFeature.class);

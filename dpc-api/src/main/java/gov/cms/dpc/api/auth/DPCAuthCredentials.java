@@ -3,6 +3,9 @@ package gov.cms.dpc.api.auth;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import org.hl7.fhir.dstu3.model.Organization;
 
+/**
+ * Wrapper class for passing authentication state between the {@link io.dropwizard.auth.AuthFilter} and the {@link io.dropwizard.auth.Authenticator}
+ */
 public class DPCAuthCredentials {
 
     private final String macaroon;
