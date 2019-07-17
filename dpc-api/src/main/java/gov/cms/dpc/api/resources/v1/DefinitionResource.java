@@ -46,7 +46,7 @@ public class DefinitionResource extends AbstractDefinitionResource {
     @GET
     @Path("/{definitionID}")
     @FHIR
-    @ApiOperation(value = "Fetch specific structure definition", notes = "FHIR endpoitn to fetch a specific structure definition from server.", response = StructureDefinition.class)
+    @ApiOperation(value = "Fetch specific structure definition", notes = "FHIR endpoint to fetch a specific structure definition from the server.", response = StructureDefinition.class)
     public StructureDefinition getStructureDefinition(@PathParam("definitionID") String definitionID) {
         final StructureDefinition definition = this.profileSupport.fetchStructureDefinition(ctx, String.format("%s/StructureDefinition/%s", serverURL, definitionID));
         if (definition == null) {

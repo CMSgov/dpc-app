@@ -59,7 +59,7 @@ public class JobResource extends AbstractJobResource {
             @ApiResponse(code = 202, message = "Export job is in progress"),
             @ApiResponse(code = 404, message = "Export job cannot be found"),
             @ApiResponse(code = 500, message = "Export job has failed with no results"),
-            @ApiResponse(code = 200, message = "Export job has completed with any failures listed in the response body", response = JobCompletionModel.class)
+            @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class)
     })
     public Response checkJobStatus(@PathParam("jobID") String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);

@@ -64,7 +64,7 @@ public class GroupResource extends AbstractGroupResource {
     @ExceptionMetered
     @FHIRAsync
     @ApiOperation(value = "Begin export request", tags = {"Group", "Bulk Data"},
-            notes = "FHIR $export operation which initiates a bulk data export for the given Provider")
+            notes = "FHIR export operation which initiates a bulk data export for the given Provider")
     @ApiImplicitParams(
             @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", value = "respond-async"))
     @ApiResponses(
