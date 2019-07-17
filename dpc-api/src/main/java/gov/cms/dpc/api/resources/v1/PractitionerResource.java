@@ -73,10 +73,11 @@ public class PractitionerResource extends AbstractPractionerResource {
 
         final MethodOutcome outcome = test.execute();
 
-        final Practitioner resource = (Practitioner) outcome.getResource();
-        if (resource == null) {
+        if (!outcome.getCreated() || (outcome.getResource() == null)) {
             throw new WebApplicationException("Unable to submit provider", Response.Status.INTERNAL_SERVER_ERROR);
         }
+
+        final Practitioner resource = (Practitioner) outcome.getResource();
 
         // Now, submit the Practitioner Role
         final PractitionerRole role = new PractitionerRole();

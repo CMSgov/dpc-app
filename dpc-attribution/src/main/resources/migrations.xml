@@ -276,4 +276,8 @@
                 referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="remove provider constraint" author="nickrobison-usds">
+        <dropUniqueConstraint tableName="PROVIDERS" constraintName="providers_provider_id_key"/>
+    </changeSet>
+
 </databaseChangeLog>

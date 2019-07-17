@@ -19,7 +19,7 @@ import java.util.UUID;
         @NamedQuery(name = "getAllProviders", query = "from providers p")
 })
 @SQLInsert(sql = "INSERT INTO providers(first_name, last_name, provider_id, id) VALUES(?, ?, ?, ?)" +
-        " ON CONFLICT (provider_id) DO UPDATE SET last_name = EXCLUDED.last_name," +
+        " ON CONFLICT (id) DO UPDATE SET last_name = EXCLUDED.last_name," +
         " first_name = EXCLUDED.first_name")
 public class ProviderEntity implements Serializable {
 
