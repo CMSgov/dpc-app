@@ -176,7 +176,7 @@
 						"id": "28fe7a36-50ab-4e7d-bf21-312b5f5777f3",
 						"exec": [
 							"// Wait between pings",
-							"setTimeout(function() {}, 60000);"
+							"setTimeout(function() {}, 5000);"
 						],
 						"type": "text/javascript"
 					}
