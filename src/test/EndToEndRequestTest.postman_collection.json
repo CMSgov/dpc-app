@@ -5,20 +5,31 @@
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
-	"event": [
+	"variable": [
 		{
-			"listen": "prerequest",
-			"script": {
-				"id": "ed50ef5a-13ec-4e4b-a393-9ac0a1f641e3",
-				"type": "text/javascript",
-				"exec": [
-					"pm.environment.set(\"PROVIDER_ID\", \"8D80925A-027E-43DD-8AED-9A501CC4CD91\");",
-					"pm.environment.set(\"hostname\", \"localhost\");",
-					"pm.environment.set(\"api_port\", \"3002\");",
-					"pm.environment.set(\"attribution_port\", \"3500\");"
-				]
-			}
+			"id": "9367b8dc-66ce-4361-a042-0706adf9f40e",
+			"key": "PROVIDER_ID",
+			"value": "8D80925A-027E-43DD-8AED-9A501CC4CD91",
+			"type": "string"
+		},		{
+			"id": "38ea34e9-36c3-4815-9b66-819260c9a9a6",
+			"key": "hostname",
+			"value": "localhost",
+			"type": "string"
+		},
+		{
+			"id": "8331a043-07cd-4c34-9964-89734d2bf476",
+			"key": "api_port",
+			"value": "3002",
+			"type": "string"
+		},
+		{
+			"id": "fc3be08d-1265-4a72-b4e9-335e75cc7b58",
+			"key": "attribution_port",
+			"value": "3500",
+			"type": "string"
 		}
+
 	],
 	"item": [
 		{
