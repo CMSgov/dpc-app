@@ -25,6 +25,9 @@ public abstract class AbstractAttributionResource {
     @Path("/Practitioner")
     public abstract AbstractPractionerResource providerOperations();
 
+    @Path("/PractitionerRole")
+    public abstract AbstractPractitionerRoleResource providePractitionerRoleOperations();
+
     @GET
     @Path("/_healthy")
     @ApiOperation(value = "Check is healthy", notes = "Returns whether or not the application is in a healthy state." +

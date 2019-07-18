@@ -9,10 +9,7 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.annotations.AttributionService;
-import gov.cms.dpc.api.auth.MacaroonsAuthFilter;
-import gov.cms.dpc.api.auth.MacaroonsAuthenticator;
-import gov.cms.dpc.api.auth.MacaroonsAuthorizer;
-import gov.cms.dpc.api.auth.MacaroonsDynamicFeature;
+import gov.cms.dpc.api.auth.*;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.health.AttributionHealthCheck;
 import gov.cms.dpc.api.resources.TestResource;
@@ -60,12 +57,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(RosterResource.class);
         binder.bind(OrganizationResource.class);
         binder.bind(DefinitionResource.class);
-
-        // Auth
-        binder.bind(MacaroonsAuthorizer.class);
-        binder.bind(MacaroonsAuthenticator.class);
-        binder.bind(MacaroonsAuthFilter.class);
-        binder.bind(MacaroonsDynamicFeature.class);
         binder.bind(PractitionerResource.class);
 
         // Healthchecks

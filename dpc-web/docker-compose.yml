@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=dpc-website_development
+      - POSTGRES_PASSWORD=dpc-safe
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    image: dpc-web:latest
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - RAILS_MASTER_KEY
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db

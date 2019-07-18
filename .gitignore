@@ -14,3 +14,11 @@ bbcerts/*
 !bbcerts/README.md
 !bbcerts/bb.keystore.enc
 .java-version
+
+# Ignore the IG outputs
+ig/output
+ig/generated_output
+.bin/
+
+*.code-workspace
+.factorypath

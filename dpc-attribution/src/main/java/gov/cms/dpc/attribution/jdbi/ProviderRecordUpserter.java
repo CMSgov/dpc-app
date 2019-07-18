@@ -20,7 +20,7 @@ public class ProviderRecordUpserter extends AbstractRecordUpserter<ProvidersReco
 
     @Override
     List<TableField<ProvidersRecord, ?>> getConflictFields() {
-        return Collections.singletonList(PROVIDERS.PROVIDER_ID);
+        return Collections.singletonList(PROVIDERS.ID);
     }
 
     @Override

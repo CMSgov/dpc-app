@@ -52,7 +52,7 @@ This can be fixed by setting the working directory to the project root, but need
 Building DPC
 ---
 
-1. Run `mvn clean install` to build and test the application.
+1. Run `mvn clean install` after cloning to build and test the application.
 This will also construct the *Docker* images for the various services.
 To skip the Docker build pass `-Djib.skip=True`
 
@@ -62,11 +62,12 @@ In addition, some of upstream dependencies have not been updated to support Java
 Running DPC
 --- 
 
-Once the JARs are built, they can be run in two ways either via `docker compose` or by manually running the JARs.
+Once the JARs are built, they can be run in two ways either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
 
 ## Running via Docker 
 
-The application (along with all required dependencies) can be automatically started with the following command: `docker-compose up`.
+The application (along with all required dependencies) can be automatically started with the following command: `docker-compose up`. [Install Docker](https://www.docker.com/products/docker-desktop)
+
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
 ```bash
@@ -94,8 +95,8 @@ This can be overriden in two ways.
 1. Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
 1. Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
 
-***Note**: Manually specifying a config file will disable the normal configuration merging process. 
-This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed.* 
+> Note: Manually specifying a config file will disable the normal configuration merging process. 
+This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed. 
 
 1. You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a json formatted FHIR resource.
     ```bash
@@ -160,6 +161,7 @@ You will need to set the *ACCEPT* header to `application/fhir+json` (per the FHI
 1. Make a *GET* request using the URL provided by the `/Group` endpoint from the previous step.
  Which has this format: `http://localhost:3002/v1/Jobs/{unique UUID of export job}`.
  You will need to ensure that the *ACCEPT* header is set to `application/fhir+json` (per the FHIR bulk spec).
+ You will need to ensure that the *PREFER* header is set to `respond-async`.
  The server should return a *204* response until the job has completed.
  Once the job is complete, the endpoint should return data in the following format (the actual values will be different):
  

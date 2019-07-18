@@ -1,69 +1,99 @@
 package gov.cms.dpc.attribution.resources;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OrganizationRegistrationTest extends AbstractAttributionTest {
 
     private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
 
+    private final IGenericClient client;
+
     private OrganizationRegistrationTest() {
-        // Not used
+        this.client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
     }
 
     @Test
-    void testBasicRegistration() throws IOException {
+    void testBasicRegistration() {
 
         // Read in the test file
         final InputStream inputStream = OrganizationRegistrationTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
         final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
 
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getServerURL() + "/Organization");
-            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-            httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(resource)));
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(resource);
 
-            try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
-            }
-        }
+        final Organization submitted = this.client
+                .operation()
+                .onType(Organization.class)
+                .named("submit")
+                .withParameters(parameters)
+                .returnResourceType(Organization.class)
+                .encodedJson()
+                .execute();
+
+        assertAll(() -> assertNotNull(submitted, "Should have an org back"),
+                () -> assertFalse(submitted.getEndpoint().isEmpty(), "Should have endpoints"));
     }
 
     @Test
-    void testInvalidOrganization() throws IOException {
+    void testInvalidOrganization() {
 
-        // Read in the test file
+        // Create a fake org
         final Organization resource = new Organization();
         resource.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
 
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(resource);
 
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getServerURL() + "/Organization");
-            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-            httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(resource)));
+        final IOperationUntypedWithInput<Organization> operation = this.client
+                .operation()
+                .onType(Organization.class)
+                .named("submit")
+                .withParameters(parameters)
+                .returnResourceType(Organization.class)
+                .encodedJson();
 
-            try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatusLine().getStatusCode(), "Should have failed");
-            }
-        }
+        assertThrows(InternalErrorException.class, operation::execute, "Should fail with a 500 status");
+    }
+
+    @Test
+    void testEmptyBundleSubmission() {
+
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setName("test").setValue(new StringType("nothing"));
+
+        final IOperationUntypedWithInput<Organization> operation = this.client
+                .operation()
+                .onType(Organization.class)
+                .named("submit")
+                .withParameters(parameters)
+                .returnResourceType(Organization.class)
+                .encodedJson();
+
+        assertThrows(UnprocessableEntityException.class, operation::execute, "Should be unprocessable");
     }
 
     @Test
