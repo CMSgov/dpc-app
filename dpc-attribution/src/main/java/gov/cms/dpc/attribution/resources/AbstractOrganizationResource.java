@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.resources;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -19,21 +20,30 @@ public abstract class AbstractOrganizationResource {
 
     @GET
     @FHIR
-    public abstract Bundle searchAndValidateOrganizations(String tokenTag);
+    public abstract Bundle searchOrganizations(String identifier, String tokenTag);
 
     /**
      * Register a {@link Organization} with the API
      * <p>
      * We're currently using a {@link Bundle} resource, which allows us to include both the {@link Organization}
-     * as well as any {@link org.hl7.fhir.dstu3.model.Endpoint} resources
+     * as well as any {@link org.hl7.fhir.dstu3.model.Endpoint} resources.
+     * <p>
+     * The {@link Bundle} is submitted as the Resource portion of the {@link Parameters} object.
      *
      * @param bundle - {@link Bundle} to register with system
      * @return - {@link Response} whether operation succeeded or failed
      */
     @POST
+    @Path("/$submit")
     @FHIR
-    public abstract Response createOrganization(Bundle bundle);
+    public abstract Response submitOrganization(Parameters bundle);
 
+    /**
+     * Fetch the {@link Organization} with the given ID
+     *
+     * @param organizationID - {@link UUID} of organization
+     * @return - {@link Organization}
+     */
     @GET
     @FHIR
     @Path("/{organizationID}")

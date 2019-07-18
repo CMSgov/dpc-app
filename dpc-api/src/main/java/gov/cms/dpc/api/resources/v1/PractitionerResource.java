@@ -4,14 +4,15 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractionerResource;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import gov.cms.dpc.fhir.annotations.FHIR;
+import io.dropwizard.auth.Auth;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
@@ -25,40 +26,33 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
+    @GET
     @Timed
     @ExceptionMetered
-    public Bundle getPractitioners(String providerNPI) {
-        return this.client
+    public Bundle getPractitioners(@Auth OrganizationPrincipal organization, @QueryParam("identifier") String providerNPI) {
+        final var request = this.client
                 .search()
                 .forResource(Practitioner.class)
                 .encodedJson()
-                .where(Patient.IDENTIFIER.exactly().identifier(providerNPI))
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-    }
+                .withTag("organization", organization.getOrganization().getId())
+                .returnBundle(Bundle.class);
 
-    @Override
-    @Timed
-    @ExceptionMetered
-    public Practitioner submitProvider(Practitioner provider) {
-        final MethodOutcome outcome = this.client
-                .create()
-                .resource(provider)
-                .encodedJson()
-                .execute();
-
-        final Practitioner resource = (Practitioner) outcome.getResource();
-        if (resource == null) {
-            throw new WebApplicationException("Unable to submit provider", Response.Status.INTERNAL_SERVER_ERROR);
+        if (providerNPI != null && !providerNPI.equals("")) {
+            return request
+                    .where(Practitioner.IDENTIFIER.exactly().identifier(providerNPI))
+                    .execute();
+        } else {
+            return request.execute();
         }
-        return resource;
     }
 
     @Override
+    @GET
+    @Path("/{providerID}")
+    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID")
     @Timed
     @ExceptionMetered
-    public Practitioner getProvider(UUID providerID) {
+    public Practitioner getProvider(@PathParam("providerID") UUID providerID) {
         return this.client
                 .read()
                 .resource(Practitioner.class)
@@ -68,9 +62,46 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
+    @POST
     @Timed
     @ExceptionMetered
-    public Response deleteProvider(UUID providerID) {
+    public Practitioner submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
+        final var test = this.client
+                .create()
+                .resource(provider)
+                .encodedJson();
+
+        final MethodOutcome outcome = test.execute();
+
+        if (!outcome.getCreated() || (outcome.getResource() == null)) {
+            throw new WebApplicationException("Unable to submit provider", Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        final Practitioner resource = (Practitioner) outcome.getResource();
+
+        // Now, submit the Practitioner Role
+        final PractitionerRole role = new PractitionerRole();
+        role.setOrganization(new Reference(organization.getOrganization().getIdElement()));
+        role.setPractitioner(new Reference(resource.getIdElement()));
+
+        final MethodOutcome roled = this.client
+                .create()
+                .resource(role)
+                .encodedJson()
+                .execute();
+
+        if (!roled.getCreated()) {
+            throw new WebApplicationException("Unable to link provider to organization", Response.Status.INTERNAL_SERVER_ERROR);
+        }
+        return resource;
+    }
+
+    @Override
+    @DELETE
+    @Path("/{providerID}")
+    @Timed
+    @ExceptionMetered
+    public Response deleteProvider(@PathParam("providerID") UUID providerID) {
         this.client
                 .delete()
                 .resourceById(new IdType("Practitioner", providerID.toString()))
@@ -82,8 +113,10 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     @Timed
+    @PUT
+    @Path("/{providerID}")
     @ExceptionMetered
-    public Practitioner updateProvider(UUID providerID, Practitioner provider) {
+    public Practitioner updateProvider(@PathParam("providerID") UUID providerID, Practitioner provider) {
         return null;
     }
 }

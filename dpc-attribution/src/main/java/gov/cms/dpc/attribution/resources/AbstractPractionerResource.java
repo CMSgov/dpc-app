@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -18,21 +19,26 @@ public abstract class AbstractPractionerResource {
 
     /**
      * FHIR search endpoint which allows querying providers with a given NPI
+     * <p>
+     * An Organization ID is required for this endpoint, which is passed via the `_tag` query parameter.
      *
-     * @param providerNPI - {@link String} NPI to use for querying Provider database
+     * @param providerNPI     - {@link String} NPI to use for querying Provider database
+     * @param organizationTag - {@link String} ID of {@link org.hl7.fhir.dstu3.model.Organization} making the request
      * @return - {@link Bundle} of {@link Practitioner} resources matching search parameters
      */
     @GET
-    public abstract Bundle getPractitioners(String providerNPI);
+    public abstract Bundle getPractitioners(String providerNPI, @NotEmpty String organizationTag);
 
     /**
-     * Register {@link Practitioner} with application
+     * Register {@link Practitioner} with application.
+     * <p>
+     * Note: No {@link org.hl7.fhir.dstu3.model.PractitionerRole} is created by this endpoint, so the {@link Practitioner} is registered with the system, but not assigned to an {@link org.hl7.fhir.dstu3.model.Organization}
      *
      * @param provider = {@link Practitioner}
      * @return - {@link Practitioner} with additional metadata added by application
      */
     @POST
-    public abstract Practitioner submitProvider(Practitioner provider);
+    public abstract Response submitProvider(Practitioner provider);
 
     /**
      * Fetch specific {@link Practitioner} resource
