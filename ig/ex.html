@@ -1,0 +1,31 @@
+---
+# jekyll header
+level: 2
+active: format
+layout: fhir-artifact
+type: {{[type]}}
+template: example
+id: {{[id]}}
+br_StructureDefinition: profiles
+br_ValueSet : terminology
+br_CodeSystem : terminology
+br_ConceptMap : terminology
+br_CapabilityStatement : capstatements
+br_StructureMap : mappings
+br_OperationDefinition : operations
+br_SearchParameter : searchparams
+---
+
+  <!--  template typically for examples -->
+<!-- ============CONTENT CONTENT=============== -->
+
+<h2>{{[title]}}  </h2> 
+  <!--{% include {{[type]}}-{{[name]}}.xhtml %}-->
+<!--
+<p>
+Formats: <a href="{{[type]}}-{{[id]}}.xml.html">XML</a>, <a href="{{[type]}}-{{[id]}}.json.html">JSON</a>, <a href="{{[type]}}-{{[id]}}.ttl.html">Turtle</a>
+</p>
+-->
+{% include {{[type]}}-{{[name]}}.xhtml %}
+
+  <!-- ==============END CONTENT END CONTENT=================== -->

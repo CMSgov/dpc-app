@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ImplementationGuide
+    xmlns="http://hl7.org/fhir">
+    <id value="cms-dpc-ig"/>
+    <meta>
+        <versionId value="8"/>
+        <lastUpdated value="2019-07-16T14:49:27.000-04:00"/>
+    </meta>
+    <url value="https://dpc.cms.gov/ImplementationGuide/cms-dpc-ig"/>
+    <name value="DPCImplementationGuide"/>
+    <status value="draft"/>
+    <experimental value="false"/>
+    <publisher value="Centers for Medicare and Medicaid Services"/>
+    <description value="Draft implementation guide for DPC Application"/>
+    <fhirVersion value="3.0.1"/>
+    <package>
+        <name value="Profiles in this implementation guide"/>
+        <resource>
+            <example value="true"/>
+            <sourceReference>
+                <reference value="Organization/organization"/>
+                <display value="organization.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="true"/>
+            <sourceReference>
+                <reference value="Practitioner/practitioner"/>
+                <display value="practitioner.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="true"/>
+            <sourceReference>
+                <reference value="Group/group"/>
+                <display value="group.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="true"/>
+            <sourceReference>
+                <reference value="Endpoint/endpoint"/>
+                <display value="endpoint.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-patient"/>
+                <display value="DPCPatient.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="CapabilityStatement/dpc-capabilities-statement"/>
+                <display value="capabilities.json"/>
+            </sourceReference>
+        </resource>
+    </package>
+</ImplementationGuide>
