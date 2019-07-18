@@ -1,29 +1,33 @@
 <div class="hero">
   <div class="ds-l-container">
-    <div class="ds-l-row">
-      <div class="ds-l-col--12">
-        <h1 class="ds-display">A 360º view of patients’ history </h1>
+    <div class="hero__container">
+      <div class="hero__content">
+        <span class="hero__badge">CMS Pilot API</span>
+        <h1 class="hero__primary-heading">A 360° view of your patients’ history</h1>
+        <div class="ds-u-margin-top--3">
+          <div class="ds-text--lead">
+            As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history. Data at the Point of Care fills in the gaps with claims data to inform providers with secure, structured patient history, past procedures, medication adherence, and more.
+          </div>
+        </div>
+        <div class="ds-u-margin-top--7">
+          <a class="ds-c-button ds-c-button--big ds-c-button--success">
+            <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" >
+            <use xlink:href="/assets/solid.svg#key"></use>
+          </svg>
+          Request acccess</a>
+
+          <%= link_to docs_path, :class => "ds-c-button ds-c-button--inverse ds-c-button--inverse--alt ds-c-button--big" do %>
+            <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#code"></use>
+            </svg>Documentation
+          <% end %>
+        </div>
+
+        <p class="ds-u-margin-top--5">Note: Data at the Point of Care is currently a pilot program from CMS. <a href="#about-the-pilot">Learn more</a></p>
+      </div>
+      <div class="hero__image-container">
+        <%= image_tag("hero-heart.svg", class: "hero__image", alt: "") %>
       </div>
     </div>
-    <div class="ds-l-row ds-u-margin-top--3">
-      <div class="ds-l-col--8 ds-text--lead">
-        As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history. Data at the Point of Care fills in the gaps with claims data to inform providers with structured patient history, past procedures, medication adherence, and more.
-      </div>
-    </div>
-    <div class="ds-u-margin-top--7">
-      <a class="ds-c-button ds-c-button--big ds-c-button--success ds-u-margin-right--2">
-        <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" >
-        <use xlink:href="/assets/solid.svg#key"></use>
-      </svg>
-      Request acccess</a>
-
-      <%= link_to docs_path, :class => "ds-c-button ds-c-button--inverse ds-c-button--big" do %>
-        <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#code"></use>
-        </svg>API documentation
-      <% end %>
-    </div>
-
-    <p class="ds-u-margin-top--5">Note: The Data at the Point of Care is currently a pilot program from CMS. <a href="#about-the-pilot">Learn more</a></p>
   </div>
 </div>

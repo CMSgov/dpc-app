@@ -1,9 +1,31 @@
 .site-block {
+  border-top: 2px solid $color-primary-alt-light;
   padding: $spacer-7 0;
+  position: relative;
+
+  .ds-l-container {
+    position: relative;
+
+    &:before {
+      content: "";
+      background-color: $color-white;
+      border: 2px solid $color-primary-alt-light;
+      border-radius: 50%;
+      height: .5rem;
+      left: $spacer-2;
+      position: absolute;
+      top: calc(0px - #{$spacer-7} - .25rem - 2.5px);
+      width: .5rem;
+
+      @media (min-width: $width-sm) {
+        left: $spacer-4;
+      }
+    }
+  }
 }
 
 .site-block--alt {
-  background-color: $color-gray-lightest;
+  background-color: $color-primary-alt-lightest;
 }
 
 .site-block-header * {
@@ -11,7 +33,10 @@
 }
 
 .site-block-header__heading {
-  font-size: $h1-font-size;
-  font-weight: normal;
+  margin-top: 0;
   max-width: 48ch;
+
+  @media (min-width: $width-md) {
+    font-size: $h1-font-size;
+  }
 }
