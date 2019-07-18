@@ -1,7 +1,7 @@
 {
   "resourceType": "StructureDefinition",
-  "id": "dpc-patient",
-  "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-patient",
+  "id": "dpc-profile-patient",
+  "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-patient",
   "name": "DPC Patient Definition",
   "status": "draft",
   "kind": "resource",
@@ -14,38 +14,34 @@
       {
         "id": "Patient",
         "path": "Patient",
-        "name": "DPC Patient",
         "constraint": [
           {
             "key": "tel-1",
             "severity": "error",
             "human": "Must have an sms-capable phone",
-            "expression": "Patient.telecom.where(system = 'phone' and use = 'mobile').exists() or telecom.where(system = 'sms').exists()",
-            "source": "dpc-patient"
+            "expression": "Patient.telecom.where(system = 'phone' and use = 'mobile').exists() or telecom.where(system = 'sms').exists()"
           },
           {
             "key": "birth-1",
             "severity": "warning",
             "human": "If patient is part of multiple-birth, must specify birth order",
             "expression": "Patient.multipleBirth.exists() and ((Patient.multipleBirthBoolean = false) or (Patient.multipleBirthInteger > 0))"
-          },
+          }
         ]
       },
       {
         "id": "Patient.identifier",
         "path": "Patient.identifier",
         "definition": "Must have MBI",
-        "slicing": [
-          {
-            "discriminator": [
-              {
-                "type": "value",
-                "path": "system"
-              }
-            ],
-            "rules": "open"
-          }
-        ]
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        }
       },
       {
         "id": "Patient.identifier[x]",
@@ -76,7 +72,7 @@
         "id": "Patient.gender",
         "path": "Patient.gender",
         "definition": "Gender",
-        "min": "1"
+        "min": 1
       },
       {
         "id": "Patient.birthDate",

@@ -3,6 +3,6 @@ Rails.application.routes.draw do
 
   match '/home', to: 'public#home', via: :get
 
-  match '/docs', to: 'api_documents#home', via: :get
-  match '/docs/user-guide', to: 'api_documents#user_guide', via: :get
+  match '/docs', to: 'docs#reference', via: :get
+  match '/docs/guide', to: 'docs#guide', via: :get
 end

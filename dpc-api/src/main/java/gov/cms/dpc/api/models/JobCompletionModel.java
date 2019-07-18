@@ -1,5 +1,7 @@
 package gov.cms.dpc.api.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.api.converters.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.queue.models.JobResult;
@@ -70,6 +72,8 @@ public class JobCompletionModel {
     private final boolean requiresAccessToken = false;
     private List<OutputEntry> output;
     private List<OutputEntry> error;
+
+    @JsonInclude(Include.NON_NULL)
     private Map<String, Object> encryptionParameters;
 
     public JobCompletionModel() {

@@ -1,0 +1,8 @@
+{
+	"resourceType": "Organization",
+	"id": "organization",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-07-16T11:13:46.000-04:00"
+	}
+}
