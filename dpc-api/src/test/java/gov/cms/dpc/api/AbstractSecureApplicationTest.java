@@ -12,19 +12,18 @@ import org.junit.jupiter.api.BeforeEach;
 import java.io.IOException;
 
 /**
- * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link gov.cms.dpc.api.auth.StaticAuthFilter}
+ * Abstract test that enables the default token authentication backend.
  */
 @IntegrationTest
-public class AbstractApplicationTest {
-
+public class AbstractSecureApplicationTest {
     // Application prefix, which we need in order to correctly override config values.
     private static final String KEY_PREFIX = "dpc.api";
 
     protected static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
-            ConfigOverride.config(KEY_PREFIX, "authenticationDisabled", "true"));
+            ConfigOverride.config(KEY_PREFIX, "", "true"));
     protected FhirContext ctx;
 
-    protected AbstractApplicationTest() {
+    protected AbstractSecureApplicationTest() {
         // Not used
     }
 
@@ -54,7 +53,4 @@ public class AbstractApplicationTest {
     public static void shutdown() {
         APPLICATION.after();
     }
-
 }
-
-

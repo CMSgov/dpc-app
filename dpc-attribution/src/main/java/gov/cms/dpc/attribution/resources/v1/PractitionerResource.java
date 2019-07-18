@@ -5,14 +5,17 @@ import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractionerResource;
 import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 
 @FHIR
@@ -31,12 +34,12 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     // TODO: Migrate this signature to a List<Practitioner> in DPC-302
-    public Bundle getPractitioners(@QueryParam("identifier") String providerNPI) {
+    public Bundle getPractitioners(@QueryParam("identifier") String providerNPI, @NotEmpty @QueryParam("_tag") String organizationTag) {
         final Bundle bundle = new Bundle();
-        this.dao.getProviders(providerNPI)
-                .stream()
-                .map(ProviderEntity::toFHIR)
-                .forEach(provider -> bundle.addEntry().setResource(provider));
+        final List<ProviderEntity> providers = this.dao.getProviders(providerNPI, splitTag(organizationTag));
+
+        bundle.setTotal(providers.size());
+        providers.forEach(provider -> bundle.addEntry().setResource(provider.toFHIR()));
 
         return bundle;
     }
@@ -47,12 +50,12 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @Timed
     @ExceptionMetered
-    public Practitioner submitProvider(Practitioner provider) {
+    public Response submitProvider(Practitioner provider) {
 
         final ProviderEntity entity = ProviderEntity.fromFHIR(provider);
         final ProviderEntity persistedEntity = this.dao.persistProvider(entity);
 
-        return persistedEntity.toFHIR();
+        return Response.status(Response.Status.CREATED).entity(persistedEntity.toFHIR()).build();
     }
 
     @GET
@@ -62,6 +65,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     public Practitioner getProvider(@PathParam("providerID") UUID providerID) {
+
         final ProviderEntity providerEntity = this.dao
                 .getProvider(providerID)
                 .orElseThrow(() ->
@@ -78,12 +82,9 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     public Response deleteProvider(@PathParam("providerID") UUID providerID) {
-        try {
-            this.dao.deleteProvider(providerID);
-        } catch (IllegalArgumentException e) {
-            throw new WebApplicationException(String.format("Provider '%s' is not registered", providerID), Response.Status.NOT_FOUND);
-        }
 
+        final ProviderEntity provider = this.dao.getProvider(providerID).orElseThrow(() -> new WebApplicationException(String.format("Provider '%s' is not registered", providerID), Response.Status.NOT_FOUND));
+        this.dao.deleteProvider(provider);
         return Response.ok().build();
     }
 
@@ -94,8 +95,18 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     public Practitioner updateProvider(@PathParam("providerID") UUID providerID, Practitioner provider) {
-        final ProviderEntity providerEntity = this.dao.persistProvider(ProviderEntity.fromFHIR(provider, providerID));
 
+        final ProviderEntity providerEntity = this.dao.persistProvider(ProviderEntity.fromFHIR(provider, providerID));
         return providerEntity.toFHIR();
+    }
+
+    private static UUID splitTag(String tag) {
+        final String[] split = tag.split("\\|", -1);
+
+        if (split.length < 2) {
+            throw new IllegalArgumentException("Must have | delimiter in tag");
+        }
+
+        return FHIRExtractors.getEntityUUID(split[1]);
     }
 }

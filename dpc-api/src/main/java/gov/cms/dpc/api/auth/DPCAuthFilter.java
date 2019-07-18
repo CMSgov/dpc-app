@@ -1,19 +1,19 @@
 package gov.cms.dpc.api.auth;
 
-import gov.cms.dpc.api.annotations.AttributionService;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.auth.AuthFilter;
+import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import javax.annotation.Priority;
-import javax.inject.Inject;
-import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 
 /**
@@ -25,54 +25,64 @@ import java.io.IOException;
  * <p>
  * Or, directly via the 'token' query param (e.g. no Bearer prefix)
  */
-@Priority(Priorities.AUTHENTICATION)
-public class MacaroonsAuthFilter extends AuthFilter<String, OrganizationPrincipal> {
+abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
 
     private static final String BEARER_PREFIX = "Bearer";
     private static final String TOKEN_URI_PARAM = "token";
+    private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
 
-    private final WebTarget client;
-    private PathAuthorizer pa;
+    private final IGenericClient client;
 
-    @Inject
-    MacaroonsAuthFilter(@AttributionService WebTarget client) {
+
+    DPCAuthFilter(IGenericClient client, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
         this.client = client;
+        this.authenticator = auth;
     }
+
+    protected abstract DPCAuthCredentials buildCredentials(String macaroon, Organization resource, UriInfo uriInfo);
 
     @Override
     public void filter(final ContainerRequestContext requestContext) throws IOException {
         // Try to get the Macaroon from the request
         String macaroon = getMacaroon(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
 
+        final UriInfo uriInfo = requestContext.getUriInfo();
+
         if (macaroon == null) {
-            macaroon = requestContext.getUriInfo().getQueryParameters().getFirst(TOKEN_URI_PARAM);
+            macaroon = uriInfo.getQueryParameters().getFirst(TOKEN_URI_PARAM);
         }
 
         if (macaroon == null) {
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
 
-        // We need to verify that the Macaroon is valid
-        final String pathValue = requestContext.getUriInfo().getPathParameters().getFirst(this.pa.pathParam());
-        if (pathValue == null) {
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
-        }
+        // If we have a path authorizer, do that, otherwise, continue
+        final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
 
-        // Make the request
-        final Response tokenValid = this.client
-                .path(String.format("%s/%s/token/verify", this.pa.type().toString(), pathValue))
-                .queryParam("token", macaroon)
-                .request(FHIRMediaTypes.FHIR_JSON)
-                .buildGet()
-                .invoke();
-
-        if (tokenValid.getStatus() != Response.Status.OK.getStatusCode()) {
+        final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
+        if (!authenticated) {
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
     }
 
-    public void setPathAuthorizer(PathAuthorizer authorizer) {
-        this.pa = authorizer;
+    private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
+
+        logger.warn("Making request to validate token.");
+        final Bundle returnedBundle = this
+                .client
+                .search()
+                .forResource(Organization.class)
+                .withTag("http://cms.gov/token", macaroon)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        logger.warn("Found {} matching organizations", returnedBundle.getTotal());
+        if (returnedBundle.getTotal() == 0) {
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
+
+        return buildCredentials(macaroon, (Organization) returnedBundle.getEntryFirstRep().getResource(), uriInfo);
     }
 
     @Nullable

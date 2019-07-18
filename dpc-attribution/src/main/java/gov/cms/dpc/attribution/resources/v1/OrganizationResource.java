@@ -14,10 +14,7 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,31 +40,21 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @GET
     @UnitOfWork
-    public Bundle searchAndValidateOrganizations(@QueryParam("_tag") String tokenTag) {
-        if (tokenTag == null) {
-            throw new WebApplicationException("Must have token to query", Response.Status.BAD_REQUEST);
+    public Bundle searchOrganizations(@QueryParam("identifier") String identifier, @QueryParam("_tag") String tokenTag) {
+        if (tokenTag != null) {
+            return searchAndValidationByToken(tokenTag);
         }
 
-        final Macaroon macaroon = this.parseTokenTag(tokenTag);
-
-        final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
-
-        if (organizationEntities.isEmpty()) {
-            throw new WebApplicationException("Cannot find organization with registered token", Response.Status.NOT_FOUND);
+        if (identifier == null) {
+            throw new WebApplicationException("Must have either token or Identifier to search", Response.Status.BAD_REQUEST);
         }
 
-        // There should only ever be a single entity per token
-        assert (organizationEntities.size() == 1);
-
-        final OrganizationEntity organizationEntity = organizationEntities.get(0);
-
-        // Validate the token
-        if (!validateMacaroon(organizationEntity.getId(), macaroon)) {
-            throw new WebApplicationException(String.format("Invalid token for organization %s", organizationEntity.getId().toString()), Response.Status.UNAUTHORIZED);
-        }
-
+        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(identifier);
         final Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(organizationEntity.toFHIR());
+        if (!queryList.isEmpty()) {
+            bundle.setTotal(queryList.size());
+            queryList.forEach(org -> bundle.addEntry().setResource(org.toFHIR()));
+        }
 
         return bundle;
     }
@@ -76,7 +63,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    public Response createOrganization(Bundle transactionBundle) {
+    public Response submitOrganization(Parameters parameters) {
+
+        final Parameters.ParametersParameterComponent firstRep = parameters.getParameterFirstRep();
+
+        if (!firstRep.hasResource()) {
+            throw new WebApplicationException("Must submit bundle", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+        final Bundle transactionBundle = (Bundle) firstRep.getResource();
 
         final Optional<Organization> organization = transactionBundle
                 .getEntry()
@@ -89,18 +83,9 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY_422).entity("Must provide organization to register").build();
         }
 
-        // Build the endpoints
-        final List<EndpointEntity> endpoints = transactionBundle
-                .getEntry()
-                .stream()
-                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Endpoint)
-                .map(entry -> (Endpoint) entry.getResource())
-                .map(EndpointConverter::convert)
-                .collect(Collectors.toList());
-
         try {
-            this.dao.registerOrganization(organization.get(), endpoints);
-            return Response.ok().build();
+            final Organization persistedOrg = this.dao.registerOrganization(organization.get(), extractEndpoints(transactionBundle));
+            return Response.status(Response.Status.CREATED).entity(persistedOrg).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
             throw e;
@@ -206,5 +191,41 @@ public class OrganizationResource extends AbstractOrganizationResource {
         }
 
         return bakery.deserializeMacaroon(tokenTag.substring(idx + 1));
+    }
+
+    private Bundle searchAndValidationByToken(String token) {
+        final Macaroon macaroon = this.parseTokenTag(token);
+
+        final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
+
+        if (organizationEntities.isEmpty()) {
+            throw new WebApplicationException("Cannot find organization with registered token", Response.Status.NOT_FOUND);
+        }
+
+        // There should only ever be a single entity per token
+        assert (organizationEntities.size() == 1);
+
+        final OrganizationEntity organizationEntity = organizationEntities.get(0);
+
+        // Validate the token
+        if (!validateMacaroon(organizationEntity.getId(), macaroon)) {
+            throw new WebApplicationException(String.format("Invalid token for organization %s", organizationEntity.getId().toString()), Response.Status.UNAUTHORIZED);
+        }
+
+        final Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(organizationEntity.toFHIR());
+        bundle.setTotal(1);
+
+        return bundle;
+    }
+
+    private List<EndpointEntity> extractEndpoints(Bundle transactionBundle) {
+        return transactionBundle
+                .getEntry()
+                .stream()
+                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Endpoint)
+                .map(entry -> (Endpoint) entry.getResource())
+                .map(EndpointConverter::convert)
+                .collect(Collectors.toList());
     }
 }

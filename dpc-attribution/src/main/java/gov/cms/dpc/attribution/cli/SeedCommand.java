@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.dao.tables.Organizations;
 import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationEndpointsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
+import gov.cms.dpc.attribution.dao.tables.records.ProviderRolesRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
 import gov.cms.dpc.attribution.utils.DBUtils;
@@ -38,10 +39,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.MissingResourceException;
+import java.util.UUID;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
@@ -49,6 +52,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static final String CSV = "test_associations.csv";
     private static final String ORGANIZATION_BUNDLE = "organization_bundle.json";
     private static final String PROVIDER_BUNDLE = "provider_bundle.json";
+    private static final UUID ORGANIZATION_ID = UUID.fromString("46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
     private final Settings settings;
 
@@ -90,7 +94,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             seedOrganizationBundle(context, parser);
 
             // Providers next
-            seedProviderBundle(context, parser);
+            seedProviderBundle(context, parser, ORGANIZATION_ID);
 
             // Get the test attribution seeds
             seedAttributions(context, creationTimestamp);
@@ -120,7 +124,8 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         }
     }
 
-    private void seedProviderBundle(DSLContext context, IParser parser) throws IOException {
+    private void seedProviderBundle(DSLContext context, IParser parser, UUID organizationID) throws IOException {
+        final LocalDateTime created = OffsetDateTime.now(ZoneOffset.UTC).toLocalDateTime();
         try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
             final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
             final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR);
@@ -128,7 +133,11 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             providers
                     .stream()
                     .map(entity -> providersEntityToRecord(context, entity))
-                    .forEach(context::executeInsert);
+                    .forEach(record -> {
+                        context.executeInsert(record);
+                        final ProviderRolesRecord rolesRecord = providerRolesToRecord(record, created, organizationID);
+                        context.executeInsert(rolesRecord);
+                    });
         }
     }
 
@@ -195,5 +204,15 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
 
         return record;
+    }
+
+    private static ProviderRolesRecord providerRolesToRecord(ProvidersRecord record, LocalDateTime created, UUID organizationID) {
+        final ProviderRolesRecord rolesRecord = new ProviderRolesRecord();
+        rolesRecord.setId(UUID.randomUUID());
+        rolesRecord.setOrganizationId(organizationID);
+        rolesRecord.setProviderId(record.getId());
+        rolesRecord.setCreatedAt(created);
+
+        return rolesRecord;
     }
 }

@@ -51,6 +51,16 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<TokenEntity> tokens;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "provider_roles",
+            joinColumns = {
+                    @JoinColumn(name = "organization_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+            })
+    private List<ProviderEntity> providers;
+
     public OrganizationEntity() {
         // Not used
     }
@@ -109,6 +119,14 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     public void setTokens(List<TokenEntity> tokens) {
         this.tokens = tokens;
+    }
+
+    public List<ProviderEntity> getProviders() {
+        return providers;
+    }
+
+    public void setProviders(List<ProviderEntity> providers) {
+        this.providers = providers;
     }
 
     @Override
