@@ -1,6 +1,4 @@
-# frozen_string_literal: true
-
-class ApiDocumentsController < ApplicationController
+class DocsController < ApplicationController
   before_action :load_markdown
 
   private
