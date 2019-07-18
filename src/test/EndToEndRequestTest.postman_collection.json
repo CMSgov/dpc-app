@@ -2,36 +2,29 @@
 	"info": {
 		"_postman_id": "46f1266f-6a54-4a33-9d31-3ea944875a35",
 		"name": "EndToEndRequestTest",
-		"description": "This automates EndToEndRequestTest in postman.",
+		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "ed50ef5a-13ec-4e4b-a393-9ac0a1f641e3",
+				"type": "text/javascript",
+				"exec": [
+					"pm.environment.set(\"PROVIDER_ID\", \"8D80925A-027E-43DD-8AED-9A501CC4CD91\");",
+					"pm.environment.set(\"hostname\", \"localhost\");",
+					"pm.environment.set(\"api_port\", \"3002\");",
+					"pm.environment.set(\"attribution_port\", \"3500\");"
+				]
+			}
+		}
+	],
 	"item": [
 		{
 			"name": "Export missing group",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "5f936145-db10-4d73-95c6-1b8b94b5a387",
-						"exec": [
-							"// Status should be 404",
-							"pm.test(\"Status is 404\", function () {",
-							"    pm.response.to.have.status(404);",
-							"});",
-							"// Response body should include:",
-							"// The resourceType \"OperationOutcome\"",
-							"// A single issue, severity fatal",
-							"pm.test(\"Response body has correct error information\", function() {",
-							"    pm.expect(pm.response.json().resourceType).to.equal(\"OperationOutcome\");",
-							"    pm.expect(pm.response.json().issue).to.have.lengthOf(1);",
-							"    pm.expect(pm.response.json().issue[0].severity).to.equal(\"fatal\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
 			"request": {
+				"description": "This first attempt to export data should fail with a 404 because the provider data is unavailable. The next request submits a roster to correct the problem. View the `exec` field of the `event` field to see the tests run.",
 				"method": "GET",
 				"header": [
 					{
@@ -60,26 +53,35 @@
 					]
 				}
 			},
-			"response": []
-		},
-		{
-			"name": "Submit roster",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
-						"id": "72634c6f-4d6b-49b9-b4db-b172af0f04f1",
+						"id": "5f936145-db10-4d73-95c6-1b8b94b5a387",
 						"exec": [
-							"// Status should be 200",
-							"pm.test(\"Status is 200\", function () {",
-							"    pm.response.to.have.status(200);",
+							"// Status should be 404",
+							"pm.test(\"Status is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"// Response body should include:",
+							"// The resourceType \"OperationOutcome\"",
+							"// A single issue, severity fatal",
+							"pm.test(\"Response body has correct error information\", function() {",
+							"    pm.expect(pm.response.json().resourceType).to.equal(\"OperationOutcome\");",
+							"    pm.expect(pm.response.json().issue).to.have.lengthOf(1);",
+							"    pm.expect(pm.response.json().issue[0].severity).to.equal(\"fatal\");",
 							"});"
 						],
 						"type": "text/javascript"
 					}
 				}
 			],
+			"response": []
+		},
+		{
+			"name": "Submit roster",
 			"request": {
+				"description": "This request submits the roster for the provider. The roster data is in the `body` field of the request. It's easier to see in the Postman GUI.",
 				"method": "POST",
 				"header": [
 					{
@@ -105,36 +107,29 @@
 						"Group",
 						""
 					]
-				},
-				"description": "Submit the roster for the provider."
+				}
 			},
-			"response": []
-		},
-		{
-			"name": "Retry export with new group from roster",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
-						"id": "5497fa12-aefd-44c2-9254-2beb51c52e31",
+						"id": "72634c6f-4d6b-49b9-b4db-b172af0f04f1",
 						"exec": [
-							"// Status should be 204",
-							"pm.test(\"Status is 204\", function () {",
-							"    pm.response.to.have.status(204);",
-							"});",
-							"",
-							"// Url for job response should be in content-location header.",
-							"pm.test(\"Content-Location header is present\", function () {",
-							"    pm.response.to.have.header(\"Content-Location\");",
-							"});",
-							"",
-							"pm.environment.set(\"content_location\", pm.response.headers.get(\"Content-Location\"));"
+							"// Status should be 200",
+							"pm.test(\"Status is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
 						],
 						"type": "text/javascript"
 					}
 				}
 			],
+			"response": []
+		},
+		{
+			"name": "Retry export after submitting roster",
 			"request": {
+				"description": "After submitting the roster, the export request should succeed, with a 204 status and the location for the job response in the `content-location` header.",
 				"method": "GET",
 				"header": [
 					{
@@ -163,10 +158,43 @@
 					]
 				}
 			},
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5497fa12-aefd-44c2-9254-2beb51c52e31",
+						"exec": [
+							"// Status should be 204",
+							"pm.test(\"Status is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							"// Url for job response should be in content-location header.",
+							"pm.test(\"Content-Location header is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Location\");",
+							"});",
+							"",
+							"pm.environment.set(\"content_location\", pm.response.headers.get(\"Content-Location\"));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"response": []
 		},
 		{
 			"name": "Job response",
+			"request": {
+				"description": "While the export request is being processed, the job url will return a 202 status. When it is completed, a 200 status will be returned, along with JSON containing the patient, explanation of benefits, and coverage data.",
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{content_location}}",
+					"host": [
+						"{{content_location}}"
+					]
+				}
+			},
 			"event": [
 				{
 					"listen": "prerequest",
@@ -211,20 +239,21 @@
 					}
 				}
 			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{content_location}}",
-					"host": [
-						"{{content_location}}"
-					]
-				}
-			},
 			"response": []
 		},
 		{
 			"name": "Patient data",
+			"request": {
+				"description": "The patient data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one patient.",
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{patient_url}}",
+					"host": [
+						"{{patient_url}}"
+					]
+				}
+			},
 			"event": [
 				{
 					"listen": "test",
@@ -246,20 +275,21 @@
 					}
 				}
 			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{patient_url}}",
-					"host": [
-						"{{patient_url}}"
-					]
-				}
-			},
 			"response": []
 		},
 		{
 			"name": "Explanation of Benefit data",
+			"request": {
+				"description": "The explanation of benefits data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one explanation of benefits.",
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{eob_url}}",
+					"host": [
+						"{{eob_url}}"
+					]
+				}
+			},
 			"event": [
 				{
 					"listen": "test",
@@ -281,20 +311,21 @@
 					}
 				}
 			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{eob_url}}",
-					"host": [
-						"{{eob_url}}"
-					]
-				}
-			},
 			"response": []
 		},
 		{
 			"name": "Coverage data",
+			"request": {
+				"description": "The coverage data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one coverage.",
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{coverage_url}}",
+					"host": [
+						"{{coverage_url}}"
+					]
+				}
+			},
 			"event": [
 				{
 					"listen": "test",
@@ -316,32 +347,7 @@
 					}
 				}
 			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{coverage_url}}",
-					"host": [
-						"{{coverage_url}}"
-					]
-				}
-			},
 			"response": []
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"id": "ed50ef5a-13ec-4e4b-a393-9ac0a1f641e3",
-				"type": "text/javascript",
-				"exec": [
-					"pm.environment.set(\"PROVIDER_ID\", \"8D80925A-027E-43DD-8AED-9A501CC4CD91\");",
-					"pm.environment.set(\"hostname\", \"localhost\");",
-					"pm.environment.set(\"api_port\", \"3002\");",
-					"pm.environment.set(\"attribution_port\", \"3500\");"
-				]
-			}
 		}
 	]
 }
