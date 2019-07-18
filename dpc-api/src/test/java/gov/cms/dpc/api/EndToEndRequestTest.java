@@ -32,6 +32,7 @@ class EndToEndRequestTest extends AbstractApplicationTest {
      * This test verifies the E2E flow of the application.
      * The test performs the following actions:
      * 1. Request data for a provider which does not exist (receive error)
+     *   - if test has been run before, different error and we do not register the roster
      * 2. Submit a roster with a set of attributed patients (from the seeds file)
      * 3. Resubmit the request and received a job code
      * 4. Monitor for the job to complete and then retrieve the data
@@ -45,37 +46,49 @@ class EndToEndRequestTest extends AbstractApplicationTest {
 
         final IOperationUntypedWithInput<Parameters> exportOperation = ClientUtils.createExportOperation(exportClient, ClientUtils.PROVIDER_ID);
 
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, exportOperation::execute);
+        Map<String, List<String>> headers = null;
 
-        // Extract the operation outcome, to make validation easier
-        final OperationOutcome outcome = (OperationOutcome) thrown.getOperationOutcome();
-        final OperationOutcome.OperationOutcomeIssueComponent firstIssue = outcome.getIssueFirstRep();
+        try {
+            exportOperation.execute();
+        } catch (ResourceNotFoundException e) {
+            // the provider has not been registered
 
-        assertAll(() -> assertEquals(HttpStatus.NOT_FOUND_404, thrown.getStatusCode(), "Should not have found provider"),
-                () -> assertEquals("fatal", firstIssue.getSeverity().toCode(), "Should be a fatal error"),
-                () -> assertEquals(1, outcome.getIssue().size(), "Should only have a single error"));
+            // Extract the operation outcome, to make validation easier
+            final OperationOutcome outcome = (OperationOutcome) e.getOperationOutcome();
+            final OperationOutcome.OperationOutcomeIssueComponent firstIssue = outcome.getIssueFirstRep();
 
-        // Now, submit the roster and try again.
-        final InputStream resource = EndToEndRequestTest.class.getClassLoader().getResourceAsStream(CSV);
-        if (resource == null) {
-            throw new MissingResourceException("Can not find seeds file", EndToEndRequestTest.class.getName(), CSV);
+            assertAll(() -> assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode(), "Should not have found provider"),
+                    () -> assertEquals("fatal", firstIssue.getSeverity().toCode(), "Should be a fatal error"),
+                    () -> assertEquals(1, outcome.getIssue().size(), "Should only have a single error"));
+
+            // Now, submit the roster and try again.
+            final InputStream resource = EndToEndRequestTest.class.getClassLoader().getResourceAsStream(CSV);
+            if (resource == null) {
+                throw new MissingResourceException("Can not find seeds file", EndToEndRequestTest.class.getName(), CSV);
+            }
+
+            final IGenericClient rosterClient = ctx.newRestfulGenericClient(getBaseURL());
+            final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource);
+            rosterSubmission.execute();
+
+            // Retry export
+            // check the status code
+            // Try the export request again
+            final NonFhirResponseException exportThrown = assertThrows(NonFhirResponseException.class, exportOperation::execute);
+            // Verify 204
+            assertEquals(HttpStatus.NO_CONTENT_204, exportThrown.getStatusCode(), "Should have succeeded with no content");
+            headers = exportThrown.getResponseHeaders();
+
+        } catch (NonFhirResponseException e) {
+            headers = e.getResponseHeaders();
         }
 
-        final IGenericClient rosterClient = ctx.newRestfulGenericClient(getBaseURL());
-        final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource);
-        rosterSubmission.execute();
-
-        // Try the export request again
-        final NonFhirResponseException exportThrown = assertThrows(NonFhirResponseException.class, exportOperation::execute);
-        // Verify 204
-        assertEquals(HttpStatus.NO_CONTENT_204, exportThrown.getStatusCode(), "Should have succeeded with no content");
-        final Map<String, List<String>> headers = exportThrown.getResponseHeaders();
+        assertNotNull(headers, "Headers should have been set");
 
         // Get the headers and check the status
         final String jobLocation = headers.get("content-location").get(0);
 
         final JobCompletionModel jobResponse = ClientUtils.awaitExportResponse(jobLocation, "Trying");
-
 
         assertAll(() -> assertNotNull(jobResponse, "Should have Job Response"),
                 () -> assertTrue(JobModel.validResourceTypes.size() <= jobResponse.getOutput().size(), "Should have at least one resource file per resource"),
