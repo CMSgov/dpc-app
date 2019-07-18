@@ -109,15 +109,4 @@ public class PractitionerResource extends AbstractPractionerResource {
 
         return FHIRExtractors.getEntityUUID(split[1]);
     }
-
-    private void checkAssigned(ProviderEntity providerEntity, UUID organizationID) {
-        final boolean matches = providerEntity
-                .getOrganizations()
-                .stream()
-                .anyMatch(entity -> entity.getId().equals(organizationID));
-
-        if (!matches) {
-            throw new WebApplicationException("Provider is not assigned to Organization", Response.Status.UNAUTHORIZED);
-        }
-    }
 }
