@@ -38,7 +38,7 @@ public class FHIRValidationModule extends AbstractModule {
         bind(ValidationConfigurationContextResolver.class);
         bind(FHIRValidationExceptionHandler.class);
 
-        bind(DPCProfileSupport.class);
+        bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
         bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
     }
 
