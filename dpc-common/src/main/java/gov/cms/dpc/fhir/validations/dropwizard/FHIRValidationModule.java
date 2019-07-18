@@ -5,14 +5,15 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.Multibinder;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
+import gov.cms.dpc.fhir.validations.ProfileValidator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorFactory;
 import javax.validation.ValidatorFactory;
-import java.util.Set;
 
 /**
  * Guice module for setting up the required Validation components, if requested by the application
@@ -29,10 +30,12 @@ public class FHIRValidationModule extends AbstractModule {
     @Override
     protected void configure() {
 
-        TypeLiteral<Set<ConstraintValidator<?, ?>>> constraintType = new TypeLiteral<>() {
+        // Create a multibinder for automatically bundling and injecting a Set of ConstraintValidators
+        TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {
         };
+        Multibinder<ConstraintValidator<?, ?>> constraintBinder = Multibinder.newSetBinder(binder(), constraintType);
+        constraintBinder.addBinding().to(ProfileValidator.class);
 
-        bind(constraintType).toProvider(ConstraintValidationProvider.class);
         bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
         bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
         bind(ValidationConfigurationContextResolver.class);
