@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "First export operation",
+			"name": "Export missing group",
 			"event": [
 				{
 					"listen": "test",
@@ -46,12 +46,12 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:3002/v1/Group/{{PROVIDER_ID}}/$export",
+					"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{PROVIDER_ID}}/$export",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{hostname}}"
 					],
-					"port": "3002",
+					"port": "{{api_port}}",
 					"path": [
 						"v1",
 						"Group",
@@ -90,18 +90,16 @@
 					}
 				],
 				"body": {
-					"mode": "file",
-					"file": {
-						"src": "../main/resources/attribution_bundle.json"
-					}
+					"mode": "raw",
+					"raw": "{\n  \"resourceType\": \"Bundle\",\n  \"id\": \"12345\",\n  \"type\": \"collection\",\n  \"entry\": [\n    {\n      \"fullUrl\": \"http://something.gov/8D80925A-027E-43DD-8AED-9A501CC4CD91\",\n      \"resource\": {\n        \"resourceType\": \"Practitioner\",\n        \"identifier\": [\n          {\n            \"value\": \"8D80925A-027E-43DD-8AED-9A501CC4CD91\"\n          }\n        ],\n        \"name\": [\n          {\n            \"family\": \"Provider\",\n            \"given\": [\n              \"Test\"\n            ]\n          }\n        ]\n      }\n    },\n    {\n      \"fullUrl\": \"http://something.gov/20000000001809\",\n      \"resource\": {\n        \"resourceType\": \"Patient\",\n        \"identifier\": [\n          {\n            \"value\": \"20000000001809\"\n          }\n        ],\n        \"name\": [\n          {\n            \"family\": \"Patient\",\n            \"given\": [\n              \"Tester -624899019\"\n            ]\n          }\n        ],\n        \"birthDate\": \"2019-03-01\"\n      }\n    },\n    {\n      \"fullUrl\": \"http://something.gov/20000000001810\",\n      \"resource\": {\n        \"resourceType\": \"Patient\",\n        \"identifier\": [\n          {\n            \"value\": \"20000000001810\"\n          }\n        ],\n        \"name\": [\n          {\n            \"family\": \"Patient\",\n            \"given\": [\n              \"Tester -1092912540\"\n            ]\n          }\n        ],\n        \"birthDate\": \"2019-03-01\"\n      }\n    }\n  ]\n}"
 				},
 				"url": {
-					"raw": "http://localhost:3500/v1/Group/",
+					"raw": "http://{{hostname}}:{{attribution_port}}/v1/Group/",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{hostname}}"
 					],
-					"port": "3500",
+					"port": "{{attribution_port}}",
 					"path": [
 						"v1",
 						"Group",
@@ -113,7 +111,7 @@
 			"response": []
 		},
 		{
-			"name": "Second export operation",
+			"name": "Retry export with new group from roster",
 			"event": [
 				{
 					"listen": "test",
@@ -151,12 +149,12 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:3002/v1/Group/{{PROVIDER_ID}}/$export",
+					"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{PROVIDER_ID}}/$export",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{hostname}}"
 					],
-					"port": "3002",
+					"port": "{{api_port}}",
 					"path": [
 						"v1",
 						"Group",
@@ -176,7 +174,7 @@
 						"id": "28fe7a36-50ab-4e7d-bf21-312b5f5777f3",
 						"exec": [
 							"// Wait between pings",
-							"setTimeout(function() {}, 5000);"
+							"setTimeout(function() {}, 1000);"
 						],
 						"type": "text/javascript"
 					}
@@ -192,13 +190,13 @@
 							"        pm.expect(pm.response.json().error).to.have.lengthOf(0);",
 							"        pm.expect(pm.response.json().output).to.have.lengthOf(3);",
 							"        pm.expect(pm.response.json().output[0].type).to.equal(\"Patient\");",
-							"        pm.expect(pm.response.json().output[0].count).to.equal(100);",
+							"        pm.expect(pm.response.json().output[0].count).to.equal(2);",
 							"        pm.environment.set(\"patient_url\", pm.response.json().output[0].url);",
 							"        pm.expect(pm.response.json().output[1].type).to.equal(\"ExplanationOfBenefit\");",
-							"        pm.expect(pm.response.json().output[1].count).to.equal(3154);",
+							"        pm.expect(pm.response.json().output[1].count).to.equal(86);",
 							"        pm.environment.set(\"eob_url\", pm.response.json().output[1].url);",
 							"        pm.expect(pm.response.json().output[2].type).to.equal(\"Coverage\");",
-							"        pm.expect(pm.response.json().output[2].count).to.equal(400);",
+							"        pm.expect(pm.response.json().output[2].count).to.equal(8);",
 							"        pm.environment.set(\"coverage_url\", pm.response.json().output[2].url);",
 							"    })",
 							"} else {",
@@ -233,11 +231,11 @@
 					"script": {
 						"id": "3e50ce2a-4322-4723-981b-31251393b449",
 						"exec": [
-							"// There should be 100 patients.",
+							"// There should be 2 patients.",
 							"pm.test(\"Patient data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(100);",
+							"    pm.expect(responseLines).to.have.lengthOf(2);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"Patient\");",
@@ -268,11 +266,11 @@
 					"script": {
 						"id": "64383543-afd0-4aed-8e62-533892909b98",
 						"exec": [
-							"// There should be 3154 eobs.",
+							"// There should be 86 Explanations of Benefits.",
 							"pm.test(\"Explanation of Benefits data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(3154);",
+							"    pm.expect(responseLines).to.have.lengthOf(86);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"ExplanationOfBenefit\");",
@@ -303,11 +301,11 @@
 					"script": {
 						"id": "756f4c51-bce2-4a77-b3b9-bd7e96d844e5",
 						"exec": [
-							"// There should be 400 coverage.",
+							"// There should be 8 coverage.",
 							"pm.test(\"Coverage data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(400);",
+							"    pm.expect(responseLines).to.have.lengthOf(8);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"Coverage\");",
@@ -338,17 +336,10 @@
 				"id": "ed50ef5a-13ec-4e4b-a393-9ac0a1f641e3",
 				"type": "text/javascript",
 				"exec": [
-					"pm.environment.set(\"PROVIDER_ID\", \"8D80925A-027E-43DD-8AED-9A501CC4CD91\");"
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"id": "2711e719-0bd7-4948-b433-d36c7dead2b4",
-				"type": "text/javascript",
-				"exec": [
-					""
+					"pm.environment.set(\"PROVIDER_ID\", \"8D80925A-027E-43DD-8AED-9A501CC4CD91\");",
+					"pm.environment.set(\"hostname\", \"localhost\");",
+					"pm.environment.set(\"api_port\", \"3002\");",
+					"pm.environment.set(\"attribution_port\", \"3500\");"
 				]
 			}
 		}
