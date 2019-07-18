@@ -42,7 +42,7 @@ class DefinitionResourceTest {
     @Test
     void testFetchSpecificResource() {
         // Fetch the patient resource
-        final Response response = RESOURCES.target("/StructureDefinition/dpc-patient")
+        final Response response = RESOURCES.target("/StructureDefinition/dpc-profile-patient")
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .get();
 
