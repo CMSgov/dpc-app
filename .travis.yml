@@ -46,8 +46,5 @@ script:
     done
   - ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
   - ./cc-test-reporter upload-coverage
-  # Build and test the website
-  - docker-compose down
-  - docker-compose -f dpc-web/docker-compose.yml build
-  - docker-compose -f dpc-web/docker-compose.yml run web rails db:migrate db:seed
+  - ./dpc-web-test.sh
 
