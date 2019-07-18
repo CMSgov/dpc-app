@@ -21,6 +21,9 @@ public abstract class AbstractAttributionResource {
     @Path("/Practitioner")
     public abstract AbstractPractionerResource providerOperations();
 
+    @Path("/PractitionerRole")
+    public abstract AbstractPractitionerRoleResource providePractitionerRoleOperations();
+
     @GET
     @Path("/_healthy")
     public boolean checkHealth() {

@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -18,9 +19,11 @@ import java.util.UUID;
         @NamedQuery(name = "getAllProviders", query = "from providers p")
 })
 @SQLInsert(sql = "INSERT INTO providers(first_name, last_name, provider_id, id) VALUES(?, ?, ?, ?)" +
-        " ON CONFLICT (provider_id) DO UPDATE SET last_name = EXCLUDED.last_name," +
+        " ON CONFLICT (id) DO UPDATE SET last_name = EXCLUDED.last_name," +
         " first_name = EXCLUDED.first_name")
-public class ProviderEntity {
+public class ProviderEntity implements Serializable {
+
+    public static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
@@ -32,6 +35,16 @@ public class ProviderEntity {
     private String providerFirstName;
     @Column(name = "last_name")
     private String providerLastName;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "provider_roles",
+    joinColumns = {
+            @JoinColumn(name = "provider_id", referencedColumnName = "id")
+    },
+    inverseJoinColumns = {
+            @JoinColumn(name = "organization_id", referencedColumnName = "id")
+    })
+    private List<OrganizationEntity> organizations;
 
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -88,6 +101,14 @@ public class ProviderEntity {
         this.attributedPatients = attributedPatients;
     }
 
+    public List<OrganizationEntity> getOrganizations() {
+        return organizations;
+    }
+
+    public void setOrganizations(List<OrganizationEntity> organizations) {
+        this.organizations = organizations;
+    }
+
     public Practitioner toFHIR() {
         return ProviderEntityConverter.convert(this);
     }
@@ -116,11 +137,7 @@ public class ProviderEntity {
     public static ProviderEntity fromFHIR(Practitioner resource, UUID resourceID) {
         final ProviderEntity provider = new ProviderEntity();
 
-        if (resourceID == null) {
-            provider.setProviderID(UUID.randomUUID());
-        } else {
-            provider.setProviderID(resourceID);
-        }
+        provider.setProviderID(Objects.requireNonNullElseGet(resourceID, UUID::randomUUID));
 
         provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));
         final HumanName name = resource.getNameFirstRep();
