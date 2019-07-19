@@ -17,6 +17,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Api(value = "Group")
 public class GroupResource extends AbstractGroupResource {
@@ -41,7 +42,9 @@ public class GroupResource extends AbstractGroupResource {
     )
     public Response submitRoster(Bundle providerBundle) {
         logger.debug("API request to submit roster");
-        this.engine.addAttributionRelationships(providerBundle);
+        // FIXME(nickrobison): Remove this!
+        final UUID organizationID = UUID.randomUUID();
+        this.engine.addAttributionRelationships(providerBundle, organizationID);
 
         return Response.status(Response.Status.CREATED).build();
     }

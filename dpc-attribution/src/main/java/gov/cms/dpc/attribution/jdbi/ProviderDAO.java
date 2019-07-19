@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
@@ -107,10 +108,12 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     }
 
     @Override
-    public void addAttributionRelationships(Bundle attributionBundle) {
+    public void addAttributionRelationships(Bundle attributionBundle, UUID organizationID) {
         // Web API check that this is ok to do
         final Practitioner practitioner = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
         final ProviderEntity provider = ProviderEntity.fromFHIR(practitioner);
+        final OrganizationEntity organization = new OrganizationEntity();
+        organization.setId(organizationID);
 
         // Get the patients and create the attribution
         attributionBundle
@@ -120,6 +123,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType() == ResourceType.Patient)
                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
+                .peek(patientEntity -> patientEntity.setOrganization(organization))
                 .map(pEntity -> new AttributionRelationship(provider, pEntity))
                 .forEach(this.rDAO::addAttributionRelationship);
     }

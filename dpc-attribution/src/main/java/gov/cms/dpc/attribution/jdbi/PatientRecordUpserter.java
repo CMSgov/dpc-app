@@ -20,16 +20,16 @@ public class PatientRecordUpserter extends AbstractRecordUpserter<PatientsRecord
 
     @Override
     List<TableField<PatientsRecord, ?>> getConflictFields() {
-        return Collections.singletonList(PATIENTS.BENEFICIARY_ID);
+        return List.of(PATIENTS.BENEFICIARY_ID, PATIENTS.ORGANIZATION_ID);
     }
 
     @Override
     List<TableField<PatientsRecord, ?>> getExcludedFields() {
-        return Collections.singletonList(PATIENTS.ID);
+        return List.of(PATIENTS.ID, PATIENTS.ORGANIZATION_ID);
     }
 
     @Override
     List<TableField<PatientsRecord, ?>> getReturnFields() {
-        return Collections.singletonList(PATIENTS.ID);
+        return List.of(PATIENTS.ID, PATIENTS.ORGANIZATION_ID);
     }
 }

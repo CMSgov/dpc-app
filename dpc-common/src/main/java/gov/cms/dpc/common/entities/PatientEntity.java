@@ -1,13 +1,18 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.fhir.FHIRExtractors;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Objects;
@@ -33,8 +38,20 @@ public class PatientEntity implements Serializable {
     private String patientLastName;
 
     @NotNull
+    @ManyToOne
+    private OrganizationEntity organization;
+
+    @NotNull
     @Column(name = "dob")
     private LocalDate dob;
+
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @CreationTimestamp
+    private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @UpdateTimestamp
+    private OffsetDateTime updatedAt;
 
     public PatientEntity() {
 //        Hibernate Required
@@ -80,6 +97,30 @@ public class PatientEntity implements Serializable {
         this.dob = dob;
     }
 
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public OrganizationEntity getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(OrganizationEntity organization) {
+        this.organization = organization;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -106,6 +147,11 @@ public class PatientEntity implements Serializable {
         patient.setPatientFirstName(name.getGivenAsSingleString());
         patient.setPatientLastName(name.getFamily());
 
+        // Set the managing organization
+        final Reference managingOrganization = resource.getManagingOrganization();
+        final OrganizationEntity organizationEntity = new OrganizationEntity();
+        organizationEntity.setId(FHIRExtractors.getEntityUUID(managingOrganization.getReference()));
+        patient.setOrganization(organizationEntity);
         return patient;
     }
 

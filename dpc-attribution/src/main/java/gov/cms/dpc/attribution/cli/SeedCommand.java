@@ -97,7 +97,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             seedProviderBundle(context, parser, ORGANIZATION_ID);
 
             // Get the test attribution seeds
-            seedAttributions(context, creationTimestamp);
+            seedAttributions(context, ORGANIZATION_ID, creationTimestamp);
 
             logger.info("Finished loading seeds");
         }
@@ -141,7 +141,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         }
     }
 
-    private void seedAttributions(DSLContext context, OffsetDateTime creationTimestamp) throws IOException {
+    private void seedAttributions(DSLContext context, UUID organizationID, OffsetDateTime creationTimestamp) throws IOException {
         try (InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV)) {
             if (resource == null) {
                 throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
@@ -151,7 +151,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     .entrySet()
                     .stream()
                     .map(SeedProcessor::generateRosterBundle)
-                    .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, creationTimestamp));
+                    .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, organizationID, creationTimestamp));
         }
     }
 

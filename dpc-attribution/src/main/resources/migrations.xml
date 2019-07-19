@@ -276,8 +276,23 @@
                 referencedColumnNames="id"/>
     </changeSet>
 
-    <changeSet id="remove provider constraint" author="nickrobison-usds">
+    <changeSet id="remove-provider-constraint" author="nickrobison-usds">
         <dropUniqueConstraint tableName="PROVIDERS" constraintName="providers_provider_id_key"/>
+    </changeSet>
+
+    <changeSet id="add-patient-org-timestamps" author="nickrobison-usds">
+        <addColumn tableName="PATIENTS">
+            <column name="organization_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="update-patient-constraints" author="nickrobison-usds">
+        <dropUniqueConstraint tableName="PATIENTS" constraintName="patients_beneficiary_id_key"/>
+        <addUniqueConstraint tableName="PATIENTS" columnNames="beneficiary_id, organization_id"/>
     </changeSet>
 
 </databaseChangeLog>

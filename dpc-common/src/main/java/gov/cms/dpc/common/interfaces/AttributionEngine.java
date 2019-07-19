@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The Attribution Engine manages relationships between providers (represented as {@link Practitioner} resources) and {@link Patient}.
@@ -37,8 +38,9 @@ public interface AttributionEngine {
      * The input format assumes that the {@link Bundle#getEntryFirstRep()} call returns a {@link Practitioner} resource and subsequent {@link org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent} are of type {@link Patient}.
      *
      * @param attributionBundle - {@link Bundle} which contains Roster information
+     * @param organizationID    - {@link UUID} of {@link org.hl7.fhir.dstu3.model.Organization} to associate with attribution
      */
-    void addAttributionRelationships(Bundle attributionBundle);
+    void addAttributionRelationships(Bundle attributionBundle, UUID organizationID);
 
     /**
      * Remove an attribution relationship between the given provider and patient.
