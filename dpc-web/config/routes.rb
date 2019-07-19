@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :users
   root to: 'public#home'
 
   match '/home', to: 'public#home', via: :get
