@@ -41,7 +41,7 @@ script:
   - mvn test -Pintegration-tests -pl dpc-api
   - docker-compose down
   - docker-compose up -d
-  - sleep 30
+  - sleep 60
   - node_modules/.bin/newman run src/test/EndToEndRequestTest.postman_collection.json
   - mvn jacoco:report
   - |

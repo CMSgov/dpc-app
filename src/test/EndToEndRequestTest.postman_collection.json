@@ -185,7 +185,12 @@
 							"    pm.response.to.have.header(\"Content-Location\");",
 							"});",
 							"",
-							"pm.environment.set(\"content_location\", pm.response.headers.get(\"Content-Location\"));"
+							"if (pm.response.headers.get(\"Content-Location\")) {",
+							"  pm.environment.set(\"content_location\", pm.response.headers.get(\"Content-Location\"));",
+							"} else {",
+							"  // Fail the test, no content location.",
+							"  postman.setNextRequest(null);",
+							"}"
 						],
 						"type": "text/javascript"
 					}
