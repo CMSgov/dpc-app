@@ -40,7 +40,7 @@ script:
   # Run the integration-test profile, which only runs a subset of the tests
   - mvn test -Pintegration-tests -pl dpc-api
   - docker-compose down
-  - docker-compose up
+  - docker-compose up -d
   - sleep 30
   - node_modules/.bin/newman run src/test/EndToEndRequestTest.postman_collection.json
   - mvn jacoco:report
