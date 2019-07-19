@@ -244,6 +244,10 @@
 
         <dropColumn tableName="ORGANIZATIONS" columnName="token_ids"/>
     </changeSet>
+    
+    <changeSet id="add-roster-constraints" author="nickrobison-usds">
+        <addUniqueConstraint tableName="ATTRIBUTIONS" columnNames="provider_id, patient_id"/>
+    </changeSet>
 
     <changeSet id="create-provider-roles-table" author="nickrobison-usds">
         <createTable tableName="PROVIDER_ROLES">

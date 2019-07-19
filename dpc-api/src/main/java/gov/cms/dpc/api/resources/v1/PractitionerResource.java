@@ -9,6 +9,10 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractionerResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.auth.Auth;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -27,9 +31,16 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     @GET
+    @FHIR
     @Timed
     @ExceptionMetered
-    public Bundle getPractitioners(@Auth OrganizationPrincipal organization, @QueryParam("identifier") String providerNPI) {
+    @ApiOperation(value = "Search for providers", notes = "FHIR endpoint to search for Practitioner resources." +
+            "<p>If a provider NPI is given, the results are filtered accordingly. " +
+            "Otherwise, the method returns all Practitioners associated to the given Organization")
+    public Bundle getPractitioners(@ApiParam(hidden = true)
+                                   @Auth OrganizationPrincipal organization,
+                                   @ApiParam(value = "Provider NPI")
+                                   @QueryParam("identifier") String providerNPI) {
         final var request = this.client
                 .search()
                 .forResource(Practitioner.class)
@@ -48,11 +59,17 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     @GET
+    @FHIR
     @Path("/{providerID}")
     @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID")
     @Timed
     @ExceptionMetered
-    public Practitioner getProvider(@PathParam("providerID") UUID providerID) {
+    @ApiOperation(value = "Fetch provider", notes = "FHIR endpoint to fetch a specific Practitioner resource." +
+            "<p>Note: FHIR refers to *Providers* as *Practitioners* and names the resources and endpoints accordingly")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "No matching Practitioner resource was found", response = OperationOutcome.class)
+    })
+    public Practitioner getProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID) {
         return this.client
                 .read()
                 .resource(Practitioner.class)
@@ -63,8 +80,10 @@ public class PractitionerResource extends AbstractPractionerResource {
 
     @Override
     @POST
+    @FHIR
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
     public Practitioner submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
         final var test = this.client
                 .create()
@@ -99,9 +118,14 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @DELETE
     @Path("/{providerID}")
+    @FHIR
     @Timed
     @ExceptionMetered
-    public Response deleteProvider(@PathParam("providerID") UUID providerID) {
+    @ApiOperation(value = "Delete provider", notes = "FHIR endpoint to remove the given Practitioner resource")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "No matching Practitioner resource was found", response = OperationOutcome.class)
+    })
+    public Response deleteProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID) {
         this.client
                 .delete()
                 .resourceById(new IdType("Practitioner", providerID.toString()))
@@ -112,11 +136,13 @@ public class PractitionerResource extends AbstractPractionerResource {
     }
 
     @Override
-    @Timed
     @PUT
     @Path("/{providerID}")
+    @FHIR
+    @Timed
     @ExceptionMetered
-    public Practitioner updateProvider(@PathParam("providerID") UUID providerID, Practitioner provider) {
+    @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
+    public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, Practitioner provider) {
         return null;
     }
 }
