@@ -93,7 +93,7 @@ public class AttributionFHIRTest {
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
             // Get the patients
@@ -140,7 +140,7 @@ public class AttributionFHIRTest {
             submitUpdate.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(updateBundle)));
 
             try (CloseableHttpResponse response = client.execute(submitUpdate)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
             // Check how many are attributed

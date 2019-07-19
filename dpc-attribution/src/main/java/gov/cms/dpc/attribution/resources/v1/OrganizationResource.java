@@ -8,12 +8,15 @@ import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Api(value = "Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
@@ -39,8 +43,23 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @Override
     @GET
+    @FHIR
     @UnitOfWork
-    public Bundle searchOrganizations(@QueryParam("identifier") String identifier, @QueryParam("_tag") String tokenTag) {
+    @ApiOperation(value = "Search and Validate Token",
+            notes = "FHIR Endpoint to find an Organization resource associated to the given authentication token." +
+                    "<p>This also validates that the token is valid." +
+                    "<p>The *_tag* parameter is used to convey the token, which is half-way between FHIR and REST." +
+                    "<p>Either an identifier or a token must be present for the query to work.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Organization matching (valid) token was found."),
+            @ApiResponse(code = 404, message = "Organization was not found matching token", response = OperationOutcome.class),
+            @ApiResponse(code = 401, message = "Organization was found, but token was invalid", response = OperationOutcome.class)
+    })
+    public Bundle searchOrganizations(
+            @ApiParam(value = "NPI of Organization")
+            @QueryParam("identifier") String identifier,
+            @ApiParam(value = "Authorization token to validate")
+            @QueryParam("_tag") String tokenTag) {
         if (tokenTag != null) {
             return searchAndValidationByToken(tokenTag);
         }
@@ -60,9 +79,15 @@ public class OrganizationResource extends AbstractOrganizationResource {
     }
 
     @Override
+    @FHIR
     @UnitOfWork
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Create Organization", notes = "FHIR endpoint that accepts a Bundle resource containing an Organization and a list of Endpoint resources to register with the application")
+    @ApiResponses(value = {
+            @ApiResponse(code = 422, message = "Must provide a single Organization resource to register", response = OperationOutcome.class),
+            @ApiResponse(code = 201, message = "Organization was successfully registered")
+    })
     public Response submitOrganization(Parameters parameters) {
 
         final Parameters.ParametersParameterComponent firstRep = parameters.getParameterFirstRep();
@@ -94,9 +119,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @GET
     @Path("/{organizationID}")
+    @FHIR
     @UnitOfWork
     @Override
-    public Organization getOrganization(@PathParam("organizationID") UUID organizationID) {
+    @ApiOperation(value = "Fetch organization", notes = "FHIR endpoint to fetch an Organization with the given Resource ID")
+    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
+    public Organization getOrganization(
+            @ApiParam(value = "Organization resource ID", required = true)
+            @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> orgOptional = this.dao.fetchOrganization(organizationID);
         final OrganizationEntity organizationEntity = orgOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find organization '%s'", organizationID), Response.Status.NOT_FOUND));
         return organizationEntity.toFHIR();
@@ -108,7 +138,11 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @Timed
     @ExceptionMetered
-    public List<String> getOrganizationTokens(@PathParam("organizationID") UUID organizationID) {
+    @ApiOperation(value = "Fetch organization tokens", notes = "Method to retrieve the authentication tokens associated to the given Organization. This searches by resource ID")
+    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
+    public List<String> getOrganizationTokens(
+            @ApiParam(value = "Organization resource ID", required = true)
+            @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
         final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
@@ -126,7 +160,10 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @Timed
     @ExceptionMetered
-    public String createOrganizationToken(@PathParam("organizationID") UUID organizationID) {
+    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)")
+    public String createOrganizationToken(
+            @ApiParam(value = "Organization resource ID", required = true)
+            @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
         final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
@@ -148,7 +185,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Timed
     @ExceptionMetered
     @Path("/{organizationID}/token/verify")
-    public Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
+    @ApiOperation(value = "Verify authentication token", notes = "Verify an authentication token with a given Organization. " +
+            "This allows for checking if a given token is correctly to the organization if the token is valid.")
+    @ApiResponses(value = @ApiResponse(code = 401, message = "Token is not valid for the given Organization"))
+    public Response verifyOrganizationToken(
+            @ApiParam(value = "Organization resource ID", required = true)
+            @PathParam("organizationID") UUID organizationID,
+            @ApiParam(value = "Authentication token to verify", required = true)
+            @NotEmpty @QueryParam("token") String token) {
         final boolean valid = validateMacaroon(organizationID, parseToken(token));
         if (valid) {
             return Response.ok().build();

@@ -17,3 +17,9 @@ Give a list of tickets closed in this PR.
 **Future Work**
 
 List any additional tickets that have either been created due to work in this PR, or existing tickets that expand upon the feature or provide additonal fixes.
+
+**Checklist**
+
+- [ ] Demo and Seed commands are working
+- [ ] Swagger documentation has been updated
+- [ ] FHIR documentation has been updated
