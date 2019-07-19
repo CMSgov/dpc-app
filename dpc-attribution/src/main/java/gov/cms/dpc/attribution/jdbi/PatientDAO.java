@@ -23,5 +23,14 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         return Optional.ofNullable(get(patientID));
     }
 
+    public boolean deletePatient(UUID patientID) {
+        final PatientEntity patientEntity = this.get(patientID);
 
+        if (patientEntity == null) {
+            return false;
+        }
+
+        currentSession().delete(patientEntity);
+        return true;
+    }
 }
