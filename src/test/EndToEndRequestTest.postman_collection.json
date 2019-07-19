@@ -126,9 +126,9 @@
 					"script": {
 						"id": "72634c6f-4d6b-49b9-b4db-b172af0f04f1",
 						"exec": [
-							"// Status should be 200",
-							"pm.test(\"Status is 200\", function () {",
-							"    pm.response.to.have.status(200);",
+							"// Status should be 201",
+							"pm.test(\"Status is 201\", function () {",
+							"    pm.response.to.have.status(201);",
 							"});"
 						],
 						"type": "text/javascript"
