@@ -22,6 +22,9 @@ public abstract class AbstractAttributionResource {
     @Path("/Endpoint")
     public abstract AbstractEndpointResource endpointOperations();
 
+    @Path("/Patient")
+    public abstract AbstractPatientResource patientOperations();
+
     @Path("/Practitioner")
     public abstract AbstractPractionerResource providerOperations();
 

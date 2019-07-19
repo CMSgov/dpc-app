@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -13,7 +14,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "patients")
-public class PatientEntity {
+public class PatientEntity implements Serializable {
+
+    public static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -110,5 +113,9 @@ public class PatientEntity {
         return date.toInstant()
                 .atZone(ZoneOffset.UTC)
                 .toLocalDate();
+    }
+
+    public static Date fromLocalDate(LocalDate date) {
+        return Date.from(date.atStartOfDay().toInstant(ZoneOffset.UTC));
     }
 }
