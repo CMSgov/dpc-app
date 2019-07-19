@@ -54,8 +54,9 @@ public class APITestHelpers {
     /**
      * Register an organization with the Attribution Service
      * Organizations are pulled from the `organization_bundle.json` file and filtered based on the provided resource ID
-     * @param client - {@link IGenericClient} client to communicate to attribution service
-     * @param parser - {@link IParser} to use for reading {@link Bundle} JSON
+     *
+     * @param client         - {@link IGenericClient} client to communicate to attribution service
+     * @param parser         - {@link IParser} to use for reading {@link Bundle} JSON
      * @param organizationID - {@link String} organzation ID to filter for
      * @return - {@link String} Access token generated for the {@link Organization}
      * @throws IOException
@@ -99,8 +100,7 @@ public class APITestHelpers {
                     .encodedJson()
                     .execute();
 
-
-            try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
                 // Now, create a Macaroon
                 final HttpPost tokenPost = new HttpPost(String.format("%s/%s/token", ATTRIBUTION_URL, organization.getId()));

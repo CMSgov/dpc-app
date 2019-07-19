@@ -9,6 +9,7 @@ import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.queue.DPCQueueConfig;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.redisson.config.Config;
 
@@ -40,6 +41,10 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     private DPCFHIRConfiguration fhirConfig;
 
     private boolean authenticationDisabled;
+
+    @Valid
+    @JsonProperty("swagger")
+    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -100,5 +105,13 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration config) {
         this.fhirConfig = config;
+    }
+
+    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+        return swaggerBundleConfiguration;
+    }
+
+    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
+        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     }
 }

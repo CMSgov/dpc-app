@@ -4,6 +4,11 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.ExportPath;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +21,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+@Api(tags = {"Bulk Data", "Data"})
 public class DataResource extends AbstractDataResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
@@ -33,6 +39,11 @@ public class DataResource extends AbstractDataResource {
     @GET
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Download output files.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "File of newline-delimited JSON FHIR objects"),
+            @ApiResponse(code = 500, message = "An error occurred", response = OperationOutcome.class)
+    })
     public Response export(@PathParam("fileID") String fileID) {
         final StreamingOutput fileStream = outputStream -> {
             final java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", fileLocation, fileID));

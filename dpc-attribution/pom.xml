@@ -66,6 +66,10 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.smoketurner</groupId>
+            <artifactId>dropwizard-swagger</artifactId>
+        </dependency>
         <!--Testing dependencies-->
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -88,8 +92,8 @@
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-client</artifactId>
             <scope>test</scope>
-		</dependency>
-		<dependency>
+        </dependency>
+        <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-macaroons</artifactId>
             <version>0.3.0-SNAPSHOT</version>
