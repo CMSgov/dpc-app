@@ -88,18 +88,18 @@ public class AttributionFHIRTest {
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
 
-            final HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+            HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
             httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
             // Get the patients
 
             // Check how many are attributed
-            final HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
+            HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
             getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (CloseableHttpResponse response = client.execute(getPatients)) {
@@ -115,6 +115,26 @@ public class AttributionFHIRTest {
 
             try (CloseableHttpResponse response = client.execute(isAttributed)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
+            }
+
+            // Submit again and make sure the size doesn't change
+            httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+            httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
+
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+            }
+
+            // Check how many are attributed
+            getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
+            getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+
+            try (CloseableHttpResponse response = client.execute(getPatients)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
+                List<String> beneies = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
+                });
+                assertEquals(bundle.getEntry().size() - 1, beneies.size(), "Should have the same number of beneies");
             }
         }
     }
@@ -140,7 +160,7 @@ public class AttributionFHIRTest {
             submitUpdate.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(updateBundle)));
 
             try (CloseableHttpResponse response = client.execute(submitUpdate)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
             // Check how many are attributed

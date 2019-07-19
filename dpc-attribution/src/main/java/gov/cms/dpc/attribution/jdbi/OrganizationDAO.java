@@ -21,11 +21,13 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         super(factory.getSessionFactory());
     }
 
-    public void registerOrganization(Organization resource, List<EndpointEntity> endpoints) {
+    public Organization registerOrganization(Organization resource, List<EndpointEntity> endpoints) {
         final OrganizationEntity entity = new OrganizationEntity().fromFHIR(resource);
         endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
         entity.setEndpoints(endpoints);
-        persist(entity);
+        final OrganizationEntity persisted = persist(entity);
+
+        return persisted.toFHIR();
     }
 
     public Optional<OrganizationEntity> fetchOrganization(UUID organizationID) {
@@ -43,6 +45,16 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
 
         query.where(builder.equal(root.join("tokens").get("id"), tokenID));
+
+        return list(query);
+    }
+
+    public List<OrganizationEntity> searchByIdentifier(String identifier) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<OrganizationEntity> query = builder.createQuery(OrganizationEntity.class);
+        final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
+
+        query.where(builder.equal(root.get("organizationID").get("value"), identifier));
 
         return list(query);
     }

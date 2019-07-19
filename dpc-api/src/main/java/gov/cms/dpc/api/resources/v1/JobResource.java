@@ -10,6 +10,10 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -28,6 +32,7 @@ import java.util.stream.Collectors;
 /**
  * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
  */
+@Api(tags = {"Bulk Data", "Job"})
 public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
@@ -46,6 +51,16 @@ public class JobResource extends AbstractJobResource {
     @GET
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Check export job status",
+            notes = "This endpoint is used to query the status of a given Export operation. " +
+                    "When the job is in progress, the API returns a 204 status." +
+                        "When completed, an output response is returned, which contains the necessary metadata for retrieving any output files.")
+    @ApiResponses({
+            @ApiResponse(code = 202, message = "Export job is in progress"),
+            @ApiResponse(code = 404, message = "Export job cannot be found"),
+            @ApiResponse(code = 500, message = "Export job has failed with no results"),
+            @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class)
+    })
     public Response checkJobStatus(@PathParam("jobID") String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
         final Optional<JobModel> maybeJob = this.queue.getJob(jobUUID);
@@ -59,12 +74,13 @@ public class JobResource extends AbstractJobResource {
             Response.ResponseBuilder builder = Response.noContent();
             JobStatus jobStatus = job.getStatus();
             switch (jobStatus) {
-                case RUNNING: case QUEUED: {
+                case RUNNING:
+                case QUEUED: {
                     builder = builder.status(HttpStatus.ACCEPTED_202).header("X-Progress", jobStatus);
                     break;
                 }
                 case COMPLETED: {
-                    assert(job.getCompleteTime().isPresent());
+                    assert (job.getCompleteTime().isPresent());
                     final String resourceQueryParam = job.getResourceTypes().stream()
                             .map(ResourceType::toString)
                             .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
@@ -90,7 +106,8 @@ public class JobResource extends AbstractJobResource {
 
     /**
      * Form a list of output entries for the output file
-     * @param job - The job with its job result list
+     *
+     * @param job                    - The job with its job result list
      * @param forOperationalOutcomes - Only return operational outcomes if true, don't include them otherwise
      * @return the list of OutputEntry
      */

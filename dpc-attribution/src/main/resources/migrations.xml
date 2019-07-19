@@ -244,5 +244,44 @@
 
         <dropColumn tableName="ORGANIZATIONS" columnName="token_ids"/>
     </changeSet>
+    
+    <changeSet id="add-roster-constraints" author="nickrobison-usds">
+        <addUniqueConstraint tableName="ATTRIBUTIONS" columnNames="provider_id, patient_id"/>
+    </changeSet>
+
+    <changeSet id="create-provider-roles-table" author="nickrobison-usds">
+        <createTable tableName="PROVIDER_ROLES">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID"/>
+            <column name="provider_id" type="UUID"/>
+            <column name="created_at" type="DATETIME"/>
+        </createTable>
+
+        <!--        Add an index on both the organization and the provider-->
+        <createIndex tableName="PROVIDER_ROLES" indexName="provider_roles_orgs_idx">
+            <column name="organization_id"/>
+            <column name="provider_id"/>
+        </createIndex>
+
+        <!--        FK constraints to existing organizations and practitioners-->
+        <addForeignKeyConstraint
+                baseTableName="PROVIDER_ROLES"
+                baseColumnNames="organization_id"
+                constraintName="fk_provider_roles_organization"
+                referencedTableName="ORGANIZATIONS"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="PROVIDER_ROLES"
+                baseColumnNames="provider_id"
+                constraintName="fk_provider_roles_providers"
+                referencedTableName="PROVIDERS"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="remove provider constraint" author="nickrobison-usds">
+        <dropUniqueConstraint tableName="PROVIDERS" constraintName="providers_provider_id_key"/>
+    </changeSet>
 
 </databaseChangeLog>

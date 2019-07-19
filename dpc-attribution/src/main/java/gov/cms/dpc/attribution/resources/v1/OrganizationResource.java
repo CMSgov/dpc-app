@@ -8,16 +8,16 @@ import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Api(value = "Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
@@ -42,41 +43,59 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @Override
     @GET
+    @FHIR
     @UnitOfWork
-    public Bundle searchAndValidateOrganizations(@QueryParam("_tag") String tokenTag) {
-        if (tokenTag == null) {
-            throw new WebApplicationException("Must have token to query", Response.Status.BAD_REQUEST);
+    @ApiOperation(value = "Search and Validate Token",
+            notes = "FHIR Endpoint to find an Organization resource associated to the given authentication token." +
+                    "<p>This also validates that the token is valid." +
+                    "<p>The *_tag* parameter is used to convey the token, which is half-way between FHIR and REST." +
+                    "<p>Either an identifier or a token must be present for the query to work.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Organization matching (valid) token was found."),
+            @ApiResponse(code = 404, message = "Organization was not found matching token", response = OperationOutcome.class),
+            @ApiResponse(code = 401, message = "Organization was found, but token was invalid", response = OperationOutcome.class)
+    })
+    public Bundle searchOrganizations(
+            @ApiParam(value = "NPI of Organization")
+            @QueryParam("identifier") String identifier,
+            @ApiParam(value = "Authorization token to validate")
+            @QueryParam("_tag") String tokenTag) {
+        if (tokenTag != null) {
+            return searchAndValidationByToken(tokenTag);
         }
 
-        final Macaroon macaroon = this.parseTokenTag(tokenTag);
-
-        final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
-
-        if (organizationEntities.isEmpty()) {
-            throw new WebApplicationException("Cannot find organization with registered token", Response.Status.NOT_FOUND);
+        if (identifier == null) {
+            throw new WebApplicationException("Must have either token or Identifier to search", Response.Status.BAD_REQUEST);
         }
 
-        // There should only ever be a single entity per token
-        assert (organizationEntities.size() == 1);
-
-        final OrganizationEntity organizationEntity = organizationEntities.get(0);
-
-        // Validate the token
-        if (!validateMacaroon(organizationEntity.getId(), macaroon)) {
-            throw new WebApplicationException(String.format("Invalid token for organization %s", organizationEntity.getId().toString()), Response.Status.UNAUTHORIZED);
-        }
-
+        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(identifier);
         final Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(organizationEntity.toFHIR());
+        if (!queryList.isEmpty()) {
+            bundle.setTotal(queryList.size());
+            queryList.forEach(org -> bundle.addEntry().setResource(org.toFHIR()));
+        }
 
         return bundle;
     }
 
     @Override
+    @FHIR
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    public Response createOrganization(Bundle transactionBundle) {
+    @ApiOperation(value = "Create Organization", notes = "FHIR endpoint that accepts a Bundle resource containing an Organization and a list of Endpoint resources to register with the application")
+    @ApiResponses(value = {
+            @ApiResponse(code = 422, message = "Must provide a single Organization resource to register", response = OperationOutcome.class),
+            @ApiResponse(code = 201, message = "Organization was successfully registered")
+    })
+    public Response submitOrganization(Parameters parameters) {
+
+        final Parameters.ParametersParameterComponent firstRep = parameters.getParameterFirstRep();
+
+        if (!firstRep.hasResource()) {
+            throw new WebApplicationException("Must submit bundle", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+        final Bundle transactionBundle = (Bundle) firstRep.getResource();
 
         final Optional<Organization> organization = transactionBundle
                 .getEntry()
@@ -89,18 +108,9 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY_422).entity("Must provide organization to register").build();
         }
 
-        // Build the endpoints
-        final List<EndpointEntity> endpoints = transactionBundle
-                .getEntry()
-                .stream()
-                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Endpoint)
-                .map(entry -> (Endpoint) entry.getResource())
-                .map(EndpointConverter::convert)
-                .collect(Collectors.toList());
-
         try {
-            this.dao.registerOrganization(organization.get(), endpoints);
-            return Response.ok().build();
+            final Organization persistedOrg = this.dao.registerOrganization(organization.get(), extractEndpoints(transactionBundle));
+            return Response.status(Response.Status.CREATED).entity(persistedOrg).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
             throw e;
@@ -109,9 +119,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @GET
     @Path("/{organizationID}")
+    @FHIR
     @UnitOfWork
     @Override
-    public Organization getOrganization(@PathParam("organizationID") UUID organizationID) {
+    @ApiOperation(value = "Fetch organization", notes = "FHIR endpoint to fetch an Organization with the given Resource ID")
+    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
+    public Organization getOrganization(
+            @ApiParam(value = "Organization resource ID", required = true)
+            @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> orgOptional = this.dao.fetchOrganization(organizationID);
         final OrganizationEntity organizationEntity = orgOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find organization '%s'", organizationID), Response.Status.NOT_FOUND));
         return organizationEntity.toFHIR();
@@ -123,7 +138,11 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @Timed
     @ExceptionMetered
-    public List<String> getOrganizationTokens(@PathParam("organizationID") UUID organizationID) {
+    @ApiOperation(value = "Fetch organization tokens", notes = "Method to retrieve the authentication tokens associated to the given Organization. This searches by resource ID")
+    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
+    public List<String> getOrganizationTokens(
+            @ApiParam(value = "Organization resource ID", required = true)
+            @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
         final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
@@ -141,7 +160,10 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @Timed
     @ExceptionMetered
-    public String createOrganizationToken(@PathParam("organizationID") UUID organizationID) {
+    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)")
+    public String createOrganizationToken(
+            @ApiParam(value = "Organization resource ID", required = true)
+            @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
         final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
@@ -163,7 +185,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Timed
     @ExceptionMetered
     @Path("/{organizationID}/token/verify")
-    public Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @QueryParam("token") String token) {
+    @ApiOperation(value = "Verify authentication token", notes = "Verify an authentication token with a given Organization. " +
+            "This allows for checking if a given token is correctly to the organization if the token is valid.")
+    @ApiResponses(value = @ApiResponse(code = 401, message = "Token is not valid for the given Organization"))
+    public Response verifyOrganizationToken(
+            @ApiParam(value = "Organization resource ID", required = true)
+            @PathParam("organizationID") UUID organizationID,
+            @ApiParam(value = "Authentication token to verify", required = true)
+            @NotEmpty @QueryParam("token") String token) {
         final boolean valid = validateMacaroon(organizationID, parseToken(token));
         if (valid) {
             return Response.ok().build();
@@ -206,5 +235,41 @@ public class OrganizationResource extends AbstractOrganizationResource {
         }
 
         return bakery.deserializeMacaroon(tokenTag.substring(idx + 1));
+    }
+
+    private Bundle searchAndValidationByToken(String token) {
+        final Macaroon macaroon = this.parseTokenTag(token);
+
+        final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
+
+        if (organizationEntities.isEmpty()) {
+            throw new WebApplicationException("Cannot find organization with registered token", Response.Status.NOT_FOUND);
+        }
+
+        // There should only ever be a single entity per token
+        assert (organizationEntities.size() == 1);
+
+        final OrganizationEntity organizationEntity = organizationEntities.get(0);
+
+        // Validate the token
+        if (!validateMacaroon(organizationEntity.getId(), macaroon)) {
+            throw new WebApplicationException(String.format("Invalid token for organization %s", organizationEntity.getId().toString()), Response.Status.UNAUTHORIZED);
+        }
+
+        final Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(organizationEntity.toFHIR());
+        bundle.setTotal(1);
+
+        return bundle;
+    }
+
+    private List<EndpointEntity> extractEndpoints(Bundle transactionBundle) {
+        return transactionBundle
+                .getEntry()
+                .stream()
+                .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Endpoint)
+                .map(entry -> (Endpoint) entry.getResource())
+                .map(EndpointConverter::convert)
+                .collect(Collectors.toList());
     }
 }

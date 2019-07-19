@@ -4,10 +4,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.health.RosterEngineHealthCheck;
-import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
-import gov.cms.dpc.attribution.jdbi.ProviderDAO;
-import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
-import gov.cms.dpc.attribution.jdbi.RosterEngine;
+import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.macaroons.BakeryProvider;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
@@ -41,6 +38,8 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(TruncateDatabase.class);
         binder.bind(EndpointResource.class);
         binder.bind(PractitionerResource.class);
+        binder.bind(PractitionerRoleResource.class);
+        binder.bind(ProviderRoleDAO.class);
 
         binder.bind(MacaroonBakery.class).toProvider(BakeryProvider.class);
 

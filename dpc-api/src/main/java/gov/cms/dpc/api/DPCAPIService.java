@@ -4,16 +4,19 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.api.auth.AuthModule;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.DemoCommand;
 import gov.cms.dpc.api.cli.OrgRegistrationCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-
-import javax.validation.Validator;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
@@ -32,11 +35,18 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         // https://github.com/dropwizard/dropwizard/issues/1772
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAPIConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
-                .modules(new DPCHibernateModule<>(), new DPCAPIModule(), new JobQueueModule<>(), new FHIRModule<>())
+                .modules(new DPCHibernateModule<>(), new AuthModule(), new DPCAPIModule(), new JobQueueModule<>(), new FHIRModule<>())
                 .build();
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
+
+        bootstrap.addBundle(new SwaggerBundle<DPCAPIConfiguration>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
+                return dpcapiConfiguration.getSwaggerBundleConfiguration();
+            }
+        });
 
         bootstrap.addCommand(new DemoCommand());
         bootstrap.addCommand(new OrgRegistrationCommand());
@@ -47,5 +57,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                     final Environment environment) {
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
+
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
     }
 }
