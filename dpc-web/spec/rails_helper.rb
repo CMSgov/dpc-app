@@ -3,7 +3,7 @@
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 
-require File.expand_path('../../config/environment', __dir__)
+require File.expand_path('../config/environment', __dir__)
 
 # Prevent database truncation if the environment is production
 abort('The Rails environment is running in production mode!') if Rails.env.production?
@@ -29,12 +29,21 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include Rails.application.routes.url_helpers
 
-  config.use_transactional_fixtures = false
+  # Devise test helpers
+  # config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::ControllerHelpers, type: :view
+  config.include Devise::Test::IntegrationHelpers, type: :feature
+  config.include Warden::Test::Helpers
 
+  Warden.test_mode!
+
+  config.use_transactional_fixtures = false
   config.before(:suite) { DatabaseCleaner.clean_with(:truncation) }
   config.before(:each) { DatabaseCleaner.strategy = :transaction }
   config.before(:each, js: true) { DatabaseCleaner.strategy = :truncation }
   config.before(:each) { DatabaseCleaner.start }
+
+  config.after(:each, type: :feature) { Warden.test_reset! }
 
   # It's recommended to use append_after to ensure DatabaseCleaner.clean
   # runs after the after-test cleanup capybara/rspec installs. Particularly
