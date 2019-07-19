@@ -123,7 +123,7 @@ public class AttributionFHIRTest {
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.OK_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
             // Check how many are attributed
