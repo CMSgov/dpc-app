@@ -2,6 +2,8 @@ env:
   global:
     # The CC_TEST_REPORTER_ID
     - secure: 56a4WQc7qRidTpb3VArrrBAm4LHF4pJge2tipcQpuDdlJ7Ec6Y/ohDACgFKcKHWsJiCxsU8RfGcdbbr2DtyTOF/8cVrV5Qdei+L4uG7v4Sap7k2O8fycBKVx9veMK5OK0vgMtF8u2I0q9E8BRlODFeMU6fGW1UqFnA0dzkQZOebpsdQEbC30RVxRz3UVMeZb19OZZgFQtruXhguoeC2s8h2vqNbqTTTHJ7IKIL01Jqg3EydwjzvbBR7y1wuiu6icZgY1PapHBbgkZ34NlibVO2GpfjaAGx/kmxMFSZZoPL+cY/52bzCQfEr03IU481GFo6KyWx+20uqX6ZySwblk5qjTrwT+TIQOY0iaIEcgiEVkvaHwEaMooOMRK1QeXS+CEc5A6Nf8PTjFdM8rpHxj515Ng13kYM/hF+Bil1huN27QSelEtcK1yqeFyKfcLFqKxKB3XjehJJiOwjRVQib323Tzq4lvP2vwpeP+p/zSCVr9GoK2nK53s7OCe1SaVuovbGIRELLkhRGMF4mHqXg7p6kl1q/M2zWy5XGMdBJBpS2fTDAQPN2+PGOpXEz8nTmQUWjRKG2B4UeViZ096OdAkBK0nwAeDFct+18DOZxc1KUQv0Q1GvIhue5XURt5jUxTqednYbUHKR+3WlTe/W7iG+UX5SQwp9CQWOiM3/kH5rE=
+    # The RAILS_MASTER_KEY
+    - secure: 5+IeEXflMPvZ2hIHsf1sHq+eY2q1J5PXF8tVHH4J39rWMar1jB0hgjJ9X+q6vDr3oRWTcxOYFyZB0O3Kg1t80op8ywisKU5SGOuYOyvl1wBo8+1meJ95B+pku/5+3zS+mTLj7nhZJWoIByaZvNRNCvUCm8kKCRlEe0LzJ3d8wIf8KqlgledrYdYN+/kqAxPxqMMafkN4hzJvcCmy76/28fhoo47ZmPe4jR2HTDJjUjgJRxUYNehUEKYFTw2d2eS029tFjdLDfKY8FvWGzx0xXVnYK/o1Jv6woE10N+zVQRoGrmW2AFALgupfTt5ROda+SRF4pnrGc90ELvR9Agj3zpKE56LbB1q8Qwcv7+USrsBI+vEiFkW5WL33Z2UJYanRVbCxVKeBAWv9y8N6ngD8dGyHHS5PJB+crY7Q9Tynva2+ygMy174L/0lMqjmRVJEbGSHjD7Lmc6uxcKVMWRo4UIhjxEZ/OPcP352Tz2kQ+717BGnGYrFI7tKvOc7gt2DtD8iaLtNPRjWOA87FFDJ/w1XfvQsFiMkEdR/K7iEzfBV61mJ33JyMEu3tpiw/fhz5XayFbJg4eeeqS2AaFYQSVBFRNnRjbrLFIbO1SiCPjeTmGYTq09m+f9DIti9b5oLbaEfJo+K+oc0/xgvoM+HrhQe9Y7HQkwoIAUyAmrc0WMY=
 
 dist: xenial
 language: java
@@ -51,4 +53,5 @@ script:
     done
   - ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
   - ./cc-test-reporter upload-coverage
+  - ./dpc-web-test.sh
 
