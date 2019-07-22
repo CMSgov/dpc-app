@@ -48,6 +48,7 @@ public class BaseResource extends AbstractBaseResource {
     }
 
     @Override
+    @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     public CapabilityStatement metadata() {
         return Capabilities.buildCapabilities();
