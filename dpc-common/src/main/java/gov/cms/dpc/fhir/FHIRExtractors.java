@@ -1,5 +1,7 @@
 package gov.cms.dpc.fhir;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -60,5 +62,36 @@ public class FHIRExtractors {
         final String id = Objects.requireNonNull(matcher.group(1));
 
         return UUID.fromString(id);
+    }
+
+    /**
+     * Extracts an {@link Identifier} from a FHIR search parameter.
+     *
+     * @param queryParam - {@link String} query parameter with the input format: [system]|[value].
+     * @return - {@link Identifier}
+     */
+    public static Identifier parseIDFromQueryParam(String queryParam) {
+
+        final Pair<String, String> stringPair = parseTag(queryParam);
+        final Identifier identifier = new Identifier();
+        identifier.setSystem(stringPair.getLeft());
+        identifier.setValue(stringPair.getRight());
+        return identifier;
+    }
+
+    /**
+     * Parses a given FHIR tag into a System/Code pair
+     * Splits the tag based on the '|' character.
+     *
+     * @param tag - {@link String} tag to parse
+     * @return - {@link Pair} of System {@link String} and Code {@link String}
+     */
+    public static Pair<String, String> parseTag(String tag) {
+        final int idx = tag.indexOf('|');
+        if (idx <= 0) {
+            throw new IllegalArgumentException("Malformed tag");
+        }
+
+        return Pair.of(tag.substring(0, idx), tag.substring(idx + 1));
     }
 }

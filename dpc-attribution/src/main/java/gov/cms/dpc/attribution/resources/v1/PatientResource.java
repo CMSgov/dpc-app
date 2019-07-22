@@ -3,16 +3,22 @@ package gov.cms.dpc.attribution.resources.v1;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
 import gov.cms.dpc.attribution.resources.AbstractPatientResource;
 import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.entities.PatientEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PatientResource extends AbstractPatientResource {
 
@@ -26,9 +32,30 @@ public class PatientResource extends AbstractPatientResource {
 
     @GET
     @FHIR
+    @UnitOfWork
     @Override
-    public Bundle searchPatients(@QueryParam("identifier") String patientID, @QueryParam("tag") String organizationToken) {
-        return null;
+    public Bundle searchPatients(@QueryParam("identifier") String patientMBI, @QueryParam("organization") String organizationReference) {
+        if (patientMBI == null && organizationReference == null) {
+            throw new WebApplicationException("Must have either Patient Identifier or Organization Resource ID", Response.Status.BAD_REQUEST);
+        }
+        final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
+        if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
+            throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
+        }
+
+        final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
+        final List<Bundle.BundleEntryComponent> patientEntries = this.dao.patientSearch(patientIdentifier.getValue(), organizationID)
+                .stream()
+                .map(PatientEntityConverter::convert)
+                .map(patient -> new Bundle.BundleEntryComponent().setResource(patient))
+                .collect(Collectors.toList());
+
+        final Bundle searchBundle = new Bundle();
+        searchBundle.setType(Bundle.BundleType.SEARCHSET);
+        searchBundle.setTotal(patientEntries.size());
+        searchBundle.setEntry(patientEntries);
+        return searchBundle;
+
     }
 
     @POST

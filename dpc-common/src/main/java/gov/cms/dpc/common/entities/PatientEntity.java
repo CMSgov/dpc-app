@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -38,10 +39,6 @@ public class PatientEntity implements Serializable {
     private String patientLastName;
 
     @NotNull
-    @ManyToOne
-    private OrganizationEntity organization;
-
-    @NotNull
     @Column(name = "dob")
     private LocalDate dob;
 
@@ -52,6 +49,20 @@ public class PatientEntity implements Serializable {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
+
+    @NotNull
+    @ManyToOne
+    private OrganizationEntity organization;
+
+    @ManyToMany
+    @JoinTable(name = "attributions",
+            joinColumns = {
+                    @JoinColumn(name = "patient_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+            })
+    private List<ProviderEntity> attributedProviders;
 
     public PatientEntity() {
 //        Hibernate Required
@@ -119,6 +130,14 @@ public class PatientEntity implements Serializable {
 
     public void setOrganization(OrganizationEntity organization) {
         this.organization = organization;
+    }
+
+    public List<ProviderEntity> getAttributedProviders() {
+        return attributedProviders;
+    }
+
+    public void setAttributedProviders(List<ProviderEntity> attributedProviders) {
+        this.attributedProviders = attributedProviders;
     }
 
     @Override

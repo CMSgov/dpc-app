@@ -3,17 +3,21 @@ package gov.cms.dpc.attribution.resources;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
-import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PatientResourceTest extends AbstractAttributionTest {
 
@@ -60,7 +64,65 @@ class PatientResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPatientSearch() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
+        final IQuery<Bundle> firstQuery = client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + DEFAULT_ORG_ID))
+                .returnBundle(Bundle.class)
+                .encodedJson();
+
+        final Bundle firstSearch = firstQuery.execute();
+
+        assertEquals(1, firstSearch.getTotal(), "Should have a single patient");
+
+        // Try for wrong org
+
+        final Bundle secondSearch = client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(0, secondSearch.getTotal(), "Should not have any patients");
     }
 
+    @Test
+    void testPatientDeletion() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        final IQuery<Bundle> firstQuery = client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + DEFAULT_ORG_ID))
+                .returnBundle(Bundle.class)
+                .encodedJson();
+
+        final Bundle firstSearch = firstQuery.execute();
+
+        assertEquals(1, firstSearch.getTotal(), "Should have a single patient");
+
+        // Remove the patient and try the search again
+        final Patient patient = (Patient) firstSearch.getEntryFirstRep().getResource();
+
+        final IBaseOperationOutcome outcome = client
+                .delete()
+                .resource(patient)
+                .encodedJson()
+                .execute();
+
+
+        assertNull(outcome, "Should have succeeded with empty outcome");
+
+        // Try the first search again, which should be empty
+
+        final Bundle finalSearch = firstQuery.execute();
+        assertEquals(0, finalSearch.getTotal(), "Should not have any patients");
+    }
 }
