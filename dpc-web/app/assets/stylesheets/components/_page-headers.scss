@@ -1,0 +1,42 @@
+.page-header {
+  background-color: $color-gray-dark;
+  color: $color-white;
+  padding-top: $spacer-5;
+
+  .ds-c-tabs {
+    border-bottom: 0;
+    margin-top: 0 - $spacer-3;
+  }
+
+  .ds-c-tabs__item {
+    background-color: rgba($color-gray, .3);
+    color: $color-white;
+    border: 0;
+    margin: 0 4px 0 0;
+  }
+
+  .ds-c-tabs__item--active {
+    background-color: $color-white;
+    color: $color-gray-dark;
+
+    &:before {
+      background-color: $color-primary;
+      content: "";
+      height: 4px;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: -1px;
+    }
+  }
+
+}
+
+.page-header__heading {
+  display: block;
+  font-size: $h1-font-size;
+  font-weight: $font-bold;
+  margin: 0;
+  padding-bottom: $spacer-5;
+}
+

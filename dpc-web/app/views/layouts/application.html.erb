@@ -7,16 +7,24 @@
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
-    <div class="ds-l-container">
-      <div class="ds-l-row">
-        <div class="ds-l-col--12">
-          <h1><%= yield(:title) %></h1>
+    <header class="page-header">
+      <div class="ds-l-container">
+        <span class="page-header__heading">Docs</span>
+
+        <div class="ds-c-tabs">
+          <%= link_to docs_path, :class => "ds-c-tabs__item #{current_class?(docs_path)}" do %>
+            Reference
+          <% end %>
+          <%= link_to docs_guide_path, :class => "ds-c-tabs__item #{current_class?(docs_guide_path)}" do %>
+            Guide
+          <% end %>
         </div>
+
       </div>
-    </div>
+    </header>
 
     <!-- content -->
-    <section class="ds-l-container" id="main">
+    <section class="ds-l-container ds-u-padding-top--7">
       <%= yield %>
     </section>
 
