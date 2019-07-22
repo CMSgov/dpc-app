@@ -2,7 +2,9 @@ package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
 
 public class PatientEntityConverter {
 
@@ -24,6 +26,10 @@ public class PatientEntityConverter {
                 .addIdentifier()
                 .setSystem(DPCIdentifierSystem.MBI.getSystem())
                 .setValue(entity.getBeneficiaryID());
+
+        // Managing organization
+        final Reference organization = new Reference(new IdType("Organization", entity.getOrganization().getId().toString()));
+        patient.setManagingOrganization(organization);
 
         return patient;
     }

@@ -10,7 +10,6 @@ import gov.cms.dpc.fhir.converters.entities.PatientEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.inject.Inject;
@@ -101,8 +100,13 @@ public class PatientResource extends AbstractPatientResource {
     @PUT
     @Path("/{patientID}")
     @FHIR
+    @UnitOfWork
     @Override
-    public Patient updatePatient(@PathParam("patientID") UUID patientID, Patient patient) {
-        return null;
+    public Response updatePatient(@PathParam("patientID") UUID patientID, Patient patient) {
+        final PatientEntity patientEntity = this.dao.updatePatient(patientID, PatientEntity.fromFHIR(patient));
+
+        return Response.ok()
+                .entity(PatientEntityConverter.convert(patientEntity))
+                .build();
     }
 }

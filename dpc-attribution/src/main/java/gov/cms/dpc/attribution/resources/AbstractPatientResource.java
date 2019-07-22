@@ -32,5 +32,5 @@ public abstract class AbstractPatientResource {
 
     @PUT
     @Path("/{patientID}")
-    public abstract Patient updatePatient(UUID patientID, Patient patient);
+    public abstract Response updatePatient(UUID patientID, Patient patient);
 }

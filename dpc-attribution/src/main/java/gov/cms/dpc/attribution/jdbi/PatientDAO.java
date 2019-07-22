@@ -60,4 +60,15 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         currentSession().delete(patientEntity);
         return true;
     }
+
+    public PatientEntity updatePatient(UUID patientID, PatientEntity updatedPatient) {
+        final PatientEntity patient = this.getPatient(patientID)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find patient"));
+
+        final PatientEntity fullyUpdated = patient.update(updatedPatient);
+
+        currentSession().merge(fullyUpdated);
+
+        return fullyUpdated;
+    }
 }

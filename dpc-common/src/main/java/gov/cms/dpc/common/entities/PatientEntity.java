@@ -140,6 +140,20 @@ public class PatientEntity implements Serializable {
         this.attributedProviders = attributedProviders;
     }
 
+    /**
+     * Update {@link Patient} fields.
+     * Only first/last name and DOB is supported at this point.
+     *
+     * @param updated - {@link PatientEntity} with new values
+     * @return - {@link PatientEntity} existing record with updated fields.
+     */
+    public PatientEntity update(PatientEntity updated) {
+        this.setPatientFirstName(updated.getPatientFirstName());
+        this.setPatientLastName(updated.getPatientLastName());
+        this.setDob(updated.getDob());
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

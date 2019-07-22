@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Date;
 import java.util.UUID;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
@@ -124,5 +125,52 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         final Bundle finalSearch = firstQuery.execute();
         assertEquals(0, finalSearch.getTotal(), "Should not have any patients");
+    }
+
+    @Test
+    void testPatientUpdate() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        final IQuery<Bundle> firstQuery = client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "19990000002902"))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + DEFAULT_ORG_ID))
+                .returnBundle(Bundle.class)
+                .encodedJson();
+
+        final Bundle firstSearch = firstQuery.execute();
+
+        assertEquals(1, firstSearch.getTotal(), "Should have a single patient");
+
+        final Patient foundPatient = (Patient) firstSearch.getEntryFirstRep().getResource();
+
+        // Update the name
+        foundPatient.getNameFirstRep().setFamily("Updated");
+        foundPatient.setBirthDate(Date.valueOf("2001-01-01"));
+
+        // Update the patient
+
+        final MethodOutcome updated = client
+                .update()
+                .resource(foundPatient)
+                .encodedJson()
+                .execute();
+
+        final Patient updatedPatient = (Patient) updated.getResource();
+
+        assertFalse(foundPatient.equalsDeep(updatedPatient), "Should not match");
+
+        // Try to pull the record, again, from the DB
+
+        final Patient fetchedPatient = client
+                .read()
+                .resource(Patient.class)
+                .withId(foundPatient.getId())
+                .encodedJson()
+                .execute();
+
+        assertAll(() -> assertFalse(fetchedPatient.equalsDeep(foundPatient), "Should not match original record"),
+                () -> assertTrue(fetchedPatient.equalsDeep(updatedPatient), "Should match updated record"));
     }
 }
