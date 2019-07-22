@@ -1,4 +1,5 @@
 IG_PUBLISHER = ./.bin/org.hl7.fhir.publisher.jar 
+REPORT_COVERAGE ?= false
 
 ${IG_PUBLISHER}:
 	-mkdir ./.bin
@@ -9,6 +10,5 @@ ig/publish: ${IG_PUBLISHER}
 	@echo "making IG"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
-unexport REPORT_COVERAGE
 travis:
 	@./dpc-test.sh
