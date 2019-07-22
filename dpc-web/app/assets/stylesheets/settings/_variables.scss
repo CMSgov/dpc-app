@@ -1,0 +1,29 @@
+// Colors
+$color-warn-alt: #e27100;
+$color-primary-alt-dark: #004972;
+
+// Focus
+$focus-outline:  5px solid $color-gold-light;
+
+// Measure
+$measure-1:  40ch;
+$measure-2:  60ch;
+$measure-3:  66ch;
+$measure-4:  72ch;
+$measuer-5:  77ch;
+
+// Breakpoints
+$width-nav: 860px;
+
+// Replace US WDS font stacks with HealthCare.gov font stacks
+$font-sans: 'Roboto', sans-serif;
+$font-mono: 'Roboto Mono', monospace;
+
+$font-normal: 400;
+$font-bold: 700;
+
+// Z-indexes
+$z-index-nav:      8000;
+$z-index-overlay:     9000;
+$z-index-flyout:     10000;
+

@@ -1,59 +1,223 @@
-
-
-<section class="site-block">
-  <div class="ds-l-container">
-    <div class="site-block-header">
-      <h2 class="site-block-header__heading">How can Data at the Point of Care help providers improve care and reduce burden for doctors and patients?</h2>
-      <div class="site-block-header__description">
-        <p>Tracking down medical history takes valuable time that can otherwise be spent with patients. Data at the point of care will allow providers to:</p>
+<main id="main">
+  <section class="site-block site-block--alt">
+    <div class="ds-l-container">
+      <div class="site-block-header">
+        <h2 class="site-block-header__heading">How does Data at the Point of Care reduce your burden and help you improve care?</h2>
+      </div>
+      <div class="ds-l-row ds-u-margin-top--5">
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("provider-calendar.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Reveals the medical history of your new patients</h3>
+            <p>Avoid having to rely on paper, faxes, or the patient’s memory to know past diagnoses, procedures, and medications.</p>
+          </div>
+        </div>
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("provider-conversation.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Lets you see how other providers are caring for your patients</h3>
+            <p>Learn about any other provider visits, new diagnoses and medications, completed procedures and preventive items, and urgent care, hospital, or ER visits.</p>
+          </div>
+        </div>
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("provider-medications.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Gives insight into your patients’ medication history & adherence</h3>
+            <p>View medications that were filled at the pharmacy to learn about possible gaps in medication history and adherence.</p>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="ds-l-row ds-u-margin-top--5">
-      <div class="ds-l-col--12 ds-l-md-col--4">
-        <h3>Access medical history for new patients</h3>
-        <p>Avoid having to rely on patient memory to know past diagnoses, procedures, and medications.</p>
-      </div>
-      <div class="ds-l-col--12 ds-l-md-col--4">
-        <h3>Be aware of what other providers are doing for your patients</h3>
-        <p>Learn about any other provider visits, new diagnoses and medications, completed procedures and preventive items, and urgent care, hospital, or ER visits.</p>
-      </div>
-      <div class="ds-l-col--12 ds-l-md-col--4">
-        <h3>Get insight into medication adherence</h3>
-        <p>View medications that were filled at the pharmacy to learn about possible gaps in medication adherence.</p>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<section class="site-block site-block--alt" id="about-the-pilot">
-  <div class="ds-l-container">
-    <div class="site-block-header">
-      <h2 class="site-block-header__heading">About the pilot</h2>
-      <div class="site-block-header__description">
-        <p>The Data at the Point of Care is a pilot program that aims to enable healthcare providers in delivering high quality care directly to Medicare beneficiaries by making a patient's Medicare claims data available to the provider for treatment needs. The information can be accessed in the existing workflow and without logging into another application or portal.  Claims information can be used to confirm information, fill in gaps in care, and improve patient safety. The Data at the Point of care pilot program includes data from inpatient, outpatient, and pharmacy claims with diagnoses, procedures, preventive tests, medications, hospital admissions, and visit information for outpatient, urgent care, and emergency rooms.</p>
+  <section class="site-block">
+    <div class="ds-l-container">
+      <div class="site-block-header">
+        <h2 class="site-block-header__heading">How does Data at the Point of Care improve your <em>patients’</em> experience and give them better care?</h2>
       </div>
-    </div>
-    <h3>How to get started</h3>
-    <ol>
-      <li>Request access to the pilot on the Request Access Page. Remember, this is a pilot and and the process may move slowly. You can prepare for connection by reviewing the User Guide. </li>
-      <li>You will be contacted when CMS is ready to provide access to the synthetic data for testing.</li>
-      <li>Provide a demo to the Data at the Point of Care team.</li>
-      <li>Receive production credentials and perform initial test and feedback cycle for production data.</li>
-    </ol>
-  </div>
-</section>
-
-<section class="site-block">
-  <div class="ds-l-container">
-    <div class="site-block-header">
-      <h2 class="site-block-header__heading">About the data</h2>
-      <div class="site-block-header__description">
-        <p>The claims data is provided using the industry-standard HL7 Fast Healthcare Interoperability Resources (FHIR) resources, specifically the Bulk FHIR specification.</p>
+      <div class="ds-l-row ds-u-margin-top--5">
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("patient-documents.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Reduces their frustration and documentation</h3>
+            <p>Patients no longer need to recall and retell their entire past history at each visit.</p>
+          </div>
+        </div>
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("patient-clock.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Gives them more time with you for current needs</h3>
+            <p>Patients get more of your time to focus on their concerns and issues instead of you wasting time searching for information.</p>
+          </div>
+        </div>
+        <div class="ds-l-col--12 ds-l-md-col--4 benefit-prop">
+          <div class="benefit-prop__img-wrap">
+            <%= image_tag("patient-teamwork.svg", alt: "") %>
+          </div>
+          <div class="benefit-prop__body">
+            <h3>Keeps the entire provider team on the same page</h3  >
+            <p>Patients receive better coordination between their providers because the whole team has a full picture of their care.</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
+  <section class="site-block" id="about-the-pilot">
+    <div class="ds-l-container">
+      <div class="site-block-header">
+        <h2 class="site-block-header__heading">About the pilot</h2>
+        <div class="site-block-header__description">
+          <p> Data at the Point of Care is a pilot API program that enables healthcare providers to deliver high quality care directly to Medicare beneficiaries by making a patient’s Medicare claims data available to the provider for treatment needs. The information can be accessed in the existing workflow and without logging into another application or portal. Claims information can be used to confirm information, fill in gaps in care, and improve patient safety.</p>
+        </div>
 
+        <div class="usa-accordion usa-accordion--bordered">
+          <!-- Use the accurate heading level to maintain the document outline -->
+          <h2 class="usa-accordion__heading">
+            <button class="usa-accordion__button" aria-expanded="false" aria-controls="a0">
+               What kind of provider is CMS looking for?
+            </button>
+          </h2>
+          <div id="a0" class="usa-accordion__content">
+            <p>CMS is looking for provider organizations who are interested in connecting first to synthetic claims data and then, after successful testing and validation with the synthetic data, connecting to production claims data for their patients. With a goal of ensuring this information is in the existing clinical workflow, the provider is encouraged to speak to their existing vendors for electronic health records, population health, and record notification to participate with them in the pilot. We are seeking input and feedback from healthcare providers and their technology partners throughout the process.</p>
 
+            <p>CMS is especially interested in working with healthcare providers who already receive claims from other payers and who have successfully integrated the information into provider's existing workflow. healthcare providers with experience using Blue Button 2.0 or the Beneficiary Claims Data API pilot project are encouraged to request access to the Data at the Point of Care pilot project as well.</p>
 
+          </div>
+        </div>
+      </div>
+      <div class="ds-u-margin-top--7">
+        <h3 class="ds-u-margin-top--5">Pilot data comes from inpatient, outpatient, and pharmacy claims,
+    including:</h3>
+        <ul class="site-pills">
+          <li class="site-pills__item">Diagnoses</li>
+          <li class="site-pills__item site-pills__item--orange">Procedures</li>
+          <li class="site-pills__item site-pills__item--green">Preventive tests</li>
+          <li class="site-pills__item site-pills__item--dark-blue">Medications</li>
+        </ul>
+
+        <h3 class="ds-u-margin-top--5">Plus visit data for:</h3>
+        <ul class="site-pills">
+          <li class="site-pills__item site-pills__item--orange">Outpatient care</li>
+          <li class="site-pills__item site-pills__item--dark-blue">Hospital admissions</li>
+          <li class="site-pills__item site-pills__item--green">Emergency room care</li>
+          <li class="site-pills__item">Urgent care</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="site-block site-block--alt" id="getting-started">
+    <div class="ds-l-container">
+      <div class="site-block-header">
+        <h2 class="site-block-header__heading">Getting started</h2>
+      </div>
+      <ol class="site-process-list">
+        <li class="site-process-list__item">
+          <h3 class="site-process-list__heading">Request access to the pilot</h3>
+          <div class="site-process-list__body">
+            <p>Do this on the <a href="#">Request Access Page</a>. Remember, this is a pilot and and the process may move slowly. You can prepare for connection by reviewing the <a href="#">API documentation</a>.</p>
+          </div>
+        </li>
+        <li class="site-process-list__item">
+          <h3 class="site-process-list__heading">You will be contacted</h3>
+          <div class="site-process-list__body">
+            <p>Based on the specification and sample data, build and test with synthetic data.</p>
+          </div>
+        </li>
+        <li class="site-process-list__item">
+          <h3 class="site-process-list__heading">Develop and test</h3>
+          <div class="site-process-list__body">
+            <p>When CMS is ready to provide access to the synthetic data for testing, they will email you with details.</p>
+          </div>
+        </li>
+        <li class="site-process-list__item">
+          <h3 class="site-process-list__heading">Provide a demo</h3>
+          <div class="site-process-list__body">
+            <p>The Data at the Point of Care team will review your implementation to determine whether you’re ready for production.</p>
+          </div>
+        </li>
+        <li class="site-process-list__item">
+          <h3 class="site-process-list__heading">Perform initial test and feedback cycle</h3>
+          <div class="site-process-list__body">
+            <p>Receive production credentials and test with production data. Continue providing feedback!</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="site-block">
+    <div class="ds-l-container">
+      <div class="site-block-header">
+        <h2 class="site-block-header__heading">About the data</h2>
+        <div class="site-block-header__description">
+          <p>The claims data is provided using the industry-standard <a href="#">HL7 Fast Healthcare Interoperability Resources (FHIR)</a> resources, specifically the <a href="#">Bulk FHIR specification</a>.</p>
+        </div>
+
+        <div class="usa-accordion usa-accordion--bordered ds-u-margin-top--7">
+
+          <!-- Use the accurate heading level to maintain the document outline -->
+          <h2 class="usa-accordion__heading">
+            <button class="usa-accordion__button" aria-expanded="false" aria-controls="a1">
+              What is FHIR (Fast Healthcare Interoperability Resources)?
+            </button>
+          </h2>
+          <div id="a1" class="usa-accordion__content">
+            <p>FHIR is a specification for how servers that provide healthcare records should be set up.</p>
+            <p>FHIR provides a framework for the exchange of healthcare-related data, allowing any system to access and consume this data to solve clinical and administrative problems around healthcare-related data.</p>
+            <p>Data at the Point of Care will be using the following endpoints from the FHIR spec:</p>
+            <ul>
+              <li>patient endpoint</li>
+              <li>explanation of benefits endpoint</li>
+              <li>coverage endpoint</li>
+            </ul>
+          </div>
+
+          <!-- Use the accurate heading level to maintain the document outline -->
+          <h2 class="usa-accordion__heading">
+            <button class="usa-accordion__button" aria-expanded="false" aria-controls="a2">
+               How is the Data at the Point of Care pilot different from Blue Button 2.0 and Beneficiary Claims Data API?
+            </button>
+          </h2>
+          <div id="a2" class="usa-accordion__content">
+            <p>Blue Button 2.0 provides FHIR-formatted data for one individual Medicare beneficiary at a time, to registered applications with beneficiary authorization. See https://bluebutton.cms.gov/.</p>
+
+            <p>BCDA provides FHIR-formatted bulk data files to an ACO for all of the beneficiaries eligible to a given Shared Savings Program ACO. BCDA does not require individual beneficiary authorization but does allow a process for patients to opt out of data sharing.</p>
+
+            <p>Data at the Point of Care Pilot provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. Data at the Point of Care does not require individual beneficiary authorization but does allow a process for patients to opt out of data sharing.</p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="billboard">
+    <div class="ds-l-container">
+      <div class="billboard__content">
+        <h2 class="billboard__heading">Join the community!</h2>
+        <div>
+        <%= link_to docs_path, :class => "ds-c-button ds-c-button--primary ds-c-button--big ds-u-margin-right--2" do %>
+          <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <use xlink:href="/assets/solid.svg#key"></use>
+          </svg>Request access
+        <% end %>
+        <%= link_to docs_path, :class => "ds-c-button ds-c-button--inverse ds-c-button--inverse--alt ds-c-button--big" do %>
+          Join Google Group
+        <% end %>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
