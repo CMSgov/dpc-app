@@ -8,6 +8,10 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.entities.PatientEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -32,8 +36,14 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Search for Patients", notes = "Search for Patient records, optionally restricting by associated organization." +
+            "<p>Must provide ONE OF organization ID or patient MBI to search for")
+    @ApiResponses(@ApiResponse(code = 400, message = "Must have Organization ID or Patient MBI in order to search"))
     @Override
-    public Bundle searchPatients(@QueryParam("identifier") String patientMBI, @QueryParam("organization") String organizationReference) {
+    public Bundle searchPatients(@ApiParam(value = "Patient MBI")
+                                 @QueryParam("identifier") String patientMBI,
+                                 @ApiParam(value = "Organization ID")
+                                 @QueryParam("organization") String organizationReference) {
         if (patientMBI == null && organizationReference == null) {
             throw new WebApplicationException("Must have either Patient Identifier or Organization Resource ID", Response.Status.BAD_REQUEST);
         }
@@ -60,6 +70,7 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field.")
     @Override
     public Response createPatient(Patient patient) {
         final PatientEntity entity = this.dao.persistPatient(PatientEntity.fromFHIR(patient));
@@ -72,9 +83,11 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @Path("/{patientID}")
     @FHIR
+    @ApiOperation(value = "Fetch Patient", notes = "Fetch specific Patient record, irrespective of managing organization.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Patient with given ID"))
     @UnitOfWork
     @Override
-    public Patient getPatient(@PathParam("patientID") UUID patientID) {
+    public Patient getPatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID) {
         final PatientEntity patientEntity = this.dao.getPatient(patientID)
                 .orElseThrow(() ->
                         new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND));
@@ -86,8 +99,10 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/{patientID}")
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Delete Patient", notes = "Remove specific Patient record")
+    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to delete"))
     @Override
-    public Response deletePatient(@PathParam("patientID") UUID patientID) {
+    public Response deletePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID) {
         final boolean found = this.dao.deletePatient(patientID);
 
         if (!found) {
@@ -101,8 +116,10 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/{patientID}")
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Update Patient record", notes = "Update specific Patient record." +
+            "<p>Currently, this method only allows for updating of the Patient first/last name, and BirthDate.")
     @Override
-    public Response updatePatient(@PathParam("patientID") UUID patientID, Patient patient) {
+    public Response updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
         final PatientEntity patientEntity = this.dao.updatePatient(patientID, PatientEntity.fromFHIR(patient));
 
         return Response.ok()
