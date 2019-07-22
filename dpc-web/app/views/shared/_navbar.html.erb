@@ -1,33 +1,40 @@
-<div class="ds-l-container">
-  <nav class="navbar navbar-light ">
-    <a class="navbar-brand" href="/">
-      <img src="/assets/site-logo.png" alt="CMS Logo">
-    </a>
+<nav class="navbar" id="navbar">
+  <a class="site-logo" href="/">
+    <%= image_tag("top-nav-heart.svg", alt: "Heart logo") %> <span class="site-logo-text">Data at the Point of Care</span>
+  </a>
 
-    <!--
-    <button class="navbar-toggler" type="button" data-toggle="collapse"
-        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-        aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+
+  <button id="topnav__show-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__show-button" type="button" aria-controls="topnav-wrap" aria-label="Show menu">
+    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <use xlink:href="/assets/solid.svg#bars"></use>
+    </svg>
+  </button>
+
+
+
+  <div class="topnav-wrap" id="topnav-wrap">
+    <button id="topnav__close-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__close-button" type="button"
+aria-controls="topnav-wrap" aria-label="Close menu">
+      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#times"></use>
+      </svg>
     </button>
-    -->
+    <ul class="topnav">
+      <li class="topnav__item">
+        <%= link_to docs_path, :class => "topnav__link" do %>
+          Documentation
+        <% end %>
+      </li>
 
-    <!--
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="topnav">
-        <li class="topnav__item">
-          <a class="topnav__link" href="">Support</a>
-        </li>
+      <li class="topnav__item">
+        <a class="topnav__link" href="#">Support</a>
+      </li>
 
-        <li class="topnav__item">
-          <a class="topnav__link" href="#">Blog</a>
-        </li>
-
-        <li class="topnav__item">
-         <a class="ds-c-button ds-c-button--success" href="#">Sign Up For Beta!</a>
-        </li>
-      </ul>
-    </div>
-    -->
-  </nav>
-</div>
+      <li class="topnav__item">
+       <%= link_to docs_path, :class => "ds-c-button ds-c-button--primary" do %>
+         Request access
+       <% end %>
+      </li>
+    </ul>
+  </div>
+</nav>
