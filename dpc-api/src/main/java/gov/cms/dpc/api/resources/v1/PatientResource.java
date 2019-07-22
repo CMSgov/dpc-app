@@ -10,7 +10,7 @@ import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+@Api(value = "Patient")
 public class PatientResource extends AbstractPatientResource {
 
     // TODO: This should be moved into a helper class, in DPC-432.
@@ -36,6 +37,8 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Search for Patients", notes = "FHIR endpoint for searching for Patient resources." +
+            "<p> If Patient Identifier is provided, results will be filtered to match the given property")
     @Override
     public Bundle getPatients(@ApiParam(hidden = true)
                               @Auth OrganizationPrincipal organization,
@@ -71,6 +74,7 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @Override
     public Patient submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, Patient patient) {
 
@@ -96,8 +100,10 @@ public class PatientResource extends AbstractPatientResource {
     @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Fetch Patient", notes = "Fetch specific Patient record.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Patient with given ID"))
     @Override
-    public Patient getPatient(@PathParam("patientID") UUID patientID) {
+    public Patient getPatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID) {
         return this.client
                 .read()
                 .resource(Patient.class)
@@ -112,8 +118,10 @@ public class PatientResource extends AbstractPatientResource {
     @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Delete Patient", notes = "Remove specific Patient record")
+    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to delete"))
     @Override
-    public Response deletePatient(@PathParam("patientID") UUID patientID) {
+    public Response deletePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID) {
         this.client
                 .delete()
                 .resourceById("Patient", patientID.toString())
@@ -129,8 +137,11 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Update Patient record", notes = "Update specific Patient record." +
+            "<p>Currently, this method only allows for updating of the Patient first/last name, and BirthDate.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to update"))
     @Override
-    public Patient updatePatient(@PathParam("patientID") UUID patientID, Patient patient) {
+    public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(patient)

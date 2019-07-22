@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources;
 
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -12,6 +13,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.sql.Date;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -98,12 +100,81 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientRemoval() {
+    void testPatientRemoval() throws IOException {
+        final IParser parser = ctx.newJsonParser();
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        final String macaroon = APITestHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
 
+        final Bundle patients = client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .execute();
+
+        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
+
+        // Try to remove one
+
+        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
+
+        client
+                .delete()
+                .resource(patient)
+                .encodedJson()
+                .execute();
+
+        // Make sure it's done
+
+        final IReadExecutable<Patient> fetchRequest = client
+                .read()
+                .resource(Patient.class)
+                .withId(patient.getId())
+                .encodedJson();
+
+        // TODO: DPC-433, this really should be NotFound, but we can't disambiguate between the two cases
+        assertThrows(AuthenticationException.class, fetchRequest::execute, "Should not have found the resource");
+
+        // Search again
+        final Bundle secondSearch = client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .execute();
+
+        assertEquals(99, secondSearch.getTotal(), "Should have correct number of patients");
     }
 
     @Test
-    void testPatientUpdating() {
+    void testPatientUpdating() throws IOException {
+        final IParser parser = ctx.newJsonParser();
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        final String macaroon = APITestHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
 
+        final Bundle patients = client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .execute();
+
+        assertEquals(99, patients.getTotal(), "Should have correct number of patients");
+
+        // Try to remove one
+
+        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
+        patient.setBirthDate(Date.valueOf("2000-01-01"));
+
+        final MethodOutcome outcome = client
+                .update()
+                .resource(patient)
+                .withId(patient.getId())
+                .encodedJson()
+                .execute();
+
+        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
     }
 }

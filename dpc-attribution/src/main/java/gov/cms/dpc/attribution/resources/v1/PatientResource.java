@@ -129,6 +129,7 @@ public class PatientResource extends AbstractPatientResource {
     @UnitOfWork
     @ApiOperation(value = "Update Patient record", notes = "Update specific Patient record." +
             "<p>Currently, this method only allows for updating of the Patient first/last name, and BirthDate.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to update"))
     @Override
     public Response updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
         final PatientEntity patientEntity = this.dao.updatePatient(patientID, PatientEntity.fromFHIR(patient));
