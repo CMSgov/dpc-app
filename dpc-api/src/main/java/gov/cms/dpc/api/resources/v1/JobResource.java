@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -48,6 +49,7 @@ public class JobResource extends AbstractJobResource {
 
     @Override
     @Path("/{jobID}")
+    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "jobID")
     @GET
     @Timed
     @ExceptionMetered
