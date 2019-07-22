@@ -1,26 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>
-      <%= content_for?(:title) ? yield(:title) : 'CMS.gov' %> | Data at the Point of Care
-    </title>
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag    'application', media: 'all' %>
-  </head>
+  <%= render partial: 'shared/head' %>
 
   <body class="ds-base">
-
-    <a class="ds-c-skip-nav" href="#main">Skip to main content</a>
-
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
-    <!-- hero -->
-    <% if controller.controller_name == "public" %>
-      <%= render partial: 'public/hero' %>
-    <% else %>
     <div class="ds-l-container">
       <div class="ds-l-row">
         <div class="ds-l-col--12">
@@ -28,21 +14,14 @@
         </div>
       </div>
     </div>
-    <% end %>
 
     <!-- content -->
-    <% if controller.controller_name == "public" %>
-      <%= yield %>
-    <% else %>
     <section class="ds-l-container" id="main">
       <%= yield %>
     </section>
-    <% end %>
 
 
     <%= render partial: 'shared/footer' %>
-
-    <%= javascript_include_tag 'application' %>
 
   </body>
 </html>
