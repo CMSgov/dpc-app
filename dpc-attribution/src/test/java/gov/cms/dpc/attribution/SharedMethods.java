@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.http.HttpEntity;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -28,13 +29,13 @@ public class SharedMethods {
 
         // Create the provider with the necessary fields
         final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(providerID);
+        practitioner.addIdentifier().setValue(providerID).setSystem(DPCIdentifierSystem.MBI.getSystem());
         practitioner.addName().addGiven("Test").setFamily("Provider");
         bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
 
         // Add some random values to the patient
         final Patient patient = new Patient();
-        patient.addIdentifier().setValue(patientID);
+        patient.addIdentifier().setValue(patientID).setSystem(DPCIdentifierSystem.MBI.getSystem());
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
         final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();

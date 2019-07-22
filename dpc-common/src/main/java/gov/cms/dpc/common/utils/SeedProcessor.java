@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.utils;
 
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -73,7 +74,7 @@ public class SeedProcessor {
                 .forEach((value) -> {
                     // Add some random values to the patient
                     final Patient patient = new Patient();
-                    patient.addIdentifier().setValue(value.getRight());
+                    patient.addIdentifier().setValue(value.getRight()).setSystem(DPCIdentifierSystem.MBI.getSystem());
                     patient.addName().addGiven("Tester " + rand.nextInt()).setFamily("Patient");
                     patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
                     final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();

@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
  * <p>
  * Make sure APIKEY environment variable it set
  */
+@Disabled
 class GenerateRosters {
 
     private static final String CSV = "test_associations.csv";

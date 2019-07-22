@@ -17,7 +17,7 @@ public class FHIRBuilders {
      */
     public static Practitioner buildPractitionerFromNPI(String npi) {
         final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(npi);
+        practitioner.addIdentifier().setValue(npi).setSystem(DPCIdentifierSystem.NPPES.getSystem());
 
         return practitioner;
     }
@@ -30,7 +30,7 @@ public class FHIRBuilders {
      */
     public static Patient buildPatientFromMBI(String MPI) {
         final Patient patient = new Patient();
-        patient.addIdentifier().setValue(MPI);
+        patient.addIdentifier().setValue(MPI).setSystem(DPCIdentifierSystem.MBI.getSystem());
 
         return patient;
     }
