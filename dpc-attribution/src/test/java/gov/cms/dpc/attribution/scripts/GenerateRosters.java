@@ -77,7 +77,7 @@ class GenerateRosters {
         }
 
         // Dump it all to a file
-        try (FileWriter fileWriter = new FileWriter("../src/main/resources/patient_bundle.json")) {
+        try (FileWriter fileWriter = new FileWriter("../src/main/resources/patient_bundle.json", StandardCharsets.UTF_8)) {
             ctx.newJsonParser().encodeResourceToWriter(patientBundle, fileWriter);
         }
     }
