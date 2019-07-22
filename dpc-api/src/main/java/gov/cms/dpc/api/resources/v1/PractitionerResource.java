@@ -118,6 +118,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @DELETE
     @Path("/{providerID}")
+    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -138,6 +139,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @PUT
     @Path("/{providerID}")
+    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID")
     @FHIR
     @Timed
     @ExceptionMetered

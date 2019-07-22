@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
 import io.swagger.annotations.Api;
@@ -7,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 import javax.inject.Inject;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 
@@ -40,12 +42,15 @@ public class BaseResource extends AbstractBaseResource {
     }
 
     @Override
+    @Public
     @ApiOperation(value = "Return the software version", hidden = true)
     public String version() {
         return "Version 1";
     }
 
     @Override
+    @GET
+    @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     public CapabilityStatement metadata() {
         return Capabilities.buildCapabilities();
