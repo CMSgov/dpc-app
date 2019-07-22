@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractDefinitionResource;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -8,6 +9,7 @@ import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
 import javax.inject.Inject;
@@ -45,6 +47,7 @@ public class DefinitionResource extends AbstractDefinitionResource {
     @Override
     @GET
     @Path("/{definitionID}")
+    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "definitionId")
     @FHIR
     @ApiOperation(value = "Fetch specific structure definition", notes = "FHIR endpoint to fetch a specific structure definition from the server.", response = StructureDefinition.class)
     public StructureDefinition getStructureDefinition(@PathParam("definitionID") String definitionID) {
