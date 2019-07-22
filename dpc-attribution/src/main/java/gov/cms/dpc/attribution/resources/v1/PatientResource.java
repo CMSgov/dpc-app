@@ -37,19 +37,23 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Search for Patients", notes = "Search for Patient records, optionally restricting by associated organization." +
-            "<p>Must provide ONE OF organization ID or patient MBI to search for")
+            "<p>Must provide ONE OF organization ID, patient MBI, or Patient Resource ID to search for")
     @ApiResponses(@ApiResponse(code = 400, message = "Must have Organization ID or Patient MBI in order to search"))
     @Override
-    public Bundle searchPatients(@ApiParam(value = "Patient MBI")
-                                 @QueryParam("identifier") String patientMBI,
-                                 @ApiParam(value = "Organization ID")
-                                 @QueryParam("organization") String organizationReference) {
-        if (patientMBI == null && organizationReference == null) {
-            throw new WebApplicationException("Must have either Patient Identifier or Organization Resource ID", Response.Status.BAD_REQUEST);
+    public Bundle searchPatients(
+            @ApiParam(value = "Patient resource ID")
+            @QueryParam("_id") UUID resourceID,
+            @ApiParam(value = "Patient MBI")
+            @QueryParam("identifier") String patientMBI,
+            @ApiParam(value = "Organization ID")
+            @QueryParam("organization") String organizationReference) {
+        if (patientMBI == null && organizationReference == null && resourceID == null) {
+            throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
         }
 
         final String idValue;
 
+        // Extract the Patient MBI from the query param
         if (patientMBI != null) {
             final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
             if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
@@ -61,7 +65,7 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
-        final List<Bundle.BundleEntryComponent> patientEntries = this.dao.patientSearch(idValue, organizationID)
+        final List<Bundle.BundleEntryComponent> patientEntries = this.dao.patientSearch(resourceID, idValue, organizationID)
                 .stream()
                 .map(PatientEntityConverter::convert)
                 .map(patient -> new Bundle.BundleEntryComponent().setResource(patient))

@@ -2,6 +2,8 @@ package gov.cms.dpc.api.resources;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -12,8 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PatientResourceTest extends AbstractSecureApplicationTest {
 
@@ -27,7 +28,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = APITestHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID);
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
-//        APITestHelpers.setupPatientTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = client
                 .search()
@@ -49,16 +50,16 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(1, specificSearch.getTotal(), "Should have a single patient");
 
         // Fetch the provider directly
-        final Patient foundProvider = (Patient) specificSearch.getEntryFirstRep().getResource();
+        final Patient foundPatient = (Patient) specificSearch.getEntryFirstRep().getResource();
 
         final Patient queriedProvider = client
                 .read()
                 .resource(Patient.class)
-                .withId(foundProvider.getIdElement())
+                .withId(foundPatient.getIdElement())
                 .encodedJson()
                 .execute();
 
-        assertTrue(foundProvider.equalsDeep(queriedProvider), "Search and GET should be identical");
+        assertTrue(foundPatient.equalsDeep(queriedProvider), "Search and GET should be identical");
 
         // Create a new org and make sure it has no providers
         final String m2 = APITestHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID);
@@ -66,24 +67,43 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         // Update the Macaroons interceptor to use the new Organization token
         ((APITestHelpers.MacaroonsInterceptor) client.getInterceptors().get(0)).setMacaroon(m2);
 
-        final Bundle otherPractitioners = client
+        final Bundle otherPatients = client
                 .search()
                 .forResource(Patient.class)
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
 
-        assertEquals(0, otherPractitioners.getTotal(), "Should not have any practitioners");
+        assertEquals(0, otherPatients.getTotal(), "Should not have any practitioners");
 
-        // Try to look for one of the other practitioners
+        // Try to look for one of the other patients
+        final IReadExecutable<Patient> fetchRequest = client
+                .read()
+                .resource(Patient.class)
+                .withId(foundPatient.getId())
+                .encodedJson();
+
+        assertThrows(AuthenticationException.class, fetchRequest::execute, "Should not be authorized");
+
+        // Search, and find nothing
         final Bundle otherSpecificSearch = client
                 .search()
                 .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().identifier(foundProvider.getIdentifierFirstRep().getValue()))
+                .where(Patient.IDENTIFIER.exactly().identifier(foundPatient.getIdentifierFirstRep().getValue()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
 
         assertEquals(0, otherSpecificSearch.getTotal(), "Should have a specific provider");
+    }
+
+    @Test
+    void testPatientRemoval() {
+
+    }
+
+    @Test
+    void testPatientUpdating() {
+
     }
 }

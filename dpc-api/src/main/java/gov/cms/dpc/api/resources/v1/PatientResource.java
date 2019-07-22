@@ -17,8 +17,13 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class PatientResource extends AbstractPatientResource {
+
+    // TODO: This should be moved into a helper class, in DPC-432.
+    // This checks to see if the Identifier is fully specified or not.
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
 
     private final IGenericClient client;
 
@@ -45,8 +50,17 @@ public class PatientResource extends AbstractPatientResource {
                 .returnBundle(Bundle.class);
 
         if (patientMBI != null && !patientMBI.equals("")) {
+
+            // Handle MBI parsing
+            // This should come out as part of DPC-432
+            final String expandedMBI;
+            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
+                expandedMBI = patientMBI;
+            } else {
+                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
+            }
             return request
-                    .where(Patient.IDENTIFIER.exactly().identifier(patientMBI))
+                    .where(Patient.IDENTIFIER.exactly().identifier(expandedMBI))
                     .execute();
         }
 

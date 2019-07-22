@@ -206,7 +206,7 @@ public class APITestHelpers {
     static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
             IOException {
         ConfigFactory.invalidateCaches();
-//        truncateDatabase();
+        truncateDatabase();
         application.before();
     }
 

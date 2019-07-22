@@ -26,7 +26,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         return Optional.ofNullable(get(patientID));
     }
 
-    public List<PatientEntity> patientSearch(String patientMBI, UUID organizationID) {
+    public List<PatientEntity> patientSearch(UUID resourceID, String patientMBI, UUID organizationID) {
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
@@ -34,6 +34,10 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         query.select(root);
 
         List<Predicate> predicates = new ArrayList<>();
+        if (resourceID != null) {
+            predicates.add(builder.equal(root.get("patientID"), resourceID));
+        }
+
         if (patientMBI != null) {
             predicates.add(builder.equal(root.get("beneficiaryID"), patientMBI));
         }
