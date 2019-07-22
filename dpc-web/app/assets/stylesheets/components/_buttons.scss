@@ -1,0 +1,31 @@
+.ds-c-button {
+  box-sizing: border-box;
+  font-family: $font-sans;
+}
+
+.ds-c-button--big {
+  width: 100%;
+
+  @media (min-width: $width-sm) {
+    width: auto;
+  }
+}
+
+.ds-c-button--big + .ds-c-button--big {
+  margin: $spacer-2 0 0;
+
+  @media (min-width: $width-md) {
+    margin: 0 0 0 $spacer-2;
+  }
+}
+
+.ds-c-button--inverse--alt {
+  border-color: $color-primary-alt-lightest;
+  color: $color-primary-alt-lightest;
+
+  &:hover,
+  &:focus {
+    border-color: $color-white;
+    color: $color-white;
+  }
+}
