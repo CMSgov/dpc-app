@@ -46,7 +46,7 @@ public class PatientResource extends AbstractPatientResource {
 
         if (patientMBI != null && !patientMBI.equals("")) {
             return request
-                    .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), patientMBI))
+                    .where(Patient.IDENTIFIER.exactly().identifier(patientMBI))
                     .execute();
         }
 
@@ -83,7 +83,7 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @Override
-    public Patient getPatient(UUID patientID) {
+    public Patient getPatient(@PathParam("patientID") UUID patientID) {
         return this.client
                 .read()
                 .resource(Patient.class)
@@ -99,7 +99,7 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @Override
-    public Response deletePatient(UUID patientID) {
+    public Response deletePatient(@PathParam("patientID") UUID patientID) {
         this.client
                 .delete()
                 .resourceById("Patient", patientID.toString())
@@ -116,7 +116,7 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @Override
-    public Patient updatePatient(UUID patientID, Patient patient) {
+    public Patient updatePatient(@PathParam("patientID") UUID patientID, Patient patient) {
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(patient)

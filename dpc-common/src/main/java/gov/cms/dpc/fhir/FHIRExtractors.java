@@ -74,7 +74,13 @@ public class FHIRExtractors {
 
         final Pair<String, String> stringPair = parseTag(queryParam);
         final Identifier identifier = new Identifier();
-        identifier.setSystem(stringPair.getLeft());
+        // Strip off any trailing '\' characters.
+        // These might come in when parsing an ID that was generated with HAPI using the systemAndCode method
+        String system = stringPair.getLeft();
+        if (system.endsWith("\\")) {
+            system = system.substring(0, system.length() - 1);
+        }
+        identifier.setSystem(system);
         identifier.setValue(stringPair.getRight());
         return identifier;
     }

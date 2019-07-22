@@ -4,8 +4,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -14,46 +15,45 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PractitionerResourceTest extends AbstractSecureApplicationTest {
+class PatientResourceTest extends AbstractSecureApplicationTest {
 
-    PractitionerResourceTest() {
+    PatientResourceTest() {
         // Not used
     }
 
     @Test
-    void ensurePractitionersExist() throws IOException {
+    void ensurePatientsExist() throws IOException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = APITestHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID);
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
-        APITestHelpers.setupPractitionerTest(client, parser);
+//        APITestHelpers.setupPatientTest(client, parser);
 
-        // Find everything attributed
-        final Bundle practitioners = client
+        final Bundle patients = client
                 .search()
-                .forResource(Practitioner.class)
-                .returnBundle(Bundle.class)
+                .forResource(Patient.class)
                 .encodedJson()
+                .returnBundle(Bundle.class)
                 .execute();
 
-        assertEquals(4, practitioners.getTotal(), "Should have all the providers");
+        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
 
         final Bundle specificSearch = client
                 .search()
-                .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("8075963174210588464"))
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "20000000000882"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
 
-        assertEquals(1, specificSearch.getTotal(), "Should have a specific provider");
+        assertEquals(1, specificSearch.getTotal(), "Should have a single patient");
 
         // Fetch the provider directly
-        final Practitioner foundProvider = (Practitioner) specificSearch.getEntryFirstRep().getResource();
+        final Patient foundProvider = (Patient) specificSearch.getEntryFirstRep().getResource();
 
-        final Practitioner queriedProvider = client
+        final Patient queriedProvider = client
                 .read()
-                .resource(Practitioner.class)
+                .resource(Patient.class)
                 .withId(foundProvider.getIdElement())
                 .encodedJson()
                 .execute();
@@ -68,7 +68,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         final Bundle otherPractitioners = client
                 .search()
-                .forResource(Practitioner.class)
+                .forResource(Patient.class)
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -78,14 +78,12 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         // Try to look for one of the other practitioners
         final Bundle otherSpecificSearch = client
                 .search()
-                .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().identifier(foundProvider.getIdentifierFirstRep().getValue()))
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().identifier(foundProvider.getIdentifierFirstRep().getValue()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
 
         assertEquals(0, otherSpecificSearch.getTotal(), "Should have a specific provider");
-
-        // Try to search for our fund provider
     }
 }

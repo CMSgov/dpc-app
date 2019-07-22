@@ -47,13 +47,21 @@ public class PatientResource extends AbstractPatientResource {
         if (patientMBI == null && organizationReference == null) {
             throw new WebApplicationException("Must have either Patient Identifier or Organization Resource ID", Response.Status.BAD_REQUEST);
         }
-        final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
-        if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
-            throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
+
+        final String idValue;
+
+        if (patientMBI != null) {
+            final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
+            if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
+                throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
+            }
+            idValue = patientIdentifier.getValue();
+        } else {
+            idValue = null;
         }
 
         final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
-        final List<Bundle.BundleEntryComponent> patientEntries = this.dao.patientSearch(patientIdentifier.getValue(), organizationID)
+        final List<Bundle.BundleEntryComponent> patientEntries = this.dao.patientSearch(idValue, organizationID)
                 .stream()
                 .map(PatientEntityConverter::convert)
                 .map(patient -> new Bundle.BundleEntryComponent().setResource(patient))
@@ -65,19 +73,6 @@ public class PatientResource extends AbstractPatientResource {
         searchBundle.setEntry(patientEntries);
         return searchBundle;
 
-    }
-
-    @POST
-    @FHIR
-    @UnitOfWork
-    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field.")
-    @Override
-    public Response createPatient(Patient patient) {
-        final PatientEntity entity = this.dao.persistPatient(PatientEntity.fromFHIR(patient));
-
-        return Response.status(Response.Status.CREATED)
-                .entity(PatientEntityConverter.convert(entity))
-                .build();
     }
 
     @GET
@@ -93,6 +88,19 @@ public class PatientResource extends AbstractPatientResource {
                         new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND));
 
         return PatientEntityConverter.convert(patientEntity);
+    }
+
+    @POST
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field.")
+    @Override
+    public Response createPatient(Patient patient) {
+        final PatientEntity entity = this.dao.persistPatient(PatientEntity.fromFHIR(patient));
+
+        return Response.status(Response.Status.CREATED)
+                .entity(PatientEntityConverter.convert(entity))
+                .build();
     }
 
     @DELETE

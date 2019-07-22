@@ -135,6 +135,26 @@ public class APITestHelpers {
         }
     }
 
+    public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
+            final Bundle patientBundle = (Bundle) parser.parseResource(inputStream);
+
+            // Post them all
+            patientBundle
+                    .getEntry()
+                    .stream()
+                    .map(Bundle.BundleEntryComponent::getResource)
+                    .map(resource -> (Patient) resource)
+                    .forEach(patient -> {
+                        client
+                                .create()
+                                .resource(patient)
+                                .encodedJson()
+                                .execute();
+                    });
+        }
+    }
+
     /**
      * Build Dropwizard test instance with a specific subset of Resources and Providers
      *
@@ -144,7 +164,8 @@ public class APITestHelpers {
      * @param validation - {@code true} enable custom validation. {@code false} Disable custom validation
      * @return
      */
-    public static ResourceExtension buildResourceExtension(FhirContext ctx, List<Object> resources, List<Object> providers, boolean validation) {
+    public static ResourceExtension buildResourceExtension(FhirContext
+                                                                   ctx, List<Object> resources, List<Object> providers, boolean validation) {
 
         final var builder = ResourceExtension
                 .builder()
@@ -182,9 +203,10 @@ public class APITestHelpers {
         return client;
     }
 
-    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws IOException {
+    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
+            IOException {
         ConfigFactory.invalidateCaches();
-        truncateDatabase();
+//        truncateDatabase();
         application.before();
     }
 
@@ -199,7 +221,8 @@ public class APITestHelpers {
         }
     }
 
-    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws IOException {
+    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
+            IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
         try (CloseableHttpClient client = HttpClients.createDefault()) {
