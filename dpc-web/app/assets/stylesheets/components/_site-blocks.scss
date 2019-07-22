@@ -26,6 +26,10 @@
 
 .site-block--alt {
   background-color: $color-primary-alt-lightest;
+
+  a {
+    color: $color-primary-darker;
+  }
 }
 
 .site-block-header * {

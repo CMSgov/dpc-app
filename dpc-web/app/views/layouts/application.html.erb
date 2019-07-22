@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>
       <%= content_for?(:title) ? yield(:title) : 'CMS.gov' %> | Data at the Point of Care
@@ -43,6 +43,6 @@
     <%= render partial: 'shared/footer' %>
 
     <%= javascript_include_tag 'application' %>
-    
+
   </body>
 </html>

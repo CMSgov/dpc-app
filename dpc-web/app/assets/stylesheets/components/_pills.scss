@@ -29,16 +29,16 @@
 }
 
 .site-pills__item--orange {
-  background-color: $color-warn-lightest;
+  background-color: rgba($color-warn-lightest, .9);
   color: $color-warn-alt;
 }
 
 .site-pills__item--dark-blue {
-  background-color: $color-primary-alt-light;
+  background-color: rgba($color-primary-alt-light, .7);
   color: $color-primary-alt-dark;
 }
 
 .site-pills__item--green {
-  background-color: $color-success-lightest;
-  color: $color-success
+  background-color: rgba($color-success-lightest, .9);
+  color: $color-success;
 }
