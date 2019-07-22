@@ -3,7 +3,81 @@
   color: $color-white;
   padding: $spacer-7 0;
 
+  h1 {
+    color: $color-white;
+    line-height: 1.2;
+    margin: $spacer-2 0 0;
+  }
+
   a:not(.ds-c-button) {
     color: $color-primary-alt-light;
+  }
+}
+
+.hero__badge {
+  background: $color-primary-alt-lightest;
+  border-radius: 8px;
+  color: $color-primary-darkest;
+  display: inline-block;
+  font-weight: $font-bold;
+  margin: $spacer-2 0;
+  padding: $spacer-1 $spacer-2;
+  text-transform: uppercase;
+}
+
+.hero__primary-heading {
+  font-size: $h1-font-size;
+  margin-bottom: 0;
+
+  @media (min-width: $width-md) {
+    font-size: $h1-font-size;
+  }
+
+  @media (min-width: $width-lg) {
+    font-size: $display-font-size;
+  }
+}
+
+.hero__container {
+  align-items: center;
+
+  flex-direction: column;
+
+  @media (min-width: $width-md) {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: row;
+  }
+
+  @media (min-width: $width-lg) {
+    align-items: center;
+  }
+}
+
+.hero__image-container {
+  @media (min-width: $width-md) {
+    padding-left: $spacer-3;
+    padding-top: 90px;
+  }
+
+  @media (min-width: $width-lg) {
+    padding-top: 0;
+    padding-left: $spacer-7;
+  }
+}
+
+.hero__image {
+  display: block;
+  height: 100%;
+  margin: $spacer-5 auto 0;
+  width: 10rem;
+
+  @media (min-width: $width-md) {
+    margin: 0;
+    width: 12rem;
+  }
+
+  @media (min-width: $width-lg) {
+    width: 21rem;
   }
 }
