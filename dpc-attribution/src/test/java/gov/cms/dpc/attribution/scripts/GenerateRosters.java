@@ -10,9 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.MissingResourceException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +46,7 @@ class GenerateRosters {
         patientBundle.setType(Bundle.BundleType.COLLECTION);
 
         // List of Patients from the test seeds file
-        final List<String> idFromSeeds = getPatientIDFromSeeds();
+        final List<String> idFromSeeds = new ArrayList<>(getPatientIDFromSeeds());
 
         final Bundle syntheaBundle = client
                 .search()
@@ -82,8 +80,8 @@ class GenerateRosters {
         }
     }
 
-    private List<String> getPatientIDFromSeeds() throws IOException {
-        List<String> patientIDs = new ArrayList<>();
+    private Set<String> getPatientIDFromSeeds() throws IOException {
+        Set<String> patientIDs = new HashSet<>();
         try (InputStream stream = GenerateRosters.class.getClassLoader().getResourceAsStream(CSV)) {
 
             if (stream == null) {

@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -43,8 +44,7 @@ public class FHIRExtractors {
      * @return - {@link String} patient MBI
      */
     public static String getPatientMPI(Patient patient) {
-        // This should probably find the ID with the correct URI, instead of just pulling the first value
-        return patient.getIdentifierFirstRep().getValue();
+        return findMatchingIdentifier(patient.getIdentifier(), DPCIdentifierSystem.MBI).getValue();
     }
 
     /**
@@ -92,12 +92,20 @@ public class FHIRExtractors {
      * @param tag - {@link String} tag to parse
      * @return - {@link Pair} of System {@link String} and Code {@link String}
      */
-    public static Pair<String, String> parseTag(String tag) {
+    private static Pair<String, String> parseTag(String tag) {
         final int idx = tag.indexOf('|');
         if (idx <= 0) {
-            throw new IllegalArgumentException("Malformed tag");
+            throw new IllegalArgumentException(String.format("Malformed tag: %s", tag));
         }
 
         return Pair.of(tag.substring(0, idx), tag.substring(idx + 1));
+    }
+
+    private static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) {
+        return identifiers
+                .stream()
+                .filter(id -> id.getSystem().equals(DPCIdentifierSystem.MBI.getSystem()))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Cannot find identifier for system: %s", system.getSystem())));
     }
 }

@@ -72,7 +72,6 @@ public class PatientResource extends AbstractPatientResource {
         searchBundle.setTotal(patientEntries.size());
         searchBundle.setEntry(patientEntries);
         return searchBundle;
-
     }
 
     @GET

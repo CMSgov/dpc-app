@@ -175,7 +175,7 @@ public class PatientEntity implements Serializable {
 
         final PatientEntity patient = new PatientEntity();
         patient.setDob(PatientEntity.toLocalDate(resource.getBirthDate()));
-        patient.setBeneficiaryID(resource.getIdentifierFirstRep().getValue());
+        patient.setBeneficiaryID(FHIRExtractors.getPatientMPI(resource));
         final HumanName name = resource.getNameFirstRep();
         patient.setPatientFirstName(name.getGivenAsSingleString());
         patient.setPatientLastName(name.getFamily());
