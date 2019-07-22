@@ -45,7 +45,6 @@ class APIResourceAnnotationTest {
                 .addAll(reflections.getMethodsAnnotatedWith(HEAD.class))
                 .addAll(reflections.getMethodsAnnotatedWith(DELETE.class))
                 .addAll(reflections.getMethodsAnnotatedWith(PATCH.class))
-                .addAll(reflections.getMethodsAnnotatedWith(ApiOperation.class))
                 .build();
 
         methods = methods.stream()

@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 import javax.inject.Inject;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 
@@ -48,6 +49,7 @@ public class BaseResource extends AbstractBaseResource {
     }
 
     @Override
+    @GET
     @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     public CapabilityStatement metadata() {
