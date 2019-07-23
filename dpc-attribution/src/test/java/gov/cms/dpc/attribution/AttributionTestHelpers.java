@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 
+import java.io.InputStream;
 import java.sql.Date;
 
 public class AttributionTestHelpers {
@@ -43,5 +44,25 @@ public class AttributionTestHelpers {
     public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(serverURL);
+    }
+
+    public static Organization createOrganization(FhirContext ctx, String serverURL) {
+        // Read in the test file
+        final InputStream inputStream = AttributionTestHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
+        final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
+
+        final IGenericClient client = createFHIRClient(ctx, serverURL);
+
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(resource);
+
+        return client
+                .operation()
+                .onType(Organization.class)
+                .named("submit")
+                .withParameters(parameters)
+                .returnResourceType(Organization.class)
+                .encodedJson()
+                .execute();
     }
 }

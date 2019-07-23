@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.SharedMethods.UnmarshallResponse;
 import static gov.cms.dpc.attribution.SharedMethods.createAttributionBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,7 +65,7 @@ class ExpirationJobTest {
 
         // Manually add a new relationship with a current creation timestamp
         final String newPatientID = "test-new-patient-id";
-        final Bundle updateBundle = createAttributionBundle(PROVIDER_ID, newPatientID);
+        final Bundle updateBundle = createAttributionBundle(PROVIDER_ID, newPatientID, DEFAULT_ORG_ID);
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
 

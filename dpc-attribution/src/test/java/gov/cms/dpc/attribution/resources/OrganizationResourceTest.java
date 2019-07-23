@@ -33,24 +33,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBasicRegistration() {
-
-        // Read in the test file
-        final InputStream inputStream = OrganizationResourceTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
-        final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
-
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-
-        final Parameters parameters = new Parameters();
-        parameters.addParameter().setResource(resource);
-
-        client
-                .operation()
-                .onType(Organization.class)
-                .named("submit")
-                .withParameters(parameters)
-                .returnResourceType(Organization.class)
-                .encodedJson()
-                .execute();
+        assertNotNull(AttributionTestHelpers.createOrganization(ctx, getServerURL()), "Should have org");
     }
 
     @Test

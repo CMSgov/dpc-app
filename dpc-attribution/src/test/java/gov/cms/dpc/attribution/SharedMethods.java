@@ -3,15 +3,15 @@ package gov.cms.dpc.attribution;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.http.HttpEntity;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.UUID;
+
+import static gov.cms.dpc.attribution.AbstractAttributionTest.ORGANIZATION_ID;
 
 public class SharedMethods {
 
@@ -22,7 +22,7 @@ public class SharedMethods {
         return (List<T>) mapper.readValue(entity.getContent(), List.class);
     }
 
-    public static Bundle createAttributionBundle(String providerID, String patientID) {
+    public static Bundle createAttributionBundle(String providerID, String patientID, String organizationID) {
         final Bundle bundle = new Bundle();
         bundle.setId(new IdType("Roster", "bundle-update"));
         bundle.setType(Bundle.BundleType.COLLECTION);
@@ -31,6 +31,10 @@ public class SharedMethods {
         final Practitioner practitioner = new Practitioner();
         practitioner.addIdentifier().setValue(providerID).setSystem(DPCIdentifierSystem.MBI.getSystem());
         practitioner.addName().addGiven("Test").setFamily("Provider");
+
+        final Meta meta = new Meta();
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organizationID, "Organization ID");
+        practitioner.setMeta(meta);
         bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
 
         // Add some random values to the patient

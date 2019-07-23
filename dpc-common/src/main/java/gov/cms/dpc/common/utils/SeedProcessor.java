@@ -69,6 +69,7 @@ public class SeedProcessor {
         // Add the Organization ID
         final Meta meta = new Meta();
         meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organizationID.toString(), "Organization ID");
+        practitioner.setMeta(meta);
 
         bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
 

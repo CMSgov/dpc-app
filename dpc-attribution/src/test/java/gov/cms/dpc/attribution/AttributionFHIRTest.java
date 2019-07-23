@@ -17,6 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.AfterAll;
@@ -30,18 +31,18 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.SharedMethods.createAttributionBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AttributionFHIRTest {
-
-    private static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static Organization organization;
 
     @BeforeAll
     public static void setup() throws Exception {
@@ -57,6 +58,9 @@ public class AttributionFHIRTest {
 
         // Read in the seeds and create the 'Roster' bundle
         groupedPairs = SeedProcessor.extractProviderMap(resource);
+
+        // Create the Organization
+        organization = AttributionTestHelpers.createOrganization(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort()));
     }
 
     @AfterAll
@@ -67,9 +71,11 @@ public class AttributionFHIRTest {
     @TestFactory
     Stream<DynamicTest> generateBundleTests() {
 
+        // Create the Organization
+
         BiFunction<Bundle, String, String> nameGenerator = (bundle, operation) -> String.format("[%s] provider: %s", operation.toUpperCase(), ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue());
 
-        final UUID orgID = UUID.fromString(ORGANIZATION_ID);
+        final UUID orgID = UUID.fromString(organization.getIdElement().getIdPart());
 
         // Get all the provider IDs and generate tests for them.
         return groupedPairs
@@ -133,7 +139,7 @@ public class AttributionFHIRTest {
             // Add an additional patient
             // Create a new bundle with extra patients to attribute
             final String newPatientID = "test-new-patient-id";
-            final Bundle updateBundle = createAttributionBundle(providerID, newPatientID);
+            final Bundle updateBundle = createAttributionBundle(providerID, newPatientID, organization.getIdElement().getIdPart());
 
             // Submit the bundle
             final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
