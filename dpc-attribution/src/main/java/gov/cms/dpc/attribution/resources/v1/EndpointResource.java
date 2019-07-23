@@ -33,4 +33,6 @@ public class EndpointResource extends AbstractEndpointResource {
     public Response createEndpoint(Endpoint endpoint) {
         return Response.status(Response.Status.CREATED).build();
     }
+
+
 }
