@@ -387,14 +387,14 @@ ul#markdown-toc {
   /* font-size: 0.8em; */
   /* list-style: none; */
     list-style-position: inside;
-    margin: 4px;
-    padding: 4px;
+    margin: 24px 0;
+    padding: 16px;
     /*float: right;*/
     z-index: 10;
     width: 100%;
-    background-color: #f5f5f5;
-    border: 1px solid #f5f5f5;
-    border-radius: 5px;
+    background-color: #F1F1F1;
+    border: 1px solid #D6D7D9;
+    border-radius: 2px;
 }
 
 li#markdown-toc {
