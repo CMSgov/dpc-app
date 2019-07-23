@@ -411,9 +411,10 @@ li#markdown-toc {
 }
 
 p#publish-box {
-  background-color: yellow;
-  border:1px solid maroon;
-  padding: 5px;
+  background-color: #FFF1D2;
+  border: 1px solid #FDB81E;
+  padding: 16px;
+  margin: 24px 0;
 }
 
 img#publish-box {
