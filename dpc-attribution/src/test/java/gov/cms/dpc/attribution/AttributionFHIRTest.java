@@ -35,7 +35,7 @@ import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.SharedMethods.createAttributionBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AttributionFHIRTest {
+class AttributionFHIRTest {
 
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final FhirContext ctx = FhirContext.forDstu3();
@@ -45,7 +45,7 @@ public class AttributionFHIRTest {
     private static Organization organization;
 
     @BeforeAll
-    public static void setup() throws Exception {
+    static void setup() throws Exception {
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything");
         APPLICATION.getApplication().run("db", "migrate");
@@ -64,7 +64,7 @@ public class AttributionFHIRTest {
     }
 
     @AfterAll
-    public static void shutdown() {
+    static void shutdown() {
         APPLICATION.after();
     }
 
@@ -130,7 +130,7 @@ public class AttributionFHIRTest {
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
             // Check how many are attributed
