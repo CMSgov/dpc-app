@@ -24,8 +24,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     void ensurePractitionersExist() throws IOException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = APITestHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID);
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
         APITestHelpers.setupPractitionerTest(client, parser);
 
         // Find everything attributed

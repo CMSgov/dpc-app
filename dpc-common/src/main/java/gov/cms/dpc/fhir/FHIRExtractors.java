@@ -4,6 +4,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +17,8 @@ import java.util.regex.Pattern;
  * Helper class for extracting various features from FHIR resources
  */
 public class FHIRExtractors {
+
+    private static final Logger logger = LoggerFactory.getLogger(FHIRExtractors.class);
 
     private static final Pattern idExtractor = Pattern.compile("/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/?");
 
@@ -49,11 +53,22 @@ public class FHIRExtractors {
 
     /**
      * Extracts the UUID from the ID of a given resource.
+     * <p>
+     * The ID could be in one of two forms: 1. {ResourceType}/{identifier}. 2. {identifier}
+     * In the first case, we need to strip off the Resource Type and then encode to {@link UUID}.
+     * In the second, we can try to encode directly.
      *
      * @param idString - {@link String} ID to parse
      * @return - {@link UUID} of resource
      */
     public static UUID getEntityUUID(String idString) {
+        logger.trace("Extracting from Entity ID {}", idString);
+        // Figure out if we need to split the Entity UUID, look for the '/' delimiter
+        final int delimIndex = idString.indexOf('/');
+        if (delimIndex < 0) {
+            return UUID.fromString(idString);
+        }
+
         final Matcher matcher = idExtractor.matcher(idString);
         if (!matcher.find() && !(matcher.groupCount() == 1)) {
             throw new IllegalArgumentException(String.format("Cannot extract string from '%s'", idString));

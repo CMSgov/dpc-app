@@ -16,6 +16,11 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,11 +100,14 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         final Practitioner pract2 = (Practitioner) outcome.getResource();
 
+
         // Try to fetch all the patients
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(DEFAULT_ORG_ID));
         final Bundle providers = client
                 .search()
                 .forResource(Practitioner.class)
-                .withTag("Organization", "Organization/" + AttributionTestHelpers.DEFAULT_ORG_ID)
+                .whereMap(searchParams)
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -107,12 +115,12 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         // We expect that the existing seeds already exist, plus the one we just added so this means 8 + 1 have been assigned to the organization
         assertEquals(9, providers.getEntry().size(), "Should have assigned providers");
 
+        searchParams.put("identifier", Collections.singletonList(pract2.getIdentifierFirstRep().getValue()));
         // Try to search for the provider, we should get the same results
         final Bundle searchedProviders = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Patient.IDENTIFIER.exactly().identifier(pract2.getIdentifierFirstRep().getValue()))
-                .withTag("Organization", "Organization/" + AttributionTestHelpers.DEFAULT_ORG_ID)
+                .whereMap(searchParams)
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();

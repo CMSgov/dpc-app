@@ -1,6 +1,7 @@
 package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.annotations.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
+
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 
 /**
  * Abstract test that enables the default token authentication backend.
@@ -22,7 +25,8 @@ public class AbstractSecureApplicationTest {
 
     protected static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
             ConfigOverride.config(KEY_PREFIX, "", "true"));
-    protected FhirContext ctx;
+    protected static FhirContext ctx;
+    protected static String ORGANIZATION_TOKEN;
 
     protected AbstractSecureApplicationTest() {
         // Not used
@@ -35,11 +39,14 @@ public class AbstractSecureApplicationTest {
     @BeforeAll
     public static void setup() throws IOException {
         APITestHelpers.setupApplication(APPLICATION);
+        ctx = FhirContext.forDstu3();
+        // Register a test organization for us
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        ORGANIZATION_TOKEN = APITestHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID);
     }
 
     @BeforeEach
     public void eachSetup() throws IOException {
-        ctx = FhirContext.forDstu3();
 
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
