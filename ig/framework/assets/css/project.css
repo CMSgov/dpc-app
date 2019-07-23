@@ -52,10 +52,10 @@ body {
   position: relative;
 }
 #segment-header {
-  background-color: #f5f5f5;
+  background-color: white;
 }
 #segment-header > .container {
-  background-color: #e6e6e6;
+  background-color: white;
 }
 #segment-footer {
   background-color: #707070;
@@ -76,22 +76,22 @@ body {
 }
 /*
 @media (max-width: 767px) {
-	body {
-		//padding-left: 0;
-		//padding-right: 0;
-		.segment > .container {
-			//padding-left: 10px;
-			//padding-right: 10px;
-		}
-	}
-	.segment {
-		margin-left: -20px;
-		margin-right: -20px;
-		&#segment-content {
-			margin-left: 0;
-			margin-right: 0;
-		}
-	}
+  body {
+    //padding-left: 0;
+    //padding-right: 0;
+    .segment > .container {
+      //padding-left: 10px;
+      //padding-right: 10px;
+    }
+  }
+  .segment {
+    margin-left: -20px;
+    margin-right: -20px;
+    &#segment-content {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
 }
 */
 #sidebar > .inner-wrapper {
@@ -107,9 +107,10 @@ body {
 ----------------------------------------------------------------------------------------*/
 .logo {
   float: left;
-  margin-top: 6px;
+  margin-top: 20px;
   margin-left: 20px;
-  margin-bottom: 4px;
+  margin-bottom: 20px;
+  max-width: 250px;
 }
 
 #project-nav {
@@ -147,7 +148,7 @@ body {
   right: 0;
   top: 0;
   height: 8px;
-  background: #999999;
+  background: #205493;
 }
 #notes a {
   color: #555555;
@@ -453,3 +454,24 @@ h5:before{
 }
 
 */
+
+
+/* Bootstrap navbar overrides */
+ .navbar-inverse {
+   background-color: #205493;
+ }
+
+ .navbar-nav > li {
+   margin-bottom: 0;
+ }
+
+ .navbar-inverse .navbar-nav > li > a {
+   color: #fff;
+   font-weight: bold;
+   padding-top: 20px;
+   padding-bottom: 20px;
+ }
+
+  .navbar-inverse .navbar-nav > li > a:hover {
+    background-color: #112E51;
+  }
