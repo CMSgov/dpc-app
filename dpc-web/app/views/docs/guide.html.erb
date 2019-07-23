@@ -1,9 +1,29 @@
 <% title "Guide" %>
 
-<p>Content for Guide</p>
+<div class="ds-l-row">
+  <div class="ds-l-col--12 ds-l-md-col--4">
+    <ul class="sidenav">
+      <li class="sidenav__item">
+        <a href="#" class="sidenav__link">Side nav link</a>
+      </li>
+      <li class="sidenav__item">
+        <a href="#" class="sidenav__link">Side nav link</a>
+      </li>
+      <li class="sidenav__item">
+        <a href="#" class="sidenav__link">Side nav link</a>
+      </li>
+      <li class="sidenav__item">
+        <a href="#" class="sidenav__link">Side nav link</a>
+      </li>
+      <li class="sidenav__item">
+        <a href="#" class="sidenav__link">Side nav link</a>
+      </li>
+    </ul>
+  </div>
+  <main class="ds-l-col--12 ds-l-md-col--8" id="main">
 
-<%= link_to docs_path, :class => "ds-c-button" do %>
-reference
-<% end %>
+    <h1>Guide</h1>
 
-<%= raw(@html_content) %>
+    <%= raw(@html_content) %>
+  </main>
+</div>

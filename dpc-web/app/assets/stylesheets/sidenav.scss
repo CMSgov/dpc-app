@@ -3,6 +3,11 @@
   top: $spacer-5;
   list-style: none;
   padding: 0;
+
+  @media (min-width: $width-md) {
+    position: sticky;
+    top: $spacer-5;
+  }
 }
 
 .sidenav__item {
