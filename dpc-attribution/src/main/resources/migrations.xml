@@ -295,4 +295,19 @@
         <addUniqueConstraint tableName="PATIENTS" columnNames="beneficiary_id, organization_id"/>
     </changeSet>
 
+    <changeSet id="remove-practitioner-roles" author="nickrobison-usds">
+        <addColumn tableName="PROVIDERS">
+            <column name="organization_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="PROVIDERS"
+                baseColumnNames="organization_id"
+                constraintName="fk_provider_organization"
+                referencedTableName="ORGANIZATIONS"
+                referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>

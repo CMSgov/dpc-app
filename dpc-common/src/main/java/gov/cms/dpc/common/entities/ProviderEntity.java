@@ -1,12 +1,15 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
 import org.hibernate.annotations.SQLInsert;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
@@ -36,15 +39,19 @@ public class ProviderEntity implements Serializable {
     @Column(name = "last_name")
     private String providerLastName;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "provider_roles",
-    joinColumns = {
-            @JoinColumn(name = "provider_id", referencedColumnName = "id")
-    },
-    inverseJoinColumns = {
-            @JoinColumn(name = "organization_id", referencedColumnName = "id")
-    })
-    private List<OrganizationEntity> organizations;
+    @NotNull
+    @ManyToOne
+    private OrganizationEntity organization;
+
+//    @ManyToMany(fetch = FetchType.LAZY)
+//    @JoinTable(name = "provider_roles",
+//    joinColumns = {
+//            @JoinColumn(name = "provider_id", referencedColumnName = "id")
+//    },
+//    inverseJoinColumns = {
+//            @JoinColumn(name = "organization_id", referencedColumnName = "id")
+//    })
+//    private List<OrganizationEntity> organizations;
 
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -101,12 +108,12 @@ public class ProviderEntity implements Serializable {
         this.attributedPatients = attributedPatients;
     }
 
-    public List<OrganizationEntity> getOrganizations() {
-        return organizations;
+    public OrganizationEntity getOrganization() {
+        return organization;
     }
 
-    public void setOrganizations(List<OrganizationEntity> organizations) {
-        this.organizations = organizations;
+    public void setOrganization(OrganizationEntity organization) {
+        this.organization = organization;
     }
 
     public Practitioner toFHIR() {
@@ -137,6 +144,18 @@ public class ProviderEntity implements Serializable {
     public static ProviderEntity fromFHIR(Practitioner resource, UUID resourceID) {
         final ProviderEntity provider = new ProviderEntity();
 
+        // Get the Organization, from the tag field
+        final String organizationID = resource.getMeta().getTag()
+                .stream()
+                .filter(tag -> tag.getSystem().equals(DPCIdentifierSystem.DPC.getSystem()))
+                .map(Coding::getCode)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Practitioner MUST have DPC organization tag"));
+
+        final OrganizationEntity organizationEntity = new OrganizationEntity();
+        organizationEntity.setId(UUID.fromString(organizationID));
+
+        provider.setOrganization(organizationEntity);
         provider.setProviderID(Objects.requireNonNullElseGet(resourceID, UUID::randomUUID));
 
         provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));

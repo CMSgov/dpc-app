@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
@@ -39,6 +40,7 @@ import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
  */
 public class ClientUtils {
 
+    public static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
     public static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
     private static final Logger logger = LoggerFactory.getLogger(ClientUtils.class);
 
@@ -98,7 +100,7 @@ public class ClientUtils {
      * @return - {@link ICreateTyped} FHIR Post operation, ready to execute
      * @throws IOException - throws if unable to read the file
      */
-    public static ICreateTyped createRosterSubmission(IGenericClient client, InputStream resource) throws IOException {
+    public static ICreateTyped createRosterSubmission(IGenericClient client, InputStream resource, UUID organizationID) throws IOException {
 
         final Map<String, List<Pair<String, String>>> providerMap = SeedProcessor.extractProviderMap(resource);
 
@@ -110,7 +112,7 @@ public class ClientUtils {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Cannot find matching provider"));
 
-        final Bundle providerBundle = SeedProcessor.generateRosterBundle(providerRoster);
+        final Bundle providerBundle = SeedProcessor.generateRosterBundle(providerRoster, organizationID);
 
         // Now, submit the bundle
         // TODO: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.

@@ -26,10 +26,7 @@ import org.junit.jupiter.api.TestFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.MissingResourceException;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -37,6 +34,8 @@ import static gov.cms.dpc.attribution.SharedMethods.createAttributionBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AttributionFHIRTest {
+
+    private static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final FhirContext ctx = FhirContext.forDstu3();
@@ -70,11 +69,13 @@ public class AttributionFHIRTest {
 
         BiFunction<Bundle, String, String> nameGenerator = (bundle, operation) -> String.format("[%s] provider: %s", operation.toUpperCase(), ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue());
 
+        final UUID orgID = UUID.fromString(ORGANIZATION_ID);
+
         // Get all the provider IDs and generate tests for them.
         return groupedPairs
                 .entrySet()
                 .stream()
-                .map(SeedProcessor::generateRosterBundle)
+                .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateRosterBundle(entry, orgID))
                 .flatMap((bundle) -> Stream.of(
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));

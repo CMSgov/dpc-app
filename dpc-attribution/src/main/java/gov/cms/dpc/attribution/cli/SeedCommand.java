@@ -110,8 +110,8 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             }
             final OrganizationEntity orgEntity = new OrganizationEntity();
             final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
-            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, EndpointConverter::convert);
-            final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class, bundle, orgEntity::fromFHIR);
+            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, EndpointConverter::convert, ORGANIZATION_ID);
+            final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class, bundle, orgEntity::fromFHIR, ORGANIZATION_ID);
 
             organizationEntities
                     .stream()
@@ -128,7 +128,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final LocalDateTime created = OffsetDateTime.now(ZoneOffset.UTC).toLocalDateTime();
         try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
             final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
-            final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR);
+            final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR, organizationID);
 
             providers
                     .stream()
@@ -150,7 +150,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     .extractProviderMap(resource)
                     .entrySet()
                     .stream()
-                    .map(SeedProcessor::generateRosterBundle)
+                    .map(entry -> SeedProcessor.generateRosterBundle(entry, organizationID))
                     .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, organizationID, creationTimestamp));
         }
     }
@@ -202,6 +202,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
     private static ProvidersRecord providersEntityToRecord(DSLContext context, ProviderEntity entity) {
         final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
+        record.setOrganizationId(entity.getOrganization().getId());
 
         return record;
     }

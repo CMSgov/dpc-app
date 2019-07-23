@@ -4,10 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.sql.Date;
 
@@ -21,6 +18,12 @@ public class AttributionTestHelpers {
         practitioner.addIdentifier().setValue(NPI);
         practitioner.addName()
                 .setFamily("Practitioner").addGiven("Test");
+
+        // Meta data which includes the Org we're using
+        final Meta meta = new Meta();
+
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), DEFAULT_ORG_ID, "OrganizationID");
+        practitioner.setMeta(meta);
 
         return practitioner;
     }

@@ -19,8 +19,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EndToEndRequestTest extends AbstractApplicationTest {
@@ -68,7 +70,7 @@ class EndToEndRequestTest extends AbstractApplicationTest {
             }
 
             final IGenericClient rosterClient = ctx.newRestfulGenericClient(getBaseURL());
-            final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource);
+            final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource, UUID.fromString(ORGANIZATION_ID));
             rosterSubmission.execute();
 
             // Retry export

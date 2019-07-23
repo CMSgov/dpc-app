@@ -5,6 +5,7 @@ import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -38,6 +39,10 @@ public class RosterUtils {
 
         // Insert the provider, patient, and attribution relationships
         final Practitioner provider = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
+
+        final Meta meta = new Meta();
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organizationID.toString(), "Organization ID");
+        provider.setMeta(meta);
 
         final ProviderEntity providerEntity = ProviderEntity.fromFHIR(provider);
         if (providerEntity.getProviderID() == null) {

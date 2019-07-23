@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class DemoCommand extends Command {
     private final FhirContext ctx;
@@ -48,6 +49,14 @@ public class DemoCommand extends Command {
                 .setDefault(ClientUtils.PROVIDER_ID)
                 .help("Execute as a specific provider");
 
+        // Option for overriding the organization ID
+        subparser
+                .addArgument("-o", "--organization")
+                .dest("organization-id")
+                .type(UUID.class)
+                .setDefault(ClientUtils.ORGANIZATION_ID)
+                .help("Execute as a specific Organization");
+
         subparser
                 .addArgument("--host")
                 .dest("hostname")
@@ -73,7 +82,7 @@ public class DemoCommand extends Command {
 //         Sleep for 2 seconds, for presentation reasons
         Thread.sleep(2000);
 
-        this.uploadBundle(namespace, baseURL);
+        this.uploadBundle(namespace, baseURL, namespace.get("organization-id"));
 
         // Sleep for 2 seconds, for presentation reasons
         Thread.sleep(2000);
@@ -96,14 +105,14 @@ public class DemoCommand extends Command {
         return ClientUtils.createExportOperation(exportClient, providerID);
     }
 
-    private void uploadBundle(Namespace namespace, String baseURL) throws IOException {
+    private void uploadBundle(Namespace namespace, String baseURL, UUID organizationID) throws IOException {
         // Read the provider bundle from the given file
         final String seedsFile = getSeedsFile(namespace);
         try (InputStream resource = new FileInputStream(new File(seedsFile))) {
             // Now, submit the bundle
             System.out.println("Uploading Patient roster");
             final IGenericClient rosterClient = ctx.newRestfulGenericClient(baseURL);
-            final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource);
+            final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource, organizationID);
             rosterSubmission.execute();
         }
     }

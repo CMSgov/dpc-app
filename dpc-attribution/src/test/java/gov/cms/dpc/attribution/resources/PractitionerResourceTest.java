@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,9 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testPractitionerReadWrite() {
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-1");
+
+
+
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
         final MethodOutcome mo = client
                 .create()
