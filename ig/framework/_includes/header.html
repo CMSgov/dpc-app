@@ -22,7 +22,7 @@
   <!-- Project extras -->
   <link href="assets/css/project.css" rel="stylesheet"/>
   <link href="assets/css/pygments-manni.css" rel="stylesheet"/>
-	<link href="assets/css/jquery-ui.css" rel="stylesheet"/>
+  <link href="assets/css/jquery-ui.css" rel="stylesheet"/>
 {% if page.mycss %}
 <link href="assets/css/{{page.mycss}}" rel="stylesheet"/>
 {% endif %}
@@ -43,17 +43,17 @@
 
 <!-- hl7 logo -->
     <a no-external="true" href="http://hl7.org/fhir">
-      <img alt="FHIR Homepage" class="img-responsive logo" src="assets/images/fhir-logo-www.png"/>
+      <img alt="Data at the Point of Care logo" class="img-responsive logo" src="assets/images/dpc-ig-logo.png"/>
     </a>
 <!-- end hl7 logo -->
 
+      <!--
 
- <!-- org logo -->
-             {% include logo.md %}
-  <!-- end org logo -->
+      JC: I'm commenting this out because I'm not
+          if we need to distinguish between Build and
+          Release
 
-
-      <div id="project-status" class="project-status"> <!-- ig title text -->
+      <div id="project-status" class="project-status">
 
       {% if {{site.data.fhir.ig.status}} == 'draft' %}
       <strong>{{site.data.fhir.ig.title}} Implementation Guide CI Build</strong>
@@ -61,7 +61,8 @@
       <strong>{{site.data.fhir.ig.title}} Implementation Guide Release {{site.data.fhir.ig.version}}</strong>
       {% endif %}
 
-    </div><!-- end ig title text -->
+    </div>
+    -->
 
   </div><!-- end container -->
   <div class="container">
