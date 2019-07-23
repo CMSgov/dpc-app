@@ -31,16 +31,24 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Override
     public void configure(Binder binder) {
         binder.requestStaticInjection(DPCHibernateBundle.class);
-        binder.bind(ProviderDAO.class);
-        binder.bind(AttributionEngine.class).to(RosterEngine.class);
+
+        // Resources
         binder.bind(V1AttributionResource.class);
-        binder.bind(OrganizationDAO.class);
-        binder.bind(TruncateDatabase.class);
         binder.bind(EndpointResource.class);
+        binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
-        binder.bind(PractitionerRoleResource.class);
+
+        // DAOs
+        binder.bind(OrganizationDAO.class);
+        binder.bind(PatientDAO.class);
+        binder.bind(ProviderDAO.class);
         binder.bind(ProviderRoleDAO.class);
 
+        // Tasks
+        binder.bind(TruncateDatabase.class);
+
+        // Services
+        binder.bind(AttributionEngine.class).to(RosterEngine.class);
         binder.bind(MacaroonBakery.class).toProvider(BakeryProvider.class);
 
         // Healthchecks

@@ -4,11 +4,13 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Api(value = "Group")
 public class GroupResource extends AbstractGroupResource {
@@ -41,7 +44,19 @@ public class GroupResource extends AbstractGroupResource {
     )
     public Response submitRoster(Bundle providerBundle) {
         logger.debug("API request to submit roster");
-        this.engine.addAttributionRelationships(providerBundle);
+        // FIXME(nickrobison): Remove this! This is really gross, but will come out as part of our Group refactoring
+        final UUID organizationID = providerBundle.getEntryFirstRep()
+                .getResource()
+                .getMeta()
+                .getTag()
+                .stream()
+                .filter(tag -> tag.getSystem().equals(DPCIdentifierSystem.DPC.getSystem()))
+                .map(Coding::getCode)
+                .map(UUID::fromString)
+                .findFirst()
+                .orElseThrow(() -> new WebApplicationException("Must have Metadata identifier", Response.Status.INTERNAL_SERVER_ERROR));
+
+        this.engine.addAttributionRelationships(providerBundle, organizationID);
 
         return Response.status(Response.Status.CREATED).build();
     }

@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         // Otherwise, try to lookup the matching resource
         logger.debug("Looking up resource {} in path authorizer. With value: {}", credentials.getPathAuthorizer().type(), credentials.getPathAuthorizer().pathParam());
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("identifier", Collections.singletonList(credentials.getPathValue()));
+        searchParams.put("_id", Collections.singletonList(credentials.getPathValue()));
         searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
         final Bundle bundle = this.client
                 .search()

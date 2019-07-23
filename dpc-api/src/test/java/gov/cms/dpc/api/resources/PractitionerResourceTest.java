@@ -4,29 +4,28 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
-    private static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
-
     PractitionerResourceTest() {
+        // Not used
     }
 
     @Test
     void ensurePractitionersExist() throws IOException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = APITestHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID);
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
         APITestHelpers.setupPractitionerTest(client, parser);
 
         // Find everything attributed
@@ -62,7 +61,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         assertTrue(foundProvider.equalsDeep(queriedProvider), "Search and GET should be identical");
 
         // Create a new org and make sure it has no providers
-        final String m2 = APITestHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID);
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, ATTRIBUTION_URL);
 
         // Update the Macaroons interceptor to use the new Organization token
         ((APITestHelpers.MacaroonsInterceptor) client.getInterceptors().get(0)).setMacaroon(m2);

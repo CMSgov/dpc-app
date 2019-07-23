@@ -22,12 +22,13 @@ public abstract class AbstractPractionerResource {
      * <p>
      * An Organization ID is required for this endpoint, which is passed via the `_tag` query parameter.
      *
+     * @param resourceID      - {@link UUID} resource ID to query for
      * @param providerNPI     - {@link String} NPI to use for querying Provider database
      * @param organizationTag - {@link String} ID of {@link org.hl7.fhir.dstu3.model.Organization} making the request
      * @return - {@link Bundle} of {@link Practitioner} resources matching search parameters
      */
     @GET
-    public abstract Bundle getPractitioners(String providerNPI, @NotEmpty String organizationTag);
+    public abstract Bundle getPractitioners(UUID resourceID, String providerNPI, @NotEmpty String organizationTag);
 
     /**
      * Register {@link Practitioner} with application.

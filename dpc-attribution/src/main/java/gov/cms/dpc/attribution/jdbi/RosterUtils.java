@@ -6,10 +6,8 @@ import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.hl7.fhir.dstu3.model.*;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +33,17 @@ public class RosterUtils {
      *
      * @param attributionBundle - Roster {@link Bundle} to add/update
      * @param ctx               - {@link DSLContext} DB context to utilize
+     * @param organizationID    - {@link UUID} organization ID to associate to patient
      * @param creationTimestamp - {@link Timestamp} of when the attribution relationships were updated
      */
-    public static void submitAttributionBundle(Bundle attributionBundle, DSLContext ctx, OffsetDateTime creationTimestamp) {
+    public static void submitAttributionBundle(Bundle attributionBundle, DSLContext ctx, UUID organizationID, OffsetDateTime creationTimestamp) {
 
         // Insert the provider, patient, and attribution relationships
         final Practitioner provider = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
+
+        final Meta meta = new Meta();
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organizationID.toString(), "Organization ID");
+        provider.setMeta(meta);
 
         final ProviderEntity providerEntity = ProviderEntity.fromFHIR(provider);
         if (providerEntity.getProviderID() == null) {
@@ -49,6 +52,8 @@ public class RosterUtils {
 
         logger.debug("Adding provider {}", providerEntity.getProviderNPI());
         final ProvidersRecord providerRecord = ctx.newRecord(PROVIDERS, providerEntity);
+        // Get the Org ID, because Jooq can't do it on its own
+        providerRecord.setOrganizationId(providerEntity.getOrganization().getId());
         // Upsert the record and get the new ID
         providerRecord.setId(new ProviderRecordUpserter(ctx, providerRecord).upsert().getId());
 
@@ -57,7 +62,9 @@ public class RosterUtils {
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType() == ResourceType.Patient)
-                .map(patient -> PatientEntity.fromFHIR((Patient) patient))
+                .map(resource -> (Patient) resource)
+                .peek(patient -> patient.setManagingOrganization(new Reference("Organization/" + organizationID.toString())))
+                .map(PatientEntity::fromFHIR)
                 .forEach(patientEntity -> RosterUtils.createUpdateAttributionRelationship(ctx, patientEntity, providerRecord, creationTimestamp));
     }
 
@@ -66,7 +73,10 @@ public class RosterUtils {
         if (patientEntity.getPatientID() == null) {
             patientEntity.setPatientID(UUID.randomUUID());
         }
-        final PatientRecordUpserter patientRecordUpserter = new PatientRecordUpserter(ctx, ctx.newRecord(PATIENTS, patientEntity));
+
+        final PatientsRecord patientsRecord = ctx.newRecord(PATIENTS, patientEntity);
+        patientsRecord.setOrganizationId(patientEntity.getOrganization().getId());
+        final PatientRecordUpserter patientRecordUpserter = new PatientRecordUpserter(ctx, patientsRecord);
         final PatientsRecord patient = patientRecordUpserter.upsert();
 
         // If the attribution relationship already exists, ignore it.

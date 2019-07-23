@@ -80,7 +80,12 @@ Alternatively, the individual services can be manually executing the `server` co
 
 > Note: When manually running the individual services you'll need to ensure that there are no listening port collisions.
 By default, each service starts with the same application (8080) and admin (9900) ports. We provide a sample `application.local.conf` file which contains all the necessary configuration options.
-This file can be copied and used directly: `cp application.local.conf.sample application.local.conf`. 
+This file can be copied and used directly: `cp application.local.conf.sample application.local.conf`.
+
+> Note: The API service requires authentication before performing actions. This will cause most integration tests to fail, as they expect the endpoints to be open.
+Authentication can be disabled in one of two ways: 
+Set the `ENV` environment variable to `dev` (which is the default when running under Docker).
+Or, set `dpc.api.authenticationDisabled=true` in the config file (the default from the sample config file).   
 
 Next start each service in a new terminal window, from within the the `dpc-app` root directory. 
 

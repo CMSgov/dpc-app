@@ -19,6 +19,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class AttributionServiceClient implements AttributionEngine {
@@ -60,7 +61,7 @@ public class AttributionServiceClient implements AttributionEngine {
     }
 
     @Override
-    public void addAttributionRelationships(Bundle attributionBundle) {
+    public void addAttributionRelationships(Bundle attributionBundle, UUID organizationID) {
         final Invocation invocation = this.client
                 .path("Group")
                 .request(FHIRMediaTypes.FHIR_JSON)

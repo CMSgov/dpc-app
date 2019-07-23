@@ -2,12 +2,14 @@ package gov.cms.dpc.api.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.api.models.JobCompletionModel;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class DemoCommand extends Command {
     private final FhirContext ctx;
@@ -48,18 +51,41 @@ public class DemoCommand extends Command {
                 .setDefault(ClientUtils.PROVIDER_ID)
                 .help("Execute as a specific provider");
 
+        // Option for overriding the organization ID
+        subparser
+                .addArgument("-o", "--organization")
+                .dest("organization-id")
+                .type(String.class)
+                .setDefault(ClientUtils.ORGANIZATION_ID)
+                .help("Execute as a specific Organization");
+
         subparser
                 .addArgument("--host")
                 .dest("hostname")
                 .type(String.class)
                 .setDefault("localhost:3002")
                 .help("Set the hostname (including port number) for running the Demo against");
+
+        subparser
+                .addArgument("-a", "--attribution")
+                .dest("attribution-server")
+                .setDefault("localhost:3500")
+                .help("Set the hostname (including port number) of the Attribution Service");
     }
 
     @Override
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         System.out.println("Running demo!");
         final String baseURL = buildBaseURL(namespace);
+
+        // Create the default organization
+        final String organizationID = namespace.get("organization-id");
+        // Create a client for submitting the organization
+        final String attributionURL = String.format("http://%s/v1", namespace.getString("attribution-server"));
+        // Disable validation against Attribution service
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        final IGenericClient attributionClient = ctx.newRestfulGenericClient(attributionURL);
+        FHIRHelpers.registerOrganization(attributionClient, ctx.newJsonParser(), organizationID, attributionURL);
 
         // Make the initial export request
         // If it's a 404, that's fine, for anything else, fail
@@ -73,7 +99,8 @@ public class DemoCommand extends Command {
 //         Sleep for 2 seconds, for presentation reasons
         Thread.sleep(2000);
 
-        this.uploadBundle(namespace, baseURL);
+
+        this.uploadBundle(namespace, baseURL, UUID.fromString(organizationID));
 
         // Sleep for 2 seconds, for presentation reasons
         Thread.sleep(2000);
@@ -96,14 +123,14 @@ public class DemoCommand extends Command {
         return ClientUtils.createExportOperation(exportClient, providerID);
     }
 
-    private void uploadBundle(Namespace namespace, String baseURL) throws IOException {
+    private void uploadBundle(Namespace namespace, String baseURL, UUID organizationID) throws IOException {
         // Read the provider bundle from the given file
         final String seedsFile = getSeedsFile(namespace);
         try (InputStream resource = new FileInputStream(new File(seedsFile))) {
             // Now, submit the bundle
             System.out.println("Uploading Patient roster");
             final IGenericClient rosterClient = ctx.newRestfulGenericClient(baseURL);
-            final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource);
+            final ICreateTyped rosterSubmission = ClientUtils.createRosterSubmission(rosterClient, resource, organizationID);
             rosterSubmission.execute();
         }
     }
@@ -115,14 +142,13 @@ public class DemoCommand extends Command {
         try {
             exportOperation.execute();
         } catch (NonFhirResponseException e) {
-            final NonFhirResponseException e1 = e;
-            if (e1.getStatusCode() != HttpStatus.NO_CONTENT_204) {
+            if (e.getStatusCode() != HttpStatus.NO_CONTENT_204) {
                 e.printStackTrace();
                 System.exit(1);
             }
 
             // Get the correct header
-            final Map<String, List<String>> headers = e1.getResponseHeaders();
+            final Map<String, List<String>> headers = e.getResponseHeaders();
 
             // Get the headers and check the status
             exportURL = headers.get("content-location").get(0);

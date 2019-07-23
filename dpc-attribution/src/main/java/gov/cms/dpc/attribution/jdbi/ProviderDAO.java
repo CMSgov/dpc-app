@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
@@ -48,7 +49,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         return Optional.ofNullable(get(providerID));
     }
 
-    public List<ProviderEntity> getProviders(String providerNPI, UUID organizationID) {
+    public List<ProviderEntity> getProviders(UUID providerID, String providerNPI, UUID organizationID) {
 
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
@@ -60,8 +61,14 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         List<Predicate> predicates = new ArrayList<>();
         // Always restrict by Organization
         predicates.add(builder
-                .equal(root.join("organizations").get("id"),
+                .equal(root.join("organization").get("id"),
                         organizationID));
+
+        // If we're provided a resource ID, query for that
+        if (providerID != null) {
+            predicates.add(builder
+                    .equal(root.get("providerID"), providerID));
+        }
 
         // If we've provided an NPI, use it as a query restriction.
         // Otherwise, return everything
@@ -107,10 +114,12 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
     }
 
     @Override
-    public void addAttributionRelationships(Bundle attributionBundle) {
+    public void addAttributionRelationships(Bundle attributionBundle, UUID organizationID) {
         // Web API check that this is ok to do
         final Practitioner practitioner = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
         final ProviderEntity provider = ProviderEntity.fromFHIR(practitioner);
+        final OrganizationEntity organization = new OrganizationEntity();
+        organization.setId(organizationID);
 
         // Get the patients and create the attribution
         attributionBundle
@@ -120,6 +129,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType() == ResourceType.Patient)
                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
+                .peek(patientEntity -> patientEntity.setOrganization(organization))
                 .map(pEntity -> new AttributionRelationship(provider, pEntity))
                 .forEach(this.rDAO::addAttributionRelationship);
     }

@@ -29,6 +29,9 @@ public abstract class AbstractBaseResource {
     @Path("/Organization")
     public abstract AbstractOrganizationResource organizationOperations();
 
+    @Path("/Patient")
+    public abstract AbstractPatientResource patientOperations();
+
     @Path("/Practitioner")
     public abstract AbstractPractionerResource practitionerOperations();
 

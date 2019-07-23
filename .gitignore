@@ -22,3 +22,5 @@ ig/generated_output
 
 *.code-workspace
 .factorypath
+dpc-web/.rakeTasks
+out/

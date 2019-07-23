@@ -9,6 +9,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.DemoCommand;
 import gov.cms.dpc.api.cli.OrgRegistrationCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
+import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
@@ -55,6 +56,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     @Override
     public void run(final DPCAPIConfiguration configuration,
                     final Environment environment) {
+        EnvironmentParser.getEnvironment("API");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
 

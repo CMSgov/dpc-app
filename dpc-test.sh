@@ -30,12 +30,11 @@ fi
 
 ls reports
 docker-compose down
-docker-compose up -d --scale api=0
-sleep 30
+docker-compose up -d
+sleep 60
 
-# Run the integration-test profile, which only runs a subset of the tests
-mvn test -Pintegration-tests -pl dpc-api
-mvn jacoco:report
+# Run the Postman tests
+node_modules/.bin/newman run src/test/EndToEndRequestTest.postman_collection.json
 
 if [ -n "$REPORT_COVERAGE" ]; then
     for module in dpc-api
