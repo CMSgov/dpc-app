@@ -5,4 +5,7 @@ Rails.application.routes.draw do
 
   match '/docs', to: 'docs#reference', via: :get
   match '/docs/guide', to: 'docs#guide', via: :get
+
+  match '/faq', to: 'pages#faq', via: :get
+  match '/support', to: 'pages#support', via: :get
 end
