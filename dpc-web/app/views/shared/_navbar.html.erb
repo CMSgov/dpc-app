@@ -29,7 +29,9 @@ aria-controls="topnav-wrap" aria-label="Close menu">
       </li>
 
       <li class="topnav__item">
-        <a class="topnav__link" href="#">Support</a>
+        <%= link_to support_path, :class => "topnav__link" do %>
+          Support
+        <% end %>
       </li>
 
       <li class="topnav__item">
