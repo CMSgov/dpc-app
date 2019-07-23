@@ -58,11 +58,14 @@ body {
   background-color: white;
 }
 #segment-footer {
-  background-color: #707070;
+  background-color: white;
+  border-top: 3px solid #112E51;
+  margin-top: 64px;
 }
 #segment-footer > .container {
-  background-color: #ad1f2f;
-  color: #ffffff;
+  background-color: white;
+  color: #212121;
+  margin-top: 32px;
 }
 #segment-footer > .container .inner-wrapper {
   padding: 11px 20px;
