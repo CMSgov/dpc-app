@@ -535,3 +535,7 @@ td {
   .navbar-inverse .navbar-nav > li > a:hover {
     background-color: #112E51;
   }
+
+  .navbar .collapse.in {
+    margin-top: 20px;
+  }
