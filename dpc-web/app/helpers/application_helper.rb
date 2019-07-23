@@ -10,4 +10,9 @@ module ApplicationHelper
     html = HighlightSource.render(text)
     html.html_safe
   end
+
+  def current_class?(test_path)
+    return 'ds-c-tabs__item--active' if request.path == test_path
+    ''
+  end
 end

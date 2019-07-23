@@ -1,48 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>
-      <%= content_for?(:title) ? yield(:title) : 'CMS.gov' %> | Data at the Point of Care
-    </title>
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag    'application', media: 'all' %>
-  </head>
+  <%= render partial: 'shared/head' %>
 
   <body class="ds-base">
-
-    <a class="ds-c-skip-nav" href="#main">Skip to main content</a>
-
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
-    <!-- hero -->
-    <% if controller.controller_name == "public" %>
-      <%= render partial: 'public/hero' %>
-    <% else %>
-    <div class="ds-l-container">
-      <div class="ds-l-row">
-        <div class="ds-l-col--12">
-          <h1><%= yield(:title) %></h1>
+    <header class="page-header">
+      <div class="ds-l-container">
+        <span class="page-header__heading">Docs</span>
+
+        <div class="ds-c-tabs">
+          <%= link_to docs_path, :class => "ds-c-tabs__item #{current_class?(docs_path)}" do %>
+            Reference
+          <% end %>
+          <%= link_to docs_guide_path, :class => "ds-c-tabs__item #{current_class?(docs_guide_path)}" do %>
+            Guide
+          <% end %>
         </div>
+
       </div>
-    </div>
-    <% end %>
+    </header>
 
     <!-- content -->
-    <% if controller.controller_name == "public" %>
-      <%= yield %>
-    <% else %>
-    <section class="ds-l-container" id="main">
+    <section class="ds-l-container ds-u-padding-top--7">
       <%= yield %>
     </section>
-    <% end %>
 
 
     <%= render partial: 'shared/footer' %>
-
-    <%= javascript_include_tag 'application' %>
 
   </body>
 </html>
