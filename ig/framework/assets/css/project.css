@@ -502,6 +502,17 @@ p {
   max-width: 77ch;
 }
 
+tr {
+  font-size: 16px;
+}
+
+th {
+  font-size: 16px;
+}
+
+td {
+  font-size: 16;
+}
 
  .navbar-inverse {
    background-color: #205493;
