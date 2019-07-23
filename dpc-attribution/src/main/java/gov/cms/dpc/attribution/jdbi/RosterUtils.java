@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import gov.cms.dpc.attribution.dao.tables.Attributions;
 import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
@@ -78,13 +79,26 @@ public class RosterUtils {
         final PatientRecordUpserter patientRecordUpserter = new PatientRecordUpserter(ctx, patientsRecord);
         final PatientsRecord patient = patientRecordUpserter.upsert();
 
-        logger.debug("Attributing patient {} to provider {}.", patientEntity.getBeneficiaryID(), providerRecord.getProviderId());
+        // If the attribution relationship already exists, ignore it.
 
-        // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
-        final AttributionsRecord attr = new AttributionsRecord();
-        attr.setProviderId(providerRecord.getId());
-        attr.setPatientId(patient.getId());
-        attr.setCreatedAt(creationTimestamp);
-        ctx.executeInsert(attr);
+        final boolean attributionExist = ctx.fetchExists(Attributions.ATTRIBUTIONS,
+                Attributions.ATTRIBUTIONS.PROVIDER_ID
+                        .eq(providerRecord.getId())
+                        .and(Attributions.ATTRIBUTIONS.PATIENT_ID.eq(patient.getId())));
+
+        final String beneficiaryID = patientEntity.getBeneficiaryID();
+        final String providerNPI = providerRecord.getProviderId();
+
+        if (!attributionExist) {
+            logger.debug("Attributing patient {} to provider {}.", beneficiaryID, providerNPI);
+            // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
+            final AttributionsRecord attr = new AttributionsRecord();
+            attr.setProviderId(providerRecord.getId());
+            attr.setPatientId(patient.getId());
+            attr.setCreatedAt(creationTimestamp);
+            ctx.executeInsert(attr);
+        } else {
+            logger.debug("Attribution relationship already exists between patient {} and provider {}", beneficiaryID, providerRecord.getProviderId());
+        }
     }
 }
