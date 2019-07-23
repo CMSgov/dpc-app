@@ -13,21 +13,18 @@ public class V1AttributionResource extends AbstractAttributionResource {
     private final EndpointResource er;
     private final PatientResource par;
     private final PractitionerResource pr;
-    private final PractitionerRoleResource prr;
 
     @Inject
     public V1AttributionResource(GroupResource gr,
                                  OrganizationResource or,
                                  EndpointResource er,
                                  PatientResource par,
-                                 PractitionerResource pr,
-                                 PractitionerRoleResource prr) {
+                                 PractitionerResource pr) {
         this.gr = gr;
         this.or = or;
         this.er = er;
         this.par = par;
         this.pr = pr;
-        this.prr = prr;
     }
 
     @Override
@@ -53,10 +50,5 @@ public class V1AttributionResource extends AbstractAttributionResource {
     @Override
     public AbstractPractionerResource providerOperations() {
         return this.pr;
-    }
-
-    @Override
-    public AbstractPractitionerRoleResource providePractitionerRoleOperations() {
-        return this.prr;
     }
 }

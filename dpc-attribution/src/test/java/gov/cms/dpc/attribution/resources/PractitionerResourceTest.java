@@ -10,7 +10,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
@@ -91,17 +94,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .execute();
 
         final Practitioner pract2 = (Practitioner) outcome.getResource();
-
-        // Assign it to the organization
-        final PractitionerRole role = new PractitionerRole();
-        role.setPractitioner(new Reference(pract2.getId()));
-        role.setOrganization(new Reference(new IdType("Organization", DEFAULT_ORG_ID)));
-
-        client
-                .create()
-                .resource(role)
-                .encodedJson()
-                .execute();
 
         // Try to fetch all the patients
         final Bundle providers = client

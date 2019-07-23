@@ -133,11 +133,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             providers
                     .stream()
                     .map(entity -> providersEntityToRecord(context, entity))
-                    .forEach(record -> {
-                        context.executeInsert(record);
-                        final ProviderRolesRecord rolesRecord = providerRolesToRecord(record, created, organizationID);
-                        context.executeInsert(rolesRecord);
-                    });
+                    .forEach(context::executeInsert);
         }
     }
 

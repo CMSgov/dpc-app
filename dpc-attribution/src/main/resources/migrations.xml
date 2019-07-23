@@ -312,4 +312,8 @@
                 referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="drop-practitioner-roles" author="nickrobison-usds">
+        <dropTable tableName="PROVIDER_ROLES"/>
+    </changeSet>
+
 </databaseChangeLog>

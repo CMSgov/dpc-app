@@ -54,13 +54,6 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
-//    @JoinTable(name = "provider_roles",
-//            joinColumns = {
-//                    @JoinColumn(name = "organization_id", referencedColumnName = "id")
-//            },
-//            inverseJoinColumns = {
-//                    @JoinColumn(name = "provider_id", referencedColumnName = "id")
-//            })
     private List<ProviderEntity> providers;
 
     public OrganizationEntity() {

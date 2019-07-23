@@ -3,7 +3,6 @@ package gov.cms.dpc.common.entities;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
-import org.hibernate.annotations.SQLInsert;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -21,9 +20,6 @@ import java.util.UUID;
         @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id"),
         @NamedQuery(name = "getAllProviders", query = "from providers p")
 })
-//@SQLInsert(sql = "INSERT INTO providers(first_name, last_name, provider_id, id, organization_id) VALUES(?, ?, ?, ?, ?)" +
-//        " ON CONFLICT (provider_id, organization_id) DO UPDATE SET last_name = EXCLUDED.last_name," +
-//        " first_name = EXCLUDED.first_name")
 public class ProviderEntity implements Serializable {
 
     public static final long serialVersionUID = 42L;
@@ -42,17 +38,6 @@ public class ProviderEntity implements Serializable {
     @NotNull
     @ManyToOne
     private OrganizationEntity organization;
-
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    @JoinTable(name = "provider_roles",
-//    joinColumns = {
-//            @JoinColumn(name = "provider_id", referencedColumnName = "id")
-//    },
-//    inverseJoinColumns = {
-//            @JoinColumn(name = "organization_id", referencedColumnName = "id")
-//    })
-//    private List<OrganizationEntity> organizations;
-
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "attributions",
