@@ -11,6 +11,7 @@ dpc {
         port = 9911
       }]
     }
+    authenticationDisabled=true
   }
 
   attribution {

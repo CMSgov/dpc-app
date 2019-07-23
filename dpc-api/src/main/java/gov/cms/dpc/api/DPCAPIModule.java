@@ -9,7 +9,6 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.annotations.AttributionService;
-import gov.cms.dpc.api.auth.*;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.health.AttributionHealthCheck;
 import gov.cms.dpc.api.resources.TestResource;
@@ -51,13 +50,14 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(TestResource.class);
         // V1 Resources
         binder.bind(BaseResource.class);
+        binder.bind(DataResource.class);
+        binder.bind(DefinitionResource.class);
         binder.bind(GroupResource.class);
         binder.bind(JobResource.class);
-        binder.bind(DataResource.class);
-        binder.bind(RosterResource.class);
         binder.bind(OrganizationResource.class);
-        binder.bind(DefinitionResource.class);
+        binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
+        binder.bind(RosterResource.class);
 
         // Healthchecks
         binder.bind(AttributionHealthCheck.class);

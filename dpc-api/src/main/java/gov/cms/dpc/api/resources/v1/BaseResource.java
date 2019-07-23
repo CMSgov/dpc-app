@@ -21,6 +21,7 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractDataResource dr;
     private final AbstractRosterResource rr;
     private final AbstractOrganizationResource or;
+    private final AbstractPatientResource par;
     private final AbstractPractionerResource pr;
     private final AbstractDefinitionResource sdr;
 
@@ -30,6 +31,7 @@ public class BaseResource extends AbstractBaseResource {
                         DataResource dr,
                         RosterResource rr,
                         OrganizationResource or,
+                        PatientResource par,
                         PractitionerResource pr,
                         DefinitionResource sdr) {
         this.gr = gr;
@@ -37,12 +39,15 @@ public class BaseResource extends AbstractBaseResource {
         this.dr = dr;
         this.rr = rr;
         this.or = or;
+        this.par = par;
         this.pr = pr;
         this.sdr = sdr;
     }
 
     @Override
     @Public
+    @GET
+    @Path("/version")
     @ApiOperation(value = "Return the software version", hidden = true)
     public String version() {
         return "Version 1";
@@ -50,6 +55,7 @@ public class BaseResource extends AbstractBaseResource {
 
     @Override
     @GET
+    @Path("/metadata")
     @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     public CapabilityStatement metadata() {
@@ -84,6 +90,11 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     public AbstractOrganizationResource organizationOperations() {
         return this.or;
+    }
+
+    @Override
+    public AbstractPatientResource patientOperations() {
+        return this.par;
     }
 
     @Override

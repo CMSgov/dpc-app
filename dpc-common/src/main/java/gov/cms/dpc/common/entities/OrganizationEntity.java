@@ -15,9 +15,10 @@ import org.hl7.fhir.dstu3.model.Reference;
 import javax.persistence.*;
 import javax.validation.Valid;
 import java.io.Serializable;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Entity(name = "organizations")
@@ -52,13 +53,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     private List<TokenEntity> tokens;
 
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "provider_roles",
-            joinColumns = {
-                    @JoinColumn(name = "organization_id", referencedColumnName = "id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "provider_id", referencedColumnName = "id")
-            })
+    @JoinColumn(name = "organization_id")
     private List<ProviderEntity> providers;
 
     public OrganizationEntity() {

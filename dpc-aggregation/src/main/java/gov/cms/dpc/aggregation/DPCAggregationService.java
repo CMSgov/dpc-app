@@ -1,21 +1,17 @@
 package gov.cms.dpc.aggregation;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
-import com.codahale.metrics.MetricRegistry;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
+import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
-
-    private static final Logger logger = LoggerFactory.getLogger(DPCAggregationService.class);
 
     public static void main(final String[] args) throws Exception {
         new DPCAggregationService().run(args);
@@ -42,13 +38,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
-        String envVar = "local";
-        try {
-            envVar = System.getenv("ENV");
-        } catch (NullPointerException e) {
-            // If ENV isn't set, just ignore it.
-        }
-
-        logger.info("Starting AggregationManager Service in environment: {}", envVar);
+        EnvironmentParser.getEnvironment("Aggregation");
     }
 }

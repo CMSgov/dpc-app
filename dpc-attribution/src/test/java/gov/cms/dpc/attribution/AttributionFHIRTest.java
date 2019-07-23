@@ -17,6 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.AfterAll;
@@ -26,26 +27,25 @@ import org.junit.jupiter.api.TestFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.MissingResourceException;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.SharedMethods.createAttributionBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AttributionFHIRTest {
+class AttributionFHIRTest {
 
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static Organization organization;
 
     @BeforeAll
-    public static void setup() throws Exception {
+    static void setup() throws Exception {
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything");
         APPLICATION.getApplication().run("db", "migrate");
@@ -58,23 +58,30 @@ public class AttributionFHIRTest {
 
         // Read in the seeds and create the 'Roster' bundle
         groupedPairs = SeedProcessor.extractProviderMap(resource);
+
+        // Create the Organization
+        organization = AttributionTestHelpers.createOrganization(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort()));
     }
 
     @AfterAll
-    public static void shutdown() {
+    static void shutdown() {
         APPLICATION.after();
     }
 
     @TestFactory
     Stream<DynamicTest> generateBundleTests() {
 
+        // Create the Organization
+
         BiFunction<Bundle, String, String> nameGenerator = (bundle, operation) -> String.format("[%s] provider: %s", operation.toUpperCase(), ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue());
+
+        final UUID orgID = UUID.fromString(organization.getIdElement().getIdPart());
 
         // Get all the provider IDs and generate tests for them.
         return groupedPairs
                 .entrySet()
                 .stream()
-                .map(SeedProcessor::generateRosterBundle)
+                .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateRosterBundle(entry, orgID))
                 .flatMap((bundle) -> Stream.of(
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));
@@ -123,7 +130,7 @@ public class AttributionFHIRTest {
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
             // Check how many are attributed
@@ -152,7 +159,7 @@ public class AttributionFHIRTest {
             // Add an additional patient
             // Create a new bundle with extra patients to attribute
             final String newPatientID = "test-new-patient-id";
-            final Bundle updateBundle = createAttributionBundle(providerID, newPatientID);
+            final Bundle updateBundle = createAttributionBundle(providerID, newPatientID, organization.getIdElement().getIdPart());
 
             // Submit the bundle
             final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");

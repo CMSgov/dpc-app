@@ -6,6 +6,7 @@ import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
+import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import io.dropwizard.Application;
@@ -58,6 +59,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) throws DatabaseException, SQLException {
         migrateDatabase(configuration, environment);
+        EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
     }

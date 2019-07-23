@@ -7,6 +7,7 @@ import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractionerResource;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +19,7 @@ import org.hl7.fhir.dstu3.model.*;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.UUID;
+import java.util.*;
 
 public class PractitionerResource extends AbstractPractionerResource {
 
@@ -41,27 +42,35 @@ public class PractitionerResource extends AbstractPractionerResource {
                                    @Auth OrganizationPrincipal organization,
                                    @ApiParam(value = "Provider NPI")
                                    @QueryParam("identifier") String providerNPI) {
+
+        // Create search params
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections
+                .singletonList(organization
+                        .getOrganization()
+                        .getIdElement()
+                        .getIdPart()));
+
         final var request = this.client
                 .search()
                 .forResource(Practitioner.class)
                 .encodedJson()
-                .withTag("organization", organization.getOrganization().getId())
                 .returnBundle(Bundle.class);
 
         if (providerNPI != null && !providerNPI.equals("")) {
-            return request
-                    .where(Practitioner.IDENTIFIER.exactly().identifier(providerNPI))
-                    .execute();
-        } else {
-            return request.execute();
+            searchParams.put("identifier", Collections.singletonList(providerNPI));
         }
+
+        return request
+                .whereMap(searchParams)
+                .execute();
     }
 
     @Override
     @GET
     @FHIR
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID")
+    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch provider", notes = "FHIR endpoint to fetch a specific Practitioner resource." +
@@ -84,7 +93,10 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
-    public Practitioner submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
+    @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
+    public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
+
+        addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
         final var test = this.client
                 .create()
                 .resource(provider)
@@ -97,22 +109,7 @@ public class PractitionerResource extends AbstractPractionerResource {
         }
 
         final Practitioner resource = (Practitioner) outcome.getResource();
-
-        // Now, submit the Practitioner Role
-        final PractitionerRole role = new PractitionerRole();
-        role.setOrganization(new Reference(organization.getOrganization().getIdElement()));
-        role.setPractitioner(new Reference(resource.getIdElement()));
-
-        final MethodOutcome roled = this.client
-                .create()
-                .resource(role)
-                .encodedJson()
-                .execute();
-
-        if (!roled.getCreated()) {
-            throw new WebApplicationException("Unable to link provider to organization", Response.Status.INTERNAL_SERVER_ERROR);
-        }
-        return resource;
+        return Response.status(Response.Status.CREATED).entity(resource).build();
     }
 
     @Override
@@ -146,5 +143,18 @@ public class PractitionerResource extends AbstractPractionerResource {
     @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
     public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, Practitioner provider) {
         return null;
+    }
+
+    private static void addOrganizationTag(Practitioner provider, String organizationID) {
+        final Coding orgTag = new Coding(DPCIdentifierSystem.DPC.getSystem(), organizationID, "Organization ID");
+        final Meta meta = provider.getMeta();
+        // If no Meta, create new values
+        if (meta == null) {
+            final Meta newMeta = new Meta();
+            newMeta.addTag(orgTag);
+            provider.setMeta(newMeta);
+        } else {
+            meta.addTag(orgTag);
+        }
     }
 }

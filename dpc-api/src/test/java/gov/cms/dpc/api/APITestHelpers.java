@@ -51,72 +51,6 @@ public class APITestHelpers {
         return ctx.newRestfulGenericClient(ATTRIBUTION_URL);
     }
 
-    /**
-     * Register an organization with the Attribution Service
-     * Organizations are pulled from the `organization_bundle.json` file and filtered based on the provided resource ID
-     *
-     * @param client         - {@link IGenericClient} client to communicate to attribution service
-     * @param parser         - {@link IParser} to use for reading {@link Bundle} JSON
-     * @param organizationID - {@link String} organzation ID to filter for
-     * @return - {@link String} Access token generated for the {@link Organization}
-     * @throws IOException
-     */
-    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID) throws IOException {
-        // Register an organization, and a token
-        // Read in the test file
-        String macaroon;
-        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("organization_bundle.json")) {
-
-
-            final Bundle orgBundle = (Bundle) parser.parseResource(inputStream);
-
-            // Filter the bundle to only return resources for the given Organization
-            final Bundle filteredBundle = new Bundle();
-            orgBundle
-                    .getEntry()
-                    .stream()
-                    .filter(Bundle.BundleEntryComponent::hasResource)
-                    .map(Bundle.BundleEntryComponent::getResource)
-                    .filter(resource -> {
-                        if (resource.getResourceType() == ResourceType.Organization) {
-                            return resource.getIdElement().getIdPart().equals(organizationID);
-                        } else {
-                            return ((Endpoint) resource).getManagingOrganization().getReference().equals("Organization/" + organizationID);
-                        }
-                    })
-                    .forEach(entry -> {
-                        filteredBundle.addEntry().setResource(entry);
-                    });
-
-            final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(filteredBundle);
-
-            final Organization organization = client
-                    .operation()
-                    .onType(Organization.class)
-                    .named("submit")
-                    .withParameters(parameters)
-                    .returnResourceType(Organization.class)
-                    .encodedJson()
-                    .execute();
-
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-
-                // Now, create a Macaroon
-                final HttpPost tokenPost = new HttpPost(String.format("%s/%s/token", ATTRIBUTION_URL, organization.getId()));
-                tokenPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-
-                try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
-                    assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
-                    macaroon = EntityUtils.toString(response.getEntity());
-                    assertNotNull(macaroon, "Should have Macaroon");
-                }
-            }
-        }
-
-        return macaroon;
-    }
-
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
         try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("provider_bundle.json")) {
             final Bundle orgBundle = (Bundle) parser.parseResource(inputStream);
@@ -135,6 +69,26 @@ public class APITestHelpers {
         }
     }
 
+    public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
+            final Bundle patientBundle = (Bundle) parser.parseResource(inputStream);
+
+            // Post them all
+            patientBundle
+                    .getEntry()
+                    .stream()
+                    .map(Bundle.BundleEntryComponent::getResource)
+                    .map(resource -> (Patient) resource)
+                    .forEach(patient -> {
+                        client
+                                .create()
+                                .resource(patient)
+                                .encodedJson()
+                                .execute();
+                    });
+        }
+    }
+
     /**
      * Build Dropwizard test instance with a specific subset of Resources and Providers
      *
@@ -144,7 +98,8 @@ public class APITestHelpers {
      * @param validation - {@code true} enable custom validation. {@code false} Disable custom validation
      * @return
      */
-    public static ResourceExtension buildResourceExtension(FhirContext ctx, List<Object> resources, List<Object> providers, boolean validation) {
+    public static ResourceExtension buildResourceExtension(FhirContext
+                                                                   ctx, List<Object> resources, List<Object> providers, boolean validation) {
 
         final var builder = ResourceExtension
                 .builder()
@@ -182,7 +137,8 @@ public class APITestHelpers {
         return client;
     }
 
-    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws IOException {
+    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
+            IOException {
         ConfigFactory.invalidateCaches();
         truncateDatabase();
         application.before();
@@ -199,7 +155,8 @@ public class APITestHelpers {
         }
     }
 
-    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws IOException {
+    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
+            IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
         try (CloseableHttpClient client = HttpClients.createDefault()) {

@@ -7,6 +7,7 @@ import gov.cms.dpc.api.resources.AbstractRosterResource;
 import org.hl7.fhir.dstu3.model.Bundle;
 
 import javax.inject.Inject;
+import java.util.UUID;
 
 public class RosterResource extends AbstractRosterResource {
 
@@ -23,7 +24,9 @@ public class RosterResource extends AbstractRosterResource {
     @Timed
     @ExceptionMetered
     public Bundle submitRoster(Bundle providerBundle) {
-        attributionEngine.addAttributionRelationships(providerBundle);
+        // FIXME(nickrobison): Remove this!
+        final UUID organizationID = UUID.randomUUID();
+        attributionEngine.addAttributionRelationships(providerBundle, organizationID);
 
         return providerBundle;
     }

@@ -1,10 +1,8 @@
 package gov.cms.dpc.common.utils;
 
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,7 +55,7 @@ public class SeedProcessor {
      * @param entry - {@link Map#entry(Object, Object)} representing the providerID and a {@link List} of {@link Pair} objects containing both the providerID and the patientID
      * @return - {@link Bundle} representing the {@link Patient} resources attributed to the {@link Practitioner}
      */
-    public static Bundle generateRosterBundle(Map.Entry<String, List<Pair<String, String>>> entry) {
+    public static Bundle generateRosterBundle(Map.Entry<String, List<Pair<String, String>>> entry, UUID organizationID) {
         final Bundle bundle = new Bundle();
 
         bundle.setId(new IdType("Roster", "12345"));
@@ -67,13 +65,19 @@ public class SeedProcessor {
         final Practitioner practitioner = new Practitioner();
         practitioner.addIdentifier().setValue(entry.getKey());
         practitioner.addName().addGiven("Test").setFamily("Provider");
+
+        // Add the Organization ID
+        final Meta meta = new Meta();
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organizationID.toString(), "Organization ID");
+        practitioner.setMeta(meta);
+
         bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
 
         entry.getValue()
                 .forEach((value) -> {
                     // Add some random values to the patient
                     final Patient patient = new Patient();
-                    patient.addIdentifier().setValue(value.getRight());
+                    patient.addIdentifier().setValue(value.getRight()).setSystem(DPCIdentifierSystem.MBI.getSystem());
                     patient.addName().addGiven("Tester " + rand.nextInt()).setFamily("Patient");
                     patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
                     final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
