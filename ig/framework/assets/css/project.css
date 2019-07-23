@@ -461,6 +461,48 @@ h5:before{
 
 
 /* Bootstrap navbar overrides */
+
+h1 {
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 46.8px;
+  margin-bottom: 18px;
+  margin-top: 54px;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 31.2px;
+  margin-bottom: 12px;
+  margin-top: 36px;
+}
+
+h3 {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 27.3px;
+  margin-bottom: 10.5px;
+  margin-top: 31.5px;
+}
+
+h4 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 23.4px;
+  margin-bottom: 9px;
+  margin-top: 27px;
+}
+
+p {
+  font-size: 16px;
+  line-height: 24px;
+  margin-bottom: 16px;
+  margin-top: 16px;
+  max-width: 77ch;
+}
+
+
  .navbar-inverse {
    background-color: #205493;
  }
