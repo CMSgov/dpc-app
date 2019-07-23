@@ -61,7 +61,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         List<Predicate> predicates = new ArrayList<>();
         // Always restrict by Organization
         predicates.add(builder
-                .equal(root.join("organizations").get("id"),
+                .equal(root.join("organization").get("id"),
                         organizationID));
 
         // If we've provided an NPI, use it as a query restriction.

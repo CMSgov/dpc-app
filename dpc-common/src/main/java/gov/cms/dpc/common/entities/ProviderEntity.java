@@ -21,9 +21,9 @@ import java.util.UUID;
         @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id"),
         @NamedQuery(name = "getAllProviders", query = "from providers p")
 })
-@SQLInsert(sql = "INSERT INTO providers(first_name, last_name, provider_id, id) VALUES(?, ?, ?, ?)" +
-        " ON CONFLICT (id) DO UPDATE SET last_name = EXCLUDED.last_name," +
-        " first_name = EXCLUDED.first_name")
+//@SQLInsert(sql = "INSERT INTO providers(first_name, last_name, provider_id, id, organization_id) VALUES(?, ?, ?, ?, ?)" +
+//        " ON CONFLICT (provider_id, organization_id) DO UPDATE SET last_name = EXCLUDED.last_name," +
+//        " first_name = EXCLUDED.first_name")
 public class ProviderEntity implements Serializable {
 
     public static final long serialVersionUID = 42L;

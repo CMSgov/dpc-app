@@ -57,13 +57,19 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Override
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
+    @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system." +
+            "<p>Each provider must have a metadata Tag with the responsible Organization ID included." +
+            "If not, we'll reject it." +
+            "<p> If a provider is already registered with the Organization, an errorr is thrown.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "New resource was created"),
+    })
     public Response submitProvider(Practitioner provider) {
 
         final ProviderEntity entity = ProviderEntity.fromFHIR(provider);
-        final ProviderEntity persistedEntity = this.dao.persistProvider(entity);
-
-        return Response.status(Response.Status.CREATED).entity(persistedEntity.toFHIR()).build();
+        final ProviderEntity persisted = this.dao.persistProvider(entity);
+        // If a new record exists, return it with the created status
+        return Response.status(Response.Status.CREATED).entity(persisted.toFHIR()).build();
     }
 
     @GET

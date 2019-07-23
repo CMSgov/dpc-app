@@ -2,8 +2,10 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
@@ -26,16 +28,18 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-1");
 
-
-
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
-        final MethodOutcome mo = client
+        final ICreateTyped creation = client
                 .create()
                 .resource(practitioner)
-                .encodedJson()
+                .encodedJson();
+        final MethodOutcome mo = creation
                 .execute();
 
         final Practitioner pract2 = (Practitioner) mo.getResource();
+
+        // Try again, should fail
+        assertThrows(InternalErrorException.class, creation::execute, "Should already exist");
 
         // Try to directly access
 
@@ -108,8 +112,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        // We expect that the existing seeds already exist, plus the one we just added so this means 4 + 1 have been assigned to the organization
-        assertEquals(5, providers.getEntry().size(), "Should have assigned providers");
+        // We expect that the existing seeds already exist, plus the one we just added so this means 8 + 1 have been assigned to the organization
+        assertEquals(9, providers.getEntry().size(), "Should have assigned providers");
 
         // Try to search for the provider, we should get the same results
         final Bundle searchedProviders = client
@@ -140,6 +144,11 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         pract2.getNameFirstRep().setFamily("Updated");
 
+        // Meta data doesn't persist, so update it again
+        final Meta meta = new Meta();
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), DEFAULT_ORG_ID, "Organization ID");
+        pract2.setMeta(meta);
+
         client
                 .update()
                 .resource(pract2)
@@ -154,6 +163,9 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .withId(pract2.getId())
                 .encodedJson()
                 .execute();
+
+        // Set the Meta data, so we know it deeply matches
+        pract3.setMeta(meta);
 
         assertTrue(pract2.equalsDeep(pract3), "Updated values should match");
         assertFalse(pract3.equalsDeep(practitioner), "Should not match original");

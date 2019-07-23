@@ -51,6 +51,8 @@ public class RosterUtils {
 
         logger.debug("Adding provider {}", providerEntity.getProviderNPI());
         final ProvidersRecord providerRecord = ctx.newRecord(PROVIDERS, providerEntity);
+        // Get the Org ID, because Jooq can't do it on its own
+        providerRecord.setOrganizationId(providerEntity.getOrganization().getId());
         // Upsert the record and get the new ID
         providerRecord.setId(new ProviderRecordUpserter(ctx, providerRecord).upsert().getId());
 
