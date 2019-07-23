@@ -46,6 +46,8 @@ public class BaseResource extends AbstractBaseResource {
 
     @Override
     @Public
+    @GET
+    @Path("/version")
     @ApiOperation(value = "Return the software version", hidden = true)
     public String version() {
         return "Version 1";
@@ -53,6 +55,7 @@ public class BaseResource extends AbstractBaseResource {
 
     @Override
     @GET
+    @Path("/metadata")
     @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     public CapabilityStatement metadata() {

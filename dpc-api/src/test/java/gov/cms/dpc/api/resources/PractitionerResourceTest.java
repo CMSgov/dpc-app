@@ -4,13 +4,14 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -60,7 +61,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         assertTrue(foundProvider.equalsDeep(queriedProvider), "Search and GET should be identical");
 
         // Create a new org and make sure it has no providers
-        final String m2 = APITestHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID);
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, ATTRIBUTION_URL);
 
         // Update the Macaroons interceptor to use the new Organization token
         ((APITestHelpers.MacaroonsInterceptor) client.getInterceptors().get(0)).setMacaroon(m2);

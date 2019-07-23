@@ -3,6 +3,7 @@ package gov.cms.dpc.api;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.annotations.IntegrationTest;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 
+import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 
 /**
@@ -42,7 +44,7 @@ public class AbstractSecureApplicationTest {
         ctx = FhirContext.forDstu3();
         // Register a test organization for us
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        ORGANIZATION_TOKEN = APITestHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID);
+        ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
     }
 
     @BeforeEach

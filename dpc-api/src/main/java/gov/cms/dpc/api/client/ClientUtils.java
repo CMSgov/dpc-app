@@ -40,7 +40,7 @@ import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
  */
 public class ClientUtils {
 
-    public static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+    public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     public static final String PROVIDER_ID = "8D80925A-027E-43DD-8AED-9A501CC4CD91";
     private static final Logger logger = LoggerFactory.getLogger(ClientUtils.class);
 
