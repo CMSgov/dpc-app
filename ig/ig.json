@@ -117,6 +117,11 @@
 			"defns": "StructureDefinition-dpc-profile-patient-definitions.html",
 			"source": "DPCPatient.json"
 		},
+		"StructureDefinition/dpc-profile-practitioner": {
+			"base": "StructureDefinition-dpc-profile-practitioner.html",
+			"defns": "StructureDefinition-dpc-profile-practitioner-definitions.html",
+			"source": "DPCPractitioner.json"
+		},
 		"CapabilityStatement/dpc-capabilities-statement": {
 			"base": "CapabilityStatement-dpc-capabilities.html",
 			"defns": "CapabilityStatement-dpc-capabilities-definitions.html",

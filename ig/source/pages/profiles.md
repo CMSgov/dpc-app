@@ -27,8 +27,12 @@ active: profiles
 </thead>
 <tbody>
 <tr>
-<td><a href="StructureDefinition-dpc-profile-patient.html">undefined</a></td>
-<td></td>
+<td><a href="StructureDefinition-dpc-profile-patient.html">DPC Roster Patient Profile</a></td>
+<td>Profile for submitting patient information for Roster purposes</td>
+</tr>
+<tr>
+<td><a href="StructureDefinition-dpc-profile-practitioner.html">DPC Roster Practitioner Profile</a></td>
+<td>Profile for submitting practitioner information for Roster purposes</td>
 </tr>
 </tbody>
 </table>

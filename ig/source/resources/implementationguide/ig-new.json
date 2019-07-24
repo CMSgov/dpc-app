@@ -7,23 +7,23 @@
   },
   "extension" : [{
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/source/resources"
+    "valueString" : "/Users/raac/Development/dpc-app/ig/source/resources"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/dpc-common/src/main/resources/validations"
+    "valueString" : "/Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/dpc-api/src/main/resources"
+    "valueString" : "/Users/raac/Development/dpc-app/dpc-api/src/main/resources"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/framework"
+    "valueString" : "/Users/raac/Development/dpc-app/ig/framework"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/source/pages"
+    "valueString" : "/Users/raac/Development/dpc-app/ig/source/pages"
   }],
   "url" : "https://dpc.cms.gov/ImplementationGuide/cms-dpc-ig",
   "name" : "DPCImplementationGuide",
@@ -76,6 +76,14 @@
       "reference" : {
         "reference" : "StructureDefinition/dpc-profile-patient",
         "display" : "DPCPatient.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "StructureDefinition/dpc-profile-practitioner",
+        "display" : "DPCPractitioner.json"
       },
       "exampleBoolean" : false,
       "groupingId" : "p1"
