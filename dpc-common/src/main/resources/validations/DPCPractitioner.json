@@ -3,6 +3,7 @@
   "id": "dpc-profile-practitioner",
   "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-practitioner",
   "name": "DPC Practitioner",
+  "publisher": "The DPC Team",
   "status": "draft",
   "kind": "resource",
   "abstract": false,

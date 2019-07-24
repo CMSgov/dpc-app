@@ -3,6 +3,7 @@
   "id": "dpc-profile-patient",
   "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-patient",
   "name": "DPC Patient",
+  "publisher": "The DPC Team",
   "status": "draft",
   "kind": "resource",
   "abstract": false,

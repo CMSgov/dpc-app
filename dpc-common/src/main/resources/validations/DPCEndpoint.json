@@ -3,6 +3,7 @@
   "id": "dpc-profile-endpoint",
   "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-endpoint",
   "name": "DPC Endpoint",
+  "publisher": "The DPC Team",
   "status": "draft",
   "kind": "resource",
   "abstract": false,

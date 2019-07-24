@@ -3,6 +3,7 @@
   "id": "dpc-profile-organization",
   "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-organization",
   "name": "DPC Organization",
+  "publisher": "The DPC Team",
   "status": "draft",
   "kind": "resource",
   "abstract": false,

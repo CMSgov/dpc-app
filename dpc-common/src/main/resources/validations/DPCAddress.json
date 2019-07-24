@@ -3,6 +3,7 @@
   "id": "dpc-profile-address",
   "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-address",
   "name": "DPC Address",
+  "publisher": "The DPC Team",
   "status": "draft",
   "kind": "complex-type",
   "abstract": false,
