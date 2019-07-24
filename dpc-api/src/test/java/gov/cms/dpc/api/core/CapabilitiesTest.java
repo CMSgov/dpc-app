@@ -32,7 +32,7 @@ class CapabilitiesTest {
 
     @Test
     void capabilitiesIsValid() {
-        final CapabilityStatement capabilities = Capabilities.buildCapabilities();
+        final CapabilityStatement capabilities = Capabilities.getCapabilities();
         final ValidationResult validationResult = validator.validateWithResult(capabilities);
         assertTrue(validationResult.isSuccessful(), validationResultsToString(validationResult));
     }

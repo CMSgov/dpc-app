@@ -31,7 +31,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
     @ApiOperation(value = "Get organization details",
             notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
-    authorizations = @Authorization(value = "apiKey"))
+            authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
     public Organization getOrganization(@PathParam("organizationID") UUID organizationID) {

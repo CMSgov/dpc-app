@@ -107,7 +107,7 @@ class AuthHandlerTest {
     private static BaseResource mockBaseResource() {
         final BaseResource base = mock(BaseResource.class);
 
-        doReturn(Capabilities.buildCapabilities()).when(base).metadata();
+        doReturn(Capabilities.getCapabilities()).when(base).metadata();
 
         return base;
     }
