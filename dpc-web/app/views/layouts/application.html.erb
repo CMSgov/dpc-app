@@ -9,26 +9,17 @@
 
     <header class="page-header">
       <div class="ds-l-container">
-        <span class="page-header__heading">Docs</span>
-
-        <div class="ds-c-tabs">
-          <%= link_to docs_path, :class => "ds-c-tabs__item #{current_class?(docs_path)}" do %>
-            Reference
-          <% end %>
-          <%= link_to docs_guide_path, :class => "ds-c-tabs__item #{current_class?(docs_guide_path)}" do %>
-            Guide
-          <% end %>
-        </div>
-
+        <h1 class="page-header__heading"><%= yield(:title) %></h1>
       </div>
     </header>
 
     <!-- content -->
-    <section class="ds-l-container ds-u-padding-top--7">
+    <section class="ds-l-container ds-u-padding-top--7 ds-u-margin-bottom--7" id="main">
       <%= yield %>
     </section>
 
 
     <%= render partial: 'shared/footer' %>
+
   </body>
 </html>
