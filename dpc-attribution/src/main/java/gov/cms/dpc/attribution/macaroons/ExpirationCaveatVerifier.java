@@ -15,11 +15,8 @@ import java.util.Optional;
 public class ExpirationCaveatVerifier implements CaveatVerifier {
 
     static final String CAVEAT_INVALID = "Caveat is expired";
-    private final TokenPolicy.ExpirationPolicy expirationPolicy;
 
-    ExpirationCaveatVerifier(TokenPolicy policy) {
-        this.expirationPolicy = policy.getExpirationPolicy();
-    }
+    ExpirationCaveatVerifier(TokenPolicy policy) { }
 
     @Override
     public Optional<String> check(MacaroonCaveat caveat) {
