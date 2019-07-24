@@ -4,17 +4,20 @@
   <p>
     <% if @dpc_registration.opt_in %>
       You've chosen to register for access to the DPC API, and your
-      status is <%= @dpc_registration.status %>.
+      status is <%= @dpc_registration.opt_in_status %>.
     <% else %>
       You've chosen NOT to register for access to the DPC API.
     <% end %>
   </p>
   <p>
+    Currently, your access level to the DPC API is: <%= @dpc_registration.access_level.tr('_', ' ') %>.
+  </p>
+  <p>
     Registration Details:<br/>
     <%= @dpc_registration.user.name %><br/>
-    <%= @dpc_registration.organization %><br/>
-    <%= @dpc_registration.address_1 %><br/>
-    <%= @dpc_registration.address_2 %><br/>
-    <%= @dpc_registration.city %>, <%= @dpc_registration.state %> <%= @dpc_registration.zip %>
+    <%= @dpc_registration.user.organization %><br/>
+    <%= @dpc_registration.user.address_1 %><br/>
+    <%= @dpc_registration.user.address_2 %><br/>
+    <%= @dpc_registration.user.city %>, <%= @dpc_registration.user.state %> <%= @dpc_registration.user.zip %>
   </p>
 </div>
