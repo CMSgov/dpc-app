@@ -71,7 +71,7 @@ rbenv gemset create {latest-ruby-version: eg 2.6.2} dpc-website
 
 ### Credentials
 
-The database is password encrypted. Additionally, sensitive information exists that mist also be encrypted in the credentials file. In order to build the database and run the application, you'll need a copy of the `master.key` file. TBD: contact information for this file.
+The database is password encrypted. Credentials are passed via environment variables. See the "Running the Server" section for information on which environment variables to set.
 
 
 ### Running the server
@@ -80,7 +80,13 @@ rails db:create db:migrate db:seed
 rails server
 ```
 
-Note: If you need to change the database configuration, it can be overridden using the `DB_USER`, `DB_PASS`, and `DB_HOST` environment variables.
+Note: If you need to change the database configuration, it can be overridden using the `DB_USER`, `DB_PASS`, and `DATABASE_URL` environment variables. Example:
+
+```
+export DB_USER=postgres
+export DB_PASS=password
+export DATABASE_URL=postgresql://localhost/dpc-website_development
+```
 
 
 # Running via Docker
@@ -89,7 +95,7 @@ The DPC website can also be run via docker. Follow the below steps to build and 
 
 ## Build the Docker Container
 
-First, ensure the contents of the `master.key` from the above settings is added to an environment variable `RAILS_MASTER_KEY`. Then, to build the container, simply run the following command:
+To build the container, simply run the following command:
 
 ```Bash
 docker-compose build
@@ -116,3 +122,7 @@ When you're done, shut down the server with the following command:
 ```Bash
 docker-compose down
 ```
+
+# Production
+
+When running in production, the Docker Compose database should not be used. RDS should be used instead. Additionally, the following environment variable should be used to set production mode: `RAILS_ENV=production`.
