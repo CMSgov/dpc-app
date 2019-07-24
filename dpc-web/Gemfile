@@ -17,6 +17,7 @@ gem 'kramdown', '~> 2.1'
 gem 'jquery-rails'
 gem 'bootstrap'
 gem 'devise'
+gem 'brakeman'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]

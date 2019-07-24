@@ -17,6 +17,13 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_email, with: user.email
       fill_in :user_password, with: user.password
       fill_in :user_password_confirmation, with: user.password_confirmation
+      fill_in :user_organization, with: user.organization
+      fill_in :user_address_1, with: user.address_1
+      fill_in :user_address_2, with: user.address_2
+      fill_in :user_city, with: user.city
+      find('#user_state').find("option[value=#{user.state}]").select_option
+      fill_in :user_zip, with: user.zip
+
       click_on('Sign up')
     end
 
@@ -32,6 +39,12 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_email, with: user.email
       fill_in :user_password, with: user.password
       fill_in :user_password_confirmation, with: user.password_confirmation
+      fill_in :user_organization, with: user.organization
+      fill_in :user_address_1, with: user.address_1
+      fill_in :user_address_2, with: user.address_2
+      fill_in :user_city, with: user.city
+      find('#user_state').find("option[value=#{user.state}]").select_option
+      fill_in :user_zip, with: user.zip
       click_on('Sign up')
     end
 
@@ -49,6 +62,12 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_email, with: user.email
       fill_in :user_password, with: user.password
       fill_in :user_password_confirmation, with: user.password_confirmation
+      fill_in :user_organization, with: user.organization
+      fill_in :user_address_1, with: user.address_1
+      fill_in :user_address_2, with: user.address_2
+      fill_in :user_city, with: user.city
+      find('#user_state').find("option[value=#{user.state}]").select_option
+      fill_in :user_zip, with: user.zip
       click_on('Sign up')
     end
 

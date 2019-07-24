@@ -33,9 +33,6 @@ class DpcRegistrationsController < ApplicationController
   private
 
   def dpc_registrations_params
-    params.require(:dpc_registration).permit(
-      :organization, :address_1, :address_2,
-      :city, :state, :zip, :opt_in
-    )
+    params.require(:dpc_registration).permit(:opt_in)
   end
 end
