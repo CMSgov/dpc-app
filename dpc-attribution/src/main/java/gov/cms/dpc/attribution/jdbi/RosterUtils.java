@@ -4,11 +4,13 @@ import gov.cms.dpc.attribution.dao.tables.Attributions;
 import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
+import gov.cms.dpc.attribution.exceptions.AttributionException;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 import org.jooq.DSLContext;
+import org.jooq.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,10 +68,20 @@ public class RosterUtils {
                 .peek(patient -> patient.setManagingOrganization(new Reference("Organization/" + organizationID.toString())))
                 .map(PatientEntity::fromFHIR)
                 .forEach(patientEntity -> RosterUtils.createUpdateAttributionRelationship(ctx, patientEntity, providerRecord, creationTimestamp));
+
+        int attributionListSize = ctx
+                .selectCount()
+                .from(Attributions.ATTRIBUTIONS)
+                .where(Attributions.ATTRIBUTIONS.PROVIDER_ID.eq(providerRecord.getId()))
+                .execute();
+
+        if(attributionListSize>4000){
+            throw new AttributionException("Attribution list size greater than permissible");
+        }
     }
 
     private static void createUpdateAttributionRelationship(DSLContext ctx, PatientEntity patientEntity, ProvidersRecord providerRecord, OffsetDateTime creationTimestamp) {
-        // Create a new record from the patient entity
+        // Create a new record from the patient eny
         if (patientEntity.getPatientID() == null) {
             patientEntity.setPatientID(UUID.randomUUID());
         }
