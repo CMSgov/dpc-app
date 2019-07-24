@@ -88,7 +88,12 @@ public class Capabilities {
         final SystemInteractionComponent batchInteraction = new SystemInteractionComponent(new Enumeration<>(new SystemRestfulInteractionEnumFactory(), SystemRestfulInteraction.BATCH));
         serverComponent.setInteraction(Collections.singletonList(batchInteraction));
 
-        serverComponent.setResource(List.of(
+        serverComponent.setResource(generateRestResource());
+        return Collections.singletonList(serverComponent);
+    }
+
+    private static List<CapabilityStatementRestResourceComponent> generateRestResource() {
+        return List.of(
                 generateRestComponent("Endpoint", List.of(
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
@@ -108,9 +113,7 @@ public class Capabilities {
                 generateRestComponent("StructureDefinition", List.of(
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ))
                         , Collections.emptyList())
-        ));
-
-        return Collections.singletonList(serverComponent);
+        );
     }
 
     private static CapabilityStatementRestResourceComponent generateRestComponent(String name, List<ResourceInteractionComponent> interactions, List<CapabilityStatementRestResourceSearchParamComponent> searchParams) {
