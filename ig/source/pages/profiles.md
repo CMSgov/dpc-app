@@ -27,6 +27,14 @@ active: profiles
 </thead>
 <tbody>
 <tr>
+<td><a href="StructureDefinition-dpc-profile-address.html">DPC Address Profile</a></td>
+<td>Profile for required address information for Organizations</td>
+</tr>
+<tr>
+<td><a href="StructureDefinition-dpc-profile-organization.html">DPC Organization Profile</a></td>
+<td>Profile for DPC registered organizations</td>
+</tr>
+<tr>
 <td><a href="StructureDefinition-dpc-profile-patient.html">DPC Roster Patient Profile</a></td>
 <td>Profile for submitting patient information for Roster purposes</td>
 </tr>

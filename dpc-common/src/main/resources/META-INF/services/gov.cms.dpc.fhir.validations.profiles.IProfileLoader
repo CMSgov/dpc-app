@@ -1,2 +1,4 @@
 gov.cms.dpc.fhir.validations.profiles.PatientProfile
 gov.cms.dpc.fhir.validations.profiles.PractitionerProfile
+gov.cms.dpc.fhir.validations.profiles.AddressProfile
+gov.cms.dpc.fhir.validations.profiles.OrganizationProfile

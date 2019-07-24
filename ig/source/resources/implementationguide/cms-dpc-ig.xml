@@ -46,6 +46,20 @@
         <resource>
             <example value="false"/>
             <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-address"/>
+                <display value="DPCAddress.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-organization"/>
+                <display value="DPCOrganization.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
                 <reference value="StructureDefinition/dpc-profile-patient"/>
                 <display value="DPCPatient.json"/>
             </sourceReference>

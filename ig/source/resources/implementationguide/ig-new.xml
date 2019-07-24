@@ -69,6 +69,22 @@
     </resource>
     <resource>
       <reference>
+        <reference value="StructureDefinition/dpc-profile-address"/>
+        <display value="DPCAddress.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="StructureDefinition/dpc-profile-organization"/>
+        <display value="DPCOrganization.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
         <reference value="StructureDefinition/dpc-profile-patient"/>
         <display value="DPCPatient.json"/>
       </reference>

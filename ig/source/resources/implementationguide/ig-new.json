@@ -74,6 +74,22 @@
     },
     {
       "reference" : {
+        "reference" : "StructureDefinition/dpc-profile-address",
+        "display" : "DPCAddress.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "StructureDefinition/dpc-profile-organization",
+        "display" : "DPCOrganization.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
         "reference" : "StructureDefinition/dpc-profile-patient",
         "display" : "DPCPatient.json"
       },
