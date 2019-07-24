@@ -3,6 +3,7 @@ package gov.cms.dpc.api.core;
 
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRFormatters;
+import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.util.Arrays;
@@ -93,6 +94,8 @@ public class Capabilities {
         practitioner.setSearchParam(List.of(
                 new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
         ));
+
+        practitioner.setProfile(new Reference(new IdType("StructureDefinition", PractitionerProfile.PROFILE_URI)));
 
         return practitioner;
     }
