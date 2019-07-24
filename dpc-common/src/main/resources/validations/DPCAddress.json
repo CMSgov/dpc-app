@@ -51,13 +51,6 @@
         "max": "1"
       },
       {
-        "id": "Address.district",
-        "path": "Address.district",
-        "definition": "Must have district",
-        "min": 1,
-        "max": "1"
-      },
-      {
         "id": "Address.state",
         "path": "Address.state",
         "definition": "Must have state",

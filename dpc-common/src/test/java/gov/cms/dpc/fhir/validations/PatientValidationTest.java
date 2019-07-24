@@ -208,7 +208,7 @@ class PatientValidationTest {
         return patient;
     }
 
-    Address generateFakeAddress() {
+    private Address generateFakeAddress() {
         final Address address = new Address();
         address.addLine("1800 Pennsylvania Ave NW");
         address.setCity("Washington");
