@@ -2,7 +2,7 @@
   "resourceType": "StructureDefinition",
   "id": "dpc-profile-address",
   "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-address",
-  "name": "DPC Address Definition",
+  "name": "DPC Address",
   "status": "draft",
   "kind": "complex-type",
   "abstract": false,

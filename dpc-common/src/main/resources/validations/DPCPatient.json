@@ -2,7 +2,7 @@
   "resourceType": "StructureDefinition",
   "id": "dpc-profile-patient",
   "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-patient",
-  "name": "DPC Patient Definition",
+  "name": "DPC Patient",
   "status": "draft",
   "kind": "resource",
   "abstract": false,

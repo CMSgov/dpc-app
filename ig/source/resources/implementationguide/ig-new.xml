@@ -27,7 +27,7 @@
   <experimental value="false"/>
   <publisher value="Centers for Medicare and Medicaid Services"/>
   <description value="Draft implementation guide for DPC Application"/>
-  <packageId value="cms-dpc-ig"/>
+  <packageId value="cms-dpc-ig-"/>
   <license value="CC0-1.0"/>
   <fhirVersion value="3.0.1"/>
   <fhirVersion value="3.0.1"/>
@@ -71,6 +71,14 @@
       <reference>
         <reference value="StructureDefinition/dpc-profile-address"/>
         <display value="DPCAddress.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="StructureDefinition/dpc-profile-endpoint"/>
+        <display value="DPCEndpoint.json"/>
       </reference>
       <exampleBoolean value="false"/>
       <groupingId value="p1"/>

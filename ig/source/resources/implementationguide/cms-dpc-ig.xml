@@ -53,6 +53,13 @@
         <resource>
             <example value="false"/>
             <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-endpoint"/>
+                <display value="DPCEndpoint.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
                 <reference value="StructureDefinition/dpc-profile-organization"/>
                 <display value="DPCOrganization.json"/>
             </sourceReference>

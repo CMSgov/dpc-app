@@ -2,7 +2,7 @@
   "resourceType": "StructureDefinition",
   "id": "dpc-profile-organization",
   "url": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-organization",
-  "name": "DPC Organization Definition",
+  "name": "DPC Organization",
   "status": "draft",
   "kind": "resource",
   "abstract": false,
@@ -59,7 +59,13 @@
         "path": "Organization.endpoint",
         "definition": "An Organization will always have at least one FHIR endpoint",
         "min": 1,
-        "max": "*"
+        "max": "*",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-endpoint"
+          }
+        ]
       }
     ]
   }
