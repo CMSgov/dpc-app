@@ -29,7 +29,7 @@
     "https://trifolia-on-fhir.lantanagroup.com"
   ],
   "sct-edition": "http://snomed.info/sct/731000124108",
-  "canonicalBase": "https://dpc.cms.gov",
+  "canonicalBase": "https://dpc.cms.gov/fhir/v1",
   "defaults": {
     "Location": {
       "template-base": "ex.html"
