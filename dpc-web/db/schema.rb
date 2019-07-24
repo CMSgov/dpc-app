@@ -10,12 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_07_19_151153) do
+ActiveRecord::Schema.define(version: 2019_07_18_151153) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "registrations", force: :cascade do |t|
+  create_table "dpc_registrations", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "organization", null: false
     t.string "address_1", null: false
@@ -24,10 +24,12 @@ ActiveRecord::Schema.define(version: 2019_07_19_151153) do
     t.string "state", null: false
     t.string "zip", null: false
     t.boolean "opt_in", default: true
+    t.integer "status", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["organization"], name: "index_registrations_on_organization"
-    t.index ["user_id"], name: "index_registrations_on_user_id"
+    t.index ["organization"], name: "index_dpc_registrations_on_organization"
+    t.index ["status"], name: "index_dpc_registrations_on_status"
+    t.index ["user_id"], name: "index_dpc_registrations_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|

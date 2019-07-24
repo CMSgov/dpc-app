@@ -39,6 +39,15 @@ aria-controls="topnav-wrap" aria-label="Close menu">
          Request access
        <% end %>
       </li>
+
+      <li class="topnav__item">
+        <% if user_signed_in? %>
+          <a class="ds-c-button ds-c-button--medium ds-c-button--primary ds-u-margin-right--2"
+             id="sign-out" href="<%= destroy_user_session_path %>" data-method="delete">
+             Sign out
+          </a>
+        <% end %>
+      </li>
     </ul>
   </div>
 </nav>
