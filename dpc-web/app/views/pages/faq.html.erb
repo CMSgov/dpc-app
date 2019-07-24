@@ -14,7 +14,7 @@
     </h2>
     <div id="a1" class="usa-accordion__content">
       <ul>
-        <li>First, <a href="#">request access</a> to the pilot. This puts you on the list of providers who are interested, regardless of whether your vendors are ready to participate.</li>
+        <li>First, <% unless user_signed_in? %><%= link_to "Request access page", new_registration_path(User) %><% else %> Request access page <% end %> to the pilot. This puts you on the list of providers who are interested, regardless of whether your vendors are ready to participate.</li>
         <li>Ask your software provider if they have implemented the Bulk FHIR specification.</li>
         <li>Direct them to this website and encourage them to use the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a>.</li>
         <li>Ask them if they can commit to working with you on this project and if so, when will they be ready.</li>

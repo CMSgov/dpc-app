@@ -34,20 +34,21 @@ aria-controls="topnav-wrap" aria-label="Close menu">
         <% end %>
       </li>
 
-      <li class="topnav__item">
-       <%= link_to docs_path, :class => "ds-c-button ds-c-button--primary" do %>
-         Request access
-       <% end %>
-      </li>
-
-      <li class="topnav__item">
-        <% if user_signed_in? %>
+      <% unless user_signed_in? %>
+        <li class="topnav__item ds-u-padding-right--1">
+          <%= link_to "Request access", new_registration_path(User), class: "ds-c-button ds-c-button--success" %>
+        </li>
+        <li class="topnav__item">
+          <%= link_to "Log in", new_session_path(User), class: "ds-c-button ds-c-button--primary" %>
+        </li>
+      <% else %>
+        <li class="topnav__item">
           <a class="ds-c-button ds-c-button--medium ds-c-button--primary ds-u-margin-right--2"
              id="sign-out" href="<%= destroy_user_session_path %>" data-method="delete">
              Sign out
           </a>
-        <% end %>
-      </li>
+        </li>
+      <% end %>
     </ul>
   </div>
 </nav>
