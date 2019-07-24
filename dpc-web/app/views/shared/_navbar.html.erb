@@ -13,7 +13,7 @@
   </button>
 
 
-
+  <% unless (controller_name == "sessions" || controller_name == "registrations") %>
   <div class="topnav-wrap" id="topnav-wrap">
     <button id="topnav__close-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__close-button" type="button"
 aria-controls="topnav-wrap" aria-label="Close menu">
@@ -51,4 +51,5 @@ aria-controls="topnav-wrap" aria-label="Close menu">
       <% end %>
     </ul>
   </div>
+  <% end %>
 </nav>
