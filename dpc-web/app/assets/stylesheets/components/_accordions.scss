@@ -5,20 +5,20 @@
   width: 100%;
 }
 
-.usa-accordion > li{
+.usa-accordion > li {
   margin-bottom: 0;
   max-width: unset;
 }
 
-.usa-accordion > ul li ul{
+.usa-accordion > ul li ul {
   list-style: disc;
 }
 
-.usa-accordion > ul li ul > li > ul{
+.usa-accordion > ul li ul > li > ul {
   list-style: circle;
 }
 
-.usa-accordion > ul li ul > li > ul > li > ul{
+.usa-accordion > ul li ul > li > ul > li > ul {
   list-style: square;
 }
 
@@ -27,14 +27,14 @@
   margin-top: 0.5rem;
 }
 
-.usa-accordion--bordered .usa-accordion__content{
+.usa-accordion--bordered .usa-accordion__content {
   border-bottom: 0.25rem solid $color-warn-lightest;
   border-left: 0.25rem solid $color-warn-lightest;
   border-right: 0.25rem solid $color-warn-lightest;
   padding-bottom: 1rem;
 }
 
-.usa-accordion--bordered .usa-accordion__heading{
+.usa-accordion--bordered .usa-accordion__heading {
   margin-bottom:0;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .usa-accordion__heading:not(:first-child),
-.usa-prose .usa-accordion__heading:not(:first-child){
+.usa-prose .usa-accordion__heading:not(:first-child) {
   margin-top:0.5rem;
 }
 
@@ -54,18 +54,26 @@
   background-color:white;
   margin-top:0;
   overflow:auto;
-  padding:1rem 1.25rem calc(1rem - 0.25rem) 1.25rem;
+  padding: 1rem 1.25rem calc(1rem - 0.25rem) 1.25rem;
+
+  > * {
+    max-width: 77ch;
+  }
+
+  li {
+    margin: 1em 0;
+  }
 }
 
-.usa-accordion__content > *:first-child{
+.usa-accordion__content > *:first-child {
   margin-top:0;
 }
 
-.usa-accordion__content > *:last-child{
+.usa-accordion__content > *:last-child {
   margin-bottom:0;
 }
 
-.usa-accordion__content[aria-hidden=true]{
+.usa-accordion__content[aria-hidden=true] {
   display:none;
 }
 
@@ -92,15 +100,15 @@
   width: 100%;
 }
 
-.usa-accordion__button:hover{
+.usa-accordion__button:hover {
   color: $color-primary-darkest;
 }
 
-.usa-accordion__button:active{
+.usa-accordion__button:active {
   color: $color-primary-darkest;
 }
 
-.usa-accordion__button:visited{
+.usa-accordion__button:visited {
   color: $color-primary-darkest;
 }
 
@@ -112,13 +120,13 @@
   text-decoration:underline;
 }
 
-.usa-accordion__button:hover{
+.usa-accordion__button:hover {
   background-color: $color-warn-lighter;
   color: $color-gray-dark;
   text-decoration: none;
 }
 
-.usa-accordion__button[aria-expanded=false]{
+.usa-accordion__button[aria-expanded=false] {
   background-image: url(plus.svg), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
   background-image: url(plus.svg), linear-gradient(transparent, transparent);
   background-repeat: no-repeat;
