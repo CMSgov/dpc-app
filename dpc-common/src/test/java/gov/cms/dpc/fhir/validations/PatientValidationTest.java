@@ -19,7 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PatientValidation {
+class PatientValidationTest {
 
     private static FhirValidator fhirValidator;
     private static DPCProfileSupport dpcModule;
