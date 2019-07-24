@@ -4,6 +4,8 @@ package gov.cms.dpc.api.core;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRFormatters;
 import org.hl7.fhir.dstu3.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,10 +15,38 @@ import static org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 
 public class Capabilities {
 
+    private static final Logger logger = LoggerFactory.getLogger(Capabilities.class);
+
+    private static final Object lock = new Object();
+    private static volatile CapabilityStatement statement;
+
     private Capabilities() {
     }
 
-    public static CapabilityStatement buildCapabilities() {
+    /**
+     * Get the system's {@link CapabilityStatement}.
+     * <p>
+     * This value is lazily generated the first time it's called.
+     *
+     * @return - {@link CapabilityStatement} of system.
+     */
+    public static CapabilityStatement getCapabilities() {
+        // Double lock check to lazy init capabilities statement
+        if (statement == null) {
+            synchronized (lock) {
+                if (statement == null) {
+                    logger.debug("Building capabilities statement");
+                    statement = buildCapabilities();
+                    return statement;
+                }
+            }
+        }
+        logger.trace("Returning cached capabilities statement");
+        return statement;
+    }
+
+
+    private static CapabilityStatement buildCapabilities() {
         final PropertiesProvider pp = new PropertiesProvider();
 
         DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIRFormatters.DATE_TIME_FORMATTER));
@@ -59,7 +89,8 @@ public class Capabilities {
         serverComponent.setInteraction(Collections.singletonList(batchInteraction));
 
         serverComponent.setResource(List.of(
-//                generateGroupEndpoints(),
+                generateEndpointEndpoints(),
+                generateOrganizationEndpoints(),
                 generatePractitionerEndpoints(),
                 generateStructureDefinitionEndpoints()
         ));
@@ -67,15 +98,29 @@ public class Capabilities {
         return Collections.singletonList(serverComponent);
     }
 
-    @SuppressWarnings({"UnusedMethod"}) // Will be expanded with DPC-293
-    private static CapabilityStatementRestResourceComponent generateGroupEndpoints() {
-        final CapabilityStatementRestResourceComponent group = new CapabilityStatementRestResourceComponent();
-        group.setType("Group");
+    private static CapabilityStatementRestResourceComponent generateEndpointEndpoints() {
+        final CapabilityStatementRestResourceComponent endpoint = new CapabilityStatementRestResourceComponent();
+        endpoint.setType("Endpoint");
+        endpoint.setVersioning(ResourceVersionPolicy.NOVERSION);
 
-        // STU3 does not support resource level operations, so we'll just add a document comment for now.
-        group.setDocumentation("Defines the $export operator, which complies with the draft Bulk Data Specification");
+        endpoint.setInteraction(List.of(
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
+        ));
 
-        return group;
+        return endpoint;
+    }
+
+    private static CapabilityStatementRestResourceComponent generateOrganizationEndpoints() {
+        final CapabilityStatementRestResourceComponent organization = new CapabilityStatementRestResourceComponent();
+        organization.setType("Organization");
+        organization.setVersioning(ResourceVersionPolicy.NOVERSION);
+
+        organization.setInteraction(List.of(
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
+        ));
+
+        return organization;
     }
 
     private static CapabilityStatementRestResourceComponent generatePractitionerEndpoints() {
@@ -84,6 +129,7 @@ public class Capabilities {
         practitioner.setVersioning(ResourceVersionPolicy.NOVERSION);
 
         practitioner.setInteraction(List.of(
+                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
                 new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
                 new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
                 new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
