@@ -2,25 +2,27 @@
 
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
   <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+    <%= f.label :email, :class => "ds-c-label" %>
+    <%= f.email_field :email, autofocus: true, autocomplete: "email", :class => "ds-c-field" %>
   </div>
 
   <div class="field">
-    <%= f.label :password %><br />
-    <%= f.password_field :password, autocomplete: "current-password" %>
+    <%= f.label :password, :class => "ds-c-label" %>
+    <%= f.password_field :password, autocomplete: "current-password", :class => "ds-c-field" %>
   </div>
 
   <% if devise_mapping.rememberable? %>
-    <div class="field">
-      <%= f.check_box :remember_me %>
+    <div class="field ds-u-margin-top--3">
+      <%= f.check_box :remember_me, :class => "ds-c-choice" %>
       <%= f.label :remember_me %>
     </div>
   <% end %>
 
-  <div class="actions">
-    <%= f.submit "Log in" %>
+  <div class="actions ds-u-margin-top--3">
+    <%= f.submit "Log in", :class => "ds-c-button ds-c-button--primary" %>
   </div>
 <% end %>
 
+<div class="ds-u-margin-y--5">
 <%= render "devise/shared/links" %>
+</div>
