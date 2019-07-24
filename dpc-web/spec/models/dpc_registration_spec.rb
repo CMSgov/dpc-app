@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
-
-RSpec.describe Registration, type: :model do
-  subject { build :registration, user: user }
-  let(:user) { create :user }
+RSpec.describe DpcRegistration, type: :model do
+  subject { build :dpc_registration }
 
   describe 'factory' do
     it { is_expected.to be_valid }
@@ -56,9 +53,36 @@ RSpec.describe Registration, type: :model do
       expect(subject).to_not be_valid
     end
 
-    it 'must be a valid state' do
+    it 'accepts zip + 4' do
+      subject.zip = '12345-6789'
+      expect(subject).to be_valid
+    end
+
+    it 'must be valid' do
       subject.zip = '123456-756'
       expect(subject).to_not be_valid
+    end
+  end
+
+  describe '#opt_in' do
+    it 'defaults to true' do
+      subject.save
+      expect(subject.opt_in).to be_truthy
+    end
+  end
+
+  describe '#status' do
+    it 'is required' do
+      subject.status = nil
+      expect(subject).to_not be_valid
+    end
+
+    it 'must be valid' do
+      expect { subject.status = 'blah-blah' }.to raise_error(ArgumentError)
+    end
+
+    it 'defaults to pending' do
+      expect(subject.status).to eq('pending')
     end
   end
 end

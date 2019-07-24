@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-class Registration < ApplicationRecord
+class DpcRegistration < ApplicationRecord
+  belongs_to :user, inverse_of: :dpc_registration
+
   STATES = {
     AK: 'Alaska', AL: 'Alabama', AR: 'Arkansas', AZ: 'Arizona',
     CA: 'California', CO: 'Colorado', CT: 'Connecticut',
@@ -19,11 +21,12 @@ class Registration < ApplicationRecord
     GU: 'Guam', PR: 'Puerto Rico', VI: 'Virgin Islands'
   }.freeze
 
-  belongs_to :user, inverse_of: :registration
+  enum status: %i[pending synthesized production]
 
   validates :organization, presence: true
   validates :address_1, presence: true
   validates :city, presence: true
   validates :state, inclusion: { in: STATES.keys.map(&:to_s) }
-  validates :zip, format: { with: /\A\d{5}(?:\-\d{4})\z/ }
+  validates :zip, format: { with: /\A\d{5}(?:\-\d{4})?\z/ }
+  validates :status, inclusion: { in: %w[pending synthesized production] }
 end

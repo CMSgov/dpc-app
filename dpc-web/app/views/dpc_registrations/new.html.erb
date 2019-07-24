@@ -1,0 +1,84 @@
+<% if @dpc_registration.errors.any? %>
+  <div>
+    <ul>
+      <% @dpc_registration.errors.full_messages.each do |error| %>
+        <li><%= error %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<div>
+  <h1>Register for API Beta Testing</h1>
+
+  <!-- must use local: true, not remote: false -->
+  <%= form_with model: @dpc_registration, url: dpc_registrations_path, method: :post, local: true do |f| %>
+    <div class="field">
+        <%=
+          render(partial: 'shared/form_control', locals: {
+            record: @dpc_registration, column: :organization, label: :capitalize, required: true,
+            control: f.text_field(:organization, value: @dpc_registration.organization, class: 'form-control')
+          })
+        %>
+    </div>
+
+    <div class="field ds-u-margin-top--2">
+        <%=
+          render(partial: 'shared/form_control', locals: {
+            record: @dpc_registration, column: :address_1, label: :capitalize, required: true,
+            control: f.text_field(:address_1, value: @dpc_registration.address_1, class: 'form-control')
+          })
+        %>
+    </div>
+
+    <div class="field ds-u-margin-top--2">
+        <%=
+          render(partial: 'shared/form_control', locals: {
+            record: @dpc_registration, column: :address_2, label: :capitalize, required: false,
+            control: f.text_field(:address_2, value: @dpc_registration.address_2, class: 'form-control')
+          })
+        %>
+    </div>
+
+    <div class="field ds-u-margin-top--2">
+        <%=
+          render(partial: 'shared/form_control', locals: {
+            record: @dpc_registration, column: :city, label: :capitalize, required: true,
+            control: f.text_field(:city, value: @dpc_registration.city, class: 'form-control')
+          })
+        %>
+    </div>
+
+    <div class="field ds-u-margin-top--2">
+        <%=
+          render(partial: 'shared/form_control', locals: {
+            record: @dpc_registration, column: :state, label: :capitalize, required: true,
+            control: f.select(
+              :state,
+              DpcRegistration::STATES.each_with_object([]) { |state, memo| memo << [state[1], state[0]] },
+              value: @dpc_registration.state,
+              class: 'form-control'
+            )
+          })
+        %>
+    </div>
+
+    <div class="field ds-u-margin-top--2">
+        <%=
+          render(partial: 'shared/form_control', locals: {
+            record: @dpc_registration, column: :zip, label: :capitalize, required: true,
+            control: f.text_field(:zip, value: @dpc_registration.zip, class: 'form-control')
+          })
+        %>
+    </div>
+
+  <div class="field ds-u-margin-top--2">
+      <%= f.check_box :opt_in, autofocus: true %>
+      <%= f.label 'I wish to particiapte' %>
+    </div>
+
+    <%= f.submit 'Register',
+      class: "ds-c-button ds-c-button--medium ds-c-button--primary ds-u-margin-top--2",
+      id: "registration_register" %>
+  <% end %>
+</div>
