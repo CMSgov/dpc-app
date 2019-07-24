@@ -17,7 +17,7 @@ public class StaticAuthenticator implements Authenticator<DPCAuthCredentials, Or
 
 
     @Inject
-    StaticAuthenticator() {
+    public StaticAuthenticator() {
     }
 
     @Override

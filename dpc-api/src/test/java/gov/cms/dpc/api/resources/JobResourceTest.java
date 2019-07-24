@@ -1,13 +1,17 @@
 package gov.cms.dpc.api.resources;
 
+import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.v1.JobResource;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +35,9 @@ public class JobResourceTest {
         final var jobID = UUID.randomUUID();
         final var queue = new MemoryQueue();
         final var resource = new JobResource(queue, TEST_BASEURL);
-        final Response response = resource.checkJobStatus(jobID.toString());
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+
+        final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
 
         assertEquals(HttpStatus.NOT_FOUND_404, response.getStatus());
     }
@@ -42,10 +48,12 @@ public class JobResourceTest {
     @Test
     public void testQueuedJob() {
         final var jobID = UUID.randomUUID();
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryQueue();
 
         // Setup a queued job
-        final var job = new JobModel(jobID,
+        final var job = new JobModel(jobID, orgID,
                 JobModel.validResourceTypes,
                 TEST_PROVIDER_ID,
                 List.of(TEST_PATIENT_ID));
@@ -53,7 +61,7 @@ public class JobResourceTest {
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
-        final Response response = resource.checkJobStatus(jobID.toString());
+        final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
                 () -> assertEquals(JobStatus.QUEUED.toString(), response.getHeaderString("X-Progress")));
     }
@@ -64,10 +72,12 @@ public class JobResourceTest {
     @Test
     public void testRunningJob() {
         final var jobID = UUID.randomUUID();
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryQueue();
 
         // Setup a running job
-        final var job = new JobModel(jobID,
+        final var job = new JobModel(jobID, orgID,
                 JobModel.validResourceTypes,
                 TEST_PROVIDER_ID,
                 List.of(TEST_PATIENT_ID));
@@ -76,7 +86,7 @@ public class JobResourceTest {
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
-        final Response response = resource.checkJobStatus(jobID.toString());
+        final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
                 () -> assertEquals(JobStatus.RUNNING.toString(), response.getHeaderString("X-Progress")));
     }
@@ -87,10 +97,12 @@ public class JobResourceTest {
     @Test
     public void testSuccessfulJob() {
         final var jobID = UUID.randomUUID();
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryQueue();
 
         // Setup a completed job
-        final var job = new JobModel(jobID,
+        final var job = new JobModel(jobID, orgID,
                 JobModel.validResourceTypes,
                 TEST_PROVIDER_ID,
                 List.of(TEST_PATIENT_ID));
@@ -104,7 +116,7 @@ public class JobResourceTest {
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
-        final Response response = resource.checkJobStatus(jobID.toString());
+        final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
         // Test the completion model
@@ -123,10 +135,12 @@ public class JobResourceTest {
     @Test
     public void testJobWithError() {
         final var jobID = UUID.randomUUID();
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryQueue();
 
         // Setup a completed job with one error
-        final var job = new JobModel(jobID,
+        final var job = new JobModel(jobID, orgID,
                 List.of(ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 List.of(TEST_PATIENT_ID));
@@ -136,7 +150,7 @@ public class JobResourceTest {
 
         // Test the response for ok
         final var resource = new JobResource(queue, TEST_BASEURL);
-        final Response response = resource.checkJobStatus(jobID.toString());
+        final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
         // Test the completion model
@@ -154,10 +168,12 @@ public class JobResourceTest {
     @Test
     public void testFailedJob() {
         final var jobID = UUID.randomUUID();
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryQueue();
 
         // Setup a failed job
-        final var job = new JobModel(jobID,
+        final var job = new JobModel(jobID, orgID,
                 JobModel.validResourceTypes,
                 TEST_PROVIDER_ID,
                 List.of(TEST_PATIENT_ID));
@@ -167,7 +183,7 @@ public class JobResourceTest {
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
-        final Response response = resource.checkJobStatus(jobID.toString());
+        final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus()));
     }
 }

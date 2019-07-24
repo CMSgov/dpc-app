@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources;
 
 
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.FHIR;
 
 import javax.ws.rs.GET;
@@ -19,7 +20,8 @@ public abstract class AbstractGroupResource {
 
     @Path("/{providerID}/$export")
     @GET
-    public abstract Response export(@PathParam("providerID") String groupID,
+    public abstract Response export(OrganizationPrincipal organizationPrincipal,
+                                    @PathParam("providerID") String groupID,
                                     @QueryParam("_type") String resourceTypes,
                                     @QueryParam("_outputFormat") String outputFormat,
                                     @QueryParam("_since") String since);

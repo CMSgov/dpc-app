@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.*;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
@@ -7,9 +8,11 @@ import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRBuilders;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
@@ -61,7 +64,6 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @GET // Need this here, since we're using a path param
     @Path("/{providerID}/$export")
-    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID/export")
     @Timed
     @ExceptionMetered
     @FHIRAsync
@@ -72,7 +74,9 @@ public class GroupResource extends AbstractGroupResource {
     @ApiResponses(
             @ApiResponse(code = 204, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
     )
-    public Response export(@ApiParam(value = "Provider NPI", required = true)
+    public Response export(@ApiParam(hidden = true)
+                           @Auth OrganizationPrincipal organizationPrincipal,
+                           @ApiParam(value = "Provider NPI", required = true)
                            @PathParam("providerID") String providerID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") String resourceTypes,
@@ -93,10 +97,12 @@ public class GroupResource extends AbstractGroupResource {
 
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
+        final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
 
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
-        this.queue.submitJob(jobID, new JobModel(jobID, resources, providerID, attributedBeneficiaries.get()));
+
+        this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, providerID, attributedBeneficiaries.get()));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();

@@ -36,4 +36,9 @@
                                  referencedColumnNames="jobid"/>
     </changeSet>
 
+    <changeSet id="add-job-id" author="ronakdev">
+        <addColumn tableName="JOB_QUEUE">
+            <column name="organization_id" type="UUID" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

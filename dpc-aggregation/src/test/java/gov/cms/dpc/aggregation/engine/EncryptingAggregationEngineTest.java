@@ -97,8 +97,9 @@ class EncryptingAggregationEngineTest {
     @Test
     void shouldWriteEncryptedTmpFiles() throws GeneralSecurityException, IOException {
         // Make a simple job with one resource type
-        final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var jobID = UUID.randomUUID();
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 Collections.singletonList(ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)),
@@ -106,14 +107,14 @@ class EncryptingAggregationEngineTest {
         );
 
         // Do the job
-        queue.submitJob(jobId, job);
+        queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).orElseThrow().getStatus()));
-        var outputFilePath = ResourceWriter.formEncryptedOutputFilePath(exportPath, jobId, ResourceType.Patient, 0);
-        var metadataFilePath = ResourceWriter.formEncryptedMetadataPath(exportPath, jobId, ResourceType.Patient, 0);
+        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobID).orElseThrow().getStatus()));
+        var outputFilePath = ResourceWriter.formEncryptedOutputFilePath(exportPath, jobID, ResourceType.Patient, 0);
+        var metadataFilePath = ResourceWriter.formEncryptedMetadataPath(exportPath, jobID, ResourceType.Patient, 0);
 
         assertTrue(Files.exists(Path.of(outputFilePath)), "Output file doesn't exist in tmp");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Encrypt metadata doesn't exist");
@@ -131,8 +132,9 @@ class EncryptingAggregationEngineTest {
     @Test
     void shouldWriteEncryptedErrorFilesTest() throws GeneralSecurityException, IOException {
         // Make a simple job with one resource type
-        final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var jobID = UUID.randomUUID();
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 Collections.singletonList(ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 Collections.singletonList("-1"), // Invalid patient id
@@ -140,14 +142,14 @@ class EncryptingAggregationEngineTest {
         );
 
         // Do the job
-        queue.submitJob(jobId, job);
+        queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).orElseThrow().getStatus()));
-        var errorFilePath = ResourceWriter.formEncryptedOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
-        var metadataFilePath = ResourceWriter.formEncryptedMetadataPath(exportPath, jobId, ResourceType.OperationOutcome, 0);
+        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobID).orElseThrow().getStatus()));
+        var errorFilePath = ResourceWriter.formEncryptedOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
+        var metadataFilePath = ResourceWriter.formEncryptedMetadataPath(exportPath, jobID, ResourceType.OperationOutcome, 0);
 
         assertTrue(Files.exists(Path.of(errorFilePath)), "Error file is missing");
         assertTrue(Files.exists(Path.of(metadataFilePath)), "Error metadata file is missing");
