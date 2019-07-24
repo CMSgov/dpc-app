@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.resources.v1;
 
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -8,8 +7,6 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,13 +18,9 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testOrganizationFetch() throws IOException {
+    void testOrganizationFetch() {
 
-        // This will come out once DPC-428 is merged
-        final IParser parser = ctx.newJsonParser();
-        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = APITestHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID);
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
 
         final Organization organization = client
                 .read()
