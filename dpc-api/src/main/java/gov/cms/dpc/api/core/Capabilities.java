@@ -89,68 +89,40 @@ public class Capabilities {
         serverComponent.setInteraction(Collections.singletonList(batchInteraction));
 
         serverComponent.setResource(List.of(
-                generateEndpointEndpoints(),
-                generateOrganizationEndpoints(),
-                generatePractitionerEndpoints(),
-                generateStructureDefinitionEndpoints()
+                generateRestComponent("Endpoint", List.of(
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
+                ), Collections.emptyList()),
+                generateRestComponent("Organization", List.of(
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
+                ), Collections.emptyList()),
+                generateRestComponent("Practitioner", List.of(
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
+                ), List.of(
+                        new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
+                )),
+                generateRestComponent("StructureDefinition", List.of(
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ))
+                        , Collections.emptyList())
         ));
 
         return Collections.singletonList(serverComponent);
     }
 
-    private static CapabilityStatementRestResourceComponent generateEndpointEndpoints() {
-        final CapabilityStatementRestResourceComponent endpoint = new CapabilityStatementRestResourceComponent();
-        endpoint.setType("Endpoint");
-        endpoint.setVersioning(ResourceVersionPolicy.NOVERSION);
-
-        endpoint.setInteraction(List.of(
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
-        ));
-
-        return endpoint;
-    }
-
-    private static CapabilityStatementRestResourceComponent generateOrganizationEndpoints() {
-        final CapabilityStatementRestResourceComponent organization = new CapabilityStatementRestResourceComponent();
-        organization.setType("Organization");
-        organization.setVersioning(ResourceVersionPolicy.NOVERSION);
-
-        organization.setInteraction(List.of(
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
-        ));
-
-        return organization;
-    }
-
-    private static CapabilityStatementRestResourceComponent generatePractitionerEndpoints() {
-        final CapabilityStatementRestResourceComponent practitioner = new CapabilityStatementRestResourceComponent();
-        practitioner.setType("Practitioner");
-        practitioner.setVersioning(ResourceVersionPolicy.NOVERSION);
-
-        practitioner.setInteraction(List.of(
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
-        ));
-
-        practitioner.setSearchParam(List.of(
-                new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
-        ));
-
-        return practitioner;
-    }
-
-    private static CapabilityStatementRestResourceComponent generateStructureDefinitionEndpoints() {
+    private static CapabilityStatementRestResourceComponent generateRestComponent(String name, List<ResourceInteractionComponent> interactions, List<CapabilityStatementRestResourceSearchParamComponent> searchParams) {
         final CapabilityStatementRestResourceComponent definitions = new CapabilityStatementRestResourceComponent();
-        definitions.setType("StructureDefinition");
+        definitions.setType(name);
         definitions.setVersioning(ResourceVersionPolicy.NOVERSION);
 
-        definitions.setInteraction(List.of(
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
-        ));
+        definitions.setInteraction(interactions);
+
+        if (!searchParams.isEmpty()) {
+            definitions.setSearchParam(searchParams);
+        }
 
         return definitions;
     }
