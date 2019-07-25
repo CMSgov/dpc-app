@@ -20,6 +20,7 @@ public class OrganizationCommand extends ConfiguredCommand<DPCAPIConfiguration> 
 
         // Register subcommands
         registerSubCommand(new OrgListCommand());
+        registerSubCommand(new OrgDeleteCommand());
     }
 
     @Override

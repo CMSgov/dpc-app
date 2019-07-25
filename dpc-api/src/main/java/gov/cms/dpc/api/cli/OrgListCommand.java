@@ -55,7 +55,6 @@ public class OrgListCommand extends Command {
 
         // Generate the table
         final String[] headers = {"ID", "NPI", "NAME"};
-        String[][] data;
 
         final List<String[]> collect = organizations
                 .getEntry()
