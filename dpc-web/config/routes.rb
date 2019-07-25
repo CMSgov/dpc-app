@@ -9,5 +9,5 @@ Rails.application.routes.draw do
   match '/faq', to: 'pages#faq', via: :get
   match '/support', to: 'pages#support', via: :get
 
-  match '/implementationguide/', to: "ig#index", via: :get
+  match '/implementationguide', to: "ig#index", via: :get
 end

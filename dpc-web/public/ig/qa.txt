@@ -1,0 +1,52 @@
+﻿Data @ the Point of Care Implementation Guide : Validation Results
+=========================================
+
+err = 36, warn = 4, info = 0
+Generated Thu Jul 25 13:43:10 EDT 2019. FHIR version 3.0.1 for cms-dpc-ig-# (canonical = https://dpc.cms.gov/fhir/v1)
+
+ Build Errors : 0 / 1
+ /Users/raac/Development/dpc-app/dpc-api/src/main/resources/capabilities : 0 / 2
+ /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCAddress : 0 / 0
+ /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCEndpoint : 0 / 0
+ /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCOrganization : 0 / 0
+ /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCPatient : 0 / 0
+ /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCPractitioner : 0 / 0
+ /Users/raac/Development/dpc-app/ig/source/resources/endpoint/endpoint : 4 / 0
+ /Users/raac/Development/dpc-app/ig/source/resources/group/group : 2 / 0
+ /Users/raac/Development/dpc-app/ig/source/resources/implementationguide/cms-dpc-ig : 11 / 0
+ /Users/raac/Development/dpc-app/ig/source/resources/organization/organization : 1 / 0
+ /Users/raac/Development/dpc-app/ig/source/resources/practitioner/practitioner : 0 / 0
+</table>
+== n/a ==
+WARNING: ImplementationGuide.id: The Implementation Guide Resource id should be cms-dpc-ig--null
+== /Users/raac/Development/dpc-app/dpc-api/src/main/resources/capabilities.json ==
+WARNING: CapabilityStatement/dpc-capabilities: CapabilityStatement.format[0]: ValueSet http://hl7.org/fhir/ValueSet/mimetypes not found
+WARNING: CapabilityStatement/dpc-capabilities: CapabilityStatement.format[1]: ValueSet http://hl7.org/fhir/ValueSet/mimetypes not found
+== /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCAddress.json ==
+== /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCEndpoint.json ==
+== /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCOrganization.json ==
+== /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCPatient.json ==
+== /Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations/DPCPractitioner.json ==
+== /Users/raac/Development/dpc-app/ig/source/resources/endpoint/endpoint.json ==
+ERROR: Endpoint/endpoint: Endpoint: Profile http://hl7.org/fhir/StructureDefinition/Endpoint, Element 'Endpoint.status': minimum required = 1, but only found 0
+ERROR: Endpoint/endpoint: Endpoint: Profile http://hl7.org/fhir/StructureDefinition/Endpoint, Element 'Endpoint.connectionType': minimum required = 1, but only found 0
+ERROR: Endpoint/endpoint: Endpoint: Profile http://hl7.org/fhir/StructureDefinition/Endpoint, Element 'Endpoint.payloadType': minimum required = 1, but only found 0
+ERROR: Endpoint/endpoint: Endpoint: Profile http://hl7.org/fhir/StructureDefinition/Endpoint, Element 'Endpoint.address': minimum required = 1, but only found 0
+== /Users/raac/Development/dpc-app/ig/source/resources/group/group.json ==
+ERROR: Group/group: Group: Profile http://hl7.org/fhir/StructureDefinition/Group, Element 'Group.type': minimum required = 1, but only found 0
+ERROR: Group/group: Group: Profile http://hl7.org/fhir/StructureDefinition/Group, Element 'Group.actual': minimum required = 1, but only found 0
+== /Users/raac/Development/dpc-app/ig/source/resources/implementationguide/cms-dpc-ig.xml ==
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[0].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[1].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[2].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[3].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[4].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[5].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[6].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[7].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[8].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[9].extension[0].url: URL value 'http://hl7.org/fhir/tools/StructureDefinition/resource-information' does not resolve
+ERROR: ImplementationGuide/cms-dpc-ig: ImplementationGuide.package[0].resource[9].source.ofType(Reference): Unable to resolve resource 'CapabilityStatement/dpc-capabilities-statement'
+== /Users/raac/Development/dpc-app/ig/source/resources/organization/organization.json ==
+ERROR: Organization/organization: Organization: The organization SHALL at least have a name or an id, and possibly more than one [(identifier.count() + name.count()) > 0]
+== /Users/raac/Development/dpc-app/ig/source/resources/practitioner/practitioner.json ==

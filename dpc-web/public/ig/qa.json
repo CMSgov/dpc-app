@@ -1,0 +1,11 @@
+﻿{
+  "url": "https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig",
+  "name": "Data @ the Point of Care Implementation Guide",
+  "package-id": "cms-dpc-ig-",
+  "date": "Thu, 25 Jul, 2019 13:42:59 -0400",
+  "errs": 36,
+  "warnings": 4,
+  "hints": 0,
+  "version": "3.0.1",
+  "tool": "4.1.0 (3)"
+}

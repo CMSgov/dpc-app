@@ -19,7 +19,6 @@ bbcerts/*
 ig/output
 ig/generated_output
 .bin/
-dpc-web/public/ig
 
 *.code-workspace
 .factorypath

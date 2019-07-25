@@ -1,0 +1,45 @@
+{
+  "package": "cms-dpc-ig-",
+  "fhirVersion": "3.0.1",
+  "extensions": [],
+  "profiles": {
+    "Endpoint": [
+      {
+        "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-endpoint",
+        "title": "DPC Endpoint"
+      }
+    ],
+    "Organization": [
+      {
+        "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization",
+        "title": "DPC Organization"
+      }
+    ],
+    "Patient": [
+      {
+        "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient",
+        "title": "DPC Patient"
+      }
+    ],
+    "Practitioner": [
+      {
+        "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner",
+        "title": "DPC Practitioner"
+      }
+    ]
+  },
+  "usage": {
+    "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName": [
+      "StructureDefinition.snapshot.element.binding"
+    ],
+    "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding": [
+      "StructureDefinition.snapshot.element.binding"
+    ],
+    "http://hl7.org/fhir/StructureDefinition/elementdefinition-maxValueSet": [
+      "StructureDefinition.snapshot.element.binding"
+    ],
+    "http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name": [
+      "StructureDefinition.snapshot.element"
+    ]
+  }
+}

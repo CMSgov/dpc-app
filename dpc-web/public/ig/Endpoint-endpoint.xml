@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Endpoint xmlns="http://hl7.org/fhir">
+  <id value="endpoint"/>
+  <meta>
+    <versionId value="1"/>
+    <lastUpdated value="2019-07-16T11:13:46.000-04:00"/>
+  </meta>
+  <text>
+    <status value="generated"/><div xmlns="http://www.w3.org/1999/xhtml"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: endpoint</p><p><b>meta</b>: </p></div>
+  </text>
+</Endpoint>

@@ -19,7 +19,7 @@
     <valueString value="/Users/raac/Development/dpc-app/ig/framework"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
-    <valueString value="/Users/raac/Development/dpc-app/ig/source/pages"/>
+    <valueString value="/Users/raac/Development/dpc-app/ig/source/pages/implementationguide"/>
   </extension>
   <url value="https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig"/>
   <name value="Data @ the Point of Care Implementation Guide"/>

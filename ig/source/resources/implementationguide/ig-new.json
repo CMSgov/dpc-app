@@ -23,7 +23,7 @@
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/raac/Development/dpc-app/ig/source/pages"
+    "valueString" : "/Users/raac/Development/dpc-app/ig/source/pages/implementationguide"
   }],
   "url" : "https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig",
   "name" : "Data @ the Point of Care Implementation Guide",
