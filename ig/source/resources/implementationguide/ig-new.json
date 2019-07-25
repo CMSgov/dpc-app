@@ -7,23 +7,23 @@
   },
   "extension" : [{
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/raac/Development/dpc-app/ig/source/resources"
+    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/source/resources"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations"
+    "valueString" : "/Users/jaredcunha/work/dpc-app/dpc-common/src/main/resources/validations"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/raac/Development/dpc-app/dpc-api/src/main/resources"
+    "valueString" : "/Users/jaredcunha/work/dpc-app/dpc-api/src/main/resources"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/raac/Development/dpc-app/ig/framework"
+    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/framework"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/raac/Development/dpc-app/ig/source/pages"
+    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/source/pages"
   }],
   "url" : "https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig",
   "name" : "Data @ the Point of Care Implementation Guide",
