@@ -8,8 +8,8 @@ RUN mkdir /dpc-web
 WORKDIR /dpc-web
 
 # Copy over the files needed to fetch dependencies
-COPY Gemfile /dpc-web/Gemfile
-COPY Gemfile.lock /dpc-web/Gemfile.lock
+COPY ../Gemfile /dpc-web/Gemfile
+COPY ../Gemfile.lock /dpc-web/Gemfile.lock
 COPY package.json /dpc-web/package.json
 COPY package-lock.json /dpc-web/package-lock.json
 
