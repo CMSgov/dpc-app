@@ -184,3 +184,10 @@ You will need to set the *ACCEPT* header to `application/fhir+json` (per the FHI
     The output array contains a list of URLs where the exported files can be downloaded from.
 1. Download the exported files by calling the `/Data` endpoint with URLs provided. e.g. `http://localhost:3002/v1/Data/de00da66-86cf-4be1-a2a8-0415b21a6a9b`.
 1. Enjoy your glorious ND-JSON formatted FHIR data.
+
+Building the Additional Services
+---
+
+Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
+
+Building the FHIR implementation guide is detailed [here](ig/README.md).
