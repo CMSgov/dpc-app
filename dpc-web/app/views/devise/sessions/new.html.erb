@@ -1,38 +1,44 @@
 <% title "Log in" %>
 
 <div class="ds-l-row">
-  <div class="ds-l-col--12 ds-l-md-col--8 ds-u-margin-bottom--5">
+  <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-bottom--1 ds-u-margin-x--auto">
+    <div class="card card--border-top card--shadow">
+      <h1 class="ds-u-margin-top--0">Log in</h1>
 
-    <h2>Welcome back!</h2>
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+      <%= devise_error_messages! %>
+        <div class="field">
+          <%= f.label :email, :class => "ds-c-label" %>
+          <%= f.email_field :email, autocomplete: "email", :class => "ds-c-field" %>
+        </div>
 
-    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-    <%= devise_error_messages! %>
-      <div class="field">
-        <%= f.label :email, :class => "ds-c-label" %>
-        <%= f.email_field :email, autofocus: true, autocomplete: "email", :class => "ds-c-field" %>
-      </div>
+        <div class="field">
+          <%= f.label :password, :class => "ds-c-label" %>
+          <%= f.password_field :password, autocomplete: "current-password", :class => "ds-c-field" %>
+        </div>
 
-      <div class="field">
-        <%= f.label :password, :class => "ds-c-label" %>
-        <%= f.password_field :password, autocomplete: "current-password", :class => "ds-c-field" %>
-      </div>
+        <% if devise_mapping.rememberable? %>
+          <div class="field ds-u-margin-top--3">
+            <%= f.check_box :remember_me, :class => "ds-c-choice" %>
+            <%= f.label :remember_me %>
+          </div>
+        <% end %>
 
-      <% if devise_mapping.rememberable? %>
-        <div class="field ds-u-margin-top--3">
-          <%= f.check_box :remember_me, :class => "ds-c-choice" %>
-          <%= f.label :remember_me %>
+        <div class="actions ds-u-margin-top--3">
+          <%= f.submit "Log in", :class => "ds-c-button ds-c-button--primary" %>
         </div>
       <% end %>
-
-      <div class="actions ds-u-margin-top--3">
-        <%= f.submit "Log in", :class => "ds-c-button ds-c-button--primary" %>
-      </div>
-    <% end %>
-
+    </div>
   </div>
 
-  <div class="ds-l-col--12 ds-l-md-col--4">
-    <%= render "devise/shared/links" %>
-  </div>
 
+
+</div>
+
+<div class="ds-l-row">
+  <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-x--auto">
+    <div class="card">
+      <%= render "devise/shared/links" %>
+    </div>
+  </div>
 </div>
