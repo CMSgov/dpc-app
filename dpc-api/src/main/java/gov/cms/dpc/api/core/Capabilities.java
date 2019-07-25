@@ -3,6 +3,10 @@ package gov.cms.dpc.api.core;
 
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRFormatters;
+import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
+import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
+import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +22,13 @@ public class Capabilities {
     private static final Logger logger = LoggerFactory.getLogger(Capabilities.class);
 
     private static final Object lock = new Object();
+    private static final List<ResourceInteractionComponent> DEFAULT_INTERACTIONS = List.of(
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
+    );
     private static volatile CapabilityStatement statement;
 
     private Capabilities() {
@@ -97,10 +108,13 @@ public class Capabilities {
                 generateRestComponent("Endpoint", List.of(
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
-                ), Collections.emptyList()),
+                ), Collections.emptyList(), EndpointProfile.PROFILE_URI),
                 generateRestComponent("Organization", List.of(
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
-                ), Collections.emptyList()),
+                ), Collections.emptyList(), OrganizationProfile.PROFILE_URI),
+                generateRestComponent("Patient", DEFAULT_INTERACTIONS, List.of(
+                        new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
+                ), PatientProfile.PROFILE_URI),
                 generateRestComponent("Practitioner", List.of(
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
@@ -109,17 +123,24 @@ public class Capabilities {
                         new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
                 ), List.of(
                         new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
-                )),
+                ), PractitionerProfile.PROFILE_URI),
                 generateRestComponent("StructureDefinition", List.of(
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ))
-                        , Collections.emptyList())
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE))
+                        , Collections.emptyList(), null)
         );
     }
 
-    private static CapabilityStatementRestResourceComponent generateRestComponent(String name, List<ResourceInteractionComponent> interactions, List<CapabilityStatementRestResourceSearchParamComponent> searchParams) {
+    private static CapabilityStatementRestResourceComponent generateRestComponent(String name,
+                                                                                  List<ResourceInteractionComponent> interactions,
+                                                                                  List<CapabilityStatementRestResourceSearchParamComponent> searchParams,
+                                                                                  String profileURI) {
         final CapabilityStatementRestResourceComponent definitions = new CapabilityStatementRestResourceComponent();
         definitions.setType(name);
         definitions.setVersioning(ResourceVersionPolicy.NOVERSION);
+        if (profileURI != null) {
+            definitions.setProfile(new Reference(profileURI));
+        }
 
         definitions.setInteraction(interactions);
 

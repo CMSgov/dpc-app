@@ -6,11 +6,9 @@ import gov.cms.dpc.fhir.FHIRConvertable;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.AddressConverter;
 import gov.cms.dpc.fhir.converters.ContactElementConverter;
+import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.persistence.*;
 import javax.validation.Valid;
@@ -127,6 +125,10 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @Override
     public OrganizationEntity fromFHIR(Organization resource) {
         final OrganizationEntity entity = new OrganizationEntity();
+
+        // Add the profile metadata
+        final Meta meta = new Meta();
+        meta.addProfile(OrganizationProfile.PROFILE_URI);
 
         // If we have an ID, and it parses, use it
         final String idString = resource.getId();

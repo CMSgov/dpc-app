@@ -10,9 +10,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -44,6 +46,17 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .execute();
 
         final Practitioner pract2 = (Practitioner) mo.getResource();
+
+        // Verify that it has the correct profile
+        // Find the correct profile
+        final boolean foundProfile = pract2
+                .getMeta()
+                .getProfile()
+                .stream()
+                .map(UriType::getValueAsString)
+                .anyMatch(profileString -> profileString.equals(PractitionerProfile.PROFILE_URI));
+
+        assertTrue(foundProfile, "Should have appropriate DPC profile");
 
         // Try again, should fail
         assertThrows(InternalErrorException.class, creation::execute, "Should already exist");

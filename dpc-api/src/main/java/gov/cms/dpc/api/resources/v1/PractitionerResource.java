@@ -9,6 +9,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractionerResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -92,6 +93,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Profiled(profile = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner")
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
     @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
     public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {

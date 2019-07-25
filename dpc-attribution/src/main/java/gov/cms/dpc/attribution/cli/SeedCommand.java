@@ -125,7 +125,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     }
 
     private void seedProviderBundle(DSLContext context, IParser parser, UUID organizationID) throws IOException {
-        final LocalDateTime created = OffsetDateTime.now(ZoneOffset.UTC).toLocalDateTime();
         try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
             final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
             final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR, organizationID);
@@ -201,15 +200,5 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         record.setOrganizationId(entity.getOrganization().getId());
 
         return record;
-    }
-
-    private static ProviderRolesRecord providerRolesToRecord(ProvidersRecord record, LocalDateTime created, UUID organizationID) {
-        final ProviderRolesRecord rolesRecord = new ProviderRolesRecord();
-        rolesRecord.setId(UUID.randomUUID());
-        rolesRecord.setOrganizationId(organizationID);
-        rolesRecord.setProviderId(record.getId());
-        rolesRecord.setCreatedAt(created);
-
-        return rolesRecord;
     }
 }

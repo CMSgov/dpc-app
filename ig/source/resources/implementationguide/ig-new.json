@@ -7,31 +7,31 @@
   },
   "extension" : [{
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/source/resources"
+    "valueString" : "/Users/raac/Development/dpc-app/ig/source/resources"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/dpc-common/src/main/resources/validations"
+    "valueString" : "/Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/dpc-api/src/main/resources"
+    "valueString" : "/Users/raac/Development/dpc-app/dpc-api/src/main/resources"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/framework"
+    "valueString" : "/Users/raac/Development/dpc-app/ig/framework"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/source/pages"
+    "valueString" : "/Users/raac/Development/dpc-app/ig/source/pages"
   }],
-  "url" : "https://dpc.cms.gov/ImplementationGuide/cms-dpc-ig",
-  "name" : "DPCImplementationGuide",
+  "url" : "https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig",
+  "name" : "Data @ the Point of Care Implementation Guide",
   "status" : "draft",
   "experimental" : false,
   "publisher" : "Centers for Medicare and Medicaid Services",
   "description" : "Draft implementation guide for DPC Application",
-  "packageId" : "cms-dpc-ig",
+  "packageId" : "cms-dpc-ig-",
   "license" : "CC0-1.0",
   "fhirVersion" : ["3.0.1",
   "3.0.1"],
@@ -74,8 +74,40 @@
     },
     {
       "reference" : {
+        "reference" : "StructureDefinition/dpc-profile-address",
+        "display" : "DPCAddress.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "StructureDefinition/dpc-profile-endpoint",
+        "display" : "DPCEndpoint.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "StructureDefinition/dpc-profile-organization",
+        "display" : "DPCOrganization.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
         "reference" : "StructureDefinition/dpc-profile-patient",
         "display" : "DPCPatient.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "StructureDefinition/dpc-profile-practitioner",
+        "display" : "DPCPractitioner.json"
       },
       "exampleBoolean" : false,
       "groupingId" : "p1"

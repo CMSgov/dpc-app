@@ -45,6 +45,14 @@ Once the resource has been added to the `cms-dpc-ig.xml` file, we also need to a
 }
 ```
 
+The final step is to add the individual Markdown files which contain the descriptive content.
+In the `pages/includes` directory we need to create three files which specify the intro, summary and search content for each resource:
+
+`touch {dpc-profile-name}-{intro|summary|search}.md`
+
+You also need to update the index pages (e.g. profiles.md, capstatements.md) with the link to the newly created resource.
+This is the auto-generated file specified in the `base` field of the `ig.json` file. 
+
 ## Build the IG
 
 The FHIR group has created an [IG Publisher](http://wiki.hl7.org/index.php?title=IG_Publisher_Documentation) which automates the process of generating the HTML files and documents in the layout expected by FHIR developers.

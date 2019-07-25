@@ -36,7 +36,7 @@ class DefinitionResourceTest {
 
         final Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, (InputStream) response.getEntity());
 
-        assertEquals(1, bundle.getEntry().size(), "Should have structure definitions");
+        assertEquals(5, bundle.getEntry().size(), "Should have all the structure definitions");
     }
 
     @Test
