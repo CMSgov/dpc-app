@@ -36,10 +36,10 @@ aria-controls="topnav-wrap" aria-label="Close menu">
 
       <% unless user_signed_in? %>
         <li class="topnav__item ds-u-padding-right--1">
-          <%= link_to "Request access", new_registration_path(User), class: "ds-c-button ds-c-button--success" %>
+          <%= link_to "Log in", new_session_path(User), class: "ds-c-button" %>
         </li>
         <li class="topnav__item">
-          <%= link_to "Log in", new_session_path(User), class: "ds-c-button ds-c-button--primary" %>
+          <%= link_to "Request access", new_registration_path(User), class: "ds-c-button ds-c-button--primary" %>
         </li>
       <% else %>
         <li class="topnav__item">
