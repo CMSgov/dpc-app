@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <%= render partial: 'shared/head' %>
+
+  <body class="ds-base">
+    <!-- nav -->
+    <%= render partial: 'shared/navbar' %>
+
+    <header class="page-header">
+      <div class="ds-l-container">
+        <span class="page-header__heading">Docs</span>
+
+        <div class="ds-c-tabs">
+          <%= link_to docs_path, :class => "ds-c-tabs__item #{current_class?(docs_path)}" do %>
+            Reference
+          <% end %>
+          <%= link_to docs_guide_path, :class => "ds-c-tabs__item #{current_class?(docs_guide_path)}" do %>
+            Guide
+          <% end %>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- content -->
+    <section class="ds-l-container ds-u-padding-top--7">
+      <%= yield %>
+    </section>
+
+
+    <%= render partial: 'shared/footer' %>
+  </body>
+</html>

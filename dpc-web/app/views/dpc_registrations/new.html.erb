@@ -1,0 +1,25 @@
+<% if @dpc_registration.errors.any? %>
+  <div>
+    <ul>
+      <% @dpc_registration.errors.full_messages.each do |error| %>
+        <li><%= error %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<div>
+  <h1>Register for API Beta Testing</h1>
+
+  <!-- must use local: true, not remote: false -->
+  <%= form_with model: @dpc_registration, url: dpc_registrations_path, method: :post, local: true do |f| %>
+  <div class="field ds-u-margin-top--2">
+      <%= f.check_box :opt_in, autofocus: true %>
+      <%= f.label 'I wish to particiapte' %>
+    </div>
+
+    <%= f.submit 'Register',
+      class: "ds-c-button ds-c-button--medium ds-c-button--primary ds-u-margin-top--2",
+      id: "registration_register" %>
+  <% end %>
+</div>

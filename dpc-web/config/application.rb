@@ -32,5 +32,10 @@ module DpcWebsite
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # field_with_errors support, avoid that nasty line break on errors
+    config.action_view.field_error_proc = Proc.new { |html_tag, instance|
+      html_tag
+    }
   end
 end
