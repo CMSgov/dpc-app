@@ -125,7 +125,8 @@ public class Capabilities {
                         new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
                 ), PractitionerProfile.PROFILE_URI),
                 generateRestComponent("StructureDefinition", List.of(
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ))
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE))
                         , Collections.emptyList(), null)
         );
     }
