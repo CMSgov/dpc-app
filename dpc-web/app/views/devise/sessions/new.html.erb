@@ -4,8 +4,9 @@
   <div class="ds-l-col--12 ds-l-md-col--8 ds-u-margin-bottom--5">
 
     <h2>Welcome back!</h2>
-    
+
     <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <%= devise_error_messages! %>
       <div class="field">
         <%= f.label :email, :class => "ds-c-label" %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email", :class => "ds-c-field" %>
@@ -27,6 +28,7 @@
         <%= f.submit "Log in", :class => "ds-c-button ds-c-button--primary" %>
       </div>
     <% end %>
+
   </div>
 
   <div class="ds-l-col--12 ds-l-md-col--4">
