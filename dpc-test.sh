@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ -n "$REPORT_COVERAGE" ]; then
    echo "┌──────────────────────────────────────────┐"
    echo "│                                          │"
@@ -15,7 +17,7 @@ else
     echo "└──────────────────────────────────────────┘"
 fi
 
-mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Perror-prone -B -V
+mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Djib.skip=true -Perror-prone -B -V
 mvn test -B -V
 # Format the test results and copy to a new directory
 mvn jacoco:report
@@ -28,7 +30,6 @@ if [ -n "$REPORT_COVERAGE" ]; then
     done
 fi
 
-ls reports
 docker-compose down
 docker-compose up -d
 sleep 60

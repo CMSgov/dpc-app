@@ -26,7 +26,7 @@ class ExpirationVerifierTest extends AbstractVerifierTest<ExpirationCaveatVerifi
 
     @Override
     MacaroonCaveat getCorrectCaveat() {
-        return new MacaroonCaveat("expires", MacaroonCaveat.Operator.EQ, OffsetDateTime.now().plus(2, ChronoUnit.YEARS).toString());
+        return new MacaroonCaveat("expires", MacaroonCaveat.Operator.EQ, OffsetDateTime.now(ZoneOffset.UTC).plus(2, ChronoUnit.YEARS).toString());
     }
 
     @Override

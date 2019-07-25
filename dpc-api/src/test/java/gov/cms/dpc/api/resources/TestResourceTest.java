@@ -70,7 +70,7 @@ class TestResourceTest {
         // Get the error messages
         final OperationOutcome operationOutcome = parser.parseResource(OperationOutcome.class, response.readEntity(InputStream.class));
 
-        assertEquals(6, operationOutcome.getIssue().size(), "Should have a bunch of issues");
+        assertEquals(3, operationOutcome.getIssue().size(), "Should have a couple of issues");
     }
 
     @Test
@@ -104,6 +104,7 @@ class TestResourceTest {
 
         patient.setId("test-patient");
         patient.setGender(Enumerations.AdministrativeGender.MALE);
+        patient.setManagingOrganization(new Reference("Organization/test-org"));
 
         return patient;
     }

@@ -19,7 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PatientValidation {
+class PatientValidationTest {
 
     private static FhirValidator fhirValidator;
     private static DPCProfileSupport dpcModule;
@@ -92,54 +92,6 @@ class PatientValidation {
     }
 
     @Test
-    void testBirthOrder() {
-        // Test optional birth order
-        final Patient patient = generateFakePatient();
-        patient.addName().setFamily("Patient").addGiven("Test");
-        patient.setBirthDate(Date.valueOf("1990-01-01"));
-        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
-        patient.addAddress(generateFakeAddress());
-
-        final ValidationResult result = fhirValidator.validateWithResult(patient);
-        final Executable singleWarning = () -> assertEquals(ResultSeverityEnum.WARNING, result.getMessages().get(0).getSeverity(), "Should have warning message");
-        assertAll(() -> assertTrue(result.isSuccessful(), "Should have passed with warning"),
-                () -> assertEquals(1, result.getMessages().size(), "Should have a single warning message"),
-                singleWarning);
-
-        // Add a boolean birth order
-        patient.setMultipleBirth(new BooleanType(true));
-        final ValidationResult r2 = fhirValidator.validateWithResult(patient);
-        assertAll(() -> assertTrue(r2.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(1, r2.getMessages().size(), "Should have a single failure"),
-                singleWarning);
-
-        patient.setMultipleBirth(new IntegerType(2));
-        final ValidationResult r3 = fhirValidator.validateWithResult(patient);
-        assertTrue(r3.isSuccessful(), "Should have passed");
-    }
-
-    @Test
-    void testContact() {
-        // Test must have one of Email or SMS
-        final Patient patient = generateFakePatient();
-        patient.addName().setFamily("Patient").addGiven("Test");
-        patient.setBirthDate(Date.valueOf("1990-01-01"));
-        patient.setMultipleBirth(new BooleanType(false));
-        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5500");
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
-        patient.addAddress(generateFakeAddress());
-
-        final ValidationResult result = fhirValidator.validateWithResult(patient);
-        assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
-
-        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.SMS).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
-        final ValidationResult r2 = fhirValidator.validateWithResult(patient);
-        assertTrue(r2.isSuccessful(), "Should have passed");
-    }
-
-    @Test
     void testIdentifier() {
         final Patient patient = generateFakePatient();
         patient.addName().setFamily("Patient").addGiven("Test");
@@ -164,36 +116,6 @@ class PatientValidation {
         assertTrue(r3.isSuccessful(), "Should have passed");
     }
 
-    @Test
-    void testAddress() {
-        final Patient patient = generateFakePatient();
-        patient.addName().setFamily("Patient").addGiven("Test");
-        patient.setBirthDate(Date.valueOf("1990-01-01"));
-        patient.setMultipleBirth(new BooleanType(false));
-        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
-
-        final ValidationResult result = fhirValidator.validateWithResult(patient);
-        assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
-
-        // Try with address text
-
-        final Address address = new Address();
-        address.setText("1800 Nothing Nowhere, CO 11111");
-
-        patient.setAddress(List.of(address));
-
-        final ValidationResult r2 = fhirValidator.validateWithResult(patient);
-        assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(5, r2.getMessages().size(), "Should have failures for all elements"));
-
-        patient.setAddress(List.of(generateFakeAddress()));
-
-        final ValidationResult r3 = fhirValidator.validateWithResult(patient);
-        assertTrue(r3.isSuccessful(), "Should have passed");
-    }
-
     Patient generateFakePatient() {
 
         final Patient patient = new Patient();
@@ -204,11 +126,12 @@ class PatientValidation {
 
         patient.setId("test-patient");
         patient.setGender(Enumerations.AdministrativeGender.MALE);
+        patient.setManagingOrganization(new Reference("Organization/test-organization"));
 
         return patient;
     }
 
-    Address generateFakeAddress() {
+    private Address generateFakeAddress() {
         final Address address = new Address();
         address.addLine("1800 Pennsylvania Ave NW");
         address.setCity("Washington");
