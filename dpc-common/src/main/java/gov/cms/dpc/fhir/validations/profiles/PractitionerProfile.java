@@ -5,7 +5,7 @@ package gov.cms.dpc.fhir.validations.profiles;
  */
 public class PractitionerProfile implements IProfileLoader {
 
-    public static String PROFILE_URI = "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-practitioner";
+    public static String PROFILE_URI = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner";
 
     @Override
     public String getPath() {
