@@ -43,6 +43,16 @@
       </div>
 
       <div class="field">
+        <%= f.label :organization_type, 'Practice type', :class => "ds-c-label" %>
+        <%= f.select :organization_type,
+          User::organization_types.keys.each_with_object([]) { |key, memo| memo << [key.humanize, key] },
+          { include_blank: 'Please select a practice type' },
+          :class => "ds-c-field",
+          value: @user.organization_type
+        %>
+      </div>
+
+      <div class="field">
         <%= f.label :address_1, :class => "ds-c-label" %>
         <%= f.text_field :address_1, :class => "ds-c-field" %>
       </div>
