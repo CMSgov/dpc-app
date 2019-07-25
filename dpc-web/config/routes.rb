@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   devise_for :users
+  get '/dpc_registrations' => "dpc_registrations#new", as: :user_root
   root to: 'public#home'
 
   match '/home', to: 'public#home', via: :get
@@ -10,5 +11,5 @@ Rails.application.routes.draw do
   match '/faq', to: 'pages#faq', via: :get
   match '/support', to: 'pages#support', via: :get
 
-  resources :dpc_registrations, only: %i[show]
+  resources :dpc_registrations, only: %i[new show]
 end

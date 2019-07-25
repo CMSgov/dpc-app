@@ -55,7 +55,7 @@ RSpec.feature 'new user signs up for account' do
     end
 
     scenario 'returns to the sign in page' do
-      expect(page).to have_content('Request access')
+      expect(page).to have_content('Log in')
       expect(page).to have_content('you must agree')
     end
   end
@@ -79,7 +79,7 @@ RSpec.feature 'new user signs up for account' do
     end
 
     scenario 'returns to the sign in page' do
-      expect(page).to have_content('Request access')
+      expect(page).to have_content('Log in')
       expect(page).to have_content("Last name can't be blank")
     end
   end
@@ -105,7 +105,7 @@ RSpec.feature 'new user signs up for account' do
     end
 
     scenario 'returns to the sign in page' do
-      expect(page).to have_content('Request access')
+      expect(page).to have_content('Log in')
       expect(page).to have_content('Email has already been taken')
     end
   end
