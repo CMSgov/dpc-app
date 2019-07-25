@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe User, type: :model do
-  subject { build :user }
+  subject { create :user }
 
   describe 'factory' do
     it { is_expected.to be_valid }
@@ -31,6 +31,17 @@ RSpec.describe User, type: :model do
     it 'is required' do
       subject.organization = nil
       expect(subject).to_not be_valid
+    end
+  end
+
+  describe '#organization_type' do
+    it 'is required' do
+      subject.organization_type = nil
+      expect(subject).to_not be_valid
+    end
+
+    it 'must be valid' do
+      expect { subject.organization_type = 'blah-blah' }.to raise_error(ArgumentError)
     end
   end
 

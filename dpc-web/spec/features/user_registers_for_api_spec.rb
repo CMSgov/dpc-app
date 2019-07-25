@@ -17,6 +17,7 @@ RSpec.feature 'user visits beta registration' do
       fill_in :user_password, with: user.password
       fill_in :user_password_confirmation, with: user.password_confirmation
       fill_in :user_organization, with: user.organization
+      find('#user_organization_type').find("option[value=#{User.organization_types.keys.first}]").select_option
       fill_in :user_address_1, with: user.address_1
       fill_in :user_address_2, with: user.address_2
       fill_in :user_city, with: user.city

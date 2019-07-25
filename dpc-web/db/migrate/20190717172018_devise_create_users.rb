@@ -6,6 +6,7 @@ class DeviseCreateUsers < ActiveRecord::Migration[5.2]
       t.string :first_name, null: false
       t.string :last_name, null: false
       t.string :organization, null: false
+      t.integer :organization_type, null: false
       t.string :address_1, null: false
       t.string :address_2, default: ''
       t.string :city, null: false

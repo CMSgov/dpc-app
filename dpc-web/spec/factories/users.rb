@@ -11,6 +11,7 @@ FactoryBot.define do
     city { 'Pecoima' }
     state { 'AZ' }
     zip { '12345' }
+    organization_type { 0 }
 
     password { '123456' }
     password_confirmation { '123456' }
