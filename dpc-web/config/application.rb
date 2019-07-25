@@ -1,5 +1,8 @@
 require_relative 'boot'
 
+# Enable stout syncing for Docker
+$stdout.sync = true
+
 require "rails"
 # Pick the frameworks you want:
 require "active_model/railtie"
