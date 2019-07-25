@@ -74,7 +74,7 @@ public class JobResource extends AbstractJobResource {
         return maybeJob.map(job -> {
             logger.debug("Fetched Job: {}", job);
             if (!job.getOrgID().equals(orgUUID)) {
-                Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
+                return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
             }
             if (!job.isValid()) {
                 throw new JobQueueFailure(jobUUID, "Fetched an invalid job model");

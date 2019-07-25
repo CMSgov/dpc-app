@@ -26,6 +26,7 @@ public class JobResourceTest {
     static final String TEST_PROVIDER_ID = "1";
     static final String TEST_PATIENT_ID = "1";
     static final String TEST_BASEURL = "http://localhost:8080";
+    static final String OTHER_ORGANIZATION = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a1";
 
     /**
      * Test that a non-existent job is handled correctly
@@ -185,5 +186,48 @@ public class JobResourceTest {
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus()));
+    }
+
+    /**
+     * Test accessing a job with the wrong organization
+     */
+    @Test
+    public void testWrongOrgJobAccess() {
+        final var jobID = UUID.randomUUID();
+        final var organizationPrincipalCorrect = APITestHelpers.makeOrganizationPrincipal();
+        final var orgIDCorrect = FHIRExtractors.getEntityUUID(organizationPrincipalCorrect.getOrganization().getId());
+        final var organizationPrincipalWrong = APITestHelpers.makeOrganizationPrincipal(OTHER_ORGANIZATION);
+
+        final var queue = new MemoryQueue();
+
+        // Setup a completed job
+        final var job = new JobModel(jobID, orgIDCorrect,
+                JobModel.validResourceTypes,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID));
+        queue.submitJob(jobID, job);
+        queue.workJob();
+        final var results = JobModel.validResourceTypes
+                .stream()
+                .map(resourceType -> new JobResult(jobID, resourceType, 0, 1))
+                .collect(Collectors.toList());
+        queue.completeJob(jobID, JobStatus.COMPLETED, results);
+
+        // Try accessing it with the wrong org (should be unauthorized)
+        final var resource = new JobResource(queue, TEST_BASEURL);
+        final Response responseWrong = resource.checkJobStatus(organizationPrincipalWrong, jobID.toString());
+        assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, responseWrong.getStatus()));
+
+        // Access it with the right org (should be authorized)
+        final Response responseRight = resource.checkJobStatus(organizationPrincipalCorrect, jobID.toString());
+        assertAll(() -> assertEquals(HttpStatus.OK_200, responseRight.getStatus()));
+
+        // Test the completion model
+        final var completion = (JobCompletionModel) responseRight.getEntity();
+        assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
+                () -> assertEquals(0, completion.getError().size()));
+        for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobResult.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
+        }
     }
 }

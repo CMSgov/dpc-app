@@ -53,6 +53,12 @@ public class APITestHelpers {
         return new OrganizationPrincipal(org);
     }
 
+    public static OrganizationPrincipal makeOrganizationPrincipal(String id) {
+        Organization org = new Organization();
+        org.setId(id);
+        return new OrganizationPrincipal(org);
+    }
+
     public static IGenericClient buildAttributionClient(FhirContext ctx) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(ATTRIBUTION_URL);
