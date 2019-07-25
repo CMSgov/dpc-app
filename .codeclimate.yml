@@ -37,3 +37,5 @@ plugins:
       app_path: dpc-web
   rubocop:
     enabled: true
+    config:
+      file: dpc-web/rubo-codeclimate.yml
