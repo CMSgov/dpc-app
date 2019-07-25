@@ -2,7 +2,9 @@ package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 
@@ -14,6 +16,11 @@ public class PatientEntityConverter {
 
     public static Patient convert(PatientEntity entity) {
         final Patient patient = new Patient();
+
+        // Add the patient metadata
+        final Meta meta = new Meta();
+        meta.addProfile(PatientProfile.PROFILE_URI);
+        patient.setMeta(meta);
 
         patient.setId(entity.getPatientID().toString());
         patient.addName()

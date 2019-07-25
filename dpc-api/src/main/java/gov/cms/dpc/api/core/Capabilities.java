@@ -3,7 +3,13 @@ package gov.cms.dpc.api.core;
 
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRFormatters;
+import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
+import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
+import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,10 +19,45 @@ import static org.hl7.fhir.dstu3.model.CapabilityStatement.*;
 
 public class Capabilities {
 
+    private static final Logger logger = LoggerFactory.getLogger(Capabilities.class);
+
+    private static final Object lock = new Object();
+    private static final List<ResourceInteractionComponent> DEFAULT_INTERACTIONS = List.of(
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
+            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
+    );
+    private static volatile CapabilityStatement statement;
+
     private Capabilities() {
     }
 
-    public static CapabilityStatement buildCapabilities() {
+    /**
+     * Get the system's {@link CapabilityStatement}.
+     * <p>
+     * This value is lazily generated the first time it's called.
+     *
+     * @return - {@link CapabilityStatement} of system.
+     */
+    public static CapabilityStatement getCapabilities() {
+        // Double lock check to lazy init capabilities statement
+        if (statement == null) {
+            synchronized (lock) {
+                if (statement == null) {
+                    logger.debug("Building capabilities statement");
+                    statement = buildCapabilities();
+                    return statement;
+                }
+            }
+        }
+        logger.trace("Returning cached capabilities statement");
+        return statement;
+    }
+
+
+    private static CapabilityStatement buildCapabilities() {
         final PropertiesProvider pp = new PropertiesProvider();
 
         DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIRFormatters.DATE_TIME_FORMATTER));
@@ -58,53 +99,54 @@ public class Capabilities {
         final SystemInteractionComponent batchInteraction = new SystemInteractionComponent(new Enumeration<>(new SystemRestfulInteractionEnumFactory(), SystemRestfulInteraction.BATCH));
         serverComponent.setInteraction(Collections.singletonList(batchInteraction));
 
-        serverComponent.setResource(List.of(
-//                generateGroupEndpoints(),
-                generatePractitionerEndpoints(),
-                generateStructureDefinitionEndpoints()
-        ));
-
+        serverComponent.setResource(generateRestResource());
         return Collections.singletonList(serverComponent);
     }
 
-    @SuppressWarnings({"UnusedMethod"}) // Will be expanded with DPC-293
-    private static CapabilityStatementRestResourceComponent generateGroupEndpoints() {
-        final CapabilityStatementRestResourceComponent group = new CapabilityStatementRestResourceComponent();
-        group.setType("Group");
-
-        // STU3 does not support resource level operations, so we'll just add a document comment for now.
-        group.setDocumentation("Defines the $export operator, which complies with the draft Bulk Data Specification");
-
-        return group;
+    private static List<CapabilityStatementRestResourceComponent> generateRestResource() {
+        return List.of(
+                generateRestComponent("Endpoint", List.of(
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
+                ), Collections.emptyList(), EndpointProfile.PROFILE_URI),
+                generateRestComponent("Organization", List.of(
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
+                ), Collections.emptyList(), OrganizationProfile.PROFILE_URI),
+                generateRestComponent("Patient", DEFAULT_INTERACTIONS, List.of(
+                        new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
+                ), PatientProfile.PROFILE_URI),
+                generateRestComponent("Practitioner", List.of(
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
+                ), List.of(
+                        new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
+                ), PractitionerProfile.PROFILE_URI),
+                generateRestComponent("StructureDefinition", List.of(
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
+                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE))
+                        , Collections.emptyList(), null)
+        );
     }
 
-    private static CapabilityStatementRestResourceComponent generatePractitionerEndpoints() {
-        final CapabilityStatementRestResourceComponent practitioner = new CapabilityStatementRestResourceComponent();
-        practitioner.setType("Practitioner");
-        practitioner.setVersioning(ResourceVersionPolicy.NOVERSION);
-
-        practitioner.setInteraction(List.of(
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
-        ));
-
-        practitioner.setSearchParam(List.of(
-                new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
-        ));
-
-        return practitioner;
-    }
-
-    private static CapabilityStatementRestResourceComponent generateStructureDefinitionEndpoints() {
+    private static CapabilityStatementRestResourceComponent generateRestComponent(String name,
+                                                                                  List<ResourceInteractionComponent> interactions,
+                                                                                  List<CapabilityStatementRestResourceSearchParamComponent> searchParams,
+                                                                                  String profileURI) {
         final CapabilityStatementRestResourceComponent definitions = new CapabilityStatementRestResourceComponent();
-        definitions.setType("StructureDefinition");
+        definitions.setType(name);
         definitions.setVersioning(ResourceVersionPolicy.NOVERSION);
+        if (profileURI != null) {
+            definitions.setProfile(new Reference(profileURI));
+        }
 
-        definitions.setInteraction(List.of(
-                new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
-        ));
+        definitions.setInteraction(interactions);
+
+        if (!searchParams.isEmpty()) {
+            definitions.setSearchParam(searchParams);
+        }
 
         return definitions;
     }

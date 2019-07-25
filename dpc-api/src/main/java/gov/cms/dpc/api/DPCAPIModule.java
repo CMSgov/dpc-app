@@ -52,6 +52,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(BaseResource.class);
         binder.bind(DataResource.class);
         binder.bind(DefinitionResource.class);
+        binder.bind(EndpointResource.class);
         binder.bind(GroupResource.class);
         binder.bind(JobResource.class);
         binder.bind(OrganizationResource.class);

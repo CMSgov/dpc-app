@@ -24,3 +24,5 @@ ig/generated_output
 .factorypath
 dpc-web/.rakeTasks
 out/
+
+node_modules/

@@ -10,5 +10,6 @@ ig/publish: ${IG_PUBLISHER}
 	@echo "making IG"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
+.PHONY: travis
 travis:
 	@./dpc-test.sh

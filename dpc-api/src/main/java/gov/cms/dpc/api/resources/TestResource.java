@@ -34,7 +34,7 @@ public class TestResource {
     @POST
     @Public
     @ApiOperation(value = "validation test resource")
-    public Response testValidations(@Valid @Profiled(profile = "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-patient") Patient patient) {
+    public Response testValidations(@Valid @Profiled(profile = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient") Patient patient) {
         return Response.ok().build();
     }
 }
