@@ -140,6 +140,22 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return organizationEntity.toFHIR();
     }
 
+    @DELETE
+    @Path("/{organizationID}")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Delete organization", notes = "FHIR endpoint to deleta an Organization with the given Resource ID." +
+            "<p>This also drops ALL resources associated to the given entity.")
+    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
+    @Override
+    public Response deleteOrganization(@ApiParam(value = "Organization resource ID", required = true) @PathParam("organizationID") UUID organizationID) {
+        final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)
+                .orElseThrow(() -> new WebApplicationException("Cannot find organization.", Response.Status.NOT_FOUND));
+
+        this.dao.deleteOrganization(organizationEntity);
+        return Response.ok().build();
+    }
+
     @GET
     @Path("/{organizationID}/token")
     @UnitOfWork

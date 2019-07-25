@@ -51,6 +51,19 @@ public abstract class AbstractOrganizationResource {
     public abstract Organization getOrganization(UUID organizationID);
 
     /**
+     * Delete the {@link Organization} from the system.
+     * <p>
+     * Note: This drop ALL resources associated to the given Organization
+     *
+     * @param organizationID - {@link UUID} of organization
+     * @return - {@link Response} whether or not the drop was successful
+     */
+    @DELETE
+    @FHIR
+    @Path("/{organizationID}")
+    public abstract Response deleteOrganization(UUID organizationID);
+
+    /**
      * Get authentication token for {@link Organization}.
      * If no token exists, returns an empty {@link List}
      *

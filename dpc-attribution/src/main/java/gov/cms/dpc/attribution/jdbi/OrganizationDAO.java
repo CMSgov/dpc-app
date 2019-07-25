@@ -47,6 +47,10 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         persist(entity);
     }
 
+    public void deleteOrganization(OrganizationEntity entity) {
+        currentSession().delete(entity);
+    }
+
     public List<OrganizationEntity> searchByToken(String tokenID) {
 
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
