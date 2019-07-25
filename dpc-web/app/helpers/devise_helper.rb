@@ -20,7 +20,7 @@ module DeviseHelper
     <div class="ds-c-alert ds-c-alert--error">
       <div class="ds-c-alert__body">
         <h3 class="ds-c-alert__heading">Your email or password is incorrect.</h3>
-        <p class="ds-c-alert__text">If you forgot your password, please email <a href="mailto:dpcinfo@cms.hhs.gov?Subject=Forgot Password">dpcinfo@cms.hhs.gov</a> to request a reset.</p>
+        <p class="ds-c-alert__text">If you forgot your password, please email <a href="mailto:dpcinfo@cms.hhs.gov?subject=Forgot password">dpcinfo@cms.hhs.gov</a> to request a reset.</p>
       </div>
     </div>
     HTML
