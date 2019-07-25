@@ -7,19 +7,19 @@
     <lastUpdated value="2019-07-16T14:49:27.000-04:00"/>
   </meta>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/raac/Development/dpc-app/ig/source/resources"/>
+    <valueString value="/Users/jaredcunha/work/dpc-app/ig/source/resources"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations"/>
+    <valueString value="/Users/jaredcunha/work/dpc-app/dpc-common/src/main/resources/validations"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/raac/Development/dpc-app/dpc-api/src/main/resources"/>
+    <valueString value="/Users/jaredcunha/work/dpc-app/dpc-api/src/main/resources"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
-    <valueString value="/Users/raac/Development/dpc-app/ig/framework"/>
+    <valueString value="/Users/jaredcunha/work/dpc-app/ig/framework"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
-    <valueString value="/Users/raac/Development/dpc-app/ig/source/pages"/>
+    <valueString value="/Users/jaredcunha/work/dpc-app/ig/source/pages"/>
   </extension>
   <url value="https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig"/>
   <name value="Data @ the Point of Care Implementation Guide"/>
