@@ -8,84 +8,87 @@
       <h2>Your information</h2>
 
       <div class="field">
-        <%= f.label :first_name, :class => "ds-c-label" %>
-        <%= f.text_field :first_name, autofocus: true, :class => "ds-c-field" %>
+        <%= f.label :first_name, class: "ds-c-label" %>
+        <%= f.text_field :first_name, autofocus: true, class: "ds-c-field" %>
       </div>
 
       <div class="field">
-        <%= f.label :last_name, :class => "ds-c-label" %>
-        <%= f.text_field :last_name, :class => "ds-c-field" %>
+        <%= f.label :last_name, class: "ds-c-label" %>
+        <%= f.text_field :last_name, class: "ds-c-field" %>
       </div>
 
       <div class="field">
-        <%= f.label :email, :class => "ds-c-label" %>
-        <%= f.email_field :email, autocomplete: "email", :class => "ds-c-field" %>
+        <%= f.label :email, class: "ds-c-label" %>
+        <%= f.email_field :email, autocomplete: "email", class: "ds-c-field" %>
       </div>
 
       <div class="field">
-        <%= f.label :password, :class => "ds-c-label" %>
+        <%= f.label :password, class: "ds-c-label" %>
         <% if @minimum_password_length %>
         <em>(<%= @minimum_password_length %> characters minimum)</em>
         <% end %><br />
-        <%= f.password_field :password, :class => "ds-c-field" %>
+        <%= f.password_field :password, class: "ds-c-field" %>
       </div>
 
       <div class="field">
-        <%= f.label :password_confirmation, :class => "ds-c-label" %>
-        <%= f.password_field :password_confirmation, :class => "ds-c-field" %>
+        <%= f.label :password_confirmation, class: "ds-c-label" %>
+        <%= f.password_field :password_confirmation, class: "ds-c-field" %>
       </div>
 
       <h2>Your practice</h2>
 
       <div class="field">
-        <%= f.label :organization, "Name of your practice", :class => "ds-c-label" %>
-        <%= f.text_field :organization, :class => "ds-c-field" %>
+        <%= f.label :organization, "Name of your practice", class: "ds-c-label" %>
+        <%= f.text_field :organization, class: "ds-c-field" %>
       </div>
 
       <div class="field">
-        <%= f.label :organization_type, 'Practice type', :class => "ds-c-label" %>
+        <%= f.label :organization_type, 'Practice type', class: "ds-c-label" %>
         <%= f.select :organization_type,
           User::organization_types.keys.each_with_object([]) { |key, memo| memo << [key.humanize, key] },
           { include_blank: 'Please select a practice type' },
-          :class => "ds-c-field",
+          class: "ds-c-field",
           value: @user.organization_type
         %>
       </div>
 
       <div class="field">
-        <%= f.label :address_1, :class => "ds-c-label" %>
-        <%= f.text_field :address_1, :class => "ds-c-field" %>
+        <%= f.label :address_1, class: "ds-c-label" %>
+        <%= f.text_field :address_1, class: "ds-c-field" %>
       </div>
 
       <div class="field">
-        <%= f.label :address_2, :class => "ds-c-label" %>
-        <%= f.text_field :address_2, :class => "ds-c-field" %>
+        <%= f.label :address_2, class: "ds-c-label" %>
+        <%= f.text_field :address_2, class: "ds-c-field" %>
       </div>
 
       <div class="field">
-        <%= f.label :city, :class => "ds-c-label" %>
-        <%= f.text_field :city, :class => "ds-c-field" %>
+        <%= f.label :city, class: "ds-c-label" %>
+        <%= f.text_field :city, class: "ds-c-field" %>
       </div>
 
       <div class="field">
-        <%= f.label :state, :class => "ds-c-label" %>
+        <%= f.label :state, class: "ds-c-label" %>
         <%= f.select :state,
               User::STATES.each_with_object([]) { |state, memo| memo << [state[1], state[0]] },
               { },
-              :class => "ds-c-field",
+              class: "ds-c-field",
               value: @user.state
         %>
       </div>
 
       <div class="field">
-        <%= f.label :zip, :class => "ds-c-label" %>
-        <%= f.text_field :zip, :class => "ds-c-field" %>
+        <%= f.label :zip, class: "ds-c-label" %>
+        <%= f.text_field :zip, class: "ds-c-field" %>
       </div>
 
-
+      <div class="field ds-u-margin-top--2">
+        <%= f.check_box :agree_to_terms, class: 'ds-u-margin-right--1' %>
+        <%= f.label :agree_to_terms, 'I agree to the terms of DPC API access' %>
+      </div>
 
       <div class="actions ds-u-margin-top--3">
-        <%= f.submit "Sign up", id: 'sign-up', :class => "ds-c-button ds-c-button--primary" %>
+        <%= f.submit "Sign up", id: 'sign-up', class: "ds-c-button ds-c-button--primary" %>
       </div>
     <% end %>
   </div>

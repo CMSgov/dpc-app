@@ -39,7 +39,7 @@ aria-controls="topnav-wrap" aria-label="Close menu">
           <%= link_to "Log in", new_session_path(User), class: "ds-c-button" %>
         </li>
         <li class="topnav__item">
-          <%= link_to "Request access", new_registration_path(User), class: "ds-c-button ds-c-button--primary" %>
+          <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
         </li>
       <% else %>
         <li class="topnav__item">

@@ -2,14 +2,6 @@
 
 <div>
   <p>
-    <% if @dpc_registration.opt_in %>
-      You've chosen to register for access to the DPC API, and your
-      status is <%= @dpc_registration.opt_in_status %>.
-    <% else %>
-      You've chosen NOT to register for access to the DPC API.
-    <% end %>
-  </p>
-  <p>
     Currently, your access level to the DPC API is: <%= @dpc_registration.access_level.tr('_', ' ') %>.
   </p>
   <p>
