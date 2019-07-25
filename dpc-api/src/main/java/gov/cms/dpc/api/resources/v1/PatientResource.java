@@ -9,6 +9,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
@@ -74,6 +75,7 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @Timed
     @ExceptionMetered
+    @Profiled(profile = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient")
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @Override
     public Patient submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, Patient patient) {
