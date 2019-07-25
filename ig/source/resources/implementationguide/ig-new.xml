@@ -21,9 +21,9 @@
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
     <valueString value="/Users/raac/Development/dpc-app/ig/source/pages"/>
   </extension>
-  <url value="https://dpc.cms.gov/ImplementationGuide/cms-dpc-ig"/>
+  <url value="https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig"/>
   <name value="Data @ the Point of Care Implementation Guide"/>
-  <status value="active"/>
+  <status value="draft"/>
   <experimental value="false"/>
   <publisher value="Centers for Medicare and Medicaid Services"/>
   <description value="Draft implementation guide for DPC Application"/>

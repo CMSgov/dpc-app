@@ -25,9 +25,9 @@
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
     "valueString" : "/Users/raac/Development/dpc-app/ig/source/pages"
   }],
-  "url" : "https://dpc.cms.gov/ImplementationGuide/cms-dpc-ig",
+  "url" : "https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig",
   "name" : "Data @ the Point of Care Implementation Guide",
-  "status" : "active",
+  "status" : "draft",
   "experimental" : false,
   "publisher" : "Centers for Medicare and Medicaid Services",
   "description" : "Draft implementation guide for DPC Application",
