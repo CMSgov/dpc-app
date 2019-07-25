@@ -50,8 +50,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ApiOperation(value = "Search and Validate Token",
             notes = "FHIR Endpoint to find an Organization resource associated to the given authentication token." +
                     "<p>This also validates that the token is valid." +
-                    "<p>The *_tag* parameter is used to convey the token, which is half-way between FHIR and REST." +
-                    "<p>Either an identifier or a token must be present for the query to work.")
+                    "<p>The *_tag* parameter is used to convey the token, which is half-way between FHIR and REST.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Organization matching (valid) token was found."),
             @ApiResponse(code = 404, message = "Organization was not found matching token", response = OperationOutcome.class),
@@ -66,12 +65,19 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return searchAndValidationByToken(tokenTag);
         }
 
+        final Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+
         if (identifier == null) {
-            throw new WebApplicationException("Must have either token or Identifier to search", Response.Status.BAD_REQUEST);
+            final List<OrganizationEntity> organizationEntityList = this.dao.listOrganizations();
+            bundle.setTotal(organizationEntityList.size());
+
+            organizationEntityList.forEach(entity -> bundle.addEntry().setResource(entity.toFHIR()));
+            return bundle;
         }
 
         final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(identifier);
-        final Bundle bundle = new Bundle();
+
         if (!queryList.isEmpty()) {
             bundle.setTotal(queryList.size());
             queryList.forEach(org -> bundle.addEntry().setResource(org.toFHIR()));

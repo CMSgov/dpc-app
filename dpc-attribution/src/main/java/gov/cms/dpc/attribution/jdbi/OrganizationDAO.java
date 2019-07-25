@@ -34,6 +34,15 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
      return Optional.ofNullable(get(organizationID));
     }
 
+    public List<OrganizationEntity> listOrganizations() {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<OrganizationEntity> query = builder.createQuery(OrganizationEntity.class);
+        final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
+        query.select(root);
+
+        return list(query);
+    }
+
     public void updateOrganization(OrganizationEntity entity) {
         persist(entity);
     }
