@@ -5,6 +5,7 @@
   "name": "DPC Endpoint",
   "publisher": "The DPC Team",
   "status": "draft",
+  "version": "0.0.1",
   "kind": "resource",
   "abstract": false,
   "type": "Endpoint",
@@ -32,7 +33,7 @@
         "type": [
           {
             "code": "Reference",
-            "targetProfile": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-organization"
+            "targetProfile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization"
           }
         ]
       }

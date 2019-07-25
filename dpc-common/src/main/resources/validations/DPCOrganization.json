@@ -5,6 +5,7 @@
   "name": "DPC Organization",
   "publisher": "The DPC Team",
   "status": "draft",
+  "version": "0.0.1",
   "kind": "resource",
   "abstract": false,
   "type": "Organization",
@@ -49,7 +50,7 @@
         "type": [
           {
             "code": "Address",
-            "profile": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-address"
+            "profile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-address"
           }
         ],
         "min": 1,
@@ -64,7 +65,7 @@
         "type": [
           {
             "code": "Reference",
-            "targetProfile": "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-endpoint"
+            "targetProfile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-endpoint"
           }
         ]
       }

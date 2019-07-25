@@ -5,6 +5,7 @@
   "name": "DPC Address",
   "publisher": "The DPC Team",
   "status": "draft",
+  "version": "0.0.1",
   "kind": "complex-type",
   "abstract": false,
   "type": "Address",

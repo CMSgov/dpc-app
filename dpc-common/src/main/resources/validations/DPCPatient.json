@@ -5,6 +5,7 @@
   "name": "DPC Patient",
   "publisher": "The DPC Team",
   "status": "draft",
+  "version": "0.0.1",
   "kind": "resource",
   "abstract": false,
   "type": "Patient",
