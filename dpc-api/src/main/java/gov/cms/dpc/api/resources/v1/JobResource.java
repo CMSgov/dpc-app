@@ -73,11 +73,11 @@ public class JobResource extends AbstractJobResource {
         // Return a response based on status
         return maybeJob.map(job -> {
             logger.debug("Fetched Job: {}", job);
-            if (!job.isValid()) {
-                throw new JobQueueFailure(jobUUID, "Fetched an invalid job model");
-            }
             if (!job.getOrgID().equals(orgUUID)) {
                 Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
+            }
+            if (!job.isValid()) {
+                throw new JobQueueFailure(jobUUID, "Fetched an invalid job model");
             }
             Response.ResponseBuilder builder = Response.noContent();
             JobStatus jobStatus = job.getStatus();
