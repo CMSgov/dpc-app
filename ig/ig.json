@@ -2,11 +2,11 @@
   "tool": "jekyll",
   "source": "implementationguide/cms-dpc-ig.xml",
   "npm-name": "cms-dpc-ig-",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "paths": {
     "qa": "generated_output/qa",
     "temp": "generated_output/temp",
-    "output": "output",
+    "output": "../dpc-web/public/ig",
     "txCache": "generated_output/txCache",
     "specification": "http://hl7.org/fhir/STU3",
     "pages": [
