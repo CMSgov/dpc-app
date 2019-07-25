@@ -1,6 +1,9 @@
 package gov.cms.dpc.api;
 
 import com.google.common.collect.ImmutableSet;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.api.auth.annotations.Public;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -11,8 +14,10 @@ import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
 import javax.ws.rs.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,6 +59,37 @@ class APIResourceAnnotationTest {
         methods
                 .forEach(method ->
                         assertTrue(method.isAnnotationPresent(ApiOperation.class), String.format("Method: %s in Class: %s must have Swagger annotation", method.getName(), method.getDeclaringClass())));
+    }// iterate over parameters (at least one should have Auth)
+
+    @Test
+    void allResourcesHaveSecurityAnnotations() {
+        methods.forEach(method -> assertMethodHasValidAuthAnnotations(method));
     }
 
+    /**
+     * Asserts that the method has valid auth-annotations
+     * To pass, the method must either have a parameter with an Auth or a PathAuthorizer or Public annotation on the method
+     *
+     * @param method - The Method to check for valid annotations
+     */
+    private static void assertMethodHasValidAuthAnnotations(Method method) {
+        boolean validParameters = false;
+        final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+        for (Annotation[] annotations : paramAnnotations) {
+            for (Annotation annotation : annotations) {
+                if(annotation.annotationType().equals(Auth.class)) {
+                    validParameters = true;
+                    break;
+                }
+            }
+            if (!validParameters) {
+                break;
+            }
+        }
+
+        // each method should have validParameter or Public or PathAuthorizer annotations
+        assertTrue((validParameters || method.isAnnotationPresent(PathAuthorizer.class) || method.isAnnotationPresent(Public.class)),
+                String.format("Method: %s in Class: %s must either have a parameter with an Auth or a PathAuthorizer or Public annotation on the method.", method.getName(), method.getDeclaringClass())
+        );
+    }
 }

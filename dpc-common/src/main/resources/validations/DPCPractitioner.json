@@ -1,0 +1,67 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "dpc-profile-practitioner",
+  "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner",
+  "name": "DPC Practitioner",
+  "publisher": "The DPC Team",
+  "status": "draft",
+  "version": "0.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Practitioner",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Practitioner",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Practitioner",
+        "path": "Practitioner"
+      },
+      {
+        "id": "Practitioner.identifier",
+        "path": "Practitioner.identifier",
+        "definition": "Practitioner must have NPI identifier",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Practitioner.identifier[x]",
+        "path": "Practitioner.identifier",
+        "sliceName": "practitioner-npi",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Practitioner.identifier[x]:system",
+        "path": "Practitioner.identifier.system",
+        "min": 1,
+        "fixedCode": "http://hl7.org/fhir/sid/us-npi"
+      },
+      {
+        "id": "Practitioner.name",
+        "path": "Practitioner.name",
+        "definition": "Practitioner must have a provided name",
+        "min": 1
+      },
+      {
+        "id": "Practitioner.name.family",
+        "path": "Practitioner.name.family",
+        "definition": "Practitioner family name",
+        "min": 1
+      },
+      {
+        "id": "Practitioner.name.given",
+        "path": "Practitioner.name.given",
+        "definition": "Practitioner given name",
+        "min": 1
+      }
+    ]
+  }
+}

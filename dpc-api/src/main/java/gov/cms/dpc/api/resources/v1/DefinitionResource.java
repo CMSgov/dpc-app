@@ -1,12 +1,12 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.resources.AbstractDefinitionResource;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
@@ -31,13 +31,16 @@ public class DefinitionResource extends AbstractDefinitionResource {
         this.serverURL = serverURL;
     }
 
-    @Override
-    @ApiOperation(value = "Fetch all structure definitions", notes = "FHIR endpoint which fetches all structure definitions from the server", response = Bundle.class)
+    @Public
     @FHIR
+    @ApiOperation(value = "Fetch all structure definitions", notes = "FHIR endpoint which fetches all structure definitions from the server", response = Bundle.class)
+    @Override
     public Bundle getStructureDefinitions() {
         final Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
         profileSupport.fetchAllStructureDefinitions(ctx)
                 .forEach(structureDefinition -> bundle.addEntry().setResource(structureDefinition));
+        bundle.setTotal(bundle.getEntry().size());
 
         return bundle;
     }
@@ -45,10 +48,12 @@ public class DefinitionResource extends AbstractDefinitionResource {
     @Override
     @GET
     @Path("/{definitionID}")
+    @Public
     @FHIR
     @ApiOperation(value = "Fetch specific structure definition", notes = "FHIR endpoint to fetch a specific structure definition from the server.", response = StructureDefinition.class)
-    public StructureDefinition getStructureDefinition(@PathParam("definitionID") String definitionID) {
-        final StructureDefinition definition = this.profileSupport.fetchStructureDefinition(ctx, String.format("%s/StructureDefinition/%s", serverURL, definitionID));
+    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Structure Definition"))
+    public StructureDefinition getStructureDefinition(@ApiParam(value = "Structure Definition Resource ID", required = true) @PathParam("definitionID") String definitionID) {
+        final StructureDefinition definition = this.profileSupport.fetchStructureDefinition(ctx, String.format("%s/v1/StructureDefinition/%s", serverURL, definitionID));
         if (definition == null) {
             throw new WebApplicationException(String.format("Cannot find Structure Definition with ID: %s", definitionID), Response.Status.NOT_FOUND);
         }

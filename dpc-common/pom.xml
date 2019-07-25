@@ -78,5 +78,11 @@
             <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!--        We need the HTTP Client for the helper class, but it can be provided-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

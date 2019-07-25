@@ -1,0 +1,12 @@
+<head>
+  <title>
+    <%= content_for?(:title) ? yield(:title) : 'CMS.gov' %> | Data at the Point of Care
+  </title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name=”robots” content=”noindex, nofollow”>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= stylesheet_link_tag    'application', media: 'all' %>
+</head>

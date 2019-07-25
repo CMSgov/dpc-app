@@ -1,128 +1,148 @@
 {
-	"tool": "jekyll",
-	"source": "implementationguide/cms-dpc-ig.xml",
-	"npm-name": "cms-dpc-ig",
-	"license": "CC0-1.0",
-	"paths": {
-		"qa": "generated_output/qa",
-		"temp": "generated_output/temp",
-		"output": "output",
-		"txCache": "generated_output/txCache",
-		"specification": "http://hl7.org/fhir/STU3",
-		"pages": [
-			"framework",
-			"source/pages"
-		],
-		"resources": [
-			"source/resources",
-			"../dpc-common/src/main/resources/validations",
-			"../dpc-api/src/main/resources"
-		]
-	},
-	"pages": [
-		"pages"
-	],
-	"extension-domains": [
-		"https://trifolia-on-fhir.lantanagroup.com"
-	],
-	"allowed-domains": [
-		"https://trifolia-on-fhir.lantanagroup.com"
-	],
-	"sct-edition": "http://snomed.info/sct/731000124108",
-	"canonicalBase": "https://dpc.cms.gov",
-	"defaults": {
-		"Location": {
-			"template-base": "ex.html"
-		},
-		"ProcedureRequest": {
-			"template-base": "ex.html"
-		},
-		"Organization": {
-			"template-base": "ex.html"
-		},
-		"MedicationStatement": {
-			"template-base": "ex.html"
-		},
-		"SearchParameter": {
-			"template-base": "base.html"
-		},
-		"StructureDefinition": {
-			"template-mappings": "sd-mappings.html",
-			"template-base": "sd.html",
-			"template-defns": "sd-definitions.html"
-		},
-		"Immunization": {
-			"template-base": "ex.html"
-		},
-		"Patient": {
-			"template-base": "ex.html"
-		},
-		"StructureMap": {
-			"content": false,
-			"script": false,
-			"template-base": "ex.html",
-			"profiles": false
-		},
-		"ConceptMap": {
-			"template-base": "base.html"
-		},
-		"Practitioner": {
-			"template-base": "ex.html"
-		},
-		"OperationDefinition": {
-			"template-base": "base.html"
-		},
-		"CodeSystem": {
-			"template-base": "base.html"
-		},
-		"Communication": {
-			"template-base": "ex.html"
-		},
-		"Any": {
-			"template-format": "format.html",
-			"template-base": "base.html"
-		},
-		"PractitionerRole": {
-			"template-base": "ex.html"
-		},
-		"ValueSet": {
-			"template-base": "base.html"
-		},
-		"CapabilityStatement": {
-			"template-base": "base.html"
-		},
-		"Observation": {
-			"template-base": "ex.html"
-		}
-	},
-	"resources": {
-		"Organization/organization": {
-			"base": "Organization-organization.html",
-			"defns": "Organization-organization-definitions.html"
-		},
-		"Practitioner/practitioner": {
-			"base": "Practitioner-practitioner.html",
-			"defns": "Practitioner-practitioner-definitions.html"
-		},
-		"Group/group": {
-			"base": "Group-group.html",
-			"defns": "Group-group-definitions.html"
-		},
-		"Endpoint/endpoint": {
-			"base": "Endpoint-endpoint.html",
-			"defns": "Endpoint-endpoint-definitions.html"
-		},
-		"StructureDefinition/dpc-profile-patient": {
-			"base": "StructureDefinition-dpc-profile-patient.html",
-			"defns": "StructureDefinition-dpc-profile-patient-definitions.html",
-			"source": "DPCPatient.json"
-		},
-		"CapabilityStatement/dpc-capabilities-statement": {
-			"base": "CapabilityStatement-dpc-capabilities.html",
-			"defns": "CapabilityStatement-dpc-capabilities-definitions.html",
-			"source": "capabilities.json"
-		}
-	},
-	"version": "3.0.1",
-	"dependencyList": []
+  "tool": "jekyll",
+  "source": "implementationguide/cms-dpc-ig.xml",
+  "npm-name": "cms-dpc-ig-",
+  "license": "CC0-1.0",
+  "paths": {
+    "qa": "generated_output/qa",
+    "temp": "generated_output/temp",
+    "output": "output",
+    "txCache": "generated_output/txCache",
+    "specification": "http://hl7.org/fhir/STU3",
+    "pages": [
+      "framework",
+      "source/pages"
+    ],
+    "resources": [
+      "source/resources",
+      "../dpc-common/src/main/resources/validations",
+      "../dpc-api/src/main/resources"
+    ]
+  },
+  "pages": [
+    "pages"
+  ],
+  "extension-domains": [
+    "https://trifolia-on-fhir.lantanagroup.com"
+  ],
+  "allowed-domains": [
+    "https://trifolia-on-fhir.lantanagroup.com"
+  ],
+  "sct-edition": "http://snomed.info/sct/731000124108",
+  "canonicalBase": "https://dpc.cms.gov/fhir/v1",
+  "defaults": {
+    "Location": {
+      "template-base": "ex.html"
+    },
+    "ProcedureRequest": {
+      "template-base": "ex.html"
+    },
+    "Organization": {
+      "template-base": "ex.html"
+    },
+    "MedicationStatement": {
+      "template-base": "ex.html"
+    },
+    "SearchParameter": {
+      "template-base": "base.html"
+    },
+    "StructureDefinition": {
+      "template-mappings": "sd-mappings.html",
+      "template-base": "sd.html",
+      "template-defns": "sd-definitions.html"
+    },
+    "Immunization": {
+      "template-base": "ex.html"
+    },
+    "Patient": {
+      "template-base": "ex.html"
+    },
+    "StructureMap": {
+      "content": false,
+      "script": false,
+      "template-base": "ex.html",
+      "profiles": false
+    },
+    "ConceptMap": {
+      "template-base": "base.html"
+    },
+    "Practitioner": {
+      "template-base": "ex.html"
+    },
+    "OperationDefinition": {
+      "template-base": "base.html"
+    },
+    "CodeSystem": {
+      "template-base": "base.html"
+    },
+    "Communication": {
+      "template-base": "ex.html"
+    },
+    "Any": {
+      "template-format": "format.html",
+      "template-base": "base.html"
+    },
+    "PractitionerRole": {
+      "template-base": "ex.html"
+    },
+    "ValueSet": {
+      "template-base": "base.html"
+    },
+    "CapabilityStatement": {
+      "template-base": "base.html"
+    },
+    "Observation": {
+      "template-base": "ex.html"
+    }
+  },
+  "resources": {
+    "Organization/organization": {
+      "base": "Organization-organization.html",
+      "defns": "Organization-organization-definitions.html"
+    },
+    "Practitioner/practitioner": {
+      "base": "Practitioner-practitioner.html",
+      "defns": "Practitioner-practitioner-definitions.html"
+    },
+    "Group/group": {
+      "base": "Group-group.html",
+      "defns": "Group-group-definitions.html"
+    },
+    "Endpoint/endpoint": {
+      "base": "Endpoint-endpoint.html",
+      "defns": "Endpoint-endpoint-definitions.html"
+    },
+    "StructureDefinition/dpc-profile-address": {
+      "base": "StructureDefinition-dpc-profile-address.html",
+      "defns": "StructureDefinition-dpc-profile-address-definitions.html",
+      "source": "DPCAddress.json"
+    },
+    "StructureDefinition/dpc-profile-endpoint": {
+      "base": "StructureDefinition-dpc-profile-endpoint.html",
+      "defns": "StructureDefinition-dpc-profile-endpoint-definitions.html",
+      "source": "DPCEndpoint.json"
+    },
+    "StructureDefinition/dpc-profile-organization": {
+      "base": "StructureDefinition-dpc-profile-organization.html",
+      "defns": "StructureDefinition-dpc-profile-organization-definitions.html",
+      "source": "DPCOrganization.json"
+    },
+    "StructureDefinition/dpc-profile-patient": {
+      "base": "StructureDefinition-dpc-profile-patient.html",
+      "defns": "StructureDefinition-dpc-profile-patient-definitions.html",
+      "source": "DPCPatient.json"
+    },
+    "StructureDefinition/dpc-profile-practitioner": {
+      "base": "StructureDefinition-dpc-profile-practitioner.html",
+      "defns": "StructureDefinition-dpc-profile-practitioner-definitions.html",
+      "source": "DPCPractitioner.json"
+    },
+    "CapabilityStatement/dpc-capabilities-statement": {
+      "base": "CapabilityStatement-dpc-capabilities.html",
+      "defns": "CapabilityStatement-dpc-capabilities-definitions.html",
+      "source": "capabilities.json"
+    }
+  },
+  "version": "3.0.1",
+  "dependencyList": []
 }

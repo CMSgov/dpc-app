@@ -1,0 +1,78 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "dpc-profile-address",
+  "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-address",
+  "name": "DPC Address",
+  "publisher": "The DPC Team",
+  "status": "draft",
+  "version": "0.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "type": "Address",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Address",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Address",
+        "path": "Address"
+      },
+      {
+        "id": "Address.use",
+        "path": "Address.use",
+        "definition": "Must have address usage",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Address.type",
+        "path": "Address.type",
+        "definition": "Must have address type",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Address.text",
+        "path": "Address.text",
+        "definition": "Cannot use text formatted address",
+        "min": 0,
+        "max": "0"
+      },
+      {
+        "id": "Address.line",
+        "path": "Address.line",
+        "definition": "Must have at least one address line",
+        "min": 1,
+        "max": "*"
+      },
+      {
+        "id": "Address.city",
+        "path": "Address.city",
+        "definition": "Must have city",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Address.state",
+        "path": "Address.state",
+        "definition": "Must have state",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Address.postalCode",
+        "path": "Address.postalCode",
+        "definition": "Must have zip code",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Address.country",
+        "path": "Address.country",
+        "definition": "Must have country",
+        "min": 1,
+        "max": "1"
+      }
+    ]
+  }
+}

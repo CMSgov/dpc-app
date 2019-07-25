@@ -78,7 +78,7 @@
       <div class="site-block-header">
         <h2 class="site-block-header__heading">About the pilot</h2>
         <div class="site-block-header__description">
-          <p> Data at the Point of Care is a pilot API program that enables healthcare providers to deliver high quality care directly to Medicare beneficiaries by making a patient’s Medicare claims data available to the provider for treatment needs. The information can be accessed in the existing workflow and without logging into another application or portal. Claims information can be used to confirm information, fill in gaps in care, and improve patient safety.</p>
+          <p> Data at the Point of Care is a pilot API program that enables healthcare providers to deliver high quality care directly to Medicare beneficiaries by making a patient’s Medicare claims data available to the provider for treatment needs. The information can be accessed in the existing workflow and without logging into another application or portal. Claims information can be used to confirm information, fill in gaps in care, and improve patient safety. For more information about the pilot <%= link_to "read our FAQ", faq_path %>.</p>
         </div>
 
         <div class="usa-accordion usa-accordion--bordered">
@@ -126,11 +126,11 @@
         <li class="site-process-list__item">
           <h3 class="site-process-list__heading">Request access to the pilot</h3>
           <div class="site-process-list__body">
-            <p>Do this on the <a href="#">Request Access Page</a>. Remember, this is a pilot and and the process may move slowly. You can prepare for connection by reviewing the <a href="#">API documentation</a>.</p>
+            <p>Do this on the <a href="#">Request Access Page</a>. Remember, this is a pilot and and the process may move slowly. You can prepare for connection by reviewing the <%= link_to "API documentation", docs_path %>.</p>
           </div>
         </li>
         <li class="site-process-list__item">
-          <h3 class="site-process-list__heading">You will be contacted</h3>
+          <h3 class="site-process-list__heading">We’ll reach out to you</h3>
           <div class="site-process-list__body">
             <p>Based on the specification and sample data, build and test with synthetic data.</p>
           </div>
@@ -162,7 +162,8 @@
       <div class="site-block-header">
         <h2 class="site-block-header__heading">About the data</h2>
         <div class="site-block-header__description">
-          <p>The claims data is provided using the industry-standard <a href="#">HL7 Fast Healthcare Interoperability Resources (FHIR)</a> resources, specifically the <a href="#">Bulk FHIR specification</a>.</p>
+          <p>The claims data is provided using the industry-standard <a href="http://hl7.org/fhir/">HL7 Fast Healthcare Interoperability Resources (FHIR)</a> resources, specifically the <a href="The Nick [1:39 PM]
+http://hl7.org/fhir/us/bulkdata/2019May/index.html">Bulk FHIR specification</a>.</p>
         </div>
 
         <div class="usa-accordion usa-accordion--bordered ds-u-margin-top--7">
@@ -187,15 +188,15 @@
           <!-- Use the accurate heading level to maintain the document outline -->
           <h2 class="usa-accordion__heading">
             <button class="usa-accordion__button" aria-expanded="false" aria-controls="a2">
-               How is the Data at the Point of Care pilot different from Blue Button 2.0 and Beneficiary Claims Data API?
+               How is the Data at the Point of Care pilot different from Blue Button 2.0 and Beneficiary Claims Data API (BCDA)?
             </button>
           </h2>
           <div id="a2" class="usa-accordion__content">
-            <p>Blue Button 2.0 provides FHIR-formatted data for one individual Medicare beneficiary at a time, to registered applications with beneficiary authorization. See https://bluebutton.cms.gov/.</p>
+            <p><strong>Blue Button 2.0</strong> provides FHIR-formatted data for one individual Medicare beneficiary at a time, to registered applications with beneficiary authorization. See https://bluebutton.cms.gov/.</p>
 
-            <p>BCDA provides FHIR-formatted bulk data files to an ACO for all of the beneficiaries eligible to a given Shared Savings Program ACO. BCDA does not require individual beneficiary authorization but does allow a process for patients to opt out of data sharing.</p>
+            <p><strong>BCDA</strong> provides FHIR-formatted bulk data files to an ACO for all of the beneficiaries eligible to a given Shared Savings Program ACO. BCDA does not require individual beneficiary authorization but does allow a process for patients to opt out of data sharing.</p>
 
-            <p>Data at the Point of Care Pilot provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. Data at the Point of Care does not require individual beneficiary authorization but does allow a process for patients to opt out of data sharing.</p>
+            <p><strong>Data at the Point of Care</strong> pilot provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. Data at the Point of Care does not require individual beneficiary authorization but does allow a process for patients to opt out of data sharing.</p>
 
           </div>
         </div>
@@ -213,7 +214,7 @@
             <use xlink:href="/assets/solid.svg#key"></use>
           </svg>Request access
         <% end %>
-        <%= link_to docs_path, :class => "ds-c-button ds-c-button--inverse ds-c-button--inverse--alt ds-c-button--big" do %>
+        <%= link_to "https://groups.google.com/d/forum/dpc-api", :class => "ds-c-button ds-c-button--inverse ds-c-button--inverse--alt ds-c-button--big" do %>
           Join Google Group
         <% end %>
         </div>

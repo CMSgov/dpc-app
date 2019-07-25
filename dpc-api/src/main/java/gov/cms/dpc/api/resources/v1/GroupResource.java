@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import gov.cms.dpc.api.auth.annotations.*;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
@@ -60,6 +61,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @GET // Need this here, since we're using a path param
     @Path("/{providerID}/$export")
+    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID/export")
     @Timed
     @ExceptionMetered
     @FHIRAsync
@@ -108,6 +110,7 @@ public class GroupResource extends AbstractGroupResource {
      * @return - {@link String} test string
      */
     @POST
+    @Public
     @ApiOperation(value = "FHIR marshall test", hidden = true)
     public Patient marshalTest(Group group) {
 

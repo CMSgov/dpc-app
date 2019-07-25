@@ -16,6 +16,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 class OrganizationResourceTest extends AbstractAttributionTest {
 
     private OrganizationResourceTest() {
@@ -31,24 +33,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBasicRegistration() {
-
-        // Read in the test file
-        final InputStream inputStream = OrganizationResourceTest.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
-        final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
-
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-
-        final Parameters parameters = new Parameters();
-        parameters.addParameter().setResource(resource);
-
-        client
-                .operation()
-                .onType(Organization.class)
-                .named("submit")
-                .withParameters(parameters)
-                .returnResourceType(Organization.class)
-                .encodedJson()
-                .execute();
+        assertNotNull(AttributionTestHelpers.createOrganization(ctx, getServerURL()), "Should have org");
     }
 
     @Test

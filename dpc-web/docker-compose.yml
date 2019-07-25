@@ -14,10 +14,9 @@ services:
     build: .
     image: dpc-web:latest
     environment:
-      - DB_HOST=db
+      - DATABASE_URL=postgresql://db/dpc-website_development
       - DB_USER=postgres
       - DB_PASS=dpc-safe
-      - RAILS_MASTER_KEY
     ports:
       - "3000:3000"
     depends_on:

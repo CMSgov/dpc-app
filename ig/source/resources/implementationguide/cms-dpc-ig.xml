@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ImplementationGuide
-    xmlns="http://hl7.org/fhir">
+        xmlns="http://hl7.org/fhir">
     <id value="cms-dpc-ig"/>
     <meta>
         <versionId value="8"/>
         <lastUpdated value="2019-07-16T14:49:27.000-04:00"/>
     </meta>
-    <url value="https://dpc.cms.gov/ImplementationGuide/cms-dpc-ig"/>
-    <name value="DPCImplementationGuide"/>
+    <url value="https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig"/>
+    <name value="Data @ the Point of Care Implementation Guide"/>
     <status value="draft"/>
     <experimental value="false"/>
     <publisher value="Centers for Medicare and Medicaid Services"/>
@@ -46,8 +46,36 @@
         <resource>
             <example value="false"/>
             <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-address"/>
+                <display value="DPCAddress.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-endpoint"/>
+                <display value="DPCEndpoint.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-organization"/>
+                <display value="DPCOrganization.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
                 <reference value="StructureDefinition/dpc-profile-patient"/>
                 <display value="DPCPatient.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-practitioner"/>
+                <display value="DPCPractitioner.json"/>
             </sourceReference>
         </resource>
         <resource>

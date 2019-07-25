@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources;
 
+import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import io.swagger.annotations.Api;
@@ -24,14 +25,16 @@ public class TestResource {
     }
 
     @GET
+    @Public
     @ApiOperation(value = "test resource")
     public Response base() {
         return Response.status(Response.Status.OK).entity("Hello there!").build();
     }
 
     @POST
+    @Public
     @ApiOperation(value = "validation test resource")
-    public Response testValidations(@Valid @Profiled(profile = "https://dpc.cms.gov/fhir/StructureDefinition/dpc-profile-patient") Patient patient) {
+    public Response testValidations(@Valid @Profiled(profile = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient") Patient patient) {
         return Response.ok().build();
     }
 }

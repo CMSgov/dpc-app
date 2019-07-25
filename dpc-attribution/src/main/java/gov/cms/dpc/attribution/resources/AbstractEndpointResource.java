@@ -1,11 +1,11 @@
 package gov.cms.dpc.attribution.resources;
 
-import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 @Path("/Endpoint")
 public abstract class AbstractEndpointResource {
@@ -14,7 +14,10 @@ public abstract class AbstractEndpointResource {
         // Not used
     }
 
-    @POST
-    @FHIR
-    public abstract Response createEndpoint(Endpoint endpoint);
+    @GET
+    public abstract Bundle searchEndpoints(String organizationID);
+
+    @GET
+    @Path("/{endpointID}")
+    public abstract Endpoint fetchEndpoint(UUID endpointID);
 }

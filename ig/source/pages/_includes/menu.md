@@ -22,8 +22,10 @@
 -->
 - [Home](index.html){: .active}
 - [Table of Contents](toc.html)
-- [Profiles, Extensions & Transactions](profiles.html)
-- [Terminology](terminology.html)
+- [Profiles](profiles.html)
+- [Extensions](extensions.html)
+- [Operations](operations.html)
+- [Security](security.html)
 - [Capability Statements](capstatements.html)
 - [Other](other.html)
 - [Downloads](downloads.html)

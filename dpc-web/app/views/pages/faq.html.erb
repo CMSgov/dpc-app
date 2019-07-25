@@ -1,0 +1,141 @@
+<% title "Frequently asked questions" %>
+
+  <div class="ds-text--lead ds-u-measure--wide">
+    <p>As we continue to gather feedback from users on the Data at the Point of Care (DPC) pilot, we will likekly add more FAQs to this page. If you have a question that is not listed below, please use the <a href="https://groups.google.com/d/forum/dpc-api">DPC Google Group</a>.</p>
+  </div>
+
+  <div class="usa-accordion usa-accordion--bordered ds-u-margin-top--7">
+
+    <!-- Use the accurate heading level to maintain the document outline -->
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a1">
+        I'm a provider. How can I get my Electronic Medical Record provider or other software vendors to use to the DPC API?
+      </button>
+    </h2>
+    <div id="a1" class="usa-accordion__content">
+      <ul>
+        <li>First, <a href="#">request access</a> to the pilot. This puts you on the list of providers who are interested, regardless of whether your vendors are ready to participate.</li>
+        <li>Ask your software provider if they have implemented the Bulk FHIR specification.</li>
+        <li>Direct them to this website and encourage them to use the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a>.</li>
+        <li>Ask them if they can commit to working with you on this project and if so, when will they be ready.</li>
+      </ul>
+    </div>
+
+    <!-- Use the accurate heading level to maintain the document outline -->
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a2">
+        What type of providers is CMS looking to join the pilot?
+      </button>
+    </h2>
+    <div id="a2" class="usa-accordion__content">
+      <ul>
+        <li>Fee-for-Service (FFS) providers who treat Medicare patients</li>
+        <li>Already receive claims from other payers and who have successfully integrated the information into provider's existing workflow</li>
+        <li>Have experience using Blue Button 2.0 or the Beneficiary Claims Data API pilot project
+Already using or testing wth FHIR, especially Bulk FHIR</li>
+      </ul>
+    </div>
+
+    <!-- Use the accurate heading level to maintain the document outline -->
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a3">
+        How will the pilot project work? How many providers can join and how long does it last?
+      </button>
+    </h2>
+    <div id="a3" class="usa-accordion__content">
+      <ul>
+        <li>After the announcement, any FFS provider can request access access to synthetic data.</li>
+        <li>CMS will slowly roll out the tokens to providers based on order of request, their readiness, their experience with FHIR, claims data, Blue Button and BCDA, and our ability to respond.</li>
+        <li>The team is aiming for a September test with a few providers who are have built, tested, and can demonstrate their readiness to test with production data.</li>
+        <li>CMS will slowly roll out the tokens to these providers based on readiness and the team's ability to respond.</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a4">
+        How can I get more information?
+      </button>
+    </h2>
+    <div id="a4" class="usa-accordion__content">
+      <ul>
+        <li>Technical documentation is available in the <a href="#">API Documentation</a>.</li>
+        <li>A Google Group has been created to provide answers to questions and to support providers and developers who are implementing Data at the Point of Care. Sign up at https://dpc.cms.gov and join the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a>.</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a5">
+        How is the Data at the Point of Care pilot different from Blue Button 2.0 and Beneficiary Claims Data API (BCDA)?
+      </button>
+    </h2>
+    <div id="a5" class="usa-accordion__content">
+      <ul>
+        <li>Blue Button 2.0 provides FHIR-formatted data for one individual Medicare beneficiary at a time, to registered applications with beneficiary authorization. See <a href="https://bluebutton.cms.gov/">https://bluebutton.cms.gov/</a>.</li>
+        <li>BCDA provides FHIR-formatted bulk data files to an Accountable Care Organization (ACO) for all of the beneficiaries assigned to a given ACO. BCDA follows the ACO data sharing process where patients can choose to opt out of data sharing.</li>
+        <li>Data at the Point of Care Pilot provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. Data is shared for between covered entities for treatment purposes as defined under HIPAA. Patient can choose to opt out of data sharing.</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a6">
+        Is there a cost to get the claims information in the Data at the Point of Care pilot?
+      </button>
+    </h2>
+    <div id="a6" class="usa-accordion__content">
+      <p>There is no cost for the data.</p>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a7">
+        What type of information do we want as feedback?
+      </button>
+    </h2>
+    <div id="a7" class="usa-accordion__content">
+      <ul>
+        <li>Usefulness of the data to evaluate helpful CMS claims data is for impacting treatment, provider burden, and quality of care for Fee-for-Service (FFS) providers at the point of care</li>
+        <li>Ease of implementation for vendors and providers to evaluate how easy it is to configure and get started with requesting and receiving claims data</li>
+        <li>Practicality and effectiveness of attribution logic that determines which providers can request and receive claims data for which patients and for how long</li>
+        <li>Ease and effectiveness of ways that providers can share their access with vendors without breaking trust in the chain</li>
+        <li>Level of satisfaction and other feedback from patients regarding how they would like to be informed of data being shared for treatment purposes and of their right to opt out of data sharing</li>
+        <li>Measure of the frequency of use and an evaluation of performance in different use cases to determine infrastructure decisions</li>
+        <li>Learn about other feedback, additions, or changes that might be needed if this were to go beyond a pilot</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a8">
+        How will we make sure that the data is secure and protected?
+      </button>
+    </h2>
+    <div id="a8" class="usa-accordion__content">
+      <ul>
+        <li>Data at the Point of Care secures Protected Health Information (PHI) and Personally Identifiable Information (PII) and has multiple layers of protection, such as encryption in transit and at rest, security certification requirements of connecting vendors, auditing and analytics to look for suspicious activity, terms of service restrictions, public and private security keys, and IP address restriction.</li>
+        <li>Data at the Point of Care is built based on privacy requirements defined by HIPAA and outlined in the Notice of Privacy Practices for Original Medicare. This allows patients to opt out of data sharing.</li>
+        <li>We will be using the pilot to test notification and consent messages and processes that are easy to understand by beneficiaries without adding additional complexity to the sharing of data.</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a9">
+        Can a patient opt out of data sharing?
+      </button>
+    </h2>
+    <div id="a9" class="usa-accordion__content">
+      <ul>
+        <li>Yes, Data at the Point of Care is based on privacy requirements defined by HIPAA and outlines in the Notice of Privacy Practices for Original Medicare. This allows patients to opt out of data sharing. </li>
+        <li>Patients can opt out of data sharing by calling 1800 Medicare (<a href="tel:1-800-633-4227">1-800-633-4227</a>) to request that their data not be shared by CMS to their providers.</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a10">
+        I requested access to the pilot. When will CMS get back to me?
+      </button>
+    </h2>
+    <div id="a10" class="usa-accordion__content">
+      <ul>
+        <li>CMS will slowly roll out the tokens to providers based on order of request, their readiness, their experience with FHIR, claims data, Blue Button and BCDA, and our ability to respond.</li>
+        <li>Updates will be posted to the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a> as we progress through the pilot process.</li>
+      </ul>
+    </div>
+  </div>

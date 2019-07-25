@@ -13,3 +13,6 @@ active: capstatements
 
 <!-- end TOC -->
 
+<ul>
+<li><a href="CapabilityStatement-dpc-capabilities.html">DPC Capability Statement</a></li>
+</ul>

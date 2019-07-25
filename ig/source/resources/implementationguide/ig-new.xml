@@ -7,27 +7,27 @@
     <lastUpdated value="2019-07-16T14:49:27.000-04:00"/>
   </meta>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/narobison/Developer/dpc-app/ig/source/resources"/>
+    <valueString value="/Users/raac/Development/dpc-app/ig/source/resources"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/narobison/Developer/dpc-app/dpc-common/src/main/resources/validations"/>
+    <valueString value="/Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/narobison/Developer/dpc-app/dpc-api/src/main/resources"/>
+    <valueString value="/Users/raac/Development/dpc-app/dpc-api/src/main/resources"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
-    <valueString value="/Users/narobison/Developer/dpc-app/ig/framework"/>
+    <valueString value="/Users/raac/Development/dpc-app/ig/framework"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
-    <valueString value="/Users/narobison/Developer/dpc-app/ig/source/pages"/>
+    <valueString value="/Users/raac/Development/dpc-app/ig/source/pages"/>
   </extension>
-  <url value="https://dpc.cms.gov/ImplementationGuide/cms-dpc-ig"/>
-  <name value="DPCImplementationGuide"/>
+  <url value="https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig"/>
+  <name value="Data @ the Point of Care Implementation Guide"/>
   <status value="draft"/>
   <experimental value="false"/>
   <publisher value="Centers for Medicare and Medicaid Services"/>
   <description value="Draft implementation guide for DPC Application"/>
-  <packageId value="cms-dpc-ig"/>
+  <packageId value="cms-dpc-ig-"/>
   <license value="CC0-1.0"/>
   <fhirVersion value="3.0.1"/>
   <fhirVersion value="3.0.1"/>
@@ -69,8 +69,40 @@
     </resource>
     <resource>
       <reference>
+        <reference value="StructureDefinition/dpc-profile-address"/>
+        <display value="DPCAddress.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="StructureDefinition/dpc-profile-endpoint"/>
+        <display value="DPCEndpoint.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="StructureDefinition/dpc-profile-organization"/>
+        <display value="DPCOrganization.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
         <reference value="StructureDefinition/dpc-profile-patient"/>
         <display value="DPCPatient.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="StructureDefinition/dpc-profile-practitioner"/>
+        <display value="DPCPractitioner.json"/>
       </reference>
       <exampleBoolean value="false"/>
       <groupingId value="p1"/>

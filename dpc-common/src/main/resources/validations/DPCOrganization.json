@@ -1,0 +1,74 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "dpc-profile-organization",
+  "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization",
+  "name": "DPC Organization",
+  "publisher": "The DPC Team",
+  "status": "draft",
+  "version": "0.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Organization",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Organization",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Organization",
+        "path": "Organization"
+      },
+      {
+        "id": "Organization.identifier",
+        "path": "Organization.identifier",
+        "definition": "Organization must have NPI identifier",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Organization.identifier[x]",
+        "path": "Organization.identifier",
+        "sliceName": "organization-npi",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Organization.identifier[x]:system",
+        "path": "Organization.identifier.system",
+        "min": 1,
+        "fixedCode": "http://hl7.org/fhir/sid/us-npi"
+      },
+      {
+        "id": "Organization.address",
+        "path": "Organization.address",
+        "type": [
+          {
+            "code": "Address",
+            "profile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-address"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Organization.endpoint",
+        "path": "Organization.endpoint",
+        "definition": "An Organization will always have at least one FHIR endpoint",
+        "min": 1,
+        "max": "*",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-endpoint"
+          }
+        ]
+      }
+    ]
+  }
+}

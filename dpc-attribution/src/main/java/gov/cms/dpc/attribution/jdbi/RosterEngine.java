@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static gov.cms.dpc.attribution.dao.tables.Attributions.ATTRIBUTIONS;
 import static gov.cms.dpc.attribution.dao.tables.Patients.PATIENTS;
@@ -97,13 +98,13 @@ public class RosterEngine implements AttributionEngine {
     }
 
     @Override
-    public void addAttributionRelationships(Bundle attributionBundle) {
+    public void addAttributionRelationships(Bundle attributionBundle, UUID organizationID) {
         try (final Connection connection = this.dataSource.getConnection();
              final DSLContext context = DSL.using(connection, this.settings)) {
             context.transaction(config -> {
 
                 final DSLContext ctx = DSL.using(config);
-                RosterUtils.submitAttributionBundle(attributionBundle, ctx, OffsetDateTime.now(ZoneOffset.UTC));
+                RosterUtils.submitAttributionBundle(attributionBundle, ctx, organizationID, OffsetDateTime.now(ZoneOffset.UTC));
             });
         } catch (SQLException e) {
             throw new AttributionException("Unable to open connection to database", e);
