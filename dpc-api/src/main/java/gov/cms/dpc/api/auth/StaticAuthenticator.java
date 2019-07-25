@@ -15,7 +15,9 @@ import java.util.Optional;
  */
 public class StaticAuthenticator implements Authenticator<DPCAuthCredentials, OrganizationPrincipal> {
 
-
+    /**
+     * Empty Constructor Used for Testing Purposes
+     */
     @Inject
     public StaticAuthenticator() {
     }

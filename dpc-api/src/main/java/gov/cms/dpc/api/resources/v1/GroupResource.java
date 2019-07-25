@@ -101,8 +101,7 @@ public class GroupResource extends AbstractGroupResource {
 
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
-
-        this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, providerID, attributedBeneficiaries.get()));
+        attributedBeneficiaries.ifPresent(value ->  this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, providerID, value)));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
