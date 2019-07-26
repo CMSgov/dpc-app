@@ -19,7 +19,7 @@
     <valueString value="/Users/raac/Development/dpc-app/ig/framework"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
-    <valueString value="/Users/raac/Development/dpc-app/ig/source/pages/implementationguide"/>
+    <valueString value="/Users/raac/Development/dpc-app/ig/source/pages"/>
   </extension>
   <url value="https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig"/>
   <name value="Data @ the Point of Care Implementation Guide"/>
@@ -27,7 +27,7 @@
   <experimental value="false"/>
   <publisher value="Centers for Medicare and Medicaid Services"/>
   <description value="Draft implementation guide for DPC Application"/>
-  <packageId value="cms-dpc-ig-"/>
+  <packageId value="cms-dpc-ig"/>
   <license value="MIT"/>
   <fhirVersion value="3.0.1"/>
   <fhirVersion value="3.0.1"/>
