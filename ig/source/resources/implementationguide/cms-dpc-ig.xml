@@ -16,34 +16,6 @@
     <package>
         <name value="Profiles in this implementation guide"/>
         <resource>
-            <example value="true"/>
-            <sourceReference>
-                <reference value="Organization/organization"/>
-                <display value="organization.json"/>
-            </sourceReference>
-        </resource>
-        <resource>
-            <example value="true"/>
-            <sourceReference>
-                <reference value="Practitioner/practitioner"/>
-                <display value="practitioner.json"/>
-            </sourceReference>
-        </resource>
-        <resource>
-            <example value="true"/>
-            <sourceReference>
-                <reference value="Group/group"/>
-                <display value="group.json"/>
-            </sourceReference>
-        </resource>
-        <resource>
-            <example value="true"/>
-            <sourceReference>
-                <reference value="Endpoint/endpoint"/>
-                <display value="endpoint.json"/>
-            </sourceReference>
-        </resource>
-        <resource>
             <example value="false"/>
             <sourceReference>
                 <reference value="StructureDefinition/dpc-profile-address"/>
@@ -82,7 +54,7 @@
             <example value="false"/>
             <sourceReference>
                 <reference value="CapabilityStatement/dpc-capabilities-statement"/>
-                <display value="capabilities.json"/>
+                <display value="DPCCapabilities.json"/>
             </sourceReference>
         </resource>
     </package>
