@@ -22,10 +22,11 @@ class User < ApplicationRecord
   }.freeze
 
   # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable,
+  # :confirmable, :lockable,
   # :trackable, and :omniauthable, :recoverable,
   devise :database_authenticatable, :rememberable,
-         :validatable, :trackable, :registerable
+         :validatable, :trackable, :registerable,
+         :timeoutable
 
   enum organization_type: {
     primary_care_clinic: 0, speciality_clinic: 1,
