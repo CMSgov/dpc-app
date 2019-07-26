@@ -47,7 +47,7 @@
           <%= f.label :organization_type, 'Type of organization', class: "ds-c-label" %>
           <%= f.select :organization_type,
             User::organization_types.keys.each_with_object([]) { |key, memo| memo << [key.humanize, key] },
-            { include_blank: 'Please select a practice type' },
+            { include_blank: 'Please select' },
             class: "ds-c-field",
             value: @user.organization_type
           %>
