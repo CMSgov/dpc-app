@@ -55,6 +55,10 @@
   border-top: 4px solid $color-success-light;
 }
 
+.card--border-top--red {
+  border-top: 4px solid $color-secondary;
+}
+
 .card--shadow {
   box-shadow: 0px 0px 50px rgba(0,0,0,0.5);
 }
