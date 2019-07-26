@@ -13,3 +13,7 @@ ig/publish: ${IG_PUBLISHER}
 .PHONY: travis
 travis:
 	@./dpc-test.sh
+
+.PHONY: website
+website: ig/publish
+	@docker build -f dpc-web/Dockerfile dpc-web/
