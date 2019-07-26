@@ -13,7 +13,7 @@
   </button>
 
 
-
+  <% unless (controller_name == "sessions" || controller_name == "registrations") %>
   <div class="topnav-wrap" id="topnav-wrap">
     <button id="topnav__close-button" class="ds-c-button ds-c-button--transparent ds-c-button--big topnav__close-button" type="button"
 aria-controls="topnav-wrap" aria-label="Close menu">
@@ -34,11 +34,22 @@ aria-controls="topnav-wrap" aria-label="Close menu">
         <% end %>
       </li>
 
-      <li class="topnav__item">
-       <%= link_to docs_path, :class => "ds-c-button ds-c-button--primary" do %>
-         Request access
-       <% end %>
-      </li>
+      <% unless user_signed_in? %>
+        <li class="topnav__item ds-u-padding-right--1">
+          <%= link_to "Log in", new_session_path(User), class: "ds-c-button" %>
+        </li>
+        <li class="topnav__item">
+          <%= link_to "Request access", new_registration_path(User), class: "ds-c-button ds-c-button--primary" %>
+        </li>
+      <% else %>
+        <li class="topnav__item">
+          <a class="ds-c-button ds-c-button--medium ds-c-button--primary ds-u-margin-right--2"
+             id="sign-out" href="<%= destroy_user_session_path %>" data-method="delete">
+             Sign out
+          </a>
+        </li>
+      <% end %>
     </ul>
   </div>
+  <% end %>
 </nav>

@@ -16,6 +16,8 @@ gem 'kramdown', '~> 2.1'
 
 gem 'jquery-rails'
 gem 'bootstrap'
+gem 'devise'
+gem 'brakeman'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
@@ -25,6 +27,13 @@ group :development, :test do
   gem 'capybara'
   gem 'factory_bot_rails'
   gem 'faker'
+  gem 'simplecov', require: false
+  gem 'vcr'
+  gem 'webmock'
+end
+
+group :test do
+  gem 'selenium-webdriver'
 end
 
 group :development do
