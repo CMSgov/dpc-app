@@ -1,24 +1,62 @@
+<% title "Welcome, #{@dpc_registration.user.first_name}!" %>
+
 <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 
+<div class="ds-l-row">
+  <div class="ds-l-row--12 ds-l-md-col--8">
+
+    <div>
+      <% if @dpc_registration.access_level == "no_access" %>
+      <span class="ds-c-badge ds-c-badge--warn ds-u-font-size--base">Access requested</span>
+      <% end %>
+    </div>
+
+    <h2>Please stay tuned</h2>
+    <p class="ds-text--lead">CMS will respond when it is ready for you to join the pilot. Unfortunately, this could take a bit of time. In the meantime, CMS recommends taking the following actions: </p>
+
+    <div class="ds-u-border-top--1 ds-u-padding-y--3 ds-u-margin-top--5">
+      <h3>For any announcements, you should join the Google Group.</h3>
+      <p>The Google Group will keep you posted with the latest news about the Data at the Point of Care (DPC) pilot and allow you to communicate with the DPC team.</p>
+      <p><a class="ds-c-button ds-c-button--primary" href="https://groups.google.com/d/forum/dpc-api">Join the Google Group</a></p>
+    </div>
+
+    <div class="ds-u-border-top--1 ds-u-padding-y--3">
+      <h3>Ask your software developer to read the developer documentation. </h3>
+      <p>Need blurb text here</p>
+      <p><%= link_to "API documentation", docs_path, :class => "ds-c-button ds-c-button--primary" %></p>
+    </div>
+
+    <div class="ds-u-border-top--1 ds-u-padding-y--3">
+      <h3>Still need more information?</h3>
+      <ul>
+        <li><%= link_to "Read frequently asked questions", faq_path %></li>
+        <li><%= link_to "Visit the marking page", home_path %></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ds-l-row--12 ds-l-md-col--3 ds-u-margin-left--auto ">
+    <div class="ds-u-padding--2 ds-u-fill--gray-lightest ds-u-radius">
+      <h3>Your info</h3>
+      <p>
+        <strong>Name:</strong> <%= @dpc_registration.user.name %><br/>
+        <strong>Email:</strong> <%= @dpc_registration.user.email %><br/>
+      </p>
+
+      <h3>Your practice</h3>
+      <p>
+        <strong>Name:</strong> <%= @dpc_registration.user.organization %><br/>
+        <strong>Type:</strong> <%= @dpc_registration.user.organization_type.humanize %><br/>
+        <strong>Address:</strong><br>
+        <%= @dpc_registration.user.address_1 %><br/>
+        <% if @dpc_registration.user.address_2.length > 1 %>
+          <%= @dpc_registration.user.address_2 %><br/>
+        <% end %>
+        <%= @dpc_registration.user.city %>, <%= @dpc_registration.user.state %> <%= @dpc_registration.user.zip %>
+      </p>
+    </div>
+  </div>
+</div>
 <div>
-  <p>
-    <% if @dpc_registration.opt_in %>
-      You've chosen to register for access to the DPC API, and your
-      status is <%= @dpc_registration.opt_in_status %>.
-    <% else %>
-      You've chosen NOT to register for access to the DPC API.
-    <% end %>
-  </p>
-  <p>
-    Currently, your access level to the DPC API is: <%= @dpc_registration.access_level.tr('_', ' ') %>.
-  </p>
-  <p>
-    Registration Details:<br/>
-    <%= @dpc_registration.user.name %><br/>
-    <%= @dpc_registration.user.organization %><br/>
-    <%= @dpc_registration.user.organization_type.humanize %><br/>
-    <%= @dpc_registration.user.address_1 %><br/>
-    <%= @dpc_registration.user.address_2 %><br/>
-    <%= @dpc_registration.user.city %>, <%= @dpc_registration.user.state %> <%= @dpc_registration.user.zip %>
-  </p>
+
+
 </div>

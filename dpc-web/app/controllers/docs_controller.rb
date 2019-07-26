@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DocsController < ApplicationController
   before_action :load_markdown
 

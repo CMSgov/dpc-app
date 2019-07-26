@@ -41,6 +41,9 @@ class User < ApplicationRecord
   validates :city, presence: true
   validates :state, inclusion: { in: STATES.keys.map(&:to_s) }
   validates :zip, format: { with: /\A\d{5}(?:\-\d{4})?\z/ }
+  validates :agree_to_terms, inclusion: {
+    in: [true], message: 'you must agree to the terms of service to create an account'
+  }
 
   def name
     "#{first_name} #{last_name}"
