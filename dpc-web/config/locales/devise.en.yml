@@ -46,7 +46,7 @@ en:
       updated: "Your account has been updated successfully."
       updated_but_not_signed_in: "Your account has been updated successfully, but since your password was changed, you need to sign in again"
     sessions:
-      signed_in: "Signed in successfully."
+      signed_in: " "
       signed_out: "Signed out successfully."
       already_signed_out: "Signed out successfully."
     unlocks:

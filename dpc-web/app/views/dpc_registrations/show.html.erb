@@ -1,3 +1,5 @@
+<% title "Welcome, #{@dpc_registration.user.first_name}!" %>
+
 <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 
 <div>
@@ -7,6 +9,7 @@
   <p>
     Registration Details:<br/>
     <%= @dpc_registration.user.name %><br/>
+    <%= @dpc_registration.user.email %><br/>
     <%= @dpc_registration.user.organization %><br/>
     <%= @dpc_registration.user.organization_type.humanize %><br/>
     <%= @dpc_registration.user.address_1 %><br/>
