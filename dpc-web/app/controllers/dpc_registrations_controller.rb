@@ -14,4 +14,8 @@ class DpcRegistrationsController < ApplicationController
     flash.alert e.message
     redirect_back(fallback_location: root_path)
   end
+
+  def profile
+    @dpc_registration = DpcRegistration.find(current_user.id)
+  end
 end
