@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -128,6 +129,7 @@ class PatientResourceTest extends AbstractAttributionTest {
     }
 
     @Test
+    @Disabled
     void testPatientUpdate() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
