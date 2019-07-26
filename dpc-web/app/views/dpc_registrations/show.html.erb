@@ -1,7 +1,4 @@
 <% title "Welcome, #{@dpc_registration.user.first_name}!" %>
-<%= current_user.remember_expires_at %><br/>
-<%= current_user.remember_created_at %><br/>
-<%= Time.now %>
 <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 
 <div class="ds-l-row">
