@@ -1,0 +1,28 @@
+<% title "Welcome, #{@dpc_registration.user.first_name}!" %>
+
+
+<div class="ds-l-row">
+  <div class="ds-l-row--12 ds-l-md-col--3 ">
+      <h3>Your info</h3>
+      <p>
+        <strong>Name:</strong> <%= @dpc_registration.user.name %><br/>
+        <strong>Email:</strong> <%= @dpc_registration.user.email %><br/>
+      </p>
+
+      <h3>Your practice</h3>
+      <p>
+        <strong>Name:</strong> <%= @dpc_registration.user.organization %><br/>
+        <strong>Type:</strong> <%= @dpc_registration.user.organization_type.humanize %><br/>
+        <strong>Address:</strong><br>
+        <%= @dpc_registration.user.address_1 %><br/>
+        <% if @dpc_registration.user.address_2.length > 1 %>
+          <%= @dpc_registration.user.address_2 %><br/>
+        <% end %>
+        <%= @dpc_registration.user.city %>, <%= @dpc_registration.user.state %> <%= @dpc_registration.user.zip %>
+      </p>
+  </div>
+</div>
+
+<%= link_to "edit profile", edit_registration_path(User) %>
+
+
