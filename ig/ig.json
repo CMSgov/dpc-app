@@ -140,7 +140,7 @@
     "CapabilityStatement/dpc-capabilities-statement": {
       "base": "CapabilityStatement-dpc-capabilities.html",
       "defns": "CapabilityStatement-dpc-capabilities-definitions.html",
-      "source": "capabilities.json"
+      "source": "DPCCapabilities.json"
     }
   },
   "version": "3.0.1",

@@ -82,7 +82,7 @@
             <example value="false"/>
             <sourceReference>
                 <reference value="CapabilityStatement/dpc-capabilities-statement"/>
-                <display value="capabilities.json"/>
+                <display value="DPCCapabilities.json"/>
             </sourceReference>
         </resource>
     </package>
