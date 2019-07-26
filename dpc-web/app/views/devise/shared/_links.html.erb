@@ -1,10 +1,10 @@
 <%- if controller_name != 'sessions' %>
-  <h2>Already have an account?</h2>
-  <%= link_to "Log in", new_session_path(resource_name), class: "ds-c-button" %>
+  <p class="ds-u-margin-y--0">Already have an account?
+  <%= link_to "Log in", new_session_path(resource_name) %></p>
 <% end %>
 
 <%- if devise_mapping.registerable? && controller_name != 'registrations' %>
-  <p class="ds-u-margin-y--0">Already have an account? <%= link_to "Sign up", new_registration_path(resource_name), id: 'sign-up' %></p>
+  <p class="ds-u-margin-y--0">Don’t have an account? <%= link_to "Request access", new_registration_path(resource_name), id: 'sign-up' %></p>
 
 <% end %>
 
