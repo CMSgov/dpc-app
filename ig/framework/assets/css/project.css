@@ -35,7 +35,57 @@ widget in sidebar vs in column = uiterlijk op basis van locale class via functio
 
 */
 /* SCAFFOLDING STYLING
-----------------------------------------------------------------------------------------*/
+----------------------------------------------------------------------------------------*//* roboto-regular - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'),
+       url('../fonts/roboto-v19-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('../fonts/roboto-v19-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* roboto-italic - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Roboto Italic'), local('Roboto-Italic'),
+       url('../fonts/roboto-v19-latin-italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('../fonts/roboto-v19-latin-italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* roboto-700 - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Bold'), local('Roboto-Bold'),
+       url('../fonts/roboto-v19-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('../fonts/roboto-v19-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* roboto-700italic - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Roboto Bold Italic'), local('Roboto-BoldItalic'),
+       url('../fonts/roboto-v19-latin-700italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('../fonts/roboto-v19-latin-700italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* roboto-mono-regular - latin */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Mono'), local('RobotoMono-Regular'),
+       url('roboto-mono-v6-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('roboto-mono-v6-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+
 html {
   background-color: ;
 }
@@ -43,6 +93,7 @@ body {
   background-color: #ffffff;
   position: relative;
   padding-top: 0;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 .segment {
   position: relative;
@@ -173,7 +224,7 @@ body {
   margin-bottom: 0;
 }
 .navbar .nav > li > a {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 .navbar .nav > li > a {
   padding: 10px 12px;
@@ -471,6 +522,7 @@ h1 {
   line-height: 46.8px;
   margin-bottom: 18px;
   margin-top: 54px;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 h2 {
@@ -479,6 +531,7 @@ h2 {
   line-height: 31.2px;
   margin-bottom: 12px;
   margin-top: 36px;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 h3 {
@@ -487,6 +540,7 @@ h3 {
   line-height: 27.3px;
   margin-bottom: 10.5px;
   margin-top: 31.5px;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 h4 {
@@ -495,6 +549,7 @@ h4 {
   line-height: 23.4px;
   margin-bottom: 9px;
   margin-top: 27px;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 p {
@@ -503,6 +558,7 @@ p {
   margin-bottom: 16px;
   margin-top: 16px;
   max-width: 77ch;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 tr {
@@ -517,6 +573,10 @@ td {
   font-size: 16px;
 }
 
+li {
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
  .navbar-inverse {
    background-color: #205493;
  }
@@ -527,9 +587,9 @@ td {
 
  .navbar-inverse .navbar-nav > li > a {
    color: #fff;
-   font-weight: bold;
    padding-top: 20px;
    padding-bottom: 20px;
+   letter-spacing: 0.055em;
  }
 
   .navbar-inverse .navbar-nav > li > a:hover {
@@ -554,12 +614,14 @@ td {
     font-weight: bold;
     margin-bottom: 20px;
     text-align: left;
+    font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
   table thead th {
     border: 1px solid #5c5c5c;
     background-color: #f0f0f0;
     padding: 8px 16px;
+    font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
   table tbody th,
@@ -569,6 +631,7 @@ td {
     border: 1px solid #5c5c5c;
     padding: 8px 16px;
     font-weight: normal;
+    font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
   /* Tabs overrides */
