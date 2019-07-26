@@ -1,0 +1,143 @@
+{
+  "resourceType": "CapabilityStatement",
+  "description": "This Capability Statement defines the available resource, endpoints and operations supported by the Data @ the Point of Care Application.",
+  "id": "dpc-capabilities",
+  "version": "0.3.0-SNAPSHOT",
+  "status": "draft",
+  "date": "2019",
+  "publisher": "Centers for Medicare and Medicaid Services",
+  "kind": "capability",
+  "instantiates": [
+    "http://build.fhir.org/ig/HL7/bulk-data/CapabilityStatement-bulk-data"
+  ],
+  "software": {
+    "name": "Data @ Point of Care API",
+    "version": "0.3.0-SNAPSHOT",
+    "releaseDate": "2019"
+  },
+  "fhirVersion": "3.0.1",
+  "acceptUnknown": "extensions",
+  "format": [
+    "application/json",
+    "application/fhir+json"
+  ],
+  "rest": [
+    {
+      "mode": "server",
+      "resource": [
+        {
+          "type": "Endpoint",
+          "profile": {
+            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-endpoint"
+          },
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "versioning": "no-version"
+        },
+        {
+          "type": "Organization",
+          "profile": {
+            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization"
+          },
+          "interaction": [
+            {
+              "code": "read"
+            }
+          ],
+          "versioning": "no-version"
+        },
+        {
+          "type": "Patient",
+          "profile": {
+            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient"
+          },
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "versioning": "no-version",
+          "searchParam": [
+            {
+              "name": "identifier",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "Practitioner",
+          "profile": {
+            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+          },
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "versioning": "no-version",
+          "searchParam": [
+            {
+              "name": "identifier",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "type": "StructureDefinition",
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "versioning": "no-version"
+        }
+      ],
+      "interaction": [
+        {
+          "code": "batch"
+        }
+      ],
+      "operation": [
+        {
+          "name": "Group level data export",
+          "definition": {
+            "reference": "http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export"
+          }
+        }
+      ]
+    }
+  ]
+}

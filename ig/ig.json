@@ -96,22 +96,6 @@
     }
   },
   "resources": {
-    "Organization/organization": {
-      "base": "Organization-organization.html",
-      "defns": "Organization-organization-definitions.html"
-    },
-    "Practitioner/practitioner": {
-      "base": "Practitioner-practitioner.html",
-      "defns": "Practitioner-practitioner-definitions.html"
-    },
-    "Group/group": {
-      "base": "Group-group.html",
-      "defns": "Group-group-definitions.html"
-    },
-    "Endpoint/endpoint": {
-      "base": "Endpoint-endpoint.html",
-      "defns": "Endpoint-endpoint-definitions.html"
-    },
     "StructureDefinition/dpc-profile-address": {
       "base": "StructureDefinition-dpc-profile-address.html",
       "defns": "StructureDefinition-dpc-profile-address-definitions.html",
@@ -140,7 +124,7 @@
     "CapabilityStatement/dpc-capabilities-statement": {
       "base": "CapabilityStatement-dpc-capabilities.html",
       "defns": "CapabilityStatement-dpc-capabilities-definitions.html",
-      "source": "capabilities.json"
+      "source": "DPCCapabilities.json"
     }
   },
   "version": "3.0.1",
