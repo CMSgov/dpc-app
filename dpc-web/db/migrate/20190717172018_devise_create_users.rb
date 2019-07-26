@@ -12,6 +12,7 @@ class DeviseCreateUsers < ActiveRecord::Migration[5.2]
       t.string :city, null: false
       t.string :state, null: false
       t.string :zip, null: false
+      t.boolean :agree_to_terms, null: false
 
       ## Database authenticatable
       t.string :email,              null: false, default: ''

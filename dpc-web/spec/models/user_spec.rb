@@ -87,4 +87,16 @@ RSpec.describe User, type: :model do
       expect(subject).to_not be_valid
     end
   end
+
+  describe '#agree_to_terms' do
+    it 'is required' do
+      subject.agree_to_terms = nil
+      expect(subject).to_not be_valid
+    end
+
+    it 'must be true to create user' do
+      subject.agree_to_terms = false
+      expect(subject).to_not be_valid
+    end
+  end
 end
