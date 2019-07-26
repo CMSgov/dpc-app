@@ -101,12 +101,6 @@ To build the container, simply run the following command:
 docker-compose build
 ```
 
-After the container is built, initialize the database:
-
-```Bash
-docker-compose run web rails db:migrate db:seed
-```
-
 ## Start the Docker Container
 
 The following command will start both the database server and rails server:
@@ -117,7 +111,7 @@ docker-compose up
 
 ## Stop / Destroy the Docker Container
 
-When you're done, shut down the server with the following command:
+When you're done, shut down the server with the following command (this also destroys the database):
 
 ```Bash
 docker-compose down
