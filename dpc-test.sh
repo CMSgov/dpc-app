@@ -17,8 +17,8 @@ else
     echo "└──────────────────────────────────────────┘"
 fi
 
-mvn clean install -DskipTests=true -Djib.skip=true -Perror-prone -B -V
-mvn test -B -V
+mvn clean compile -Perror-prone -B -V
+mvn package
 # Format the test results and copy to a new directory
 mvn jacoco:report
 mkdir reports
