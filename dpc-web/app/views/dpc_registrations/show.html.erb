@@ -2,18 +2,48 @@
 
 <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 
+
+<div class="ds-l-row">
+  <div class="ds-l-row--12 ds-l-md-col--8">
+    <h2>Please stay tuned</h2>
+    <p class="ds-text--lead">CMS will respond when it is ready for you to join the pilot. Unfortunately, this could take a bit of time. In the meantime, CMS recommends taking the following actions: </p>
+
+    <div class="ds-u-border-top--1">
+      <h3>For any announcements, you should join the Google Group.</h3>
+      <p>The Google Group will keep you posted with the latest news about the Data at the Point of Care (DPC) pilot</p>
+      <p><a class="ds-c-button ds-c-button--primary" href="https://groups.google.com/d/forum/dpc-api">Join the Google Group</a></p>
+    </div>
+
+    <div class="ds-u-border-top--1">
+      <h3>Familiarize yourself with the documentation</h3>
+      <p>The Google Group will keep you posted with the latest news about the Data at the Point of Care (DPC) pilot</p>
+      <p><%= link_to docs_path, :class => "ds-c-button ds-c-button--primary" do %>
+        Read the documentation
+      <% end %></p>
+    </div>
+  </div>
+  <div class="ds-l-row--12 ds-l-md-col--3 ds-u-margin-left--auto ds-u-padding--2 ds-u-fill--gray-lightest">
+    <strong>Current access:</strong> <%= @dpc_registration.access_level.tr('_', ' ') %>
+    <h3>Your info</h3>
+    <p>
+      <strong>Name:</strong> <%= @dpc_registration.user.name %><br/>
+      <strong>Email:</strong> <%= @dpc_registration.user.email %><br/>
+    </p>
+
+    <h3>Your practice</h3>
+    <p>
+      <strong>Name:</strong> <%= @dpc_registration.user.organization %><br/>
+      <strong>Type:</strong> <%= @dpc_registration.user.organization_type.humanize %><br/>
+      <strong>Address:</strong><br>
+      <%= @dpc_registration.user.address_1 %><br/>
+      <% if @dpc_registration.user.address_2.length > 1 %>
+        <%= @dpc_registration.user.address_2 %><br/>
+      <% end %>
+      <%= @dpc_registration.user.city %>, <%= @dpc_registration.user.state %> <%= @dpc_registration.user.zip %>
+    </p>
+  </div>
+</div>
 <div>
-  <p>
-    Currently, your access level to the DPC API is: <%= @dpc_registration.access_level.tr('_', ' ') %>.
-  </p>
-  <p>
-    Registration Details:<br/>
-    <%= @dpc_registration.user.name %><br/>
-    <%= @dpc_registration.user.email %><br/>
-    <%= @dpc_registration.user.organization %><br/>
-    <%= @dpc_registration.user.organization_type.humanize %><br/>
-    <%= @dpc_registration.user.address_1 %><br/>
-    <%= @dpc_registration.user.address_2 %><br/>
-    <%= @dpc_registration.user.city %>, <%= @dpc_registration.user.state %> <%= @dpc_registration.user.zip %>
-  </p>
+
+
 </div>

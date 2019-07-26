@@ -1,7 +1,11 @@
 <% if notice %>
-  <div>notice: <%= notice %></div>
+  <div class="ds-c-alert">
+  <div class="ds-c-alert__body">
+    <h3 class="ds-c-alert__heading"><%= notice %></h3>
+  </div>
+</div>
 <% end %>
 
 <% if alert %>
-  <div>alert: <%= alert %></div>
+  <div><%= alert %></div>
 <% end %>
