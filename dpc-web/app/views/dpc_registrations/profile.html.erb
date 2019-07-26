@@ -8,16 +8,11 @@
 </div>
 
 <div class="ds-l-row">
-  <div class="ds-l-row--12 ds-l-md-col--6 ds-u-display--flex">
-    <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <use xlink:href="/assets/solid.svg#user"></use>
-    </svg>
-    <div>
-      <h3 class="ds-u-border-bottom--1">Your info</h3>
-      <div class="ds-text--lead">
-        <p><strong>Name:</strong><br><%= @dpc_registration.user.name %></p>
-        <p><strong>Email:</strong><br><%= @dpc_registration.user.email %></p>
-      </div>
+  <div class="ds-l-row--12 ds-l-md-col--6">
+    <h3 class="ds-u-border-bottom--1">Your info</h3>
+    <div class="ds-text--lead">
+      <p><strong>Name:</strong><br><%= @dpc_registration.user.name %></p>
+      <p><strong>Email:</strong><br><%= @dpc_registration.user.email %></p>
     </div>
   </div>
 
