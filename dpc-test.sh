@@ -17,7 +17,7 @@ else
     echo "└──────────────────────────────────────────┘"
 fi
 
-mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Djib.skip=true -Perror-prone -B -V
+mvn clean install -DskipTests=true -Djib.skip=true -Perror-prone -B -V
 mvn test -B -V
 # Format the test results and copy to a new directory
 mvn jacoco:report
