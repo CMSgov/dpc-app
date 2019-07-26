@@ -7,6 +7,10 @@ if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
 
+# Compile the web assets
+echo "Compiling web assets..."
+rails assets:precompile
+
 # Run the database migrations
 echo "Migrating the database..."
 rails db:migrate
