@@ -829,4 +829,8 @@ The response will be the requested data as FHIR Coverage resources in NDJSON for
 }
 ~~~
 
+## DPC Implementation Guide
+
+The DPC team has created a FHIR Implementation Guide which provides detailed information regarding the FHIR APIs and Data Models. 
+You can access the guide here: [Data @ the Point of Care Implementation Guide](ig/index.html).
 
