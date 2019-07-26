@@ -1,19 +1,23 @@
 <% title "Welcome, #{@dpc_registration.user.first_name}!" %>
 
-<div class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
+<div class="ds-u-md-display--flex ds-u-justify-content--between ds-u-align-items--center">
 <h2>Your profile</h2>
 <div>
   <%= link_to "edit profile", edit_registration_path(User), :class => "ds-c-button ds-c-button--primary" %>
-  <a class="ds-c-button" href="<%= destroy_user_session_path %>" data-method="delete">Sign out</a>
 </div>
 </div>
 
 <div class="ds-l-row">
-  <div class="ds-l-row--12 ds-l-md-col--6">
-    <h3 class="ds-u-border-bottom--1">Your info</h3>
-    <div class="ds-text--lead">
-      <p><strong>Name:</strong><br><%= @dpc_registration.user.name %></p>
-      <p><strong>Email:</strong><br><%= @dpc_registration.user.email %></p>
+  <div class="ds-l-row--12 ds-l-md-col--6 ds-u-display--flex">
+    <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <use xlink:href="/assets/solid.svg#user"></use>
+    </svg>
+    <div>
+      <h3 class="ds-u-border-bottom--1">Your info</h3>
+      <div class="ds-text--lead">
+        <p><strong>Name:</strong><br><%= @dpc_registration.user.name %></p>
+        <p><strong>Email:</strong><br><%= @dpc_registration.user.email %></p>
+      </div>
     </div>
   </div>
 
