@@ -21,3 +21,36 @@ services:
       - "3000:3000"
     depends_on:
       - db
+  matomo_db:
+    image: mariadb
+    command: --max-allowed-packet=64MB
+    restart: always
+    volumes:
+      - matomo_db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    env_file:
+      - ./matomo_db.env
+
+  matomo_app:
+    image: matomo
+    restart: always
+    volumes:
+      #     - ./config:/var/www/html/config
+      #     - ./logs:/var/www/html/logs
+      - matomo:/var/www/html
+    environment:
+      - MATOMO_DATABASE_HOST=matomo_db
+      - VIRTUAL_HOST=
+    env_file:
+      - ./matomo_db.env
+    ports:
+      - 80:80
+#    entrypoint:
+#      - /entrypoint.sh &
+#      - echo "[General]" >> piwik/config/config.ini.php
+#      - echo 'trusted_hosts[] = "localhost:8080"'
+
+volumes:
+  matomo_db:
+  matomo:
