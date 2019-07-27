@@ -12,6 +12,7 @@ FactoryBot.define do
     state { 'AZ' }
     zip { '12345' }
     organization_type { 0 }
+    agree_to_terms { true }
 
     password { '123456' }
     password_confirmation { '123456' }

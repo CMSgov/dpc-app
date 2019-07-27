@@ -17,14 +17,10 @@ ActiveRecord::Schema.define(version: 2019_07_18_151153) do
 
   create_table "dpc_registrations", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.boolean "opt_in", default: false
-    t.integer "opt_in_status", default: 1
     t.integer "access_level", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["access_level"], name: "index_dpc_registrations_on_access_level"
-    t.index ["opt_in"], name: "index_dpc_registrations_on_opt_in"
-    t.index ["opt_in_status"], name: "index_dpc_registrations_on_opt_in_status"
     t.index ["user_id"], name: "index_dpc_registrations_on_user_id"
   end
 
@@ -38,6 +34,7 @@ ActiveRecord::Schema.define(version: 2019_07_18_151153) do
     t.string "city", null: false
     t.string "state", null: false
     t.string "zip", null: false
+    t.boolean "agree_to_terms", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.datetime "remember_created_at"

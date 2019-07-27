@@ -1,34 +1,26 @@
 package gov.cms.dpc.api.core;
 
 
+import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRFormatters;
-import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
-import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
-import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
-import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.MissingResourceException;
 
-import static org.hl7.fhir.dstu3.model.CapabilityStatement.*;
+import static org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementSoftwareComponent;
 
 public class Capabilities {
 
     private static final Logger logger = LoggerFactory.getLogger(Capabilities.class);
+    private static final String CAP_STATEMENT = "DPCCapabilities.json";
 
     private static final Object lock = new Object();
-    private static final List<ResourceInteractionComponent> DEFAULT_INTERACTIONS = List.of(
-            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
-            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
-            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
-            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
-            new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
-    );
     private static volatile CapabilityStatement statement;
 
     private Capabilities() {
@@ -62,26 +54,19 @@ public class Capabilities {
 
         DateTimeType releaseDate = DateTimeType.parseV3(pp.getBuildTimestamp().format(FHIRFormatters.DATE_TIME_FORMATTER));
 
-        CapabilityStatement capabilityStatement = new CapabilityStatement();
-        capabilityStatement
-                .setStatus(Enumerations.PublicationStatus.DRAFT)
-                .setDateElement(releaseDate)
-                .setPublisher("Centers for Medicare and Medicaid Services")
-                .setVersion(pp.getBuildVersion())
-                // This should track the FHIR version used by BlueButton
-                .setFhirVersion("3.0.1")
-                .setSoftware(generateSoftwareComponent(releaseDate, pp.getBuildVersion()))
-                .setKind(CapabilityStatementKind.CAPABILITY)
-                .setRest(generateRestComponents())
-                .setFormat(Arrays.asList(new CodeType("application/json"), new CodeType("application/fhir+json")))
-                .setAcceptUnknown(UnknownContentCode.EXTENSIONS);
+        logger.debug("Reading {} from resources", CAP_STATEMENT);
+        try (InputStream resource = Capabilities.class.getClassLoader().getResourceAsStream(CAP_STATEMENT)) {
+            if (resource == null) {
+                throw new MissingResourceException("Cannot find Capability Statement", Capabilities.class.getName(), CAP_STATEMENT);
+            }
 
-        // Set the narrative
-        capabilityStatement.getText().setDivAsString("<div>This is a narrative</div>");
-        capabilityStatement.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-
-
-        return capabilityStatement;
+            final CapabilityStatement capabilityStatement = FhirContext.forDstu3().newJsonParser().parseResource(CapabilityStatement.class, resource);
+            return capabilityStatement
+                    .setVersion(pp.getBuildVersion())
+                    .setSoftware(generateSoftwareComponent(releaseDate, pp.getBuildVersion()));
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to read capability statement", e);
+        }
     }
 
     private static CapabilityStatementSoftwareComponent generateSoftwareComponent(DateTimeType releaseDate, String releaseVersion) {
@@ -89,65 +74,5 @@ public class Capabilities {
                 .setName("Data @ Point of Care API")
                 .setVersion(releaseVersion)
                 .setReleaseDateElement(releaseDate);
-    }
-
-    private static List<CapabilityStatementRestComponent> generateRestComponents() {
-        final CapabilityStatementRestComponent serverComponent = new CapabilityStatementRestComponent();
-        serverComponent.setMode(RestfulCapabilityMode.SERVER);
-
-        // Create batch interaction
-        final SystemInteractionComponent batchInteraction = new SystemInteractionComponent(new Enumeration<>(new SystemRestfulInteractionEnumFactory(), SystemRestfulInteraction.BATCH));
-        serverComponent.setInteraction(Collections.singletonList(batchInteraction));
-
-        serverComponent.setResource(generateRestResource());
-        return Collections.singletonList(serverComponent);
-    }
-
-    private static List<CapabilityStatementRestResourceComponent> generateRestResource() {
-        return List.of(
-                generateRestComponent("Endpoint", List.of(
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
-                ), Collections.emptyList(), EndpointProfile.PROFILE_URI),
-                generateRestComponent("Organization", List.of(
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ)
-                ), Collections.emptyList(), OrganizationProfile.PROFILE_URI),
-                generateRestComponent("Patient", DEFAULT_INTERACTIONS, List.of(
-                        new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
-                ), PatientProfile.PROFILE_URI),
-                generateRestComponent("Practitioner", List.of(
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.CREATE),
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.UPDATE),
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.DELETE),
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE)
-                ), List.of(
-                        new CapabilityStatementRestResourceSearchParamComponent().setName("identifier").setType(Enumerations.SearchParamType.STRING)
-                ), PractitionerProfile.PROFILE_URI),
-                generateRestComponent("StructureDefinition", List.of(
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.READ),
-                        new ResourceInteractionComponent().setCode(TypeRestfulInteraction.SEARCHTYPE))
-                        , Collections.emptyList(), null)
-        );
-    }
-
-    private static CapabilityStatementRestResourceComponent generateRestComponent(String name,
-                                                                                  List<ResourceInteractionComponent> interactions,
-                                                                                  List<CapabilityStatementRestResourceSearchParamComponent> searchParams,
-                                                                                  String profileURI) {
-        final CapabilityStatementRestResourceComponent definitions = new CapabilityStatementRestResourceComponent();
-        definitions.setType(name);
-        definitions.setVersioning(ResourceVersionPolicy.NOVERSION);
-        if (profileURI != null) {
-            definitions.setProfile(new Reference(profileURI));
-        }
-
-        definitions.setInteraction(interactions);
-
-        if (!searchParams.isEmpty()) {
-            definitions.setSearchParam(searchParams);
-        }
-
-        return definitions;
     }
 }

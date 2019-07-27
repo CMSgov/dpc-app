@@ -20,4 +20,4 @@ RUN gem install bundler --no-document && bundle install && npm install
 COPY . /dpc-web
 
 # Start the rails server
-CMD ["rails", "server", "-b", "0.0.0.0"]
+CMD ["./docker/entrypoint.sh"]
