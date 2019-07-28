@@ -108,6 +108,8 @@ GEM
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     hashdiff (1.0.0)
+    health_check (3.0.0)
+      railties (>= 5.0)
     i18n (1.6.0)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.3)
@@ -303,6 +305,7 @@ DEPENDENCIES
   devise
   factory_bot_rails
   faker
+  health_check
   jbuilder (~> 2.5)
   jquery-rails
   kramdown (~> 2.1)
