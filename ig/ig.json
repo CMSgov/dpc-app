@@ -96,6 +96,16 @@
     }
   },
   "resources": {
+    "Patient/dpc-sample-patient": {
+      "base": "Patient-patient.html",
+      "defns": "Patient-patient-definitions.html",
+      "source": "patient/DPC-sample-patient.json"
+    },
+    "Practitioner/dpc-sample-practitioner": {
+      "base": "Practitioner-practitioner.html",
+      "defns": "Practitioner-practitioner-definitions.html",
+      "source": "practitioner/DPC-sample-practitioner.json"
+    },
     "StructureDefinition/dpc-profile-address": {
       "base": "StructureDefinition-dpc-profile-address.html",
       "defns": "StructureDefinition-dpc-profile-address-definitions.html",

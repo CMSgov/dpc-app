@@ -728,6 +728,43 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/Practitioner
 **provider.json**
 
 ~~~json
+{
+  "resourceType": "Practitioner",
+  "identifier": [
+    {
+      "system": "http://hl7.org/fhir/sid/us-npi",
+      "value": "3116145044854423862"
+    }
+  ],
+  "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
+  "address": [
+    {
+      "city": "PLYMOUTH",
+      "country": "US",
+      "line": [
+        "275 SANDWICH STREET"
+      ],
+      "postalCode": "02360",
+      "state": "MA"
+    }
+  ],
+  "gender": "male",
+  "meta": {
+    "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
+    "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
+  },
+  "name": [
+    {
+      "family": "Klocko",
+      "given": [
+        "Leonard"
+      ],
+      "prefix": [
+        "Dr."
+      ]
+    }
+  ]
+}
 ~~~
 
 The `Practitioner.id` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group). 
@@ -761,6 +798,92 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/Patient
 **patient.json**
 
 ~~~json
+{
+  "resourceType": "Patient",
+  "id": "728b270d-d7de-4143-82fe-d3ccd92cebe4",
+  "meta": {
+    "versionId": "MTU1NDgxMjczNTM5MjYwMDAwMA",
+    "lastUpdated": "2019-04-09T12:25:35.392600+00:00"
+  },
+  "identifier": [
+    {
+      "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+      "value": "20000000001809"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Prosacco",
+      "given": [
+        "Jonathan"
+      ],
+      "prefix": [
+        "Mr."
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "555-719-3748",
+      "use": "home"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1943-06-08",
+  "address": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/geolocation",
+          "extension": [
+            {
+              "url": "latitude",
+              "valueDecimal": 42.187011
+            },
+            {
+              "url": "longitude",
+              "valueDecimal": -71.30040
+            }
+          ]
+        }
+      ],
+      "line": [
+        "1038 Ratke Throughway Apt 10"
+      ],
+      "city": "Medfield",
+      "state": "Massachusetts",
+      "postalCode": "02052",
+      "country": "US"
+    }
+  ],
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/v3/MaritalStatus",
+        "code": "M",
+        "display": "Married"
+      }
+    ],
+    "text": "M"
+  },
+  "multipleBirthBoolean": false,
+  "communication": [
+    {
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "en-US",
+            "display": "English (Region=United States)"
+          }
+        ],
+        "text": "English"
+      }
+    }
+  ]
+}
 ~~~
 
 
