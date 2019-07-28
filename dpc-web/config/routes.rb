@@ -18,6 +18,8 @@ Rails.application.routes.draw do
   match '/faq', to: 'pages#faq', via: :get
   match '/support', to: 'pages#support', via: :get
 
+  match '/profile', to: 'dpc_registrations#profile', via: :get
+
   resources :dpc_registrations, only: %i[new show]
 
 
