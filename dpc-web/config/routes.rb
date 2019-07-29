@@ -17,6 +17,7 @@ Rails.application.routes.draw do
 
   match '/faq', to: 'pages#faq', via: :get
   match '/support', to: 'pages#support', via: :get
+  match '/terms-of-service', to: 'pages#terms_of_service', via: :get
 
   match '/profile', to: 'dpc_registrations#profile', via: :get
 
