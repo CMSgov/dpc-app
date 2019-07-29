@@ -85,11 +85,11 @@ public class DemoCommand extends Command {
         // Disable validation against Attribution service
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         final IGenericClient attributionClient = ctx.newRestfulGenericClient(attributionURL);
-        FHIRHelpers.registerOrganization(attributionClient, ctx.newJsonParser(), organizationID, attributionURL);
+        final String token = FHIRHelpers.registerOrganization(attributionClient, ctx.newJsonParser(), organizationID, attributionURL);
 
         // Make the initial export request
         // If it's a 404, that's fine, for anything else, fail
-        final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(namespace, baseURL);
+        final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(namespace, baseURL, token);
         try {
             exportOperation.execute();
         } catch (ResourceNotFoundException e) {
@@ -114,9 +114,9 @@ public class DemoCommand extends Command {
         System.exit(0);
     }
 
-    private IOperationUntypedWithInput<Parameters> createExportOperation(Namespace namespace, String baseURL) {
+    private IOperationUntypedWithInput<Parameters> createExportOperation(Namespace namespace, String baseURL, String token) {
         // Submit an export request for a provider which is not known to the system.
-        final IGenericClient exportClient = ClientUtils.createExportClient(ctx, baseURL);
+        final IGenericClient exportClient = ClientUtils.createExportClient(ctx, baseURL, token);
 
         final String providerID = namespace.getString("provider-id");
 

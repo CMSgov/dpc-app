@@ -13,6 +13,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -53,16 +54,18 @@ public class ClientUtils {
      *
      * @param context - FHIR context to use
      * @param serverBaseURL - the base URL for the FHIR endpoint
+     * @param token - Authorization token to use for requests
      * @return {@link IGenericClient} for FHIR requests
      * @see #createExportOperation(IGenericClient, String)
      */
-    public static IGenericClient createExportClient(FhirContext context, String serverBaseURL) {
+    public static IGenericClient createExportClient(FhirContext context, String serverBaseURL, String token) {
         final IGenericClient exportClient = context.newRestfulGenericClient(serverBaseURL);
         // Add a header the hard way
         final var addPreferInterceptor = new IClientInterceptor()  {
             @Override
             public void interceptRequest(IHttpRequest iHttpRequest) {
                 iHttpRequest.addHeader(PREFER_HEADER, PREFER_RESPOND_ASYNC);
+                iHttpRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
             }
 
             @Override
@@ -80,7 +83,7 @@ public class ClientUtils {
      * @param exportClient - {@link IGenericClient} client to use for the request.
      * @param providerID - {@link String} provider ID to request data for
      * @return - {@link IOperationUntypedWithInput} export request, ready to execute
-     * @see #createExportClient(FhirContext, String)
+     * @see #createExportClient(FhirContext, String, String)
      */
     public static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient exportClient, String providerID) {
         return exportClient
