@@ -18,3 +18,7 @@ The [Formal Profile Definition](#profile) below provides the formal summary, def
 1. a family name
 1. a birth date
 1. a Managing Organization
+
+#### Examples
+
+- [dpc-sample-patient](Patient-728b270d-d7de-4143-82fe-d3ccd92cebe4.html)

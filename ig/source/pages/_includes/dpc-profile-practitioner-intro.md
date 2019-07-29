@@ -14,3 +14,7 @@ The [Formal Profile Definition](#profile) below provides the formal summary, def
 1. a National Provider Identifier (NPI)
 1. a given name
 1. a family name
+
+#### Examples
+
+- [dpc-sample-provider](Practitioner-0c527d2e-2e8a-4808-b11d-0fa06baf8254.html) 

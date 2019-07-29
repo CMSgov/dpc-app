@@ -23,6 +23,20 @@
             </sourceReference>
         </resource>
         <resource>
+            <example value="true"/>
+            <sourceReference>
+                <reference value="Patient/dpc-sample-patient"/>
+                <display value="DPC-sample-patient.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="true"/>
+            <sourceReference>
+                <reference value="Practitioner/dpc-sample-practitioner"/>
+                <display value="DPC-sample-practitioner.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
             <example value="false"/>
             <sourceReference>
                 <reference value="StructureDefinition/dpc-profile-endpoint"/>
