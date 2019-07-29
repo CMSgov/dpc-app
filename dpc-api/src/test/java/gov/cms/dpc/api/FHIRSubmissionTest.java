@@ -1,5 +1,9 @@
 package gov.cms.dpc.api;
 
+import gov.cms.dpc.api.auth.DPCAuthCredentials;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.StaticAuthFilter;
+import gov.cms.dpc.api.auth.StaticAuthenticator;
 import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
@@ -7,9 +11,12 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import io.dropwizard.auth.AuthFilter;
+import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
+import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,13 +47,21 @@ class FHIRSubmissionTest {
     private static final String TEST_PROVIDER_ID = "1";
     private final JobQueue queue = spy(MemoryQueue.class);
     private final AttributionServiceClient client = mock(AttributionServiceClient.class);
-    private ResourceExtension groupResource = ResourceExtension.builder().addResource(new GroupResource(queue, client, TEST_BASE_URL)).build();
-    private ResourceExtension jobResource = ResourceExtension.builder().addResource(new JobResource(queue, TEST_BASE_URL)).build();
 
+    private static final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
+    private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
+
+    ResourceExtension groupResource = ResourceExtension.builder()
+            .addResource(new GroupResource(queue, client, TEST_BASE_URL))
+            .addResource(new JobResource(queue, TEST_BASE_URL))
+            .setTestContainerFactory(testContainer)
+            .addProvider(staticFilter)
+            .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
+            .build();
 
     // Test data
     private List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private final JobModel testJobModel = new JobModel(UUID.randomUUID(),
+    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), UUID.randomUUID(),
             Collections.singletonList(ResourceType.Patient),
             TEST_PROVIDER_ID,
             testBeneficiaries);
@@ -71,7 +86,7 @@ class FHIRSubmissionTest {
 
     @Test
     void testDataRequest() {
-        final WebTarget target = groupResource.client().target("/Group/1/$export");
+        final WebTarget target = groupResource.target("/Group/1/$export");
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
@@ -80,7 +95,7 @@ class FHIRSubmissionTest {
 
         // Check that the job is in progress
         String jobURL = response.getHeaderString("Content-Location").replace(TEST_BASE_URL, "");
-        WebTarget jobTarget = jobResource.client().target(jobURL);
+        WebTarget jobTarget = groupResource.target(jobURL);
         Response jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
         assertEquals(HttpStatus.ACCEPTED_202, jobResp.getStatus(), "Job should be in progress");
 
@@ -89,7 +104,7 @@ class FHIRSubmissionTest {
         final var job = queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getRight();
         queue.completeJob(job.getJobID(), JobStatus.COMPLETED, job.getJobResults());
 
-        jobTarget = jobResource.client().target(jobURL);
+        jobTarget = groupResource.target(jobURL);
         jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
         assertEquals(HttpStatus.OK_200, jobResp.getStatus(), "Job should be done");
 
@@ -113,11 +128,11 @@ class FHIRSubmissionTest {
 
     /**
      * Test with a resource type in the '_type' query parameter
-     */
+     *///fails
     @Test
     void testOneResourceSubmission() {
         // A request with parameters ...
-        final WebTarget target = groupResource.client()
+        final WebTarget target = groupResource
                 .target("/Group/1/$export")
                 .queryParam("_type", ResourceType.Patient);
         final Response response = target.request()
@@ -140,7 +155,7 @@ class FHIRSubmissionTest {
     @Test
     void testTwoResourceSubmission() {
         // A request with parameters ...
-        final WebTarget target = groupResource.client()
+        final WebTarget target = groupResource
                 .target("/Group/1/$export")
                 .queryParam("_type", String.format("%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit));
         final Response response = target.request()
@@ -161,7 +176,7 @@ class FHIRSubmissionTest {
     @Test
     void testThreeResourceSubmission() {
         // A request with parameters ...
-        final WebTarget target = groupResource.client()
+        final WebTarget target = groupResource
                 .target("/Group/1/$export")
                 .queryParam("_type", String.format("%s,%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage));
         final Response response = target.request()
@@ -186,7 +201,7 @@ class FHIRSubmissionTest {
     @Test
     void testBadResourceSubmission() {
         // A request with a bad resource type parameter...
-        final WebTarget target = groupResource.client()
+        final WebTarget target = groupResource
                 .target("/Group/1/$export")
                 .queryParam("_type", "BadResource");
         final Response response = target.request().get();
@@ -202,7 +217,7 @@ class FHIRSubmissionTest {
     @Test
     void testNoResourceSubmission() {
         // A request with no resource type parameters...
-        final WebTarget target = groupResource.client().target("/Group/1/$export");
+        final WebTarget target = groupResource.target("/Group/1/$export");
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
@@ -215,5 +230,4 @@ class FHIRSubmissionTest {
         var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()));
     }
-
 }

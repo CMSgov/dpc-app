@@ -89,12 +89,14 @@ class QueueTest {
     }
 
     void testSimpleSubmissionCompletion(JobQueue queue) {
+        // One organization id for both jobs
+        final UUID orgID = UUID.randomUUID();
         // Add a couple of jobs
         final Set<UUID> jobSet = new HashSet<>();
         jobSet.add(UUID.randomUUID());
         jobSet.add(UUID.randomUUID());
 
-        jobSet.forEach((job) -> queue.submitJob(job, QueueTest.buildModel(job)));
+        jobSet.forEach((job) -> queue.submitJob(job, QueueTest.buildModel(job, orgID)));
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
 
         // Check the status of the job
@@ -150,7 +152,8 @@ class QueueTest {
     void testPatientAndEOBSubmission(JobQueue queue) {
         // Add a job with a EOB resource
         final var jobID = UUID.randomUUID();
-        final var jobSubmission = QueueTest.buildModel(jobID, ResourceType.Patient, ResourceType.ExplanationOfBenefit);
+        final var orgID = UUID.randomUUID();
+        final var jobSubmission = QueueTest.buildModel(jobID, orgID, ResourceType.Patient, ResourceType.ExplanationOfBenefit);
         queue.submitJob(jobID, jobSubmission);
 
         // Retrieve the job with both resources
@@ -186,11 +189,11 @@ class QueueTest {
         return set.stream().findFirst().orElseThrow(() -> new IllegalStateException("Cannot get first from empty array"));
     }
 
-    private static JobModel buildModel(UUID id) {
-        return buildModel(id, ResourceType.Patient);
+    private static JobModel buildModel(UUID jobID, UUID orgID) {
+        return buildModel(jobID, orgID, ResourceType.Patient);
     }
 
-    private static JobModel buildModel(UUID id, ResourceType... resources) {
-        return new JobModel(id, Arrays.asList(resources), "test-provider-1", List.of("test-patient-1", "test-patient-2"));
+    private static JobModel buildModel(UUID jobID, UUID orgID, ResourceType... resources) {
+        return new JobModel(jobID, orgID, Arrays.asList(resources), "test-provider-1", List.of("test-patient-1", "test-patient-2"));
     }
 }

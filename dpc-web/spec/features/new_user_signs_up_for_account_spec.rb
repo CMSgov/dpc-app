@@ -30,8 +30,17 @@ RSpec.feature 'new user signs up for account' do
     end
 
     scenario 'adds a new record to the users table' do
-      expect(page).to have_http_status(200)
       expect(User.find_by(email: user.email)).to_not be_nil
+    end
+
+    scenario 'is brought to the registrations dashboard' do
+      expect(page).to have_http_status(200)
+      expect(page).to have_content('Dashboard')
+    end
+
+    scenario 'can see profile information' do
+      click_link('dpc_registrations_profile_link')
+      expect(page).to have_content(user.email)
     end
   end
 

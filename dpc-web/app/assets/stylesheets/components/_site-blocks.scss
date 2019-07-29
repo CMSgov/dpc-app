@@ -55,6 +55,27 @@
   border-top: 4px solid $color-success-light;
 }
 
+.card--border-top--red {
+  border-top: 4px solid $color-secondary;
+}
+
 .card--shadow {
   box-shadow: 0px 0px 50px rgba(0,0,0,0.5);
+}
+
+.dashboard-grid {
+  margin: $spacer-3  0 - $spacer-2;
+}
+
+.dashboard-grid__item {
+  padding: $spacer-2;
+  margin: $spacer-2 0;
+}
+
+.dashboard-grid__content {
+  background: $color-gray-lightest;
+  border: 1px solid $color-gray-lighter;
+  border-radius: 3px;
+  height: 100%;
+  padding: $spacer-2;
 }

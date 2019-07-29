@@ -2,11 +2,18 @@
 
 Per the FHIR specific, each application should have and Implementation Guide (IG) that describes the possible server operations, and data formats/responses.
 
-Builing this guide is a two step process.
+Building this guide is a two step process.
 
 1. Author the content 
 
 1. Build the IG
+
+## Required dependencies
+
+The FHIR IG publisher is required for the build process, but will automatically be installed during the build process.
+
+The publisher has a dependency on [Jekyll](https://jekyllrb.com), which needs to be installed separately:
+`gem install jekyll`.
 
 
 ## Author the content

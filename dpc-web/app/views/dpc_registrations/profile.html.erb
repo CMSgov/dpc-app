@@ -1,0 +1,37 @@
+<% title "Welcome, #{@dpc_registration.user.first_name}!" %>
+
+<div class="ds-u-md-display--flex ds-u-justify-content--between ds-u-align-items--center">
+<h2>Your profile</h2>
+<div>
+  <%= link_to "edit profile", edit_registration_path(User), :class => "ds-c-button ds-c-button--primary" %>
+</div>
+</div>
+
+<div class="ds-l-row">
+  <div class="ds-l-row--12 ds-l-md-col--6">
+    <h3 class="ds-u-border-bottom--1">Your info</h3>
+    <div class="ds-text--lead">
+      <p><strong>Name:</strong><br><%= @dpc_registration.user.name %></p>
+      <p><strong>Email:</strong><br><%= @dpc_registration.user.email %></p>
+    </div>
+  </div>
+
+  <div class="ds-l-row--12 ds-l-md-col--6">
+    <h3 class="ds-u-border-bottom--1">Your organization</h3>
+    <div class="ds-text--lead">
+      <p><strong>Name:</strong><br><%= @dpc_registration.user.organization %></p>
+      <p><strong>Type:</strong><br><%= @dpc_registration.user.organization_type.titleize %></p>
+      <p> <strong>Address:</strong><br>
+        <%= @dpc_registration.user.address_1 %><br/>
+        <% if @dpc_registration.user.address_2.length > 1 %>
+          <%= @dpc_registration.user.address_2 %><br/>
+        <% end %>
+        <%= @dpc_registration.user.city %>, <%= @dpc_registration.user.state %> <%= @dpc_registration.user.zip %>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+
+

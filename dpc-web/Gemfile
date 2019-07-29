@@ -18,6 +18,7 @@ gem 'jquery-rails'
 gem 'bootstrap'
 gem 'devise'
 gem 'brakeman'
+gem 'health_check'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]

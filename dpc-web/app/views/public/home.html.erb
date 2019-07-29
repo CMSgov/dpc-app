@@ -126,7 +126,7 @@
         <li class="site-process-list__item">
           <h3 class="site-process-list__heading">Request access to the pilot</h3>
           <div class="site-process-list__body">
-            <p>Do this on the <%= link_to "Request access page", new_registration_path(User) %>. Remember, this is a pilot and and the process may move slowly. You can prepare for connection by reviewing the <%= link_to "API documentation", docs_path %>.</p>
+            <p>Do this on the <%= link_to "Request access page", new_registration_path(User) %>. Remember, this is a pilot and and the process may move slowly. You can prepare for connection by asking your software developer to read the <%= link_to "developer documentation", docs_path %>.</p>
           </div>
         </li>
         <li class="site-process-list__item">
@@ -209,10 +209,12 @@ http://hl7.org/fhir/us/bulkdata/2019May/index.html">Bulk FHIR specification</a>.
       <div class="billboard__content">
         <h2 class="billboard__heading">Join the community!</h2>
         <div>
-        <%= link_to new_registration_path(User), :class => "ds-c-button ds-c-button--primary ds-c-button--big ds-u-margin-right--2" do %>
-          <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <use xlink:href="/assets/solid.svg#key"></use>
-          </svg>Request access
+        <% unless user_signed_in? %>
+          <%= link_to new_registration_path(User), :class => "ds-c-button ds-c-button--primary ds-c-button--big ds-u-margin-right--2" do %>
+            <svg class="ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#key"></use>
+            </svg>Request access
+          <% end %>
         <% end %>
         <%= link_to "https://groups.google.com/d/forum/dpc-api", :class => "ds-c-button ds-c-button--inverse ds-c-button--inverse--alt ds-c-button--big" do %>
           Join Google Group

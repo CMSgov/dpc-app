@@ -36,7 +36,7 @@
           <%= f.password_field :password_confirmation, class: "ds-c-field" %>
         </div>
 
-        <h2>Your practice</h2>
+        <h2>Your organization</h2>
 
         <div class="field">
           <%= f.label :organization, "Name of your organization", class: "ds-c-label" %>
@@ -46,8 +46,8 @@
         <div class="field">
           <%= f.label :organization_type, 'Type of organization', class: "ds-c-label" %>
           <%= f.select :organization_type,
-            User::organization_types.keys.each_with_object([]) { |key, memo| memo << [key.humanize, key] },
-            { include_blank: 'Please select a practice type' },
+            User::organization_types.keys.each_with_object([]) { |key, memo| memo << [key.titleize, key] },
+            { include_blank: 'Please select' },
             class: "ds-c-field",
             value: @user.organization_type
           %>

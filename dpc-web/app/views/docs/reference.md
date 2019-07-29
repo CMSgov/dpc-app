@@ -1004,3 +1004,9 @@ The final state would be the provider having *Patient/74af8018-f3a1-469c-9bfa-1d
         ]
       }
 ~~~
+
+## DPC Implementation Guide
+
+The DPC team has created a FHIR Implementation Guide which provides detailed information regarding the FHIR APIs and Data Models.
+
+<a href="/ig/index.html" class="ds-c-button">Read the Implementation Guide</a>

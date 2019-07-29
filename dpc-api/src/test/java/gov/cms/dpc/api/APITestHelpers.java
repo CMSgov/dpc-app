@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.*;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
@@ -44,6 +45,18 @@ public class APITestHelpers {
 
     private APITestHelpers() {
         // Not used
+    }
+
+    public static OrganizationPrincipal makeOrganizationPrincipal() {
+        Organization org = new Organization();
+        org.setId(ORGANIZATION_ID);
+        return new OrganizationPrincipal(org);
+    }
+
+    public static OrganizationPrincipal makeOrganizationPrincipal(String id) {
+        Organization org = new Organization();
+        org.setId(id);
+        return new OrganizationPrincipal(org);
     }
 
     public static IGenericClient buildAttributionClient(FhirContext ctx) {

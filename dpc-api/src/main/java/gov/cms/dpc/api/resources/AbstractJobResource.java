@@ -1,5 +1,7 @@
 package gov.cms.dpc.api.resources;
 
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -15,5 +17,5 @@ public abstract class AbstractJobResource {
 
     @Path("/{jobID}")
     @GET
-    public abstract Response checkJobStatus(String jobID);
+    public abstract Response checkJobStatus(OrganizationPrincipal organizationPrincipal, String jobID);
 }
