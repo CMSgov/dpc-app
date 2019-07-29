@@ -25,7 +25,7 @@ public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, Organizatio
     private static final String ORG_HEADER = "Organization";
 
     @Inject
-    StaticAuthFilter(Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
+    public StaticAuthFilter(Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
         this.authenticator = auth;
     }
 

@@ -2,15 +2,18 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
+import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -49,7 +52,6 @@ public class JobResource extends AbstractJobResource {
 
     @Override
     @Path("/{jobID}")
-    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "jobID")
     @GET
     @Timed
     @ExceptionMetered
@@ -63,13 +65,17 @@ public class JobResource extends AbstractJobResource {
             @ApiResponse(code = 500, message = "Export job has failed with no results"),
             @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class)
     })
-    public Response checkJobStatus(@PathParam("jobID") String jobID) {
+    public Response checkJobStatus(@Auth OrganizationPrincipal organizationPrincipal, @PathParam("jobID") String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
+        final UUID orgUUID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final Optional<JobModel> maybeJob = this.queue.getJob(jobUUID);
 
         // Return a response based on status
         return maybeJob.map(job -> {
             logger.debug("Fetched Job: {}", job);
+            if (!job.getOrgID().equals(orgUUID)) {
+                return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
+            }
             if (!job.isValid()) {
                 throw new JobQueueFailure(jobUUID, "Fetched an invalid job model");
             }

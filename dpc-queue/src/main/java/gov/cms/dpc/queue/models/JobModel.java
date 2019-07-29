@@ -48,6 +48,12 @@ public class JobModel implements Serializable {
     private UUID jobID;
 
     /**
+     * The unique organization identifier
+     */
+    @Column(name = "organization_id")
+    private UUID orgID;
+
+    /**
      * The list of resource types requested
      *
      * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
@@ -109,8 +115,9 @@ public class JobModel implements Serializable {
         // Hibernate required
     }
 
-    public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
+    public JobModel(UUID jobID, UUID orgID, List<ResourceType> resourceTypes, String providerID, List<String> patients) {
         this.jobID = jobID;
+        this.orgID = orgID;
         this.resourceTypes = resourceTypes;
         this.jobResults = new ArrayList<>();
         this.providerID = providerID;
@@ -119,8 +126,9 @@ public class JobModel implements Serializable {
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
-    public JobModel(UUID jobID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
+    public JobModel(UUID jobID, UUID orgID, List<ResourceType> resourceTypes, String providerID, List<String> patients, RSAPublicKey pubKey) {
         this.jobID = jobID;
+        this.orgID = orgID;
         this.resourceTypes = resourceTypes;
         this.jobResults = new ArrayList<>();
         this.providerID = providerID;
@@ -152,6 +160,8 @@ public class JobModel implements Serializable {
     public UUID getJobID() {
         return jobID;
     }
+
+    public UUID getOrgID() { return orgID; }
 
     public List<ResourceType> getResourceTypes() {
         return resourceTypes;
@@ -232,6 +242,7 @@ public class JobModel implements Serializable {
         JobModel other = (JobModel) o;
         return new EqualsBuilder()
                 .append(jobID, other.jobID)
+                .append(orgID, other.orgID)
                 .append(jobResults, other.jobResults)
                 .append(resourceTypes, other.resourceTypes)
                 .append(providerID, other.providerID)
@@ -247,6 +258,7 @@ public class JobModel implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(jobID,
+                orgID,
                 resourceTypes,
                 jobResults,
                 providerID,
@@ -262,6 +274,7 @@ public class JobModel implements Serializable {
     public String toString() {
         return "JobModel{" +
                 "jobID=" + jobID +
+                "orgID=" + orgID +
                 ", resourceTypes=" + resourceTypes.toString() +
                 ", providerID='" + providerID + '\'' +
                 ", patients=" + patients +
