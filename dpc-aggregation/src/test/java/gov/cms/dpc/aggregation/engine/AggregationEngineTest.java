@@ -42,7 +42,7 @@ class AggregationEngineTest {
 
     @BeforeAll
     static void setupAll() {
-        final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
