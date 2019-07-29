@@ -61,7 +61,8 @@ class BatchAggregationEngineTest {
     void largeJobTestSingleResource() {
         // Make a simple job with one resource type
         final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var orgId = UUID.randomUUID();
+        JobModel job = new JobModel(jobId, orgId,
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 TEST_PROVIDER_ID,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)));
@@ -92,7 +93,8 @@ class BatchAggregationEngineTest {
     void largeJobTest() {
         // Make a simple job with one resource type
         final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var orgId = UUID.randomUUID();
+        JobModel job = new JobModel(jobId, orgId,
                 JobModel.validResourceTypes,
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_IDS);
@@ -119,7 +121,8 @@ class BatchAggregationEngineTest {
     void largeJobWithBadPatientTest() {
         // Make a simple job with one resource type
         final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var orgId = UUID.randomUUID();
+        JobModel job = new JobModel(jobId, orgId,
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS);

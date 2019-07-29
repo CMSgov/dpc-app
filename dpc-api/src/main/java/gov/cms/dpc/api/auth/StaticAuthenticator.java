@@ -15,9 +15,9 @@ import java.util.Optional;
  */
 public class StaticAuthenticator implements Authenticator<DPCAuthCredentials, OrganizationPrincipal> {
 
-
     @Inject
-    StaticAuthenticator() {
+    public StaticAuthenticator() {
+        // do nothing because this is used for testing within FHIRSubmissionTest
     }
 
     @Override

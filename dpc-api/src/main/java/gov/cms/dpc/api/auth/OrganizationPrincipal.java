@@ -11,7 +11,7 @@ public class OrganizationPrincipal implements Principal {
 
     private final Organization organization;
 
-    OrganizationPrincipal(Organization organization) {
+    public OrganizationPrincipal(Organization organization) {
         this.organization = organization;
     }
 

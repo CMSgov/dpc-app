@@ -72,22 +72,23 @@ class AggregationEngineTest {
     @Test
     void simpleJobTest() {
         // Make a simple job with one resource type
-        final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var jobID = UUID.randomUUID();
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 Collections.singletonList(ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)));
 
         // Do the job
-        queue.submitJob(jobId, job);
+        queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
-        final var completeJob = queue.getJob(jobId).orElseThrow();
+        final var completeJob = queue.getJob(jobID).orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.Patient, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -97,21 +98,22 @@ class AggregationEngineTest {
     @Test
     void multipleFileJobTest() {
         // build a job with multiple resource types
-        final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var jobID = UUID.randomUUID();
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 JobModel.validResourceTypes,
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_IDS);
 
         // Do the job
-        queue.submitJob(jobId, job);
+        queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobId).get().getStatus()));
+        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobID).get().getStatus()));
         JobModel.validResourceTypes.forEach(resourceType -> {
-            var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, resourceType, 0);
+            var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, resourceType, 0);
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
     }
@@ -122,23 +124,24 @@ class AggregationEngineTest {
     @Test
     void emptyJobTest() {
         // Job with a unsupported resource type
-        final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var jobID = UUID.randomUUID();
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 List.of(ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 List.of());
 
         // Do the job
-        queue.submitJob(jobId, job);
+        queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
-        assertFalse(queue.getJob(jobId).isEmpty(), "Unable to retrieve job from queue.");
-        queue.getJob(jobId).ifPresent(retrievedJob -> {
+        assertFalse(queue.getJob(jobID).isEmpty(), "Unable to retrieve job from queue.");
+        queue.getJob(jobID).ifPresent(retrievedJob -> {
             assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus());
             assertEquals(0, retrievedJob.getJobResults().size());
-            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.Patient, 0))));
-            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0))));
+            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.Patient, 0))));
+            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0))));
         });
     }
 
@@ -149,19 +152,20 @@ class AggregationEngineTest {
     @Test
     void badJobTest() {
         // Job with a unsupported resource type
-        final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var jobID = UUID.randomUUID();
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 List.of(ResourceType.Schedule),
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_IDS);
 
         // Do the job
-        queue.submitJob(jobId, job);
+        queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> engine.completeJob(pair));
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobId).isPresent(), "Unable to retrieve job from queue."),
-                () -> assertEquals(JobStatus.FAILED, queue.getJob(jobId).get().getStatus()));
+        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent(), "Unable to retrieve job from queue."),
+                () -> assertEquals(JobStatus.FAILED, queue.getJob(jobID).get().getStatus()));
     }
 
     /**
@@ -175,7 +179,8 @@ class AggregationEngineTest {
         assertEquals(3, patientIDs.size());
 
         final var jobID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID,
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 patientIDs);
@@ -218,22 +223,23 @@ class AggregationEngineTest {
         AggregationEngine.setGlobalErrorHandler();
 
         // Make a simple job with one resource type
-        final var jobId = UUID.randomUUID();
-        JobModel job = new JobModel(jobId,
+        final var jobID = UUID.randomUUID();
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 Collections.singletonList(ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_IDS);
 
         // Do the job
-        queue.submitJob(jobId, job);
+        queue.submitJob(jobID, job);
         queue.workJob().ifPresent(pair -> sequentialEngine.completeJob(pair));
 
         // Look at the result
-        final var completeJob = queue.getJob(jobId).orElseThrow();
+        final var completeJob = queue.getJob(jobID).orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.Patient, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobId, ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -253,7 +259,8 @@ class AggregationEngineTest {
         Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString());
 
         final var jobID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID,
+        final var orgID = UUID.randomUUID();
+        JobModel job = new JobModel(jobID, orgID,
                 Collections.singletonList(ResourceType.Patient),
                 TEST_PROVIDER_ID,
                 Collections.singletonList("1"));

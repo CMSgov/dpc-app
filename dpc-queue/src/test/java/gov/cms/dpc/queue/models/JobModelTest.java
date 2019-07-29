@@ -13,8 +13,9 @@ class JobModelTest {
     @Test
     void testEqual() {
         final var jobID = UUID.randomUUID();
-        final var a = new JobModel(jobID, List.of(ResourceType.Patient), "1", List.of("1"));
-        final var c = new JobModel(jobID, List.of(ResourceType.ExplanationOfBenefit), "1", List.of("1"));
+        final var orgID = UUID.randomUUID();
+        final var a = new JobModel(jobID, orgID, List.of(ResourceType.Patient), "1", List.of("1"));
+        final var c = new JobModel(jobID, orgID, List.of(ResourceType.ExplanationOfBenefit), "1", List.of("1"));
         assertFalse(a.equals(c), "expected a to not equal c");
         assertTrue(a.equals(a));
     }
@@ -22,8 +23,9 @@ class JobModelTest {
     @Test
     void testHash() {
         final var jobID = UUID.randomUUID();
-        final var a = new JobModel(jobID, List.of(ResourceType.Patient), "1", List.of("1"));
-        final var c = new JobModel(jobID, List.of(ResourceType.ExplanationOfBenefit), "1", List.of("1"));
+        final var orgID = UUID.randomUUID();
+        final var a = new JobModel(jobID, orgID, List.of(ResourceType.Patient), "1", List.of("1"));
+        final var c = new JobModel(jobID, orgID, List.of(ResourceType.ExplanationOfBenefit), "1", List.of("1"));
         assertNotEquals(a.hashCode(), c.hashCode(), "expected a to not equal c");
     }
 
@@ -31,7 +33,8 @@ class JobModelTest {
     void testStatus() {
         // Run through the states of a job
         final var jobID = UUID.randomUUID();
-        final var job = new JobModel(jobID, List.of(ResourceType.Patient), "1", List.of("1"));
+        final var orgID = UUID.randomUUID();
+        final var job = new JobModel(jobID, orgID, List.of(ResourceType.Patient), "1", List.of("1"));
         assertAll(() -> assertEquals(JobStatus.QUEUED, job.getStatus()),
                 () -> assertTrue(job.getSubmitTime().isPresent()),
                 () -> assertTrue(job.getStartTime().isEmpty()));
