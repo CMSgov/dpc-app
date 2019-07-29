@@ -9,7 +9,9 @@
 
     <header class="page-header">
       <div class="ds-l-container">
-        <h1 class="page-header__heading"><%= yield(:title) %></h1>
+        <h1 class="page-header__heading">
+          <%= content_for?(:banner_title) ? yield(:banner_title) : yield(:title) %>
+        </h1>
       </div>
     </header>
 
