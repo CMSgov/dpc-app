@@ -1,5 +1,5 @@
 ## Information on accessing and working with the API
-- Join the Data at the Point of Care Google Group →
+- [Join the Data at the Point of Care Google Group](https://groups.google.com/d/forum/dpc-api)
 
 
 ---
@@ -16,7 +16,7 @@ This guide serves as a starting point for users to begin working with the API.
 This project provides an implementation of the FHIR [Bulk Data Export](http://hl7.org/fhir/us/bulkdata/2019May/index.html) specification, which provides an async interface over the existing Blue Button 2.0 data model.
 Details on the Blue Button data model can be found on its [project page](https://bluebutton.cms.gov).
 
-This project will closely track changes in the underlying standard and is fully compliant with the current specification, with the following limitations: 
+This project will closely track changes in the underlying standard and is fully compliant with the current specification, with the following limitations:
 
 - Type filters are not supported
 - The `_since` parameter is not currently supported.
@@ -46,7 +46,7 @@ Specific details on creating and updating treatment rosters is given in a later 
 Providers are required to keep their treatment rosters up to date, as patient attributions automatically expire after 90 days.
 If an attribution expires, the provider may resubmit the patient to their roster and re-attest to a treatment purpose for another 90 days.
 
-CMS currently restricts individual providers to no more than 5,000 attributed patients. 
+CMS currently restricts individual providers to no more than 5,000 attributed patients.
 These restrictions are subject to change over time.
 
 ## Authentication and Authorization
@@ -408,9 +408,9 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/jobs/42 \
 }
 ~~~
 
-Claims data can be found at the URLs within the output field. 
-The number 42 in the data file URLs is the same job ID from the Content-Location header URL in previous step. 
-If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field. 
+Claims data can be found at the URLs within the output field.
+The number 42 in the data file URLs is the same job ID from the Content-Location header URL in previous step.
+If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field.
 The errors are provided in NDJSON files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
 
 **5. Retrieve the NDJSON output file(s)**
@@ -767,7 +767,7 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/Practitioner
 }
 ~~~
 
-The `Practitioner.id` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group). 
+The `Practitioner.id` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
 
 
 ### Create a Patient
@@ -910,7 +910,7 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/Group
 -H 'Accept: application/fhir+json' \
 -X POST \
 -d @group.json
-~~~ 
+~~~
 
 **group.json**
 
