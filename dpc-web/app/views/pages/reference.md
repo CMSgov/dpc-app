@@ -7,7 +7,7 @@
 As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history.
 The Data at the Point of Care (DPC) pilot project fills in the gaps with claims data to inform providers with structured patient history, past procedures, medication adherence, and more.
 
-This API follows the workflow outlined by the FHIR Bulk Data Export specification, using the HL7 FHIR Standard. Claims data is provided as FHIR resources in NDJSON format.
+This API follows the workflow outlined by the FHIR Bulk Data Export specification, using the [HL7 FHIR Standard](http://hl7.org/fhir/). Claims data is provided as FHIR resources in [NDJSON](http://ndjson.org/) format.
 
 This guide serves as a starting point for users to begin working with the API.
 
@@ -23,11 +23,11 @@ This project will closely track changes in the underlying standard and is fully 
 - Only `Group` level exporting is supported, not `Patient` or `System` level exports
 
 
-In addition, the only available resource types are those exposed by Blue Button which include:
+In addition, the only available resource types are those exposed by [Blue Button](https://bluebutton.cms.gov/developers/#core-resources) which include:
 
-- Explanation of Benefits
-- Patient
-- Coverage
+- [Explanation of Benefits](https://bluebutton.cms.gov/eob/)
+- [Patient](https://www.hl7.org/fhir/patient.html)
+- [Coverage](http://hl7.org/fhir/coverage.html)
 
 ## Attribution
 
@@ -38,7 +38,7 @@ Given than existing standard for patient rosters does not exist, CMS is currentl
 The goal is to provide feedback to the group on experiences related to implementation and supporting the recommendations.
 
 > Note: The attribution logic and interaction flow will be subject to revision over time.
-CMS welcomes feedback on the implementation as well as experiences with other system.
+CMS welcomes [feedback on the implementation](https://groups.google.com/d/forum/dpc-api) as well as experiences with other system.
 
 Specific details on creating and updating treatment rosters is given in a later [section](#create-an-attribution-group).
 
@@ -254,7 +254,7 @@ See the [Authentication and Authorization](#authentication-and-authorization) se
 
 **2. Find the Provider Group**
 
-Lookup the attribution [Group](https://hl7.org/fhir/STU3/group.html) resource associated to a specific provider using their National Provider Identity (NPI) number.
+Lookup the attribution [Group](https://hl7.org/fhir/STU3/group.html) resource associated to a specific provider using their [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number.
 Creating attribution groups is covered later in this [reference](#attributing-patients-to-providers).
 
 ~~~ sh
@@ -336,8 +336,8 @@ The dollar sign (‘$’) before the word “export” in the URL indicates that
 **Headers**
 
 - Authorization: Bearer {token}
-- Accept: application/fhir+json
-- Prefer: respond-async
+- Accept: `application/fhir+json`
+- Prefer: `respond-async`
 
 **cURL command**
 
@@ -369,8 +369,8 @@ In the example header below, the number 42 in the URL represents the ID of the e
 GET https://sandbox.dpc.cms.gov/fhir/v1/jobs/42
 ~~~
 
-Using the Content-Location header value from the data export response, you can check the status of the export job.
-The status will change from 202 Accepted to 200 OK when the export job is complete and the data is ready to be downloaded.
+Using the `Content-Location` header value from the data export response, you can check the status of the export job.
+The status will change from `202 Accepted` to `200 OK` when the export job is complete and the data is ready to be downloaded.
 
 **Headers**
 
@@ -712,7 +712,7 @@ POST /fhir/v1/Practitioner
 
 Details on the exact data format are given in the [implementation guide]() but at a minimum, each resource must include:
 
-- The NPI of the provider
+- The [NPI](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) of the provider
 - The provider's first and last name
 
 **cURL command**
@@ -961,9 +961,18 @@ This can be accomplished through the same endpoint described in the previous [se
 Removing patients from the attribution Group is done by setting the `Group.member.inactive` value to `true` when resubmitting the Patient reference (as shown below).
 
 Membership changes submitted to an existing attribution Group are always merged with the existing group state.
-Consider the example Group resource shown below. From the previous example, we know that the provider with NPI *110001029483* has two attributed patients (*Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d* and *Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874*).
-By submitting a new roster with the information show below, the result with be *Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d* being removed from the roster and *Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1* being added.
-The final state would be the provider having *Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874* and *Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1* attributed.
+Consider the example Group resource shown below. From the previous example, we know that the provider with NPI *110001029483* has two attributed patients: 
+
+	Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d
+	Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874
+
+By submitting a new roster with the information show below, the result with be `Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d` being removed from the roster and `Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1` being added.
+The final state would be the provider having 
+
+	Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874
+	Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1
+	
+attributed.
 
 ***Add and remove attributed Patients***
 
