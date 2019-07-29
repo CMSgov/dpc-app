@@ -7,7 +7,7 @@ ${IG_PUBLISHER}:
 
 .PHONY: ig/publish
 ig/publish: ${IG_PUBLISHER}
-	@echo "making IG"
+	@echo "Building Implementation Guide"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
 .PHONY: travis
