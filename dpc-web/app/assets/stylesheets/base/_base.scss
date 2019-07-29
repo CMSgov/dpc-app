@@ -43,3 +43,7 @@ kbd,
 samp {
   font-family: $font-mono;
 }
+
+.ds-c-choice + label a {
+  margin-left: 1ch;
+}
