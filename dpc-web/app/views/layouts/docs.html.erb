@@ -11,15 +11,16 @@
       <div class="ds-l-container">
         <span class="page-header__heading">Docs</span>
 
-        <div class="ds-c-tabs">
-          <%= link_to docs_path, :class => "ds-c-tabs__item #{current_class?(docs_path)}" do %>
-            Reference
-          <% end %>
-          <%= link_to docs_guide_path, :class => "ds-c-tabs__item #{current_class?(docs_guide_path)}" do %>
-            Guide
-          <% end %>
-        </div>
-
+        <% if false %> Comment out tabs until guide is ready
+          <div class="ds-c-tabs">
+            <%= link_to docs_path, :class => "ds-c-tabs__item #{current_class?(docs_path)}" do %>
+              Reference
+            <% end %>
+            <%= link_to docs_guide_path, :class => "ds-c-tabs__item #{current_class?(docs_guide_path)}" do %>
+              Guide
+            <% end %>
+          </div>
+        <% end %>
       </div>
     </header>
 
