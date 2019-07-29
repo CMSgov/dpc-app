@@ -6,14 +6,13 @@
 
 As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history.
 The Data at the Point of Care (DPC) pilot project fills in the gaps with claims data to inform providers with structured patient history, past procedures, medication adherence, and more.
+This data is made available through a set of [FHIR](http://hl7.org/fhir/STU3/) compliant APIs. 
 
-This API follows the workflow outlined by the FHIR Bulk Data Export specification, using the [HL7 FHIR Standard](http://hl7.org/fhir/). Claims data is provided as FHIR resources in [NDJSON](http://ndjson.org/) format.
-
-This guide serves as a starting point for users to begin working with the API.
+This guide serves as a starting point for users to begin working with the API by introducing the core APIs as well as two key concepts of [Bulk Data](#bulk-data) and [Patient Attribution](#attribution).
 
 ## Bulk Data
 
-This project provides an implementation of the FHIR [Bulk Data Export](http://hl7.org/fhir/us/bulkdata/2019May/index.html) specification, which provides an async interface over the existing Blue Button 2.0 data model.
+This project provides an implementation of the FHIR [Bulk Data Access](http://hl7.org/fhir/us/bulkdata/2019May/index.html) specification, which provides an async interface over the existing Blue Button 2.0 data model.
 Details on the Blue Button data model can be found on its [project page](https://bluebutton.cms.gov).
 
 This project will closely track changes in the underlying standard and is fully compliant with the current specification, with the following limitations:
@@ -32,9 +31,9 @@ In addition, the only available resource types are those exposed by [Blue Button
 ## Attribution
 
 In order to receive data from the DPC application, a healthcare provider must have a treatment related purpose for viewing a patient's claims history.
-Providers can attest to their treatment purposes by submitting a treatment roster which lists the patients currently under their care.
+Providers can attest to their treatment purposes by submitting a an *attribution roster* which lists the patients currently under their care.
 
-Given than existing standard for patient rosters does not exist, CMS is currently piloting an implementation of the [Attribution Guide](https://github.com/smart-on-fhir/smart-on-fhir.github.io/wiki/Bulk-data:-thoughts-on-attribution-lists-and-groups) currently under discussion with the SMART-ON-FHIR team.
+Given that existing standards for patient rosters do not exist, CMS is currently piloting an implementation of the [Attribution Guide](https://github.com/smart-on-fhir/smart-on-fhir.github.io/wiki/Bulk-data:-thoughts-on-attribution-lists-and-groups) currently under discussion with the [SMART-ON-FHIR](https://docs.smarthealthit.org/) team.
 The goal is to provide feedback to the group on experiences related to implementation and supporting the recommendations.
 
 > Note: The attribution logic and interaction flow will be subject to revision over time.
@@ -264,7 +263,7 @@ GET /fhir/v1/Group?characteristic=attributed-to&characteristic-code={provider NP
 **cURL command**
 
 ~~~ sh
-curl -v https://sandbox.DPC.cms.gov/fhir/v1/Group?characteristic=attributed-to&characteristic-code=11349583 \
+curl -v https://sandbox.dpc.cms.gov/fhir/v1/Group?characteristic=attributed-to&characteristic-code=11349583 \
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json
 ~~~
@@ -352,7 +351,7 @@ curl -v https://sandbox.DPC.cms.gov/api/v1/Group/64d0cd85-7767-425a-a3b8-dcc9bdf
 
 If the request was successful, a `202 Accepted` response code will be returned and the response will include a `Content-Location` header.
 The value of this header indicates the location to check for job status and outcome.
-In the example header below, the number 42 in the URL represents the ID of the export job.
+In the example header below, the number `42` in the URL represents the ID of the export job.
 
 **Headers**
 
@@ -409,7 +408,7 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/jobs/42 \
 ~~~
 
 Claims data can be found at the URLs within the output field.
-The number 42 in the data file URLs is the same job ID from the Content-Location header URL in previous step.
+The number `42` in the data file URLs is the same job ID from the Content-Location header URL in previous step.
 If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field.
 The errors are provided in [NDJSON](http://ndjson.org/) files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
 
