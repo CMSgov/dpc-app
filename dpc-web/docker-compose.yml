@@ -11,7 +11,9 @@ services:
       - "5432:5432"
 
   web:
-    build: .
+    build:
+      context: ..
+      dockerfile: dpc-web/Dockerfile
     image: dpc-web:latest
     environment:
       - DATABASE_URL=postgresql://db/dpc-website_development
