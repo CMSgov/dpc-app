@@ -25,6 +25,7 @@ before_install:
 
 install:
   - npm install newman
+  - gem install jekyll
 
 script:
   - ./dpc-test.sh
