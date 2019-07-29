@@ -9,7 +9,7 @@ class DpcRegistrationsController < ApplicationController
   end
 
   def show
-    @dpc_registration = DpcRegistration.find(current_user.id)
+    @dpc_registration = DpcRegistration.find_by(user: current_user)
   rescue ActiveRecord::RecordNotFound => e
     flash.alert e.message
     redirect_back(fallback_location: root_path)
