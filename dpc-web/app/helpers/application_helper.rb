@@ -5,6 +5,10 @@ module ApplicationHelper
     content_for(:title) { page_title }
   end
 
+  def banner_title(banner_title)
+    content_for(:banner_title) { banner_title }
+  end
+
   def syntax_highlight(text)
     # Initialized in config/initializers/rouge_highlighter.rb
     html = HighlightSource.render(text)
