@@ -16,6 +16,6 @@ class DpcRegistrationsController < ApplicationController
   end
 
   def profile
-    @dpc_registration = DpcRegistration.find(current_user.id)
+    @dpc_registration = DpcRegistration.find_by(user: current_user)
   end
 end
