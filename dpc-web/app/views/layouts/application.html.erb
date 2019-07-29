@@ -16,10 +16,11 @@
           <%= link_to authenticated_root_path, :class => "ds-c-tabs__item #{current_class?(authenticated_root_path)} #{current_class?(dpc_registration_path(current_user.id))}" do %>
             Dashboard
           <% end %>
-          <%= link_to profile_path, :class => "ds-c-tabs__item #{current_class?(profile_path)}
-          #{current_class?(profile_path)}" do %>
-            Profile
-          <% end %>
+          <%= link_to profile_path, id: :dpc_registrations_profile_link,
+            :class => "ds-c-tabs__item #{current_class?(profile_path)}
+            #{current_class?(profile_path)}" do %>
+              Profile
+            <% end %>
         </div>
         <% end %>
       </div>
