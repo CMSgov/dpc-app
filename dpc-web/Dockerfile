@@ -36,13 +36,13 @@ RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompil
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.c" -delete && \
     find /usr/local/bundle/gems/ -name "*.o" -delete && \
-    rm -rf node_modules tmp/cache app/assets vendor/assets lib/assets spec
+    rm -rf tmp/cache spec
 
 
 FROM ruby:2.6.2-alpine
 
 # Install app dependencies
-RUN apk add --no-cache postgresql-client tzdata
+RUN apk add --no-cache postgresql-client nodejs tzdata
 
 # Set the working directory
 RUN mkdir /dpc-web
@@ -51,9 +51,6 @@ WORKDIR /dpc-web
 # Copy the compiled Ruby app
 COPY --from=ruby_builder /usr/local/bundle/ /usr/local/bundle/
 COPY --from=ruby_builder /dpc-web /dpc-web
-
-# Disable ExecJS (Install Node and remove this if we find a need for it)
-ENV EXECJS_RUNTIME Disabled
 
 # Start the rails server
 CMD ["./docker/entrypoint.sh"]
