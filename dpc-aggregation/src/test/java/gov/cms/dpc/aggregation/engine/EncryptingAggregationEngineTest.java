@@ -58,7 +58,7 @@ class EncryptingAggregationEngineTest {
     @BeforeAll
     static void setupAll() {
         // Use the test.conf as the base for config. encrypt.conf will only enable encryption.
-        final var config = ConfigFactory.load("test.application.conf").getConfig("dpc.aggregation");
+        final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(1000, exportPath, 3, true, true, 0.5f, 2.5f);
         ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
