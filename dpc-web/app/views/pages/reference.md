@@ -51,7 +51,7 @@ These restrictions are subject to change over time.
 
 ## Authentication and Authorization
 
-The Data at the Point of Care pilot project is currently accessible as a private sandbox environment, which returns sample NDJSON files with synthetic beneficiary data.
+The Data at the Point of Care pilot project is currently accessible as a private sandbox environment, which returns sample [NDJSON](http://ndjson.org/) files with synthetic beneficiary data.
 There is no beneficiary PII or PHI in the files you can access via the sandbox.
 
 The long-term goal of the project is to align with the security and authorization processes recommended by the [SMART Backend Services Guide](https://build.fhir.org/ig/HL7/bulk-data/authorization/index.html).
@@ -411,13 +411,13 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/jobs/42 \
 Claims data can be found at the URLs within the output field.
 The number 42 in the data file URLs is the same job ID from the Content-Location header URL in previous step.
 If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field.
-The errors are provided in NDJSON files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
+The errors are provided in [NDJSON](http://ndjson.org/) files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
 
 **5. Retrieve the NDJSON output file(s)**
 
 > Note: The `Data` endpoint is not a FHIR resource and doesn't require the `Accept` header to be set to `application/fhir+json`.
 
-To obtain the exported explanation of benefit data, a GET request is made to the output URLs in the job status response when the job reaches the Completed state. The data will be presented as an NDJSON file of ExplanationOfBenefit resources.
+To obtain the exported explanation of benefit data, a GET request is made to the output URLs in the job status response when the job reaches the Completed state. The data will be presented as an [NDJSON](http://ndjson.org/) file of ExplanationOfBenefit resources.
 
 **Request**
 
