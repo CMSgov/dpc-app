@@ -82,7 +82,7 @@
         "type": [
           {
             "code": "Reference",
-            "targetProfile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-orgaization"
+            "targetProfile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization"
           }
         ]
       }
