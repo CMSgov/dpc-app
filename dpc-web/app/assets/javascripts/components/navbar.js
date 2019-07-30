@@ -14,23 +14,27 @@ function removeElementsByClass(className){
   }
 }
 
-close_mobile_nav_button.addEventListener("click", function(e) {
-  console.log('close');
-  document.body.classList.remove(nav_open_class);
-  mobile_nav.classList.remove(visible_class);
-  open_mobile_nav_button.focus();
-  removeElementsByClass(overlay_class);
-});
 
-open_mobile_nav_button.addEventListener("click", function(e) {
-  document.body.classList.add(nav_open_class);
-  mobile_nav.classList.add(visible_class);
-  close_mobile_nav_button.focus();
-  navbar.insertBefore(overlay, mobile_nav);
-  overlay.classList.add(overlay_class);
 
-  setTimeout(function(){
-    overlay.classList.add(visible_class);
-  }, 100);
+if(typeof(close_mobile_nav_button) != 'undefined' && close_mobile_nav_button != null){
+  close_mobile_nav_button.addEventListener("click", function(e) {
+    document.body.classList.remove(nav_open_class);
+    mobile_nav.classList.remove(visible_class);
+    open_mobile_nav_button.focus();
+    removeElementsByClass(overlay_class);
+  });
+};
 
-})
+if(typeof(open_mobile_nav_button) != 'undefined' && open_mobile_nav_button != null){
+  open_mobile_nav_button.addEventListener("click", function(e) {
+    document.body.classList.add(nav_open_class);
+    mobile_nav.classList.add(visible_class);
+    close_mobile_nav_button.focus();
+    navbar.insertBefore(overlay, mobile_nav);
+    overlay.classList.add(overlay_class);
+
+    setTimeout(function(){
+      overlay.classList.add(visible_class);
+    }, 100);
+  })
+};
