@@ -1,4 +1,5 @@
 <head>
+  <%= render partial: 'shared/google-analytics' %>
   <title>
     <%= content_for?(:title) ? yield(:title) : 'CMS.gov' %> | Data at the Point of Care
   </title>
@@ -19,6 +20,4 @@
   <%= csp_meta_tag %>
 
   <%= stylesheet_link_tag    'application', media: 'all' %>
-
-  <%= render partial: 'shared/google-analytics' %>
 </head>
