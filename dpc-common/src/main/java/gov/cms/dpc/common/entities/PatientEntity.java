@@ -54,15 +54,15 @@ public class PatientEntity implements Serializable {
     @ManyToOne
     private OrganizationEntity organization;
 
-    @ManyToMany
-    @JoinTable(name = "attributions",
-            joinColumns = {
-                    @JoinColumn(name = "patient_id", referencedColumnName = "id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "provider_id", referencedColumnName = "id")
-            })
-    private List<ProviderEntity> attributedProviders;
+//    @ManyToMany
+//    @JoinTable(name = "attributions",
+//            joinColumns = {
+//                    @JoinColumn(name = "patient_id", referencedColumnName = "id")
+//            },
+//            inverseJoinColumns = {
+//                    @JoinColumn(name = "roster_id", referencedColumnName = "id")
+//            })
+//    private List<ProviderEntity> attributedProviders;
 
     public PatientEntity() {
 //        Hibernate Required
@@ -132,13 +132,13 @@ public class PatientEntity implements Serializable {
         this.organization = organization;
     }
 
-    public List<ProviderEntity> getAttributedProviders() {
-        return attributedProviders;
-    }
-
-    public void setAttributedProviders(List<ProviderEntity> attributedProviders) {
-        this.attributedProviders = attributedProviders;
-    }
+//    public List<ProviderEntity> getAttributedProviders() {
+//        return attributedProviders;
+//    }
+//
+//    public void setAttributedProviders(List<ProviderEntity> attributedProviders) {
+//        this.attributedProviders = attributedProviders;
+//    }
 
     /**
      * Update {@link Patient} fields.

@@ -40,7 +40,7 @@ public class ProviderEntity implements Serializable {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "attributions",
             joinColumns = {
-                    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+                    @JoinColumn(name = "roster_id", referencedColumnName = "id")
             },
             inverseJoinColumns = {
                     @JoinColumn(name = "patient_id", referencedColumnName = "id")

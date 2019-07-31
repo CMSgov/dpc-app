@@ -1,6 +1,5 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
@@ -16,6 +15,7 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -27,7 +27,6 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Api(value = "Group")
@@ -68,9 +67,15 @@ public class GroupResource extends AbstractGroupResource {
 
         final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0));
         // Add the first provider
-        final Group persistedGroup = this.rosterDAO.persistEntity(rosterEntity).toFHIR();
+        final RosterEntity persisted = this.rosterDAO.persistEntity(rosterEntity);
+        final Group persistedGroup = persisted.toFHIR();
 
         return Response.status(Response.Status.CREATED).entity(persistedGroup).build();
+    }
+
+    @Override
+    public Bundle rosterSearch(@NotEmpty @QueryParam("_tag") UUID organizationID, @QueryParam("npi") String providerNPI, @QueryParam("member") String patientID) {
+        return null;
     }
 
     @POST
@@ -103,9 +108,9 @@ public class GroupResource extends AbstractGroupResource {
     }
 
 
-    @Path("/{groupID}")
+    @Path("/{rosterID}")
     @GET
-    @Override
+    @UnitOfWork
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Get attributed patients", notes = "Returns a list of Patient MBIs that are attributed to the given Provider.")
@@ -113,24 +118,29 @@ public class GroupResource extends AbstractGroupResource {
             @ApiResponse(code = 500, message = "Internal server error that prevented the service from looking up the attributed patients"),
             @ApiResponse(code = 404, message = "No provider exists with the given NPI")
     })
-    public List<String> getAttributedPatients(
+    @Override
+    public Group getRoster(
             @ApiParam(value = "Provider NPI", required = true)
-            @PathParam("groupID") String groupID) {
-        logger.debug("API request to retrieve attributed patients for {}", groupID);
+            @PathParam("rosterID") UUID rosterID) {
+        logger.debug("API request to retrieve attributed patients for {}", rosterID);
 
-        Optional<List<String>> attributedBeneficiaries;
-        try {
-            // Create a practitioner resource for retrieval
-            attributedBeneficiaries = engine.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(groupID));
-        } catch (Exception e) {
-            logger.error("Cannot get attributed patients for {}", groupID, e);
-            throw new WebApplicationException(String.format("Unable to retrieve attributed patients for: %s", groupID), Response.Status.INTERNAL_SERVER_ERROR);
-        }
+        return this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> new WebApplicationException("Cannot find Roster", Response.Status.NOT_FOUND))
+                .toFHIR();
 
-        if (attributedBeneficiaries.isEmpty()) {
-            throw new WebApplicationException(String.format("Unable to find provider: %s", groupID), Response.Status.NOT_FOUND);
-        }
-        return attributedBeneficiaries.get();
+//        Optional<List<String>> attributedBeneficiaries;
+//        try {
+//            // Create a practitioner resource for retrieval
+//            attributedBeneficiaries = engine.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(groupID));
+//        } catch (Exception e) {
+//            logger.error("Cannot get attributed patients for {}", groupID, e);
+//            throw new WebApplicationException(String.format("Unable to retrieve attributed patients for: %s", groupID), Response.Status.INTERNAL_SERVER_ERROR);
+//        }
+//
+//        if (attributedBeneficiaries.isEmpty()) {
+//            throw new WebApplicationException(String.format("Unable to find provider: %s", groupID), Response.Status.NOT_FOUND);
+//        }
+//        return attributedBeneficiaries.get();
     }
 
     @Path("/{groupID}/{patientID}")

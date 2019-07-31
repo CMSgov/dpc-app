@@ -15,9 +15,9 @@ import java.util.Objects;
 //                "inner join patients as pat on a.patient = pat.patientID " +
 //                "where prov.providerNPI = :provID and pat.beneficiaryID = :patID")
 //})
-@Table(name = "attributions",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"patient_id", "provider_id"})}
-)
+//@Table(name = "attributions",
+//        uniqueConstraints = {@UniqueConstraint(columnNames = {"patient_id", "provider_id"})}
+//)
 public class AttributionRelationship {
 
     @Id
@@ -25,10 +25,10 @@ public class AttributionRelationship {
     @Column(name = "id", updatable = false, nullable = false)
     private Long attributionID;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne
     private RosterEntity roster;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     private PatientEntity patient;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
@@ -42,7 +42,6 @@ public class AttributionRelationship {
     public AttributionRelationship(RosterEntity roster, PatientEntity patient) {
         this.roster = roster;
         this.patient = patient;
-        this.created = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
     public AttributionRelationship(RosterEntity roster, PatientEntity patient, OffsetDateTime created) {

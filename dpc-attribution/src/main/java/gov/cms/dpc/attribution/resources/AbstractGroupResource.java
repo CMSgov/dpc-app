@@ -1,14 +1,16 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.List;
+import java.util.UUID;
 
 @Path("/Group")
+@FHIR
 public abstract class AbstractGroupResource {
 
     protected AbstractGroupResource() {
@@ -16,17 +18,19 @@ public abstract class AbstractGroupResource {
     }
 
     @POST
-    @FHIR
     public abstract Response createRoster(Group attributionRoster);
+
+    @GET
+    public abstract Bundle rosterSearch(@NotEmpty UUID organizationID, String providerNPI, String patientID);
+
 
     @POST
     @Path("/$submit")
-    @FHIR
     public abstract Response submitRoster(Bundle providerBundle);
 
     @GET
-    @Path("/{groupID}")
-    public abstract List<String> getAttributedPatients(String groupID);
+    @Path("/{rosterID}")
+    public abstract Group getRoster(UUID rosterID);
 
     @GET
     @Path("/{groupID}/{patientID}")

@@ -72,23 +72,6 @@ public class SeedProcessor {
 
         bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
 
-        final CodeableConcept attributionConcept = new CodeableConcept();
-        attributionConcept.setText("attributed-to");
-
-        final CodeableConcept NPIConcept = new CodeableConcept();
-        NPIConcept.setText(entry.getKey());
-
-        final Group group = new Group();
-        group.setType(Group.GroupType.PERSON);
-        group.setActive(true);
-        group.addCharacteristic()
-                .setExclude(false)
-                .setCode(attributionConcept)
-                .setValue(NPIConcept);
-
-        // Add the org
-        FHIRBuilders.addOrganizationTag(group, organizationID);
-
         entry.getValue()
                 .forEach((value) -> {
                     // Add some random values to the patient
@@ -101,13 +84,7 @@ public class SeedProcessor {
                     component.setResource(patient);
                     component.setFullUrl("http://something.gov/" + patient.getIdentifierFirstRep().getValue());
                     bundle.addEntry(component);
-
-                    // Add to group
-                    group.addMember().setEntity(new Reference(patient.getId()));
                 });
-
-        // Now, add the Group
-        bundle.addEntry().setResource(group);
         return bundle;
     }
 }

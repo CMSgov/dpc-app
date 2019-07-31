@@ -56,7 +56,7 @@ public class RosterEngine implements AttributionEngine {
             }
             final List<String> beneficiaryIDs = context.select()
                     .from(PROVIDERS)
-                    .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
+//                    .join(ATTRIBUTIONS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
                     .join(PATIENTS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID))
                     .where(PROVIDERS.PROVIDER_ID.eq(providerNPI))
                     .fetch().getValues(PATIENTS.BENEFICIARY_ID);
@@ -83,7 +83,7 @@ public class RosterEngine implements AttributionEngine {
 
                 // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
                 final AttributionsRecord attr = new AttributionsRecord();
-                attr.setProviderId(providerRecord.getId());
+//                attr.setProviderId(providerRecord.getId());
                 attr.setPatientId(patientRecord.getId());
                 attr.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
 
@@ -127,7 +127,7 @@ public class RosterEngine implements AttributionEngine {
                 final String providerNPI = FHIRExtractors.getProviderNPI(provider);
                 final String patientMPI = FHIRExtractors.getPatientMPI(patient);
                 final Result<AttributionsRecord> attributionsRecords = ctx.selectFrom(ATTRIBUTIONS
-                        .join(PROVIDERS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
+//                        .join(PROVIDERS).on(ATTRIBUTIONS.PROVIDER_ID.eq(PROVIDERS.ID))
                         .join(PATIENTS).on(ATTRIBUTIONS.PATIENT_ID.eq(PATIENTS.ID)))
                         .where(PROVIDERS.PROVIDER_ID.eq(providerNPI).and(PATIENTS.BENEFICIARY_ID.eq(patientMPI)))
                         .fetchInto(ATTRIBUTIONS);
@@ -158,7 +158,7 @@ public class RosterEngine implements AttributionEngine {
             return context.fetchExists(context.selectOne()
                     .from(ATTRIBUTIONS)
                     .join(PATIENTS).on(PATIENTS.ID.eq(ATTRIBUTIONS.PATIENT_ID))
-                    .join(PROVIDERS).on(PROVIDERS.ID.eq(ATTRIBUTIONS.PROVIDER_ID))
+//                    .join(PROVIDERS).on(PROVIDERS.ID.eq(ATTRIBUTIONS.PROVIDER_ID))
                     .where(PATIENTS.BENEFICIARY_ID
                             .eq(FHIRExtractors.getPatientMPI(patient))
                             .and(PROVIDERS.PROVIDER_ID

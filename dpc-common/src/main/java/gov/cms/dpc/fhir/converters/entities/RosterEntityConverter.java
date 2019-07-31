@@ -20,6 +20,7 @@ public class RosterEntityConverter {
         final Group group = new Group();
         group.setType(Group.GroupType.PERSON);
         group.setActual(true);
+        group.setId(entity.getId().toString());
 
         final CodeableConcept attributedConcept = new CodeableConcept();
         attributedConcept.setText("attributed-to");
@@ -32,9 +33,9 @@ public class RosterEntityConverter {
                 .setExclude(false);
 
         final List<Group.GroupMemberComponent> patients = entity
-                .getPatients()
+                .getAttributions()
                 .stream()
-                .map(relationships -> new IdType("Patient", relationships.getPatientID().toString()))
+                .map(relationships -> new IdType("Patient", relationships.getPatient().getPatientID().toString()))
                 .map(Reference::new)
                 .map(Group.GroupMemberComponent::new)
                 .collect(Collectors.toList());

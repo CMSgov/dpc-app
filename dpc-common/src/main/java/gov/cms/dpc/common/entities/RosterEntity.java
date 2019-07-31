@@ -4,8 +4,9 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.RosterEntityConverter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hl7.fhir.dstu3.model.Element;
 import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -34,15 +35,8 @@ public class RosterEntity implements Serializable {
     @JoinColumn(name = "organization_id")
     private OrganizationEntity managingOrganization;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "attributions",
-            joinColumns = {
-                    @JoinColumn(name = "roster_id", referencedColumnName = "id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "patient_id", referencedColumnName = "id")
-            })
-    private List<PatientEntity> patients;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "roster")
+    private List<AttributionRelationship> attributions;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
@@ -80,12 +74,12 @@ public class RosterEntity implements Serializable {
         this.managingOrganization = managingOrganization;
     }
 
-    public List<PatientEntity> getPatients() {
-        return patients;
+    public List<AttributionRelationship> getAttributions() {
+        return attributions;
     }
 
-    public void setPatients(List<PatientEntity> patients) {
-        this.patients = patients;
+    public void setAttributions(List<AttributionRelationship> attributions) {
+        this.attributions = attributions;
     }
 
     public OffsetDateTime getCreatedAt() {
@@ -113,17 +107,17 @@ public class RosterEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RosterEntity that = (RosterEntity) o;
-        return id.equals(that.id) &&
-                attributedProvider.equals(that.attributedProvider) &&
-                managingOrganization.equals(that.managingOrganization) &&
-                patients.equals(that.patients) &&
-                createdAt.equals(that.createdAt) &&
-                updatedAt.equals(that.updatedAt);
+        return Objects.equals(id, that.id) &&
+                Objects.equals(attributedProvider, that.attributedProvider) &&
+                Objects.equals(managingOrganization, that.managingOrganization) &&
+                Objects.equals(attributions, that.attributions) &&
+                Objects.equals(createdAt, that.createdAt) &&
+                Objects.equals(updatedAt, that.updatedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, attributedProvider, managingOrganization, patients, createdAt, updatedAt);
+        return Objects.hash(id, attributedProvider, managingOrganization, attributions, createdAt, updatedAt);
     }
 
     public static RosterEntity fromFHIR(Group attributionRoster, ProviderEntity providerEntity) {
@@ -145,7 +139,7 @@ public class RosterEntity implements Serializable {
                 .setManagingOrganization(organizationEntity);
 
         // Add patients, but only those which are active
-        rosterEntity.setPatients(getAttributedPatients(attributionRoster, providerEntity));
+        rosterEntity.setAttributions(getAttributedPatients(attributionRoster, rosterEntity));
 
         // Add the provider
         rosterEntity.setAttributedProvider(providerEntity);
@@ -153,17 +147,18 @@ public class RosterEntity implements Serializable {
         return rosterEntity;
     }
 
-    private static List<PatientEntity> getAttributedPatients(Group attributionRoster, ProviderEntity providerEntity) {
+    private static List<AttributionRelationship> getAttributedPatients(Group attributionRoster, RosterEntity roster) {
         return attributionRoster
                 .getMember()
                 .stream()
                 .filter(member -> !member.getInactive())
                 .map(Group.GroupMemberComponent::getEntity)
-                .map(Element::getId)
+                .map(Reference::getReference)
+                .map(IdType::new)
                 .map(id -> {
                     final PatientEntity patientEntity = new PatientEntity();
-                    patientEntity.setPatientID(UUID.fromString(id));
-                    return patientEntity;
+                    patientEntity.setPatientID(UUID.fromString(id.getIdPart()));
+                    return new AttributionRelationship(roster, patientEntity);
                 })
                 .collect(Collectors.toList());
     }

@@ -59,7 +59,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
             return false;
         }
 
-        patientEntity.setAttributedProviders(Collections.emptyList());
+//        patientEntity.setAttributedProviders(Collections.emptyList());
         currentSession().merge(patientEntity);
         currentSession().delete(patientEntity);
         return true;

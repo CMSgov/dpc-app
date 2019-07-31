@@ -81,10 +81,11 @@ public class RosterUtils {
 
         // If the attribution relationship already exists, ignore it.
 
-        final boolean attributionExist = ctx.fetchExists(Attributions.ATTRIBUTIONS,
-                Attributions.ATTRIBUTIONS.PROVIDER_ID
-                        .eq(providerRecord.getId())
-                        .and(Attributions.ATTRIBUTIONS.PATIENT_ID.eq(patient.getId())));
+        final boolean attributionExist = false;
+//        final boolean attributionExist = ctx.fetchExists(Attributions.ATTRIBUTIONS,
+//                Attributions.ATTRIBUTIONS.PROVIDER_ID
+//                        .eq(providerRecord.getId())
+//                        .and(Attributions.ATTRIBUTIONS.PATIENT_ID.eq(patient.getId())));
 
         final String beneficiaryID = patientEntity.getBeneficiaryID();
         final String providerNPI = providerRecord.getProviderId();
@@ -93,7 +94,7 @@ public class RosterUtils {
             logger.debug("Attributing patient {} to provider {}.", beneficiaryID, providerNPI);
             // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
             final AttributionsRecord attr = new AttributionsRecord();
-            attr.setProviderId(providerRecord.getId());
+//            attr.setProviderId(providerRecord.getId());
             attr.setPatientId(patient.getId());
             attr.setCreatedAt(creationTimestamp);
             ctx.executeInsert(attr);
