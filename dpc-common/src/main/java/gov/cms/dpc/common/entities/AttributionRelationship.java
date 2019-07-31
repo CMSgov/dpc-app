@@ -9,12 +9,12 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Entity(name = "attributions")
-@NamedQueries({
-        @NamedQuery(name = "findRelationship", query = "select a from attributions a " +
-                "inner join providers prov on a.provider = prov.providerID " +
-                "inner join patients as pat on a.patient = pat.patientID " +
-                "where prov.providerNPI = :provID and pat.beneficiaryID = :patID")
-})
+//@NamedQueries({
+//        @NamedQuery(name = "findRelationship", query = "select a from attributions a " +
+//                "inner join providers prov on a.provider = prov.providerID " +
+//                "inner join patients as pat on a.patient = pat.patientID " +
+//                "where prov.providerNPI = :provID and pat.beneficiaryID = :patID")
+//})
 @Table(name = "attributions",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"patient_id", "provider_id"})}
 )
@@ -26,7 +26,7 @@ public class AttributionRelationship {
     private Long attributionID;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    private ProviderEntity provider;
+    private RosterEntity roster;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     private PatientEntity patient;
@@ -39,20 +39,20 @@ public class AttributionRelationship {
         this.created = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
-    public AttributionRelationship(ProviderEntity provider, PatientEntity patient) {
-        this.provider = provider;
+    public AttributionRelationship(RosterEntity roster, PatientEntity patient) {
+        this.roster = roster;
         this.patient = patient;
         this.created = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
-    public AttributionRelationship(ProviderEntity provider, PatientEntity patient, OffsetDateTime created) {
-        this.provider = provider;
+    public AttributionRelationship(RosterEntity roster, PatientEntity patient, OffsetDateTime created) {
+        this.roster = roster;
         this.patient = patient;
         this.created = created;
     }
 
-    public AttributionRelationship(ProviderEntity provider, PatientEntity patient, Timestamp created) {
-        this.provider = provider;
+    public AttributionRelationship(RosterEntity roster, PatientEntity patient, Timestamp created) {
+        this.roster = roster;
         this.patient = patient;
         this.created = OffsetDateTime.ofInstant(created.toInstant(), ZoneOffset.UTC);
     }
@@ -65,12 +65,12 @@ public class AttributionRelationship {
         this.attributionID = attributionID;
     }
 
-    public ProviderEntity getProvider() {
-        return provider;
+    public RosterEntity getRoster() {
+        return roster;
     }
 
-    public void setProvider(ProviderEntity provider) {
-        this.provider = provider;
+    public void setRoster(RosterEntity roster) {
+        this.roster = roster;
     }
 
     public PatientEntity getPatient() {
@@ -95,21 +95,21 @@ public class AttributionRelationship {
         if (!(o instanceof AttributionRelationship)) return false;
         AttributionRelationship that = (AttributionRelationship) o;
         return Objects.equals(attributionID, that.attributionID) &&
-                Objects.equals(provider, that.provider) &&
+                Objects.equals(roster, that.roster) &&
                 Objects.equals(patient, that.patient) &&
                 Objects.equals(created, that.created);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(attributionID, provider, patient, created);
+        return Objects.hash(attributionID, roster, patient, created);
     }
 
     @Override
     public String toString() {
         return "AttributionRelationship{" +
                 "attributionID=" + attributionID +
-                ", provider=" + provider +
+                ", roster=" + roster +
                 ", patient=" + patient +
                 ", created=" + created +
                 '}';

@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
@@ -12,6 +13,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -46,16 +48,16 @@ public class GroupResource extends AbstractGroupResource {
 
     @POST
     @FHIR
+    @UnitOfWork
     @Override
-    public Group createRoster(Group attributionRoster) {
+    public Response createRoster(Group attributionRoster) {
         // Lookup the Provider by NPI
 
         final String providerNPI = attributionRoster
                 .getCharacteristic()
                 .stream()
-                .map(Group.GroupCharacteristicComponent::getCode)
-                .filter(code -> code.getCodingFirstRep().getCode().equals("attributed-to"))
-                .map(CodeableConcept::getText)
+                .filter(concept -> concept.getCode().getText().equals("attributed-to"))
+                .map(concept -> ((CodeableConcept) concept.getValue()).getText())
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
 
@@ -65,7 +67,10 @@ public class GroupResource extends AbstractGroupResource {
         }
 
         final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0));
-        return this.rosterDAO.persistEntity(rosterEntity).toFHIR();
+        // Add the first provider
+        final Group persistedGroup = this.rosterDAO.persistEntity(rosterEntity).toFHIR();
+
+        return Response.status(Response.Status.CREATED).entity(persistedGroup).build();
     }
 
     @POST

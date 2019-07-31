@@ -139,7 +139,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
                 .filter(resource -> resource.getResourceType() == ResourceType.Patient)
                 .map(patient -> PatientEntity.fromFHIR((Patient) patient))
                 .peek(patientEntity -> patientEntity.setOrganization(organization))
-                .map(pEntity -> new AttributionRelationship(provider, pEntity))
+                .map(pEntity -> new AttributionRelationship(null, pEntity))
                 .forEach(this.rDAO::addAttributionRelationship);
     }
 

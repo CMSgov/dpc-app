@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Entity(name = "roster")
+@Entity(name = "rosters")
 public class RosterEntity implements Serializable {
     public static final long serialVersionUID = 42L;
 
@@ -25,15 +25,24 @@ public class RosterEntity implements Serializable {
     private UUID id;
 
     @NotNull
-    @OneToOne
-    private ProviderEntity providerID;
+    @ManyToOne
+    @JoinColumn(name = "provider_id")
+    private ProviderEntity attributedProvider;
 
     @NotNull
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "organization_id")
     private OrganizationEntity managingOrganization;
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<AttributionRelationship> patients;
+    @JoinTable(name = "attributions",
+            joinColumns = {
+                    @JoinColumn(name = "roster_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "patient_id", referencedColumnName = "id")
+            })
+    private List<PatientEntity> patients;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
@@ -55,12 +64,12 @@ public class RosterEntity implements Serializable {
         this.id = id;
     }
 
-    public ProviderEntity getProviderID() {
-        return providerID;
+    public ProviderEntity getAttributedProvider() {
+        return attributedProvider;
     }
 
-    public void setProviderID(ProviderEntity providerID) {
-        this.providerID = providerID;
+    public void setAttributedProvider(ProviderEntity attributedProvider) {
+        this.attributedProvider = attributedProvider;
     }
 
     public OrganizationEntity getManagingOrganization() {
@@ -71,11 +80,11 @@ public class RosterEntity implements Serializable {
         this.managingOrganization = managingOrganization;
     }
 
-    public List<AttributionRelationship> getPatients() {
+    public List<PatientEntity> getPatients() {
         return patients;
     }
 
-    public void setPatients(List<AttributionRelationship> patients) {
+    public void setPatients(List<PatientEntity> patients) {
         this.patients = patients;
     }
 
@@ -105,7 +114,7 @@ public class RosterEntity implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         RosterEntity that = (RosterEntity) o;
         return id.equals(that.id) &&
-                providerID.equals(that.providerID) &&
+                attributedProvider.equals(that.attributedProvider) &&
                 managingOrganization.equals(that.managingOrganization) &&
                 patients.equals(that.patients) &&
                 createdAt.equals(that.createdAt) &&
@@ -114,11 +123,19 @@ public class RosterEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, providerID, managingOrganization, patients, createdAt, updatedAt);
+        return Objects.hash(id, attributedProvider, managingOrganization, patients, createdAt, updatedAt);
     }
 
     public static RosterEntity fromFHIR(Group attributionRoster, ProviderEntity providerEntity) {
         final RosterEntity rosterEntity = new RosterEntity();
+
+        final UUID rosterID;
+        if (attributionRoster.getId() == null) {
+            rosterID = UUID.randomUUID();
+        } else {
+            rosterID = UUID.fromString(attributionRoster.getId());
+        }
+        rosterEntity.setId(rosterID);
 
         // Set the managing organization
         final OrganizationEntity organizationEntity = new OrganizationEntity();
@@ -130,10 +147,13 @@ public class RosterEntity implements Serializable {
         // Add patients, but only those which are active
         rosterEntity.setPatients(getAttributedPatients(attributionRoster, providerEntity));
 
+        // Add the provider
+        rosterEntity.setAttributedProvider(providerEntity);
+
         return rosterEntity;
     }
 
-    private static List<AttributionRelationship> getAttributedPatients(Group attributionRoster, ProviderEntity providerEntity) {
+    private static List<PatientEntity> getAttributedPatients(Group attributionRoster, ProviderEntity providerEntity) {
         return attributionRoster
                 .getMember()
                 .stream()
@@ -144,13 +164,6 @@ public class RosterEntity implements Serializable {
                     final PatientEntity patientEntity = new PatientEntity();
                     patientEntity.setPatientID(UUID.fromString(id));
                     return patientEntity;
-                })
-                .map(patient -> {
-                    final AttributionRelationship relationship = new AttributionRelationship();
-                    relationship.setProvider(providerEntity);
-                    relationship.setPatient(patient);
-
-                    return relationship;
                 })
                 .collect(Collectors.toList());
     }

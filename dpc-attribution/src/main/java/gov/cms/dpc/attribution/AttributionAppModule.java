@@ -37,6 +37,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(EndpointResource.class);
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
+        binder.bind(GroupResource.class);
 
         // DAOs
         binder.bind(EndpointDAO.class);
@@ -44,6 +45,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(PatientDAO.class);
         binder.bind(ProviderDAO.class);
         binder.bind(ProviderRoleDAO.class);
+        binder.bind(RosterDAO.class);
 
         // Tasks
         binder.bind(TruncateDatabase.class);
@@ -65,11 +67,12 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
      * @param engine          - {@link AttributionEngine} first constructor parameter (provided by Guice) to resource
      * @return - {@link GroupResource} with injected database session
      */
-    @Provides
-    GroupResource provideAttributionResource(DPCHibernateBundle hibernateModule, AttributionEngine engine) {
-        return new UnitOfWorkAwareProxyFactory(hibernateModule)
-                .create(GroupResource.class, AttributionEngine.class, engine);
-    }
+//    @Provides
+//    GroupResource provideAttributionResource(DPCHibernateBundle hibernateModule, AttributionEngine engine) {
+//        return new GroupResource();
+////        return new UnitOfWorkAwareProxyFactory(hibernateModule)
+////                .create(GroupResource.class, AttributionEngine.class, engine);
+//    }
 
     @Provides
     OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao, MacaroonBakery bakery) {

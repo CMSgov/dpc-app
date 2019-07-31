@@ -17,7 +17,7 @@ public abstract class AbstractGroupResource {
 
     @POST
     @FHIR
-    public abstract Group createRoster(Group attributionRoster);
+    public abstract Response createRoster(Group attributionRoster);
 
     @POST
     @Path("/$submit")

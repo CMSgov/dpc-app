@@ -25,7 +25,7 @@ public class RosterEntityConverter {
         attributedConcept.setText("attributed-to");
 
         final CodeableConcept providerConcept = new CodeableConcept();
-        providerConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(entity.getProviderID().getProviderNPI());
+        providerConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(entity.getAttributedProvider().getProviderNPI());
         group.addCharacteristic()
                 .setCode(attributedConcept)
                 .setValue(providerConcept)
@@ -34,7 +34,7 @@ public class RosterEntityConverter {
         final List<Group.GroupMemberComponent> patients = entity
                 .getPatients()
                 .stream()
-                .map(relationships -> new IdType("Patient", relationships.getPatient().getPatientID().toString()))
+                .map(relationships -> new IdType("Patient", relationships.getPatientID().toString()))
                 .map(Reference::new)
                 .map(Group.GroupMemberComponent::new)
                 .collect(Collectors.toList());

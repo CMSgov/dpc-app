@@ -1,6 +1,9 @@
 package gov.cms.dpc.attribution;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.common.utils.SeedProcessor;
@@ -16,10 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.SharedMethods.createAttributionBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AttributionFHIRTest {
 
@@ -69,7 +70,7 @@ class AttributionFHIRTest {
     }
 
     @TestFactory
-    Stream<DynamicTest> generateBundleTests() {
+    Stream<DynamicTest> generateRosterTests() {
 
         // Create the Organization
 
@@ -90,16 +91,59 @@ class AttributionFHIRTest {
 
     private void submitRoster(Bundle bundle) throws Exception {
 
-        final String providerID = ((Practitioner) bundle.getEntryFirstRep().getResource()).getIdentifierFirstRep().getValue();
-        final String patientID = ((Patient) bundle.getEntry().get(1).getResource()).getIdentifierFirstRep().getValue();
+        // Provider first, then patients
+        final Practitioner practitioner = (Practitioner) bundle.getEntryFirstRep().getResource();
+        final String providerID = practitioner.getId();
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");
 
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+        final MethodOutcome createdPractitioner = client
+                .create()
+                .resource(practitioner)
+                .encodedJson()
+                .execute();
+
+        assertTrue(createdPractitioner.getCreated(), "Should have created the practitioner");
+
+        bundle
+                .getEntry()
+                .stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(resource -> resource.getResourceType() == ResourceType.Patient)
+                .map(resource -> (Patient) resource)
+                .forEach(patient -> {
+                    final MethodOutcome created = client
+                            .create()
+                            .resource(patient)
+                            .encodedJson()
+                            .execute();
+                    assertTrue(created.getCreated(), "Should have created the patient");
+                });
+
+        // Finally, the Group
+        final Group rosterGroup = (Group) bundle.getEntry()
+                .stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.Group)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Should have group"))
+                .getResource();
+
+        final MethodOutcome groupCreated = client
+                .create()
+                .resource(rosterGroup)
+                .encodedJson()
+                .execute();
+
+        assertTrue(groupCreated.getCreated(), "Should have created the group");
+
+
+        try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
             HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/$submit");
             httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
-            try (CloseableHttpResponse response = client.execute(httpPost)) {
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
@@ -109,18 +153,20 @@ class AttributionFHIRTest {
             HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
             getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
-            try (CloseableHttpResponse response = client.execute(getPatients)) {
+            try (CloseableHttpResponse response = httpClient.execute(getPatients)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
                 List<String> beneies = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
                 });
                 assertEquals(bundle.getEntry().size() - 1, beneies.size(), "Should have the same number of beneies");
             }
 
+            final String patientID = ((Patient) bundle.getEntry().get(1).getResource()).getIdentifierFirstRep().getValue();
+
             // Check that a specific patient is attributed
             final HttpGet isAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), providerID, patientID));
             isAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
-            try (CloseableHttpResponse response = client.execute(isAttributed)) {
+            try (CloseableHttpResponse response = httpClient.execute(isAttributed)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
             }
 
@@ -129,7 +175,7 @@ class AttributionFHIRTest {
             httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
-            try (CloseableHttpResponse response = client.execute(httpPost)) {
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
@@ -137,7 +183,7 @@ class AttributionFHIRTest {
             getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
             getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
-            try (CloseableHttpResponse response = client.execute(getPatients)) {
+            try (CloseableHttpResponse response = httpClient.execute(getPatients)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
                 List<String> beneies = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
                 });

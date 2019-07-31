@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.utils;
 
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRBuilders;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 
@@ -67,11 +68,26 @@ public class SeedProcessor {
         practitioner.addName().addGiven("Test").setFamily("Provider");
 
         // Add the Organization ID
-        final Meta meta = new Meta();
-        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organizationID.toString(), "Organization ID");
-        practitioner.setMeta(meta);
+        FHIRBuilders.addOrganizationTag(practitioner, organizationID);
 
         bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
+
+        final CodeableConcept attributionConcept = new CodeableConcept();
+        attributionConcept.setText("attributed-to");
+
+        final CodeableConcept NPIConcept = new CodeableConcept();
+        NPIConcept.setText(entry.getKey());
+
+        final Group group = new Group();
+        group.setType(Group.GroupType.PERSON);
+        group.setActive(true);
+        group.addCharacteristic()
+                .setExclude(false)
+                .setCode(attributionConcept)
+                .setValue(NPIConcept);
+
+        // Add the org
+        FHIRBuilders.addOrganizationTag(group, organizationID);
 
         entry.getValue()
                 .forEach((value) -> {
@@ -80,12 +96,18 @@ public class SeedProcessor {
                     patient.addIdentifier().setValue(value.getRight()).setSystem(DPCIdentifierSystem.MBI.getSystem());
                     patient.addName().addGiven("Tester " + rand.nextInt()).setFamily("Patient");
                     patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
+                    patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID.toString())));
                     final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
                     component.setResource(patient);
                     component.setFullUrl("http://something.gov/" + patient.getIdentifierFirstRep().getValue());
                     bundle.addEntry(component);
+
+                    // Add to group
+                    group.addMember().setEntity(new Reference(patient.getId()));
                 });
 
+        // Now, add the Group
+        bundle.addEntry().setResource(group);
         return bundle;
     }
 }
