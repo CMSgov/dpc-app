@@ -70,7 +70,7 @@ class ExpirationJobTest {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
 
             // Submit the bundle
-            final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+            final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/$submit");
             submitUpdate.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
             submitUpdate.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(updateBundle)));
 

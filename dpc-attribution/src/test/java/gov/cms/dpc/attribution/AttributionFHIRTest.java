@@ -95,7 +95,7 @@ class AttributionFHIRTest {
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
 
-            HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+            HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/$submit");
             httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
@@ -125,7 +125,7 @@ class AttributionFHIRTest {
             }
 
             // Submit again and make sure the size doesn't change
-            httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+            httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/$submit");
             httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
             httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
 
@@ -162,7 +162,7 @@ class AttributionFHIRTest {
             final Bundle updateBundle = createAttributionBundle(providerID, newPatientID, organization.getIdElement().getIdPart());
 
             // Submit the bundle
-            final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group");
+            final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/$submit");
             submitUpdate.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
             submitUpdate.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(updateBundle)));
 

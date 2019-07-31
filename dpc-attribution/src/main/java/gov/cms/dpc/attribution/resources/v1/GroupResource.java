@@ -34,6 +34,7 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     @POST
+    @Path("/$submit")
     @FHIR
     @Override
     @Timed

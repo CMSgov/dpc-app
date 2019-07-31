@@ -15,6 +15,7 @@ public abstract class AbstractGroupResource {
     }
 
     @POST
+    @Path("/$submit")
     @FHIR
     public abstract Response submitRoster(Bundle providerBundle);
 
