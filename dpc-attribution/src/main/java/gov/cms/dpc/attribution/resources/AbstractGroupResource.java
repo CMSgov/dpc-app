@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -13,6 +14,10 @@ public abstract class AbstractGroupResource {
     protected AbstractGroupResource() {
         // Not used
     }
+
+    @POST
+    @FHIR
+    public abstract Group createRoster(Group attributionRoster);
 
     @POST
     @Path("/$submit")

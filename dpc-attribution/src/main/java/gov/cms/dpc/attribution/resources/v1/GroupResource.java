@@ -2,15 +2,22 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.attribution.jdbi.ProviderDAO;
+import gov.cms.dpc.attribution.jdbi.RosterDAO;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
+import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRBuilders;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Group;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +34,38 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
     private final AttributionEngine engine;
+    private final ProviderDAO providerDAO;
+    private final RosterDAO rosterDAO;
 
     @Inject
-    GroupResource(AttributionEngine engine) {
+    GroupResource(AttributionEngine engine, ProviderDAO providerDAO, RosterDAO rosterDAO) {
         this.engine = engine;
+        this.rosterDAO = rosterDAO;
+        this.providerDAO = providerDAO;
+    }
+
+    @POST
+    @FHIR
+    @Override
+    public Group createRoster(Group attributionRoster) {
+        // Lookup the Provider by NPI
+
+        final String providerNPI = attributionRoster
+                .getCharacteristic()
+                .stream()
+                .map(Group.GroupCharacteristicComponent::getCode)
+                .filter(code -> code.getCodingFirstRep().getCode().equals("attributed-to"))
+                .map(CodeableConcept::getText)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
+
+        final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster)));
+        if (providers.isEmpty()) {
+            throw new WebApplicationException("Unable to finding attributable provider", Response.Status.NOT_FOUND);
+        }
+
+        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0));
+        return this.rosterDAO.persistEntity(rosterEntity).toFHIR();
     }
 
     @POST

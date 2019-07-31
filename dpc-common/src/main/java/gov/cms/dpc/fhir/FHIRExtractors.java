@@ -4,6 +4,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,5 +124,22 @@ public class FHIRExtractors {
                 .filter(id -> id.getSystem().equals(DPCIdentifierSystem.MBI.getSystem()))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Cannot find identifier for system: %s", system.getSystem())));
+    }
+
+    /**
+     * Gets the Organization ID from the {@link ca.uhn.fhir.model.api.Tag} sections of the {@link IBaseResource}
+     * This searches through the tags for one that has the {@link DPCIdentifierSystem#DPC} system and returns the first one.
+     *
+     * @param resource - {@link IBaseResource} to
+     * @return - {@link String} Organization ID
+     * @throws IllegalArgumentException - if there is not at least one Organization tag
+     */
+    public static String getOrganizationID(IBaseResource resource) {
+        return resource.getMeta().getTag()
+                .stream()
+                .filter(tag -> tag.getSystem().equals(DPCIdentifierSystem.DPC.getSystem()))
+                .map(IBaseCoding::getCode)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Practitioner MUST have DPC organization tag"));
     }
 }

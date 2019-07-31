@@ -1,9 +1,7 @@
 package gov.cms.dpc.common.entities;
 
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -130,12 +128,7 @@ public class ProviderEntity implements Serializable {
         final ProviderEntity provider = new ProviderEntity();
 
         // Get the Organization, from the tag field
-        final String organizationID = resource.getMeta().getTag()
-                .stream()
-                .filter(tag -> tag.getSystem().equals(DPCIdentifierSystem.DPC.getSystem()))
-                .map(Coding::getCode)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Practitioner MUST have DPC organization tag"));
+        final String organizationID = FHIRExtractors.getOrganizationID(resource);
 
         final OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(UUID.fromString(organizationID));
@@ -150,4 +143,5 @@ public class ProviderEntity implements Serializable {
 
         return provider;
     }
+
 }

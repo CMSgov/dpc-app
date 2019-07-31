@@ -49,6 +49,15 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
         return Optional.ofNullable(get(providerID));
     }
 
+    /**
+     * Search for matching providers.
+     * Organization ID is ALWAYS required. NPI or Resource ID are optional
+     *
+     * @param providerID     - {@link UUID} direct provider Resource ID
+     * @param providerNPI    - {@link String} Provider NPI
+     * @param organizationID - {@link UUID} REQUIRED organization resource ID
+     * @return - {@link List} of matching {@link ProviderEntity}
+     */
     public List<ProviderEntity> getProviders(UUID providerID, String providerNPI, UUID organizationID) {
 
         // Build a selection query to get records from the database
