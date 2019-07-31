@@ -68,6 +68,7 @@ In order to use the Data APIs, upon registration and each time any software subm
 - You must promptly inform CMS or one of CMS’ contractors in the event that you no longer meet any of this terms of service.
 - You must immediately cease use of the Data APIs when you no longer meet any of the terms of this terms of service.
 - You must adhere to the basic desktop security measures to ensure the security of Medicare beneficiary personal health information.
+- You must publish your FHIR end points in the CMS National Provider and Plan Enumeration System (NPPES) database where your National Provider Identifier (NPI) record exists before production data will be provided.
 
 ### Vendor Responsibilities
 
