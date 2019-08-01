@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require './lib/dpc_middleware/ig_fix'
 
