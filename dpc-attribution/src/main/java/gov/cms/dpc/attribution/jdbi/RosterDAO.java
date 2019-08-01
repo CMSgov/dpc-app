@@ -55,4 +55,9 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         query.where(predicates.toArray(new Predicate[0]));
         return this.list(query);
     }
+
+    public RosterEntity updateRoster(RosterEntity existingRoster) {
+        this.currentSession().merge(existingRoster);
+        return existingRoster;
+    }
 }

@@ -6,6 +6,8 @@ import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RosterDAO;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.attribution.utils.RESTUtils;
+import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
@@ -14,9 +16,7 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,13 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Api(value = "Group")
 public class GroupResource extends AbstractGroupResource {
@@ -57,7 +63,13 @@ public class GroupResource extends AbstractGroupResource {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
 
-        final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster)));
+        // Check and see if a roster already exists for the provider
+        final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));
+        final List<RosterEntity> entities = this.rosterDAO.findEntities(organizationID, providerNPI, null);
+        if (!entities.isEmpty()) {
+            return Response.status(Response.Status.CREATED).entity(entities.get(0).toFHIR()).build();
+        }
+        final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, organizationID);
         if (providers.isEmpty()) {
             throw new WebApplicationException("Unable to finding attributable provider", Response.Status.NOT_FOUND);
         }
@@ -88,7 +100,73 @@ public class GroupResource extends AbstractGroupResource {
         return bundle;
     }
 
-//    @POST
+    @PUT
+    @Path("/{rosterID}")
+    @FHIR
+    @UnitOfWork
+    @Override
+    public Group updateRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> new WebApplicationException("Cannot find Roster resource", Response.Status.NOT_FOUND));
+
+        // Verify that we don't have any duplicated patient references, which causes havoc with the merge logic.
+        final Set<Reference> memberReferences = groupUpdate
+                .getMember()
+                .stream()
+                .map(Group.GroupMemberComponent::getEntity)
+                .filter(distinctByKey(Reference::getReference))
+                .collect(Collectors.toSet());
+
+        if (memberReferences.size() < groupUpdate.getMember().size()) {
+            throw new WebApplicationException("Cannot have a Patient listed twice in Group update", Response.Status.BAD_REQUEST);
+        }
+
+        // Do we really have to do a linear search to figure out who to add/remove?
+        // This should not be here for long
+        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+
+        // Remove patients first
+        groupUpdate
+                .getMember()
+                .stream()
+                .filter(Group.GroupMemberComponent::getInactive)
+                .map(Group.GroupMemberComponent::getEntity)
+                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
+
+        // Now, add all the new ones
+        groupUpdate
+                .getMember()
+                .stream()
+                .filter(member -> !member.getInactive())
+                .map(Group.GroupMemberComponent::getEntity)
+                .map(ref -> {
+                    final PatientEntity pe = new PatientEntity();
+                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
+                    return pe;
+                })
+                .map(pe -> new AttributionRelationship(existingRoster, pe))
+                .forEach(relationship -> {
+                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
+                    if (found.isEmpty()) {
+                        existingAttributions.add(relationship);
+                    }
+                });
+
+        existingRoster.setAttributions(existingAttributions);
+
+        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+    }
+
+    @DELETE
+    @Path("/{rosterID}")
+    @FHIR
+    @UnitOfWork
+    @Override
+    public Response deleteRoster(@PathParam("rosterID") UUID rosterID) {
+        return null;
+    }
+
+    //    @POST
 //    @Path("/$submit")
 //    @FHIR
 //    @Override
@@ -220,4 +298,57 @@ public class GroupResource extends AbstractGroupResource {
 //            throw new WebApplicationException("Cannot remove attributed patients", HttpStatus.INTERNAL_SERVER_ERROR_500);
 //        }
 //    }
+
+    /**
+     * Remove {@link AttributionRelationship} from the given {@link List} of {@link AttributionRelationship}, if it matches
+     *
+     * @param relationships   - {@link List} of {@link AttributionRelationship} entities to find in list
+     * @param entityReference - {{@link AttributionRelationship} to find in list
+     */
+    private static void removeAttributedPatients(List<AttributionRelationship> relationships, Reference entityReference) {
+        final IdType idType = new IdType(entityReference.getReference());
+        final Optional<AttributionRelationship> maybeAttributed = relationships
+                .stream()
+                .filter(relationship -> relationship.getPatient().getPatientID().toString().equals(idType.getIdPart()))
+                .findAny();
+
+        maybeAttributed.ifPresent(relationships::remove);
+    }
+
+    /**
+     * Find a matching {@link AttributionRelationship} from a {@link List} of {@link AttributionRelationship} entities
+     *
+     * @param relationships - {@link List} of {@link AttributionRelationship} entities to match against
+     * @param relationship  - {@link AttributionRelationship} to compare against the list
+     * @return - {@link Optional} if {@link AttributionRelationship} is in the list
+     */
+    private static Optional<AttributionRelationship> findAttributionRelationship(List<AttributionRelationship> relationships, AttributionRelationship relationship) {
+        return relationships
+                .stream()
+                .filter(r1 -> matchAttribution(r1, relationship))
+                .findAny();
+    }
+
+    /**
+     * Determines if two {@link AttributionRelationship} entity are equal, by looking at the {@link RosterEntity} and {@link PatientEntity} in both entities.
+     *
+     * @param r1 - {@link AttributionRelationship} left side of the comparison
+     * @param r2 - {@link AttributionRelationship} right side of the comparison
+     * @return - {@code true} relationships are equal. {@code false} relationships are not equal
+     */
+    private static boolean matchAttribution(AttributionRelationship r1, AttributionRelationship r2) {
+        return r1.getRoster().getId().equals(r2.getRoster().getId()) && r1.getPatient().getPatientID().equals(r2.getPatient().getPatientID());
+    }
+
+    /**
+     * Stateful {@link Predicate} filter that allows us to verify if we've seen a {@link Reference} before, since HAPI doesn't let us do directly object equality.
+     *
+     * @param keyExtractor - {@link Function} for extracting the value to compare
+     * @param <T>          - {@link T} type of comparison value
+     * @return - {@link Predicate} for use with streams.
+     */
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
+    }
 }

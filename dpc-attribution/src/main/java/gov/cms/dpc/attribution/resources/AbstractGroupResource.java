@@ -5,9 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
@@ -24,15 +22,18 @@ public abstract class AbstractGroupResource {
 
     @GET
     public abstract Bundle rosterSearch(@NotEmpty String organizationID, String providerNPI, String patientID);
-//
-//
-//    @POST
-//    @Path("/$submit")
-//    public abstract Response submitRoster(Bundle providerBundle);
 
     @GET
     @Path("/{rosterID}")
     public abstract Group getRoster(UUID rosterID);
+
+    @PUT
+    @Path("/{rosterID}")
+    public abstract Group updateRoster(UUID rosterID, Group groupUpdate);
+
+    @DELETE
+    @Path("/{rosterID}")
+    public abstract Response deleteRoster(UUID rosterID);
 //
 //    @GET
 //    @Path("/{groupID}/{patientID}")

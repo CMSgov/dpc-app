@@ -39,7 +39,9 @@ public class SharedMethods {
 
         // Add some random values to the patient
         final Patient patient = new Patient();
-        patient.addIdentifier().setValue(patientID).setSystem(DPCIdentifierSystem.MBI.getSystem());
+        final Identifier patientIdentifier = new Identifier();
+        patientIdentifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(patientID);
+        patient.addIdentifier(patientIdentifier);
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
         final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();

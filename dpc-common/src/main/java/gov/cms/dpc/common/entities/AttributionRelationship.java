@@ -91,17 +91,15 @@ public class AttributionRelationship {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AttributionRelationship)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         AttributionRelationship that = (AttributionRelationship) o;
-        return Objects.equals(attributionID, that.attributionID) &&
-                Objects.equals(roster, that.roster) &&
-                Objects.equals(patient, that.patient) &&
-                Objects.equals(created, that.created);
+        return Objects.equals(roster, that.roster) &&
+                Objects.equals(patient, that.patient);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(attributionID, roster, patient, created);
+        return Objects.hash(roster, patient);
     }
 
     @Override
