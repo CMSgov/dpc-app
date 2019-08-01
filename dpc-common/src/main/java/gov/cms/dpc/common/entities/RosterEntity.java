@@ -46,7 +46,7 @@ public class RosterEntity implements Serializable {
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
-    RosterEntity() {
+    private RosterEntity() {
         // Hibernate required
     }
 

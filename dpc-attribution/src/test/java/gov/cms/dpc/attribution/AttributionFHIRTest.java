@@ -185,7 +185,20 @@ class AttributionFHIRTest {
 //            HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
 //            getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 //
-//            final String patientID = ((Patient) bundle.getEntry().get(1).getResource()).getIdentifierFirstRep().getValue();
+            final String patientID = ((Patient) bundle.getEntry().get(1).getResource()).getIdentifierFirstRep().getValue();
+
+            final Bundle searchedPatient = client
+                    .search()
+                    .forResource(Group.class)
+                    .where(Group.MEMBER.hasId(patientID))
+                    .where(Group.CHARACTERISTIC.exactly().code(providerID))
+                    .withTag("", organizationID)
+                    .returnBundle(Bundle.class)
+                    .encodedJson()
+                    .execute();
+
+            assertEquals(1, searchedPatient.getTotal(), "Should only have a single group");
+
 //
 //            // Check that a specific patient is attributed
 //            final HttpGet isAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), providerID, patientID));
