@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.common.utils.SeedProcessor;
@@ -33,7 +36,6 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.SharedMethods.createAttributionBundle;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -85,9 +87,8 @@ class AttributionFHIRTest {
                 .stream()
                 .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateRosterBundle(entry, orgID))
                 .flatMap((bundle) -> Stream.of(
-                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle))));
-//                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));
-
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));
     }
 
     private void submitRoster(Bundle bundle) throws Exception {
@@ -131,26 +132,31 @@ class AttributionFHIRTest {
                 .filter(resource -> resource.getResourceType() == ResourceType.Patient)
                 .map(resource -> (Patient) resource)
                 .forEach(patient -> {
-                    final MethodOutcome created = client
-                            .create()
-                            .resource(patient)
-                            .encodedJson()
-                            .execute();
-                    assertTrue(created.getCreated(), "Should have created the patient");
-                    final Patient pr = (Patient) created.getResource();
+                    try {
+                        final MethodOutcome created = client
+                                .create()
+                                .resource(patient)
+                                .encodedJson()
+                                .execute();
+                        final Patient pr = (Patient) created.getResource();
+                        // Add to group
+                        rosterGroup
+                                .addMember()
+                                .setEntity(new Reference(pr.getIdElement()))
+                                .setInactive(false);
 
-                    // Add to group
-                    rosterGroup
-                            .addMember()
-                            .setEntity(new Reference(pr.getIdElement()))
-                            .setInactive(false);
+                        assertTrue(created.getCreated(), "Should have created the patient");
+                    } catch (NotModifiedException e) {
+                        e.getMessage();
+                    }
                 });
 
-        final MethodOutcome groupCreated = client
+        final ICreateTyped groupCreation = client
                 .create()
                 .resource(rosterGroup)
-                .encodedJson()
-                .execute();
+                .encodedJson();
+
+        final MethodOutcome groupCreated = groupCreation.execute();
 
         assertTrue(groupCreated.getCreated(), "Should have created the group");
 
@@ -159,32 +165,21 @@ class AttributionFHIRTest {
 
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-//            HttpPost httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/$submit");
-//            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//            httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
-//
-//            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-//                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
-//            }
-
             // Get the patients
-            final Group fetchedGroup = client
+            final IReadExecutable<Group> groupSizeQuery = client
                     .read()
                     .resource(Group.class)
                     .withId(createdGroup.getId())
-                    .encodedJson()
-                    .execute();
+                    .encodedJson();
 
+            final Group fetchedGroup = groupSizeQuery
+                    .execute();
             // Remove meta
             fetchedGroup.setMeta(null);
 
             assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
                     () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of beneies"));
 
-//            // Check how many are attributed
-//            HttpGet getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
-//            getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//
             final String patientID = ((Patient) bundle.getEntry().get(1).getResource()).getIdentifierFirstRep().getValue();
 
             final Bundle searchedPatient = client
@@ -199,34 +194,11 @@ class AttributionFHIRTest {
 
             assertEquals(1, searchedPatient.getTotal(), "Should only have a single group");
 
-//
-//            // Check that a specific patient is attributed
-//            final HttpGet isAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), providerID, patientID));
-//            isAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//
-//            try (CloseableHttpResponse response = httpClient.execute(isAttributed)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
-//            }
-//
-//            // Submit again and make sure the size doesn't change
-////            httpPost = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/$submit");
-////            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-////            httpPost.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(bundle)));
-////
-////            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-////                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
-////            }
-//
-//            // Check how many are attributed
-//            getPatients = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + providerID);
-//            getPatients.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//
-//            try (CloseableHttpResponse response = httpClient.execute(getPatients)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
-//                List<String> beneies = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
-//                });
-//                assertEquals(bundle.getEntry().size() - 1, beneies.size(), "Should have the same number of beneies");
-//            }
+            groupCreation.execute();
+
+            final Group group2 = groupSizeQuery.execute();
+            assertAll(() -> assertTrue(fetchedGroup.equalsDeep(group2), "Groups should be equal"),
+                    () -> assertEquals(bundle.getEntry().size() - 1, group2.getMember().size(), "Should have the same number of beneies"));
         }
     }
 

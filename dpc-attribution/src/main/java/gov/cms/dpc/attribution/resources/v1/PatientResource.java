@@ -99,9 +99,23 @@ public class PatientResource extends AbstractPatientResource {
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field.")
     @Override
     public Response createPatient(Patient patient) {
-        final PatientEntity entity = this.dao.persistPatient(PatientEntity.fromFHIR(patient));
 
-        return Response.status(Response.Status.CREATED)
+        final UUID organizationID = FHIRExtractors.getEntityUUID(patient.getManagingOrganization().getReference());
+        final String patientMPI = FHIRExtractors.getPatientMPI(patient);
+
+        final Response.Status status;
+        final PatientEntity entity;
+        // Check to see if Patient already exists, if so, ignore it.
+        final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMPI, organizationID);
+        if (!patientEntities.isEmpty()) {
+            status = Response.Status.CREATED;
+            entity = patientEntities.get(0);
+        } else {
+            status = Response.Status.CREATED;
+            entity = this.dao.persistPatient(PatientEntity.fromFHIR(patient));
+        }
+
+        return Response.status(status)
                 .entity(PatientEntityConverter.convert(entity))
                 .build();
     }
