@@ -7,23 +7,23 @@
   },
   "extension" : [{
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/source/resources"
+    "valueString" : "/Users/ronakshah/Developer/HHS/dpc-app/ig/source/resources"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/dpc-common/src/main/resources/validations"
+    "valueString" : "/Users/ronakshah/Developer/HHS/dpc-app/dpc-common/src/main/resources/validations"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/dpc-api/src/main/resources"
+    "valueString" : "/Users/ronakshah/Developer/HHS/dpc-app/dpc-api/src/main/resources"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/framework"
+    "valueString" : "/Users/ronakshah/Developer/HHS/dpc-app/ig/framework"
   },
   {
     "url" : "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages",
-    "valueString" : "/Users/jaredcunha/work/dpc-app/ig/source/pages"
+    "valueString" : "/Users/ronakshah/Developer/HHS/dpc-app/ig/source/pages"
   }],
   "url" : "https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig",
   "name" : "Data @ the Point of Care Implementation Guide",
@@ -42,42 +42,26 @@
     }],
     "resource" : [{
       "reference" : {
-        "reference" : "Organization/organization",
-        "display" : "organization.json"
-      },
-      "exampleBoolean" : true,
-      "groupingId" : "p1"
-    },
-    {
-      "reference" : {
-        "reference" : "Practitioner/practitioner",
-        "display" : "practitioner.json"
-      },
-      "exampleBoolean" : true,
-      "groupingId" : "p1"
-    },
-    {
-      "reference" : {
-        "reference" : "Group/group",
-        "display" : "group.json"
-      },
-      "exampleBoolean" : true,
-      "groupingId" : "p1"
-    },
-    {
-      "reference" : {
-        "reference" : "Endpoint/endpoint",
-        "display" : "endpoint.json"
-      },
-      "exampleBoolean" : true,
-      "groupingId" : "p1"
-    },
-    {
-      "reference" : {
         "reference" : "StructureDefinition/dpc-profile-address",
         "display" : "DPCAddress.json"
       },
       "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "Patient/dpc-sample-patient",
+        "display" : "DPC-sample-patient.json"
+      },
+      "exampleBoolean" : true,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "Practitioner/dpc-sample-practitioner",
+        "display" : "DPC-sample-practitioner.json"
+      },
+      "exampleBoolean" : true,
       "groupingId" : "p1"
     },
     {
@@ -115,7 +99,7 @@
     {
       "reference" : {
         "reference" : "CapabilityStatement/dpc-capabilities-statement",
-        "display" : "capabilities.json"
+        "display" : "DPCCapabilities.json"
       },
       "exampleBoolean" : false,
       "groupingId" : "p1"
