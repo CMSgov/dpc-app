@@ -54,6 +54,11 @@
         </div>
 
         <div class="field">
+          <%= f.label :num_providers, "Number of Providers at Your Organization", class: "ds-c-label" %>
+          <%= f.number_field :num_providers, value: 0, min: 0, class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
           <%= f.label :address_1, class: "ds-c-label" %>
           <%= f.text_field :address_1, class: "ds-c-field" %>
         </div>

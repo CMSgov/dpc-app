@@ -39,6 +39,7 @@ class User < ApplicationRecord
   validates :last_name, :first_name, presence: true
   validates :organization, presence: true
   validates :organization_type, inclusion: { in: organization_types.keys }
+  validates :num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
   validates :address_1, presence: true
   validates :city, presence: true
   validates :state, inclusion: { in: STATES.keys.map(&:to_s) }
