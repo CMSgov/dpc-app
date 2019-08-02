@@ -2,6 +2,7 @@
 
 class User < ApplicationRecord
   has_one :dpc_registration, inverse_of: :user
+  before_save :num_providers_to_zero_if_blank
 
   STATES = {
     AK: 'Alaska', AL: 'Alabama', AR: 'Arkansas', AZ: 'Arizona',
@@ -50,5 +51,11 @@ class User < ApplicationRecord
 
   def name
     "#{first_name} #{last_name}"
+  end
+
+  private
+
+  def num_providers_to_zero_if_blank
+    self.num_providers = 0 if num_providers.blank?
   end
 end
