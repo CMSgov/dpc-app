@@ -40,9 +40,12 @@
         </div>
 
         <div class="field">
-          <%= f.label :num_providers, "Number of Providers at Your Organization", class: "ds-c-label" %>
+          <%= f.label :num_providers, class: "ds-c-label" do %>
+          Number of Providers at Your Organization
+          <span class="ds-c-field__hint">You may use an approximate number.<br/>If you are a vendor, leave blank.</span>
+          <% end %>
           <%= f.number_field :num_providers, value: "#{resource.num_providers&.positive? ? resource.num_providers : '' }",
-            min: 0, class: "ds-c-field" %>
+            min: 0, class: "ds-c-field ds-c-field--small" %>
         </div>
 
         <div class="field">
