@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
+    private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find Roster resource", Response.Status.NOT_FOUND);
 
     private final AttributionEngine engine;
     private final ProviderDAO providerDAO;
@@ -107,7 +108,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group updateRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> new WebApplicationException("Cannot find Roster resource", Response.Status.NOT_FOUND));
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
         // Verify that we don't have any duplicated patient references, which causes havoc with the merge logic.
         final Set<Reference> memberReferences = groupUpdate
@@ -163,7 +164,11 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     @Override
     public Response deleteRoster(@PathParam("rosterID") UUID rosterID) {
-        return null;
+        final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        this.rosterDAO.delete(rosterEntity);
+        return Response.ok().build();
     }
 
     //    @POST
@@ -213,7 +218,7 @@ public class GroupResource extends AbstractGroupResource {
         logger.debug("API request to retrieve attributed patients for {}", rosterID);
 
         return this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> new WebApplicationException("Cannot find Roster", Response.Status.NOT_FOUND))
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION)
                 .toFHIR();
 
 //        Optional<List<String>> attributedBeneficiaries;

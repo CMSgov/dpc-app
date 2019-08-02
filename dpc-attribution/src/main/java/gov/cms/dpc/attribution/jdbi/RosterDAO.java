@@ -60,4 +60,8 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         this.currentSession().merge(existingRoster);
         return existingRoster;
     }
+
+    public void delete(RosterEntity rosterEntity) {
+        currentSession().delete(rosterEntity);
+    }
 }

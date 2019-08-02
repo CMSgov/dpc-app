@@ -5,10 +5,12 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -22,6 +24,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
@@ -84,7 +87,8 @@ class AttributionFHIRTest {
                 .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateRosterBundle(entry, orgID))
                 .flatMap((bundle) -> Stream.of(
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
-                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle)),
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Remove"), () -> removeRoster(bundle))));
     }
 
     private void submitRoster(Bundle bundle) {
@@ -243,20 +247,6 @@ class AttributionFHIRTest {
             updateGroupRequest
                     .execute();
 
-            // Add an additional patient
-            // Create a new bundle with extra patients to attribute
-
-//            final Bundle updateBundle = createAttributionBundle(providerID, newPatientID, organization.getIdElement().getIdPart());
-//
-//            // Submit the bundle
-//            final HttpPost submitUpdate = new HttpPost("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/$submit");
-//            submitUpdate.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//            submitUpdate.setEntity(new StringEntity(ctx.newJsonParser().encodeResourceToString(updateBundle)));
-//
-//            try (CloseableHttpResponse response = client.execute(submitUpdate)) {
-//                assertEquals(HttpStatus.CREATED_201, response.getStatusLine().getStatusCode(), "Should have succeeded");
-//            }
-
             // Check how many are attributed
 
             final IReadExecutable<Group> getUpdatedGroup = client
@@ -269,23 +259,6 @@ class AttributionFHIRTest {
 
             assertEquals(bundle.getEntry().size(), updatedGroup.getMember().size(), "Should have an additional patient");
 
-//            try (CloseableHttpResponse response = client.execute(getPatients)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
-//                final List<String> patients = mapper.readValue(EntityUtils.toString(response.getEntity()), new TypeReference<List<String>>() {
-//                });
-//                // Since the practitioner is not
-//                assertEquals(bundle.getEntry().size(), patients.size(), "Should have an additional patient");
-//            }
-
-            // Check that a specific patient is attributed
-
-
-//            final HttpGet updatedAttributed = new HttpGet(String.format("http://localhost:%d/v1/Group/%s/%s", APPLICATION.getLocalPort(), providerID, newPatientID));
-//            updatedAttributed.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//
-//            try (CloseableHttpResponse response = client.execute(updatedAttributed)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should be attributed");
-//            }
             final String patientMPI = FHIRExtractors.getPatientMPI(newPatient);
             final Bundle searchedPatient = client
                     .search()
@@ -312,6 +285,47 @@ class AttributionFHIRTest {
                     getUpdatedGroup.execute().getMember().size(),
                     "Should have a missing patient");
         }
+    }
+
+    private void removeRoster(Bundle bundle) {
+
+        final Practitioner practitioner = (Practitioner) bundle.getEntryFirstRep().getResource();
+        final String providerID = practitioner.getIdentifierFirstRep().getValue();
+        final String organizationID = FHIRExtractors.getOrganizationID(practitioner);
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");
+
+        final IQuery<Bundle> bundleSearchRequest = client
+                .search()
+                .forResource(Group.class)
+                .returnBundle(Bundle.class)
+                .where(Group.CHARACTERISTIC.exactly().code(providerID))
+                .withTag("", organizationID)
+                .encodedJson();
+
+        final Bundle rosterSearch = bundleSearchRequest
+                .execute();
+
+        assertFalse(rosterSearch.isEmpty(), "Should have roster");
+        final Group roster = (Group) rosterSearch.getEntryFirstRep().getResource();
+
+        client
+                .delete()
+                .resourceById(new IdType(roster.getId()))
+                .encodedJson()
+                .execute();
+
+        // Make sure it's done
+        final IReadExecutable<IBaseResource> rosterReadRequest = client
+                .read()
+                .resource("Group")
+                .withId(roster.getId())
+                .encodedJson();
+        assertThrows(ResourceNotFoundException.class, rosterReadRequest::execute, "Should not have roster");
+
+        final Bundle emptyBundle = bundleSearchRequest.execute();
+        assertEquals(0, emptyBundle.getTotal(), "Should not have found any rosters");
+
     }
 
     private static Group createBaseAttributionGroup(String providerNPI, String organizationID) {
