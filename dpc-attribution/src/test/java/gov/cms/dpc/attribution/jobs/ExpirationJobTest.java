@@ -82,18 +82,6 @@ class ExpirationJobTest {
                 .execute();
 
         assertEquals(1, expiredGroup.getMember().size(), "Should only have a single Member");
-
-//        try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-//
-//            final HttpGet httpGet = new HttpGet("http://localhost:" + APPLICATION.getLocalPort() + "/v1/Group/" + PROVIDER_ID);
-//            httpGet.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
-//
-//            try (final CloseableHttpResponse response = httpClient.execute(httpGet)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
-//                List<String> beneficiaries = UnmarshallResponse(response.getEntity());
-//                assertEquals(1, beneficiaries.size(), "Should have only have a single relationship");
-//            }
-//        }
     }
 
     void startJob(Client client, String jobName) {
