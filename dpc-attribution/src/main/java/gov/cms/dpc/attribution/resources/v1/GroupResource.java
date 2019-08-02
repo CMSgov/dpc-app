@@ -16,7 +16,10 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +55,11 @@ public class GroupResource extends AbstractGroupResource {
     @POST
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Create Attribution Roster", notes = "FHIR endpoint to create an Attribution roster (Group resource) associated to the provider listed in the in the Group characteristics.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Successfully created Roster"),
+            @ApiResponse(code = 200, message = "Roster already exists")
+    })
     @Override
     public Response createRoster(Group attributionRoster) {
         // Lookup the Provider by NPI
@@ -61,7 +69,7 @@ public class GroupResource extends AbstractGroupResource {
         final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));
         final List<RosterEntity> entities = this.rosterDAO.findEntities(organizationID, providerNPI, null);
         if (!entities.isEmpty()) {
-            return Response.status(Response.Status.CREATED).entity(entities.get(0).toFHIR()).build();
+            return Response.status(Response.Status.OK).entity(entities.get(0).toFHIR()).build();
         }
         final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, organizationID);
         if (providers.isEmpty()) {
@@ -79,13 +87,20 @@ public class GroupResource extends AbstractGroupResource {
     @GET
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Search for attribution rosters", notes = "FHIR endpoint to search for Attribution Rosters." +
+            "<p> You can search for Groups associated to a given provider (via the Provider NPI) and groups for which a patient is a member of (by patient MBI)")
     @Override
-    public Bundle rosterSearch(@NotEmpty @QueryParam("_tag") String organizationToken, @QueryParam("characteristic") String providerNPI, @QueryParam("member") String patientID) {
+    public Bundle rosterSearch(@ApiParam(value = "Organization ID")
+                               @NotEmpty @QueryParam("_tag") String organizationToken,
+                               @ApiParam(value = "Provider NPI")
+                               @QueryParam("characteristic") String providerNPI,
+                               @ApiParam(value = "Patient MBI")
+                               @QueryParam("member") String patientMBI) {
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
         final UUID organizationID = RESTUtils.parseTokenTag(organizationToken);
-        this.rosterDAO.findEntities(organizationID, providerNPI, patientID)
+        this.rosterDAO.findEntities(organizationID, providerNPI, patientMBI)
                 .stream()
                 .map(RosterEntity::toFHIR)
                 .forEach(entity -> bundle.addEntry().setResource(entity));
@@ -98,6 +113,7 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{rosterID}")
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Update roster", notes = "FHIR endpoint to update the given Group resource with members to add or remove.")
     @Override
     public Group updateRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
@@ -155,6 +171,8 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{rosterID}")
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Delete roster", notes = "FHIR Endpoint to delete attribution roster")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Response deleteRoster(@PathParam("rosterID") UUID rosterID) {
         final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)

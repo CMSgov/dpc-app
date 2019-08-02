@@ -9,15 +9,6 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Entity(name = "attributions")
-//@NamedQueries({
-//        @NamedQuery(name = "findRelationship", query = "select a from attributions a " +
-//                "inner join providers prov on a.provider = prov.providerID " +
-//                "inner join patients as pat on a.patient = pat.patientID " +
-//                "where prov.providerNPI = :provID and pat.beneficiaryID = :patID")
-//})
-//@Table(name = "attributions",
-//        uniqueConstraints = {@UniqueConstraint(columnNames = {"patient_id", "provider_id"})}
-//)
 public class AttributionRelationship {
 
     @Id

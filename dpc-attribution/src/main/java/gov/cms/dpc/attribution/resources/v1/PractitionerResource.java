@@ -129,6 +129,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Practitioner"))
     public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, Practitioner provider) {
         final ProviderEntity providerEntity = this.dao.persistProvider(ProviderEntity.fromFHIR(provider, providerID));
         return providerEntity.toFHIR();

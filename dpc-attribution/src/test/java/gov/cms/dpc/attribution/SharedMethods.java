@@ -2,23 +2,16 @@ package gov.cms.dpc.attribution;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import org.apache.http.HttpEntity;
 import org.hl7.fhir.dstu3.model.*;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.attribution.AbstractAttributionTest.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SharedMethods {
@@ -79,23 +72,17 @@ public class SharedMethods {
                 .filter(resource -> resource.getResourceType() == ResourceType.Patient)
                 .map(resource -> (Patient) resource)
                 .forEach(patient -> {
-                    try {
-                        final MethodOutcome created = client
-                                .create()
-                                .resource(patient)
-                                .encodedJson()
-                                .execute();
-                        final Patient pr = (Patient) created.getResource();
-                        // Add to group
-                        rosterGroup
-                                .addMember()
-                                .setEntity(new Reference(pr.getIdElement()))
-                                .setInactive(false);
-
-                        assertTrue(created.getCreated(), "Should have created the patient");
-                    } catch (NotModifiedException e) {
-                        e.getMessage();
-                    }
+                    final MethodOutcome created = client
+                            .create()
+                            .resource(patient)
+                            .encodedJson()
+                            .execute();
+                    final Patient pr = (Patient) created.getResource();
+                    // Add to group
+                    rosterGroup
+                            .addMember()
+                            .setEntity(new Reference(pr.getIdElement()))
+                            .setInactive(false);
                 });
 
         final ICreateTyped groupCreation = client

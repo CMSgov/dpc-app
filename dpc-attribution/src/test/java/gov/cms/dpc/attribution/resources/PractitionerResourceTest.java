@@ -124,8 +124,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        // We expect that the existing seeds already exist, plus the one we just added so this means 8 + 1 have been assigned to the organization
-        assertEquals(9, providers.getEntry().size(), "Should have assigned providers");
+        assertEquals(5, providers.getEntry().size(), "Should have assigned providers");
 
         searchParams.put("identifier", Collections.singletonList(pract2.getIdentifierFirstRep().getValue()));
         // Try to search for the provider, we should get the same results
