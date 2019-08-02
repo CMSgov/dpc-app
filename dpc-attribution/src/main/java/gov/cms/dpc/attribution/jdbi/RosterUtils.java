@@ -1,12 +1,16 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.attribution.dao.tables.Attributions;
+import gov.cms.dpc.attribution.dao.tables.Rosters;
 import gov.cms.dpc.attribution.dao.tables.records.AttributionsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
+import gov.cms.dpc.attribution.dao.tables.records.RostersRecord;
+import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
@@ -66,6 +70,39 @@ public class RosterUtils {
                 .peek(patient -> patient.setManagingOrganization(new Reference("Organization/" + organizationID.toString())))
                 .map(PatientEntity::fromFHIR)
                 .forEach(patientEntity -> RosterUtils.createUpdateAttributionRelationship(ctx, patientEntity, providerRecord, creationTimestamp));
+    }
+
+    public static void submitAttributionGroup(Group attributionGroup, DSLContext ctx, UUID organizationID, OffsetDateTime creationTimestamp) {
+        // Insert the Roster and attribution relationships
+
+        // Get the provider, by NPI
+        final String providerNPI = FHIRExtractors.getAttributedNPI(attributionGroup);
+
+        final ProvidersRecord providersRecord = ctx.selectFrom(PROVIDERS)
+                .where(PROVIDERS.PROVIDER_ID.eq(providerNPI))
+                .fetchOne();
+
+        final RostersRecord roster = new RostersRecord();
+        roster.setId(UUID.randomUUID());
+        roster.setOrganizationId(organizationID);
+        roster.setProviderId(providersRecord.getId());
+        roster.setCreatedAt(creationTimestamp);
+        ctx.executeInsert(roster);
+
+        // Now, the attribution relationships
+        attributionGroup
+                .getMember()
+                .stream()
+                .map(Group.GroupMemberComponent::getEntity)
+                .map(entity -> new IdType(entity.getReference()))
+                .map(id -> {
+                    final AttributionsRecord ar = new AttributionsRecord();
+                    ar.setCreatedAt(creationTimestamp);
+                    ar.setRosterId(roster.getId());
+                    ar.setPatientId(UUID.fromString(id.getIdPart()));
+                    return ar;
+                })
+                .forEach(ctx::executeInsert);
     }
 
     private static void createUpdateAttributionRelationship(DSLContext ctx, PatientEntity patientEntity, ProvidersRecord providerRecord, OffsetDateTime creationTimestamp) {

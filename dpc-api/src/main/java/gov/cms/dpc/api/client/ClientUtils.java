@@ -112,7 +112,7 @@ public class ClientUtils {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Cannot find matching provider"));
 
-        final Bundle providerBundle = SeedProcessor.generateRosterBundle(providerRoster, organizationID);
+        final Bundle providerBundle = SeedProcessor.generateAttributionGroup(providerRoster, organizationID);
 
         // Now, submit the bundle
         // TODO: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.

@@ -55,14 +55,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Response createRoster(Group attributionRoster) {
         // Lookup the Provider by NPI
-
-        final String providerNPI = attributionRoster
-                .getCharacteristic()
-                .stream()
-                .filter(concept -> concept.getCode().getText().equals("attributed-to"))
-                .map(concept -> ((CodeableConcept) concept.getValue()).getText())
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
+        final String providerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
         // Check and see if a roster already exists for the provider
         final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));

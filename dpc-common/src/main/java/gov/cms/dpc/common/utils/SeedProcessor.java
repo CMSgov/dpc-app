@@ -56,7 +56,30 @@ public class SeedProcessor {
      * @param entry - {@link Map#entry(Object, Object)} representing the providerID and a {@link List} of {@link Pair} objects containing both the providerID and the patientID
      * @return - {@link Bundle} representing the {@link Patient} resources attributed to the {@link Practitioner}
      */
-    public static Bundle generateRosterBundle(Map.Entry<String, List<Pair<String, String>>> entry, UUID organizationID) {
+    public static Group generateAttributionGroup(Map.Entry<String, List<Pair<String, String>>> entry, UUID organizationID, Map<String, Reference> patientReferences) {
+
+        final Group group = createBaseAttributionGroup(entry.getKey(), organizationID.toString());
+
+        final List<Group.GroupMemberComponent> members = entry
+                .getValue()
+                .stream()
+                .map(Pair::getRight)
+                .map(patientReferences::get)
+                .filter(Objects::nonNull)
+                .map(ref -> {
+                    final Group.GroupMemberComponent member = new Group.GroupMemberComponent();
+                    member
+                            .setInactive(false)
+                            .setEntity(ref);
+                    return member;
+                })
+                .collect(Collectors.toList());
+
+        return group.setMember(members);
+    }
+
+    public static Bundle generateAttributionBundle(Map.Entry<String, List<Pair<String, String>>> entry, UUID organizationID) {
+
         final Bundle bundle = new Bundle();
 
         bundle.setId(new IdType("Roster", "12345"));
@@ -86,5 +109,24 @@ public class SeedProcessor {
                     bundle.addEntry(component);
                 });
         return bundle;
+    }
+
+    public static Group createBaseAttributionGroup(String providerNPI, String organizationID) {
+
+        final CodeableConcept attributionConcept = new CodeableConcept();
+        attributionConcept.setText("attributed-to");
+
+        final CodeableConcept NPIConcept = new CodeableConcept();
+        NPIConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(providerNPI);
+        final Group rosterGroup = new Group();
+        rosterGroup.setType(Group.GroupType.PERSON);
+        rosterGroup.setActive(true);
+        rosterGroup.addCharacteristic()
+                .setExclude(false)
+                .setCode(attributionConcept)
+                .setValue(NPIConcept);
+        FHIRBuilders.addOrganizationTag(rosterGroup, UUID.fromString(organizationID));
+
+        return rosterGroup;
     }
 }

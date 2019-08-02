@@ -1,9 +1,7 @@
 package gov.cms.dpc.fhir;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -140,6 +138,16 @@ public class FHIRExtractors {
                 .filter(tag -> tag.getSystem().equals(DPCIdentifierSystem.DPC.getSystem()))
                 .map(IBaseCoding::getCode)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Practitioner MUST have DPC organization tag"));
+                .orElseThrow(() -> new IllegalArgumentException("Roster MUST have DPC organization tag"));
+    }
+
+    public static String getAttributedNPI(Group group) {
+        return group
+                .getCharacteristic()
+                .stream()
+                .filter(concept -> concept.getCode().getText().equals("attributed-to"))
+                .map(concept -> ((CodeableConcept) concept.getValue()).getCodingFirstRep().getCode())
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
     }
 }
