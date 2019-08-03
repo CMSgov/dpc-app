@@ -3,6 +3,7 @@ package gov.cms.dpc.common.entities;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.persistence.*;
@@ -131,7 +132,7 @@ public class ProviderEntity implements Serializable {
         final String organizationID = FHIRExtractors.getOrganizationID(resource);
 
         final OrganizationEntity organizationEntity = new OrganizationEntity();
-        organizationEntity.setId(UUID.fromString(organizationID));
+        organizationEntity.setId(UUID.fromString(new IdType(organizationID).getIdPart()));
 
         provider.setOrganization(organizationEntity);
         provider.setProviderID(Objects.requireNonNullElseGet(resourceID, UUID::randomUUID));

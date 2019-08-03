@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.inject.Inject;
@@ -22,6 +23,8 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
 public class PatientResource extends AbstractPatientResource {
 
@@ -123,6 +126,15 @@ public class PatientResource extends AbstractPatientResource {
         return Response.status(status)
                 .entity(PatientEntityConverter.convert(entity))
                 .build();
+    }
+
+    @POST
+    @Path("/$submit")
+    @FHIR
+    @UnitOfWork
+    @Override
+    public Bundle bulkSubmitPatients(Parameters params) {
+        return bulkResourceHandler(Patient.class, params, this::createPatient);
     }
 
     @DELETE

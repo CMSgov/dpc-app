@@ -1,10 +1,59 @@
 package gov.cms.dpc.attribution.utils;
 
+import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Resource;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RESTUtils {
+
+
+    /**
+     * Helper method for bulk submitting a {@Bundle} of specific resources
+     *
+     * @param clazz          - {@link Class} of type of filter {@link Bundle} entries
+     * @param params         - {@link Parameters} which has a {@link Parameters#getParameterFirstRep()}
+     * @param resourceAction - {@link Function<T, Response>} which performs the actual bulk action for a single {@link BaseResource} of type {@link T}
+     * @param <T>            - {@link T} generic type parameter which extends {@link BaseResource}
+     * @return - {@link Bundle} containing the processed results from the bulk submission
+     */
+    public static <T extends BaseResource> Bundle bulkResourceHandler(Class<T> clazz, Parameters params, Function<T, Response> resourceAction) {
+        final Bundle resourceBundle = (Bundle) params.getParameterFirstRep().getResource();
+        final Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        // Grab all of the providers and submit them individually (for now)
+        // TODO: Optimize insert as part of DPC-490
+
+        final List<Bundle.BundleEntryComponent> bundleEntries = resourceBundle
+                .getEntry()
+                .stream()
+                .filter(Bundle.BundleEntryComponent::hasResource)
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(resource -> resource.getClass().equals(clazz))
+                .map(clazz::cast)
+                .map(resource -> {
+                    final Response response = resourceAction.apply(resource);
+                    if (HttpStatus.isSuccess(response.getStatus())) {
+                        return (Resource) response.getEntity();
+                    }
+                    // If there's an error, rethrow the original method
+                    throw new WebApplicationException(response);
+                })
+                .map(resource -> new Bundle.BundleEntryComponent().setResource(resource))
+                .collect(Collectors.toList());
+
+        bundle.setEntry(bundleEntries);
+        bundle.setTotal(bundleEntries.size());
+        return bundle;
+    }
 
     public static UUID parseTokenTag(String tokenTag) {
         final int idx = tokenTag.indexOf('|');

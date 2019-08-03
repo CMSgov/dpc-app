@@ -2,8 +2,11 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
@@ -18,7 +21,10 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
+
+import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 
 @Api(value = "Patient")
 public class PatientResource extends AbstractPatientResource {
@@ -26,12 +32,15 @@ public class PatientResource extends AbstractPatientResource {
     // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
+    private static final String PATIENT_PROFILE = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient";
 
     private final IGenericClient client;
+    private final FhirValidator validator;
 
     @Inject
-    PatientResource(IGenericClient client) {
+    PatientResource(IGenericClient client, FhirValidator validator) {
         this.client = client;
+        this.validator = validator;
     }
 
     @GET
@@ -75,7 +84,7 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @Timed
     @ExceptionMetered
-    @Profiled(profile = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient")
+    @Profiled(profile = PATIENT_PROFILE)
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @Override
     public Patient submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, Patient patient) {
@@ -95,6 +104,20 @@ public class PatientResource extends AbstractPatientResource {
 
         return (Patient) outcome.getResource();
     }
+
+    @FHIR
+    @POST
+    @Path("/$submit")
+    @Timed
+    @ExceptionMetered
+    @Override
+    public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Bundle patientBundle) {
+        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator, PATIENT_PROFILE);
+
+        final Bundle bundle = bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
+        return bundle;
+    }
+
 
     @GET
     @FHIR
@@ -156,5 +179,20 @@ public class PatientResource extends AbstractPatientResource {
             throw new WebApplicationException("Unable to update Patient", Response.Status.INTERNAL_SERVER_ERROR);
         }
         return resource;
+    }
+
+    private static void validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator, String profileURL) {
+        {
+            if (!APIHelpers.hasProfile(patient, profileURL)) {
+                throw new WebApplicationException("Patient must have correct profile", Response.Status.BAD_REQUEST);
+            }
+            // Set the Managing Org, since we need it for the validation
+            patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
+            final ValidationResult result = validator.validateWithResult(patient);
+            if (!result.isSuccessful()) {
+                throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
+            }
+        }
+
     }
 }

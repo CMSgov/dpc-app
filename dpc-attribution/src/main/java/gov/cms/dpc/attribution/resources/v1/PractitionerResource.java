@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
+
 @FHIR
 @Api(value = "Practitioner")
 public class PractitionerResource extends AbstractPractitionerResource {
@@ -74,9 +76,13 @@ public class PractitionerResource extends AbstractPractitionerResource {
     public Response submitProvider(Practitioner provider) {
 
         final ProviderEntity entity = ProviderEntity.fromFHIR(provider);
-        final ProviderEntity persisted = this.dao.persistProvider(entity);
-        // If a new record exists, return it with the created status
-        return Response.status(Response.Status.CREATED).entity(persisted.toFHIR()).build();
+        final List<ProviderEntity> existingProviders = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
+        if (existingProviders.isEmpty()) {
+            final ProviderEntity persisted = this.dao.persistProvider(entity);
+            return Response.status(Response.Status.CREATED).entity(persisted.toFHIR()).build();
+        }
+
+        return Response.ok().entity(existingProviders.get(0).toFHIR()).build();
     }
 
     @POST
@@ -87,33 +93,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ExceptionMetered
     @Override
     public Bundle bulkSubmitProviders(Parameters params) {
-        final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.COLLECTION);
-        // Grab all of the providers and submit them individually (for now)
-        // TODO: Optimize insert as part of DPC-490
-
-        final List<BundleEntryComponent> bundleEntries = providerBundle
-                .getEntry()
-                .stream()
-                .filter(BundleEntryComponent::hasResource)
-                .map(BundleEntryComponent::getResource)
-                .filter(resource -> resource.getResourceType() == ResourceType.Practitioner)
-                .map(resource -> (Practitioner) resource)
-                .map(provider -> {
-                    final Response response = this.submitProvider(provider);
-                    if (HttpStatus.isSuccess(response.getStatus())) {
-                        return (Practitioner) response.getEntity();
-                    }
-                    // If there's an error, rethrow the original method
-                    throw new WebApplicationException(response);
-                })
-                .map(practitoner -> new BundleEntryComponent().setResource(practitoner))
-                .collect(Collectors.toList());
-
-        bundle.setEntry(bundleEntries);
-        bundle.setTotal(bundleEntries.size());
-        return bundle;
+        return bulkResourceHandler(Practitioner.class, params, this::submitProvider);
     }
 
     @GET

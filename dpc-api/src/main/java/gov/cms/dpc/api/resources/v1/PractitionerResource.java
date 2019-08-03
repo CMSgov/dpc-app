@@ -3,10 +3,10 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
@@ -24,7 +24,9 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
+
+import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 
 public class PractitionerResource extends AbstractPractitionerResource {
 
@@ -128,25 +130,12 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ExceptionMetered
     @Override
     public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Bundle providerBundle) {
-        // We need to figure out how to validate the bundle entries
-        providerBundle
-                .getEntry()
-                .forEach(entry -> validateAndTagProvider((Practitioner) entry.getResource(),
-                        organization.getOrganization().getId(),
-                        validator,
-                        PRACTITIONER_PROFILE));
+        final Consumer<Practitioner> entryHandler = (resource) -> validateAndTagProvider((Practitioner) resource,
+                organization.getOrganization().getId(),
+                validator,
+                PRACTITIONER_PROFILE);
 
-        final Parameters params = new Parameters();
-        params.addParameter().setResource(providerBundle);
-        return this.client
-                .operation()
-                .onType(Practitioner.class)
-                .named("submit")
-                .withParameters(params)
-                .returnResourceType(Bundle.class)
-                .encodedJson()
-                .execute();
-
+        return bulkResourceClient(Practitioner.class, client, entryHandler, providerBundle);
     }
 
 
@@ -197,29 +186,14 @@ public class PractitionerResource extends AbstractPractitionerResource {
     }
 
     private static void validateAndTagProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
-        if (!hasProfile(provider, profileURL)) {
+        if (!APIHelpers.hasProfile(provider, profileURL)) {
             throw new WebApplicationException("Provider must have correct profile", Response.Status.BAD_REQUEST);
         }
         final ValidationResult result = validator.validateWithResult(provider);
         if (!result.isSuccessful()) {
-            throw new WebApplicationException(formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
         }
         addOrganizationTag(provider, organizationID);
-    }
-
-    private static boolean hasProfile(Practitioner value, String profileURI) {
-        return value
-                .getMeta()
-                .getProfile()
-                .stream()
-                .anyMatch(pred -> pred.getValueAsString().equals(profileURI));
-    }
-
-    private static String formatValidationMessages(List<SingleValidationMessage> messages) {
-        return messages
-                .stream()
-                .map(SingleValidationMessage::getMessage)
-                .collect(Collectors.joining(", "));
     }
 
 }

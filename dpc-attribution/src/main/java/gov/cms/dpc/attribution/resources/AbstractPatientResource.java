@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.ws.rs.*;
@@ -21,6 +22,10 @@ public abstract class AbstractPatientResource {
 
     @POST
     public abstract Response createPatient(Patient patient);
+
+    @POST
+    @Path("/$submit")
+    public abstract Bundle bulkSubmitPatients(Parameters params);
 
     @GET
     @Path("/{patientID}")
