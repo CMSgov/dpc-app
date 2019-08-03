@@ -2,11 +2,14 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
-import gov.cms.dpc.api.resources.AbstractPractionerResource;
+import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
@@ -21,14 +24,18 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class PractitionerResource extends AbstractPractionerResource {
+public class PractitionerResource extends AbstractPractitionerResource {
 
+    private static final String PRACTITIONER_PROFILE = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner";
     private final IGenericClient client;
+    private final FhirValidator validator;
 
     @Inject
-    PractitionerResource(IGenericClient client) {
+    PractitionerResource(IGenericClient client, FhirValidator validator) {
         this.client = client;
+        this.validator = validator;
     }
 
     @Override
@@ -93,7 +100,7 @@ public class PractitionerResource extends AbstractPractionerResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Profiled(profile = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner")
+    @Profiled(profile = PRACTITIONER_PROFILE)
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
     @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
     public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
@@ -113,6 +120,35 @@ public class PractitionerResource extends AbstractPractionerResource {
         final Practitioner resource = (Practitioner) outcome.getResource();
         return Response.status(Response.Status.CREATED).entity(resource).build();
     }
+
+    @POST
+    @Path("/$submit")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @Override
+    public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Bundle providerBundle) {
+        // We need to figure out how to validate the bundle entries
+        providerBundle
+                .getEntry()
+                .forEach(entry -> validateAndTagProvider((Practitioner) entry.getResource(),
+                        organization.getOrganization().getId(),
+                        validator,
+                        PRACTITIONER_PROFILE));
+
+        final Parameters params = new Parameters();
+        params.addParameter().setResource(providerBundle);
+        return this.client
+                .operation()
+                .onType(Practitioner.class)
+                .named("submit")
+                .withParameters(params)
+                .returnResourceType(Bundle.class)
+                .encodedJson()
+                .execute();
+
+    }
+
 
     @Override
     @DELETE
@@ -159,4 +195,31 @@ public class PractitionerResource extends AbstractPractionerResource {
             meta.addTag(orgTag);
         }
     }
+
+    private static void validateAndTagProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
+        if (!hasProfile(provider, profileURL)) {
+            throw new WebApplicationException("Provider must have correct profile", Response.Status.BAD_REQUEST);
+        }
+        final ValidationResult result = validator.validateWithResult(provider);
+        if (!result.isSuccessful()) {
+            throw new WebApplicationException(formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
+        }
+        addOrganizationTag(provider, organizationID);
+    }
+
+    private static boolean hasProfile(Practitioner value, String profileURI) {
+        return value
+                .getMeta()
+                .getProfile()
+                .stream()
+                .anyMatch(pred -> pred.getValueAsString().equals(profileURI));
+    }
+
+    private static String formatValidationMessages(List<SingleValidationMessage> messages) {
+        return messages
+                .stream()
+                .map(SingleValidationMessage::getMessage)
+                .collect(Collectors.joining(", "));
+    }
+
 }

@@ -26,7 +26,7 @@ public abstract class AbstractAttributionResource {
     public abstract AbstractPatientResource patientOperations();
 
     @Path("/Practitioner")
-    public abstract AbstractPractionerResource providerOperations();
+    public abstract AbstractPractitionerResource providerOperations();
 
     @GET
     @Path("/_healthy")

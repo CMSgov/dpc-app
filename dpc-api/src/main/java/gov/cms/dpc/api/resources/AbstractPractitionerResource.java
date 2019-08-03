@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -10,9 +11,9 @@ import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @FHIR
-public abstract class AbstractPractionerResource {
+public abstract class AbstractPractitionerResource {
 
-    protected AbstractPractionerResource() {
+    protected AbstractPractitionerResource() {
         // Not used
     }
 
@@ -21,6 +22,10 @@ public abstract class AbstractPractionerResource {
 
     @POST
     public abstract Response submitProvider(OrganizationPrincipal organization, Practitioner provider);
+
+    @POST
+    @Path("/$submit")
+    public abstract Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Bundle providerBundle);
 
     @GET
     @Path("/{providerID}")

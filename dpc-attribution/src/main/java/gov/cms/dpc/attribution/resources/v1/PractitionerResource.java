@@ -3,26 +3,27 @@ package gov.cms.dpc.attribution.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
-import gov.cms.dpc.attribution.resources.AbstractPractionerResource;
+import gov.cms.dpc.attribution.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @FHIR
 @Api(value = "Practitioner")
-public class PractitionerResource extends AbstractPractionerResource {
+public class PractitionerResource extends AbstractPractitionerResource {
 
     private final ProviderDAO dao;
 
@@ -76,6 +77,43 @@ public class PractitionerResource extends AbstractPractionerResource {
         final ProviderEntity persisted = this.dao.persistProvider(entity);
         // If a new record exists, return it with the created status
         return Response.status(Response.Status.CREATED).entity(persisted.toFHIR()).build();
+    }
+
+    @POST
+    @Path("/$submit")
+    @FHIR
+    @UnitOfWork
+    @Timed
+    @ExceptionMetered
+    @Override
+    public Bundle bulkSubmitProviders(Parameters params) {
+        final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
+        final Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        // Grab all of the providers and submit them individually (for now)
+        // TODO: Optimize insert as part of DPC-490
+
+        final List<BundleEntryComponent> bundleEntries = providerBundle
+                .getEntry()
+                .stream()
+                .filter(BundleEntryComponent::hasResource)
+                .map(BundleEntryComponent::getResource)
+                .filter(resource -> resource.getResourceType() == ResourceType.Practitioner)
+                .map(resource -> (Practitioner) resource)
+                .map(provider -> {
+                    final Response response = this.submitProvider(provider);
+                    if (HttpStatus.isSuccess(response.getStatus())) {
+                        return (Practitioner) response.getEntity();
+                    }
+                    // If there's an error, rethrow the original method
+                    throw new WebApplicationException(response);
+                })
+                .map(practitoner -> new BundleEntryComponent().setResource(practitoner))
+                .collect(Collectors.toList());
+
+        bundle.setEntry(bundleEntries);
+        bundle.setTotal(bundleEntries.size());
+        return bundle;
     }
 
     @GET

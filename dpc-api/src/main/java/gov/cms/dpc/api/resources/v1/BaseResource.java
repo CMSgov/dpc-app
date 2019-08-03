@@ -23,7 +23,7 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractRosterResource rr;
     private final AbstractOrganizationResource or;
     private final AbstractPatientResource par;
-    private final AbstractPractionerResource pr;
+    private final AbstractPractitionerResource pr;
     private final AbstractDefinitionResource sdr;
 
     @Inject
@@ -106,7 +106,7 @@ public class BaseResource extends AbstractBaseResource {
     }
 
     @Override
-    public AbstractPractionerResource practitionerOperations() {
+    public AbstractPractitionerResource practitionerOperations() {
         return this.pr;
     }
 }
