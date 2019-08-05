@@ -49,16 +49,16 @@
             User::organization_types.keys.each_with_object([]) { |key, memo| memo << [key.titleize, key] },
             { include_blank: 'Please select' },
             class: "ds-c-field",
+            :data => {:hide_follow_up => 'health_it_vendor'},
             value: @user.organization_type
           %>
-        </div>
-
-        <div class="field">
-          <%= f.label :num_providers, class: "ds-c-label" do %>
-          Number of Providers at Your Organization (optional)
-          <span class="ds-c-field__hint">You may use an approximate number.<br/>If you are a vendor, leave blank.</span>
-          <% end %>
-          <%= f.number_field :num_providers, value: '', min: 0, class: "ds-c-field ds-c-field--small" %>
+          <div class="field field--follow-up" hidden>
+            <%= f.label :num_providers, class: "ds-c-label" do %>
+            Number of Providers at Your Organization (optional)
+            <span class="ds-c-field__hint">You may use an approximate number.</span>
+            <% end %>
+            <%= f.number_field :num_providers, value: '', min: 0, class: "ds-c-field ds-c-field--small" %>
+          </div>
         </div>
 
         <div class="field">
