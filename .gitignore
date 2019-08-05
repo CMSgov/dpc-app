@@ -30,4 +30,4 @@ out/
 node_modules/
 
 # Created by Postman tests
-package-lock.json
+/package-lock.json
