@@ -70,7 +70,7 @@ public class GroupResource extends AbstractGroupResource {
                 .execute();
 
         final Group createdGroup = (Group) outcome.getResource();
-        final Response.Status status = outcome.getCreated() == null ? Response.Status.CREATED : Response.Status.OK;
+        final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
 
         return Response.status(status).entity(createdGroup).build();
     }

@@ -55,7 +55,7 @@ public class PatientEntity implements Serializable {
     @ManyToOne
     private OrganizationEntity organization;
 
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "patient")
+    @OneToMany(mappedBy = "patient")
     private List<AttributionRelationship> attributions;
 
     public PatientEntity() {

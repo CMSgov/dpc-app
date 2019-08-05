@@ -59,7 +59,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertTrue(foundProfile, "Should have appropriate DPC profile");
 
         // Try again, should fail
-        assertThrows(InternalErrorException.class, creation::execute, "Should already exist");
+        final MethodOutcome execute = creation.execute();
+        assertNull(execute.getCreated(), "Should already exist");
 
         // Try to directly access
 

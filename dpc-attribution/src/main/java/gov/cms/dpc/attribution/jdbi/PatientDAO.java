@@ -6,7 +6,11 @@ import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PatientDAO extends AbstractDAO<PatientEntity> {
 
@@ -56,9 +60,16 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
             return false;
         }
 
-//        patientEntity.setAttributedProviders(Collections.emptyList());
-        currentSession().merge(patientEntity);
-        currentSession().delete(patientEntity);
+        // Delete all the attribution relationships
+        final int deletedRows = removeAttributionRelationships(patientEntity);
+
+        final List<AttributionRelationship> attributions = patientEntity.getAttributions();
+        if (deletedRows != attributions.size()) {
+            throw new IllegalStateException(String.format("Expected to delete %d rows, but only %d were deleted", attributions.size(), deletedRows));
+        }
+
+        this.currentSession().delete(patientEntity);
+
         return true;
     }
 
@@ -88,5 +99,20 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         query.where(builder.equal(rosterJoin.get(RosterEntity_.id), rosterID));
 
         return this.list(query);
+    }
+
+    private int removeAttributionRelationships(PatientEntity patientEntity) {
+        final List<Long> attributionIDs = patientEntity
+                .getAttributions()
+                .stream()
+                .map(AttributionRelationship::getAttributionID)
+                .collect(Collectors.toList());
+
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaDelete<AttributionRelationship> criteriaDelete = builder.createCriteriaDelete(AttributionRelationship.class);
+        final Root<AttributionRelationship> root = criteriaDelete.from(AttributionRelationship.class);
+
+        criteriaDelete.where(root.get(AttributionRelationship_.attributionID).in(attributionIDs));
+        return this.currentSession().createQuery(criteriaDelete).executeUpdate();
     }
 }
