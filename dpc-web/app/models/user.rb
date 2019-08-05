@@ -2,6 +2,7 @@
 
 class User < ApplicationRecord
   has_one :dpc_registration, inverse_of: :user
+  before_save :num_providers_to_zero_if_blank
 
   STATES = {
     AK: 'Alaska', AL: 'Alabama', AR: 'Arkansas', AZ: 'Arizona',
@@ -39,6 +40,7 @@ class User < ApplicationRecord
   validates :last_name, :first_name, presence: true
   validates :organization, presence: true
   validates :organization_type, inclusion: { in: organization_types.keys }
+  validates :num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
   validates :address_1, presence: true
   validates :city, presence: true
   validates :state, inclusion: { in: STATES.keys.map(&:to_s) }
@@ -49,5 +51,11 @@ class User < ApplicationRecord
 
   def name
     "#{first_name} #{last_name}"
+  end
+
+  private
+
+  def num_providers_to_zero_if_blank
+    self.num_providers = 0 if num_providers.blank?
   end
 end

@@ -45,6 +45,22 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe '#num_providers' do
+    it 'defaults to 0' do
+      expect(subject.num_providers).to be_zero
+    end
+
+    it 'must be greater than or equal to 0' do
+      subject.num_providers = -1
+      expect(subject).to_not be_valid
+    end
+
+    it 'must be an integer' do
+      subject.num_providers = 1.23
+      expect(subject).to_not be_valid
+    end
+  end
+
   describe '#address' do
     it 'first line is required' do
       subject.address_1 = nil
