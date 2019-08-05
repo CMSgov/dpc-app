@@ -15,6 +15,7 @@ require "action_view/railtie"
 require "action_cable/engine"
 require "sprockets/railtie"
 # require "rails/test_unit/railtie"
+require "./lib/dpc_middleware/ig_fix"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -40,5 +41,8 @@ module DpcWebsite
     config.action_view.field_error_proc = Proc.new { |html_tag, instance|
       html_tag
     }
+
+    # Add middleware to fix issue with /ig links breaking
+    config.middleware.insert_before ActionDispatch::Static, DpcMiddleware::IgFix
   end
 end
