@@ -127,6 +127,8 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization." +
+            "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
     @Override
     public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Bundle providerBundle) {
         final Consumer<Practitioner> entryHandler = (resource) -> validateAndTagProvider((Practitioner) resource,

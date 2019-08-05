@@ -85,17 +85,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return Response.ok().entity(existingProviders.get(0).toFHIR()).build();
     }
 
-    @POST
-    @Path("/$submit")
-    @FHIR
-    @UnitOfWork
-    @Timed
-    @ExceptionMetered
-    @Override
-    public Bundle bulkSubmitProviders(Parameters params) {
-        return bulkResourceHandler(Practitioner.class, params, this::submitProvider);
-    }
-
     @GET
     @Path("/{providerID}")
     @FHIR
@@ -116,6 +105,18 @@ public class PractitionerResource extends AbstractPractitionerResource {
                                 providerID), Response.Status.NOT_FOUND));
 
         return providerEntity.toFHIR();
+    }
+
+    @POST
+    @Path("/$submit")
+    @FHIR
+    @UnitOfWork
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization.")
+    @Override
+    public Bundle bulkSubmitProviders(Parameters params) {
+        return bulkResourceHandler(Practitioner.class, params, this::submitProvider);
     }
 
     @DELETE

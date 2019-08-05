@@ -14,12 +14,13 @@ public class AttributionRelationship {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
+    @Access(AccessType.PROPERTY)
     private Long attributionID;
 
     @ManyToOne
     private RosterEntity roster;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private PatientEntity patient;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")

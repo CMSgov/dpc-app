@@ -29,8 +29,8 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static gov.cms.dpc.attribution.SharedMethods.createBaseAttributionGroup;
 import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
+import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AttributionFHIRTest {
@@ -135,6 +135,19 @@ class AttributionFHIRTest {
         final Group group2 = groupSizeQuery.execute();
         assertAll(() -> assertTrue(fetchedGroup.equalsDeep(group2), "Groups should be equal"),
                 () -> assertEquals(bundle.getEntry().size() - 1, group2.getMember().size(), "Should have the same number of beneies"));
+
+        // Try to get attributed patients
+        final Bundle attributed = client
+                .operation()
+                .onInstance(group2.getIdElement())
+                .named("patients")
+                .withNoParameters(Parameters.class)
+                .useHttpGet()
+                .encodedJson()
+                .returnResourceType(Bundle.class)
+                .execute();
+
+        assertEquals(group2.getMember().size(), attributed.getTotal(), "Should have the same number of patients");
     }
 
 

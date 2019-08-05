@@ -114,7 +114,7 @@ public class SeedProcessor {
     public static Group createBaseAttributionGroup(String providerNPI, String organizationID) {
 
         final CodeableConcept attributionConcept = new CodeableConcept();
-        attributionConcept.setText("attributed-to");
+        attributionConcept.addCoding().setCode("attributed-to");
 
         final CodeableConcept NPIConcept = new CodeableConcept();
         NPIConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(providerNPI);

@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
+import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SharedMethods {
@@ -95,24 +96,5 @@ public class SharedMethods {
         assertTrue(groupCreated.getCreated(), "Should have created the group");
 
         return (Group) groupCreated.getResource();
-    }
-
-    public static Group createBaseAttributionGroup(String providerNPI, String organizationID) {
-
-        final CodeableConcept attributionConcept = new CodeableConcept();
-        attributionConcept.setText("attributed-to");
-
-        final CodeableConcept NPIConcept = new CodeableConcept();
-        NPIConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(providerNPI);
-        final Group rosterGroup = new Group();
-        rosterGroup.setType(Group.GroupType.PERSON);
-        rosterGroup.setActive(true);
-        rosterGroup.addCharacteristic()
-                .setExclude(false)
-                .setCode(attributionConcept)
-                .setValue(NPIConcept);
-        FHIRBuilders.addOrganizationTag(rosterGroup, UUID.fromString(organizationID));
-
-        return rosterGroup;
     }
 }

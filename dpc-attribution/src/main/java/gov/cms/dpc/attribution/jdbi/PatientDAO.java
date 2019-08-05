@@ -1,14 +1,11 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.*;
 
 public class PatientDAO extends AbstractDAO<PatientEntity> {
@@ -74,5 +71,22 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         currentSession().merge(fullyUpdated);
 
         return fullyUpdated;
+    }
+
+    public List fetchPatientMBIByRosterID(UUID rosterID) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
+        final Root<PatientEntity> root = query.from(PatientEntity.class);
+        query.select(root);
+
+        // Join across the AttributionRelationships
+        final ListJoin<PatientEntity, AttributionRelationship> attrJoins = root.join(PatientEntity_.attributions);
+        final Join<AttributionRelationship, RosterEntity> rosterJoin = attrJoins.join(AttributionRelationship_.roster);
+
+        query.select(root.get(PatientEntity_.BENEFICIARY_ID));
+
+        query.where(builder.equal(rosterJoin.get(RosterEntity_.id), rosterID));
+
+        return this.list(query);
     }
 }

@@ -110,6 +110,8 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/$submit")
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization." +
+            "<p> Each Patient resource MUST implement the " + PATIENT_PROFILE + "profile.")
     @Override
     public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Bundle patientBundle) {
         final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator, PATIENT_PROFILE);

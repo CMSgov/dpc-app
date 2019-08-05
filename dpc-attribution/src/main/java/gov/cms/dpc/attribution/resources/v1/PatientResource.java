@@ -132,6 +132,7 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/$submit")
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization.")
     @Override
     public Bundle bulkSubmitPatients(Parameters params) {
         return bulkResourceHandler(Patient.class, params, this::createPatient);

@@ -23,7 +23,7 @@ public class RosterEntityConverter {
         group.setId(entity.getId().toString());
 
         final CodeableConcept attributedConcept = new CodeableConcept();
-        attributedConcept.setText("attributed-to");
+        attributedConcept.addCoding().setCode("attributed-to");
 
         final CodeableConcept providerConcept = new CodeableConcept();
         providerConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(entity.getAttributedProvider().getProviderNPI());

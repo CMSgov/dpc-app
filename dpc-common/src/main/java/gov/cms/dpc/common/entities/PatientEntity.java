@@ -27,6 +27,7 @@ public class PatientEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
+    @Access(AccessType.PROPERTY)
     private UUID patientID;
 
     @NotEmpty

@@ -23,30 +23,21 @@ public class RosterEntity implements Serializable {
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
+    @Access(AccessType.PROPERTY)
     private UUID id;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id")
     private ProviderEntity attributedProvider;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     private OrganizationEntity managingOrganization;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "roster")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "roster", fetch = FetchType.EAGER)
     private List<AttributionRelationship> attributions;
-
-    @OneToMany
-    @JoinTable(name = "attributions",
-            joinColumns = {
-                    @JoinColumn(name = "roster_id", referencedColumnName = "id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "patient_id", referencedColumnName = "id")
-            })
-    private List<PatientEntity> attributedPatients;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
@@ -106,14 +97,6 @@ public class RosterEntity implements Serializable {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public List<PatientEntity> getAttributedPatients() {
-        return attributedPatients;
-    }
-
-    public void setAttributedPatients(List<PatientEntity> attributedPatients) {
-        this.attributedPatients = attributedPatients;
     }
 
     public Group toFHIR() {

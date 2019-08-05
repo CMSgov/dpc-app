@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.attribution.jdbi.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RosterDAO;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
@@ -11,16 +12,13 @@ import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.converters.entities.PatientEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Group;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +43,15 @@ public class GroupResource extends AbstractGroupResource {
 
     private final AttributionEngine engine;
     private final ProviderDAO providerDAO;
+    private final PatientDAO patientDAO;
     private final RosterDAO rosterDAO;
 
     @Inject
-    GroupResource(AttributionEngine engine, ProviderDAO providerDAO, RosterDAO rosterDAO) {
+    GroupResource(AttributionEngine engine, ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO) {
         this.engine = engine;
         this.rosterDAO = rosterDAO;
         this.providerDAO = providerDAO;
+        this.patientDAO = patientDAO;
     }
 
     @POST
@@ -115,6 +115,10 @@ public class GroupResource extends AbstractGroupResource {
     @Path("/{rosterID}/$patients")
     @FHIR
     @UnitOfWork
+    @ApiOperation(value = "Get attributed patient IDs", notes = "FHIR endpoint to retrieve the Patient MBIs for roster entities." +
+            "<p> This is an operation optimized for returning only the MBIs for the Patient resources linked to the Roster. " +
+            "It returns empty Patient resources with only the MBI added as an identifier.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Bundle getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID) {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
@@ -123,13 +127,20 @@ public class GroupResource extends AbstractGroupResource {
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
-        final List<Bundle.BundleEntryComponent> patients = existingRoster
-                .getAttributedPatients()
+        // We have to do this because Hibernate/Dropwizard get confused when returning a single type (link String)
+        @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(existingRoster.getId());
+
+        final List<Bundle.BundleEntryComponent> patients = patientMBIs
                 .stream()
-                .map(patient -> new Bundle.BundleEntryComponent().setResource(PatientEntityConverter.convert(patient)))
+                .map(mbi -> {
+                    // Generate a fake patient, with only the ID set
+                    final Patient p = new Patient();
+                    p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
+                    return new Bundle.BundleEntryComponent().setResource(p);
+                })
                 .collect(Collectors.toList());
 
-        bundle.setTotal(patients.size());
+        bundle.setTotal(patientMBIs.size());
         bundle.setEntry(patients);
 
         return bundle;
@@ -141,6 +152,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Update roster", notes = "FHIR endpoint to update the given Group resource with members to add or remove.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Group updateRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
