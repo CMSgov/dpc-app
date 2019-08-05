@@ -192,7 +192,17 @@
                         <ports>
                             <port>8080</port>
                         </ports>
+                        <entrypoint>/entrypoint.sh</entrypoint>
                     </container>
+                    <extraDirectory>
+                        <path>${project.basedir}/docker</path>
+                        <permissions>
+                            <permission>
+                                <file>/entrypoint.sh</file>
+                                <mode>755</mode>
+                            </permission>
+                        </permissions>
+                    </extraDirectory>
                 </configuration>
             </plugin>
         </plugins>
