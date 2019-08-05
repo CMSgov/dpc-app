@@ -38,6 +38,16 @@ public class RosterEntity implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "roster")
     private List<AttributionRelationship> attributions;
 
+    @OneToMany
+    @JoinTable(name = "attributions",
+            joinColumns = {
+                    @JoinColumn(name = "roster_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "patient_id", referencedColumnName = "id")
+            })
+    private List<PatientEntity> attributedPatients;
+
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
     private OffsetDateTime createdAt;
@@ -96,6 +106,14 @@ public class RosterEntity implements Serializable {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<PatientEntity> getAttributedPatients() {
+        return attributedPatients;
+    }
+
+    public void setAttributedPatients(List<PatientEntity> attributedPatients) {
+        this.attributedPatients = attributedPatients;
     }
 
     public Group toFHIR() {

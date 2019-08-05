@@ -10,7 +10,6 @@ import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
@@ -107,7 +106,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
     public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
 
-        addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
+        APIHelpers.addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
         final var test = this.client
                 .create()
                 .resource(provider)
@@ -172,19 +171,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return null;
     }
 
-    private static void addOrganizationTag(Practitioner provider, String organizationID) {
-        final Coding orgTag = new Coding(DPCIdentifierSystem.DPC.getSystem(), organizationID, "Organization ID");
-        final Meta meta = provider.getMeta();
-        // If no Meta, create new values
-        if (meta == null) {
-            final Meta newMeta = new Meta();
-            newMeta.addTag(orgTag);
-            provider.setMeta(newMeta);
-        } else {
-            meta.addTag(orgTag);
-        }
-    }
-
     private static void validateAndTagProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
         if (!APIHelpers.hasProfile(provider, profileURL)) {
             throw new WebApplicationException("Provider must have correct profile", Response.Status.BAD_REQUEST);
@@ -193,7 +179,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
         if (!result.isSuccessful()) {
             throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
         }
-        addOrganizationTag(provider, organizationID);
+        APIHelpers.addOrganizationTag(provider, organizationID);
     }
 
 }

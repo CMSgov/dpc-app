@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Helper class for extracting various features from FHIR resources
@@ -137,6 +138,7 @@ public class FHIRExtractors {
                 .stream()
                 .filter(tag -> tag.getSystem().equals(DPCIdentifierSystem.DPC.getSystem()))
                 .map(IBaseCoding::getCode)
+                .map(code -> new IdType(code).getIdPart())
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Roster MUST have DPC organization tag"));
     }
@@ -145,9 +147,12 @@ public class FHIRExtractors {
         return group
                 .getCharacteristic()
                 .stream()
-                .filter(concept -> concept.getCode().getText().equals("attributed-to"))
-                .map(concept -> ((CodeableConcept) concept.getValue()).getCodingFirstRep().getCode())
-                .findFirst()
+                .filter(concept -> concept.getCode().getCodingFirstRep().getCode().equals("attributed-to"))
+                .map(Group.GroupCharacteristicComponent::getValue)
+                .flatMap(value -> ((CodeableConcept) value).getCoding().stream())
+                .filter(code -> code.getSystem().equals(DPCIdentifierSystem.NPPES.getSystem()))
+                .map(Coding::getCode)
+                        .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
     }
 }

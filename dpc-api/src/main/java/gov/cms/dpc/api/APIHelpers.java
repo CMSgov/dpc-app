@@ -2,9 +2,8 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.SingleValidationMessage;
-import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Parameters;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -49,5 +48,18 @@ public class APIHelpers {
                 .stream()
                 .map(SingleValidationMessage::getMessage)
                 .collect(Collectors.joining(", "));
+    }
+
+    public static void addOrganizationTag(Resource resource, String organizationID) {
+        final Coding orgTag = new Coding(DPCIdentifierSystem.DPC.getSystem(), organizationID, "Organization ID");
+        final Meta meta = resource.getMeta();
+        // If no Meta, create new values
+        if (meta == null) {
+            final Meta newMeta = new Meta();
+            newMeta.addTag(orgTag);
+            resource.setMeta(newMeta);
+        } else {
+            meta.addTag(orgTag);
+        }
     }
 }

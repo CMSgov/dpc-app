@@ -1,5 +1,6 @@
 package gov.cms.dpc.api;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.StaticAuthFilter;
@@ -46,7 +47,8 @@ class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private static final String TEST_PROVIDER_ID = "1";
     private final JobQueue queue = spy(MemoryQueue.class);
-    private final AttributionServiceClient client = mock(AttributionServiceClient.class);
+//    private final AttributionServiceClient client = mock(AttributionServiceClient.class);
+    private final IGenericClient client = mock(IGenericClient.class);
 
     private static final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
@@ -73,8 +75,8 @@ class FHIRSubmissionTest {
         reset(queue);
 
         // Mock the attribution call
-        Mockito.when(client.getAttributedPatientIDs(Mockito.any(Practitioner.class)))
-                .thenReturn(Optional.of(testBeneficiaries));
+//        Mockito.when(client.getAttributedPatientIDs(Mockito.any(Practitioner.class)))
+//                .thenReturn(Optional.of(testBeneficiaries));
 
         // Mock the submission call to verify the job type
         doAnswer(answer -> {

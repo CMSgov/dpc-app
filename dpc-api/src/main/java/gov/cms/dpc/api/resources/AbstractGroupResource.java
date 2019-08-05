@@ -3,11 +3,9 @@ package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.hl7.fhir.dstu3.model.Group;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 @FHIR
@@ -17,6 +15,9 @@ public abstract class AbstractGroupResource {
     protected AbstractGroupResource() {
         // Not used
     }
+
+    @POST
+    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, Group attributionRoster);
 
     @Path("/{providerID}/$export")
     @GET

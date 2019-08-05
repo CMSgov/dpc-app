@@ -1,14 +1,15 @@
 package gov.cms.dpc.api.resources.v1;
 
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.common.annotations.APIV1;
-import gov.cms.dpc.common.interfaces.AttributionEngine;
-import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
@@ -27,7 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 
 
@@ -40,14 +43,36 @@ public class GroupResource extends AbstractGroupResource {
     static final String LIST_DELIMITER = ",";
 
     private final JobQueue queue;
-    private final AttributionEngine client;
+    private final IGenericClient client;
     private final String baseURL;
 
     @Inject
-    public GroupResource(JobQueue queue, AttributionEngine client, @APIV1 String baseURL) {
+    public GroupResource(JobQueue queue, IGenericClient client, @APIV1 String baseURL) {
         this.queue = queue;
         this.client = client;
         this.baseURL = baseURL;
+    }
+
+
+    @POST
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @Override
+    public Response createRoster(@Auth OrganizationPrincipal organizationPrincipal, Group attributionRoster) {
+        addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
+
+        final MethodOutcome outcome = this
+                .client
+                .create()
+                .resource(attributionRoster)
+                .encodedJson()
+                .execute();
+
+        final Group createdGroup = (Group) outcome.getResource();
+        final Response.Status status = outcome.getCreated() == null ? Response.Status.CREATED : Response.Status.OK;
+
+        return Response.status(status).entity(createdGroup).build();
     }
 
     /**
@@ -76,7 +101,7 @@ public class GroupResource extends AbstractGroupResource {
     )
     public Response export(@ApiParam(hidden = true)
                            @Auth OrganizationPrincipal organizationPrincipal,
-                           @ApiParam(value = "Provider NPI", required = true)
+                           @ApiParam(value = "Provider ID", required = true)
                            @PathParam("providerID") String providerID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") String resourceTypes,
@@ -89,11 +114,34 @@ public class GroupResource extends AbstractGroupResource {
         // Check the parameters
         checkExportRequest(outputFormat, since);
 
-        // Get a list of attributed beneficiaries
-        final Optional<List<String>> attributedBeneficiaries = this.client.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(providerID));
-        if (attributedBeneficiaries.isEmpty()) {
-            throw new WebApplicationException("Attribution server error");
+        final Group attributionRoster = this.client
+                .read()
+                .resource(Group.class)
+                .withId(new IdType("Practitioner", providerID))
+                .encodedJson()
+                .execute();
+
+        if (attributionRoster.getMember().isEmpty()) {
+            throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
         }
+
+        // Get the patients, along with their MBIs
+        final Bundle patients = this.client
+                .operation()
+                .onInstance(new IdType(attributionRoster.getId()))
+                .named("patients")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .encodedJson()
+                .execute();
+
+        final List<String> attributedPatients = patients
+                .getEntry()
+                .stream()
+                .map(entry -> (Patient) entry.getResource())
+                .map(FHIRExtractors::getPatientMPI)
+                .collect(Collectors.toList());
 
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
@@ -101,30 +149,10 @@ public class GroupResource extends AbstractGroupResource {
 
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
-        attributedBeneficiaries.ifPresent(value ->  this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, providerID, value)));
+        this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, providerID, attributedPatients));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
-    }
-
-    /**
-     * Test method for verifying FHIR deserialization, it will eventually be removed.
-     * TODO(nickrobison): Remove this
-     *
-     * @param group - {@link Group} to use for testing
-     * @return - {@link String} test string
-     */
-    @POST
-    @Public
-    @ApiOperation(value = "FHIR marshall test", hidden = true)
-    public Patient marshalTest(Group group) {
-
-        if (group.getIdentifierFirstRep().getValue().equals("Group/fail")) {
-            throw new IllegalStateException("Should fail");
-        }
-
-        final HumanName name = new HumanName().setFamily("Doe").addGiven("John");
-        return new Patient().addName(name).addIdentifier(new Identifier().setValue("test-id"));
     }
 
     /**

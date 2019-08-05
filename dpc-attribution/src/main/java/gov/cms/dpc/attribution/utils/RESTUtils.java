@@ -17,11 +17,11 @@ public class RESTUtils {
 
 
     /**
-     * Helper method for bulk submitting a {@Bundle} of specific resources
+     * Helper method for bulk submitting a {@link Bundle} of specific resources
      *
      * @param clazz          - {@link Class} of type of filter {@link Bundle} entries
      * @param params         - {@link Parameters} which has a {@link Parameters#getParameterFirstRep()}
-     * @param resourceAction - {@link Function<T, Response>} which performs the actual bulk action for a single {@link BaseResource} of type {@link T}
+     * @param resourceAction - {@link Function} which performs the actual bulk action for a single {@link BaseResource} of type {@link T}
      * @param <T>            - {@link T} generic type parameter which extends {@link BaseResource}
      * @return - {@link Bundle} containing the processed results from the bulk submission
      */

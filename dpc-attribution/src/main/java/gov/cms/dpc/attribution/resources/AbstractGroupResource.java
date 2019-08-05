@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
@@ -26,6 +27,10 @@ public abstract class AbstractGroupResource {
     @GET
     @Path("/{rosterID}")
     public abstract Group getRoster(UUID rosterID);
+
+    @GET
+    @Path("/{rosterID}/$patients")
+    public abstract Bundle getAttributedPatients(@NotNull UUID rosterID);
 
     @PUT
     @Path("/{rosterID}")

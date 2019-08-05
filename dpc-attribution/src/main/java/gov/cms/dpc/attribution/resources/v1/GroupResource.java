@@ -13,6 +13,7 @@ import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.converters.entities.PatientEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -73,7 +75,7 @@ public class GroupResource extends AbstractGroupResource {
         }
         final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, organizationID);
         if (providers.isEmpty()) {
-            throw new WebApplicationException("Unable to finding attributable provider", Response.Status.NOT_FOUND);
+            throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
         final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0));
@@ -108,6 +110,31 @@ public class GroupResource extends AbstractGroupResource {
         bundle.setTotal(bundle.getEntry().size());
         return bundle;
     }
+
+    @GET
+    @Path("/{rosterID}/$patients")
+    @FHIR
+    @UnitOfWork
+    @Override
+    public Bundle getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID) {
+        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        final Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+
+        final List<Bundle.BundleEntryComponent> patients = existingRoster
+                .getAttributedPatients()
+                .stream()
+                .map(patient -> new Bundle.BundleEntryComponent().setResource(PatientEntityConverter.convert(patient)))
+                .collect(Collectors.toList());
+
+        bundle.setTotal(patients.size());
+        bundle.setEntry(patients);
+
+        return bundle;
+    }
+
 
     @PUT
     @Path("/{rosterID}")
