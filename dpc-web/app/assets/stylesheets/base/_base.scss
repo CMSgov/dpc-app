@@ -44,6 +44,13 @@ samp {
   font-family: $font-mono;
 }
 
+blockquote {
+  border-left: 5px solid $color-gray-light;
+  color: $color-gray;
+  margin-left: 0;
+  padding-left: $spacer-2;
+}
+
 .ds-c-choice + label a {
   margin-left: 1ch;
 }

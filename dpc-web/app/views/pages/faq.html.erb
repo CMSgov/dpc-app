@@ -128,12 +128,79 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
       </ul>
     </div>
 
+
     <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="a10">
-        I requested access to the pilot. When will CMS get back to me?
+        As a healthcare provider, are there any other requirements for me to join?
       </button>
     </h2>
     <div id="a10" class="usa-accordion__content">
+      <ul>
+        <li>Review the <%= link_to "Terms of Service", terms_of_service_path %>. You will be attesting that you follow those with each roster add and renewal.</li>
+        <li>Make sure your vendor can support the APIs as described in the <%= link_to "Documentation", docs_path %>.</li>
+        <li>Enter your FHIR end points in the <a href="https://nppes.cms.hhs.gov">National Provider and Plan Enumeration System (NPPES)</a>. No production access is provided until this step is completed for each provider.</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a11">
+        As a healthcare vendor, are there any other requirements for me to join?
+      </button>
+    </h2>
+    <div id="a11" class="usa-accordion__content">
+      <ul>
+        <li>Review the <%= link_to "Terms of Service", terms_of_service_path %>. You will be attesting that you follow those with each roster add and renewal. </li>
+        <li>Make sure you have at least one of security certifications
+          <ul>
+            <li>HHS ONC Health IT Certification (2015)</li>
+            <li>HITRUST Validated Assessment (or an audited self-assessment if you are working toward HITRUST Validated Assessment within a calendar year</li>
+          </ul>
+        </li>
+        <li>Develop to the <%= link_to "Documentation", docs_path %> and test with the synthetic data</li>
+        <li>Prepare to demo your functionality to show us how the claims data is made available to the provider at the point of care</li>
+      </ul>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a12">
+        As a healthcare vendor, what are the steps I should be following in preparation of supporting a provider?
+      </button>
+    </h2>
+    <div id="a12" class="usa-accordion__content">
+      <ol>
+        <li>Develop a working implementation of a Bulk Data Client</li>
+        <li>Ask the provider to submit their FHIR endpoint to NPPES by logging in and updating their NPI record</li>
+        <li>Be prepared to submit required patient/provider data that fulfills the specified FHIR profiles.</li>
+        <li>Implement the required components of the SMART Backend Services Authentication (e.g. host public key and sign JWTs for token requests)</li>
+        <li>Be prepared to demo your solution to our team to show us the workflows and screens that enable providers to use the information at the point of care in their workflow.</li>
+      </ol>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a13">
+        I am an Emergency Room provider. Can I participate?
+      </button>
+    </h2>
+    <div id="a13" class="usa-accordion__content">
+      <p>Yes! The emergency room scenario is a great use of claims data. When adding patients to the roster from an emergency room, the time period will be 72 hours instead of the 90 days that occurs for outpatient visits. Otherwise, you can add patients to your roster as they are admitted to the emergency room.</p>
+    </div>
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a14">
+        I have questions about whether I would be a good pilot. How can I learn more?
+      </button>
+    </h2>
+    <div id="a14" class="usa-accordion__content">
+      <p>Join our <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a>! The Google Group is a great place to ask questions and read what the rest of the community is asking as well.</p>
+    </div>
+
+
+    <h2 class="usa-accordion__heading">
+      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a15">
+        I requested access to the pilot. When will CMS get back to me?
+      </button>
+    </h2>
+    <div id="a15" class="usa-accordion__content">
       <ul>
         <li>CMS will slowly roll out the tokens to providers based on order of request, their readiness, their experience with FHIR, claims data, Blue Button and BCDA, and our ability to respond.</li>
         <li>Updates will be posted to the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a> as CMS progresses through the pilot process.</li>
