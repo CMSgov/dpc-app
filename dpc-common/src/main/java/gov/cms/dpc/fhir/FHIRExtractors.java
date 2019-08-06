@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Helper class for extracting various features from FHIR resources
@@ -108,9 +107,9 @@ public class FHIRExtractors {
      * @param tag - {@link String} tag to parse
      * @return - {@link Pair} of System {@link String} and Code {@link String}
      */
-    private static Pair<String, String> parseTag(String tag) {
+    public static Pair<String, String> parseTag(String tag) {
         final int idx = tag.indexOf('|');
-        if (idx <= 0) {
+        if (idx < 0) {
             throw new IllegalArgumentException(String.format("Malformed tag: %s", tag));
         }
 
@@ -152,7 +151,7 @@ public class FHIRExtractors {
                 .flatMap(value -> ((CodeableConcept) value).getCoding().stream())
                 .filter(code -> code.getSystem().equals(DPCIdentifierSystem.NPPES.getSystem()))
                 .map(Coding::getCode)
-                        .findFirst()
+                .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
     }
 }

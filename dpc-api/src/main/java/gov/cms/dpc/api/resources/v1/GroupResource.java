@@ -2,11 +2,15 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IBaseQuery;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
@@ -52,7 +56,6 @@ public class GroupResource extends AbstractGroupResource {
         this.baseURL = baseURL;
     }
 
-
     @POST
     @FHIR
     @Timed
@@ -77,6 +80,100 @@ public class GroupResource extends AbstractGroupResource {
         final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
 
         return Response.status(status).entity(createdGroup).build();
+    }
+
+    @GET
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Search for Attribution Rosters", notes = "FHIR endpoint for searching for Attribution rosters." +
+            "<p> If Provider NPI is given, all attribution groups for that provider will be returned. " +
+            "If a Patient ID is given, all attribution groups for which that patient is a member will be returned.")
+    @Override
+    public Bundle rosterSearch(@ApiParam(hidden = true)
+                               @Auth OrganizationPrincipal organizationPrincipal,
+                               @ApiParam(value = "Provider NPI")
+                               @QueryParam(value = Group.SP_CHARACTERISTIC_VALUE)
+                                       String providerNPI,
+                               @ApiParam(value = "Patient ID")
+                               @QueryParam(value = Group.SP_MEMBER)
+                                       String patientID) {
+
+        IQuery<Bundle> baseQuery = this.client
+                .search()
+                .forResource(Group.class)
+                .returnBundle(Bundle.class);
+
+        // These are unchecked casts because I can't understand the HAPI type hierarchy, but this should be safe.
+        //noinspection unchecked
+        baseQuery = (IQuery<Bundle>) searchForProvider(baseQuery, providerNPI);
+        //noinspection unchecked
+        baseQuery = (IQuery<Bundle>) searchForPatient(baseQuery, patientID);
+
+        baseQuery
+                .withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getOrganization().getIdElement().getIdPart());
+
+        return baseQuery
+                .encodedJson()
+                .execute();
+    }
+
+    @GET
+    @FHIR
+    @Path("/{rosterID}")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Fetch Attribution Roster", notes = "Fetch specific Attribution roster.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @Override
+    public Group getRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
+        return this.client
+                .read()
+                .resource(Group.class)
+                .withId(new IdType("Group", rosterID.toString()))
+                .encodedJson()
+                .execute();
+    }
+
+    @PUT
+    @Path("/{rosterID}")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "rosterID")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Update Attribution Roster", notes = "Update specific Attribution roster." +
+            "<p>Updates allow for adding or removing patients from the roster.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @Override
+    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group rosterUpdate) {
+        final MethodOutcome outcome = this.client
+                .update()
+                .resource(rosterUpdate)
+                .withId(new IdType("Group", rosterID.toString()))
+                .encodedJson()
+                .execute();
+
+        return (Group) outcome.getResource();
+    }
+
+    @DELETE
+    @FHIR
+    @Path("/{rosterID}")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "rosterID")
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Delete Attribution Roster", notes = "Remove specific Attribution roster")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @Override
+    public Response deleteRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
+        this.client
+                .delete()
+                .resourceById(new IdType("Group", rosterID.toString()))
+                .encodedJson()
+                .execute();
+
+        return Response.ok().build();
     }
 
     /**
@@ -214,5 +311,21 @@ public class GroupResource extends AbstractGroupResource {
         return JobModel.validResourceTypes.stream()
                 .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
                 .findFirst();
+    }
+
+    private static IBaseQuery<?> searchForProvider(IBaseQuery<?> query, String providerNPI) {
+        return query
+                .where(Group.CHARACTERISTIC_VALUE
+                        .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
+                        .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), providerNPI)));
+    }
+
+
+    private static IBaseQuery<?> searchForPatient(IBaseQuery<?> query, String patientID) {
+        if (patientID != null) {
+            return query
+                    .where(Group.MEMBER.hasId(patientID));
+        }
+        return query;
     }
 }

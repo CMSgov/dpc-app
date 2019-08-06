@@ -1,5 +1,7 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
@@ -17,6 +19,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -95,14 +98,16 @@ public class GroupResource extends AbstractGroupResource {
     public Bundle rosterSearch(@ApiParam(value = "Organization ID")
                                @NotEmpty @QueryParam("_tag") String organizationToken,
                                @ApiParam(value = "Provider NPI")
-                               @QueryParam("characteristic") String providerNPI,
+                               @QueryParam(Group.SP_CHARACTERISTIC_VALUE) String providerNPI,
                                @ApiParam(value = "Patient MBI")
-                               @QueryParam("member") String patientMBI) {
+                               @QueryParam(Group.SP_MEMBER) String patientMBI) {
+
+        final Pair<IdType, IdType> idPair = parseCompositeID(providerNPI);
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
         final UUID organizationID = RESTUtils.parseTokenTag(organizationToken);
-        this.rosterDAO.findEntities(organizationID, providerNPI, patientMBI)
+        this.rosterDAO.findEntities(organizationID, idPair.getRight().getIdPart(), patientMBI)
                 .stream()
                 .map(RosterEntity::toFHIR)
                 .forEach(entity -> bundle.addEntry().setResource(entity));
@@ -405,5 +410,21 @@ public class GroupResource extends AbstractGroupResource {
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
+    }
+
+    private static Pair<IdType, IdType> parseCompositeID(String queryParam) {
+        final String[] split = queryParam.split("\\$");
+        if (split.length != 2) {
+            throw new IllegalArgumentException("Cannot parse query param: " + queryParam);
+        }
+        // Left tag
+        final Pair<String, String> leftPair = FHIRExtractors.parseTag(split[0]);
+        final IdType leftID = new IdType(leftPair.getLeft(), leftPair.getRight());
+
+        // Right tag
+        final Pair<String, String> rightPair = FHIRExtractors.parseTag(split[1]);
+        final IdType rightID = new IdType(rightPair.getLeft(), rightPair.getRight());
+
+        return Pair.of(leftID, rightID);
     }
 }
