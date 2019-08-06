@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 
 public class RESTUtils {
 
+    private RESTUtils() {
+        // Not used
+    }
 
     /**
      * Helper method for bulk submitting a {@link Bundle} of specific resources
@@ -55,12 +58,25 @@ public class RESTUtils {
         return bundle;
     }
 
-    public static UUID parseTokenTag(String tokenTag) {
+    /**
+     * Extract specific value from Token tag.
+     * This works by splitting the string on the '|' character and passing the right hand value to the builder.
+     *
+     * @param builder  - {@link Function} for building specific return value.
+     * @param tokenTag - {@link String} token value to parse
+     * @param <T>      - {@link T} generic return type
+     * @return - {@link T}
+     */
+    public static <T> T parseTokenTag(Function<String, T> builder, String tokenTag) {
         final int idx = tokenTag.indexOf('|');
         if (idx < 0) {
             throw new WebApplicationException("Malformed tokenTag", Response.Status.BAD_REQUEST);
         }
 
-        return UUID.fromString(tokenTag.substring(idx + 1));
+        return builder.apply(tokenTag.substring(idx + 1));
+    }
+
+    public static UUID tokenTagToUUID(String tokenTag) {
+        return parseTokenTag(UUID::fromString, tokenTag);
     }
 }

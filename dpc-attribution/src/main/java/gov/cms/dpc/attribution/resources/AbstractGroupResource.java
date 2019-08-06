@@ -39,17 +39,4 @@ public abstract class AbstractGroupResource {
     @DELETE
     @Path("/{rosterID}")
     public abstract Response deleteRoster(UUID rosterID);
-//
-//    @GET
-//    @Path("/{groupID}/{patientID}")
-//    public abstract boolean isAttributed(String groupID, String patientID);
-//
-//
-//    @PUT
-//    @Path("/{groupID}/{patientID}")
-//    public abstract void attributePatient(String groupID, String patientID);
-//
-//    @DELETE
-//    @Path("/{groupID}/{patientID}")
-//    public abstract void removeAttribution(String groupID, String patientID);
 }

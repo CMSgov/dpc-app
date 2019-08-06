@@ -101,7 +101,7 @@ public class GroupResource extends AbstractGroupResource {
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
-        final UUID organizationID = RESTUtils.parseTokenTag(organizationToken);
+        final UUID organizationID = RESTUtils.tokenTagToUUID(organizationToken);
         this.rosterDAO.findEntities(organizationID, idPair.getRight().getIdPart(), patientID)
                 .stream()
                 .map(RosterEntity::toFHIR)
@@ -170,36 +170,9 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Cannot have a Patient listed twice in Group update", Response.Status.BAD_REQUEST);
         }
 
-        // Do we really have to do a linear search to figure out who to add/remove?
-        // This should not be here for long
         final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-
-        // Remove patients first
-        groupUpdate
-                .getMember()
-                .stream()
-                .filter(Group.GroupMemberComponent::getInactive)
-                .map(Group.GroupMemberComponent::getEntity)
-                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
-
-        // Now, add all the new ones
-        groupUpdate
-                .getMember()
-                .stream()
-                .filter(member -> !member.getInactive())
-                .map(Group.GroupMemberComponent::getEntity)
-                .map(ref -> {
-                    final PatientEntity pe = new PatientEntity();
-                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
-                    return pe;
-                })
-                .map(pe -> new AttributionRelationship(existingRoster, pe))
-                .forEach(relationship -> {
-                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
-                    if (found.isEmpty()) {
-                        existingAttributions.add(relationship);
-                    }
-                });
+        // Add and remove Roster members
+        processGroupMembers(existingRoster, groupUpdate);
 
         existingRoster.setAttributions(existingAttributions);
 
@@ -221,35 +194,6 @@ public class GroupResource extends AbstractGroupResource {
         return Response.ok().build();
     }
 
-    //    @POST
-//    @Path("/$submit")
-//    @FHIR
-//    @Override
-//    @Timed
-//    @ExceptionMetered
-//    @ApiOperation(value = "Submit Attribution Bundle", notes = "FHIR endpoint that accepts a Bundle resource, corresponding to an Attribution set.")
-//    @ApiResponses(
-//            @ApiResponse(code = 201, message = "Attribution Bundle was successfully added")
-//    )
-//    public Response submitRoster(Bundle providerBundle) {
-//        logger.debug("API request to submit roster");
-//        // FIXME(nickrobison): Remove this! This is really gross, but will come out as part of our Group refactoring
-//        final UUID organizationID = providerBundle.getEntryFirstRep()
-//                .getResource()
-//                .getMeta()
-//                .getTag()
-//                .stream()
-//                .filter(tag -> tag.getSystem().equals(DPCIdentifierSystem.DPC.getSystem()))
-//                .map(Coding::getCode)
-//                .map(UUID::fromString)
-//                .findFirst()
-//                .orElseThrow(() -> new WebApplicationException("Must have Metadata identifier", Response.Status.INTERNAL_SERVER_ERROR));
-//
-//        this.engine.addAttributionRelationships(providerBundle, organizationID);
-//
-//        return Response.status(Response.Status.CREATED).build();
-//    }
-
 
     @Path("/{rosterID}")
     @GET
@@ -270,89 +214,7 @@ public class GroupResource extends AbstractGroupResource {
         return this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION)
                 .toFHIR();
-
-//        Optional<List<String>> attributedBeneficiaries;
-//        try {
-//            // Create a practitioner resource for retrieval
-//            attributedBeneficiaries = engine.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(groupID));
-//        } catch (Exception e) {
-//            logger.error("Cannot get attributed patients for {}", groupID, e);
-//            throw new WebApplicationException(String.format("Unable to retrieve attributed patients for: %s", groupID), Response.Status.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        if (attributedBeneficiaries.isEmpty()) {
-//            throw new WebApplicationException(String.format("Unable to find provider: %s", groupID), Response.Status.NOT_FOUND);
-//        }
-//        return attributedBeneficiaries.get();
     }
-//
-//    @Path("/{groupID}/{patientID}")
-//    @GET
-//    @Override
-//    @Timed
-//    @ExceptionMetered
-//    @ApiOperation(value = "Verify attribution relationship", notes = "Returns whether or not the Patient (identified by MBI) is attributed to the given Provider (identified by NPI)")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "Patient is attributed to the given provider"),
-//            @ApiResponse(code = 406, message = "Patient is not attributed to the given provider")
-//    })
-//    public boolean isAttributed(@ApiParam(value = "Provider NPI", required = true)
-//                                @PathParam("groupID") String groupID,
-//                                @ApiParam(value = "Patient MBI", required = true)
-//                                @PathParam("patientID") String patientID) {
-//        logger.debug("API request to determine attribution between {} and {}", groupID, patientID);
-//        final boolean attributed = engine.isAttributed(
-//                FHIRBuilders.buildPractitionerFromNPI(groupID),
-//                FHIRBuilders.buildPatientFromMBI(patientID));
-//        if (!attributed) {
-//            throw new WebApplicationException(HttpStatus.NOT_ACCEPTABLE_406);
-//        }
-//        return true;
-//    }
-//
-//    @Path("/{groupID}/{patientID}")
-//    @PUT
-//    @Override
-//    @Timed
-//    @ExceptionMetered
-//    @ApiOperation(value = "Attribute patient to provider", notes = "Method to attributed a patient (identified by MBI) to a given provider (identified by NPI)")
-//    @ApiResponses(value = @ApiResponse(code = 500, message = "Service was unable to attribute patient to provider"))
-//    public void attributePatient(@ApiParam(value = "Provider NPI", required = true)
-//                                 @PathParam("groupID") String groupID,
-//                                 @ApiParam(value = "Patient MBI", required = true)
-//                                 @PathParam("patientID") String patientID) {
-//        logger.debug("API request to add attribution between {} and {}", groupID, patientID);
-//        try {
-//            this.engine.addAttributionRelationship(
-//                    FHIRBuilders.buildPractitionerFromNPI(groupID),
-//                    FHIRBuilders.buildPatientFromMBI(patientID));
-//        } catch (Exception e) {
-//            logger.error("Error attributing patient", e);
-//            throw new WebApplicationException("Cannot attribute patients", HttpStatus.INTERNAL_SERVER_ERROR_500);
-//        }
-//    }
-//
-//    @Path("/{groupID}/{patientID}")
-//    @Override
-//    @DELETE
-//    @Timed
-//    @ExceptionMetered
-//    @ApiOperation(value = "Remove patient attribution", notes = "Method to remove an attributed patient (identified by MBI) from a given provider (identified by NPI)")
-//    @ApiResponses(value = @ApiResponse(code = 500, message = "Service was unable to remove attribution between patient and provider"))
-//    public void removeAttribution(@ApiParam(value = "Provider NPI", required = true)
-//                                  @PathParam("groupID") String groupID,
-//                                  @ApiParam(value = "Patient MBI", required = true)
-//                                  @PathParam("patientID") String patientID) {
-//        logger.debug("API request to remove attribution between {} and {}", groupID, patientID);
-//        try {
-//            this.engine.removeAttributionRelationship(
-//                    FHIRBuilders.buildPractitionerFromNPI(groupID),
-//                    FHIRBuilders.buildPatientFromMBI(patientID));
-//        } catch (Exception e) {
-//            logger.error("Error removing patient", e);
-//            throw new WebApplicationException("Cannot remove attributed patients", HttpStatus.INTERNAL_SERVER_ERROR_500);
-//        }
-//    }
 
     /**
      * Remove {@link AttributionRelationship} from the given {@link List} of {@link AttributionRelationship}, if it matches
@@ -421,5 +283,38 @@ public class GroupResource extends AbstractGroupResource {
         final IdType rightID = new IdType(rightPair.getLeft(), rightPair.getRight());
 
         return Pair.of(leftID, rightID);
+    }
+
+    private static void processGroupMembers(RosterEntity existingRoster, Group groupUpdate) {
+        // Do we really have to do a linear search to figure out who to add/remove?
+        // This should not be here for long
+        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+
+        // Remove patients first
+        groupUpdate
+                .getMember()
+                .stream()
+                .filter(Group.GroupMemberComponent::getInactive)
+                .map(Group.GroupMemberComponent::getEntity)
+                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
+
+        // Now, add all the new ones
+        groupUpdate
+                .getMember()
+                .stream()
+                .filter(member -> !member.getInactive())
+                .map(Group.GroupMemberComponent::getEntity)
+                .map(ref -> {
+                    final PatientEntity pe = new PatientEntity();
+                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
+                    return pe;
+                })
+                .map(pe -> new AttributionRelationship(existingRoster, pe))
+                .forEach(relationship -> {
+                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
+                    if (found.isEmpty()) {
+                        existingAttributions.add(relationship);
+                    }
+                });
     }
 }

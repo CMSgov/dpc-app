@@ -180,7 +180,7 @@ public class GroupResource extends AbstractGroupResource {
      * On success, returns a {@link org.eclipse.jetty.http.HttpStatus#NO_CONTENT_204} response with no content in the result.
      * The `Content-Location` header contains the URI to call when checking job status. On failure, return an {@link OperationOutcome}.
      *
-     * @param providerID    {@link String} ID of provider to retrieve data for
+     * @param rosterID    {@link String} ID of provider to retrieve data for
      * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}
      * @param outputFormat  - Optional outputFormats parameter
      * @param since         - Optional since parameter
@@ -188,7 +188,7 @@ public class GroupResource extends AbstractGroupResource {
      */
     @Override
     @GET // Need this here, since we're using a path param
-    @Path("/{providerID}/$export")
+    @Path("/{rosterID}/$export")
     @Timed
     @ExceptionMetered
     @FHIRAsync
@@ -202,46 +202,20 @@ public class GroupResource extends AbstractGroupResource {
     public Response export(@ApiParam(hidden = true)
                            @Auth OrganizationPrincipal organizationPrincipal,
                            @ApiParam(value = "Provider ID", required = true)
-                           @PathParam("providerID") String providerID,
+                           @PathParam("rosterID") String rosterID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") String resourceTypes,
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") String outputFormat,
                            @ApiParam(value = "Request data that has been updated after the given point. (Not implemented yet)", hidden = true)
                            @QueryParam("_since") String since) {
-        logger.debug("Exporting data for provider: {}", providerID);
+        logger.debug("Exporting data for provider: {}", rosterID);
 
         // Check the parameters
         checkExportRequest(outputFormat, since);
 
-        final Group attributionRoster = this.client
-                .read()
-                .resource(Group.class)
-                .withId(new IdType("Practitioner", providerID))
-                .encodedJson()
-                .execute();
-
-        if (attributionRoster.getMember().isEmpty()) {
-            throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
-        }
-
-        // Get the patients, along with their MBIs
-        final Bundle patients = this.client
-                .operation()
-                .onInstance(new IdType(attributionRoster.getId()))
-                .named("patients")
-                .withNoParameters(Parameters.class)
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .encodedJson()
-                .execute();
-
-        final List<String> attributedPatients = patients
-                .getEntry()
-                .stream()
-                .map(entry -> (Patient) entry.getResource())
-                .map(FHIRExtractors::getPatientMPI)
-                .collect(Collectors.toList());
+        // Get the attributed patients
+        final List<String> attributedPatients = fetchPatientMBIs(rosterID);
 
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
@@ -249,7 +223,7 @@ public class GroupResource extends AbstractGroupResource {
 
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
-        this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, providerID, attributedPatients));
+        this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, rosterID, attributedPatients));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
@@ -326,5 +300,37 @@ public class GroupResource extends AbstractGroupResource {
                     .where(Group.MEMBER.hasId(patientID));
         }
         return query;
+    }
+
+    private List<String> fetchPatientMBIs(String groupID) {
+
+        final Group attributionRoster = this.client
+                .read()
+                .resource(Group.class)
+                .withId(new IdType("Group", groupID))
+                .encodedJson()
+                .execute();
+
+        if (attributionRoster.getMember().isEmpty()) {
+            throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
+        }
+
+        // Get the patients, along with their MBIs
+        final Bundle patients = this.client
+                .operation()
+                .onInstance(new IdType(attributionRoster.getId()))
+                .named("patients")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .encodedJson()
+                .execute();
+
+        return patients
+                .getEntry()
+                .stream()
+                .map(entry -> (Patient) entry.getResource())
+                .map(FHIRExtractors::getPatientMPI)
+                .collect(Collectors.toList());
     }
 }

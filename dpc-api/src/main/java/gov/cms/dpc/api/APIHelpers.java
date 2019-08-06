@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
 
 public class APIHelpers {
 
+    private APIHelpers() {
+        // Not used
+    }
+
 
     public static <T extends BaseResource> Bundle bulkResourceClient(Class<T> clazz, IGenericClient client, Consumer<T> entryConsumer, Bundle resourceBundle) {
         // We need to figure out how to validate the bundle entries

@@ -36,10 +36,10 @@ public abstract class AbstractGroupResource {
     @Path("/{rosterID}")
     public abstract Response deleteRoster(UUID rosterID);
 
-    @Path("/{providerID}/$export")
+    @Path("/{rosterID}/$export")
     @GET
     public abstract Response export(OrganizationPrincipal organizationPrincipal,
-                                    @PathParam("providerID") String groupID,
+                                    @PathParam("rosterID") String rosterID,
                                     @QueryParam("_type") String resourceTypes,
                                     @QueryParam("_outputFormat") String outputFormat,
                                     @QueryParam("_since") String since);
