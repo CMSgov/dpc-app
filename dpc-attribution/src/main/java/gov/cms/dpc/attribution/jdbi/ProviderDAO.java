@@ -124,9 +124,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> implements Attribut
 
     @Override
     public void addAttributionRelationships(Bundle attributionBundle, UUID organizationID) {
-        // Web API check that this is ok to do
-        final Practitioner practitioner = (Practitioner) attributionBundle.getEntryFirstRep().getResource();
-        final ProviderEntity provider = ProviderEntity.fromFHIR(practitioner);
+        // Web API checks that this is ok to do
         final OrganizationEntity organization = new OrganizationEntity();
         organization.setId(organizationID);
 

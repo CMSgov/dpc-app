@@ -76,14 +76,11 @@ public class RosterEngine implements AttributionEngine {
                 final DSLContext ctx = DSL.using(config);
 
                 final PatientRecordUpserter patientUpserter = new PatientRecordUpserter(ctx, ctx.newRecord(PATIENTS, patient));
-                final ProviderRecordUpserter providerUpserter = new ProviderRecordUpserter(ctx, ctx.newRecord(PROVIDERS, provider));
 
                 final PatientsRecord patientRecord = patientUpserter.upsert();
-                final ProvidersRecord providerRecord = providerUpserter.upsert();
 
                 // Manually create the attribution relationship because JOOQ doesn't understand JPA ManyToOne relationships
                 final AttributionsRecord attr = new AttributionsRecord();
-//                attr.setProviderId(providerRecord.getId());
                 attr.setPatientId(patientRecord.getId());
                 attr.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
 

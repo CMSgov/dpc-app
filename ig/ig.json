@@ -135,6 +135,11 @@
       "base": "CapabilityStatement-dpc-capabilities.html",
       "defns": "CapabilityStatement-dpc-capabilities-definitions.html",
       "source": "DPCCapabilities.json"
+    },
+    "OperationDefinition/dpc-operation-submit-practitioner": {
+      "base": "OperationDefinition-dpc-submit-practitioner.html",
+      "defns": "OperationDefinition-dpc-submit-practitioner-definition.html",
+      "source": "dpc-practitioner-submit.json"
     }
   },
   "version": "3.0.1",

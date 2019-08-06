@@ -131,7 +131,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
     @Override
     public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Bundle providerBundle) {
-        final Consumer<Practitioner> entryHandler = (resource) -> validateAndTagProvider((Practitioner) resource,
+        final Consumer<Practitioner> entryHandler = (resource) -> validateAndTagProvider(resource,
                 organization.getOrganization().getId(),
                 validator,
                 PRACTITIONER_PROFILE);

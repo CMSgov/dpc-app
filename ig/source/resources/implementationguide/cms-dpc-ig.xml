@@ -71,5 +71,12 @@
                 <display value="DPCCapabilities.json"/>
             </sourceReference>
         </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="OperationDefinition/dpc-practitioners-submit"/>
+                <display value="dpc-practitioners-submit.json"/>
+            </sourceReference>
+        </resource>
     </package>
 </ImplementationGuide>

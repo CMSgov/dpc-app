@@ -57,7 +57,7 @@ public class SeedProcessor {
      * @param entry             - {@link Map#entry(Object, Object)} representing the providerID and a {@link List} of {@link Pair} objects containing both the providerID and the patientID
      * @param organizationID    - {@link UUID} of organization to register attribution group to
      * @param patientReferences - {@link Map} patient ID lookup map
-     * @return @return - {@link Group} which attributes to the given {@link Patient} entities to the {@link Practitioner} entity.
+     * @return - {@link Group} which attributes to the given {@link Patient} entities to the {@link Practitioner} entity.
      */
     public static Group generateAttributionGroup(Map.Entry<String, List<Pair<String, String>>> entry, UUID organizationID, Map<String, Reference> patientReferences) {
 

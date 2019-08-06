@@ -43,6 +43,7 @@ import static org.mockito.Mockito.*;
  * Verifies the a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
+@SuppressWarnings("rawtypes")
 class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private static final String TEST_PROVIDER_ID = "1";

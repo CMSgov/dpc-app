@@ -82,6 +82,7 @@ public class GroupResource extends AbstractGroupResource {
         return Response.status(status).entity(createdGroup).build();
     }
 
+    @SuppressWarnings("unchecked")
     @GET
     @FHIR
     @Timed
@@ -105,9 +106,7 @@ public class GroupResource extends AbstractGroupResource {
                 .returnBundle(Bundle.class);
 
         // These are unchecked casts because I can't understand the HAPI type hierarchy, but this should be safe.
-        //noinspection unchecked
         baseQuery = (IQuery<Bundle>) searchForProvider(baseQuery, providerNPI);
-        //noinspection unchecked
         baseQuery = (IQuery<Bundle>) searchForPatient(baseQuery, patientID);
 
         baseQuery

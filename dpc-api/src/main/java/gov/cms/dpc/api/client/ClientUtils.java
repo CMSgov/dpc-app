@@ -19,6 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,14 +113,14 @@ public class ClientUtils {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Cannot find matching provider"));
 
-        final Bundle providerBundle = SeedProcessor.generateAttributionGroup(providerRoster, organizationID);
+        final Group attributionRoster = SeedProcessor.generateAttributionGroup(providerRoster, organizationID, null);
 
         // Now, submit the bundle
         // TODO: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.
         // Instead, we rely on the fact that an error is not thrown.
         return client
                 .create()
-                .resource(providerBundle)
+                .resource(attributionRoster)
                 .encodedJson();
     }
 

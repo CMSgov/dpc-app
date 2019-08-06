@@ -1,7 +1,5 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import ca.uhn.fhir.rest.param.CompositeParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
@@ -13,7 +11,6 @@ import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.RosterEntity;
-import gov.cms.dpc.common.interfaces.AttributionEngine;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -44,14 +41,12 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find Roster resource", Response.Status.NOT_FOUND);
 
-    private final AttributionEngine engine;
     private final ProviderDAO providerDAO;
     private final PatientDAO patientDAO;
     private final RosterDAO rosterDAO;
 
     @Inject
-    GroupResource(AttributionEngine engine, ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO) {
-        this.engine = engine;
+    GroupResource(ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO) {
         this.rosterDAO = rosterDAO;
         this.providerDAO = providerDAO;
         this.patientDAO = patientDAO;
@@ -413,7 +408,7 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     private static Pair<IdType, IdType> parseCompositeID(String queryParam) {
-        final String[] split = queryParam.split("\\$");
+        final String[] split = queryParam.split("\\$", -1);
         if (split.length != 2) {
             throw new IllegalArgumentException("Cannot parse query param: " + queryParam);
         }

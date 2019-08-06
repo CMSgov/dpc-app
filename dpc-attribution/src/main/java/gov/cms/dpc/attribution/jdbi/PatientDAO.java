@@ -84,6 +84,8 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         return fullyUpdated;
     }
 
+    // We have to suppress this because the list returned is actually Strings, but we can't prove it to the compiler
+    @SuppressWarnings("rawtypes")
     public List fetchPatientMBIByRosterID(UUID rosterID) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);

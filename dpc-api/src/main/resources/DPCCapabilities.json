@@ -80,6 +80,11 @@
               "name": "identifier",
               "type": "string"
             }
+          ],
+          "operation": [
+            {
+              "name": "submit"
+            }
           ]
         },
         {
@@ -109,6 +114,11 @@
             {
               "name": "identifier",
               "type": "string"
+            }
+          ],
+          "operation": [
+            {
+              "name": "submit"
             }
           ]
         },

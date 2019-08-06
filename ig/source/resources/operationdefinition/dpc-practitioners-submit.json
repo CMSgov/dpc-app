@@ -1,0 +1,28 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "dpc-operation-submit-practitioner",
+  "url": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-submit-practitioner",
+  "name": "Submit Practitioners",
+  "title": "Bundled Resource Submission - Practitioner",
+  "publisher": "The DPC Team",
+  "status": "draft",
+  "version": "0.0.1",
+  "kind": "operation",
+  "code": "$submit",
+  "resource": [
+    "Practitioner"
+  ],
+  "system": false,
+  "type": true,
+  "instance": false,
+  "parameter": [
+    {
+      "name": "body",
+      "use": "in",
+      "min": 1,
+      "max": "",
+      "documentation": "Bundle resource to submit to DPC application. This should be the body of the POST request",
+      "type": "Bundle"
+    }
+  ]
+}

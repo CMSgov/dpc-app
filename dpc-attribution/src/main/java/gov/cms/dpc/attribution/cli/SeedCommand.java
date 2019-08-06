@@ -6,11 +6,9 @@ import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.OrganizationEndpoints;
 import gov.cms.dpc.attribution.dao.tables.Organizations;
 import gov.cms.dpc.attribution.dao.tables.Patients;
-import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationEndpointsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
-import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
 import gov.cms.dpc.attribution.utils.DBUtils;
 import gov.cms.dpc.common.entities.*;
@@ -43,7 +41,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
     private static final String ORGANIZATION_BUNDLE = "organization_bundle.json";
-    private static final String PROVIDER_BUNDLE = "provider_bundle.json";
     private static final String PATIENT_BUNDLE = "patient_bundle.json";
     private static final UUID ORGANIZATION_ID = UUID.fromString("46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
@@ -86,14 +83,11 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             // Start with the Organizations and their endpoints
             seedOrganizationBundle(context, parser);
 
-            // Providers next
-            final Map<String, Reference> providerReferences = seedProviderBundle(context, parser, ORGANIZATION_ID);
-
             // Add the patients, saving the references
             final Map<String, Reference> patientReferences = seedPatientBundle(context, parser, ORGANIZATION_ID);
 
             // Get the test attribution seeds
-            seedAttributions(context, ORGANIZATION_ID, creationTimestamp, patientReferences, providerReferences);
+            seedAttributions(context, ORGANIZATION_ID, creationTimestamp, patientReferences);
 
             logger.info("Finished loading seeds");
         }
@@ -120,28 +114,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         }
     }
 
-    private Map<String, Reference> seedProviderBundle(DSLContext context, IParser parser, UUID organizationID) throws IOException {
-        try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
-            final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
-            final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR, organizationID);
-
-            Map<String, Reference> providerReferences = new HashMap<>();
-
-            providers
-                    .stream()
-                    .map(entity -> providersEntityToRecord(context, entity))
-                    .peek(context::executeInsert)
-                    .forEach(record -> {
-                        final Reference ref = new Reference(new IdType("Practitioner", record.getId().toString()));
-                        providerReferences.put(record.getProviderId(), ref);
-                    });
-
-            return providerReferences;
-
-        }
-    }
-
-    private void seedAttributions(DSLContext context, UUID organizationID, OffsetDateTime creationTimestamp, Map<String, Reference> patientReferences, Map<String, Reference> providerReferences) throws IOException {
+    private void seedAttributions(DSLContext context, UUID organizationID, OffsetDateTime creationTimestamp, Map<String, Reference> patientReferences) throws IOException {
         try (InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV)) {
             if (resource == null) {
                 throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
@@ -179,10 +152,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
             return patientReferences;
         }
-    }
-
-    private static <T extends BaseResource> void loadBundle(Class<T> clazz, String filename) {
-
     }
 
     private static OffsetDateTime generateTimestamp(Namespace namespace) {
@@ -226,14 +195,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         record.setAddress(entity.getAddress());
         record.setValidationStatus(entity.getValidationStatus().ordinal());
         record.setValidationMessage(entity.getValidationMessage());
-
-        return record;
-    }
-
-    private static ProvidersRecord providersEntityToRecord(DSLContext context, ProviderEntity entity) {
-        final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
-        record.setOrganizationId(entity.getOrganization().getId());
-        record.setId(UUID.randomUUID());
 
         return record;
     }

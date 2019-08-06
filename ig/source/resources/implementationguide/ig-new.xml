@@ -7,19 +7,19 @@
     <lastUpdated value="2019-07-16T14:49:27.000-04:00"/>
   </meta>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/jaredcunha/work/dpc-app/ig/source/resources"/>
+    <valueString value="/Users/raac/Development/dpc-app/ig/source/resources"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/jaredcunha/work/dpc-app/dpc-common/src/main/resources/validations"/>
+    <valueString value="/Users/raac/Development/dpc-app/dpc-common/src/main/resources/validations"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource">
-    <valueString value="/Users/jaredcunha/work/dpc-app/dpc-api/src/main/resources"/>
+    <valueString value="/Users/raac/Development/dpc-app/dpc-api/src/main/resources"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
-    <valueString value="/Users/jaredcunha/work/dpc-app/ig/framework"/>
+    <valueString value="/Users/raac/Development/dpc-app/ig/framework"/>
   </extension>
   <extension url="http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages">
-    <valueString value="/Users/jaredcunha/work/dpc-app/ig/source/pages"/>
+    <valueString value="/Users/raac/Development/dpc-app/ig/source/pages"/>
   </extension>
   <url value="https://dpc.cms.gov/fhir/v1/ImplementationGuide/cms-dpc-ig"/>
   <name value="Data @ the Point of Care Implementation Guide"/>
@@ -37,42 +37,26 @@
     </grouping>
     <resource>
       <reference>
-        <reference value="Organization/organization"/>
-        <display value="organization.json"/>
-      </reference>
-      <exampleBoolean value="true"/>
-      <groupingId value="p1"/>
-    </resource>
-    <resource>
-      <reference>
-        <reference value="Practitioner/practitioner"/>
-        <display value="practitioner.json"/>
-      </reference>
-      <exampleBoolean value="true"/>
-      <groupingId value="p1"/>
-    </resource>
-    <resource>
-      <reference>
-        <reference value="Group/group"/>
-        <display value="group.json"/>
-      </reference>
-      <exampleBoolean value="true"/>
-      <groupingId value="p1"/>
-    </resource>
-    <resource>
-      <reference>
-        <reference value="Endpoint/endpoint"/>
-        <display value="endpoint.json"/>
-      </reference>
-      <exampleBoolean value="true"/>
-      <groupingId value="p1"/>
-    </resource>
-    <resource>
-      <reference>
         <reference value="StructureDefinition/dpc-profile-address"/>
         <display value="DPCAddress.json"/>
       </reference>
       <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="Patient/dpc-sample-patient"/>
+        <display value="DPC-sample-patient.json"/>
+      </reference>
+      <exampleBoolean value="true"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="Practitioner/dpc-sample-practitioner"/>
+        <display value="DPC-sample-practitioner.json"/>
+      </reference>
+      <exampleBoolean value="true"/>
       <groupingId value="p1"/>
     </resource>
     <resource>
@@ -110,7 +94,15 @@
     <resource>
       <reference>
         <reference value="CapabilityStatement/dpc-capabilities-statement"/>
-        <display value="capabilities.json"/>
+        <display value="DPCCapabilities.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="OperationDefinition/dpc-practitioners-submit"/>
+        <display value="dpc-practitioners-submit.json"/>
       </reference>
       <exampleBoolean value="false"/>
       <groupingId value="p1"/>
