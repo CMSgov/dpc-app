@@ -172,16 +172,6 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-<!--                    <extraDirectory>-->
-<!--                        <path>${project.basedir}/../bbcerts</path>-->
-<!--                        <path>${project.basedir}/docker</path>-->
-<!--                        <permissions>-->
-<!--                            <permission>-->
-<!--                                <file>/entrypoint.sh</file>-->
-<!--                                <mode>755</mode>-->
-<!--                            </permission>-->
-<!--                        </permissions>-->
-<!--                    </extraDirectory>-->
                     <extraDirectories>
                         <paths>
                             <path>${project.basedir}/../bbcerts</path>

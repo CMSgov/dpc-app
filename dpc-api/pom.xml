@@ -194,15 +194,18 @@
                         </ports>
                         <entrypoint>/entrypoint.sh</entrypoint>
                     </container>
-                    <extraDirectory>
-                        <path>${project.basedir}/docker</path>
+                    <extraDirectories>
+                        <paths>
+                            <path>${project.basedir}/target/jacoco-agent</path>
+                            <path>${project.basedir}/docker</path>
+                        </paths>
                         <permissions>
                             <permission>
                                 <file>/entrypoint.sh</file>
                                 <mode>755</mode>
                             </permission>
                         </permissions>
-                    </extraDirectory>
+                    </extraDirectories>
                 </configuration>
             </plugin>
         </plugins>

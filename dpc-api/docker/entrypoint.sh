@@ -2,8 +2,9 @@
 
 set -e
 
-CMDLINE="java  -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
-#-javaagent:/jacoco-agent/org.jacoco.agent-runtime.jar=destfile=/jacoco-report/jacoco-it.exec
+JACOCO="-javaagent:/org.jacoco.agent-runtime.jar=destfile=/jacoco-report/jacoco-it.exec"
+
+CMDLINE="java ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
 
 echo "Running server via entrypoint!"
 
