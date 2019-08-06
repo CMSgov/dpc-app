@@ -4,9 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -110,13 +108,13 @@ class AttributionFHIRTest {
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
                 () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of beneies"));
 
-        final String patientID = ((Patient) bundle.getEntry().get(1).getResource()).getIdentifierFirstRep().getValue();
+        final String patientID = bundle.getEntry().get(1).getResource().getId();
 
         final Bundle searchedPatient = client
                 .search()
                 .forResource(Group.class)
                 .where(Group.MEMBER.hasId(patientID))
-                .where(Group.CHARACTERISTIC.exactly().code(providerID))
+                .where(buildCharacteristicSearch(providerID))
                 .withTag("", organizationID)
                 .returnBundle(Bundle.class)
                 .encodedJson()
@@ -183,7 +181,7 @@ class AttributionFHIRTest {
         final Bundle searchedProviderGroup = client
                 .search()
                 .forResource(Group.class)
-                .where(Group.CHARACTERISTIC.exactly().code(providerID))
+                .where(buildCharacteristicSearch(providerID))
                 .withTag("", organizationID)
                 .returnBundle(Bundle.class)
                 .encodedJson()
@@ -218,12 +216,12 @@ class AttributionFHIRTest {
 
         assertEquals(bundle.getEntry().size(), updatedGroup.getMember().size(), "Should have an additional patient");
 
-        final String patientMPI = FHIRExtractors.getPatientMPI(newPatient);
+        final String patientID = newPatient.getId();
         final Bundle searchedPatient = client
                 .search()
                 .forResource(Group.class)
-                .where(Group.MEMBER.hasId(patientMPI))
-                .where(Group.CHARACTERISTIC.exactly().code(providerID))
+                .where(Group.MEMBER.hasId(patientID))
+                .where(buildCharacteristicSearch(providerID))
                 .withTag("", organizationID)
                 .returnBundle(Bundle.class)
                 .encodedJson()
@@ -257,7 +255,7 @@ class AttributionFHIRTest {
                 .search()
                 .forResource(Group.class)
                 .returnBundle(Bundle.class)
-                .where(Group.CHARACTERISTIC.exactly().code(providerID))
+                .where(buildCharacteristicSearch(providerID))
                 .withTag("", organizationID)
                 .encodedJson();
 
@@ -284,5 +282,11 @@ class AttributionFHIRTest {
         final Bundle emptyBundle = bundleSearchRequest.execute();
         assertEquals(0, emptyBundle.getTotal(), "Should not have found any rosters");
 
+    }
+
+    private static ICriterion<TokenClientParam> buildCharacteristicSearch(String providerID) {
+        return Group.CHARACTERISTIC_VALUE
+                .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
+                .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), providerID));
     }
 }

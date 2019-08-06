@@ -93,21 +93,21 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Search for attribution rosters", notes = "FHIR endpoint to search for Attribution Rosters." +
-            "<p> You can search for Groups associated to a given provider (via the Provider NPI) and groups for which a patient is a member of (by patient MBI)")
+            "<p> You can search for Groups associated to a given provider (via the Provider NPI) and groups for which a patient is a member of (by the Patient resource ID)")
     @Override
     public Bundle rosterSearch(@ApiParam(value = "Organization ID")
                                @NotEmpty @QueryParam("_tag") String organizationToken,
                                @ApiParam(value = "Provider NPI")
                                @QueryParam(Group.SP_CHARACTERISTIC_VALUE) String providerNPI,
-                               @ApiParam(value = "Patient MBI")
-                               @QueryParam(Group.SP_MEMBER) String patientMBI) {
+                               @ApiParam(value = "Patient ID")
+                               @QueryParam(Group.SP_MEMBER) String patientID) {
 
         final Pair<IdType, IdType> idPair = parseCompositeID(providerNPI);
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
         final UUID organizationID = RESTUtils.parseTokenTag(organizationToken);
-        this.rosterDAO.findEntities(organizationID, idPair.getRight().getIdPart(), patientMBI)
+        this.rosterDAO.findEntities(organizationID, idPair.getRight().getIdPart(), patientID)
                 .stream()
                 .map(RosterEntity::toFHIR)
                 .forEach(entity -> bundle.addEntry().setResource(entity));

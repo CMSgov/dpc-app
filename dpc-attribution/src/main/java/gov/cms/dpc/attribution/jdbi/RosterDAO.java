@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
@@ -26,7 +27,7 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         return Optional.ofNullable(this.get(rosterID));
     }
 
-    public List<RosterEntity> findEntities(UUID organizationID, String providerNPI, String patientMBI) {
+    public List<RosterEntity> findEntities(UUID organizationID, String providerNPI, String patientReference) {
 
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
@@ -46,10 +47,11 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
             predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_NP_I), providerNPI));
         }
 
-        if (patientMBI != null) {
+        if (patientReference != null) {
+            final UUID patientID = FHIRExtractors.getEntityUUID(patientReference);
             final Join<RosterEntity, AttributionRelationship> attrJoin = root.join(RosterEntity_.ATTRIBUTIONS);
             final Join<AttributionRelationship, PatientEntity> patientJoin = attrJoin.join(AttributionRelationship_.PATIENT);
-            predicates.add(builder.equal(patientJoin.get(PatientEntity_.BENEFICIARY_ID), patientMBI));
+            predicates.add(builder.equal(patientJoin.get(PatientEntity_.PATIENT_ID), patientID));
         }
 
         query.where(predicates.toArray(new Predicate[0]));
