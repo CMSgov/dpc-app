@@ -136,10 +136,15 @@
       "defns": "CapabilityStatement-dpc-capabilities-definitions.html",
       "source": "DPCCapabilities.json"
     },
-    "OperationDefinition/dpc-operation-submit-practitioner": {
-      "base": "OperationDefinition-dpc-submit-practitioner.html",
-      "defns": "OperationDefinition-dpc-submit-practitioner-definition.html",
+    "OperationDefinition/dpc-operation-practitioner-submit": {
+      "base": "OperationDefinition-dpc-operation-practitioner-submit.html",
+      "defns": "OperationDefinition-dpc-operation-practitioner-submit-definition.html",
       "source": "dpc-practitioner-submit.json"
+    },
+    "OperationDefinition/dpc-operation-patient-submit": {
+      "base": "OperationDefinition-dpc-operation-patient-submit.html",
+      "defns": "OperationDefinition-dpc-operation-patient-submit-definition.html",
+      "source": "dpc-patient-submit.json"
     }
   },
   "version": "3.0.1",

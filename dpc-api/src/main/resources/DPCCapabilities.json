@@ -41,6 +41,33 @@
           "versioning": "no-version"
         },
         {
+          "type": "Group",
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "versioning": "no-version",
+          "searchParam": [
+            {
+              "name": "identifier",
+              "type": "string"
+            }
+          ]
+        },
+        {
           "type": "Organization",
           "profile": {
             "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization"
@@ -80,11 +107,6 @@
               "name": "identifier",
               "type": "string"
             }
-          ],
-          "operation": [
-            {
-              "name": "submit"
-            }
           ]
         },
         {
@@ -115,11 +137,6 @@
               "name": "identifier",
               "type": "string"
             }
-          ],
-          "operation": [
-            {
-              "name": "submit"
-            }
           ]
         },
         {
@@ -145,6 +162,18 @@
           "name": "Group level data export",
           "definition": {
             "reference": "http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export"
+          }
+        },
+        {
+          "name": "Practitioner Submission",
+          "definition": {
+            "reference": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-practitioner-submit"
+          }
+        },
+        {
+          "name": "Patient Submission",
+          "definition": {
+            "reference": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-patient-submit"
           }
         }
       ]
