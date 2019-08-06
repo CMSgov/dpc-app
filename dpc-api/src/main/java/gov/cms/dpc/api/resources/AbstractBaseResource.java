@@ -14,9 +14,6 @@ public abstract class AbstractBaseResource {
 //        Not used
     }
 
-    @Path("/Bundle")
-    public abstract AbstractRosterResource rosterOperations();
-
     @Path("/Data")
     public abstract AbstractDataResource dataOperations();
 

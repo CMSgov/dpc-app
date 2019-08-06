@@ -6,9 +6,11 @@ import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.OrganizationEndpoints;
 import gov.cms.dpc.attribution.dao.tables.Organizations;
 import gov.cms.dpc.attribution.dao.tables.Patients;
+import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationEndpointsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
+import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
 import gov.cms.dpc.attribution.utils.DBUtils;
 import gov.cms.dpc.common.entities.*;
@@ -41,6 +43,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
     private static final String ORGANIZATION_BUNDLE = "organization_bundle.json";
+    private static final String PROVIDER_BUNDLE = "provider_bundle.json";
     private static final String PATIENT_BUNDLE = "patient_bundle.json";
     private static final UUID ORGANIZATION_ID = UUID.fromString("46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
@@ -83,6 +86,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             // Start with the Organizations and their endpoints
             seedOrganizationBundle(context, parser);
 
+            // Providers next
+            seedProviderBundle(context, parser, ORGANIZATION_ID);
+
             // Add the patients, saving the references
             final Map<String, Reference> patientReferences = seedPatientBundle(context, parser, ORGANIZATION_ID);
 
@@ -110,6 +116,18 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             endpointEntities
                     .stream()
                     .map(entity -> endpointsEntityToRecord(context, entity))
+                    .forEach(context::executeInsert);
+        }
+    }
+
+    private void seedProviderBundle(DSLContext context, IParser parser, UUID organizationID) throws IOException {
+        try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
+            final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
+            final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, ProviderEntity::fromFHIR, organizationID);
+
+            providers
+                    .stream()
+                    .map(entity -> providersEntityToRecord(context, entity))
                     .forEach(context::executeInsert);
         }
     }
@@ -195,6 +213,14 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         record.setAddress(entity.getAddress());
         record.setValidationStatus(entity.getValidationStatus().ordinal());
         record.setValidationMessage(entity.getValidationMessage());
+
+        return record;
+    }
+
+    private static ProvidersRecord providersEntityToRecord(DSLContext context, ProviderEntity entity) {
+        final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
+        record.setOrganizationId(entity.getOrganization().getId());
+        record.setId(UUID.randomUUID());
 
         return record;
     }
