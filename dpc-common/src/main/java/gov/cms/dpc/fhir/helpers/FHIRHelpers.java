@@ -27,7 +27,7 @@ public class FHIRHelpers {
      * @param organizationID - {@link String} organization ID to filter for
      * @param attributionURL - {@link String} Attribution server to create Org at
      * @return - {@link String} Access token generated for the {@link Organization}
-     * @throws IOException
+     * @throws IOException - Throws if HTTP client fails
      */
     public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String attributionURL) throws IOException {
         // Register an organization, and a token

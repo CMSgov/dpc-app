@@ -83,7 +83,7 @@ public class AttributionRelationship {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof AttributionRelationship)) return false;
         AttributionRelationship that = (AttributionRelationship) o;
         return Objects.equals(roster, that.roster) &&
                 Objects.equals(patient, that.patient);
