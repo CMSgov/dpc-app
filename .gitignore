@@ -29,3 +29,6 @@ out/
 
 node_modules/
 jacocoReport/
+
+# Created by Postman tests
+/package-lock.json

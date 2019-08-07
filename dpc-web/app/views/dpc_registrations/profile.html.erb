@@ -1,4 +1,6 @@
-<% title "Welcome, #{@dpc_registration.user.first_name}!" %>
+<% title "Your profile" %>
+<% banner_title "Welcome, #{@dpc_registration.user.first_name}!" %>
+<% tabs_set "shared/user_tabs" %>
 
 <div class="ds-u-md-display--flex ds-u-justify-content--between ds-u-align-items--center">
 <h2>Your profile</h2>
@@ -21,6 +23,11 @@
     <div class="ds-text--lead">
       <p><strong>Name:</strong><br><%= @dpc_registration.user.organization %></p>
       <p><strong>Type:</strong><br><%= @dpc_registration.user.organization_type.titleize %></p>
+
+      <% unless @dpc_registration.user.organization_type == "health_it_vendor" %>
+        <p><strong>Number of providers:</strong><br><%= @dpc_registration.user.num_providers %></p>
+      <% end %>
+
       <p> <strong>Address:</strong><br>
         <%= @dpc_registration.user.address_1 %><br/>
         <% if @dpc_registration.user.address_2.length > 1 %>
