@@ -237,6 +237,7 @@
     </dependencies>
 
     <profiles>
+        <!--        Profile for running the Integration tests, requires everything except for the dpc-api service to be running-->
         <profile>
             <id>integration-tests</id>
             <build>
@@ -248,6 +249,15 @@
                             <groups>Integration</groups>
                         </configuration>
                     </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+        <!--        CI Profile that adds JaCoCo to the Docker containers and runs the IT report phase correctly-->
+        <profile>
+            <id>ci</id>
+            <build>
+                <plugins>
                     <plugin>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
@@ -266,9 +276,27 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <!--                    We have to do this because for some reason the Maven plugin isn't letting me set configuration options on a per-execution basis-->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <configuration combine.self="append">
+                            <dataFile>${project.basedir}/../jacocoReport/${project.artifactId}/jacoco-it.exec</dataFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>report-integration</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>report-integration</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
+<!--        Run the Google Error Prone checker to make sure we didn't make any silly mistakes-->
         <profile>
             <id>error-prone</id>
             <build>
@@ -364,6 +392,11 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.4</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -436,7 +469,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.3</version>
                 <configuration>
                     <excludes>
                         <!--Exclude auto-generated JOOQ classes-->
@@ -449,6 +481,7 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>run-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>

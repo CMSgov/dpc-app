@@ -21,12 +21,13 @@ services:
       - "9901:9900"
     environment:
       - ENV=dev
+      - JACOCO=true
     depends_on:
       - db
       - redis
     volumes:
       - export-volume:/app/data
-      - ./jacocoReport/aggregation:/jacoco-report
+      - ./jacocoReport/dpc-aggregation:/jacoco-report
 
   attribution:
     image: ${ECR_HOST:-430398651479.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
@@ -34,11 +35,12 @@ services:
       - db
     environment:
       - ENV=dev
+      - JACOCO=true
     ports:
       - "3500:8080"
       - "9902:9900"
     volumes:
-      - ./jacocoReport/attribution:/jacoco-report
+      - ./jacocoReport/dpc-attribution:/jacoco-report
 
   api:
     image: ${ECR_HOST:-430398651479.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
@@ -47,12 +49,13 @@ services:
     environment:
       - attributionURL=http://attribution:8080/v1/
       - ENV=dev
+      - JACOCO=true
       - exportPath=/app/data
     depends_on:
       - attribution
     volumes:
       - export-volume:/app/data
-      - ./jacocoReport/api:/jacoco-report
+      - ./jacocoReport/dpc-api:/jacoco-report
 volumes:
   export-volume:
     driver: local

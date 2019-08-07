@@ -18,7 +18,7 @@ else
 fi
 
 mvn clean compile -Perror-prone -B -V
-mvn package
+mvn package -Pci
 # Format the test results and copy to a new directory
 mvn jacoco:report
 mkdir reports
@@ -32,15 +32,20 @@ fi
 
 docker-compose down
 docker-compose up -d
-sleep 60
+sleep 30
 
 # Run the Postman tests
 node_modules/.bin/newman run src/test/EndToEndRequestTest.postman_collection.json
 
+# Wait for Jacoco to finish writing the output files
+docker-compose down -t 60
+# Collect the coverage reports for the Docker integration tests
+mvn jacoco:report-integration -Pci
+
 if [ -n "$REPORT_COVERAGE" ]; then
-    for module in dpc-api
+    for module in dpc-aggregation dpc-api dpc-attribution
     do
-      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
+      JACOCO_SOURCE_PATH=./$module/src/main/java ./cc-test-reporter format-coverage ./$module/target/site/jacoco-it/jacoco.xml --input-type jacoco -o reports/codeclimate.integration.$module.json
     done
     ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
     ./cc-test-reporter upload-coverage

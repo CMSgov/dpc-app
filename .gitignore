@@ -28,3 +28,4 @@ dpc-web/.rakeTasks
 out/
 
 node_modules/
+jacocoReport/
