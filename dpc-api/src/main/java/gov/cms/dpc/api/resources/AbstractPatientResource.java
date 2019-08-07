@@ -16,7 +16,7 @@ public abstract class AbstractPatientResource {
     }
 
     @GET
-    public abstract Bundle getPatients(OrganizationPrincipal organization, String patientMBI);
+    public abstract Bundle patientSearch(OrganizationPrincipal organization, String patientMBI);
 
     @POST
     public abstract Patient submitPatient(OrganizationPrincipal organization, Patient patient);

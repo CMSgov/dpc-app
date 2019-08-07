@@ -62,8 +62,14 @@
           "versioning": "no-version",
           "searchParam": [
             {
-              "name": "identifier",
-              "type": "string"
+              "name": "characteristic-value",
+              "type": "token",
+              "documentation": "Search for Attribution rosters which are attributed to the given provider NPI"
+            },
+            {
+              "name": "member",
+              "type": "reference",
+              "documentation": "Search for Attribution groups which which the given Patient resource is a member."
             }
           ]
         },
@@ -105,7 +111,8 @@
           "searchParam": [
             {
               "name": "identifier",
-              "type": "string"
+              "type": "token",
+              "documentation": "Find patient resources which match the given Identifier. For DPC, this will always return a single resource, as MBIs are unique."
             }
           ]
         },
@@ -135,7 +142,8 @@
           "searchParam": [
             {
               "name": "identifier",
-              "type": "string"
+              "type": "token",
+              "documentation": "Find practitioner resources which match the given Identifier. For DPC, this will always return a single resource, as NPIs are unique."
             }
           ]
         },
@@ -165,13 +173,13 @@
           }
         },
         {
-          "name": "Practitioner Submission",
+          "name": "Batch Practitioner Submission",
           "definition": {
             "reference": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-practitioner-submit"
           }
         },
         {
-          "name": "Patient Submission",
+          "name": "Batch Patient Submission",
           "definition": {
             "reference": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-patient-submit"
           }

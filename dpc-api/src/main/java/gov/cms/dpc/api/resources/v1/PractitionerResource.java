@@ -47,10 +47,10 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Search for providers", notes = "FHIR endpoint to search for Practitioner resources." +
             "<p>If a provider NPI is given, the results are filtered accordingly. " +
             "Otherwise, the method returns all Practitioners associated to the given Organization")
-    public Bundle getPractitioners(@ApiParam(hidden = true)
+    public Bundle practitionerSearch(@ApiParam(hidden = true)
                                    @Auth OrganizationPrincipal organization,
-                                   @ApiParam(value = "Provider NPI")
-                                   @QueryParam("identifier") String providerNPI) {
+                                     @ApiParam(value = "Provider NPI")
+                                   @QueryParam(value = Practitioner.SP_IDENTIFIER) String providerNPI) {
 
         // Create search params
         Map<String, List<String>> searchParams = new HashMap<>();

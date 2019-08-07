@@ -50,10 +50,10 @@ public class PatientResource extends AbstractPatientResource {
     @ApiOperation(value = "Search for Patients", notes = "FHIR endpoint for searching for Patient resources." +
             "<p> If Patient Identifier is provided, results will be filtered to match the given property")
     @Override
-    public Bundle getPatients(@ApiParam(hidden = true)
+    public Bundle patientSearch(@ApiParam(hidden = true)
                               @Auth OrganizationPrincipal organization,
-                              @ApiParam(value = "Patient MBI")
-                              @QueryParam("identifier") String patientMBI) {
+                                @ApiParam(value = "Patient MBI")
+                              @QueryParam(value = Patient.SP_IDENTIFIER) String patientMBI) {
 
         final var request = this.client
                 .search()

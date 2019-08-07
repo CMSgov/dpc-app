@@ -18,7 +18,7 @@ public abstract class AbstractPractitionerResource {
     }
 
     @GET
-    public abstract Bundle getPractitioners(OrganizationPrincipal organization, String providerNPI);
+    public abstract Bundle practitionerSearch(OrganizationPrincipal organization, String providerNPI);
 
     @POST
     public abstract Response submitProvider(OrganizationPrincipal organization, Practitioner provider);
