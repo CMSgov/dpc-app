@@ -5,17 +5,15 @@ import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.OrganizationEndpoints;
 import gov.cms.dpc.attribution.dao.tables.Organizations;
+import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationEndpointsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
-import gov.cms.dpc.attribution.dao.tables.records.ProviderRolesRecord;
+import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
 import gov.cms.dpc.attribution.utils.DBUtils;
-import gov.cms.dpc.common.entities.AddressEntity;
-import gov.cms.dpc.common.entities.EndpointEntity;
-import gov.cms.dpc.common.entities.OrganizationEntity;
-import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import io.dropwizard.Application;
@@ -25,10 +23,7 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
 import org.jooq.DSLContext;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
@@ -39,12 +34,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.UUID;
+import java.util.*;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
@@ -52,6 +44,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static final String CSV = "test_associations.csv";
     private static final String ORGANIZATION_BUNDLE = "organization_bundle.json";
     private static final String PROVIDER_BUNDLE = "provider_bundle.json";
+    private static final String PATIENT_BUNDLE = "patient_bundle.json";
     private static final UUID ORGANIZATION_ID = UUID.fromString("46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
     private final Settings settings;
@@ -96,8 +89,11 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             // Providers next
             seedProviderBundle(context, parser, ORGANIZATION_ID);
 
+            // Add the patients, saving the references
+            final Map<String, Reference> patientReferences = seedPatientBundle(context, parser, ORGANIZATION_ID);
+
             // Get the test attribution seeds
-            seedAttributions(context, ORGANIZATION_ID, creationTimestamp);
+            seedAttributions(context, ORGANIZATION_ID, creationTimestamp, patientReferences);
 
             logger.info("Finished loading seeds");
         }
@@ -136,7 +132,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         }
     }
 
-    private void seedAttributions(DSLContext context, UUID organizationID, OffsetDateTime creationTimestamp) throws IOException {
+    private void seedAttributions(DSLContext context, UUID organizationID, OffsetDateTime creationTimestamp, Map<String, Reference> patientReferences) throws IOException {
         try (InputStream resource = SeedCommand.class.getClassLoader().getResourceAsStream(CSV)) {
             if (resource == null) {
                 throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
@@ -145,8 +141,34 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     .extractProviderMap(resource)
                     .entrySet()
                     .stream()
-                    .map(entry -> SeedProcessor.generateRosterBundle(entry, organizationID))
-                    .forEach(bundle -> RosterUtils.submitAttributionBundle(bundle, context, organizationID, creationTimestamp));
+                    .map(entry -> SeedProcessor.generateAttributionGroup(entry, organizationID, patientReferences))
+                    .forEach(bundle -> RosterUtils.submitAttributionGroup(bundle, context, organizationID, creationTimestamp));
+        }
+    }
+
+    private Map<String, Reference> seedPatientBundle(DSLContext context, IParser parser, UUID organizationID) throws IOException {
+        try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PATIENT_BUNDLE)) {
+            final Bundle patientBundle = parser.parseResource(Bundle.class, providerBundleStream);
+            final List<PatientEntity> patients = BundleParser.parse(Patient.class, patientBundle, PatientEntity::fromFHIR, organizationID);
+
+            Map<String, Reference> patientReferences = new HashMap<>();
+
+            patients
+                    .stream()
+                    // Add the managing organization
+                    .peek(entity -> {
+                        final OrganizationEntity organization = new OrganizationEntity();
+                        organization.setId(organizationID);
+                        entity.setOrganization(organization);
+                    })
+                    .map(entity -> patientEntityToRecord(context, entity))
+                    .peek(context::executeInsert)
+                    .forEach(record -> {
+                        final Reference ref = new Reference(new IdType("Patient", record.getId().toString()));
+                        patientReferences.put(record.getBeneficiaryId(), ref);
+                    });
+
+            return patientReferences;
         }
     }
 
@@ -198,6 +220,16 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static ProvidersRecord providersEntityToRecord(DSLContext context, ProviderEntity entity) {
         final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
         record.setOrganizationId(entity.getOrganization().getId());
+        record.setId(UUID.randomUUID());
+
+        return record;
+    }
+
+    private static PatientsRecord patientEntityToRecord(DSLContext context, PatientEntity entity) {
+        // Generate a temporary ID
+        final PatientsRecord record = context.newRecord(Patients.PATIENTS, entity);
+        record.setOrganizationId(entity.getOrganization().getId());
+        record.setId(UUID.randomUUID());
 
         return record;
     }

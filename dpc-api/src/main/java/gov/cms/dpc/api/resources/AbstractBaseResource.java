@@ -14,9 +14,6 @@ public abstract class AbstractBaseResource {
 //        Not used
     }
 
-    @Path("/Bundle")
-    public abstract AbstractRosterResource rosterOperations();
-
     @Path("/Data")
     public abstract AbstractDataResource dataOperations();
 
@@ -36,7 +33,7 @@ public abstract class AbstractBaseResource {
     public abstract AbstractPatientResource patientOperations();
 
     @Path("/Practitioner")
-    public abstract AbstractPractionerResource practitionerOperations();
+    public abstract AbstractPractitionerResource practitionerOperations();
 
     @Path("/StructureDefinition")
     public abstract AbstractDefinitionResource definitionResourceOperations();

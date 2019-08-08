@@ -1,26 +1,21 @@
 package gov.cms.dpc.attribution;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import org.apache.http.HttpEntity;
+import gov.cms.dpc.fhir.FHIRBuilders;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.attribution.AbstractAttributionTest.ORGANIZATION_ID;
+import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SharedMethods {
-
-    @SuppressWarnings("unchecked")
-    public static <T> List<T> UnmarshallResponse(HttpEntity entity) throws IOException {
-        final ObjectMapper mapper = new ObjectMapper();
-
-        return (List<T>) mapper.readValue(entity.getContent(), List.class);
-    }
 
     public static Bundle createAttributionBundle(String providerID, String patientID, String organizationID) {
         final Bundle bundle = new Bundle();
@@ -39,14 +34,67 @@ public class SharedMethods {
 
         // Add some random values to the patient
         final Patient patient = new Patient();
-        patient.addIdentifier().setValue(patientID).setSystem(DPCIdentifierSystem.MBI.getSystem());
+        final Identifier patientIdentifier = new Identifier();
+        patientIdentifier.setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(patientID);
+        patient.addIdentifier(patientIdentifier);
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
+        patient.setManagingOrganization(new Reference("Organization/" + organizationID));
         final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
         component.setResource(patient);
         component.setFullUrl("http://something.gov/" + patient.getIdentifierFirstRep().getValue());
         bundle.addEntry(component);
 
         return bundle;
+    }
+
+    public static Group submitAttributionBundle(IGenericClient client, Bundle bundle) {
+        // Provider first, then patients
+        final Practitioner practitioner = (Practitioner) bundle.getEntryFirstRep().getResource();
+        final String providerID = practitioner.getIdentifierFirstRep().getValue();
+        final String organizationID = FHIRExtractors.getOrganizationID(practitioner);
+
+        final MethodOutcome createdPractitioner = client
+                .create()
+                .resource(practitioner)
+                .encodedJson()
+                .execute();
+
+        assertTrue(createdPractitioner.getCreated(), "Should have created the practitioner");
+
+
+        // Create a group and add Patients to it
+        final Group rosterGroup = createBaseAttributionGroup(providerID, organizationID);
+
+        bundle
+                .getEntry()
+                .stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(resource -> resource.getResourceType() == ResourceType.Patient)
+                .map(resource -> (Patient) resource)
+                .forEach(patient -> {
+                    final MethodOutcome created = client
+                            .create()
+                            .resource(patient)
+                            .encodedJson()
+                            .execute();
+                    final Patient pr = (Patient) created.getResource();
+                    // Add to group
+                    rosterGroup
+                            .addMember()
+                            .setEntity(new Reference(pr.getIdElement()))
+                            .setInactive(false);
+                });
+
+        final ICreateTyped groupCreation = client
+                .create()
+                .resource(rosterGroup)
+                .encodedJson();
+
+        final MethodOutcome groupCreated = groupCreation.execute();
+
+        assertTrue(groupCreated.getCreated(), "Should have created the group");
+
+        return (Group) groupCreated.getResource();
     }
 }

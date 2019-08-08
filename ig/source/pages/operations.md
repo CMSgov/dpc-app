@@ -17,3 +17,22 @@ active: profiles
 <br />
 
 ### Operations
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="OperationDefinition-dpc-operation-practitioner-submit.html">Submit Practitioners</a></td>
+<td>Submit a Bundle of Practitioner resources</td>
+</tr>
+<tr>
+<td><a href="OperationDefinition-dpc-operation-patient-submit.html">Submit Patients</a></td>
+<td>Submit a Bundle of Patient resources</td>
+</tr>
+</tbody>
+</table>

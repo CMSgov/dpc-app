@@ -16,13 +16,6 @@
     <package>
         <name value="Profiles in this implementation guide"/>
         <resource>
-            <example value="false"/>
-            <sourceReference>
-                <reference value="StructureDefinition/dpc-profile-address"/>
-                <display value="DPCAddress.json"/>
-            </sourceReference>
-        </resource>
-        <resource>
             <example value="true"/>
             <sourceReference>
                 <reference value="Patient/dpc-sample-patient"/>
@@ -34,6 +27,20 @@
             <sourceReference>
                 <reference value="Practitioner/dpc-sample-practitioner"/>
                 <display value="DPC-sample-practitioner.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-address"/>
+                <display value="DPCAddress.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-attribution-roster"/>
+                <display value="DPCAttributionRoster.json"/>
             </sourceReference>
         </resource>
         <resource>
@@ -69,6 +76,20 @@
             <sourceReference>
                 <reference value="CapabilityStatement/dpc-capabilities-statement"/>
                 <display value="DPCCapabilities.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="OperationDefinition/dpc-practitioner-submit"/>
+                <display value="dpc-practitioner-submit.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="OperationDefinition/dpc-patient-submit"/>
+                <display value="dpc-patient-submit.json"/>
             </sourceReference>
         </resource>
     </package>

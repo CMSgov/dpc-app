@@ -48,7 +48,7 @@ public class V1AttributionResource extends AbstractAttributionResource {
     }
 
     @Override
-    public AbstractPractionerResource providerOperations() {
+    public AbstractPractitionerResource providerOperations() {
         return this.pr;
     }
 }

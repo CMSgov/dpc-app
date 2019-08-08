@@ -1,15 +1,21 @@
 package gov.cms.dpc.api.resources.v1;
 
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IBaseQuery;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.common.annotations.APIV1;
-import gov.cms.dpc.common.interfaces.AttributionEngine;
-import gov.cms.dpc.fhir.FHIRBuilders;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
+import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.profiles.AttributionRosterProfile;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import io.dropwizard.auth.Auth;
@@ -20,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -27,7 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 
 
@@ -40,14 +49,133 @@ public class GroupResource extends AbstractGroupResource {
     static final String LIST_DELIMITER = ",";
 
     private final JobQueue queue;
-    private final AttributionEngine client;
+    private final IGenericClient client;
     private final String baseURL;
 
     @Inject
-    public GroupResource(JobQueue queue, AttributionEngine client, @APIV1 String baseURL) {
+    public GroupResource(JobQueue queue, IGenericClient client, @APIV1 String baseURL) {
         this.queue = queue;
         this.client = client;
         this.baseURL = baseURL;
+    }
+
+    @POST
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Create Attribution Roster", notes = "FHIR endpoint to create an Attribution roster (Group resource) associated to the provider listed in the in the Group characteristics.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Successfully created Roster"),
+            @ApiResponse(code = 200, message = "Roster already exists")
+    })
+    @Override
+    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, Group attributionRoster) {
+        addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
+
+        final MethodOutcome outcome = this
+                .client
+                .create()
+                .resource(attributionRoster)
+                .encodedJson()
+                .execute();
+
+        final Group createdGroup = (Group) outcome.getResource();
+        final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
+
+        return Response.status(status).entity(createdGroup).build();
+    }
+
+    @SuppressWarnings("unchecked")
+    @GET
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Search for Attribution Rosters", notes = "FHIR endpoint for searching for Attribution rosters." +
+            "<p> If Provider NPI is given, all attribution groups for that provider will be returned. " +
+            "If a Patient ID is given, all attribution groups for which that patient is a member will be returned.")
+    @Override
+    public Bundle rosterSearch(@ApiParam(hidden = true)
+                               @Auth OrganizationPrincipal organizationPrincipal,
+                               @ApiParam(value = "Provider NPI")
+                               @QueryParam(value = Group.SP_CHARACTERISTIC_VALUE)
+                                       String providerNPI,
+                               @ApiParam(value = "Patient ID")
+                               @QueryParam(value = Group.SP_MEMBER)
+                                       String patientID) {
+
+        IQuery<Bundle> baseQuery = this.client
+                .search()
+                .forResource(Group.class)
+                .returnBundle(Bundle.class);
+
+        // These are unchecked casts because I can't understand the HAPI type hierarchy, but this should be safe.
+        baseQuery = (IQuery<Bundle>) searchForProvider(baseQuery, providerNPI);
+        baseQuery = (IQuery<Bundle>) searchForPatient(baseQuery, patientID);
+
+        baseQuery
+                .withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getOrganization().getIdElement().getIdPart());
+
+        return baseQuery
+                .encodedJson()
+                .execute();
+    }
+
+    @GET
+    @FHIR
+    @Path("/{rosterID}")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Fetch Attribution Roster", notes = "Fetch specific Attribution roster.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @Override
+    public Group getRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
+        return this.client
+                .read()
+                .resource(Group.class)
+                .withId(new IdType("Group", rosterID.toString()))
+                .encodedJson()
+                .execute();
+    }
+
+    @PUT
+    @Path("/{rosterID}")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "rosterID")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Update Attribution Roster", notes = "Update specific Attribution roster." +
+            "<p>Updates allow for adding or removing patients from the roster.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @Override
+    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group rosterUpdate) {
+        final MethodOutcome outcome = this.client
+                .update()
+                .resource(rosterUpdate)
+                .withId(new IdType("Group", rosterID.toString()))
+                .encodedJson()
+                .execute();
+
+        return (Group) outcome.getResource();
+    }
+
+    @DELETE
+    @FHIR
+    @Path("/{rosterID}")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "rosterID")
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Delete Attribution Roster", notes = "Remove specific Attribution roster")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @Override
+    public Response deleteRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
+        this.client
+                .delete()
+                .resourceById(new IdType("Group", rosterID.toString()))
+                .encodedJson()
+                .execute();
+
+        return Response.ok().build();
     }
 
     /**
@@ -55,7 +183,7 @@ public class GroupResource extends AbstractGroupResource {
      * On success, returns a {@link org.eclipse.jetty.http.HttpStatus#NO_CONTENT_204} response with no content in the result.
      * The `Content-Location` header contains the URI to call when checking job status. On failure, return an {@link OperationOutcome}.
      *
-     * @param providerID    {@link String} ID of provider to retrieve data for
+     * @param rosterID    {@link String} ID of provider to retrieve data for
      * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}
      * @param outputFormat  - Optional outputFormats parameter
      * @param since         - Optional since parameter
@@ -63,7 +191,7 @@ public class GroupResource extends AbstractGroupResource {
      */
     @Override
     @GET // Need this here, since we're using a path param
-    @Path("/{providerID}/$export")
+    @Path("/{rosterID}/$export")
     @Timed
     @ExceptionMetered
     @FHIRAsync
@@ -76,24 +204,21 @@ public class GroupResource extends AbstractGroupResource {
     )
     public Response export(@ApiParam(hidden = true)
                            @Auth OrganizationPrincipal organizationPrincipal,
-                           @ApiParam(value = "Provider NPI", required = true)
-                           @PathParam("providerID") String providerID,
+                           @ApiParam(value = "Provider ID", required = true)
+                           @PathParam("rosterID") String rosterID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
                            @QueryParam("_type") String resourceTypes,
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") String outputFormat,
                            @ApiParam(value = "Request data that has been updated after the given point. (Not implemented yet)", hidden = true)
                            @QueryParam("_since") String since) {
-        logger.debug("Exporting data for provider: {}", providerID);
+        logger.debug("Exporting data for provider: {}", rosterID);
 
         // Check the parameters
         checkExportRequest(outputFormat, since);
 
-        // Get a list of attributed beneficiaries
-        final Optional<List<String>> attributedBeneficiaries = this.client.getAttributedPatientIDs(FHIRBuilders.buildPractitionerFromNPI(providerID));
-        if (attributedBeneficiaries.isEmpty()) {
-            throw new WebApplicationException("Attribution server error");
-        }
+        // Get the attributed patients
+        final List<String> attributedPatients = fetchPatientMBIs(rosterID);
 
         // Generate a job ID and submit it to the queue
         final UUID jobID = UUID.randomUUID();
@@ -101,30 +226,10 @@ public class GroupResource extends AbstractGroupResource {
 
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
-        attributedBeneficiaries.ifPresent(value ->  this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, providerID, value)));
+        this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, rosterID, attributedPatients));
 
         return Response.status(Response.Status.NO_CONTENT)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
-    }
-
-    /**
-     * Test method for verifying FHIR deserialization, it will eventually be removed.
-     * TODO(nickrobison): Remove this
-     *
-     * @param group - {@link Group} to use for testing
-     * @return - {@link String} test string
-     */
-    @POST
-    @Public
-    @ApiOperation(value = "FHIR marshall test", hidden = true)
-    public Patient marshalTest(Group group) {
-
-        if (group.getIdentifierFirstRep().getValue().equals("Group/fail")) {
-            throw new IllegalStateException("Should fail");
-        }
-
-        final HumanName name = new HumanName().setFamily("Doe").addGiven("John");
-        return new Patient().addName(name).addIdentifier(new Identifier().setValue("test-id"));
     }
 
     /**
@@ -182,5 +287,53 @@ public class GroupResource extends AbstractGroupResource {
         return JobModel.validResourceTypes.stream()
                 .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
                 .findFirst();
+    }
+
+    private static IBaseQuery<?> searchForProvider(IBaseQuery<?> query, String providerNPI) {
+        return query
+                .where(Group.CHARACTERISTIC_VALUE
+                        .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
+                        .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), providerNPI)));
+    }
+
+
+    private static IBaseQuery<?> searchForPatient(IBaseQuery<?> query, String patientID) {
+        if (patientID != null) {
+            return query
+                    .where(Group.MEMBER.hasId(patientID));
+        }
+        return query;
+    }
+
+    private List<String> fetchPatientMBIs(String groupID) {
+
+        final Group attributionRoster = this.client
+                .read()
+                .resource(Group.class)
+                .withId(new IdType("Group", groupID))
+                .encodedJson()
+                .execute();
+
+        if (attributionRoster.getMember().isEmpty()) {
+            throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
+        }
+
+        // Get the patients, along with their MBIs
+        final Bundle patients = this.client
+                .operation()
+                .onInstance(new IdType(attributionRoster.getId()))
+                .named("patients")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .encodedJson()
+                .execute();
+
+        return patients
+                .getEntry()
+                .stream()
+                .map(entry -> (Patient) entry.getResource())
+                .map(FHIRExtractors::getPatientMPI)
+                .collect(Collectors.toList());
     }
 }

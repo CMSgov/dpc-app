@@ -320,4 +320,47 @@
         <dropTable tableName="PROVIDER_ROLES"/>
     </changeSet>
 
+    <changeSet id="refactor-attribution" author="nickrobison-usds">
+        <!--        Create the rosters table-->
+        <createTable tableName="ROSTERS">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="provider_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="ROSTERS"
+                baseColumnNames="provider_id"
+                constraintName="fk_rosters_providers"
+                referencedTableName="PROVIDERS"
+                referencedColumnNames="id"
+        />
+
+        <addForeignKeyConstraint
+                baseTableName="ROSTERS"
+                baseColumnNames="organization_id"
+                constraintName="fk_rosters_organizations"
+                referencedTableName="ORGANIZATIONS"
+                referencedColumnNames="id"
+        />
+
+        <!--        Update the attributions table-->
+        <dropForeignKeyConstraint baseTableName="ATTRIBUTIONS" constraintName="fk_attribution_providers"/>
+        <renameColumn tableName="ATTRIBUTIONS" oldColumnName="provider_id" newColumnName="roster_id"/>
+        <addForeignKeyConstraint
+                baseTableName="ATTRIBUTIONS"
+                baseColumnNames="roster_id"
+                constraintName="fk_attribution_roster"
+                referencedTableName="ROSTERS"
+                referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>

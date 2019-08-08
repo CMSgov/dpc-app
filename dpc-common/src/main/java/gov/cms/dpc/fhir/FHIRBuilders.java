@@ -1,7 +1,11 @@
 package gov.cms.dpc.fhir;
 
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Resource;
+
+import java.util.UUID;
 
 public class FHIRBuilders {
 
@@ -33,5 +37,23 @@ public class FHIRBuilders {
         patient.addIdentifier().setValue(MPI).setSystem(DPCIdentifierSystem.MBI.getSystem());
 
         return patient;
+    }
+
+    /**
+     * Add Organization ID to {@link Resource} {@link Meta}
+     *
+     * @param resource       - {@link Resource} to add (or update) {@link Meta}
+     * @param organizationID - {@link UUID} Organization ID
+     */
+    public static void addOrganizationTag(Resource resource, UUID organizationID) {
+        Meta meta = resource.getMeta();
+
+        if (meta == null) {
+            meta = new Meta();
+        }
+
+        // Add the Organization ID
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organizationID.toString(), "Organization ID");
+        resource.setMeta(meta);
     }
 }

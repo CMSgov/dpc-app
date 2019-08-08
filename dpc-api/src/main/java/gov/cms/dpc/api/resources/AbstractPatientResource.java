@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 
@@ -15,10 +16,13 @@ public abstract class AbstractPatientResource {
     }
 
     @GET
-    public abstract Bundle getPatients(OrganizationPrincipal organization, String patientMBI);
+    public abstract Bundle patientSearch(OrganizationPrincipal organization, String patientMBI);
 
     @POST
     public abstract Patient submitPatient(OrganizationPrincipal organization, Patient patient);
+    @POST
+    @Path("/$submit")
+    public abstract Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Bundle patientBundle);
 
     @GET
     @Path("/{patientID}")

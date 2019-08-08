@@ -1,12 +1,14 @@
 package gov.cms.dpc.api;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.*;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.StaticAuthenticator;
-import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
@@ -17,11 +19,11 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.junit.jupiter.api.BeforeEach;
+import org.hl7.fhir.dstu3.model.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import javax.ws.rs.client.WebTarget;
@@ -29,7 +31,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
@@ -42,16 +43,27 @@ import static org.mockito.Mockito.*;
  * Verifies the a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
+@SuppressWarnings("rawtypes")
 class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private static final String TEST_PROVIDER_ID = "1";
-    private final JobQueue queue = spy(MemoryQueue.class);
-    private final AttributionServiceClient client = mock(AttributionServiceClient.class);
+    private static final JobQueue queue = spy(MemoryQueue.class);
+    private static IGenericClient client = mock(IGenericClient.class);
+    private static IRead mockRead = mock(IRead.class);
+    private static IReadTyped mockTypedRead = mock(IReadTyped.class);
+    private static IReadExecutable mockExecutable = mock(IReadExecutable.class);
 
     private static final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
 
-    ResourceExtension groupResource = ResourceExtension.builder()
+    // Test data
+    private static List<String> testBeneficiaries = List.of("1", "2", "3", "4");
+    private static final JobModel testJobModel = new JobModel(UUID.randomUUID(), UUID.randomUUID(),
+            Collections.singletonList(ResourceType.Patient),
+            TEST_PROVIDER_ID,
+            testBeneficiaries);
+
+    private ResourceExtension groupResource = ResourceExtension.builder()
             .addResource(new GroupResource(queue, client, TEST_BASE_URL))
             .addResource(new JobResource(queue, TEST_BASE_URL))
             .setTestContainerFactory(testContainer)
@@ -59,24 +71,11 @@ class FHIRSubmissionTest {
             .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
             .build();
 
-    // Test data
-    private List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private final JobModel testJobModel = new JobModel(UUID.randomUUID(), UUID.randomUUID(),
-            Collections.singletonList(ResourceType.Patient),
-            TEST_PROVIDER_ID,
-            testBeneficiaries);
 
-    // Setup the Attribution service mock with a dummy list of beneficiaries
-    @BeforeEach
-    void resetMocks() {
-        reset(client);
-        reset(queue);
+    @BeforeAll
+    static void setup() {
+        mockClient();
 
-        // Mock the attribution call
-        Mockito.when(client.getAttributedPatientIDs(Mockito.any(Practitioner.class)))
-                .thenReturn(Optional.of(testBeneficiaries));
-
-        // Mock the submission call to verify the job type
         doAnswer(answer -> {
             final JobModel data = answer.getArgument(1);
             assertEquals(testJobModel.getPatients().size(), data.getPatients().size(), "Should have 4 patients");
@@ -107,23 +106,6 @@ class FHIRSubmissionTest {
         jobTarget = groupResource.target(jobURL);
         jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
         assertEquals(HttpStatus.OK_200, jobResp.getStatus(), "Job should be done");
-
-
-//        final IGenericClient client = ctx.newRestfulGenericClient();
-
-//        final Parameters execute = client
-//                .operation()
-//                .onInstanceVersion(new IdDt("Group", "1"))
-//                .named("$export")
-//                .withNoParameters(Parameters.class)
-//                .returnResourceType()
-////                .encodedJson()
-//                .useHttpGet()
-//                .execute();
-//
-//        final Bundle responseBundle = (Bundle) execute.getParameter().get(0).getResource();
-//
-//        assertEquals(1, responseBundle.getTotal(), "Should only have 1 groupResource");
     }
 
     /**
@@ -229,5 +211,50 @@ class FHIRSubmissionTest {
         assertTrue(job.isPresent());
         var resources = job.get().getRight().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private static void mockClient() {
+
+        final IOperation mockOperation = mock(IOperation.class);
+        final IOperationUnnamed unnamed = mock(IOperationUnnamed.class);
+        final IOperationUntyped untypedOperation = mock(IOperationUntyped.class);
+        final IOperationUntypedWithInput inputOp = mock(IOperationUntypedWithInput.class);
+
+        Mockito.when(client.read()).thenReturn(mockRead);
+        Mockito.when(mockRead.resource(Group.class)).thenReturn(mockTypedRead);
+        Mockito.when(mockTypedRead.withId(Mockito.any(IdType.class))).thenReturn(mockExecutable);
+        Mockito.when(mockExecutable.encodedJson()).thenReturn(mockExecutable);
+        Mockito.when(mockExecutable.execute()).thenAnswer(answer -> {
+//            if (resourceCapture.getValue().equals(Bundle.class)) {
+//        } else{
+            final Group group = new Group();
+            group.setId("test-group-id");
+            group.addMember().setEntity(new Reference("Patient/test"));
+
+            return group;
+//            }
+        });
+
+        // Patient Operation
+        Mockito.when(client.operation()).thenReturn(mockOperation);
+        Mockito.when(mockOperation.onInstance(Mockito.any())).thenReturn(unnamed);
+        Mockito.when(unnamed.named("patients")).thenReturn(untypedOperation);
+        Mockito.when(untypedOperation.withNoParameters(Mockito.any())).thenReturn(inputOp);
+        Mockito.when(inputOp.returnResourceType(Bundle.class)).thenReturn(inputOp);
+        Mockito.when(inputOp.useHttpGet()).thenReturn(inputOp);
+        Mockito.when(inputOp.encodedJson()).thenReturn(inputOp);
+        Mockito.when(inputOp.execute()).thenAnswer(answer -> {
+            final Bundle bundle = new Bundle();
+
+            testBeneficiaries.forEach(id -> {
+                final Patient p = new Patient();
+                p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(id);
+                bundle.addEntry().setResource(p);
+            });
+
+            return bundle;
+        });
     }
 }

@@ -96,6 +96,11 @@
     }
   },
   "resources": {
+    "Group/dpc-sample-attribution-roster": {
+      "base": "Group-group.html",
+      "defns": "Group-group-definitions.html",
+      "source": "group/DPC-sample-attribution-roster.json"
+    },
     "Patient/dpc-sample-patient": {
       "base": "Patient-patient.html",
       "defns": "Patient-patient-definitions.html",
@@ -110,6 +115,11 @@
       "base": "StructureDefinition-dpc-profile-address.html",
       "defns": "StructureDefinition-dpc-profile-address-definitions.html",
       "source": "DPCAddress.json"
+    },
+    "StructureDefinition/dpc-profile-attribution-roster": {
+      "base": "StructureDefinition-dpc-profile-attribution-roster.html",
+      "defns": "StructureDefinition-dpc-profile-attribution-roster-definitions.html",
+      "source": "DPCAttributionRoster.json"
     },
     "StructureDefinition/dpc-profile-endpoint": {
       "base": "StructureDefinition-dpc-profile-endpoint.html",
@@ -135,6 +145,16 @@
       "base": "CapabilityStatement-dpc-capabilities.html",
       "defns": "CapabilityStatement-dpc-capabilities-definitions.html",
       "source": "DPCCapabilities.json"
+    },
+    "OperationDefinition/dpc-operation-practitioner-submit": {
+      "base": "OperationDefinition-dpc-operation-practitioner-submit.html",
+      "defns": "OperationDefinition-dpc-operation-practitioner-submit-definition.html",
+      "source": "dpc-practitioner-submit.json"
+    },
+    "OperationDefinition/dpc-operation-patient-submit": {
+      "base": "OperationDefinition-dpc-operation-patient-submit.html",
+      "defns": "OperationDefinition-dpc-operation-patient-submit-definition.html",
+      "source": "dpc-patient-submit.json"
     }
   },
   "version": "3.0.1",
