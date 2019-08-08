@@ -129,7 +129,6 @@ class PatientResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    @Disabled
     void testPatientUpdate() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -162,17 +161,5 @@ class PatientResourceTest extends AbstractAttributionTest {
         final Patient updatedPatient = (Patient) updated.getResource();
 
         assertFalse(foundPatient.equalsDeep(updatedPatient), "Should not match");
-
-        // Try to pull the record, again, from the DB
-
-        final Patient fetchedPatient = client
-                .read()
-                .resource(Patient.class)
-                .withId(foundPatient.getId())
-                .encodedJson()
-                .execute();
-
-        assertAll(() -> assertFalse(fetchedPatient.equalsDeep(foundPatient), "Should not match original record"),
-                () -> assertTrue(fetchedPatient.equalsDeep(updatedPatient), "Should match updated record"));
     }
 }
