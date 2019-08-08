@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -62,7 +63,6 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Profiled(profile = AttributionRosterProfile.PROFILE_URI)
     @ApiOperation(value = "Create Attribution Roster", notes = "FHIR endpoint to create an Attribution roster (Group resource) associated to the provider listed in the in the Group characteristics.")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),

@@ -84,7 +84,6 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @Timed
     @ExceptionMetered
-    @Profiled(profile = PATIENT_PROFILE)
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @Override
     public Patient submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, Patient patient) {
