@@ -42,6 +42,9 @@
         },
         {
           "type": "Group",
+          "profile": {
+            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-attribution-roster"
+          },
           "interaction": [
             {
               "code": "read"

@@ -766,7 +766,40 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/Practitioner
 }
 ~~~
 
-The `Practitioner.id` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
+The `Practitioner.identifier` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
+
+The `Practitioner` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
+
+~~~sh
+POST /fhir/v1/Practitioner/$submit
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/fhir/v1/Practitioner/$submit
+-H 'Authorization: Bearer {token}' \
+-H 'Accept: application/fhir+json' \
+-X POST \
+-d @provider_bundle.json
+~~~
+
+**provider_bundle.json**
+
+~~~javascript
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "type": "Practitioner",
+        ... Omitted for Brevity...
+      }
+    }
+  ]
+}
+~~~
 
 
 ### Create a Patient
@@ -888,6 +921,39 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/Patient
 
 The `Patient.id` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
 
+The `Patient` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
+
+~~~sh
+POST /fhir/v1/Patient/$submit
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/fhir/v1/Patient/$submit
+-H 'Authorization: Bearer {token}' \
+-H 'Accept: application/fhir+json' \
+-X POST \
+-d @patient_bundle.json
+~~~
+
+**patient_bundle.json**
+
+~~~javascript
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "type": "Patient",
+        ... Omitted for Brevity...
+      }
+    }
+  ]
+}
+~~~
+
 ### Create an Attribution Group
 
 Once the Provider and Patient records have been created, the final step is to associate the records into an attribution [Group](http://hl7.org/fhir/STU3/patient.html) resource, also known as a Patient roster.
@@ -914,40 +980,41 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/Group
 **group.json**
 
 ~~~ json
-"resource": {
-        "resourceType": "Group",
-        "type": "person",
-        "actual": true,
-        "characteristic": {
-          "code": {
-            "coding": [
-              {
-                "code": "attributed-to"
-              }
-            ]
-          },
-          "valueCodeableConcept": {
-            "coding": [
-              {
-                "system": "http://hl7.org/fhir/sid/us-npi",
-                "value": "110001029483"
-              }
-            ]
+{
+  "resource": {
+    "resourceType": "Group",
+    "type": "person",
+    "actual": true,
+    "characteristic": [{
+      "code": {
+        "coding": [
+          {
+            "code": "attributed-to"
           }
-        },
-        "member": [
+        ]
+      },
+      "valueCodeableConcept": {
+        "coding": [
           {
-            "entity": {
-              "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
-            }
-          },
-          {
-            "entity": {
-              "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
-            }
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "110001029483"
           }
         ]
       }
+    }],
+    "member": [
+      {
+        "entity": {
+          "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
+        }
+      },
+      {
+        "entity": {
+          "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
+        }
+      }
+    ]
+  }
 ~~~
 
 The `Group.id` value of the returned resource can be used by the client to initiate an [export job](#exporting-data).

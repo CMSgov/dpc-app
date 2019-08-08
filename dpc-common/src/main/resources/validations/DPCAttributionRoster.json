@@ -65,6 +65,11 @@
         "id": "Group.characteristic.code.coding[x]:code",
         "path": "Group.characteristic.code.coding.code",
         "fixedCode": "attributed-to"
+      },
+      {
+        "id": "Group.member",
+        "path": "Group.member",
+        "min": 1
       }
     ]
   }

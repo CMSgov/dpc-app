@@ -42,6 +42,9 @@ public class RosterValidationTest {
         concept.addCoding().setCode("attributed-to");
         group.addCharacteristic().setCode(concept).setExclude(false).setValue(new BooleanType(false));
 
+        // Add a single member
+        group.addMember().setEntity(new Reference("Patient/yup"));
+
         final ValidationResult result = fhirValidator.validateWithResult(group);
         assertTrue(result.isSuccessful());
     }

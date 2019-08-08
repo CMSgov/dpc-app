@@ -14,6 +14,8 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
+import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.profiles.AttributionRosterProfile;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import io.dropwizard.auth.Auth;
@@ -60,6 +62,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
+    @Profiled(profile = AttributionRosterProfile.PROFILE_URI)
     @ApiOperation(value = "Create Attribution Roster", notes = "FHIR endpoint to create an Attribution roster (Group resource) associated to the provider listed in the in the Group characteristics.")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
