@@ -71,7 +71,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
 
         final PatientEntity fullyUpdated = patient.update(updatedPatient);
 
-        currentSession().merge(fullyUpdated);
+        currentSession().save(fullyUpdated);
 
         return fullyUpdated;
     }
