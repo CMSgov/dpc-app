@@ -61,7 +61,8 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .resource(patient)
                 .encodedJson();
 
-        assertThrows(InternalErrorException.class, secondCreation::execute, "Should not be able to create again");
+        final MethodOutcome execute = secondCreation.execute();
+        assertNull(execute.getCreated(), "Should not be able to create again");
     }
 
     @Test

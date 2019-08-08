@@ -28,6 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
+
 @Api(value = "Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
 
@@ -193,7 +195,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Authentication token to verify", required = true)
             @NotEmpty @QueryParam("token") String token) {
-        final boolean valid = validateMacaroon(organizationID, parseToken(token));
+        final boolean valid = validateMacaroon(organizationID, parseMacaroonToken(token));
         if (valid) {
             return Response.ok().build();
         }
@@ -221,24 +223,15 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return this.bakery.createMacaroon(caveats);
     }
 
-    private Macaroon parseToken(String token) {
+    private Macaroon parseMacaroonToken(String token) {
         if (token == null || Objects.equals(token, "")) {
             throw new WebApplicationException("Cannot have empty token string", Response.Status.BAD_REQUEST);
         }
         return this.bakery.deserializeMacaroon(token);
     }
 
-    private Macaroon parseTokenTag(String tokenTag) {
-        final int idx = tokenTag.indexOf('|');
-        if (idx <= 0) {
-            throw new WebApplicationException("Malformed tokenTag", Response.Status.BAD_REQUEST);
-        }
-
-        return bakery.deserializeMacaroon(tokenTag.substring(idx + 1));
-    }
-
     private Bundle searchAndValidationByToken(String token) {
-        final Macaroon macaroon = this.parseTokenTag(token);
+        final Macaroon macaroon = parseTokenTag(this.bakery::deserializeMacaroon, token);
 
         final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
 

@@ -1,10 +1,9 @@
 package gov.cms.dpc.common.entities;
 
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.persistence.*;
@@ -42,7 +41,7 @@ public class ProviderEntity implements Serializable {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "attributions",
             joinColumns = {
-                    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+                    @JoinColumn(name = "roster_id", referencedColumnName = "id")
             },
             inverseJoinColumns = {
                     @JoinColumn(name = "patient_id", referencedColumnName = "id")
@@ -130,15 +129,10 @@ public class ProviderEntity implements Serializable {
         final ProviderEntity provider = new ProviderEntity();
 
         // Get the Organization, from the tag field
-        final String organizationID = resource.getMeta().getTag()
-                .stream()
-                .filter(tag -> tag.getSystem().equals(DPCIdentifierSystem.DPC.getSystem()))
-                .map(Coding::getCode)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Practitioner MUST have DPC organization tag"));
+        final String organizationID = FHIRExtractors.getOrganizationID(resource);
 
         final OrganizationEntity organizationEntity = new OrganizationEntity();
-        organizationEntity.setId(UUID.fromString(organizationID));
+        organizationEntity.setId(UUID.fromString(new IdType(organizationID).getIdPart()));
 
         provider.setOrganization(organizationEntity);
         provider.setProviderID(Objects.requireNonNullElseGet(resourceID, UUID::randomUUID));
@@ -150,4 +144,5 @@ public class ProviderEntity implements Serializable {
 
         return provider;
     }
+
 }

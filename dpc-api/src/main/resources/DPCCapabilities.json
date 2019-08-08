@@ -41,6 +41,42 @@
           "versioning": "no-version"
         },
         {
+          "type": "Group",
+          "profile": {
+            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-attribution-roster"
+          },
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "create"
+            },
+            {
+              "code": "update"
+            },
+            {
+              "code": "delete"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "versioning": "no-version",
+          "searchParam": [
+            {
+              "name": "characteristic-value",
+              "type": "token",
+              "documentation": "Search for Attribution rosters which are attributed to the given provider NPI"
+            },
+            {
+              "name": "member",
+              "type": "reference",
+              "documentation": "Search for Attribution groups which which the given Patient resource is a member."
+            }
+          ]
+        },
+        {
           "type": "Organization",
           "profile": {
             "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization"
@@ -78,7 +114,8 @@
           "searchParam": [
             {
               "name": "identifier",
-              "type": "string"
+              "type": "token",
+              "documentation": "Find patient resources which match the given Identifier. For DPC, this will always return a single resource, as MBIs are unique."
             }
           ]
         },
@@ -108,7 +145,8 @@
           "searchParam": [
             {
               "name": "identifier",
-              "type": "string"
+              "type": "token",
+              "documentation": "Find practitioner resources which match the given Identifier. For DPC, this will always return a single resource, as NPIs are unique."
             }
           ]
         },
@@ -135,6 +173,18 @@
           "name": "Group level data export",
           "definition": {
             "reference": "http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export"
+          }
+        },
+        {
+          "name": "Batch Practitioner Submission",
+          "definition": {
+            "reference": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-practitioner-submit"
+          }
+        },
+        {
+          "name": "Batch Patient Submission",
+          "definition": {
+            "reference": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-patient-submit"
           }
         }
       ]

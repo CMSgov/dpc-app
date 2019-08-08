@@ -20,10 +20,9 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractJobResource jr;
     private final AbstractDataResource dr;
     private final AbstractEndpointResource er;
-    private final AbstractRosterResource rr;
     private final AbstractOrganizationResource or;
     private final AbstractPatientResource par;
-    private final AbstractPractionerResource pr;
+    private final AbstractPractitionerResource pr;
     private final AbstractDefinitionResource sdr;
 
     @Inject
@@ -31,7 +30,6 @@ public class BaseResource extends AbstractBaseResource {
                         JobResource jr,
                         DataResource dr,
                         EndpointResource er,
-                        RosterResource rr,
                         OrganizationResource or,
                         PatientResource par,
                         PractitionerResource pr,
@@ -40,7 +38,6 @@ public class BaseResource extends AbstractBaseResource {
         this.jr = jr;
         this.dr = dr;
         this.er = er;
-        this.rr = rr;
         this.or = or;
         this.par = par;
         this.pr = pr;
@@ -91,11 +88,6 @@ public class BaseResource extends AbstractBaseResource {
     }
 
     @Override
-    public AbstractRosterResource rosterOperations() {
-        return this.rr;
-    }
-
-    @Override
     public AbstractOrganizationResource organizationOperations() {
         return this.or;
     }
@@ -106,7 +98,7 @@ public class BaseResource extends AbstractBaseResource {
     }
 
     @Override
-    public AbstractPractionerResource practitionerOperations() {
+    public AbstractPractitionerResource practitionerOperations() {
         return this.pr;
     }
 }

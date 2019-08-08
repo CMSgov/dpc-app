@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.inject.Inject;
@@ -22,6 +23,8 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
 public class PatientResource extends AbstractPatientResource {
 
@@ -96,14 +99,43 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field.")
+    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field." +
+            "If a patient record already exists, a `200` status is returned, along with the existing record.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Successfully created Patient"),
+            @ApiResponse(code = 200, message = "Patient already exists")
+    })
     @Override
     public Response createPatient(Patient patient) {
-        final PatientEntity entity = this.dao.persistPatient(PatientEntity.fromFHIR(patient));
 
-        return Response.status(Response.Status.CREATED)
+        final UUID organizationID = FHIRExtractors.getEntityUUID(patient.getManagingOrganization().getReference());
+        final String patientMPI = FHIRExtractors.getPatientMPI(patient);
+
+        final Response.Status status;
+        final PatientEntity entity;
+        // Check to see if Patient already exists, if so, ignore it.
+        final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMPI, organizationID);
+        if (!patientEntities.isEmpty()) {
+            status = Response.Status.OK;
+            entity = patientEntities.get(0);
+        } else {
+            status = Response.Status.CREATED;
+            entity = this.dao.persistPatient(PatientEntity.fromFHIR(patient));
+        }
+
+        return Response.status(status)
                 .entity(PatientEntityConverter.convert(entity))
                 .build();
+    }
+
+    @POST
+    @Path("/$submit")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization.")
+    @Override
+    public Bundle bulkSubmitPatients(Parameters params) {
+        return bulkResourceHandler(Patient.class, params, this::createPatient);
     }
 
     @DELETE

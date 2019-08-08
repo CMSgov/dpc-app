@@ -8,8 +8,6 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
-import gov.cms.dpc.api.annotations.AttributionService;
-import gov.cms.dpc.api.client.AttributionServiceClient;
 import gov.cms.dpc.api.health.AttributionHealthCheck;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
@@ -18,14 +16,11 @@ import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
-import gov.cms.dpc.common.interfaces.AttributionEngine;
-import io.dropwizard.client.JerseyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Context;
 import java.util.List;
 
@@ -42,10 +37,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
         binder.requestStaticInjection(DPCHibernateBundle.class);
 
-        // Clients
-        binder.bind(AttributionEngine.class)
-                .to(AttributionServiceClient.class);
-
         // TODO: This will eventually go away.
         binder.bind(TestResource.class);
         // V1 Resources
@@ -58,21 +49,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(OrganizationResource.class);
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
-        binder.bind(RosterResource.class);
 
         // Healthchecks
         binder.bind(AttributionHealthCheck.class);
-    }
-
-    @Provides
-    @AttributionService
-    @Singleton
-    public WebTarget provideHttpClient() {
-        logger.debug("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
-        return new JerseyClientBuilder(getEnvironment())
-                .using(getConfiguration().getHttpClient())
-                .build("attribution-service")
-                .target(getConfiguration().getAttributionURL());
     }
 
     @Provides
@@ -113,6 +92,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @Singleton
     public IGenericClient provideFHIRClient(FhirContext ctx) {
+        logger.debug("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
     }

@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.resources;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.ws.rs.*;
@@ -11,9 +12,9 @@ import java.util.UUID;
 
 @Path("/Practitioner")
 @FHIR
-public abstract class AbstractPractionerResource {
+public abstract class AbstractPractitionerResource {
 
-    protected AbstractPractionerResource() {
+    protected AbstractPractitionerResource() {
         // Not used
     }
 
@@ -40,6 +41,18 @@ public abstract class AbstractPractionerResource {
      */
     @POST
     public abstract Response submitProvider(Practitioner provider);
+
+    /**
+     * Submit a {@link Bundle} of {@link Practitioner} resources as a single transaction
+     * Internally, this is implemented by calling {@link AbstractPractitionerResource#submitProvider(Practitioner)} for each entry in the bundle.
+     * This will be optimized at a later date
+     *
+     * @param providerBundle - {@link Bundle} of {@link Practitioner} resources to submit
+     * @return - {@link Bundle} of newly created {@link Practitioner} resources
+     */
+    @POST
+    @Path("/$submit")
+    public abstract Bundle bulkSubmitProviders(Parameters providerBundle);
 
     /**
      * Fetch specific {@link Practitioner} resource

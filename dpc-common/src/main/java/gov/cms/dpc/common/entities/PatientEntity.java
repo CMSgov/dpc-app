@@ -27,6 +27,7 @@ public class PatientEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
+    @Access(AccessType.PROPERTY)
     private UUID patientID;
 
     @NotEmpty
@@ -54,15 +55,8 @@ public class PatientEntity implements Serializable {
     @ManyToOne
     private OrganizationEntity organization;
 
-    @ManyToMany
-    @JoinTable(name = "attributions",
-            joinColumns = {
-                    @JoinColumn(name = "patient_id", referencedColumnName = "id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "provider_id", referencedColumnName = "id")
-            })
-    private List<ProviderEntity> attributedProviders;
+    @OneToMany(mappedBy = "patient")
+    private List<AttributionRelationship> attributions;
 
     public PatientEntity() {
 //        Hibernate Required
@@ -132,12 +126,12 @@ public class PatientEntity implements Serializable {
         this.organization = organization;
     }
 
-    public List<ProviderEntity> getAttributedProviders() {
-        return attributedProviders;
+    public List<AttributionRelationship> getAttributions() {
+        return attributions;
     }
 
-    public void setAttributedProviders(List<ProviderEntity> attributedProviders) {
-        this.attributedProviders = attributedProviders;
+    public void setAttributions(List<AttributionRelationship> attributions) {
+        this.attributions = attributions;
     }
 
     /**
@@ -181,10 +175,13 @@ public class PatientEntity implements Serializable {
         patient.setPatientLastName(name.getFamily());
 
         // Set the managing organization
+
         final Reference managingOrganization = resource.getManagingOrganization();
-        final OrganizationEntity organizationEntity = new OrganizationEntity();
-        organizationEntity.setId(FHIRExtractors.getEntityUUID(managingOrganization.getReference()));
-        patient.setOrganization(organizationEntity);
+        if (managingOrganization.getReference() != null) {
+            final OrganizationEntity organizationEntity = new OrganizationEntity();
+            organizationEntity.setId(FHIRExtractors.getEntityUUID(managingOrganization.getReference()));
+            patient.setOrganization(organizationEntity);
+        }
         return patient;
     }
 

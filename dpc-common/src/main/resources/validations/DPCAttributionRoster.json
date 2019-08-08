@@ -1,0 +1,76 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "dpc-profile-attribution-roster",
+  "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-attribution-roster",
+  "name": "DPC Attribution Roster",
+  "publisher": "The DPC Team",
+  "status": "draft",
+  "version": "0.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Group",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Group",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Group",
+        "path": "Group"
+      },
+      {
+        "id": "Group.active",
+        "path": "Group.active",
+        "definition": "Group must be active",
+        "fixedBoolean": true
+      },
+      {
+        "id": "Group.type",
+        "path": "Group.type",
+        "definition": "Group must be person",
+        "fixedCode": "person"
+      },
+      {
+        "id": "Group.actual",
+        "path": "Group.actual",
+        "definition": "Group must have actual members",
+        "fixedBoolean": true
+      },
+      {
+        "id": "Group.characteristic",
+        "path": "Group.characteristic",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Group.characteristic.code.coding",
+        "path": "Group.characteristic.code.coding",
+        "definition": "Must have \"attributed-to\" characteristic",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "code"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Group.characteristic.code.coding[x]",
+        "path": "Group.characteristic.code.coding",
+        "sliceName": "group-characteristic",
+        "min": 1
+      },
+      {
+        "id": "Group.characteristic.code.coding[x]:code",
+        "path": "Group.characteristic.code.coding.code",
+        "fixedCode": "attributed-to"
+      },
+      {
+        "id": "Group.member",
+        "path": "Group.member",
+        "min": 1
+      }
+    ]
+  }
+}

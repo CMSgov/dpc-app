@@ -31,6 +31,10 @@ active: profiles
 <td>Profile for required address information for Organizations</td>
 </tr>
 <tr>
+<td><a href="StructureDefinition-dpc-profile-attribution-roster.html">DPC Attribution Roster</a></td>
+<td>Profile for Patient attribution roster submission</td>
+</tr>
+<tr>
 <td><a href="StructureDefinition-dpc-profile-endpoint.html">DPC Endpoint Profile</a></td>
 <td>Profile for required information for an Organization's Endpoints</td>
 </tr>
