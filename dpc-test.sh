@@ -32,7 +32,7 @@ fi
 
 docker-compose down
 docker-compose up -d
-sleep 60
+sleep 120
 
 # Run the Postman tests
 node_modules/.bin/newman run src/test/EndToEndRequestTest.postman_collection.json
