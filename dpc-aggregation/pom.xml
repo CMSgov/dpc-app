@@ -172,9 +172,19 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <extraDirectory>
-                        <path>${project.basedir}/../bbcerts</path>
-                    </extraDirectory>
+                    <extraDirectories>
+                        <paths>
+                            <path>${project.basedir}/../bbcerts</path>
+                            <path>${project.basedir}/target/jacoco-agent</path>
+                            <path>${project.basedir}/docker</path>
+                        </paths>
+                        <permissions>
+                            <permission>
+                                <file>/entrypoint.sh</file>
+                                <mode>755</mode>
+                            </permission>
+                        </permissions>
+                    </extraDirectories>
                     <container>
                         <args>
                             <arg>server</arg>
@@ -182,6 +192,7 @@
                         <ports>
                             <port>8081</port>
                         </ports>
+                        <entrypoint>/entrypoint.sh</entrypoint>
                     </container>
                 </configuration>
             </plugin>

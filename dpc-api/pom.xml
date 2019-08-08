@@ -192,7 +192,20 @@
                         <ports>
                             <port>8080</port>
                         </ports>
+                        <entrypoint>/entrypoint.sh</entrypoint>
                     </container>
+                    <extraDirectories>
+                        <paths>
+                            <path>${project.basedir}/target/jacoco-agent</path>
+                            <path>${project.basedir}/docker</path>
+                        </paths>
+                        <permissions>
+                            <permission>
+                                <file>/entrypoint.sh</file>
+                                <mode>755</mode>
+                            </permission>
+                        </permissions>
+                    </extraDirectories>
                 </configuration>
             </plugin>
         </plugins>
