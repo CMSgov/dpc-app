@@ -2,11 +2,13 @@
 
 set -e
 
-CMDLINE="java -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.attribution.DPCAttributionService"
+if [ -n "$JACOCO" ]; then
+  JACOCO="-javaagent:/org.jacoco.agent-runtime.jar=destfile=/jacoco-report/jacoco-it.exec"
+else
+  JACOCO=""
+fi
 
-run_java() {
-     "$@"
-}
+CMDLINE="java ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.attribution.DPCAttributionService"
 
 if [ -n "$SEED" ]; then
     echo "Loading seeds"
