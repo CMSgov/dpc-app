@@ -80,13 +80,13 @@ Be sure to include the CMS generated Access token in the requests, as documented
 Metadata about the Data at the Point of Care (DPC) pilot project is available as a FHIR [CapabilityStatement](http://hl7.org/fhir/STU3/capabilitystatement.html) resource.
 
 ~~~ sh
-GET /fhir/v1/metadata
+GET /api/v1/metadata
 ~~~
 
 **cURL command**
 
 ~~~sh
-curl https://sandbox.dpc.cms.gov/fhir/v1/metadata
+curl https://sandbox.dpc.cms.gov/api/v1/metadata
 ~~~
 
 
@@ -123,7 +123,7 @@ curl https://sandbox.dpc.cms.gov/fhir/v1/metadata
         {
           "type": "Endpoint",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-endpoint"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint"
           },
           "interaction": [
             {
@@ -138,7 +138,7 @@ curl https://sandbox.dpc.cms.gov/fhir/v1/metadata
         {
           "type": "Organization",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization"
           },
           "interaction": [
             {
@@ -150,7 +150,7 @@ curl https://sandbox.dpc.cms.gov/fhir/v1/metadata
         {
           "type": "Patient",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
           },
           "interaction": [
             {
@@ -180,7 +180,7 @@ curl https://sandbox.dpc.cms.gov/fhir/v1/metadata
         {
           "type": "Practitioner",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
           },
           "interaction": [
             {
@@ -257,13 +257,13 @@ Lookup the attribution [Group](https://hl7.org/fhir/STU3/group.html) resource as
 Creating attribution groups is covered later in this [reference](#attributing-patients-to-providers).
 
 ~~~ sh
-GET /fhir/v1/Group?characteristic=attributed-to&characteristic-code={provider NPI}
+GET /api/v1/Group?characteristic=attributed-to&characteristic-code={provider NPI}
 ~~~
 
 **cURL command**
 
 ~~~ sh
-curl -v https://sandbox.dpc.cms.gov/fhir/v1/Group?characteristic=attributed-to&characteristic-code=11349583 \
+curl -v https://sandbox.dpc.cms.gov/api/v1/Group?characteristic=attributed-to&characteristic-code=11349583 \
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json
 ~~~
@@ -324,7 +324,7 @@ Using the `Group.id` value of the returned resources a client can initiate an ex
 **3. Initiate an export job**
 
 ~~~ sh
-GET /fhir/v1/Group/{attribution group ID}/$export
+GET /api/v1/Group/{attribution group ID}/$export
 ~~~
 
 To start an explanation of benefit data export job, a GET request is made to the ExplanationOfBenefit export endpoint.
@@ -355,7 +355,7 @@ In the example header below, the number `42` in the URL represents the ID of the
 
 **Headers**
 
-- Content-Location: https://sandbox.dpc.cms.gov/fhir/v1/jobs/42
+- Content-Location: https://sandbox.dpc.cms.gov/api/v1/jobs/42
 
 
 **4. Check the status of the export job**
@@ -365,7 +365,7 @@ In the example header below, the number `42` in the URL represents the ID of the
 **Request**
 
 ~~~ sh
-GET https://sandbox.dpc.cms.gov/fhir/v1/jobs/42
+GET https://sandbox.dpc.cms.gov/api/v1/jobs/42
 ~~~
 
 Using the `Content-Location` header value from the data export response, you can check the status of the export job.
@@ -378,7 +378,7 @@ The status will change from `202 Accepted` to `200 OK` when the export job is co
 **cURL Command**
 
 ~~~ sh
-curl -v https://sandbox.dpc.cms.gov/fhir/v1/jobs/42 \
+curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/42 \
 -H 'Authorization: Bearer {token}'
 ~~~
 
@@ -390,18 +390,18 @@ curl -v https://sandbox.dpc.cms.gov/fhir/v1/jobs/42 \
 ~~~ json
 {
 "transactionTime": "2018-10-19T14:47:33.975024Z",
-"request": "https://sandbox.dpc.cms.gov/fhir/v1/Group/64d0cd85-7767-425a-a3b8-dcc9bdfd5402/$export",
+"request": "https://sandbox.dpc.cms.gov/api/v1/Group/64d0cd85-7767-425a-a3b8-dcc9bdfd5402/$export",
 "requiresAccessToken": true,
 "output": [
   {
     "type": "ExplanationOfBenefit",
-    "url": "https://sandbox.dpc.cms.gov/fhir/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson"
+    "url": "https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson"
   }
 ],
 "error": [
   {
     "type": "OperationOutcome",
-    "url": "https://sandbox.dpc.cms.gov/fhir/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3-error.ndjson"
+    "url": "https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3-error.ndjson"
   }
 ]
 }
@@ -421,7 +421,7 @@ To obtain the exported explanation of benefit data, a GET request is made to the
 **Request**
 
 ~~~ sh
-GET https://sandbox.dpc.cms.gov/fhir/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson
+GET https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson
 ~~~
 
 **Headers**
@@ -431,7 +431,7 @@ GET https://sandbox.dpc.cms.gov/fhir/v1/data/42/DBBD1CE1-AE24-435C-807D-ED459530
 **cURL command**
 
 ~~~sh
-curl https://sandbox.dpc.cms.gov/fhir/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson \
+curl https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson \
 -H 'Authorization: Bearer {token}'
 ~~~
 
@@ -706,7 +706,7 @@ An organization must first create a [Practitioner](http://hl7.org/fhir/STU3/prac
 This is accomplished by executing a `POST` request against the `Practitioner` resource, with the body containing a FHIR Practitioner resource.
 
 ~~~sh
-POST /fhir/v1/Practitioner
+POST /api/v1/Practitioner
 ~~~
 
 Details on the exact data format are given in the [implementation guide]() but at a minimum, each resource must include:
@@ -717,7 +717,7 @@ Details on the exact data format are given in the [implementation guide]() but a
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/fhir/v1/Practitioner
+curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
@@ -771,13 +771,13 @@ The `Practitioner.identifier` value of the returned resource can be used in the 
 The `Practitioner` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
 
 ~~~sh
-POST /fhir/v1/Practitioner/$submit
+POST /api/v1/Practitioner/$submit
 ~~~
 
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/fhir/v1/Practitioner/$submit
+curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/$submit
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
@@ -808,7 +808,7 @@ The organization is also required to maintain a list of [Patient](http://hl7.org
 
 
 ~~~sh
-POST /fhir/v1/Patient
+POST /api/v1/Patient
 ~~~
 
 Details on the exact data format are given in the [implementation guide]() but at a minimum, each resource must include:
@@ -820,7 +820,7 @@ Details on the exact data format are given in the [implementation guide]() but a
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/fhir/v1/Patient
+curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
@@ -924,13 +924,13 @@ The `Patient.id` value of the returned resource can be used in the attribution g
 The `Patient` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
 
 ~~~sh
-POST /fhir/v1/Patient/$submit
+POST /api/v1/Patient/$submit
 ~~~
 
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/fhir/v1/Patient/$submit
+curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/$submit
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
@@ -964,13 +964,13 @@ Details on the exact data format are given in the [implementation guide]() but a
 - The NPI of the provider which the patients are being attributed to
 
 ~~~sh
-POST /fhir/v1/Group
+POST /api/v1/Group
 ~~~
 
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/fhir/v1/Group
+curl -v https://sandbox.dpc.cms.gov/api/v1/Group
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \

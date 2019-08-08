@@ -24,7 +24,7 @@
         ],
         "meta": {
           "profile": [
-            "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
           ],
           "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
           "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
