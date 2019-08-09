@@ -1,7 +1,7 @@
 {
   "resourceType": "StructureDefinition",
   "id": "dpc-profile-practitioner",
-  "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner",
+  "url": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner",
   "name": "DPC Practitioner",
   "publisher": "The DPC Team",
   "status": "draft",

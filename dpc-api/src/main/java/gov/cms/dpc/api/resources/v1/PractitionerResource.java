@@ -29,7 +29,7 @@ import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 
 public class PractitionerResource extends AbstractPractitionerResource {
 
-    private static final String PRACTITIONER_PROFILE = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner";
+    private static final String PRACTITIONER_PROFILE = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner";
     private final IGenericClient client;
     private final FhirValidator validator;
 
