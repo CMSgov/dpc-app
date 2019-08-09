@@ -43,7 +43,7 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
 
         // Check for any @Auth annotated params
         if (authAnnotated(am)) {
-//            this.filter.setPathAuthorizer(null);
+            logger.trace("Registering Auth param on method {}", am.toString());
             context.register(this.factory.createStandardAuthorizer());
             return;
         }

@@ -70,7 +70,10 @@
         ],
         "meta": {
           "lastUpdated": "2019-04-09T12:25:35.388143+00:00",
-          "versionId": "MTU1NDgxMjczNTM4ODE0MzAwMA"
+          "versionId": "MTU1NDgxMjczNTM4ODE0MzAwMA",
+          "profile": [
+            "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+          ]
         },
         "name": [
           {
@@ -115,7 +118,10 @@
         ],
         "meta": {
           "lastUpdated": "2019-04-09T12:25:33.265961+00:00",
-          "versionId": "MTU1NDgxMjczMzI2NTk2MTAwMA"
+          "versionId": "MTU1NDgxMjczMzI2NTk2MTAwMA",
+          "profile": [
+            "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+          ]
         },
         "name": [
           {
@@ -160,7 +166,10 @@
         ],
         "meta": {
           "lastUpdated": "2019-04-09T12:25:30.055125+00:00",
-          "versionId": "MTU1NDgxMjczMDA1NTEyNTAwMA"
+          "versionId": "MTU1NDgxMjczMDA1NTEyNTAwMA",
+          "profile": [
+            "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+          ]
         },
         "name": [
           {

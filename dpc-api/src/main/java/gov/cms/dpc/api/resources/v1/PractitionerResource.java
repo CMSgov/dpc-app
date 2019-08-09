@@ -130,7 +130,8 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization." +
             "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
     @Override
-    public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Bundle providerBundle) {
+    public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Parameters params) {
+        final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Practitioner> entryHandler = (resource) -> validateAndTagProvider(resource,
                 organization.getOrganization().getId(),
                 validator,

@@ -6,21 +6,19 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Group;
-import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,18 +50,21 @@ public class ClientUtils {
     /**
      * Helper method to create a FHIR client has the headers setup for export operations.
      *
-     * @param context - FHIR context to use
+     * @param context       - FHIR context to use
      * @param serverBaseURL - the base URL for the FHIR endpoint
      * @return {@link IGenericClient} for FHIR requests
      * @see #createExportOperation(IGenericClient, String)
      */
-    public static IGenericClient createExportClient(FhirContext context, String serverBaseURL) {
+    public static IGenericClient createExportClient(FhirContext context, String serverBaseURL, String accessToken) {
         final IGenericClient exportClient = context.newRestfulGenericClient(serverBaseURL);
         // Add a header the hard way
-        final var addPreferInterceptor = new IClientInterceptor()  {
+        final var addPreferInterceptor = new IClientInterceptor() {
             @Override
             public void interceptRequest(IHttpRequest iHttpRequest) {
                 iHttpRequest.addHeader(PREFER_HEADER, PREFER_RESPOND_ASYNC);
+                if (accessToken != null) {
+                    iHttpRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", accessToken));
+                }
             }
 
             @Override
@@ -79,14 +80,13 @@ public class ClientUtils {
      * Helper method for creating an export request using the FHIR client.
      *
      * @param exportClient - {@link IGenericClient} client to use for the request.
-     * @param providerID - {@link String} provider ID to request data for
+     * @param rosterID     - {@link String} Roster ID to request data for
      * @return - {@link IOperationUntypedWithInput} export request, ready to execute
-     * @see #createExportClient(FhirContext, String)
      */
-    public static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient exportClient, String providerID) {
+    public static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient exportClient, String rosterID) {
         return exportClient
                 .operation()
-                .onInstance(new IdDt("Group", providerID))
+                .onInstance(new IdType(rosterID))
                 .named("$export")
                 .withNoParameters(Parameters.class)
                 .encodedJson()
@@ -98,30 +98,26 @@ public class ClientUtils {
      *
      * @param client   - {@link IGenericClient} client to use for request
      * @param resource - {@link InputStream} representing test associations file
-     * @return - {@link ICreateTyped} FHIR Post operation, ready to execute
      * @throws IOException - throws if unable to read the file
      */
-    public static ICreateTyped createRosterSubmission(IGenericClient client, InputStream resource, UUID organizationID) throws IOException {
+    public static void createRosterSubmission(IGenericClient client, InputStream resource, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
 
         final Map<String, List<Pair<String, String>>> providerMap = SeedProcessor.extractProviderMap(resource);
 
         // Find the entry for the given key (yes, I know this is bad)
-        final Map.Entry<String, List<Pair<String, String>>> providerRoster = providerMap
+        providerMap
                 .entrySet()
-                .stream()
-                .filter((entry) -> entry.getKey().equals(PROVIDER_ID))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Cannot find matching provider"));
+                .forEach(providerRoster -> {
 
-        final Group attributionRoster = SeedProcessor.generateAttributionGroup(providerRoster, organizationID, null);
+                    final Group attributionRoster = SeedProcessor.generateAttributionGroup(providerRoster, organizationID, patientReferences);
 
-        // Now, submit the bundle
-        // TODO: Currently, the MethodOutcome response does not propagate the created flag, so we can't directly check that the operation succeeded.
-        // Instead, we rely on the fact that an error is not thrown.
-        return client
-                .create()
-                .resource(attributionRoster)
-                .encodedJson();
+                    // Now, submit the bundle
+                    client
+                            .create()
+                            .resource(attributionRoster)
+                            .encodedJson()
+                            .execute();
+                });
     }
 
     /**
@@ -133,11 +129,12 @@ public class ClientUtils {
      * @throws IOException          - throws if the HTTP request fails
      * @throws InterruptedException - throws if the thread is interrupted
      */
-    public static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage) throws IOException, InterruptedException {
+    public static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, String token) throws IOException, InterruptedException {
         // Use the traditional HTTP Client to check the job status
         JobCompletionModel jobResponse = null;
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet jobGet = new HttpGet(jobLocation);
+            jobGet.setHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
             boolean done = false;
 
             while (!done) {

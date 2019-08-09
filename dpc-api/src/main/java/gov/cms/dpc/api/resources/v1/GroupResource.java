@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IBaseQuery;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.param.TokenParam;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -30,10 +31,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
@@ -103,19 +101,22 @@ public class GroupResource extends AbstractGroupResource {
                                @QueryParam(value = Group.SP_MEMBER)
                                        String patientID) {
 
-        IQuery<Bundle> baseQuery = this.client
+        final Map<String, List<String>> queryParams = new HashMap<>();
+
+        if (providerNPI != null) {
+            queryParams.put(Group.SP_CHARACTERISTIC_VALUE, Collections.singletonList(providerNPI));
+        }
+
+        if (patientID != null) {
+            queryParams.put("member", Collections.singletonList(patientID));
+        }
+
+        return this.client
                 .search()
                 .forResource(Group.class)
-                .returnBundle(Bundle.class);
-
-        // These are unchecked casts because I can't understand the HAPI type hierarchy, but this should be safe.
-        baseQuery = (IQuery<Bundle>) searchForProvider(baseQuery, providerNPI);
-        baseQuery = (IQuery<Bundle>) searchForPatient(baseQuery, patientID);
-
-        baseQuery
-                .withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getOrganization().getIdElement().getIdPart());
-
-        return baseQuery
+                .whereMap(queryParams)
+                .withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getOrganization().getIdElement().getIdPart())
+                .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
     }

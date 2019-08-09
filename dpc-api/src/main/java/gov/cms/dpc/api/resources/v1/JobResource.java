@@ -3,7 +3,6 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -58,7 +57,7 @@ public class JobResource extends AbstractJobResource {
     @ApiOperation(value = "Check export job status",
             notes = "This endpoint is used to query the status of a given Export operation. " +
                     "When the job is in progress, the API returns a 204 status." +
-                        "When completed, an output response is returned, which contains the necessary metadata for retrieving any output files.")
+                    "When completed, an output response is returned, which contains the necessary metadata for retrieving any output files.")
     @ApiResponses({
             @ApiResponse(code = 202, message = "Export job is in progress"),
             @ApiResponse(code = 404, message = "Export job cannot be found"),
