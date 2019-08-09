@@ -8,7 +8,6 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
-import gov.cms.dpc.api.health.AttributionHealthCheck;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -75,7 +74,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @ServiceBaseURL
     public String provideBaseURL(@Context HttpServletRequest request) {
-        return String.format("%s://%s:%s", request.getScheme(), request.getServerName(), request.getServerPort());
+        return String.format("%s://%s:%d/%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
     }
 
     @Provides
