@@ -1,7 +1,7 @@
 {
   "resourceType": "StructureDefinition",
   "id": "dpc-profile-organization",
-  "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization",
+  "url": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization",
   "name": "DPC Organization",
   "publisher": "The DPC Team",
   "status": "draft",
@@ -50,7 +50,7 @@
         "type": [
           {
             "code": "Address",
-            "profile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-address"
+            "profile": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-address"
           }
         ],
         "min": 1,
@@ -65,7 +65,7 @@
         "type": [
           {
             "code": "Reference",
-            "targetProfile": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-endpoint"
+            "targetProfile": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint"
           }
         ]
       }

@@ -28,7 +28,7 @@
         {
           "type": "Endpoint",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-endpoint"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint"
           },
           "interaction": [
             {
@@ -43,7 +43,7 @@
         {
           "type": "Group",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-attribution-roster"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attribution-roster"
           },
           "interaction": [
             {
@@ -79,7 +79,7 @@
         {
           "type": "Organization",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-organization"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization"
           },
           "interaction": [
             {
@@ -91,7 +91,7 @@
         {
           "type": "Patient",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
           },
           "interaction": [
             {
@@ -122,7 +122,7 @@
         {
           "type": "Practitioner",
           "profile": {
-            "reference": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+            "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
           },
           "interaction": [
             {
@@ -178,13 +178,13 @@
         {
           "name": "Batch Practitioner Submission",
           "definition": {
-            "reference": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-practitioner-submit"
+            "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-submit"
           }
         },
         {
           "name": "Batch Patient Submission",
           "definition": {
-            "reference": "https://dpc.cms.gov/fhir/v1/OperationDefinition/dpc-operation-patient-submit"
+            "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-submit"
           }
         }
       ]
