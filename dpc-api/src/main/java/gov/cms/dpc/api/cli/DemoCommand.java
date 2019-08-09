@@ -154,7 +154,7 @@ public class DemoCommand extends Command {
         }
     }
 
-    private void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String token) {
+    private void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String  token) {
         providerNPIs
                 .stream()
                 .map(npi -> exportClient

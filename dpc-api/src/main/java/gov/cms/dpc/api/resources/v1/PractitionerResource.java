@@ -18,6 +18,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.hl7.fhir.dstu3.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -30,6 +32,7 @@ import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 public class PractitionerResource extends AbstractPractitionerResource {
 
     private static final String PRACTITIONER_PROFILE = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner";
+    private static final Logger logger = LoggerFactory.getLogger(PractitionerResource.class);
     private final IGenericClient client;
     private final FhirValidator validator;
 
@@ -101,7 +104,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Profiled(profile = PRACTITIONER_PROFILE)
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
     @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
     public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
@@ -175,6 +177,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     }
 
     private static void validateAndTagProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
+        logger.debug("Validating Practitioner {}", provider.toString());
         if (!APIHelpers.hasProfile(provider, profileURL)) {
             throw new WebApplicationException("Provider must have correct profile", Response.Status.BAD_REQUEST);
         }
