@@ -728,39 +728,60 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
 
 ~~~json
 {
-  "resourceType": "Practitioner",
-  "identifier": [
+  "resourceType": "Parameters",
+  "parameter": [
     {
-      "system": "http://hl7.org/fhir/sid/us-npi",
-      "value": "3116145044854423862"
-    }
-  ],
-  "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
-  "address": [
-    {
-      "city": "PLYMOUTH",
-      "country": "US",
-      "line": [
-        "275 SANDWICH STREET"
-      ],
-      "postalCode": "02360",
-      "state": "MA"
-    }
-  ],
-  "gender": "male",
-  "meta": {
-    "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
-    "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
-  },
-  "name": [
-    {
-      "family": "Klocko",
-      "given": [
-        "Leonard"
-      ],
-      "prefix": [
-        "Dr."
-      ]
+      "name": "resource",
+      "resource": {
+        "resourceType": "Bundle",
+        "id": "12345",
+        "type": "collection",
+        "entry": [
+          {
+            "resource": {
+              "active": true,
+              "address": [
+                {
+                  "city": "PLYMOUTH",
+                  "country": "US",
+                  "line": [
+                    "275 SANDWICH STREET"
+                  ],
+                  "postalCode": "02360",
+                  "state": "MA"
+                }
+              ],
+              "gender": "male",
+              "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
+              "identifier": [
+                {
+                  "system": "http://hl7.org/fhir/sid/us-npi",
+                  "value": "3116145044854423862"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+                ],
+                "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
+                "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
+              },
+              "name": [
+                {
+                  "family": "Klocko335",
+                  "given": [
+                    "Leonard963"
+                  ],
+                  "prefix": [
+                    "Dr."
+                  ]
+                }
+              ],
+              "resourceType": "Practitioner"
+            }
+          }
+        ]
+      }
     }
   ]
 }
@@ -788,16 +809,23 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/$submit
 
 ~~~javascript
 {
-  "resourceType": "Bundle",
-  "type": "collection",
-  "entry": [
-    {
-      "resource": {
-        "type": "Practitioner",
-        ... Omitted for Brevity...
-      }
-    }
-  ]
+    "resourceType": "Parameters",
+    "parameter": [{
+        "name": "resource",
+        "resource": {
+                      "resourceType": "Bundle",
+                      "type": "collection",
+                      "entry": [
+                        {
+                          "resource": {
+                            "type": "Practitioner",
+                            ... Omitted for Brevity...
+                          }
+                        }
+                      ]
+                    }
+       
+    }]
 }
 ~~~
 
