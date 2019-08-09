@@ -48,22 +48,6 @@ public class DemoCommand extends Command {
                 .setDefault("src/main/resources/test_associations.csv")
                 .help("Association file to use for demo purposes. Defaults to project root");
 
-        // Option for overriding provider id
-        subparser
-                .addArgument("-p", "--provider")
-                .dest("provider-id")
-                .type(String.class)
-                .setDefault(ClientUtils.PROVIDER_ID)
-                .help("Execute as a specific provider");
-
-        // Option for overriding the organization ID
-        subparser
-                .addArgument("-o", "--organization")
-                .dest("organization-id")
-                .type(String.class)
-                .setDefault(ClientUtils.ORGANIZATION_ID)
-                .help("Execute as a specific Organization");
-
         subparser
                 .addArgument("--host")
                 .dest("hostname")
@@ -96,77 +80,16 @@ public class DemoCommand extends Command {
         final IGenericClient exportClient = ClientUtils.createExportClient(ctx, baseURL, token);
 
         // Upload a batch of patients and a batch of providers
-        final Bundle providerBundle;
-
-        try {
-            System.out.println("Submitting practitioners");
-            providerBundle = bundleSubmitter(Practitioner.class, "provider_bundle.json", ctx.newJsonParser(), exportClient);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot submit providers.", e);
-        }
-
-        // Get the provider NPIs
-        final List<String> providerNPIs = providerBundle
-                .getEntry()
-                .stream()
-                .map(Bundle.BundleEntryComponent::getResource)
-                .map(resource -> (Practitioner) resource)
-                .map(FHIRExtractors::getProviderNPI)
-                .collect(Collectors.toList());
-
-        final Bundle patientBundle;
-
-        try {
-            System.out.println("Submitting patients");
-            patientBundle = bundleSubmitter(Patient.class, "patient_bundle.json", ctx.newJsonParser(), exportClient);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot submit patients.", e);
-        }
-
-        final Map<String, Reference> patientReferences = new HashMap<>();
-        patientBundle
-                .getEntry()
-                .stream()
-                .map(Bundle.BundleEntryComponent::getResource)
-                .map(resource -> (Patient) resource)
-                .forEach(patient -> {
-                    patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId()));
-                });
+        final List<String> providerNPIs = this.submitPractitioners(exportClient);
+        final Map<String, Reference> patientReferences = this.submitPatients(exportClient);
 
         // Upload the roster bundle
         this.createAndUploadRosters(namespace, exportClient, UUID.fromString(organizationID), patientReferences);
 
-        providerNPIs
-                .stream()
-                .map(npi -> exportClient
-                        .search()
-                        .forResource(Group.class)
-                        .where(Group.CHARACTERISTIC_VALUE
-                                .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
-                                .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), npi)))
-                        .returnBundle(Bundle.class)
-                        .encodedJson()
-                        .execute())
-                .map(search -> (Group) search.getEntryFirstRep().getResource())
-                .map(group -> {
-                    final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
-                    try {
-                        return monitorExportRequest(exportOperation, token);
-                    } catch (IOException | InterruptedException e) {
-                        throw new RuntimeException("Error monitoring export", e);
-                    }
-                })
-                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
-                    System.out.println(entry.getUrl());
-                    try {
-                        ClientUtils.fetchExportedFiles(entry.getUrl());
-                    } catch (IOException e) {
-                        throw new RuntimeException("Cannot output file", e);
-                    }
-                }));
+        // Run the job
+        this.handleExportJob(exportClient, providerNPIs, token);
 
         System.out.println("Export jobs completed");
-
         System.exit(0);
     }
 
@@ -229,5 +152,79 @@ public class DemoCommand extends Command {
                     .encodedJson()
                     .execute();
         }
+    }
+
+    private void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String token) {
+        providerNPIs
+                .stream()
+                .map(npi -> exportClient
+                        .search()
+                        .forResource(Group.class)
+                        .where(Group.CHARACTERISTIC_VALUE
+                                .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
+                                .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), npi)))
+                        .returnBundle(Bundle.class)
+                        .encodedJson()
+                        .execute())
+                .map(search -> (Group) search.getEntryFirstRep().getResource())
+                .map(group -> {
+                    final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
+                    try {
+                        return monitorExportRequest(exportOperation, token);
+                    } catch (IOException | InterruptedException e) {
+                        throw new RuntimeException("Error monitoring export", e);
+                    }
+                })
+                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
+                    System.out.println(entry.getUrl());
+                    try {
+                        ClientUtils.fetchExportedFiles(entry.getUrl());
+                    } catch (IOException e) {
+                        throw new RuntimeException("Cannot output file", e);
+                    }
+                }));
+    }
+
+    private Map<String, Reference> submitPatients(IGenericClient exportClient) {
+        final Bundle patientBundle;
+
+        try {
+            System.out.println("Submitting patients");
+            patientBundle = bundleSubmitter(Patient.class, "patient_bundle.json", ctx.newJsonParser(), exportClient);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot submit patients.", e);
+        }
+
+        final Map<String, Reference> patientReferences = new HashMap<>();
+        patientBundle
+                .getEntry()
+                .stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(resource -> (Patient) resource)
+                .forEach(patient -> {
+                    patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId()));
+                });
+
+        return patientReferences;
+    }
+
+    private List<String> submitPractitioners(IGenericClient exportClient) {
+        final Bundle providerBundle;
+
+        try {
+            System.out.println("Submitting practitioners");
+            providerBundle = bundleSubmitter(Practitioner.class, "provider_bundle.json", ctx.newJsonParser(), exportClient);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot submit providers.", e);
+        }
+
+        // Get the provider NPIs
+        return providerBundle
+                .getEntry()
+                .stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(resource -> (Practitioner) resource)
+                .map(FHIRExtractors::getProviderNPI)
+                .collect(Collectors.toList());
     }
 }

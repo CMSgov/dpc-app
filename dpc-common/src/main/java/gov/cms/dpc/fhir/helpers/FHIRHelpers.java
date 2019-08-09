@@ -46,27 +46,6 @@ public class FHIRHelpers {
                     .getEntryFirstRep().getResource();
             origOrg.getIdentifierFirstRep().setValue(organizationID);
             origOrg.setId(organizationID);
-//
-//            // Filter the bundle to only return resources for the given Organization
-//            final Bundle filteredBundle = new Bundle();
-//            orgBundle
-//                    .getEntry()
-//                    .stream()
-//                    .filter(Bundle.BundleEntryComponent::hasResource)
-//                    .map(Bundle.BundleEntryComponent::getResource)
-//                    .filter(resource -> {
-//                        if (resource.getResourceType() == ResourceType.Organization) {
-//                            return resource.getIdElement().getIdPart().equals(organizationID);
-//                        } else {
-//                            return ((Endpoint) resource).getManagingOrganization().getReference().equals("Organization/" + organizationID);
-//                        }
-//                    })
-//                    .peek(resource -> {
-//                        if (resource.getResourceType() == ResourceType.Organization) {
-//                            // Make the NPI random
-//                        }
-//                    })
-//                    .forEach(entry -> filteredBundle.addEntry().setResource(entry));
 
             final Parameters parameters = new Parameters();
             parameters.addParameter().setResource(orgBundle);

@@ -2,9 +2,6 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.IBaseQuery;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.param.TokenParam;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -15,8 +12,6 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
-import gov.cms.dpc.fhir.annotations.Profiled;
-import gov.cms.dpc.fhir.validations.profiles.AttributionRosterProfile;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.models.JobModel;
 import io.dropwizard.auth.Auth;
@@ -27,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -184,7 +178,7 @@ public class GroupResource extends AbstractGroupResource {
      * On success, returns a {@link org.eclipse.jetty.http.HttpStatus#NO_CONTENT_204} response with no content in the result.
      * The `Content-Location` header contains the URI to call when checking job status. On failure, return an {@link OperationOutcome}.
      *
-     * @param rosterID    {@link String} ID of provider to retrieve data for
+     * @param rosterID      {@link String} ID of provider to retrieve data for
      * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link ResourceType}
      * @param outputFormat  - Optional outputFormats parameter
      * @param since         - Optional since parameter
@@ -288,22 +282,6 @@ public class GroupResource extends AbstractGroupResource {
         return JobModel.validResourceTypes.stream()
                 .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
                 .findFirst();
-    }
-
-    private static IBaseQuery<?> searchForProvider(IBaseQuery<?> query, String providerNPI) {
-        return query
-                .where(Group.CHARACTERISTIC_VALUE
-                        .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
-                        .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), providerNPI)));
-    }
-
-
-    private static IBaseQuery<?> searchForPatient(IBaseQuery<?> query, String patientID) {
-        if (patientID != null) {
-            return query
-                    .where(Group.MEMBER.hasId(patientID));
-        }
-        return query;
     }
 
     private List<String> fetchPatientMBIs(String groupID) {
