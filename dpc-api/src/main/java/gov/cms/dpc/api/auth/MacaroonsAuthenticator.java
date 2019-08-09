@@ -35,7 +35,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         // If we don't have a path authorizer, just return the principal
         final OrganizationPrincipal principal = new OrganizationPrincipal(credentials.getOrganization());
         if (credentials.getPathAuthorizer() == null) {
-            logger.debug("No path authorizer is present, returning");
+            logger.debug("No path authorizer is present, returning principal");
             return Optional.of(principal);
         }
 
