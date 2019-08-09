@@ -51,7 +51,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(PractitionerResource.class);
 
         // Healthchecks
-        binder.bind(AttributionHealthCheck.class);
+        // TODO: Fix with DPC-538
+//        binder.bind(AttributionHealthCheck.class);
     }
 
     @Provides
