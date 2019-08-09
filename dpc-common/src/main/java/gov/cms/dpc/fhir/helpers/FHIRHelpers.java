@@ -13,6 +13,8 @@ import org.hl7.fhir.dstu3.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Random;
+import java.util.UUID;
 
 
 public class FHIRHelpers {
@@ -30,34 +32,23 @@ public class FHIRHelpers {
      * @throws IOException - Throws if HTTP client fails
      */
     public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String attributionURL) throws IOException {
+        // Random number generator for Org NPI
         // Register an organization, and a token
         // Read in the test file
         String macaroon;
-        try (InputStream inputStream = FHIRHelpers.class.getClassLoader().getResourceAsStream("organization_bundle.json")) {
+        try (InputStream inputStream = FHIRHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json")) {
 
 
             final Bundle orgBundle = (Bundle) parser.parseResource(inputStream);
 
-            // Filter the bundle to only return resources for the given Organization
-            final Bundle filteredBundle = new Bundle();
-            orgBundle
-                    .getEntry()
-                    .stream()
-                    .filter(Bundle.BundleEntryComponent::hasResource)
-                    .map(Bundle.BundleEntryComponent::getResource)
-                    .filter(resource -> {
-                        if (resource.getResourceType() == ResourceType.Organization) {
-                            return resource.getIdElement().getIdPart().equals(organizationID);
-                        } else {
-                            return ((Endpoint) resource).getManagingOrganization().getReference().equals("Organization/" + organizationID);
-                        }
-                    })
-                    .forEach(entry -> {
-                        filteredBundle.addEntry().setResource(entry);
-                    });
+            // Update the Organization resource and set a random NPI
+            final Organization origOrg = (Organization) orgBundle
+                    .getEntryFirstRep().getResource();
+            origOrg.getIdentifierFirstRep().setValue(organizationID);
+            origOrg.setId(organizationID);
 
             final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(filteredBundle);
+            parameters.addParameter().setResource(orgBundle);
 
             final Organization organization = client
                     .operation()

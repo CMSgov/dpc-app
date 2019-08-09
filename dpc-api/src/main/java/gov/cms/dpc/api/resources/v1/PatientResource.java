@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
@@ -112,11 +113,11 @@ public class PatientResource extends AbstractPatientResource {
     @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization." +
             "<p> Each Patient resource MUST implement the " + PATIENT_PROFILE + "profile.")
     @Override
-    public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Bundle patientBundle) {
+    public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params) {
+        final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator, PATIENT_PROFILE);
 
-        final Bundle bundle = bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
-        return bundle;
+        return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }
 
 
@@ -191,7 +192,10 @@ public class PatientResource extends AbstractPatientResource {
             patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
             final ValidationResult result = validator.validateWithResult(patient);
             if (!result.isSuccessful()) {
-                throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
+                // Temporary until DPC-536 is merged in
+                if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
+                    throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
+                }
             }
         }
 
