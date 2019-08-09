@@ -165,46 +165,10 @@ public class DemoCommand extends Command {
                     }
                 }));
 
-        // Create the default organization
-//        final String organizationID = namespace.get("organization-id");
-        // Create a client for submitting the organization
-
-//
-//        // Make the initial export request
-//        // If it's a 404, that's fine, for anything else, fail
-//        final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(namespace, baseURL);
-//        try {
-//            exportOperation.execute();
-//        } catch (ResourceNotFoundException e) {
-//            System.out.println("Provider is not registered with the system");
-//        }
-//
-////         Sleep for 2 seconds, for presentation reasons
-//        Thread.sleep(2000);
-//
-//
-//
-//
-//        // Sleep for 2 seconds, for presentation reasons
-//        Thread.sleep(2000);
-//
-//        // Retry the export request
-//        final JobCompletionModel jobResponse = ;
-//
-//        System.out.print("\n\nExport job completed successfully.%n%nAvailable files:%n");
-
+        System.out.println("Export jobs completed");
 
         System.exit(0);
     }
-
-//    private IOperationUntypedWithInput<Parameters> createExportOperation(Namespace namespace, String baseURL) {
-//        // Submit an export request for a provider which is not known to the system.
-//
-//
-//        final String providerID = namespace.getString("provider-id");
-//
-//        return ClientUtils.createExportOperation(exportClient, providerID);
-//    }
 
     private void createAndUploadRosters(Namespace namespace, IGenericClient client, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
         // Read the provider bundle from the given file
