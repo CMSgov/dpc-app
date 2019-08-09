@@ -1,7 +1,7 @@
 {
   "resourceType": "StructureDefinition",
   "id": "dpc-profile-attribution-roster",
-  "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-attribution-roster",
+  "url": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attribution-roster",
   "name": "DPC Attribution Roster",
   "publisher": "The DPC Team",
   "status": "draft",

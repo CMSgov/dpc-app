@@ -1,7 +1,7 @@
 {
   "resourceType": "StructureDefinition",
   "id": "dpc-profile-address",
-  "url": "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-address",
+  "url": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-address",
   "name": "DPC Address",
   "publisher": "The DPC Team",
   "status": "draft",

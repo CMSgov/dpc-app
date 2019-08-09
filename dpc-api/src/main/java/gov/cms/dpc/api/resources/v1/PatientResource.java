@@ -33,7 +33,7 @@ public class PatientResource extends AbstractPatientResource {
     // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
-    private static final String PATIENT_PROFILE = "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-patient";
+    private static final String PATIENT_PROFILE = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient";
 
     private final IGenericClient client;
     private final FhirValidator validator;

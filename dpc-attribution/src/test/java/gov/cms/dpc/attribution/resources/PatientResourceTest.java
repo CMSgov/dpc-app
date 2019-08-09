@@ -130,7 +130,6 @@ class PatientResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    @Disabled
     void testPatientUpdate() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -150,7 +149,8 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         // Update the name
         foundPatient.getNameFirstRep().setFamily("Updated");
-        foundPatient.setBirthDate(Date.valueOf("2001-01-01"));
+        final Date updatedBirthDate = Date.valueOf("2001-01-01");
+        foundPatient.setBirthDate(updatedBirthDate);
 
         // Update the patient
 
@@ -162,8 +162,6 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         final Patient updatedPatient = (Patient) updated.getResource();
 
-        assertFalse(foundPatient.equalsDeep(updatedPatient), "Should not match");
-
         // Try to pull the record, again, from the DB
 
         final Patient fetchedPatient = client
@@ -173,7 +171,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        assertAll(() -> assertFalse(fetchedPatient.equalsDeep(foundPatient), "Should not match original record"),
-                () -> assertTrue(fetchedPatient.equalsDeep(updatedPatient), "Should match updated record"));
+        assertAll(() -> assertTrue(fetchedPatient.equalsDeep(updatedPatient), "Should match updated record"),
+                () -> assertEquals("Updated", fetchedPatient.getNameFirstRep().getFamily(), "Should have updated family name"));
     }
 }
