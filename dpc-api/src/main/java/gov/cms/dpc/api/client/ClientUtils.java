@@ -158,12 +158,13 @@ public class ClientUtils {
      * @return - {@link File} file handle where the data is stored
      * @throws IOException - throws if the HTTP request or file writing fails
      */
-    public static File fetchExportedFiles(String fileID) throws IOException {
+    public static File fetchExportedFiles(String fileID, String token) throws IOException {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
 
             final File tempFile = File.createTempFile("dpc", ".ndjson");
 
             final HttpGet fileGet = new HttpGet(fileID);
+            fileGet.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
             try (CloseableHttpResponse fileResponse = client.execute(fileGet)) {
 
                 fileResponse.getEntity().writeTo(new FileOutputStream(tempFile));

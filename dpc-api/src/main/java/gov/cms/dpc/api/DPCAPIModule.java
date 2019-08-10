@@ -74,7 +74,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @ServiceBaseURL
     public String provideBaseURL(@Context HttpServletRequest request) {
-        return String.format("%s://%s:%d/%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
+        return String.format("%s://%s:%d%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
     }
 
     @Provides
@@ -92,7 +92,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @Singleton
     public IGenericClient provideFHIRClient(FhirContext ctx) {
-        logger.debug("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
+        logger.info("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
     }

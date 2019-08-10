@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources;
 
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 
 import javax.ws.rs.GET;
@@ -13,5 +14,5 @@ public abstract class AbstractDataResource {
 
     @Path("/{fileID}/")
     @GET
-    public abstract Response export(String fileID);
+    public abstract Response export(OrganizationPrincipal organizationPrincipal, String fileID);
 }
