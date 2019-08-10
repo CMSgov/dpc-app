@@ -154,7 +154,7 @@ public class DemoCommand extends Command {
         }
     }
 
-    private void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String  token) {
+    private void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String token) {
         providerNPIs
                 .stream()
                 .map(npi -> exportClient
@@ -178,7 +178,8 @@ public class DemoCommand extends Command {
                 .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
                     System.out.println(entry.getUrl());
                     try {
-                        ClientUtils.fetchExportedFiles(entry.getUrl());
+                        final File file = ClientUtils.fetchExportedFiles(entry.getUrl(), token);
+                        System.out.println(String.format("Downloaded file to: %s", file.getPath()));
                     } catch (IOException e) {
                         throw new RuntimeException("Cannot output file", e);
                     }

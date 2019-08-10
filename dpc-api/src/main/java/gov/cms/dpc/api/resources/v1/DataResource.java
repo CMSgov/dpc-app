@@ -2,13 +2,12 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.ExportPath;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.dropwizard.auth.Auth;
+import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -38,7 +37,6 @@ public class DataResource extends AbstractDataResource {
 
     @Override
     @Path("/{fileID}/")
-    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "fileID")
     @GET
     @Timed
     @ExceptionMetered
@@ -47,7 +45,7 @@ public class DataResource extends AbstractDataResource {
             @ApiResponse(code = 200, message = "File of newline-delimited JSON FHIR objects"),
             @ApiResponse(code = 500, message = "An error occurred", response = OperationOutcome.class)
     })
-    public Response export(@PathParam("fileID") String fileID) {
+    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @PathParam("fileID") String fileID) {
         final StreamingOutput fileStream = outputStream -> {
             final java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", fileLocation, fileID));
             logger.debug("Streaming file {}", path.toString());
