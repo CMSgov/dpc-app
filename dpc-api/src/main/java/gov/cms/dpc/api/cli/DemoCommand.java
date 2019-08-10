@@ -52,8 +52,8 @@ public class DemoCommand extends Command {
                 .addArgument("--host")
                 .dest("hostname")
                 .type(String.class)
-                .setDefault("localhost:3002")
-                .help("Set the hostname (including port number) for running the Demo against");
+                .setDefault("http://localhost:3002/v1")
+                .help("Set the hostname (including scheme, port number and path) for running the Demo against");
 
         subparser
                 .addArgument("-a", "--attribution")
@@ -132,7 +132,7 @@ public class DemoCommand extends Command {
     }
 
     private static String buildBaseURL(Namespace namespace) {
-        return "http://" + namespace.getString("hostname") + "/v1/";
+        return namespace.getString("hostname");
     }
 
     private <T extends BaseResource> Bundle bundleSubmitter(Class<T> clazz, String filename, IParser parser, IGenericClient client) throws IOException {
