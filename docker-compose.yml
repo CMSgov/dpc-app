@@ -16,7 +16,7 @@ services:
       - "5432:5432"
 
   aggregation:
-    image: ${ECR_HOST:-430398651479.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
     ports:
       - "9901:9900"
     environment:
@@ -30,7 +30,7 @@ services:
       - ./jacocoReport/dpc-aggregation:/jacoco-report
 
   attribution:
-    image: ${ECR_HOST:-430398651479.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
     depends_on:
       - db
     environment:
@@ -43,7 +43,7 @@ services:
       - ./jacocoReport/dpc-attribution:/jacoco-report
 
   api:
-    image: ${ECR_HOST:-430398651479.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
     ports:
       - "3002:3002"
     environment:
