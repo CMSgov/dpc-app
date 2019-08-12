@@ -21,7 +21,7 @@ services:
       - "9901:9900"
     environment:
       - ENV=dev
-      - JACOCO=true
+      - JACOCO=${REPORT_COVERAGE}
     depends_on:
       - db
       - redis
@@ -35,7 +35,7 @@ services:
       - db
     environment:
       - ENV=dev
-      - JACOCO=true
+      - JACOCO=${REPORT_COVERAGE}
     ports:
       - "3500:8080"
       - "9902:9900"
@@ -49,7 +49,7 @@ services:
     environment:
       - attributionURL=http://attribution:8080/v1/
       - ENV=dev
-      - JACOCO=true
+      - JACOCO=${REPORT_COVERAGE}
       - exportPath=/app/data
     depends_on:
       - attribution
