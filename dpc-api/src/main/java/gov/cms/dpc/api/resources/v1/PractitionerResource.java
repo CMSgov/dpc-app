@@ -11,7 +11,6 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -51,9 +50,9 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "<p>If a provider NPI is given, the results are filtered accordingly. " +
             "Otherwise, the method returns all Practitioners associated to the given Organization")
     public Bundle practitionerSearch(@ApiParam(hidden = true)
-                                   @Auth OrganizationPrincipal organization,
+                                     @Auth OrganizationPrincipal organization,
                                      @ApiParam(value = "Provider NPI")
-                                   @QueryParam(value = Practitioner.SP_IDENTIFIER) String providerNPI) {
+                                     @QueryParam(value = Practitioner.SP_IDENTIFIER) String providerNPI) {
 
         // Create search params
         Map<String, List<String>> searchParams = new HashMap<>();
@@ -146,7 +145,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Override
     @DELETE
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID")
+    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -167,7 +166,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Override
     @PUT
     @Path("/{providerID}")
-    @PathAuthorizer(type = ResourceType.PractitionerRole, pathParam = "providerID")
+    @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
     @FHIR
     @Timed
     @ExceptionMetered

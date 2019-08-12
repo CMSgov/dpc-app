@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.resources;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import java.util.UUID;
@@ -15,7 +16,7 @@ public abstract class AbstractEndpointResource {
     }
 
     @GET
-    public abstract Bundle searchEndpoints(String organizationID);
+    public abstract Bundle searchEndpoints(@NotNull String organizationID);
 
     @GET
     @Path("/{endpointID}")

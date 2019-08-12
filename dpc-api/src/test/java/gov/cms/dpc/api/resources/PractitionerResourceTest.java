@@ -2,6 +2,8 @@ package gov.cms.dpc.api.resources;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
@@ -12,8 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
@@ -51,14 +52,28 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         // Fetch the provider directly
         final Practitioner foundProvider = (Practitioner) specificSearch.getEntryFirstRep().getResource();
 
-        final Practitioner queriedProvider = client
+        final IReadExecutable<Practitioner> clientQuery = client
                 .read()
                 .resource(Practitioner.class)
                 .withId(foundProvider.getIdElement())
-                .encodedJson()
+                .encodedJson();
+
+        final Practitioner queriedProvider = clientQuery
                 .execute();
 
         assertTrue(foundProvider.equalsDeep(queriedProvider), "Search and GET should be identical");
+
+        // Try to delete the practitioner
+
+        client
+                .delete()
+                .resourceById(queriedProvider.getIdElement())
+                .encodedJson()
+                .execute();
+
+
+        // Try again, should be not found
+        assertThrows(AuthenticationException.class, clientQuery::execute, "Should not have practitioner");
 
         // Create a new org and make sure it has no providers
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, ATTRIBUTION_URL);
