@@ -819,7 +819,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/$submit
                         {
                           "resource": {
                             "type": "Practitioner",
-                            ... Omitted for Brevity...
+                            ... Omitted for Brevity ...
                           }
                         }
                       ]
@@ -969,13 +969,21 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/$submit
 
 ~~~javascript
 {
-  "resourceType": "Bundle",
-  "type": "collection",
-  "entry": [
+  "resourceType": "Parameters",
+  "parameter": [
     {
+      "name": "resource",
       "resource": {
-        "type": "Patient",
-        ... Omitted for Brevity...
+        "resourceType": "Bundle",
+        "type": "collection",
+        "entry": [
+          {
+            "resource": {
+              "type": "Patient",
+              ... Omitted for Brevity ...
+            }
+          }
+        ]
       }
     }
   ]
@@ -1009,11 +1017,11 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group
 
 ~~~ json
 {
-  "resource": {
-    "resourceType": "Group",
-    "type": "person",
-    "actual": true,
-    "characteristic": [{
+  "resourceType": "Group",
+  "type": "person",
+  "actual": true,
+  "characteristic": [
+    {
       "code": {
         "coding": [
           {
@@ -1029,20 +1037,21 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group
           }
         ]
       }
-    }],
-    "member": [
-      {
-        "entity": {
-          "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
-        }
-      },
-      {
-        "entity": {
-          "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
-        }
+    }
+  ],
+  "member": [
+    {
+      "entity": {
+        "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
       }
-    ]
-  }
+    },
+    {
+      "entity": {
+        "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
+      }
+    }
+  ]
+}
 ~~~
 
 The `Group.id` value of the returned resource can be used by the client to initiate an [export job](#exporting-data).
@@ -1061,14 +1070,28 @@ Consider the example Group resource shown below. From the previous example, we k
 	Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874
 
 By submitting a new roster with the information show below, the result with be `Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d` being removed from the roster and `Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1` being added.
-The final state would be the provider having 
+The final state would be the provider having the following patients attributed:
 
 	Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874
 	Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1
-	
-attributed.
 
 ***Add and remove attributed Patients***
+
+~~~sh
+PUT /api/v1/Group/{Group.id}
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
+-H 'Authorization: Bearer {token}' \
+-H 'Accept: application/fhir+json' \
+-X PUT \
+-d @updated_group.json
+~~~
+
+**updated_group.json**
 
 ~~~json
 "resource": {
