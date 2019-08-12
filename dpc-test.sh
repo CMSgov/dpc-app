@@ -31,8 +31,14 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker-compose down
-docker-compose up -d
+docker-compose up -d --scale api=0
 sleep 120
+
+# Run the integration tests
+mvn test -Pintegration-tests -pl dpc-api -am
+
+# Start the API server
+docker-compose up -d
 
 # Run the Postman tests
 node_modules/.bin/newman run src/test/EndToEndRequestTest.postman_collection.json
