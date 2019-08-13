@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.resources.v1;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -27,6 +26,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 public class PractitionerResource extends AbstractPractitionerResource {
 
@@ -108,19 +108,12 @@ public class PractitionerResource extends AbstractPractitionerResource {
     public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
 
         APIHelpers.addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
-        final var test = this.client
+        final var providerCreate = this.client
                 .create()
                 .resource(provider)
                 .encodedJson();
 
-        final MethodOutcome outcome = test.execute();
-
-        if (!outcome.getCreated() || (outcome.getResource() == null)) {
-            throw new WebApplicationException("Unable to submit provider", Response.Status.INTERNAL_SERVER_ERROR);
-        }
-
-        final Practitioner resource = (Practitioner) outcome.getResource();
-        return Response.status(Response.Status.CREATED).entity(resource).build();
+        return handleMethodOutcome(providerCreate.execute());
     }
 
     @POST
