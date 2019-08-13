@@ -135,7 +135,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @PUT
     @Path("/{rosterID}")
-    @PathAuthorizer(type = ResourceType.Patient, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -157,7 +157,7 @@ public class GroupResource extends AbstractGroupResource {
     @DELETE
     @FHIR
     @Path("/{rosterID}")
-    @PathAuthorizer(type = ResourceType.Patient, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete Attribution Roster", notes = "Remove specific Attribution roster")
@@ -187,6 +187,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @GET // Need this here, since we're using a path param
     @Path("/{rosterID}/$export")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @FHIRAsync
