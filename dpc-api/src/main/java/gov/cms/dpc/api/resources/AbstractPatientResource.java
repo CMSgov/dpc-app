@@ -20,7 +20,7 @@ public abstract class AbstractPatientResource {
     public abstract Bundle patientSearch(OrganizationPrincipal organization, String patientMBI);
 
     @POST
-    public abstract Patient submitPatient(OrganizationPrincipal organization, Patient patient);
+    public abstract Response submitPatient(OrganizationPrincipal organization, Patient patient);
     @POST
     @Path("/$submit")
     public abstract Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params);
