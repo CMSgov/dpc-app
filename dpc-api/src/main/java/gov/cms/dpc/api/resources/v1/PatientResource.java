@@ -13,7 +13,6 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
@@ -26,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 @Api(value = "Patient")
 public class PatientResource extends AbstractPatientResource {
@@ -87,7 +87,7 @@ public class PatientResource extends AbstractPatientResource {
     @ExceptionMetered
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @Override
-    public Patient submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, Patient patient) {
+    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, Patient patient) {
 
         // Set the Managing Organization on the Patient
         final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getId()));
@@ -98,11 +98,7 @@ public class PatientResource extends AbstractPatientResource {
                 .encodedJson()
                 .execute();
 
-        if (!outcome.getCreated()) {
-            throw new WebApplicationException("Unable to create Patient", Response.Status.INTERNAL_SERVER_ERROR);
-        }
-
-        return (Patient) outcome.getResource();
+        return handleMethodOutcome(outcome);
     }
 
     @FHIR
