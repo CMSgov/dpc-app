@@ -728,60 +728,42 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
 
 ~~~json
 {
-  "resourceType": "Parameters",
-  "parameter": [
+  "meta": {
+    "profile": [
+      "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+    ],
+    "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
+    "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
+  },
+  "resourceType": "Practitioner",
+  "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
+  "identifier": [
     {
-      "name": "resource",
-      "resource": {
-        "resourceType": "Bundle",
-        "id": "12345",
-        "type": "collection",
-        "entry": [
-          {
-            "resource": {
-              "active": true,
-              "address": [
-                {
-                  "city": "PLYMOUTH",
-                  "country": "US",
-                  "line": [
-                    "275 SANDWICH STREET"
-                  ],
-                  "postalCode": "02360",
-                  "state": "MA"
-                }
-              ],
-              "gender": "male",
-              "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
-              "identifier": [
-                {
-                  "system": "http://hl7.org/fhir/sid/us-npi",
-                  "value": "3116145044854423862"
-                }
-              ],
-              "meta": {
-                "profile": [
-                  "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
-                ],
-                "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
-                "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
-              },
-              "name": [
-                {
-                  "family": "Klocko335",
-                  "given": [
-                    "Leonard963"
-                  ],
-                  "prefix": [
-                    "Dr."
-                  ]
-                }
-              ],
-              "resourceType": "Practitioner"
-            }
-          }
-        ]
-      }
+      "system": "http://hl7.org/fhir/sid/us-npi",
+      "value": "3116145044854423862"
+    }
+  ],
+  "address": [
+    {
+      "city": "PLYMOUTH",
+      "country": "US",
+      "line": [
+        "275 SANDWICH STREET"
+      ],
+      "postalCode": "02360",
+      "state": "MA"
+    }
+  ],
+  "gender": "male",
+  "name": [
+    {
+      "family": "Klocko335",
+      "given": [
+        "Leonard963"
+      ],
+      "prefix": [
+        "Dr."
+      ]
     }
   ]
 }
@@ -852,7 +834,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
--d @provider.json
+-d @patient.json
 ~~~
 
 **patient.json**
