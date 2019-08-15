@@ -1,6 +1,8 @@
 IG_PUBLISHER = ./.bin/org.hl7.fhir.publisher.jar
-JMETER = ./.bin/jmeter/bin/jmeter
 REPORT_COVERAGE ?= false
+
+JMETER = ./.bin/jmeter/bin/jmeter
+SMOKE_THREADS ?= 10
 
 ${IG_PUBLISHER}:
 	-mkdir ./.bin
@@ -30,9 +32,9 @@ website:
 .PHONY: smoke/test
 smoke/test: ${JMETER}
 	@echo "Running Smoke Tests against Test env"
-	@${JMETER} -p src/main/resources/test.properties -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	@${JMETER} -p src/main/resources/test.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
 
 .PHONY: smoke/sbx
 smoke/sbx: ${JMETER}
 	@echo "Running Smoke Tests against Sandbox env"
-	@${JMETER} -p src/main/resources/sbx.properties -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	@${JMETER} -p src/main/resources/sbx.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
