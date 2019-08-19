@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 if [ -n "$REPORT_COVERAGE" ]; then
@@ -17,6 +16,15 @@ else
     echo "└──────────────────────────────────────────┘"
 fi
 
+# Install Code Climate
+if [ -n "$REPORT_COVERAGE" ]; then
+  wget https://codeclimate.com/downloads/test-reporter/test-reporter-0.6.3-linux-amd64 -O ./cc-test-reporter
+  chmod +x ./cc-test-reporter
+  ./cc-test-reporter before-build
+fi
+
+# Build the application
+docker-compose up -d db redis
 mvn clean compile -Perror-prone -B -V
 mvn package -Pci
 
@@ -43,6 +51,7 @@ docker-compose up -d
 sleep 60
 
 # Run the Postman tests
+npm install newman
 node_modules/.bin/newman run src/test/EndToEndRequestTest.postman_collection.json
 
 # Wait for Jacoco to finish writing the output files
