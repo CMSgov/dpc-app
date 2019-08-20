@@ -283,6 +283,9 @@
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <configuration combine.self="append">
                             <dataFile>${project.basedir}/../jacocoReport/${project.artifactId}/jacoco-it.exec</dataFile>
+                            <excludes>
+                                <exclude>gov.cms.dpc.testing.*</exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>

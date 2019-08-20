@@ -37,4 +37,4 @@ smoke/test: ${JMETER}
 .PHONY: smoke/prod-sbx
 smoke/prod-sbx: ${JMETER}
 	@echo "Running Smoke Tests against Sandbox env"
-	@${JMETER} -p src/main/resources/sbx.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	@${JMETER} -p src/main/resources/prod-sbx.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
