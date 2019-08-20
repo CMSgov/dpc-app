@@ -23,20 +23,19 @@ WORKDIR /dpc-web
 # Copy over the files needed to fetch dependencies
 COPY /dpc-web/Gemfile /dpc-web/Gemfile.lock /dpc-web/
 COPY /dpc-web/package.json /dpc-web/package-lock.json /dpc-web/
-COPY --from=java_builder /dpc-app/dpc-web/public/ig /dpc-web/public/ig
 
 # Install the website dependencies
 RUN gem install bundler --no-document && bundle install && npm install
 
-# Copy and build the assets pipeline
+# Copy the code, test the app, and build the assets pipeline
 COPY /dpc-web /dpc-web
+COPY --from=java_builder /dpc-app/dpc-web/public/ig /dpc-web/public/ig
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.c" -delete && \
-    find /usr/local/bundle/gems/ -name "*.o" -delete && \
-    rm -rf tmp/cache spec
+    find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
 FROM ruby:2.6.2-alpine
