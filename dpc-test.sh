@@ -40,15 +40,13 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker-compose down
-docker-compose up -d --scale api=0
-sleep 60
+docker-compose up start_dependencies
 
 # Run the integration tests
 mvn test -Pintegration-tests -pl dpc-api -am
 
 # Start the API server
-docker-compose up -d
-sleep 60
+docker-compose up start_api
 
 # Run the Postman tests
 npm install newman
