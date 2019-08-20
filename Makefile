@@ -16,4 +16,12 @@ travis:
 
 .PHONY: website
 website:
-	@docker build -f dpc-web/Dockerfile .
+	@docker build -f dpc-web/Dockerfile . -t dpc-web
+
+.PHONY: ci-app
+ci-app:
+	@./dpc-test.sh
+
+.PHONY: ci-web
+ci-web:
+	@./dpc-web-test.sh

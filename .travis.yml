@@ -19,9 +19,6 @@ cache:
 before_install:
   - sudo /etc/init.d/postgresql stop
 
-install:
-  - gem install jekyll
-
 script:
-  - ./dpc-test.sh
-  - ./dpc-web-test.sh
+  - make ci-app
+  - make ci-web
