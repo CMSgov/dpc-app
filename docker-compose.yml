@@ -52,7 +52,7 @@ services:
       - JACOCO=${REPORT_COVERAGE}
       - exportPath=/app/data
     depends_on:
-      - start_dependencies
+      - attribution
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
