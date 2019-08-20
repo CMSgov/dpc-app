@@ -100,7 +100,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         try {
             ClientUtils.createAndUploadRosters(javaSamplerContext.getParameter("seed-file"), exportClient, UUID.fromString(organizationID), patientReferences);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Cannot upload roster", e);
         }
 
         // Run the job
