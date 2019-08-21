@@ -13,6 +13,7 @@
         <module>dpc-common</module>
         <module>dpc-bluebutton</module>
         <module>dpc-macaroons</module>
+        <module>dpc-smoketest</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>
@@ -490,6 +491,8 @@
                         <exclude>gov/cms/dpc/**/cli/**/*</exclude>
                         <!-- Exclude HL7 parsers, because they're too big-->
                         <exclude>org/hl7/fhir/r4/formats/*</exclude>
+                        <!-- We can exclude testing files, because they're for testing-->
+                        <exclude>gov/cms/dpc/testing/**/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
