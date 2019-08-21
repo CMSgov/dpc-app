@@ -1,10 +1,13 @@
 package gov.cms.dpc.macaroons;
 
+import com.codahale.xsalsa20poly1305.SecretBox;
 import com.github.nitram509.jmacaroons.*;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import gov.cms.dpc.macaroons.helpers.VarInt;
 import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -180,6 +183,68 @@ public class MacaroonBakery {
                     }
                     builder.add_first_party_caveat(caveat.toString());
                 });
+    }
+
+    /**
+     * Encodes a third-party caveat using the public key of the
+     *
+     * @param caveat
+     * @return
+     */
+    private byte[] encodeThirdPartyCaveat(MacaroonCaveat caveat) {
+
+        // Create the caveat header
+//        final ByteBuffer fullMessage = ByteBuffer.allocate(1
+//                + 4
+//                + MacaroonsConstants.MACAROON_SECRET_KEY_BYTES
+//                + MacaroonsConstants.MACAROON_SECRET_NONCE_BYTES
+//                + sealed.length);
+//
+//        fullMessage.put((byte) 2);
+        return null;
+//        fullMessage.put(Arrays.copyOfRange(thirdPartyKeyBytes, 0, 4));
+
+    }
+
+    /**
+     * Encodes the caveat value using a {@link SecretBox} using the provided third-party public key and first-party private key.
+     * <p>
+     * The box format is:
+     * version (1 byte)
+     * varint encoded root key length
+     * root key
+     * caveat string
+     *
+     * @param thirdPartyKey - {@link byte[]} third-party public key to use
+     * @param privateKey    - {@link byte[]} first-party private key to use
+     * @param nonce         - {@link byte[]}
+     * @param rootKey       - {@link String} root key use to validate caveat
+     * @param caveat        - {@link String} caveat value
+     * @return - {@link byte[]} encrypted message via {@link SecretBox#seal(byte[], byte[])}
+     */
+    static byte[] encodeSecretPart(byte[] thirdPartyKey, byte[] privateKey, byte[] nonce, String rootKey, String caveat) {
+        // Convert the rootKey to bytes (preserving encoding)
+        final byte[] keyBytes = rootKey.getBytes(MacaroonsConstants.RAW_BYTE_CHARSET);
+        final byte[] messageBytes = caveat.getBytes(StandardCharsets.UTF_8);
+
+        // Root key length as a varint
+        final byte[] keyLengthBytes = VarInt.writeUnsignedVarInt(keyBytes.length);
+
+        // Allocate a byte buffer that is the size of the version (1 byte), the varint length of rootKey, rootKey and message
+        final ByteBuffer msgBuffer = ByteBuffer.allocate(1
+                + keyLengthBytes.length
+                + keyBytes.length
+                + messageBytes.length);
+
+        msgBuffer.put((byte) 2);
+        msgBuffer.put(keyLengthBytes);
+        msgBuffer.put(keyBytes);
+        msgBuffer.put(messageBytes);
+        // Reset the buffer pointer
+        msgBuffer.flip();
+
+        final SecretBox secretBox = new SecretBox(thirdPartyKey, privateKey);
+        return secretBox.seal(nonce, msgBuffer.array());
     }
 
     private void verifyMacaroonImpl(Macaroon macaroon, List<CaveatWrapper> verifiers) {

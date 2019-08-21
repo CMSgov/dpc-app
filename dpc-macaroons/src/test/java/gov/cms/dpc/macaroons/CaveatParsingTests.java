@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MacaroonCaveatTests {
+class CaveatParsingTests {
 
     @Test
     void testSimpleCaveatParsing() {
