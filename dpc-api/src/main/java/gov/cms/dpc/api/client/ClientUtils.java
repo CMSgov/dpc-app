@@ -2,15 +2,19 @@ package gov.cms.dpc.api.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -22,13 +26,12 @@ import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
@@ -171,6 +174,133 @@ public class ClientUtils {
 
                 return tempFile;
             }
+        }
+    }
+
+    public static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, String token) throws IOException, InterruptedException {
+        System.out.println("Retrying export request");
+        String exportURL = "";
+
+        try {
+            exportOperation.execute();
+        } catch (NonFhirResponseException e) {
+            if (e.getStatusCode() != HttpStatus.NO_CONTENT_204) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+
+            // Get the correct header
+            final Map<String, List<String>> headers = e.getResponseHeaders();
+
+            // Get the headers and check the status
+            exportURL = headers.get("content-location").get(0);
+            System.out.printf("Export job started. Progress URL: %s%n", exportURL);
+        }
+
+        // Poll the job until it's done
+        return awaitExportResponse(exportURL, "Checking job status", token);
+    }
+
+    public static void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String token) {
+        providerNPIs
+                .stream()
+                .map(npi -> exportClient
+                        .search()
+                        .forResource(Group.class)
+                        .where(Group.CHARACTERISTIC_VALUE
+                                .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
+                                .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), npi)))
+                        .returnBundle(Bundle.class)
+                        .encodedJson()
+                        .execute())
+                .map(search -> (Group) search.getEntryFirstRep().getResource())
+                .map(group -> {
+                    final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
+                    try {
+                        return monitorExportRequest(exportOperation, token);
+                    } catch (IOException | InterruptedException e) {
+                        throw new RuntimeException("Error monitoring export", e);
+                    }
+                })
+                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
+                    System.out.println(entry.getUrl());
+                    try {
+                        final File file = fetchExportedFiles(entry.getUrl(), token);
+                        System.out.println(String.format("Downloaded file to: %s", file.getPath()));
+                    } catch (IOException e) {
+                        throw new RuntimeException("Cannot output file", e);
+                    }
+                }));
+    }
+
+    public static <T extends BaseResource> Bundle bundleSubmitter(Class<?> baseClass, Class<T> clazz, String filename, IParser parser, IGenericClient client) throws IOException {
+
+        try (InputStream resource = baseClass.getClassLoader().getResourceAsStream(filename)) {
+            final Bundle bundle = parser.parseResource(Bundle.class, resource);
+
+            final Parameters parameters = new Parameters();
+            parameters.addParameter().setResource(bundle);
+
+            return client
+                    .operation()
+                    .onType(clazz)
+                    .named("submit")
+                    .withParameters(parameters)
+                    .returnResourceType(Bundle.class)
+                    .encodedJson()
+                    .execute();
+        }
+    }
+
+    public static Map<String, Reference> submitPatients(Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+        final Bundle patientBundle;
+
+        try {
+            System.out.println("Submitting patients");
+            patientBundle = bundleSubmitter(baseClass, Patient.class, "patient_bundle.json", ctx.newJsonParser(), exportClient);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot submit patients.", e);
+        }
+
+        final Map<String, Reference> patientReferences = new HashMap<>();
+        patientBundle
+                .getEntry()
+                .stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(resource -> (Patient) resource)
+                .forEach(patient -> {
+                    patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId()));
+                });
+
+        return patientReferences;
+    }
+
+    public static List<String> submitPractitioners(Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+        final Bundle providerBundle;
+
+        try {
+            System.out.println("Submitting practitioners");
+            providerBundle = bundleSubmitter(baseClass, Practitioner.class, "provider_bundle.json", ctx.newJsonParser(), exportClient);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot submit providers.", e);
+        }
+
+        // Get the provider NPIs
+        return providerBundle
+                .getEntry()
+                .stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(resource -> (Practitioner) resource)
+                .map(FHIRExtractors::getProviderNPI)
+                .collect(Collectors.toList());
+    }
+
+    public static void createAndUploadRosters(String seedsFile, IGenericClient client, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
+        // Read the provider bundle from the given file
+        try (InputStream resource = new FileInputStream(new File(seedsFile))) {
+            // Now, submit the bundle
+            System.out.println("Uploading Patient roster");
+            createRosterSubmission(client, resource, organizationID, patientReferences);
         }
     }
 }
