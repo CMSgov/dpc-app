@@ -40,6 +40,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker-compose down
+docker-compose up start_core_dependencies
 docker-compose up start_api_dependencies
 
 # Run the integration tests
