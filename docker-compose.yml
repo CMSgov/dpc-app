@@ -60,15 +60,21 @@ services:
   start_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:
+      - redis
+      - db
       - attribution
       - aggregation
-    command: attribution:8080 aggregation:9900
+    command: redis:6379 db:5432 attribution:8080 aggregation:9900
 
   start_api:
     image: dadarek/wait-for-dependencies
     depends_on:
+      - redis
+      - db
+      - attribution
+      - aggregation
       - api
-    command: api:3002
+    command: redis:6379 db:5432 attribution:8080 aggregation:9900 api:3002
 
 volumes:
   export-volume:
