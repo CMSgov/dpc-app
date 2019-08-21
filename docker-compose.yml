@@ -56,6 +56,20 @@ services:
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
+
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - attribution
+      - aggregation
+    command: attribution:8080 aggregation:9900
+
+  start_api:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - api
+    command: api:3002
+
 volumes:
   export-volume:
     driver: local
