@@ -57,24 +57,25 @@ services:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
 
-  start_dependencies:
+  start_core_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:
       - redis
       - db
+    command: redis:6379 db:5432
+
+  start_api_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
       - attribution
       - aggregation
-    command: redis:6379 db:5432 attribution:8080 aggregation:9900
+    command: attribution:8080 aggregation:9900
 
   start_api:
     image: dadarek/wait-for-dependencies
     depends_on:
-      - redis
-      - db
-      - attribution
-      - aggregation
       - api
-    command: redis:6379 db:5432 attribution:8080 aggregation:9900 api:3002
+    command: api:3002
 
 volumes:
   export-volume:
