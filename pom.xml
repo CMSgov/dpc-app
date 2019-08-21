@@ -492,7 +492,7 @@
                         <!-- Exclude HL7 parsers, because they're too big-->
                         <exclude>org/hl7/fhir/r4/formats/*</exclude>
                         <!-- We can exclude testing files, because they're for testing-->
-                        <exclude>gov.cms.dpc.testing.*</exclude>
+                        <exclude>gov/cms/dpc/testing/**/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
