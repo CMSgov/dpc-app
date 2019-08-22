@@ -1,35 +1,74 @@
 package gov.cms.dpc.macaroons;
 
-import com.codahale.xsalsa20poly1305.SecretBox;
+import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.whispersystems.curve25519.Curve25519;
-import org.whispersystems.curve25519.Curve25519KeyPair;
 
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ThirdPartyCaveatTests {
 
+    @BeforeAll
+    static void setup() {
+//        final KeyPair firstPartyKey = BakeryKeyFactory.generateKeyPair();
+//
+//        // Add some third party keys
+//        final KeyPair aliceKeys = BakeryKeyFactory.generateKeyPair();
+//        final KeyPair bobKeys = BakeryKeyFactory.generateKeyPair();
+//
+//        thirdKeyStore.setPublicKey("http://alice", aliceKeys.getPublic());
+//        thirdKeyStore.setPublicKey("http://bob", bobKeys.getPublic());
+
+
+    }
+
+    /**
+     * TestMacaroonPaperFig6 implements an example flow as described in the macaroons paper:
+     * http://theory.stanford.edu/~ataly/Papers/macaroons.pdf
+     * There are three services, ts, fs, as:
+     * ts is a store service which has deligated authority to a forum service fs.
+     * The forum service wants to require its users to be logged into to an authentication service as.
+     * <p>
+     * The client obtains a macaroon from fs (minted by ts, with a third party caveat addressed to as).
+     * The client obtains a discharge macaroon from as to satisfy this caveat.
+     * The target service verifies the original macaroon it delegated to fs
+     * No direct contact between as and ts is required
+     */
     @Test
-    void testSecretPartRoundTrip() {
-        // Create a test key pairs for first party and third party
-        final Curve25519 instance = Curve25519.getInstance(Curve25519.BEST);
+    void testThirdPartyRoundTrip() {
+        final MemoryThirdPartyKeyStore thirdKeyStore = new MemoryThirdPartyKeyStore();
+        final MacaroonBakery as = createBakery("as-loc", thirdKeyStore);
+        final MacaroonBakery ts = createBakery("ts-loc", thirdKeyStore);
+        final MacaroonBakery fs = createBakery("fs-loc", thirdKeyStore);
 
-        final Curve25519KeyPair thirdParty = instance.generateKeyPair();
-        final Curve25519KeyPair firstParty = instance.generateKeyPair();
+        // TS Creates a macaroon
+        final Macaroon tsMacaroon = ts.createMacaroon(Collections.emptyList());
 
-        final String testMessage = "This is a test message";
-        final String testKey = "this is a test key";
+        // TS sends the Macaroon to fs which adds a third party caveat to be discharged
+        final Macaroon m1 = fs.addCaveats(tsMacaroon, new MacaroonCaveat("as-loc", "user", MacaroonCaveat.Operator.EQ, "bob"));
+        assertEquals(1, ts.getCaveats(m1).size(), "Should have a single caveat");
 
-        final SecureRandom random = new SecureRandom();
+        final List<Macaroon> discharged = ts.dischargeAll(Collections.singletonList(m1), (caveat, value) -> {
+            assertEquals("as-loc", caveat.getLocation(), "Should have third-party caveats");
+            return as.discharge(caveat, value);
+        });
+        assertTrue(discharged.size() > 1, "Should have more than 1 macaroon");
+    }
 
-        final byte[] testNonce = new byte[24];
-        random.nextBytes(testNonce);
-        final byte[] sealed = MacaroonBakery.encodeSecretPart(thirdParty.getPublicKey(), firstParty.getPrivateKey(), testNonce, testKey, testMessage);
 
-        final SecretBox box = new SecretBox(firstParty.getPublicKey(), thirdParty.getPrivateKey());
-        final byte[] openedBytes = box.open(testNonce, sealed).orElseThrow(() -> new RuntimeException("Cannot open box"));
-        assertTrue(new String(openedBytes).endsWith(testMessage), "Should have the same message at the end");
+    private static MacaroonBakery createBakery(String location, IThirdPartyKeyStore thirdPartyKeyStore) {
+
+        final MemoryRootKeyStore keyStore = new MemoryRootKeyStore(new SecureRandom());
+
+        return new MacaroonBakery.MacaroonBakeryBuilder(location, keyStore, thirdPartyKeyStore)
+                .build();
     }
 }

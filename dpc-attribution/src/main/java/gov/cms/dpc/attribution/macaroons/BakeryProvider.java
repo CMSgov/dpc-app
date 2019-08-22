@@ -27,7 +27,7 @@ public class BakeryProvider implements Provider<MacaroonBakery> {
     @Override
     public MacaroonBakery get() {
         final TokenPolicy tokenPolicy = this.configuration.getTokenPolicy();
-        return new MacaroonBakery.MacaroonBakeryBuilder(configuration.getPublicServerURL(), store)
+        return new MacaroonBakery.MacaroonBakeryBuilder(configuration.getPublicServerURL(), store, null)
                 .addDefaultCaveatSupplier(new VersionCaveatSupplier(tokenPolicy))
                 .addDefaultCaveatSupplier(new ExpirationCaveatSupplier(tokenPolicy))
                 .addDefaultVerifier(new VersionCaveatVerifier(tokenPolicy))

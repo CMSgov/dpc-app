@@ -2,11 +2,14 @@ package gov.cms.dpc.macaroons;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import gov.cms.dpc.macaroons.helpers.BakeryKeyFactory;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
@@ -17,11 +20,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class
 BakeryTest {
 
+    private static final MemoryThirdPartyKeyStore thirdParty = new MemoryThirdPartyKeyStore();
+    private static final KeyPair bakeryKey = BakeryKeyFactory.generateKeyPair();
     private static MacaroonBakery bakery;
 
     @BeforeAll
     static void setup() {
-        bakery = new MacaroonBakery("http://localhost", new MemoryRootKeyStore(new SecureRandom()), Collections.emptyList(), Collections.emptyList());
+        bakery = new MacaroonBakery("http://localhost",
+                new MemoryRootKeyStore(new SecureRandom()),
+                thirdParty,
+                bakeryKey,
+                Collections.emptyList(),
+                Collections.emptyList());
     }
 
     @Test
@@ -46,13 +56,14 @@ BakeryTest {
     }
 
     @Test
-    void testThirdPartyCaveat() {
-        assertThrows(UnsupportedOperationException.class, () ->
-                bakery
-                        .createMacaroon(Collections.singletonList(
-                                new MacaroonCaveat("http://test.local",
-                                        "test_third_id", MacaroonCaveat.Operator.NEQ,
-                                        "wrong value"))));
+    void testLocalThirdPartyCaveat() {
+        final Macaroon macaroon = bakery
+                .createMacaroon(Collections.singletonList(
+                        new MacaroonCaveat("http://localhost",
+                                "test_third_id", MacaroonCaveat.Operator.NEQ,
+                                "wrong value")));
+
+                bakery.verifyMacaroon(macaroon);
     }
 
     private static void macaroonSerializationTest(boolean base64) {
@@ -75,7 +86,7 @@ BakeryTest {
             }
             return Optional.of("Caveat is not satisfied");
         };
-        final MacaroonBakery caveatBakery = new MacaroonBakery.MacaroonBakeryBuilder("http://test.local", new MemoryRootKeyStore(new SecureRandom()))
+        final MacaroonBakery caveatBakery = new MacaroonBakery.MacaroonBakeryBuilder("http://test.local", new MemoryRootKeyStore(new SecureRandom()), thirdParty)
                 .addDefaultVerifier(verifier)
                 .build();
 
@@ -110,7 +121,7 @@ BakeryTest {
             return Optional.empty();
         };
 
-        final MacaroonBakery caveatBakery = new MacaroonBakery.MacaroonBakeryBuilder("http://test.local", new MemoryRootKeyStore(new SecureRandom()))
+        final MacaroonBakery caveatBakery = new MacaroonBakery.MacaroonBakeryBuilder("http://test.local", new MemoryRootKeyStore(new SecureRandom()), thirdParty)
                 .addDefaultCaveatSupplier(testSupplier)
                 .addDefaultVerifier(testVerifier)
                 .build();

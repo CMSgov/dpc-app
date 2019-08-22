@@ -3,14 +3,27 @@ package gov.cms.dpc.macaroons;
 import com.codahale.xsalsa20poly1305.SecretBox;
 import com.github.nitram509.jmacaroons.*;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import gov.cms.dpc.macaroons.helpers.BakeryKeyFactory;
+import gov.cms.dpc.macaroons.helpers.ByteBufferBackedInputStream;
 import gov.cms.dpc.macaroons.helpers.VarInt;
 import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
+import org.apache.commons.lang3.tuple.Pair;
+import org.whispersystems.curve25519.Curve25519;
+import org.whispersystems.curve25519.java.curve_sigs;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.interfaces.ECPrivateKey;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -27,10 +40,17 @@ public class MacaroonBakery {
 
     private final String location;
     private final IRootKeyStore store;
+    private final KeyPair keypair;
     private final List<CaveatWrapper> defaultVerifiers;
     private final List<CaveatSupplier> defaultSuppliers;
+    private final IThirdPartyKeyStore thirdPartyKeyStore;
 
-    MacaroonBakery(String location, IRootKeyStore store, List<CaveatVerifier> defaultVerifiers, List<CaveatSupplier> defaultSuppliers) {
+    MacaroonBakery(String location,
+                   IRootKeyStore store,
+                   IThirdPartyKeyStore thirdPartyKeyStore,
+                   KeyPair keyPair,
+                   List<CaveatVerifier> defaultVerifiers,
+                   List<CaveatSupplier> defaultSuppliers) {
         this.location = location;
         this.store = store;
         this.defaultVerifiers = defaultVerifiers
@@ -38,6 +58,12 @@ public class MacaroonBakery {
                 .map(CaveatWrapper::new)
                 .collect(Collectors.toList());
         this.defaultSuppliers = defaultSuppliers;
+        this.thirdPartyKeyStore = thirdPartyKeyStore;
+        this.keypair = keyPair;
+
+        // Add the current location and the custom `local` location to the TP key store
+        this.thirdPartyKeyStore.setPublicKey(location, this.keypair.getPublic());
+        this.thirdPartyKeyStore.setPublicKey("local", this.keypair.getPublic());
     }
 
     /**
@@ -74,9 +100,31 @@ public class MacaroonBakery {
      * @throws BakeryException if unable to parse the caveats correctly
      */
     public List<MacaroonCaveat> getCaveats(Macaroon macaroon) {
-        return Arrays.stream(macaroon.caveatPackets)
-                .map(MacaroonCaveat::parseFromPacket)
-                .collect(Collectors.toList());
+        List<MacaroonCaveat> caveats = new ArrayList<>();
+
+        MacaroonCaveat currentCaveat = new MacaroonCaveat();
+
+        for (final CaveatPacket packet : macaroon.caveatPackets) {
+            // If we've encountered a CID, add the current caveat to our list and start a new one
+            if (packet.type == CaveatPacket.Type.cid) {
+                if (currentCaveat.getRawCaveat() != null) {
+                    caveats.add(currentCaveat);
+                    currentCaveat = new MacaroonCaveat();
+                }
+
+                currentCaveat.setRawCaveat(packet.getRawValue());
+            } else if (packet.type == CaveatPacket.Type.cl) {
+                currentCaveat.setLocation(packet.getValueAsText());
+            } else {
+                currentCaveat.setVerificationID(packet.getRawValue());
+            }
+        }
+
+        if (currentCaveat.getRawCaveat() != null) {
+            caveats.add(currentCaveat);
+        }
+
+        return caveats;
     }
 
     /**
@@ -88,6 +136,9 @@ public class MacaroonBakery {
      * @return - {@link Macaroon} new macaroon with existing caveats as well as newly added ones
      */
     public Macaroon addCaveats(Macaroon macaroon, MacaroonCaveat... caveats) {
+
+        // Get the root key for the Macaroon
+        final String rootKey = this.store.get(macaroon.identifier);
         final MacaroonsBuilder builder = MacaroonsBuilder.modify(macaroon);
         addCaveats(builder, Arrays.asList(caveats));
 
@@ -174,14 +225,64 @@ public class MacaroonBakery {
         return MacaroonsBuilder.deserialize(new String(decodedString, StandardCharsets.UTF_8));
     }
 
+    public List<Macaroon> dischargeAll(List<Macaroon> macaroons, MacaroonDischarger discharger) {
+        if (macaroons.isEmpty()) {
+            throw new BakeryException("No macaroons to discharge");
+        }
+
+        List<Macaroon> discharged = new ArrayList<>();
+        discharged.addAll(macaroons);
+
+        Queue<MacaroonCaveat> needCaveat = new ArrayDeque<>();
+        Map<String, Boolean> haveCaveat = new HashMap<>();
+        macaroons.subList(1, macaroons.size())
+                .forEach(macaroon -> {
+                    haveCaveat.put(macaroon.identifier, true);
+                });
+
+
+        // addCaveats adds any required third party caveats to the need slice
+        // that aren't already present .
+        Consumer<Macaroon> addCaveats = (macaroon) -> {
+            this.getCaveats(macaroon)
+                    .stream()
+                    .filter(cav -> cav.getVerificationID().length > 0 || !haveCaveat.containsKey(cav.toString()))
+                    .forEach(needCaveat::add);
+        };
+
+        macaroons.forEach(addCaveats);
+
+        // Pop each caveat off the queue and process it
+        while (!needCaveat.isEmpty()) {
+            final MacaroonCaveat cav = needCaveat.poll();
+            final Macaroon dm = discharger.getDischarge(cav, cav.getVerificationID());
+            discharged.add(dm);
+            addCaveats.accept(dm);
+        }
+
+        return discharged;
+    }
+
+    public Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
+        final Pair<String, MacaroonCaveat> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
+
+        // Create a discharge macaroon
+        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), new String(stringMacaroonCaveatPair.getRight().getRawCaveat()));
+    }
+
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {
+
+        final String rootKey = this.store.get(builder.getMacaroon().identifier);
+
         caveats
                 .forEach(caveat -> {
-                    // TODO: Eventually we'll need to support third-party caveats
                     if (caveat.isThirdParty()) {
-                        throw new UnsupportedOperationException("We do not currently support third-party caveats");
+                        final byte[] encryptedCaveat = encodeThirdPartyCaveat(caveat, rootKey);
+                        builder.add_third_party_caveat(caveat.getLocation(), rootKey, encryptedCaveat);
+
+                    } else {
+                        builder.add_first_party_caveat(caveat.toString());
                     }
-                    builder.add_first_party_caveat(caveat.toString());
                 });
     }
 
@@ -191,19 +292,42 @@ public class MacaroonBakery {
      * @param caveat
      * @return
      */
-    private byte[] encodeThirdPartyCaveat(MacaroonCaveat caveat) {
+    private byte[] encodeThirdPartyCaveat(MacaroonCaveat caveat, String rootKey) {
 
-        // Create the caveat header
-//        final ByteBuffer fullMessage = ByteBuffer.allocate(1
-//                + 4
-//                + MacaroonsConstants.MACAROON_SECRET_KEY_BYTES
-//                + MacaroonsConstants.MACAROON_SECRET_NONCE_BYTES
-//                + sealed.length);
-//
-//        fullMessage.put((byte) 2);
-        return null;
-//        fullMessage.put(Arrays.copyOfRange(thirdPartyKeyBytes, 0, 4));
+        final SecureRandom random = new SecureRandom();
 
+        final byte[] nonce = new byte[MacaroonsConstants.MACAROON_SECRET_NONCE_BYTES];
+        random.nextBytes(nonce);
+
+        final PublicKey publicKey = this.thirdPartyKeyStore.getPublicKey(caveat.getLocation())
+                .orElseThrow(() -> new BakeryException(String.format("Cannot find public key for %s", caveat.getLocation())));
+
+        final byte[] thirdPartyKeyBytes = publicKey.getEncoded();
+        final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keypair);
+        final byte[] publicKeyBytes = BakeryKeyFactory.unwrapPublicKeyBytes(privateKeyBytes);
+
+        final byte[] secretPart = encodeSecretPart(thirdPartyKeyBytes,
+                privateKeyBytes,
+                nonce,
+                rootKey,
+                caveat.toString());
+
+//         Create the caveat header
+        final ByteBuffer fullMessage = ByteBuffer.allocate(1
+                + 4
+                + MacaroonsConstants.MACAROON_SECRET_KEY_BYTES
+                + MacaroonsConstants.MACAROON_SECRET_NONCE_BYTES
+                + secretPart.length);
+
+        fullMessage.put((byte) 2);
+        fullMessage.put(Arrays.copyOfRange(thirdPartyKeyBytes, 0, 4));
+        fullMessage.put(publicKeyBytes);
+        fullMessage.put(nonce);
+        fullMessage.put(secretPart);
+        // Reset the buffer pointer
+        fullMessage.flip();
+
+        return fullMessage.array();
     }
 
     /**
@@ -225,7 +349,7 @@ public class MacaroonBakery {
     static byte[] encodeSecretPart(byte[] thirdPartyKey, byte[] privateKey, byte[] nonce, String rootKey, String caveat) {
         // Convert the rootKey to bytes (preserving encoding)
         final byte[] keyBytes = rootKey.getBytes(MacaroonsConstants.RAW_BYTE_CHARSET);
-        final byte[] messageBytes = caveat.getBytes(StandardCharsets.UTF_8);
+        final byte[] messageBytes = caveat.getBytes(CAVEAT_CHARSET);
 
         // Root key length as a varint
         final byte[] keyLengthBytes = VarInt.writeUnsignedVarInt(keyBytes.length);
@@ -245,6 +369,60 @@ public class MacaroonBakery {
 
         final SecretBox secretBox = new SecretBox(thirdPartyKey, privateKey);
         return secretBox.seal(nonce, msgBuffer.array());
+    }
+
+    private Pair<String, MacaroonCaveat> decodeCaveat(byte[] encryptedCaveat) {
+        final ByteBuffer byteBuffer = ByteBuffer.wrap(encryptedCaveat);
+        // Advance by one to skip the version
+        byteBuffer.get();
+
+        // Get the first 4 bytes of the caveat public key
+        byte[] caveatKeySignature = new byte[4];
+        byteBuffer.get(caveatKeySignature);
+
+        byte[] pubKeySig = Arrays.copyOfRange(this.keypair.getPublic().getEncoded(), 0, 4);
+        if (!Arrays.equals(caveatKeySignature, pubKeySig)) {
+            throw new BakeryException("Public key mismatch");
+        }
+
+        // Get the first party public key
+        byte[] firstPartyPublicKey = new byte[MacaroonsConstants.MACAROON_SECRET_KEY_BYTES];
+        byte[] nonce = new byte[MacaroonsConstants.MACAROON_SECRET_NONCE_BYTES];
+        byteBuffer.get(firstPartyPublicKey);
+        byteBuffer.get(nonce);
+
+
+        // Decrypt the secret part
+        final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keypair);
+
+        final SecretBox box = new SecretBox(firstPartyPublicKey, privateKeyBytes);
+
+        final byte[] msg = new byte[byteBuffer.remaining()];
+        byteBuffer.get(msg);
+        final byte[] secretPart = box.open(nonce, msg)
+                .orElseThrow(() -> new BakeryException("Cannot decrypt secret part of caveat"));
+
+        final Pair<String, MacaroonCaveat> caveatPair = decodeCaveatSecretPart(secretPart);
+
+        return caveatPair;
+    }
+
+    private static Pair<String, MacaroonCaveat> decodeCaveatSecretPart(byte[] secretPart) {
+        final ByteBuffer buffer = ByteBuffer.wrap(secretPart);
+        // Advance because we already know the version
+        buffer.get();
+        final int rootKeyLength;
+        try {
+            rootKeyLength = VarInt.readUnsignedVarInt(new DataInputStream(new ByteBufferBackedInputStream(buffer)));
+        } catch (IOException e) {
+            throw new BakeryException("Cannot read root key lenth", e);
+        }
+
+        final byte[] rootKey = new byte[rootKeyLength];
+        buffer.get(rootKey);
+        final MacaroonCaveat caveat = MacaroonCaveat.parseFromString(new String(buffer.array(), MacaroonsConstants.IDENTIFIER_CHARSET));
+
+        return Pair.of(new String(rootKey, MacaroonsConstants.IDENTIFIER_CHARSET), caveat);
     }
 
     private void verifyMacaroonImpl(Macaroon macaroon, List<CaveatWrapper> verifiers) {
@@ -270,8 +448,10 @@ public class MacaroonBakery {
 
         private final String serverLocation;
         private final IRootKeyStore rootKeyStore;
+        private final IThirdPartyKeyStore thirdPartyKeyStore;
         private final List<CaveatVerifier> caveatVerifiers;
         private final List<CaveatSupplier> caveatSuppliers;
+        private KeyPair keyPair;
 
         /**
          * Default parameters for {@link MacaroonBakery}
@@ -279,11 +459,13 @@ public class MacaroonBakery {
          * @param serverLocation - {@link String} Server URL to use when creating {@link Macaroon}
          * @param keyStore       - {@link IRootKeyStore} to use for handling {@link Macaroon} secret keys
          */
-        public MacaroonBakeryBuilder(String serverLocation, IRootKeyStore keyStore) {
+        public MacaroonBakeryBuilder(String serverLocation, IRootKeyStore keyStore, IThirdPartyKeyStore thirdPartyKeyStore) {
             this.serverLocation = serverLocation;
             this.rootKeyStore = keyStore;
+            this.thirdPartyKeyStore = thirdPartyKeyStore;
             this.caveatVerifiers = new ArrayList<>();
             this.caveatSuppliers = new ArrayList<>();
+            this.keyPair = null;
         }
 
         /**
@@ -309,16 +491,33 @@ public class MacaroonBakery {
             return this;
         }
 
+        public MacaroonBakeryBuilder withKeyPair(KeyPair keyPair) {
+            this.keyPair = keyPair;
+            return this;
+        }
+
         /**
          * Build the {@link MacaroonBakery}
          *
          * @return - {@link MacaroonBakery}
          */
         public MacaroonBakery build() {
+
+            final KeyPair keys = getKeyPair();
+
             return new MacaroonBakery(this.serverLocation,
                     this.rootKeyStore,
+                    this.thirdPartyKeyStore,
+                    keys,
                     this.caveatVerifiers,
                     this.caveatSuppliers);
+        }
+
+        private KeyPair getKeyPair() {
+            if (this.keyPair != null) {
+                return this.keyPair;
+            }
+            return BakeryKeyFactory.generateKeyPair();
         }
     }
 }

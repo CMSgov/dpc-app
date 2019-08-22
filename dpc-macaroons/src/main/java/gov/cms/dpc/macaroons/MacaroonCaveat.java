@@ -66,10 +66,15 @@ public class MacaroonCaveat {
 
     }
 
-    private final String location;
-    private final String key;
-    private final String value;
-    private final Operator op;
+    private String location;
+    private String key;
+    private String value;
+    private Operator op;
+    private byte[] rawCaveat;
+    private byte[] verificationID;
+
+    public MacaroonCaveat() {
+    }
 
     /**
      * Create a first-party caveat (e.g. one that does not have a location)
@@ -83,6 +88,8 @@ public class MacaroonCaveat {
         this.key = key;
         this.op = op;
         this.value = value;
+        this.verificationID = null;
+        this.rawCaveat = null;
     }
 
     /**
@@ -98,7 +105,13 @@ public class MacaroonCaveat {
         this.key = key;
         this.op = op;
         this.value = value;
+        this.verificationID = null;
+        this.rawCaveat = null;
 
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String getLocation() {
@@ -130,6 +143,28 @@ public class MacaroonCaveat {
      */
     public String getValue() {
         return value;
+    }
+
+    public byte[] getRawCaveat() {
+        return rawCaveat;
+    }
+
+    public void setRawCaveat(byte[] rawCaveat) {
+        this.rawCaveat = rawCaveat;
+    }
+
+    public void setVerificationID(byte[] verificationID) {
+        this.verificationID = verificationID;
+    }
+
+    /**
+     * Get the verification ID from the caveat.
+     * This is only for third-party caveats, so {@link this#isThirdParty()} must be true.
+     *
+     * @return - {@link byte[]} of verification ID
+     */
+    public byte[] getVerificationID() {
+        return verificationID;
     }
 
     /**
