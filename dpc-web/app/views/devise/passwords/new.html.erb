@@ -9,12 +9,12 @@
         <%= render "devise/shared/error_messages", resource: resource %>
 
         <div class="field">
-          <%= f.label :email, :class => "ds-c-label" %>
-          <%= f.email_field :email, autocomplete: "email", :class => "ds-c-field" %>
+          <%= f.label :email, class: "ds-c-label" %>
+          <%= f.email_field :email, autocomplete: "email", class: "ds-c-field" %>
         </div>
 
         <div class="actions ds-u-margin-top--3">
-          <%= f.submit "Send password reset instructions", :class => "ds-c-button ds-c-button--primary" %>
+          <%= f.submit "Send password reset instructions", class: "ds-c-button ds-c-button--primary", data: {test: "submit"} %>
         </div>
       <% end %>
 
