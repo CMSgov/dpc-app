@@ -24,7 +24,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 # Build the application
-docker-compose up -d db redis
+docker-compose up start_core_dependencies
 mvn clean compile -Perror-prone -B -V
 mvn package -Pci
 
@@ -40,7 +40,8 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker-compose down
-docker-compose up start_dependencies
+docker-compose up start_core_dependencies
+docker-compose up start_api_dependencies
 
 # Run the integration tests
 mvn test -Pintegration-tests -pl dpc-api -am
