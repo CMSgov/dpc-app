@@ -244,7 +244,7 @@
 
         <dropColumn tableName="ORGANIZATIONS" columnName="token_ids"/>
     </changeSet>
-    
+
     <changeSet id="add-roster-constraints" author="nickrobison-usds">
         <addUniqueConstraint tableName="ATTRIBUTIONS" columnNames="provider_id, patient_id"/>
     </changeSet>
@@ -365,9 +365,12 @@
 
     <changeSet id="add-entity-timestamps" author="nickrobison-usds">
         <addColumn tableName="PROVIDERS">
-            <column name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="created_at"
+                    type="TIMESTAMP WITH TIME ZONE"
+                    defaultValueComputed="current_timestamp"/>
+            <column name="updated_at"
+                    type="TIMESTAMP WITH TIME ZONE"
+                    defaultValueComputed="current_timestamp"/>
         </addColumn>
     </changeSet>
-
 </databaseChangeLog>
