@@ -128,6 +128,10 @@ GEM
       thor (>= 0.14, < 2.0)
     json (2.2.0)
     kramdown (2.1.0)
+    launchy (2.4.3)
+      addressable (~> 2.3)
+    letter_opener (1.7.0)
+      launchy (~> 2.2)
     listen (3.1.5)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -321,6 +325,7 @@ DEPENDENCIES
   jbuilder (~> 2.5)
   jquery-rails
   kramdown (~> 2.1)
+  letter_opener
   listen (>= 3.0.5, < 3.2)
   pg (>= 0.18, < 2.0)
   pry
