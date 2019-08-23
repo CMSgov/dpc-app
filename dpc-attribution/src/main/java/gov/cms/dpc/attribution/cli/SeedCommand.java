@@ -232,6 +232,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         // Generate a temporary ID
         final PatientsRecord record = context.newRecord(Patients.PATIENTS, entity);
         record.setOrganizationId(entity.getOrganization().getId());
+        final OffsetDateTime created = OffsetDateTime.now(ZoneOffset.UTC);
+        record.setCreatedAt(created);
+        record.setUpdatedAt(created);
         record.setId(UUID.randomUUID());
 
         return record;
