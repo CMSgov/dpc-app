@@ -363,4 +363,11 @@
                 referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="add-entity-timestamps" author="nickrobison-usds">
+        <addColumn tableName="PROVIDERS">
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

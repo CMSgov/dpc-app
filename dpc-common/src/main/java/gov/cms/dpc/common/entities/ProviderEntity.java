@@ -2,6 +2,8 @@ package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -9,6 +11,8 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -47,6 +51,12 @@ public class ProviderEntity implements Serializable {
                     @JoinColumn(name = "patient_id", referencedColumnName = "id")
             })
     private List<PatientEntity> attributedPatients;
+
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private OffsetDateTime updatedAt;
 
     public ProviderEntity() {
         // Hibernate required
@@ -100,6 +110,34 @@ public class ProviderEntity implements Serializable {
         this.organization = organization;
     }
 
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @PrePersist
+    public void setCreation() {
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        this.setCreatedAt(now);
+        this.setUpdatedAt(now);
+    }
+
+    @PreUpdate
+    public void setUpdateTime() {
+        this.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+    }
+
     public Practitioner toFHIR() {
         return ProviderEntityConverter.convert(this);
     }
@@ -144,5 +182,4 @@ public class ProviderEntity implements Serializable {
 
         return provider;
     }
-
 }

@@ -220,6 +220,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
     private static ProvidersRecord providersEntityToRecord(DSLContext context, ProviderEntity entity) {
         final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
         record.setOrganizationId(entity.getOrganization().getId());
+        final OffsetDateTime created = OffsetDateTime.now(ZoneOffset.UTC);
+        record.setCreatedAt(created);
+        record.setUpdatedAt(created);
         record.setId(UUID.randomUUID());
 
         return record;
