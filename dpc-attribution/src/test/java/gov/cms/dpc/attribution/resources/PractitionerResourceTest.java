@@ -17,10 +17,7 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
@@ -154,9 +151,12 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         final Practitioner pract2 = (Practitioner) outcome.getResource();
 
+        // Get the updated time
+        final Date createdAt = pract2.getMeta().getLastUpdated();
+
         pract2.getNameFirstRep().setFamily("Updated");
 
-        // Meta data doesn't persist, so update it again
+        // Reset the metadata to wipe out the timestamps
         final Meta meta = new Meta();
         meta.addTag(DPCIdentifierSystem.DPC.getSystem(), DEFAULT_ORG_ID, "Organization ID");
         pract2.setMeta(meta);
@@ -176,11 +176,14 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
+        final Date updatedAt = pract3.getMeta().getLastUpdated();
+
         // Set the Meta data, so we know it deeply matches
         pract3.setMeta(meta);
 
-        assertTrue(pract2.equalsDeep(pract3), "Updated values should match");
-        assertFalse(pract3.equalsDeep(practitioner), "Should not match original");
+        assertAll(() -> assertTrue(pract2.equalsDeep(pract3), "Updated values should match"),
+                () -> assertFalse(pract3.equalsDeep(practitioner), "Should not match original"),
+                () -> assertTrue(createdAt.before(updatedAt), "Creation should be before updated"));
     }
 
 }
