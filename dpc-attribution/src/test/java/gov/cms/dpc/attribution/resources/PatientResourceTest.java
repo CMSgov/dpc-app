@@ -147,6 +147,8 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         final Patient foundPatient = (Patient) firstSearch.getEntryFirstRep().getResource();
 
+        final java.util.Date createdAt = foundPatient.getMeta().getLastUpdated();
+
         // Update the name
         foundPatient.getNameFirstRep().setFamily("Updated");
         final Date updatedBirthDate = Date.valueOf("2001-01-01");
@@ -171,7 +173,12 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
+        final java.util.Date lastUpdated = fetchedPatient.getMeta().getLastUpdated();
+        fetchedPatient.setMeta(null);
+        updatedPatient.setMeta(null);
+
         assertAll(() -> assertTrue(fetchedPatient.equalsDeep(updatedPatient), "Should match updated record"),
-                () -> assertEquals("Updated", fetchedPatient.getNameFirstRep().getFamily(), "Should have updated family name"));
+                () -> assertEquals("Updated", fetchedPatient.getNameFirstRep().getFamily(), "Should have updated family name"),
+                () -> assertTrue(createdAt.before(lastUpdated), "Update timestamp should be later"));
     }
 }
