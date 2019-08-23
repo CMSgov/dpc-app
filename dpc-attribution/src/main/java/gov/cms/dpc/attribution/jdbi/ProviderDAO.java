@@ -74,4 +74,14 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> {
     public void deleteProvider(ProviderEntity provider) {
         this.currentSession().remove(provider);
     }
+
+    public ProviderEntity updateProvider(UUID providerID, ProviderEntity providerEntity) {
+        final ProviderEntity existingProvider = this.getProvider(providerID)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot "));
+
+        final ProviderEntity fullyUpdated = existingProvider.update(providerEntity);
+
+        currentSession().merge(fullyUpdated);
+        return fullyUpdated;
+    }
 }

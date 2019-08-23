@@ -142,6 +142,12 @@ public class ProviderEntity implements Serializable {
         return ProviderEntityConverter.convert(this);
     }
 
+    public ProviderEntity update(ProviderEntity entity) {
+        this.setProviderFirstName(entity.getProviderFirstName());
+        this.setProviderLastName(entity.getProviderLastName());
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
