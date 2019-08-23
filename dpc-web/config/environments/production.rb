@@ -65,6 +65,7 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "dpc-website_#{Rails.env}"
 
   config.action_mailer.perform_caching = false
+  config.action_mailer.asset_host = "https://dpc.cms.gov"
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
