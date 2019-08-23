@@ -22,6 +22,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -62,8 +63,9 @@ public class MacaroonBakery {
         this.keypair = keyPair;
 
         // Add the current location and the custom `local` location to the TP key store
-        this.thirdPartyKeyStore.setPublicKey(location, this.keypair.getPublic());
-        this.thirdPartyKeyStore.setPublicKey("local", this.keypair.getPublic());
+        final byte[] keyBytes = BakeryKeyFactory.getPublicKeyBytes(this.keypair);
+        this.thirdPartyKeyStore.setPublicKey(location, keyBytes);
+        this.thirdPartyKeyStore.setPublicKey("local", keyBytes);
     }
 
     /**
@@ -299,12 +301,12 @@ public class MacaroonBakery {
         final byte[] nonce = new byte[MacaroonsConstants.MACAROON_SECRET_NONCE_BYTES];
         random.nextBytes(nonce);
 
-        final PublicKey publicKey = this.thirdPartyKeyStore.getPublicKey(caveat.getLocation())
+        final byte[] thirdPartyKeyBytes = this.thirdPartyKeyStore.getPublicKey(caveat.getLocation())
                 .orElseThrow(() -> new BakeryException(String.format("Cannot find public key for %s", caveat.getLocation())));
 
-        final byte[] thirdPartyKeyBytes = publicKey.getEncoded();
+//        final byte[] thirdPartyKeyBytes = publicKey.getEncoded();
         final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keypair);
-        final byte[] publicKeyBytes = BakeryKeyFactory.unwrapPublicKeyBytes(privateKeyBytes);
+        final byte[] publicKeyBytes = BakeryKeyFactory.getPublicKeyBytes(this.keypair);
 
         final byte[] secretPart = encodeSecretPart(thirdPartyKeyBytes,
                 privateKeyBytes,
@@ -380,7 +382,7 @@ public class MacaroonBakery {
         byte[] caveatKeySignature = new byte[4];
         byteBuffer.get(caveatKeySignature);
 
-        byte[] pubKeySig = Arrays.copyOfRange(this.keypair.getPublic().getEncoded(), 0, 4);
+        byte[] pubKeySig = Arrays.copyOfRange(BakeryKeyFactory.getPublicKeyBytes(this.keypair), 0, 4);
         if (!Arrays.equals(caveatKeySignature, pubKeySig)) {
             throw new BakeryException("Public key mismatch");
         }
@@ -415,12 +417,15 @@ public class MacaroonBakery {
         try {
             rootKeyLength = VarInt.readUnsignedVarInt(new DataInputStream(new ByteBufferBackedInputStream(buffer)));
         } catch (IOException e) {
-            throw new BakeryException("Cannot read root key lenth", e);
+            throw new BakeryException("Cannot read root key length", e);
         }
 
         final byte[] rootKey = new byte[rootKeyLength];
         buffer.get(rootKey);
-        final MacaroonCaveat caveat = MacaroonCaveat.parseFromString(new String(buffer.array(), MacaroonsConstants.IDENTIFIER_CHARSET));
+        // Allocate space for the remaining bytes
+        final byte[] msg = new byte[buffer.remaining()];
+        buffer.get(msg);
+        final MacaroonCaveat caveat = MacaroonCaveat.parseFromString(new String(msg, MacaroonsConstants.IDENTIFIER_CHARSET));
 
         return Pair.of(new String(rootKey, MacaroonsConstants.IDENTIFIER_CHARSET), caveat);
     }

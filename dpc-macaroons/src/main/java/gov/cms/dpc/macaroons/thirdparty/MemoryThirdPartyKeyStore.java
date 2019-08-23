@@ -12,19 +12,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class MemoryThirdPartyKeyStore implements IThirdPartyKeyStore {
 
-    private final Map<String, PublicKey> store;
+    private final Map<String, byte[]> store;
 
     public MemoryThirdPartyKeyStore() {
         this.store = new ConcurrentHashMap<>();
     }
 
     @Override
-    public Optional<PublicKey> getPublicKey(String location) {
+    public Optional<byte[]> getPublicKey(String location) {
         return Optional.ofNullable(this.store.get(location));
     }
 
     @Override
-    public void setPublicKey(String location, PublicKey key) {
+    public void setPublicKey(String location, byte[] key) {
         this.store.put(location, key);
     }
 }
