@@ -2,10 +2,13 @@ package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
+import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
 import java.sql.Date;
+
+import static gov.cms.dpc.fhir.FHIRFormatters.INSTANT_FORMATTER;
 
 public class ProviderEntityConverter {
 
@@ -24,8 +27,10 @@ public class ProviderEntityConverter {
 
         practitioner.addIdentifier().setValue(entity.getProviderNPI());
         final Meta meta = new Meta();
-        // TODO: This is incorrect fix it.
-        meta.setLastUpdated(Date.valueOf("1990-01-01"));
+
+        if (entity.getUpdatedAt() != null) {
+            meta.setLastUpdatedElement(new InstantType(entity.getUpdatedAt().format(INSTANT_FORMATTER)));
+        }
         meta.addProfile(PractitionerProfile.PROFILE_URI);
         practitioner.setMeta(meta);
 
