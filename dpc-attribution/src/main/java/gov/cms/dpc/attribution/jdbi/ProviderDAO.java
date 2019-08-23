@@ -77,7 +77,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> {
 
     public ProviderEntity updateProvider(UUID providerID, ProviderEntity providerEntity) {
         final ProviderEntity existingProvider = this.getProvider(providerID)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot "));
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find provider"));
 
         final ProviderEntity fullyUpdated = existingProvider.update(providerEntity);
 
