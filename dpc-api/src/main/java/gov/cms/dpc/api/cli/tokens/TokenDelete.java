@@ -61,5 +61,7 @@ public class TokenDelete extends AbstractAttributionCommand {
                 }
             }
         }
+
+        System.out.println("Successfully deleted Token");
     }
 }

@@ -47,7 +47,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     private List<EndpointEntity> endpoints;
 
     @Valid
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization", orphanRemoval = true)
     private List<TokenEntity> tokens;
 
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "organization")

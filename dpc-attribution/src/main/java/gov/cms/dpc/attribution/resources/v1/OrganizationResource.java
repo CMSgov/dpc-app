@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
@@ -203,6 +204,30 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
         // Return the base64 encoded Macaroon
         return new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8);
+    }
+
+    @DELETE
+    @Path("/{organizationID}/token/{tokenID}")
+    @UnitOfWork
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)")
+    @Override
+    public Response deleteOrganizationToken(@NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID) {
+        final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)
+                .orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
+
+        final TokenEntity foundToken = organizationEntity
+                .getTokens()
+                .stream()
+                .filter(token -> token.getId().equals(tokenID.toString()))
+                .findAny()
+                .orElseThrow(() -> new WebApplicationException("Cannot find token by ID", Response.Status.NOT_FOUND));
+
+        organizationEntity.getTokens().remove(foundToken);
+        this.dao.updateOrganization(organizationEntity);
+
+        return Response.ok().build();
     }
 
     @Override

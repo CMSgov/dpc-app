@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -85,6 +86,10 @@ public abstract class AbstractOrganizationResource {
     @POST
     @Path("/{organizationID}/token")
     public abstract String createOrganizationToken(@PathParam("organizationID") UUID organizationID);
+
+    @DELETE
+    @Path("/{organizationID}/token/{tokenID}")
+    public abstract Response deleteOrganizationToken(@NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID);
 
     /**
      * Verify that the provided token is valid
