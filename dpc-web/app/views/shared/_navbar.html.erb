@@ -42,11 +42,24 @@ aria-controls="topnav-wrap" aria-label="Close menu">
           <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
         </li>
       <% else %>
-        <li class="topnav__item">
-          <a class="topnav__link"
-             id="sign-out" href="<%= destroy_user_session_path %>" data-method="delete">
-             Sign out
-          </a>
+        <li class="topnav__item usa-accordion">
+          <button class="topnav__link usa-accordion__button" type="button" aria-expanded="false" aria-controls="nav-1">My account</button>
+          <ul id="nav-1" class="usa-accordion__content">
+            <li>
+              <%= link_to profile_path, id: :dpc_registrations_profile_link,
+                :class => "ds-c-tabs__item #{current_class?(profile_path)}
+                #{current_class?(profile_path)}" do %>
+                  Profile
+                <% end %>
+            </li>
+            <li>
+              <a class="topnav__link"
+                 id="sign-out" href="<%= destroy_user_session_path %>" data-method="delete">
+                 Sign out
+              </a>
+            </li>
+          </ul>
+
         </li>
       <% end %>
     </ul>
