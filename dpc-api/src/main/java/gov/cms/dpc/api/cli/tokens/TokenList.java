@@ -23,7 +23,7 @@ import java.util.List;
 
 public class TokenList extends AbstractAttributionCommand {
 
-    TokenList() {
+    public TokenList() {
         super("list", "List tokens for registered Organization");
     }
 

@@ -15,7 +15,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 
 public class TokenDelete extends AbstractAttributionCommand {
 
-    TokenDelete() {
+    public TokenDelete() {
         super("delete", "Delete Organization Token");
     }
 
