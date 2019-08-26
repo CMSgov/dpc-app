@@ -50,7 +50,7 @@ public class TokenResponse implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof TokenResponse)) return false;
         TokenResponse that = (TokenResponse) o;
         return Objects.equals(id, that.id) &&
                 type == that.type &&
