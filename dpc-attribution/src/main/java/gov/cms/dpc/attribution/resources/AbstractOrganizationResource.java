@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.resources;
 
+import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -72,7 +73,7 @@ public abstract class AbstractOrganizationResource {
      */
     @GET
     @Path("/{organizationID}/token")
-    public abstract List<String> getOrganizationTokens(UUID organizationID);
+    public abstract List<TokenResponse> getOrganizationTokens(UUID organizationID);
 
     /**
      * Create authentication token for {@link Organization}.

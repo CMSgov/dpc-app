@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
+import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
@@ -164,7 +165,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ExceptionMetered
     @ApiOperation(value = "Fetch organization tokens", notes = "Method to retrieve the authentication tokens associated to the given Organization. This searches by resource ID")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
-    public List<String> getOrganizationTokens(
+    public List<TokenResponse> getOrganizationTokens(
             @ApiParam(value = "Organization resource ID", required = true)
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
@@ -174,7 +175,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return entity
                 .getTokens()
                 .stream()
-                .map(TokenEntity::getId)
+                .map(te -> new TokenResponse(te.getId(), te.getTokenType(), "never"))
                 .collect(Collectors.toList());
     }
 

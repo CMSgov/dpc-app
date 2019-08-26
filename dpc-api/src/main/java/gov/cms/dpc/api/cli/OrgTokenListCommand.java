@@ -3,7 +3,10 @@ package gov.cms.dpc.api.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
+import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
@@ -45,7 +48,7 @@ public class OrgTokenListCommand extends Command {
                 .help("Address of the Attribution Service, which handles organization registration");
 
         subparser
-                .addArgument("id")
+                .addArgument("--id")
                 .dest("org-reference")
                 .help("ID of Organization to delete");
     }
@@ -77,16 +80,17 @@ public class OrgTokenListCommand extends Command {
                     System.err.println("Error fetching organization: " + response.getStatusLine().getReasonPhrase());
                     System.exit(1);
                 }
-                final String[] tokens = EntityUtils.toString(response.getEntity()).split(",");
+
+                final ObjectMapper mapper = new ObjectMapper();
+
+                List<TokenResponse> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenResponse>>() {});
 
                 // Generate the table
-                final String[] headers = {"Token ID"};
+                final String[] headers = {"Token ID", "Type", "Expires"};
 
-                final List<String[]> collect = Arrays.stream(tokens)
-                        .map(token -> new String[]{token})
-                        .collect(Collectors.toList());
-
-                System.out.println(FlipTable.of(headers, collect.toArray(new String[0][])));
+                System.out.println(FlipTable.of(headers, tokens
+                        .stream()
+                        .map(token -> new String[]{token.getId(), token.getType().toString(), token.getExpires()}).toArray(String[][]::new)));
             }
         }
 
