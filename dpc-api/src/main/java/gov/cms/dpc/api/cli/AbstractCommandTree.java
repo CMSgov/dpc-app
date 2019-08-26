@@ -10,18 +10,13 @@ import net.sourceforge.argparse4j.inf.Subparser;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class OrganizationCommand extends ConfiguredCommand<DPCAPIConfiguration> {
+public class AbstractCommandTree extends ConfiguredCommand<DPCAPIConfiguration> {
     private static final String COMMAND_NAME_ATTR = "subcommand";
     private final SortedMap<String, Command> subcommands;
 
-    public OrganizationCommand() {
-        super("organization", "Organization related commands");
+    protected AbstractCommandTree(String name, String description) {
+        super(name, description);
         this.subcommands = new TreeMap<>();
-
-        // Register subcommands
-        registerSubCommand(new OrgListCommand());
-        registerSubCommand(new OrgDeleteCommand());
-        registerSubCommand(new OrgTokenListCommand());
     }
 
     @Override
@@ -37,12 +32,12 @@ public class OrganizationCommand extends ConfiguredCommand<DPCAPIConfiguration> 
     }
 
     @Override
-    protected void run(Bootstrap<DPCAPIConfiguration> bootstrap, Namespace namespace, DPCAPIConfiguration configuration) throws Exception {
+    protected void run(Bootstrap<DPCAPIConfiguration> bootstrap, Namespace namespace, DPCAPIConfiguration dpcapiConfiguration) throws Exception {
         final Command command = subcommands.get(namespace.getString(COMMAND_NAME_ATTR));
         command.run(bootstrap, namespace);
     }
 
-    private void registerSubCommand(Command command) {
+    protected void registerSubCommand(Command command) {
         subcommands.put(command.getName(), command);
     }
 }

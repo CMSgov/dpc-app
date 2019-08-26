@@ -1,56 +1,38 @@
-package gov.cms.dpc.api.cli;
+package gov.cms.dpc.api.cli.tokens;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
+import gov.cms.dpc.api.cli.AbstractAttributionCommand;
 import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
-import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class OrgTokenListCommand extends Command {
+public class TokenList extends AbstractAttributionCommand {
 
-    private static final String ATTR_HOSTNAME = "hostname";
-    private final FhirContext ctx;
-
-    OrgTokenListCommand() {
-        super("tokens", "List tokens for registered Organization");
-        this.ctx = FhirContext.forDstu3();
-        this.ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+    TokenList() {
+        super("list", "List tokens for registered Organization");
     }
 
     @Override
-    public void configure(Subparser subparser) {
-        // Address of the Attribution Service, which handles organization deletion
+    public void addAdditionalOptions(Subparser subparser) {
         subparser
-                .addArgument("--host")
-                .dest(ATTR_HOSTNAME)
-                .setDefault("http://localhost:3500/v1")
-                .help("Address of the Attribution Service, which handles organization registration");
-
-        subparser
-                .addArgument("--id")
+                .addArgument("id")
                 .dest("org-reference")
-                .help("ID of Organization to delete");
+                .help("ID of Organization to list tokens");
     }
 
     @Override
@@ -83,7 +65,8 @@ public class OrgTokenListCommand extends Command {
 
                 final ObjectMapper mapper = new ObjectMapper();
 
-                List<TokenResponse> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenResponse>>() {});
+                List<TokenResponse> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenResponse>>() {
+                });
 
                 // Generate the table
                 final String[] headers = {"Token ID", "Type", "Expires"};

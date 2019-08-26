@@ -1,10 +1,8 @@
-package gov.cms.dpc.api.cli;
+package gov.cms.dpc.api.cli.organizations;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.jakewharton.fliptables.FlipTable;
-import io.dropwizard.cli.Command;
+import gov.cms.dpc.api.cli.AbstractAttributionCommand;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -14,29 +12,15 @@ import org.hl7.fhir.dstu3.model.Organization;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OrgListCommand extends Command {
-
-    private static final String ATTR_HOSTNAME = "hostname";
-    private final FhirContext ctx;
+public class OrgListCommand extends AbstractAttributionCommand {
 
     OrgListCommand() {
         super("list", "List registered organizations");
-        this.ctx = FhirContext.forDstu3();
-        // Disable server validation, since the Attribution Service doesn't have a capabilities statement
-        this.ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
     }
 
-
     @Override
-    public void configure(Subparser subparser) {
-
-        // Address of the Attribution Service, which handles organization registration
-        subparser
-                .addArgument("--host")
-                .dest(ATTR_HOSTNAME)
-                .setDefault("http://localhost:3500/v1")
-                .help("Address of the Attribution Service, which handles organization registration");
-
+    public void addAdditionalOptions(Subparser subparser) {
+        // Not used
     }
 
     @Override

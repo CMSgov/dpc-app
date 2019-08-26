@@ -1,23 +1,16 @@
-package gov.cms.dpc.api.cli;
+package gov.cms.dpc.api.cli.organizations;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import io.dropwizard.cli.Command;
+import gov.cms.dpc.api.cli.AbstractAttributionCommand;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.IdType;
 
-public class OrgDeleteCommand extends Command {
-
-    private static final String ATTR_HOSTNAME = "hostname";
-    private final FhirContext ctx;
+public class OrgDeleteCommand extends AbstractAttributionCommand {
 
     OrgDeleteCommand() {
         super("delete", "Delete registered organization");
-        this.ctx = FhirContext.forDstu3();
-        this.ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
     }
 
     @Override
@@ -28,7 +21,10 @@ public class OrgDeleteCommand extends Command {
                 .dest(ATTR_HOSTNAME)
                 .setDefault("http://localhost:3500/v1")
                 .help("Address of the Attribution Service, which handles organization registration");
+    }
 
+    @Override
+    public void addAdditionalOptions(Subparser subparser) {
         subparser
                 .addArgument("id")
                 .dest("org-reference")

@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.cli;
+package gov.cms.dpc.api.cli.organizations;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
