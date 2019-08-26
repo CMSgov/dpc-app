@@ -266,10 +266,10 @@ public class MacaroonBakery {
     }
 
     public Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
-        final Pair<String, MacaroonCaveat> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
+        final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
 
         // Create a discharge macaroon
-        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), new String(stringMacaroonCaveatPair.getRight().getRawCaveat()));
+        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), new String(stringMacaroonCaveatPair.getRight().toString()));
     }
 
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {
@@ -373,7 +373,7 @@ public class MacaroonBakery {
         return secretBox.seal(nonce, msgBuffer.array());
     }
 
-    private Pair<String, MacaroonCaveat> decodeCaveat(byte[] encryptedCaveat) {
+    private Pair<String, MacaroonCondition> decodeCaveat(byte[] encryptedCaveat) {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(encryptedCaveat);
         // Advance by one to skip the version
         byteBuffer.get();
@@ -404,12 +404,12 @@ public class MacaroonBakery {
         final byte[] secretPart = box.open(nonce, msg)
                 .orElseThrow(() -> new BakeryException("Cannot decrypt secret part of caveat"));
 
-        final Pair<String, MacaroonCaveat> caveatPair = decodeCaveatSecretPart(secretPart);
+        final Pair<String, MacaroonCondition> caveatPair = decodeCaveatSecretPart(secretPart);
 
         return caveatPair;
     }
 
-    private static Pair<String, MacaroonCaveat> decodeCaveatSecretPart(byte[] secretPart) {
+    private static Pair<String, MacaroonCondition> decodeCaveatSecretPart(byte[] secretPart) {
         final ByteBuffer buffer = ByteBuffer.wrap(secretPart);
         // Advance because we already know the version
         buffer.get();
@@ -425,7 +425,7 @@ public class MacaroonBakery {
         // Allocate space for the remaining bytes
         final byte[] msg = new byte[buffer.remaining()];
         buffer.get(msg);
-        final MacaroonCaveat caveat = MacaroonCaveat.parseFromString(new String(msg, MacaroonsConstants.IDENTIFIER_CHARSET));
+        final MacaroonCondition caveat = MacaroonCondition.parseFromString(new String(msg, MacaroonsConstants.IDENTIFIER_CHARSET));
 
         return Pair.of(new String(rootKey, MacaroonsConstants.IDENTIFIER_CHARSET), caveat);
     }

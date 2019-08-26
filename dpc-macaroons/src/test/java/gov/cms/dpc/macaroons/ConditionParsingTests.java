@@ -15,33 +15,33 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CaveatParsingTests {
+class ConditionParsingTests {
 
     @Test
     void testSimpleCaveatParsing() {
-        final MacaroonCaveat macaroonCaveat = MacaroonCaveat.parseFromString("test = valid");
-        assertAll(() -> assertEquals("test", macaroonCaveat.getKey(), "Key should match"),
-                () -> assertEquals(MacaroonCaveat.Operator.EQ, macaroonCaveat.getOp(), "Op should match"),
-                () -> assertEquals("valid", macaroonCaveat.getValue(), "Value should match"));
+        final MacaroonCondition macaroonCondition = MacaroonCondition.parseFromString("test = valid");
+        assertAll(() -> assertEquals("test", macaroonCondition.getKey(), "Key should match"),
+                () -> assertEquals(MacaroonCondition.Operator.EQ, macaroonCondition.getOp(), "Op should match"),
+                () -> assertEquals("valid", macaroonCondition.getValue(), "Value should match"));
     }
 
     @Test
     void testPoorlyFormattedCaveatParsing() {
         // Test spaces
-        assertAll(() -> assertThrows(IllegalArgumentException.class, () -> MacaroonCaveat.parseFromString("test =valid"), "Caveats need spaces between entities"),
-                () -> assertThrows(IllegalArgumentException.class, () -> MacaroonCaveat.parseFromString("test=valid"), "Caveats need spaces between entities"),
-                () -> assertThrows(IllegalArgumentException.class, () -> MacaroonCaveat.parseFromString("test= valid"), "Caveats need spaces between entities"));
+        assertAll(() -> assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test =valid"), "Caveats need spaces between entities"),
+                () -> assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test=valid"), "Caveats need spaces between entities"),
+                () -> assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test= valid"), "Caveats need spaces between entities"));
     }
 
     @Test
     void testInvalidOperationValueParsing() {
-        assertAll(() -> assertThrows(IllegalArgumentException.class, () -> MacaroonCaveat.parseFromString("test ~ valid"), "Should throw for invalid operation type"));
+        assertAll(() -> assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test ~ valid"), "Should throw for invalid operation type"));
     }
 
     @Test
     void testMalformedCaveatParsing() {
-        assertThrows(IllegalArgumentException.class, () -> MacaroonCaveat.parseFromString("test ="), "Should not parse malformed caveat");
-        assertThrows(IllegalArgumentException.class, () -> MacaroonCaveat.parseFromString("test id = hello"), "Should not parse caveat with strings in key");
+        assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test ="), "Should not parse malformed caveat");
+        assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test id = hello"), "Should not parse caveat with strings in key");
     }
 
     @Test
@@ -88,7 +88,7 @@ class CaveatParsingTests {
         final byte[] firstPartyPrivate = BakeryKeyFactory.unwrapPrivateKeyBytes(firstParty);
         final byte[] firstPartyPublic = Keys.generatePublicKey(firstPartyPrivate);
 
-        // encyrpt the message
+        // encrypt the message
 
         final byte[] sealed = MacaroonBakery.encodeSecretPart(thirdPartyPublic, firstPartyPrivate, testNonce, testKey, testMessage);
 

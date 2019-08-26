@@ -47,8 +47,8 @@ BakeryTest {
     @Test
     void testCaveatParsing() {
         final List<MacaroonCaveat> caveatList = Collections.singletonList(
-                new MacaroonCaveat("test_id",
-                        MacaroonCaveat.Operator.EQ, "1234"));
+                new MacaroonCaveat("", new MacaroonCondition("test_id",
+                        MacaroonCondition.Operator.EQ, "1234")));
         final Macaroon testMacaroon = bakery
                 .createMacaroon(caveatList);
 
@@ -60,8 +60,9 @@ BakeryTest {
         final Macaroon macaroon = bakery
                 .createMacaroon(Collections.singletonList(
                         new MacaroonCaveat("http://localhost",
-                                "test_third_id", MacaroonCaveat.Operator.NEQ,
-                                "wrong value")));
+                                new MacaroonCondition(
+                                "test_third_id", MacaroonCondition.Operator.NEQ,
+                                "wrong value"))));
 
                 bakery.verifyMacaroon(macaroon);
     }
@@ -69,8 +70,8 @@ BakeryTest {
     private static void macaroonSerializationTest(boolean base64) {
         final Macaroon testMacaroon = bakery
                 .createMacaroon(Collections.singletonList(
-                        new MacaroonCaveat("test_id",
-                                MacaroonCaveat.Operator.EQ, "1234")));
+                        new MacaroonCaveat("", new MacaroonCondition("test_id",
+                                MacaroonCondition.Operator.EQ, "1234"))));
 
         final byte[] macaroonBytes = bakery.serializeMacaroon(testMacaroon, base64);
         final Macaroon mac2 = bakery.deserializeMacaroon(new String(macaroonBytes, StandardCharsets.UTF_8));
@@ -92,13 +93,13 @@ BakeryTest {
 
         final Macaroon macaroon = caveatBakery
                 .createMacaroon(Collections.singletonList(
-                        new MacaroonCaveat("test_id",
-                                MacaroonCaveat.Operator.EQ, "1234")));
+                        new MacaroonCaveat("", new MacaroonCondition("test_id",
+                                MacaroonCondition.Operator.EQ, "1234"))));
 
         caveatBakery.verifyMacaroon(macaroon);
 
         // Add an additional caveat and try to validate again, which should fail
-        final Macaroon macaroon1 = caveatBakery.addCaveats(macaroon, new MacaroonCaveat("expires", MacaroonCaveat.Operator.LT, "now"));
+        final Macaroon macaroon1 = caveatBakery.addCaveats(macaroon, new MacaroonCaveat("", new MacaroonCondition("expires", MacaroonCondition.Operator.LT, "now")));
 
         assertThrows(BakeryException.class, () -> caveatBakery.verifyMacaroon(macaroon1));
 
@@ -112,11 +113,11 @@ BakeryTest {
     @Test
     void testDefaultCaveatSuppliers() {
 
-        final MacaroonCaveat test_caveat = new MacaroonCaveat("test_caveat", MacaroonCaveat.Operator.EQ, "1");
+        final MacaroonCaveat test_caveat = new MacaroonCaveat("", new MacaroonCondition("test_caveat", MacaroonCondition.Operator.EQ, "1"));
         final CaveatSupplier testSupplier = () -> test_caveat;
         final CaveatVerifier testVerifier = (caveat) -> {
             if (caveat.getKey().equals("test_caveat")) {
-                assertEquals(caveat, test_caveat, "Caveats should match");
+                assertEquals(caveat, test_caveat.getCondition(), "Caveats should match");
             }
             return Optional.empty();
         };
@@ -128,8 +129,8 @@ BakeryTest {
 
         final Macaroon macaroon = caveatBakery
                 .createMacaroon(Collections.singletonList(
-                        new MacaroonCaveat("test_id",
-                                MacaroonCaveat.Operator.EQ, "1234")));
+                        new MacaroonCaveat("", new MacaroonCondition("test_id",
+                                MacaroonCondition.Operator.EQ, "1234"))));
 
         final List<MacaroonCaveat> macCaveats = bakery.getCaveats(macaroon);
         assertEquals(2, macCaveats.size(), "Should have two caveats");

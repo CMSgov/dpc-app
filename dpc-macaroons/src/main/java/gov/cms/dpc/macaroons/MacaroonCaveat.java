@@ -1,10 +1,9 @@
 package gov.cms.dpc.macaroons;
 
-import com.github.nitram509.jmacaroons.CaveatPacket;
+import com.github.nitram509.jmacaroons.MacaroonsConstants;
 
+import java.util.Arrays;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Defines the data necessary to generate a Macaroon caveat.
@@ -15,134 +14,38 @@ import java.util.regex.Pattern;
  */
 public class MacaroonCaveat {
 
-    // Regex for matching key, op and value from a given caveat string
-    private static final Pattern caveatPattern = Pattern.compile("([a-zA-Z0-9_]*)\\s([=><!]{1,2})\\s(.*)");
-
-    public enum Operator {
-        /**
-         * Equality between the caveat value and the verifier value
-         */
-        EQ("="),
-        /**
-         * Inequality between the caveat value and the verifier value
-         */
-        NEQ("!="),
-        /**
-         * Verifier value is less than the caveat value
-         */
-        LT("<"),
-        /**
-         * Verifier value is less than or equal to the caveat value
-         */
-        LEQ("<="),
-        /**
-         * Verifier value is greater than the caveat value
-         */
-        GT(">"),
-        /**
-         * Verifier value is greater than or equal to øthe caveat value
-         */
-        GEQ(">=");
-
-        private final String op;
-
-        Operator(String op) {
-            this.op = op;
-        }
-
-        public String getOp() {
-            return op;
-        }
-
-        public static Operator fromString(String opString) {
-            for (final Operator op : Operator.values()) {
-                if (op.getOp().equalsIgnoreCase(opString)) {
-                    return op;
-                }
-            }
-            throw new IllegalArgumentException(String.format("Cannot determine Operation enum from: %s", opString));
-        }
-
-
-    }
 
     private String location;
-    private String key;
-    private String value;
-    private Operator op;
     private byte[] rawCaveat;
     private byte[] verificationID;
 
     public MacaroonCaveat() {
+        this.location = "";
     }
 
-    /**
-     * Create a first-party caveat (e.g. one that does not have a location)
-     *
-     * @param key   -{@link String} Caveat key
-     * @param op    - {@link Operator} Caveat operator
-     * @param value - {@link String Caveat value}
-     */
-    public MacaroonCaveat(String key, Operator op, String value) {
-        this.location = "";
-        this.key = key;
-        this.op = op;
-        this.value = value;
-        this.verificationID = null;
-        this.rawCaveat = null;
+    public MacaroonCaveat(String location, MacaroonCondition condition) {
+        this.location = location;
+        this.rawCaveat = condition.toBytes();
     }
 
     /**
      * Create a caveat which may have a location (thus making it a third-party caveat)
      *
      * @param location - {@link String} third-party caveat location
-     * @param key      -{@link String} Caveat key
-     * @param op       - {@link Operator} Caveat operator
-     * @param value    - {@link String Caveat value}
      */
-    public MacaroonCaveat(String location, String key, Operator op, String value) {
+    public MacaroonCaveat(String location, byte[] rawCaveat) {
         this.location = location;
-        this.key = key;
-        this.op = op;
-        this.value = value;
         this.verificationID = null;
-        this.rawCaveat = null;
+        this.rawCaveat = rawCaveat;
 
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     public String getLocation() {
         return location;
     }
 
-    /**
-     * Get the caveat key
-     *
-     * @return - {@link String} caveat key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * Get the caveat comparison operator
-     *
-     * @return - {@link Operator}
-     */
-    public Operator getOp() {
-        return op;
-    }
-
-    /**
-     * Get the caveat value
-     *
-     * @return - {@link String} caveat value
-     */
-    public String getValue() {
-        return value;
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public byte[] getRawCaveat() {
@@ -177,42 +80,30 @@ public class MacaroonCaveat {
         return !location.equals("");
     }
 
-    /**
-     * Format the caveat value into the Macaroons caveat ID format, which is ('key'\s'op'\s'value').
-     * Notice the spaces separating each
-     *
-     * @return - {@link String} formatted caveat id
-     */
-    @Override
-    public String toString() {
-        return String.format("%s %s %s", this.getKey(), this.getOp().getOp(), this.getValue());
+    public MacaroonCondition getCondition() {
+        return MacaroonCondition.parseFromString(new String(this.rawCaveat, MacaroonsConstants.IDENTIFIER_CHARSET));
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MacaroonCaveat)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         MacaroonCaveat that = (MacaroonCaveat) o;
-        return location.equals(that.location) &&
-                key.equals(that.key) &&
-                value.equals(that.value);
+        return Objects.equals(location, that.location) &&
+                Arrays.equals(rawCaveat, that.rawCaveat) &&
+                Arrays.equals(verificationID, that.verificationID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(location, key, value);
+        int result = Objects.hash(location);
+        result = 31 * result + Arrays.hashCode(rawCaveat);
+        result = 31 * result + Arrays.hashCode(verificationID);
+        return result;
     }
 
-    static MacaroonCaveat parseFromPacket(CaveatPacket packet) {
-        final String packetValue = packet.getValueAsText();
-        return parseFromString(packetValue);
-    }
-
-    static MacaroonCaveat parseFromString(String caveatValue) {
-        final Matcher matcher = caveatPattern.matcher(caveatValue);
-        if (!matcher.matches() || matcher.groupCount() != 3) {
-            throw new IllegalArgumentException(String.format("Cannot parse caveat: %s", caveatValue));
-        }
-        return new MacaroonCaveat(matcher.group(1), Operator.fromString(matcher.group(2)), matcher.group(3));
+    @Override
+    public String toString() {
+        return new String(this.rawCaveat, MacaroonsConstants.RAW_BYTE_CHARSET);
     }
 }
