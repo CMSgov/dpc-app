@@ -197,9 +197,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         final Macaroon macaroon = generateMacaroon(organizationID);
 
         // Add the macaroon ID to the organization and update it
-        final ArrayList<TokenEntity> tokens = new ArrayList<>(entity.getTokens());
-        tokens.add(new TokenEntity(macaroon.identifier, entity, TokenEntity.TokenType.MACAROON));
-        entity.setTokens(tokens);
+        entity.addToken(new TokenEntity(macaroon.identifier, entity, TokenEntity.TokenType.MACAROON));
         this.dao.updateOrganization(entity);
 
         // Return the base64 encoded Macaroon
@@ -224,7 +222,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .findAny()
                 .orElseThrow(() -> new WebApplicationException("Cannot find token by ID", Response.Status.NOT_FOUND));
 
-        organizationEntity.getTokens().remove(foundToken);
+        organizationEntity.removeToken(foundToken);
         this.dao.updateOrganization(organizationEntity);
 
         return Response.ok().build();

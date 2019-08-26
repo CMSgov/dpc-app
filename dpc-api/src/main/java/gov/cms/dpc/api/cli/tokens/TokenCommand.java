@@ -9,5 +9,6 @@ public class TokenCommand extends AbstractCommandTree {
 
         registerSubCommand(new TokenDelete());
         registerSubCommand(new TokenList());
+        registerSubCommand(new TokenCreate());
     }
 }

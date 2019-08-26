@@ -112,8 +112,12 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         return tokens;
     }
 
-    public void setTokens(List<TokenEntity> tokens) {
-        this.tokens = tokens;
+    public void addToken(TokenEntity entity) {
+        this.tokens.add(entity);
+    }
+
+    public void removeToken(TokenEntity entity) {
+        this.tokens.remove(entity);
     }
 
     public List<ProviderEntity> getProviders() {
