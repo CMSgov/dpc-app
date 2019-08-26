@@ -88,6 +88,16 @@ export DB_PASS=password
 export DATABASE_URL=postgresql://localhost/dpc-website_development
 ```
 
+#### Background Jobs
+The web app uses Sidekiq for background job processing, which relies on Redis. If your Redis server is not running at `localhost:6379` (the default for development environments), be sure to specify the `REDIS_URL` ENV variable:
+
+```
+export REDIS_URL=redis://redis.example.com:7372/0
+```
+
+For more information, see Sidekiq's wiki on [Using Redis](https://github.com/mperham/sidekiq/wiki/Using-Redis).
+
+*Note:* You must have Sidekiq (and Redis) running in order to process asynchronous jobs, including sending email.
 
 # Running via Docker
 

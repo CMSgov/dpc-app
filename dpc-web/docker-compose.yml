@@ -10,7 +10,13 @@ services:
     ports:
       - "15432:5432"
 
+  redis:
+    image: redis
+
   web:
+    depends_on:
+      - db
+      - redis
     build:
       context: ..
       dockerfile: dpc-web/Dockerfile
@@ -20,7 +26,20 @@ services:
       - DB_USER=postgres
       - DB_PASS=dpc-safe
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+      - REDIS_URL=redis://redis:6379
     ports:
       - "3000:3000"
+
+  sidekiq:
     depends_on:
       - db
+      - redis
+    build:
+      context: ..
+      dockerfile: dpc-web/docker/sidekiq/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://db/dpc-website_development
+      - DB_USER=postgres
+      - DB_PASS=dpc-safe
+      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
+      - REDIS_URL=redis://redis:6379
