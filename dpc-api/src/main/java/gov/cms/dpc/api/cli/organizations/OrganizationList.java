@@ -12,9 +12,9 @@ import org.hl7.fhir.dstu3.model.Organization;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OrgListCommand extends AbstractAttributionCommand {
+public class OrganizationList extends AbstractAttributionCommand {
 
-    OrgListCommand() {
+    OrganizationList() {
         super("list", "List registered organizations");
     }
 

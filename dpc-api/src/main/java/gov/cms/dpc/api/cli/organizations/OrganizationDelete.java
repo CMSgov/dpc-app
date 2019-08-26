@@ -7,9 +7,9 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.IdType;
 
-public class OrgDeleteCommand extends AbstractAttributionCommand {
+public class OrganizationDelete extends AbstractAttributionCommand {
 
-    OrgDeleteCommand() {
+    OrganizationDelete() {
         super("delete", "Delete registered organization");
     }
 
