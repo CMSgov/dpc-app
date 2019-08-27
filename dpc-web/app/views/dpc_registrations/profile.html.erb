@@ -1,13 +1,4 @@
 <% title "Your profile" %>
-<% banner_title "Welcome, #{@dpc_registration.user.first_name}!" %>
-<% tabs_set "shared/user_tabs" %>
-
-<div class="ds-u-md-display--flex ds-u-justify-content--between ds-u-align-items--center">
-<h2>Your profile</h2>
-<div>
-  <%= link_to "edit profile", edit_registration_path(User), :class => "ds-c-button ds-c-button--primary" %>
-</div>
-</div>
 
 <div class="ds-l-row">
   <div class="ds-l-row--12 ds-l-md-col--6">
@@ -39,6 +30,8 @@
   </div>
 </div>
 
-
+<div>
+  <%= link_to "edit profile", edit_registration_path(User), :class => "ds-c-button ds-c-button--primary" %>
+</div>
 
 
