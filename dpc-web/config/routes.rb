@@ -1,5 +1,14 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :internal_users, path: 'internal', controllers: {
+    sessions: "internal/sessions",
+    registrations: "internal/registrations",
+    passwords: "internal/passwords"
+  }
+  devise_for :users, path: 'users', controllers: {
+    sessions: "users/sessions",
+    registrations: "users/registrations",
+    passwords: "users/passwords"
+  }
 
   authenticated :user do
     root 'dpc_registrations#show', as: :authenticated_root
@@ -21,7 +30,4 @@ Rails.application.routes.draw do
   match '/profile', to: 'dpc_registrations#profile', via: :get
 
   resources :dpc_registrations, only: %i[new show]
-
-
-
 end
