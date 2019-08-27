@@ -71,10 +71,10 @@ public class TokenTests extends AbstractApplicationTest {
     @Test
     void testTokenDeletion() throws Exception {
         // Create the organization
-        final boolean success = cli.run("register", "-f", "src/main/resources/organization.tmpl.json");
+        final boolean success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json");
 
         assertAll(() -> assertTrue(success, "Should have succeeded"),
-                () -> assertTrue(stdErr.toString().isEmpty(), "Should not have errors"),
+                () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("eyJ2IjoyLCJsIjoiaHR0"), "Should have token"));
 
         // List the tokens
