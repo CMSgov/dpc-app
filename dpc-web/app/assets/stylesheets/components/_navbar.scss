@@ -117,7 +117,6 @@
 
 .topnav__item {
   border-bottom: 1px solid $color-gray-lighter;
-  padding-right: $spacer-4;
 
   &:last-child {
     border: none;
@@ -134,6 +133,15 @@
   }
 }
 
+.topnav__item--buttons {
+  border: 0;
+  margin-top: $spacer-3;
+
+  @media (min-width: $width-nav) {
+    margin-top: 0;
+  }
+}
+
 .topnav__link,
 .topnav__link:visited {
   color: $color-primary-darkest;
@@ -145,7 +153,8 @@
 
   @media (min-width: $width-nav) {
     display: inline-block;
-    padding: 0;
+    padding: $spacer-1 $spacer-2;
+    margin-right: $spacer-2;
   }
 }
 
@@ -172,6 +181,64 @@
   }
 }
 
+
+.topnav__dropdown {
+  list-style: none;
+
+  @media (min-width: $width-nav) {
+    background-color: $color-primary-darker;
+    position: absolute;
+    right: 0;
+    width: 100%;
+  }
+}
+
+.topnav__dropdown__link {
+  display: block;
+  color: $color-base;
+  font-size: $h5-font-size;
+  font-weight: $font-bold;
+  text-decoration: none;
+
+  @media (min-width: $width-nav) {
+    color: white;
+  }
+}
+
+.topnav__dropdown__link:hover {
+  @media (min-width: $width-nav) {
+    color: $color-primary-alt-lightest;
+    text-decoration: underline;
+  }
+}
+
+// Overrides for accorion functionality
+.topnav__item.usa-accordion {
+  position: relative;
+}
+
+.topnav__link.usa-accordion__button {
+  background-color: transparent;
+
+  @media (min-width: $width-nav) {
+    background-image: url(angle-arrow-down.svg);
+    background-size: .7rem;
+    margin-right: 0;
+    padding-right: $spacer-5;
+  }
+}
+
+.topnav__link.usa-accordion__button[aria-expanded="true"] {
+
+  @media (min-width: $width-nav) {
+    background-color: $color-primary-darker;
+    background-image: url(angle-arrow-up-white.svg);
+    color: $color-white;
+  }
+}
+
+
+// Animations
 @keyframes slidein-left {
   from {
     transform: translateX(360px);
