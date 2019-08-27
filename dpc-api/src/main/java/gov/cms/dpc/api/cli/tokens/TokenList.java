@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
+import gov.cms.dpc.api.cli.OrgRegistrationCommand;
 import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.setup.Bootstrap;
@@ -23,8 +24,11 @@ import java.util.List;
 
 public class TokenList extends AbstractAttributionCommand {
 
+    private final ObjectMapper mapper;
+
     public TokenList() {
         super("list", "List tokens for registered Organization");
+        this.mapper = new ObjectMapper();
     }
 
     @Override
@@ -39,10 +43,9 @@ public class TokenList extends AbstractAttributionCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws IOException {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
-        System.out.println(String.format("Listing tokens for organization %s", orgReference));
+        System.out.println(String.format("Listing tokens for organization: %s.", orgReference));
 
         final String attributionService = namespace.getString(ATTR_HOSTNAME);
-
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
         final Organization organization = client
@@ -52,6 +55,10 @@ public class TokenList extends AbstractAttributionCommand {
                 .encodedJson()
                 .execute();
 
+        listTokens(client, organization);
+    }
+
+    private void listTokens(IGenericClient client, Organization organization) throws IOException {
         // List all the tokens, switching
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final HttpGet tokenGet = new HttpGet(String.format("%s/Organization/%s/token", client.getServerBase(), organization.getIdElement().getIdPart()));
@@ -63,19 +70,19 @@ public class TokenList extends AbstractAttributionCommand {
                     System.exit(1);
                 }
 
-                final ObjectMapper mapper = new ObjectMapper();
-
                 List<TokenResponse> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenResponse>>() {
                 });
-
-                // Generate the table
-                final String[] headers = {"Token ID", "Type", "Expires"};
-
-                System.out.println(FlipTable.of(headers, tokens
-                        .stream()
-                        .map(token -> new String[]{token.getId(), token.getType().toString(), token.getExpires()}).toArray(String[][]::new)));
+                generateTable(tokens);
             }
         }
+    }
 
+    private void generateTable(List<TokenResponse> tokens) {
+        // Generate the table
+        final String[] headers = {"Token ID", "Type", "Expires"};
+
+        System.out.println(FlipTable.of(headers, tokens
+                .stream()
+                .map(token -> new String[]{token.getId(), token.getType().toString(), token.getExpires()}).toArray(String[][]::new)));
     }
 }

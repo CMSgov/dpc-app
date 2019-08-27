@@ -39,6 +39,7 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
+    private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
     private final OrganizationDAO dao;
     private final MacaroonBakery bakery;
 
@@ -174,7 +175,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
-        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
+        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
 
         return entity
                 .getTokens()
@@ -195,7 +196,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
-        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
+        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
@@ -218,7 +219,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiParam(value = "Organization resource ID", required = true) @NotNull @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
         final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)
-                .orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
+                .orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
 
         final TokenEntity foundToken = organizationEntity
                 .getTokens()
