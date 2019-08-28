@@ -88,6 +88,18 @@ export DB_PASS=password
 export DATABASE_URL=postgresql://localhost/dpc-website_development
 ```
 
+#### Background job processing
+In order to process background jobs such as sending email, you need to make sure [DelayedJob](https://github.com/collectiveidea/delayed_job) is running:
+
+```
+bin/delayed_job start
+```
+
+This command starts DelayedJob in the background. To stop DelayedJob:
+
+```
+bin/delayed_job stop
+```
 
 # Running via Docker
 
