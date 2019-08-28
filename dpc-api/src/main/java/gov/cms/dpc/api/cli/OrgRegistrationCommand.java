@@ -22,6 +22,8 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 public class OrgRegistrationCommand extends Command {
     private static final String ORG_FILE = "org-file";
@@ -65,8 +67,9 @@ public class OrgRegistrationCommand extends Command {
         System.out.println("Registering Organization");
 
         // Read the file and parser it
+        final Path filePath = FileSystems.getDefault().getPath(namespace.getString(ORG_FILE)).normalize().toAbsolutePath();
         Bundle organization;
-        try (FileInputStream fileInputStream = new FileInputStream(new File(namespace.getString(ORG_FILE)))) {
+        try (FileInputStream fileInputStream = new FileInputStream(new File(filePath.toUri()))) {
             final IParser parser = ctx.newJsonParser();
             organization = (Bundle) parser.parseResource(fileInputStream);
         }
