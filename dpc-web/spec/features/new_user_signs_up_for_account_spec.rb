@@ -35,11 +35,12 @@ RSpec.feature 'new user signs up for account' do
 
     scenario 'is brought to the registrations dashboard' do
       expect(page).to have_http_status(200)
-      expect(page).to have_content('Dashboard')
+      expect(page).to have_css('[data-test="my-account-menu"]')
     end
 
     scenario 'can see profile information' do
-      click_link('dpc_registrations_profile_link')
+      find('[data-test="my-account-menu"]').click
+      find('[data-test="dpc-registrations-profile-link"]', visible: false).click
       expect(page).to have_content(user.email)
     end
   end
