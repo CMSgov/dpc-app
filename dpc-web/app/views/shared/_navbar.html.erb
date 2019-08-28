@@ -43,17 +43,18 @@ aria-controls="topnav-wrap" aria-label="Close menu">
         </li>
       <% else %>
         <li class="topnav__item usa-accordion">
-          <button class="topnav__link usa-accordion__button" type="button" aria-expanded="false" aria-controls="nav-1">My account</button>
+          <button class="topnav__link usa-accordion__button" type="button" aria-expanded="false"
+                  aria-controls="nav-1" data-test="my-account-menu">My account</button>
           <ul id="nav-1" class="topnav__dropdown usa-accordion__content" hidden>
             <li class="topnav__dropdown__item">
-              <%= link_to profile_path, id: :dpc_registrations_profile_link,
-                :class => "topnav__dropdown__link" do %>
+              <%= link_to profile_path, class: "topnav__dropdown__link",
+                  data: { test: 'dpc-registrations-profile-link' } do %>
                   Profile
                 <% end %>
             </li>
             <li class="topnav__dropdown__item">
-              <a class="topnav__dropdown__link"
-                 id="sign-out" href="<%= destroy_user_session_path %>" data-method="delete">
+              <a class="topnav__dropdown__link" href="<%= destroy_user_session_path %>"
+                 id="sign-out" data-method="delete">
                  Sign out
               </a>
             </li>
