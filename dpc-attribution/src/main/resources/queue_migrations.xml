@@ -41,4 +41,46 @@
             <column name="organization_id" type="UUID" />
         </addColumn>
     </changeSet>
+
+    <changeSet id="queue-v2-design" author="ronaldheft-usds">
+        <createTable tableName="JOB_QUEUE_BATCH">
+            <column name="job_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="batch_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="TINYINT"/>
+            <column name="priority" type="INTEGER"/>
+            <column name="patients" type="TEXT"/>
+            <column name="patient_index" type="INTEGER"/>
+            <column name="aggregator_id" type="UUID" />
+            <column name="update_time" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="submit_time" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="start_time" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="complete_time" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <addPrimaryKey tableName="JOB_QUEUE_BATCH"
+                       columnNames="job_id, batch_id"/>
+
+        <createTable tableName="JOB_QUEUE_BATCH_FILE">
+            <column name="job_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="batch_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource_type" type="INTEGER"/>
+            <column name="file_name" type="TEXT"/>
+            <column name="count" type="INTEGER"/>
+        </createTable>
+
+        <addPrimaryKey tableName="JOB_QUEUE_BATCH_FILE"
+                       columnNames="job_id, batch_id, resource_type"/>
+
+        <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH_FILE" baseColumnNames="job_id, batch_id" constraintName="fk_job_id_batch_id_file"
+                                 referencedTableName="JOB_QUEUE_BATCH" referencedColumnNames="job_id, batch_id"/>
+    </changeSet>
+
 </databaseChangeLog>
