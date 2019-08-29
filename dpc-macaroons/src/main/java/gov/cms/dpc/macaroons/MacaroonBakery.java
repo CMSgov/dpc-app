@@ -10,6 +10,7 @@ import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import org.apache.commons.lang3.tuple.Pair;
+import org.whispersystems.curve25519.Curve25519KeyPair;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class MacaroonBakery {
 
     private final String location;
     private final IRootKeyStore store;
-    private final KeyPair keyPair;
+    private final Curve25519KeyPair keyPair;
     private final List<CaveatWrapper> defaultVerifiers;
     private final List<CaveatSupplier> defaultSuppliers;
     private final IThirdPartyKeyStore thirdPartyKeyStore;
@@ -44,7 +45,7 @@ public class MacaroonBakery {
     MacaroonBakery(String location,
                    IRootKeyStore store,
                    IThirdPartyKeyStore thirdPartyKeyStore,
-                   KeyPair keyPair,
+                   Curve25519KeyPair keyPair,
                    List<CaveatVerifier> defaultVerifiers,
                    List<CaveatSupplier> defaultSuppliers) {
         this.location = location;
@@ -473,7 +474,7 @@ public class MacaroonBakery {
         private final IThirdPartyKeyStore thirdPartyKeyStore;
         private final List<CaveatVerifier> caveatVerifiers;
         private final List<CaveatSupplier> caveatSuppliers;
-        private KeyPair keyPair;
+        private Curve25519KeyPair keyPair;
 
         /**
          * Default parameters for {@link MacaroonBakery}
@@ -514,7 +515,7 @@ public class MacaroonBakery {
             return this;
         }
 
-        public MacaroonBakeryBuilder withKeyPair(KeyPair keyPair) {
+        public MacaroonBakeryBuilder withKeyPair(Curve25519KeyPair keyPair) {
             this.keyPair = keyPair;
             return this;
         }
@@ -526,7 +527,7 @@ public class MacaroonBakery {
          */
         public MacaroonBakery build() {
 
-            final KeyPair keys = getKeyPair();
+            final Curve25519KeyPair keys = getKeyPair();
 
             return new MacaroonBakery(this.serverLocation,
                     this.rootKeyStore,
@@ -536,7 +537,7 @@ public class MacaroonBakery {
                     this.caveatSuppliers);
         }
 
-        private KeyPair getKeyPair() {
+        private Curve25519KeyPair getKeyPair() {
             if (this.keyPair != null) {
                 return this.keyPair;
             }

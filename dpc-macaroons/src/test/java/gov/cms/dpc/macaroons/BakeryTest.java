@@ -7,6 +7,7 @@ import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.whispersystems.curve25519.Curve25519KeyPair;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
@@ -22,7 +23,7 @@ class
 BakeryTest {
 
     private static final MemoryThirdPartyKeyStore thirdParty = new MemoryThirdPartyKeyStore();
-    private static final KeyPair bakeryKey = BakeryKeyFactory.generateKeyPair();
+    private static final Curve25519KeyPair bakeryKey = BakeryKeyFactory.generateKeyPair();
     private static MacaroonBakery bakery;
 
     @BeforeAll

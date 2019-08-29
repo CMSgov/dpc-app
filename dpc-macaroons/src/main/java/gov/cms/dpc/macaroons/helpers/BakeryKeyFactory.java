@@ -6,6 +6,8 @@ import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.whispersystems.curve25519.Curve25519;
+import org.whispersystems.curve25519.Curve25519KeyPair;
 
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
@@ -17,8 +19,8 @@ public class BakeryKeyFactory {
 
     private static final KeyPairGenerator generator = initialize();
 
-    public static KeyPair generateKeyPair() {
-        return generator.generateKeyPair();
+    public static Curve25519KeyPair generateKeyPair() {
+        return Curve25519.getInstance(Curve25519.BEST).generateKeyPair();
     }
 
     /**
@@ -29,14 +31,12 @@ public class BakeryKeyFactory {
      * @param keyPair - {@link KeyPair} to parse and extract ECC secret bytes
      * @return - {@link Byte} secret key of length {@link com.github.nitram509.jmacaroons.MacaroonsConstants#MACAROON_SECRET_KEY_BYTES}
      */
-    public static byte[] unwrapPrivateKeyBytes(KeyPair keyPair) {
-        return ((ECPrivateKey) keyPair.getPrivate()).getS().toByteArray();
+    public static byte[] unwrapPrivateKeyBytes(Curve25519KeyPair keyPair) {
+        return keyPair.getPrivateKey();
     }
 
-    public static byte[] getPublicKeyBytes(KeyPair keyPair) {
-        final byte[] privBytes = unwrapPrivateKeyBytes(keyPair);
-        assert privBytes.length == MacaroonsConstants.MACAROON_SECRET_KEY_BYTES : String.format("Private key length must be %d bytes, not %d", MacaroonsConstants.MACAROON_SECRET_KEY_BYTES, privBytes.length);
-        return Keys.generatePublicKey(privBytes);
+    public static byte[] getPublicKeyBytes(Curve25519KeyPair keyPair) {
+        return keyPair.getPublicKey();
     }
 
     private static KeyPairGenerator initialize() {

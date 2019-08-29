@@ -68,8 +68,8 @@ class ConditionParsingTests {
 
     @Test
     void testSecretEncodingCustomKeys() {
-        final KeyPair firstParty = BakeryKeyFactory.generateKeyPair();
-        final KeyPair thirdParty = BakeryKeyFactory.generateKeyPair();
+        final Curve25519KeyPair firstParty = BakeryKeyFactory.generateKeyPair();
+        final Curve25519KeyPair thirdParty = BakeryKeyFactory.generateKeyPair();
 
         final String testMessage = "This is a test message";
         final String testKey = "this is a test key";

@@ -48,10 +48,5 @@
             <artifactId>curve25519-java</artifactId>
             <version>0.5.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.62</version>
-        </dependency>
     </dependencies>
 </project>
