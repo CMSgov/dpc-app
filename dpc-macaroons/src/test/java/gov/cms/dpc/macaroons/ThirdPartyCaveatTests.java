@@ -1,34 +1,37 @@
 package gov.cms.dpc.macaroons;
 
 import com.github.nitram509.jmacaroons.Macaroon;
+import com.github.nitram509.jmacaroons.MacaroonsBuilder;
+import com.github.nitram509.jmacaroons.MacaroonsConstants;
+import com.github.nitram509.jmacaroons.MacaroonsVerifier;
+import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ThirdPartyCaveatTests {
 
+    private static MacaroonBakery as;
+    private static MacaroonBakery ts;
+    private static MacaroonBakery fs;
+
     @BeforeAll
     static void setup() {
-//        final KeyPair firstPartyKey = BakeryKeyFactory.generateKeyPair();
-//
-//        // Add some third party keys
-//        final KeyPair aliceKeys = BakeryKeyFactory.generateKeyPair();
-//        final KeyPair bobKeys = BakeryKeyFactory.generateKeyPair();
-//
-//        thirdKeyStore.setPublicKey("http://alice", aliceKeys.getPublic());
-//        thirdKeyStore.setPublicKey("http://bob", bobKeys.getPublic());
-
-
+        MemoryThirdPartyKeyStore thirdKeyStore = new MemoryThirdPartyKeyStore();
+        as = createBakery("as-loc", thirdKeyStore);
+        ts = createBakery("ts-loc", thirdKeyStore);
+        fs = createBakery("fs-loc", thirdKeyStore);
     }
 
     /**
@@ -45,18 +48,13 @@ class ThirdPartyCaveatTests {
      */
     @Test
     void testThirdPartyRoundTrip() {
-        final MemoryThirdPartyKeyStore thirdKeyStore = new MemoryThirdPartyKeyStore();
-        final MacaroonBakery as = createBakery("as-loc", thirdKeyStore);
-        final MacaroonBakery ts = createBakery("ts-loc", thirdKeyStore);
-        final MacaroonBakery fs = createBakery("fs-loc", thirdKeyStore);
-
         // TS Creates a macaroon
         final Macaroon tsMacaroon = ts.createMacaroon(Collections.emptyList());
 
         // TS sends the Macaroon to fs which adds a third party caveat to be discharged
         final MacaroonCondition condition = new MacaroonCondition("user", MacaroonCondition.Operator.EQ, "bob");
 
-        final Macaroon m1 = fs.addCaveats(tsMacaroon, new MacaroonCaveat("ac-loc", condition.toBytes()));
+        final Macaroon m1 = fs.addCaveats(tsMacaroon, new MacaroonCaveat("as-loc", condition.toBytes()));
         assertEquals(1, ts.getCaveats(m1).size(), "Should have a single caveat");
 
         final List<Macaroon> discharged = ts.dischargeAll(Collections.singletonList(m1), (caveat, value) -> {
@@ -64,6 +62,22 @@ class ThirdPartyCaveatTests {
             return as.discharge(caveat, value);
         });
         assertTrue(discharged.size() > 1, "Should have more than 1 macaroon");
+
+        ts.verifyMacaroon(discharged);
+    }
+
+    @Test
+    void testThirdPartyFailsWithoutDischarge() {
+        // TS Creates a macaroon
+        final Macaroon tsMacaroon = ts.createMacaroon(Collections.emptyList());
+
+        // TS sends the Macaroon to fs which adds a third party caveat to be discharged
+        final MacaroonCondition condition = new MacaroonCondition("user", MacaroonCondition.Operator.EQ, "bob");
+
+        final Macaroon m1 = fs.addCaveats(tsMacaroon, new MacaroonCaveat("as-loc", condition.toBytes()));
+
+        final BakeryException bakeryException = assertThrows(BakeryException.class, () -> ts.verifyMacaroon(Collections.singletonList(m1)));
+        assertEquals("Couldn't verify 3rd party macaroon, because no discharged macaroon was provided to the verifier.", bakeryException.getMessage(), "Should have correct error message");
     }
 
 

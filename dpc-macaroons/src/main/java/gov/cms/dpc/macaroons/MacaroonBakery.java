@@ -10,8 +10,6 @@ import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import org.apache.commons.lang3.tuple.Pair;
-import org.whispersystems.curve25519.Curve25519;
-import org.whispersystems.curve25519.java.curve_sigs;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -19,10 +17,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
-import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -35,7 +30,7 @@ import java.util.stream.Collectors;
  */
 public class MacaroonBakery {
 
-    public static final Charset CAVEAT_CHARSET = Charset.forName("UTF-8");
+    public static final Charset CAVEAT_CHARSET = StandardCharsets.UTF_8;
     private static final Base64.Encoder encoder = Base64.getUrlEncoder();
     private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
@@ -148,23 +143,23 @@ public class MacaroonBakery {
     }
 
     /**
-     * Verify the {@link Macaroon} using only the default verifiers
+     * Verify a {@link Macaroon} using only the default verifiers
      *
-     * @param macaroon - {@link Macaroon} to verify
+     * @param macaroons - {@link List} of {@link Macaroon} to verify along with any discharges
      * @throws BakeryException if verification fails
      */
-    public void verifyMacaroon(Macaroon macaroon) {
-        verifyMacaroonImpl(macaroon, Collections.emptyList());
+    public void verifyMacaroon(List<Macaroon> macaroons) {
+        verifyMacaroonImpl(macaroons, Collections.emptyList());
     }
 
     /**
-     * Verify the {@link Macaroon} using both the default verifiers, as well as the ones provided in this method.
+     * Verify the {@link Macaroon}s using both the default verifiers, as well as the ones provided in this method.
      * The provided {@link String} variables will be directly matched against the {@link MacaroonCaveat} string representation
      *
-     * @param macaroon       - {@link Macaroon} to verify
+     * @param macaroons      - {@link List} of {@link Macaroon} to verify, along with any discharges
      * @param exactVerifiers - {@link String} values to be directly matched against {@link MacaroonCaveat} values
      */
-    public void verifyMacaroon(Macaroon macaroon, String... exactVerifiers) {
+    public void verifyMacaroon(List<Macaroon> macaroons, String... exactVerifiers) {
         // Convert the String checks into a caveat wrapper by generating a lambda which handles teh actual checking
         final List<CaveatWrapper> verifiers = Arrays.stream(exactVerifiers)
                 .map(ev -> new CaveatWrapper((caveat) -> {
@@ -175,20 +170,20 @@ public class MacaroonBakery {
                 }))
                 .collect(Collectors.toList());
 
-        verifyMacaroonImpl(macaroon, verifiers);
+        verifyMacaroonImpl(macaroons, verifiers);
     }
 
     /**
      * Verify the {@link Macaroon} using both the default verifiers, as well as the ones provided in this method.
      *
-     * @param macaroon        - {@link Macaroon} to verify
+     * @param macaroons       - {@link List} of {@link Macaroon} to verify, along with any discharges
      * @param caveatVerifiers - {@link CaveatVerifier} which will be executed against the {@link MacaroonCaveat}
      */
-    public void verifyMacaroon(Macaroon macaroon, CaveatVerifier... caveatVerifiers) {
+    public void verifyMacaroon(List<Macaroon> macaroons, CaveatVerifier... caveatVerifiers) {
         final List<CaveatWrapper> verifiers = Arrays.stream(caveatVerifiers)
                 .map(CaveatWrapper::new)
                 .collect(Collectors.toList());
-        verifyMacaroonImpl(macaroon, verifiers);
+        verifyMacaroonImpl(macaroons, verifiers);
     }
 
     /**
@@ -228,19 +223,42 @@ public class MacaroonBakery {
     }
 
     public List<Macaroon> dischargeAll(List<Macaroon> macaroons, MacaroonDischarger discharger) {
+        final List<Macaroon> macaroons1 = dischargeAllInner(macaroons, discharger);
+
+        final Macaroon rootMacaroon = macaroons1.get(0);
+
+        List<Macaroon> boundMacaroons = new ArrayList<>();
+
+        // Add the root Macaroon, which everything else binds to
+        boundMacaroons.add(rootMacaroon);
+
+        final Macaroon builder = new MacaroonsBuilder(rootMacaroon)
+                .prepare_for_request(macaroons1.get(1))
+                .getMacaroon();
+
+        boundMacaroons.add(builder);
+
+        // Bind each of the discharge macaroons to the root macaroon
+//        macaroons1.subList(1, macaroons1.size())
+//                .stream()
+//                .map(builder::prepare_for_request)
+//                .map(MacaroonsBuilder::getMacaroon)
+//                .forEach(boundMacaroons::add);
+
+        return boundMacaroons;
+    }
+
+    public List<Macaroon> dischargeAllInner(List<Macaroon> macaroons, MacaroonDischarger discharger) {
         if (macaroons.isEmpty()) {
             throw new BakeryException("No macaroons to discharge");
         }
 
-        List<Macaroon> discharged = new ArrayList<>();
-        discharged.addAll(macaroons);
+        List<Macaroon> discharged = new ArrayList<>(macaroons);
 
         Queue<MacaroonCaveat> needCaveat = new ArrayDeque<>();
         Map<String, Boolean> haveCaveat = new HashMap<>();
         macaroons.subList(1, macaroons.size())
-                .forEach(macaroon -> {
-                    haveCaveat.put(macaroon.identifier, true);
-                });
+                .forEach(macaroon -> haveCaveat.put(macaroon.identifier, true));
 
 
         // addCaveats adds any required third party caveats to the need slice
@@ -248,7 +266,7 @@ public class MacaroonBakery {
         Consumer<Macaroon> addCaveats = (macaroon) -> {
             this.getCaveats(macaroon)
                     .stream()
-                    .filter(cav -> cav.getVerificationID().length > 0 || !haveCaveat.containsKey(cav.toString()))
+                    .filter(cav -> cav.getVerificationID() != null && (cav.getVerificationID().length > 0 || !haveCaveat.containsKey(cav.toString())))
                     .forEach(needCaveat::add);
         };
 
@@ -257,7 +275,7 @@ public class MacaroonBakery {
         // Pop each caveat off the queue and process it
         while (!needCaveat.isEmpty()) {
             final MacaroonCaveat cav = needCaveat.poll();
-            final Macaroon dm = discharger.getDischarge(cav, cav.getVerificationID());
+            final Macaroon dm = discharger.getDischarge(cav, null);
             discharged.add(dm);
             addCaveats.accept(dm);
         }
@@ -269,7 +287,7 @@ public class MacaroonBakery {
         final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
 
         // Create a discharge macaroon
-        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), new String(stringMacaroonCaveatPair.getRight().toString()));
+        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), caveat.getRawCaveat());
     }
 
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {
@@ -279,8 +297,8 @@ public class MacaroonBakery {
         caveats
                 .forEach(caveat -> {
                     if (caveat.isThirdParty()) {
-                        final byte[] encryptedCaveat = encodeThirdPartyCaveat(caveat, rootKey);
-                        builder.add_third_party_caveat(caveat.getLocation(), rootKey, encryptedCaveat);
+                        final byte[] encryptedCaveat = encodeThirdPartyCaveat(caveat, "4; guaranteed random by a fair toss of the dice");
+                        builder.add_third_party_caveat(caveat.getLocation(), "4; guaranteed random by a fair toss of the dice", encryptedCaveat);
 
                     } else {
                         builder.add_first_party_caveat(caveat.toString());
@@ -404,9 +422,7 @@ public class MacaroonBakery {
         final byte[] secretPart = box.open(nonce, msg)
                 .orElseThrow(() -> new BakeryException("Cannot decrypt secret part of caveat"));
 
-        final Pair<String, MacaroonCondition> caveatPair = decodeCaveatSecretPart(secretPart);
-
-        return caveatPair;
+        return decodeCaveatSecretPart(secretPart);
     }
 
     private static Pair<String, MacaroonCondition> decodeCaveatSecretPart(byte[] secretPart) {
@@ -430,15 +446,19 @@ public class MacaroonBakery {
         return Pair.of(new String(rootKey, MacaroonsConstants.IDENTIFIER_CHARSET), caveat);
     }
 
-    private void verifyMacaroonImpl(Macaroon macaroon, List<CaveatWrapper> verifiers) {
-        final MacaroonsVerifier verifier = new MacaroonsVerifier(macaroon);
+    private void verifyMacaroonImpl(List<Macaroon> macaroons, List<CaveatWrapper> verifiers) {
+        final Macaroon rootMacaroon = macaroons.get(0);
+        final List<Macaroon> dischargeMacaroons = macaroons.subList(1, macaroons.size());
+        final MacaroonsVerifier verifier = new MacaroonsVerifier(rootMacaroon);
         // Add the default caveats and the provided ones
         this.defaultVerifiers.forEach(v -> verifier.satisfyGeneral(v::verifyCaveat));
         verifiers
                 .forEach(v -> verifier.satisfyGeneral(v::verifyCaveat));
 
+        // Add any discharge Macaroon
+        dischargeMacaroons.forEach(verifier::satisfy3rdParty);
         // Get the macaroon secret from the store
-        final String secret = this.store.get(macaroon.identifier);
+        final String secret = this.store.get(rootMacaroon.identifier);
         try {
             verifier.assertIsValid(secret);
         } catch (MacaroonValidationException e) {
