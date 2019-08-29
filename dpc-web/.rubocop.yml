@@ -11,8 +11,8 @@ AllCops:
     - 'config/**/*'
     - 'config.ru'
     - 'db/**/*'
-    - 'Gemfile'
-    - 'Rakefile'
+    - 'dpc-web/Gemfile'
+    - 'dpc-web/Rakefile'
 
 Metrics/LineLength:
   Max: 120
