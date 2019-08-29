@@ -1,17 +1,12 @@
 package gov.cms.dpc.macaroons;
 
-import com.codahale.xsalsa20poly1305.Keys;
 import com.codahale.xsalsa20poly1305.SecretBox;
 import gov.cms.dpc.macaroons.helpers.BakeryKeyFactory;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.junit.jupiter.api.Test;
 import org.whispersystems.curve25519.Curve25519;
 import org.whispersystems.curve25519.Curve25519KeyPair;
 
-import java.security.KeyPair;
 import java.security.SecureRandom;
-import java.security.interfaces.ECPublicKey;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,11 +75,11 @@ class ConditionParsingTests {
         random.nextBytes(testNonce);
 
         // Encrypt it with the first party priv key and the third party pub key
-        final byte[] thirdPartyPrivate = BakeryKeyFactory.unwrapPrivateKeyBytes(thirdParty);
-        final byte[] thirdPartyPublic = Keys.generatePublicKey(thirdPartyPrivate);
+        final byte[] thirdPartyPrivate = thirdParty.getPrivateKey();
+        final byte[] thirdPartyPublic = thirdParty.getPublicKey();
 
-        final byte[] firstPartyPrivate = BakeryKeyFactory.unwrapPrivateKeyBytes(firstParty);
-        final byte[] firstPartyPublic = Keys.generatePublicKey(firstPartyPrivate);
+        final byte[] firstPartyPrivate = firstParty.getPrivateKey();
+        final byte[] firstPartyPublic = firstParty.getPublicKey();
 
         // encrypt the message
         final byte[] sealed = MacaroonBakery.encodeSecretPart(thirdPartyPublic, firstPartyPrivate, testNonce, testKey, testMessage);

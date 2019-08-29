@@ -90,6 +90,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
+    @Singleton
     IThirdPartyKeyStore thirdPartyKeyStore() {
         return new MemoryThirdPartyKeyStore();
     }

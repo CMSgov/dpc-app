@@ -59,7 +59,7 @@ public class MacaroonBakery {
         this.keyPair = keyPair;
 
         // Add the current location and the custom `local` location to the TP key store
-        final byte[] keyBytes = BakeryKeyFactory.getPublicKeyBytes(this.keyPair);
+        final byte[] keyBytes = this.keyPair.getPublicKey();
         this.thirdPartyKeyStore.setPublicKey(location, keyBytes);
         this.thirdPartyKeyStore.setPublicKey("local", keyBytes);
     }
@@ -321,8 +321,8 @@ public class MacaroonBakery {
                 .orElseThrow(() -> new BakeryException(String.format("Cannot find public key for %s", caveat.getLocation())));
 
 //        final byte[] thirdPartyKeyBytes = publicKey.getEncoded();
-        final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keyPair);
-        final byte[] publicKeyBytes = BakeryKeyFactory.getPublicKeyBytes(this.keyPair);
+        final byte[] privateKeyBytes = this.keyPair.getPrivateKey();
+        final byte[] publicKeyBytes = this.keyPair.getPublicKey();
 
         final byte[] secretPart = encodeSecretPart(thirdPartyKeyBytes,
                 privateKeyBytes,
@@ -398,7 +398,7 @@ public class MacaroonBakery {
         byte[] caveatKeySignature = new byte[4];
         byteBuffer.get(caveatKeySignature);
 
-        byte[] pubKeySig = Arrays.copyOfRange(BakeryKeyFactory.getPublicKeyBytes(this.keyPair), 0, 4);
+        byte[] pubKeySig = Arrays.copyOfRange(this.keyPair.getPublicKey(), 0, 4);
         if (!Arrays.equals(caveatKeySignature, pubKeySig)) {
             throw new BakeryException("Public key mismatch");
         }
@@ -411,7 +411,7 @@ public class MacaroonBakery {
 
 
         // Decrypt the secret part
-        final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keyPair);
+        final byte[] privateKeyBytes = this.keyPair.getPrivateKey();
 
         final SecretBox box = new SecretBox(firstPartyPublicKey, privateKeyBytes);
 
