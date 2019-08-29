@@ -11,8 +11,9 @@ AllCops:
     - 'config/**/*'
     - 'config.ru'
     - 'db/**/*'
-    - 'dpc-web/Gemfile'
-    - 'dpc-web/Rakefile'
+
+Bundler/OrderedGems:
+  Enabled: false
 
 Metrics/LineLength:
   Max: 120
@@ -34,3 +35,7 @@ Style/Documentation:
 
 Style/Lambda:
   Enabled: false
+
+Style/SymbolArray:
+  Exclude:
+    - 'Gemfile'
