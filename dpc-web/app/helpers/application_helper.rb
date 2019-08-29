@@ -32,5 +32,4 @@ module ApplicationHelper
   def tabs_set(tabs_set)
     content_for(:tabs_set) { tabs_set }
   end
-
 end

@@ -31,3 +31,12 @@ plugins:
     enabled: true
     config:
       sonar.java.source: "11"
+  brakeman:
+    enabled: true
+    config:
+      app_path: dpc-web
+  rubocop:
+    enabled: true
+    channel: rubocop-0-67
+    config:
+      file: "dpc-web/.rubocop.yml"
