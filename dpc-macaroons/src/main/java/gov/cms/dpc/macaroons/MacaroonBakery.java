@@ -266,7 +266,7 @@ public class MacaroonBakery {
         Consumer<Macaroon> addCaveats = (macaroon) -> {
             this.getCaveats(macaroon)
                     .stream()
-                    .filter(cav -> cav.getVerificationID() != null && (cav.getVerificationID().length > 0 || !haveCaveat.containsKey(cav.toString())))
+                    .filter(cav -> cav.getVerificationID().length > 1 && !haveCaveat.containsKey(cav.toString()))
                     .forEach(needCaveat::add);
         };
 

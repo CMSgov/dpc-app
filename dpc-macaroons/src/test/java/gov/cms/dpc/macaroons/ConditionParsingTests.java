@@ -80,8 +80,6 @@ class ConditionParsingTests {
         random.nextBytes(testNonce);
 
         // Encrypt it with the first party priv key and the third party pub key
-
-
         final byte[] thirdPartyPrivate = BakeryKeyFactory.unwrapPrivateKeyBytes(thirdParty);
         final byte[] thirdPartyPublic = Keys.generatePublicKey(thirdPartyPrivate);
 
@@ -89,7 +87,6 @@ class ConditionParsingTests {
         final byte[] firstPartyPublic = Keys.generatePublicKey(firstPartyPrivate);
 
         // encrypt the message
-
         final byte[] sealed = MacaroonBakery.encodeSecretPart(thirdPartyPublic, firstPartyPrivate, testNonce, testKey, testMessage);
 
         final SecretBox box = new SecretBox(firstPartyPublic, thirdPartyPrivate);

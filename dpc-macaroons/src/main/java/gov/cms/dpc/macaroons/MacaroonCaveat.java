@@ -21,6 +21,7 @@ public class MacaroonCaveat {
 
     public MacaroonCaveat() {
         this.location = "";
+        this.verificationID = new byte[0];
     }
 
     public MacaroonCaveat(String location, MacaroonCondition condition) {
