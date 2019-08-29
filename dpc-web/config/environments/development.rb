@@ -35,6 +35,25 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  config.action_mailer.perform_deliveries = true
+
+  # By default we use letter_opener to render the email in a browser
+  # rather than send them:
+  config.action_mailer.delivery_method = :letter_opener
+
+  # For sending emails locally:
+  # config.action_mailer.delivery_method = :smtp
+  # config.action_mailer.smtp_settings = {
+  #   address:              ENV['SMTP_ADDRESS'],
+  #   port:                 ENV['SMTP_PORT'],
+  #   domain:               ENV['SMTP_DOMAIN'],
+  #   user_name:            ENV['SMTP_USER_NAME'],
+  #   password:             ENV['SMTP_PASSWORD'],
+  #   authentication:       ENV['SMTP_AUTH'],
+  #   openssl_verify_mode:  ENV['SMTP_SSL_VERIFY'],
+  #   enable_starttls_auto: true
+  # }
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
@@ -63,5 +82,6 @@ Rails.application.configure do
   config.sass.inline_source_maps = true
 
   # Devise requires mailer
-  # config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  config.action_mailer.asset_host = "http://localhost:3000"
 end

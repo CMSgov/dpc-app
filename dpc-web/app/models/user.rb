@@ -27,7 +27,7 @@ class User < ApplicationRecord
   # :trackable, and :omniauthable, :recoverable,
   devise :database_authenticatable, :rememberable,
          :validatable, :trackable, :registerable,
-         :timeoutable
+         :timeoutable, :recoverable
 
   enum organization_type: {
     primary_care_clinic: 0, speciality_clinic: 1,
