@@ -38,4 +38,4 @@ plugins:
   rubocop:
     enabled: true
     config:
-      file: dpc-web/rubo-codeclimate.yml
+      file: "dpc-web/.rubocop.yml"
