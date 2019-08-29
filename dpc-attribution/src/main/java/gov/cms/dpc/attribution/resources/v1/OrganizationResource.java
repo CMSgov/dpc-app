@@ -12,6 +12,7 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
@@ -206,7 +207,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     private boolean validateMacaroon(UUID organizationID, Macaroon macaroon) {
         try {
             final String caveatString = String.format("organization_id = %s", organizationID.toString());
-            this.bakery.verifyMacaroon(macaroon, caveatString);
+            this.bakery.verifyMacaroon(Collections.singletonList(macaroon), caveatString);
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed.", e);
             return false;
@@ -218,7 +219,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     private Macaroon generateMacaroon(UUID organizationID) {
         // Create some caveats
         final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("organization_id", MacaroonCaveat.Operator.EQ, organizationID.toString())
+                new MacaroonCaveat(new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString()))
         );
         return this.bakery.createMacaroon(caveats);
     }

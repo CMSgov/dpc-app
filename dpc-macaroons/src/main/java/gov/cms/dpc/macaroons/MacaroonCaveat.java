@@ -24,6 +24,12 @@ public class MacaroonCaveat {
         this.verificationID = new byte[0];
     }
 
+    public MacaroonCaveat(MacaroonCondition condition) {
+        this.location = "";
+        this.rawCaveat = condition.toBytes();
+        this.verificationID = new byte[0];
+    }
+
     public MacaroonCaveat(String location, MacaroonCondition condition) {
         this.location = location;
         this.rawCaveat = condition.toBytes();

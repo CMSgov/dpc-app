@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.macaroons;
 import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -24,6 +25,6 @@ public class ExpirationCaveatSupplier implements CaveatSupplier {
     public MacaroonCaveat get() {
         final OffsetDateTime expiryTime = OffsetDateTime.now(ZoneOffset.UTC)
                 .plus(expirationPolicy.getExpirationOffset(), expirationPolicy.getExpirationUnit());
-        return new MacaroonCaveat(EXPIRATION_KEY, MacaroonCaveat.Operator.EQ, expiryTime.toString());
+        return new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString()));
     }
 }
