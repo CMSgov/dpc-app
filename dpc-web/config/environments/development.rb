@@ -50,6 +50,7 @@ Rails.application.configure do
   #   user_name:            ENV['SMTP_USER_NAME'],
   #   password:             ENV['SMTP_PASSWORD'],
   #   authentication:       ENV['SMTP_AUTH'],
+  #   openssl_verify_mode:  ENV['SMTP_SSL_VERIFY'],
   #   enable_starttls_auto: true
   # }
 
