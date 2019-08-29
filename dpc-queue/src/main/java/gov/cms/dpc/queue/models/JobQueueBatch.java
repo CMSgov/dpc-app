@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -252,6 +253,18 @@ public class JobQueueBatch implements Serializable {
     }
 
     /**
+     * Pauses the current batch and allows another aggregator to pickup where left off
+     */
+    public void setPausedStatus(UUID aggregatorID) {
+        if ( this.status != JobStatus.RUNNING ) {
+            throw new JobQueueFailure(jobID, batchID, String.format("Cannot pause batch. JobStatus: %s", this.status));
+        }
+        this.verifyAggregatorID(aggregatorID);
+        this.status = JobStatus.QUEUED;
+        this.aggregatorID = null;
+    }
+
+    /**
      * Sets the completed status and verifies can be completed.
      */
     public void setCompletedStatus(UUID aggregatorID) {
@@ -279,6 +292,19 @@ public class JobQueueBatch implements Serializable {
         this.status = JobStatus.FAILED;
         this.aggregatorID = null;
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
+    /**
+     * Restarts the batch so it can be freshly picked up by a new aggregator.
+     */
+    public void restartBatch() {
+        if (!Arrays.asList(JobStatus.COMPLETED, JobStatus.FAILED).contains(this.status)) {
+            throw new JobQueueFailure(jobID, batchID, String.format("Cannot restart batch. JobStatus: %s", this.status));
+        }
+        this.status = JobStatus.QUEUED;
+        this.patientIndex = null;
+        this.startTime = null;
+        this.completeTime = null;
     }
 
     protected void verifyAggregatorID(UUID aggregatorID) throws JobQueueFailure {

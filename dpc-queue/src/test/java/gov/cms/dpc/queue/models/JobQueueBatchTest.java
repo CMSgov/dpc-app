@@ -108,6 +108,31 @@ public class JobQueueBatchTest {
     }
 
     @Test
+    void testSetPausedStatus() {
+        final var job = Mockito.spy(createJobQueueBatch());
+        job.setRunningStatus(aggregatorID);
+        Mockito.reset(job);
+
+        job.setPausedStatus(aggregatorID);
+        assertEquals(JobStatus.QUEUED, job.getStatus());
+        assertTrue(job.getAggregatorID().isEmpty());
+
+        Mockito.verify(job).verifyAggregatorID(aggregatorID);
+    }
+
+    @Test
+    void testSetPausedStatus_NotRunning() {
+        final var job = Mockito.spy(createJobQueueBatch());
+
+        try {
+            job.setPausedStatus(aggregatorID);
+            Assertions.fail();
+        } catch ( JobQueueFailure e ) {
+            assertTrue(e.getMessage().contains("Cannot pause batch."));
+        }
+    }
+
+    @Test
     void testSetCompletedStatus() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.RUNNING;
@@ -175,6 +200,32 @@ public class JobQueueBatchTest {
             Assertions.fail();
         } catch (JobQueueFailure e) {
             assertTrue(e.getMessage().contains("Cannot complete. JobStatus"));
+        }
+    }
+
+    @Test
+    void testRestartBatch() {
+        final var job = createJobQueueBatch();
+        job.setRunningStatus(aggregatorID);
+        job.setFailedStatus(aggregatorID);
+
+        job.restartBatch();
+
+        assertEquals(JobStatus.QUEUED, job.getStatus());
+        assertNull(job.patientIndex);
+        assertNull(job.startTime);
+        assertNull(job.completeTime);
+    }
+
+    @Test
+    void testRestartBatch_InvalidStatus() {
+        final var job = createJobQueueBatch();
+
+        try {
+            job.restartBatch();
+            Assertions.fail();
+        } catch (JobQueueFailure e) {
+            assertTrue(e.getMessage().contains("Cannot restart batch"));
         }
     }
 
