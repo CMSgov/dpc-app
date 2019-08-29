@@ -291,14 +291,13 @@ public class MacaroonBakery {
     }
 
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {
-
-        final String rootKey = this.store.get(builder.getMacaroon().identifier);
-
         caveats
                 .forEach(caveat -> {
                     if (caveat.isThirdParty()) {
-                        final byte[] encryptedCaveat = encodeThirdPartyCaveat(caveat, "4; guaranteed random by a fair toss of the dice");
-                        builder.add_third_party_caveat(caveat.getLocation(), "4; guaranteed random by a fair toss of the dice", encryptedCaveat);
+                        // Generate a new random key
+                        final String caveatKey = this.store.generateKey();
+                        final byte[] encryptedCaveat = encodeThirdPartyCaveat(caveat, caveatKey);
+                        builder.add_third_party_caveat(caveat.getLocation(), caveatKey, encryptedCaveat);
 
                     } else {
                         builder.add_first_party_caveat(caveat.toString());

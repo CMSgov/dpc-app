@@ -1,6 +1,7 @@
 package gov.cms.dpc.macaroons.store;
 
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import gov.cms.dpc.macaroons.helpers.SecretHelpers;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,9 +16,11 @@ import java.security.SecureRandom;
 public class MemoryRootKeyStore implements IRootKeyStore {
 
     private final String rootKey;
+    private final SecureRandom random;
 
     @Inject
     public MemoryRootKeyStore(SecureRandom random) {
+        this.random = random;
         final byte[] keyBytes = new byte[24];
         random.nextBytes(keyBytes);
         this.rootKey = new String(keyBytes, StandardCharsets.UTF_8);
@@ -35,5 +38,10 @@ public class MemoryRootKeyStore implements IRootKeyStore {
         }
 
         throw new BakeryException(String.format("Cannot find root key for ID: %s", macaroonID));
+    }
+
+    @Override
+    public String generateKey() {
+        return SecretHelpers.generateSecretKey(this.random);
     }
 }
