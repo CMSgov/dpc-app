@@ -44,6 +44,9 @@
 
     <changeSet id="queue-v2-design" author="ronaldheft-usds">
         <createTable tableName="JOB_QUEUE_BATCH">
+            <column name="job_batch_id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
             <column name="job_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
@@ -65,14 +68,10 @@
             <column name="complete_time" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
-        <addPrimaryKey tableName="JOB_QUEUE_BATCH"
-                       columnNames="job_id, batch_id"/>
+        <addUniqueConstraint tableName="JOB_QUEUE_BATCH" columnNames="job_id, batch_id"/>
 
         <createTable tableName="JOB_QUEUE_BATCH_FILE">
-            <column name="job_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="batch_id" type="UUID">
+            <column name="job_batch_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
             <column name="resource_type" type="INTEGER"/>
@@ -81,10 +80,10 @@
         </createTable>
 
         <addPrimaryKey tableName="JOB_QUEUE_BATCH_FILE"
-                       columnNames="job_id, batch_id, resource_type"/>
+                       columnNames="job_batch_id, resource_type"/>
 
-        <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH_FILE" baseColumnNames="job_id, batch_id" constraintName="fk_job_id_batch_id_file"
-                                 referencedTableName="JOB_QUEUE_BATCH" referencedColumnNames="job_id, batch_id"/>
+        <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH_FILE" baseColumnNames="job_batch_id" constraintName="fk_job_batch_id_file"
+                                 referencedTableName="JOB_QUEUE_BATCH" referencedColumnNames="job_batch_id"/>
 
         <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH" baseColumnNames="organization_id" constraintName="fk_organization_id_job_batch"
                                  referencedTableName="ORGANIZATIONS"

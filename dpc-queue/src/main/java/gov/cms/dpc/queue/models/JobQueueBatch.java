@@ -46,16 +46,21 @@ public class JobQueueBatch implements Serializable {
     }
 
     /**
-     * The unique job identifier
+     * The unique job batch identifier. Exists because Hibernate is terrible with composite keys
      */
     @Id
+    @Column(name = "job_batch_id")
+    private UUID jobBatchID;
+
+    /**
+     * The unique job identifier
+     */
     @Column(name = "job_id")
     private UUID jobID;
 
     /**
      * The unique batch identifier
      */
-    @Id
     @Column(name = "batch_id")
     private UUID batchID;
 
@@ -128,6 +133,7 @@ public class JobQueueBatch implements Serializable {
     }
 
     protected JobQueueBatch(UUID jobID, UUID batchID, UUID orgID, List<String> patients) {
+        this.jobBatchID = UUID.randomUUID();
         this.jobID = jobID;
         this.batchID = batchID;
         this.orgID = orgID;
@@ -137,6 +143,7 @@ public class JobQueueBatch implements Serializable {
     }
 
     public JobQueueBatch(UUID jobID, UUID batchID, UUID orgID, List<String> patients, RSAPublicKey pubKey) {
+        this.jobBatchID = UUID.randomUUID();
         this.jobID = jobID;
         this.batchID = batchID;
         this.orgID = orgID;
@@ -163,6 +170,10 @@ public class JobQueueBatch implements Serializable {
             default:
                 return false;
         }
+    }
+
+    public UUID getJobBatchID() {
+        return jobBatchID;
     }
 
     public UUID getJobID() {
