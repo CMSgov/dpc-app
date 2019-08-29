@@ -85,7 +85,7 @@ public class JobQueueBatch implements Serializable {
      * The last processed patient index. Null indicates no patients have been processed yet.
      */
     @Column(name = "patient_index")
-    private Integer patientIndex;
+    protected Integer patientIndex;
 
     /**
      * The current aggregator processing the batch. Null indicates no aggregator is processing the batch.
@@ -126,7 +126,7 @@ public class JobQueueBatch implements Serializable {
     public JobQueueBatch() {
     }
 
-    public JobQueueBatch(UUID jobID, UUID batchID, UUID orgID, List<String> patients) {
+    protected JobQueueBatch(UUID jobID, UUID batchID, UUID orgID, List<String> patients) {
         this.jobID = jobID;
         this.batchID = batchID;
         this.orgID = orgID;
@@ -188,8 +188,8 @@ public class JobQueueBatch implements Serializable {
         return patients;
     }
 
-    public Integer getPatientIndex() {
-        return patientIndex;
+    public Optional<Integer> getPatientIndex() {
+        return Optional.ofNullable(patientIndex);
     }
 
     public Optional<UUID> getAggregatorID() {
@@ -234,18 +234,49 @@ public class JobQueueBatch implements Serializable {
     }
 
     /**
-     * Transition this job to a COMPLETED or FAILED status.
-     * This job should be in the RUNNING state.
-     *
-     * @param status - the new status
+     * Fetch the next patient in the batch and increment the patient index.
+     * Returns null if at the end of the list.
      */
-    public void setFinishedStatus(UUID aggregatorID, JobStatus status) {
-        assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
+    public String fetchNextBatch(UUID aggregatorID) {
+        if ( this.status != JobStatus.RUNNING ) {
+            throw new JobQueueFailure(jobID, batchID, String.format("Cannot fetch next batch. JobStatus: %s", this.status));
+        }
+        this.verifyAggregatorID(aggregatorID);
+        Integer index = this.getPatientIndex().orElse(-1) + 1;
+        if ( index < this.patients.size() ) {
+            // Patient index should be set to the last successful fetched result
+            this.patientIndex = index;
+            return this.patients.get(this.patientIndex);
+        }
+        return null;
+    }
+
+    /**
+     * Sets the completed status and verifies can be completed.
+     */
+    public void setCompletedStatus(UUID aggregatorID) {
+        if (this.status != JobStatus.RUNNING) {
+            throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. JobStatus: %s", this.status));
+        }
+        if (this.patientIndex == null || this.getPatients().size() != this.patientIndex+1) {
+            throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. Job processing not finished. Only on patient %d of %d", this.getPatientIndex().orElse(-1)+1, patients.size()));
+        }
+        this.verifyAggregatorID(aggregatorID);
+        this.status = JobStatus.COMPLETED;
+        this.aggregatorID = null;
+        this.patientIndex = null;
+        completeTime = OffsetDateTime.now(ZoneOffset.UTC);
+    }
+
+    /**
+     * Marks the job batch as failed.
+     */
+    public void setFailedStatus(UUID aggregatorID) {
         if (this.status != JobStatus.RUNNING) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. JobStatus: %s", this.status));
         }
         this.verifyAggregatorID(aggregatorID);
-        this.status = status;
+        this.status = JobStatus.FAILED;
         this.aggregatorID = null;
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);
     }

@@ -2,9 +2,7 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -73,30 +71,56 @@ public class JobQueueBatchTest {
     }
 
     @Test
-    void testSetFinishedStatus() {
+    void testFetchNextBatch() {
+        final var job = Mockito.spy(createJobQueueBatch());
+        job.setRunningStatus(aggregatorID);
+        Mockito.reset(job);
+
+        final String firstResult = job.fetchNextBatch(aggregatorID);
+        assertEquals("1", firstResult);
+        assertEquals(0, job.getPatientIndex().get());
+
+        final String secondResult = job.fetchNextBatch(aggregatorID);
+        assertEquals("2", secondResult);
+        assertEquals(1, job.getPatientIndex().get());
+
+        final String thirdResult = job.fetchNextBatch(aggregatorID);
+        assertEquals("3", thirdResult);
+        assertEquals(2, job.getPatientIndex().get());
+
+        final String done = job.fetchNextBatch(aggregatorID);
+        assertNull(done);
+        assertEquals(2, job.getPatientIndex().get());
+
+        Mockito.verify(job, Mockito.times(job.getPatients().size() + 1)).verifyAggregatorID(aggregatorID);
+    }
+
+    @Test
+    void testFetchNextBatch_NotRunning() {
+        final var job = Mockito.spy(createJobQueueBatch());
+
+        try {
+            job.fetchNextBatch(aggregatorID);
+            Assertions.fail();
+        } catch ( JobQueueFailure e ) {
+            assertTrue(e.getMessage().contains("Cannot fetch next batch."));
+        }
+    }
+
+    @Test
+    void testSetCompletedStatus() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.RUNNING;
+        job.patientIndex = 2;
 
-        job.setFinishedStatus(aggregatorID, JobStatus.COMPLETED);
+        job.setCompletedStatus(aggregatorID);
 
         assertEquals(JobStatus.COMPLETED, job.getStatus());
         assertFalse(job.getAggregatorID().isPresent());
         assertNotNull(job.getCompleteTime());
+        assertNull(job.patientIndex);
 
         Mockito.verify(job).verifyAggregatorID(aggregatorID);
-    }
-
-    @Test
-    void testSetFinishedStatus_InvalidCompletionStatus() {
-        final var job = Mockito.spy(createJobQueueBatch());
-        job.status = JobStatus.RUNNING;
-
-        try {
-            job.setFinishedStatus(aggregatorID, JobStatus.QUEUED);
-            Assertions.fail();
-        } catch (AssertionError e) {
-            assertNotNull(e);
-        }
     }
 
     @Test
@@ -105,10 +129,52 @@ public class JobQueueBatchTest {
         job.status = JobStatus.QUEUED;
 
         try {
-            job.setFinishedStatus(aggregatorID, JobStatus.FAILED);
+            job.setCompletedStatus(aggregatorID);
             Assertions.fail();
-        } catch (Exception e) {
-            assertTrue(e.getMessage().contains("Cannot complete."));
+        } catch (JobQueueFailure e) {
+            assertTrue(e.getMessage().contains("Cannot complete. JobStatus"));
+        }
+    }
+
+    @Test
+    void testSetFinishedStatus_NotDoneProcessing() {
+        final var job = Mockito.spy(createJobQueueBatch());
+        job.status = JobStatus.RUNNING;
+
+        try {
+            job.setCompletedStatus(aggregatorID);
+            Assertions.fail();
+        } catch (JobQueueFailure e) {
+            assertTrue(e.getMessage().contains("Cannot complete. Job processing not finished"));
+        }
+    }
+
+    @Test
+    void testSetFailedStatus() {
+        final var job = Mockito.spy(createJobQueueBatch());
+        job.status = JobStatus.RUNNING;
+        job.patientIndex = 2;
+
+        job.setFailedStatus(aggregatorID);
+
+        assertEquals(JobStatus.FAILED, job.getStatus());
+        assertFalse(job.getAggregatorID().isPresent());
+        assertNotNull(job.getCompleteTime());
+        assertEquals(2, job.patientIndex);
+
+        Mockito.verify(job).verifyAggregatorID(aggregatorID);
+    }
+
+    @Test
+    void testSetFailedStatus_InvalidRunningStatus() {
+        final var job = Mockito.spy(createJobQueueBatch());
+        job.status = JobStatus.QUEUED;
+
+        try {
+            job.setFailedStatus(aggregatorID);
+            Assertions.fail();
+        } catch (JobQueueFailure e) {
+            assertTrue(e.getMessage().contains("Cannot complete. JobStatus"));
         }
     }
 
@@ -154,7 +220,12 @@ public class JobQueueBatchTest {
                 () -> assertTrue(job.getAggregatorID().isPresent())
         );
 
-        job.setFinishedStatus(aggregatorID, JobStatus.COMPLETED);
+        String result;
+        do {
+            result = job.fetchNextBatch(aggregatorID);
+        } while (result != null);
+
+        job.setCompletedStatus(aggregatorID);
         assertAll(
                 () -> assertEquals(JobStatus.COMPLETED, job.getStatus()),
                 () -> assertTrue(job.getCompleteTime().isPresent()),
