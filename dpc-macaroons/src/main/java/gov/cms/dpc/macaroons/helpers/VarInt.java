@@ -24,16 +24,12 @@ import java.io.IOException;
 
 /**
  * This code was taken from: https://github.com/addthis/stream-lib/blob/master/src/main/java/com/clearspring/analytics/util/Varint.java
- */
-
-
-/**
  * <p>Encodes signed and unsigned values using a common variable-length
  * scheme, found for example in
  * <a href="http://code.google.com/apis/protocolbuffers/docs/encoding.html">
  * Google's Protocol Buffers</a>. It uses fewer bytes to encode smaller values,
  * but will use slightly more bytes to encode large values.</p>
- * <p/>
+ *
  * <p>Signed values are further encoded using so-called zig-zag encoding
  * in order to make them "compatible" with variable-length encoding.</p>
  */
@@ -78,6 +74,9 @@ public final class VarInt {
     }
 
     /**
+     * @param value -   {@link Integer} integer to write
+     * @param out   - {@link DataOutput} to write varint
+     * @throws IOException - throws if cannot write
      * @see #writeSignedVarLong(long, DataOutput)
      */
     public static void writeSignedVarInt(int value, DataOutput out) throws IOException {
@@ -86,6 +85,9 @@ public final class VarInt {
     }
 
     /**
+     * @param value -   {@link Integer} integer to write
+     * @param out   - {@link DataOutput} to write varint
+     * @throws IOException - throws if cannot write
      * @see #writeUnsignedVarLong(long, DataOutput)
      */
     public static void writeUnsignedVarInt(int value, DataOutput out) throws IOException {
@@ -102,8 +104,10 @@ public final class VarInt {
     }
 
     /**
+     * @param value - {@link Integer} value to write
+     * @return {@link Byte} array of varint
      * @see #writeUnsignedVarLong(long, DataOutput)
-     * <p/>
+     * <p>
      * This one does not use streams and is much faster.
      * Makes a single object each time, and that object is a primitive array.
      */
@@ -163,6 +167,8 @@ public final class VarInt {
     }
 
     /**
+     * @param in - {@link DataInput} to read from
+     * @return - {@link Integer}
      * @throws IllegalArgumentException if variable-length value does not terminate
      *                                  after 5 bytes have been read
      * @throws IOException              if {@link DataInput} throws {@link IOException}
@@ -179,6 +185,8 @@ public final class VarInt {
     }
 
     /**
+     * @param in - {@link DataInput} to read from
+     *           * @return - {@link Integer}
      * @throws IllegalArgumentException if variable-length value does not terminate
      *                                  after 5 bytes have been read
      * @throws IOException              if {@link DataInput} throws {@link IOException}

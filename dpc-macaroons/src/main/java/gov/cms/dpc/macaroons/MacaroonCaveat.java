@@ -39,7 +39,8 @@ public class MacaroonCaveat {
     /**
      * Create a caveat which may have a location (thus making it a third-party caveat)
      *
-     * @param location - {@link String} third-party caveat location
+     * @param location  - {@link String} third-party caveat location
+     * @param rawCaveat - {@link Byte} raw caveat bytes which usually represents an encrypted third-party caveat
      */
     public MacaroonCaveat(String location, byte[] rawCaveat) {
         this.location = location;
@@ -70,9 +71,9 @@ public class MacaroonCaveat {
 
     /**
      * Get the verification ID from the caveat.
-     * This is only for third-party caveats, so {@link this#isThirdParty()} must be true.
+     * This is only for third-party caveats, so {@link MacaroonCaveat#isThirdParty()} must be true.
      *
-     * @return - {@link byte[]} of verification ID
+     * @return - {@link Byte} of verification ID
      */
     public byte[] getVerificationID() {
         return verificationID;
@@ -95,7 +96,7 @@ public class MacaroonCaveat {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof MacaroonCaveat)) return false;
         MacaroonCaveat that = (MacaroonCaveat) o;
         return Objects.equals(location, that.location) &&
                 Arrays.equals(rawCaveat, that.rawCaveat) &&

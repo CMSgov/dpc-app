@@ -24,7 +24,7 @@ public interface IRootKeyStore {
     /**
      * Generate a random key for use with caveats
      *
-     * @return - {@link byte[]} of key
+     * @return - {@link Byte} of key
      */
     String generateKey();
 }

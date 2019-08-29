@@ -36,7 +36,7 @@ public class MacaroonBakery {
 
     private final String location;
     private final IRootKeyStore store;
-    private final KeyPair keypair;
+    private final KeyPair keyPair;
     private final List<CaveatWrapper> defaultVerifiers;
     private final List<CaveatSupplier> defaultSuppliers;
     private final IThirdPartyKeyStore thirdPartyKeyStore;
@@ -55,10 +55,10 @@ public class MacaroonBakery {
                 .collect(Collectors.toList());
         this.defaultSuppliers = defaultSuppliers;
         this.thirdPartyKeyStore = thirdPartyKeyStore;
-        this.keypair = keyPair;
+        this.keyPair = keyPair;
 
         // Add the current location and the custom `local` location to the TP key store
-        final byte[] keyBytes = BakeryKeyFactory.getPublicKeyBytes(this.keypair);
+        final byte[] keyBytes = BakeryKeyFactory.getPublicKeyBytes(this.keyPair);
         this.thirdPartyKeyStore.setPublicKey(location, keyBytes);
         this.thirdPartyKeyStore.setPublicKey("local", keyBytes);
     }
@@ -134,8 +134,6 @@ public class MacaroonBakery {
      */
     public Macaroon addCaveats(Macaroon macaroon, MacaroonCaveat... caveats) {
 
-        // Get the root key for the Macaroon
-        final String rootKey = this.store.get(macaroon.identifier);
         final MacaroonsBuilder builder = MacaroonsBuilder.modify(macaroon);
         addCaveats(builder, Arrays.asList(caveats));
 
@@ -322,8 +320,8 @@ public class MacaroonBakery {
                 .orElseThrow(() -> new BakeryException(String.format("Cannot find public key for %s", caveat.getLocation())));
 
 //        final byte[] thirdPartyKeyBytes = publicKey.getEncoded();
-        final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keypair);
-        final byte[] publicKeyBytes = BakeryKeyFactory.getPublicKeyBytes(this.keypair);
+        final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keyPair);
+        final byte[] publicKeyBytes = BakeryKeyFactory.getPublicKeyBytes(this.keyPair);
 
         final byte[] secretPart = encodeSecretPart(thirdPartyKeyBytes,
                 privateKeyBytes,
@@ -358,12 +356,12 @@ public class MacaroonBakery {
      * root key
      * caveat string
      *
-     * @param thirdPartyKey - {@link byte[]} third-party public key to use
-     * @param privateKey    - {@link byte[]} first-party private key to use
-     * @param nonce         - {@link byte[]}
+     * @param thirdPartyKey - {@link Byte} third-party public key to use
+     * @param privateKey    - {@link Byte} first-party private key to use
+     * @param nonce         - {@link Byte}
      * @param rootKey       - {@link String} root key use to validate caveat
      * @param caveat        - {@link String} caveat value
-     * @return - {@link byte[]} encrypted message via {@link SecretBox#seal(byte[], byte[])}
+     * @return - {@link Byte} encrypted message via {@link SecretBox#seal(byte[], byte[])}
      */
     static byte[] encodeSecretPart(byte[] thirdPartyKey, byte[] privateKey, byte[] nonce, String rootKey, String caveat) {
         // Convert the rootKey to bytes (preserving encoding)
@@ -399,7 +397,7 @@ public class MacaroonBakery {
         byte[] caveatKeySignature = new byte[4];
         byteBuffer.get(caveatKeySignature);
 
-        byte[] pubKeySig = Arrays.copyOfRange(BakeryKeyFactory.getPublicKeyBytes(this.keypair), 0, 4);
+        byte[] pubKeySig = Arrays.copyOfRange(BakeryKeyFactory.getPublicKeyBytes(this.keyPair), 0, 4);
         if (!Arrays.equals(caveatKeySignature, pubKeySig)) {
             throw new BakeryException("Public key mismatch");
         }
@@ -412,7 +410,7 @@ public class MacaroonBakery {
 
 
         // Decrypt the secret part
-        final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keypair);
+        final byte[] privateKeyBytes = BakeryKeyFactory.unwrapPrivateKeyBytes(this.keyPair);
 
         final SecretBox box = new SecretBox(firstPartyPublicKey, privateKeyBytes);
 
@@ -482,6 +480,7 @@ public class MacaroonBakery {
          *
          * @param serverLocation - {@link String} Server URL to use when creating {@link Macaroon}
          * @param keyStore       - {@link IRootKeyStore} to use for handling {@link Macaroon} secret keys
+         * @param thirdPartyKeyStore - {@link IThirdPartyKeyStore} to use for handling public keys of third parties
          */
         public MacaroonBakeryBuilder(String serverLocation, IRootKeyStore keyStore, IThirdPartyKeyStore thirdPartyKeyStore) {
             this.serverLocation = serverLocation;
