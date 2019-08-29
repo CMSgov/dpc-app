@@ -58,6 +58,7 @@
             <column name="patients" type="TEXT"/>
             <column name="patient_index" type="INTEGER"/>
             <column name="aggregator_id" type="UUID" />
+            <column name="rsa_public_key" type="BYTEA"/>
             <column name="update_time" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="submit_time" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="start_time" type="TIMESTAMP WITH TIME ZONE"/>
