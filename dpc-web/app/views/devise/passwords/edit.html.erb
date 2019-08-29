@@ -11,20 +11,20 @@
         <%= f.hidden_field :reset_password_token %>
 
         <div class="field">
-          <%= f.label :password, "New password", :class => "ds-c-label" %>
+          <%= f.label :password, "New password", class: "ds-c-label" %>
           <% if @minimum_password_length %>
             <span class="ds-c-field__hint">(<%= @minimum_password_length %> characters minimum)</span>
           <% end %>
-          <%= f.password_field :password, :class => "ds-c-field" %>
+          <%= f.password_field :password, class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :password_confirmation, "Confirm new password", :class => "ds-c-label" %>
-          <%= f.password_field :password_confirmation, :class => "ds-c-field" %>
+          <%= f.label :password_confirmation, "Confirm new password", class: "ds-c-label" %>
+          <%= f.password_field :password_confirmation, class: "ds-c-field" %>
         </div>
 
         <div class="actions ds-u-margin-top--3">
-          <%= f.submit "Change password", :class => "ds-c-button ds-c-button--primary", data: { test: "submit" } %>
+          <%= f.submit "Change password", class: "ds-c-button ds-c-button--primary", data: { test: "submit" } %>
         </div>
       <% end %>
     </div>
