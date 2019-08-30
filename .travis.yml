@@ -19,9 +19,9 @@ cache:
 jobs:
   include:
     - stage: test
-      script: "make ci-app" Application
+      script: ./dpc-test.sh Application
     - stage: test
-      script: "make ci-web" Website
+      script: ./dpc-web-test.sh Website
 
 before_install:
   - sudo /etc/init.d/postgresql stop
