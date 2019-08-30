@@ -44,11 +44,9 @@ public class PatientEntity implements Serializable {
     private LocalDate dob;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    @CreationTimestamp
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
     @NotNull
@@ -132,6 +130,18 @@ public class PatientEntity implements Serializable {
 
     public void setAttributions(List<AttributionRelationship> attributions) {
         this.attributions = attributions;
+    }
+
+    @PrePersist
+    public void setCreation() {
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        this.setCreatedAt(now);
+        this.setUpdatedAt(now);
+    }
+
+    @PreUpdate
+    public void setUpdateTime() {
+        this.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     /**

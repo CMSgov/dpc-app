@@ -1,11 +1,13 @@
 package gov.cms.dpc.attribution.resources;
 
+import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -51,6 +53,19 @@ public abstract class AbstractOrganizationResource {
     public abstract Organization getOrganization(UUID organizationID);
 
     /**
+     * Delete the {@link Organization} from the system.
+     * <p>
+     * Note: This drop ALL resources associated to the given Organization
+     *
+     * @param organizationID - {@link UUID} of organization
+     * @return - {@link Response} whether or not the drop was successful
+     */
+    @DELETE
+    @FHIR
+    @Path("/{organizationID}")
+    public abstract Response deleteOrganization(UUID organizationID);
+
+    /**
      * Get authentication token for {@link Organization}.
      * If no token exists, returns an empty {@link List}
      *
@@ -59,7 +74,7 @@ public abstract class AbstractOrganizationResource {
      */
     @GET
     @Path("/{organizationID}/token")
-    public abstract List<String> getOrganizationTokens(UUID organizationID);
+    public abstract List<TokenResponse> getOrganizationTokens(UUID organizationID);
 
     /**
      * Create authentication token for {@link Organization}.
@@ -71,6 +86,10 @@ public abstract class AbstractOrganizationResource {
     @POST
     @Path("/{organizationID}/token")
     public abstract String createOrganizationToken(@PathParam("organizationID") UUID organizationID);
+
+    @DELETE
+    @Path("/{organizationID}/token/{tokenID}")
+    public abstract Response deleteOrganizationToken(@NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID);
 
     /**
      * Verify that the provided token is valid

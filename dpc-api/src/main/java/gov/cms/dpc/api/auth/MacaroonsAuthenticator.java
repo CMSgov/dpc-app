@@ -1,10 +1,10 @@
 package gov.cms.dpc.api.auth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -49,6 +49,12 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("_id", Collections.singletonList(credentials.getPathValue()));
         searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
+
+        // Special handl ing of Group resources, which use tags instead of resource properties.
+        // TODO: Remove with DPC-552
+        if (credentials.getPathAuthorizer().type() == ResourceType.Group) {
+            searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getId())));
+        }
         final Bundle bundle = this.client
                 .search()
                 .forResource(credentials.getPathAuthorizer().type().toString())

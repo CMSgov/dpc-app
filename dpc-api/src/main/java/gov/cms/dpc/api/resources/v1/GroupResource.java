@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
 @Api(value = "Group")
@@ -71,10 +72,7 @@ public class GroupResource extends AbstractGroupResource {
                 .encodedJson()
                 .execute();
 
-        final Group createdGroup = (Group) outcome.getResource();
-        final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
-
-        return Response.status(status).entity(createdGroup).build();
+        return handleMethodOutcome(outcome);
     }
 
     @SuppressWarnings("unchecked")
@@ -135,7 +133,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @PUT
     @Path("/{rosterID}")
-    @PathAuthorizer(type = ResourceType.Patient, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @FHIR
     @Timed
     @ExceptionMetered
@@ -157,7 +155,7 @@ public class GroupResource extends AbstractGroupResource {
     @DELETE
     @FHIR
     @Path("/{rosterID}")
-    @PathAuthorizer(type = ResourceType.Patient, pathParam = "rosterID")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete Attribution Roster", notes = "Remove specific Attribution roster")
@@ -187,6 +185,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     @GET // Need this here, since we're using a path param
     @Path("/{rosterID}/$export")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
     @FHIRAsync

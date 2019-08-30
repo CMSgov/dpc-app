@@ -97,12 +97,18 @@ public class GroupResource extends AbstractGroupResource {
                                @ApiParam(value = "Patient ID")
                                @QueryParam(Group.SP_MEMBER) String patientID) {
 
-        final Pair<IdType, IdType> idPair = parseCompositeID(providerNPI);
+        final String providerIDPart;
+        if (providerNPI != null) {
+            providerIDPart = parseCompositeID(providerNPI).getRight().getIdPart();
+        } else {
+            providerIDPart = null;
+        }
+
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
         final UUID organizationID = RESTUtils.tokenTagToUUID(organizationToken);
-        this.rosterDAO.findEntities(organizationID, idPair.getRight().getIdPart(), patientID)
+        this.rosterDAO.findEntities(organizationID, providerIDPart, patientID)
                 .stream()
                 .map(RosterEntity::toFHIR)
                 .forEach(entity -> bundle.addEntry().setResource(entity));

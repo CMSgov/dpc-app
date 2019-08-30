@@ -1,10 +1,7 @@
 package gov.cms.dpc.attribution.utils;
 
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -77,6 +74,10 @@ public class RESTUtils {
     }
 
     public static UUID tokenTagToUUID(String tokenTag) {
-        return parseTokenTag(UUID::fromString, tokenTag);
+        final Function<String, UUID> builder = (tag) -> {
+            final IdType idType = new IdType(tag);
+            return UUID.fromString(idType.getIdPart());
+        };
+        return parseTokenTag(builder, tokenTag);
     }
 }

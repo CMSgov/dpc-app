@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -23,10 +24,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
@@ -35,6 +40,7 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
+    private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
     private final OrganizationDAO dao;
     private final MacaroonBakery bakery;
 
@@ -51,8 +57,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ApiOperation(value = "Search and Validate Token",
             notes = "FHIR Endpoint to find an Organization resource associated to the given authentication token." +
                     "<p>This also validates that the token is valid." +
-                    "<p>The *_tag* parameter is used to convey the token, which is half-way between FHIR and REST." +
-                    "<p>Either an identifier or a token must be present for the query to work.")
+                    "<p>The *_tag* parameter is used to convey the token, which is half-way between FHIR and REST.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Organization matching (valid) token was found."),
             @ApiResponse(code = 404, message = "Organization was not found matching token", response = OperationOutcome.class),
@@ -67,12 +72,19 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return searchAndValidationByToken(tokenTag);
         }
 
+        final Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+
         if (identifier == null) {
-            throw new WebApplicationException("Must have either token or Identifier to search", Response.Status.BAD_REQUEST);
+            final List<OrganizationEntity> organizationEntityList = this.dao.listOrganizations();
+            bundle.setTotal(organizationEntityList.size());
+
+            organizationEntityList.forEach(entity -> bundle.addEntry().setResource(entity.toFHIR()));
+            return bundle;
         }
 
         final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(identifier);
-        final Bundle bundle = new Bundle();
+
         if (!queryList.isEmpty()) {
             bundle.setTotal(queryList.size());
             queryList.forEach(org -> bundle.addEntry().setResource(org.toFHIR()));
@@ -135,6 +147,22 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return organizationEntity.toFHIR();
     }
 
+    @DELETE
+    @Path("/{organizationID}")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Delete organization", notes = "FHIR endpoint to deleta an Organization with the given Resource ID." +
+            "<p>This also drops ALL resources associated to the given entity.")
+    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
+    @Override
+    public Response deleteOrganization(@ApiParam(value = "Organization resource ID", required = true) @PathParam("organizationID") UUID organizationID) {
+        final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)
+                .orElseThrow(() -> new WebApplicationException("Cannot find organization.", Response.Status.NOT_FOUND));
+
+        this.dao.deleteOrganization(organizationEntity);
+        return Response.ok().build();
+    }
+
     @GET
     @Path("/{organizationID}/token")
     @UnitOfWork
@@ -143,17 +171,17 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ExceptionMetered
     @ApiOperation(value = "Fetch organization tokens", notes = "Method to retrieve the authentication tokens associated to the given Organization. This searches by resource ID")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
-    public List<String> getOrganizationTokens(
+    public List<TokenResponse> getOrganizationTokens(
             @ApiParam(value = "Organization resource ID", required = true)
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
-        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
+        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
 
         return entity
                 .getTokens()
                 .stream()
-                .map(TokenEntity::getId)
+                .map(te -> new TokenResponse(te.getId(), te.getTokenType(), "never"))
                 .collect(Collectors.toList());
     }
 
@@ -169,18 +197,42 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
 
-        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find Organization: %s", organizationID), Response.Status.NOT_FOUND));
+        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
         // Add the macaroon ID to the organization and update it
-        final ArrayList<TokenEntity> tokens = new ArrayList<>(entity.getTokens());
-        tokens.add(new TokenEntity(macaroon.identifier, entity, TokenEntity.TokenType.MACAROON));
-        entity.setTokens(tokens);
+        entity.addToken(new TokenEntity(macaroon.identifier, entity, TokenEntity.TokenType.MACAROON));
         this.dao.updateOrganization(entity);
 
         // Return the base64 encoded Macaroon
         return new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8);
+    }
+
+    @DELETE
+    @Path("/{organizationID}/token/{tokenID}")
+    @UnitOfWork
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
+    @Override
+    public Response deleteOrganizationToken(
+            @ApiParam(value = "Organization resource ID", required = true) @NotNull @PathParam("organizationID") UUID organizationID,
+            @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
+        final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)
+                .orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
+
+        final TokenEntity foundToken = organizationEntity
+                .getTokens()
+                .stream()
+                .filter(token -> token.getId().equals(tokenID.toString()))
+                .findAny()
+                .orElseThrow(() -> new WebApplicationException("Cannot find token by ID", Response.Status.NOT_FOUND));
+
+        organizationEntity.removeToken(foundToken);
+        this.dao.updateOrganization(organizationEntity);
+
+        return Response.ok().build();
     }
 
     @Override

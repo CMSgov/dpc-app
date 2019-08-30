@@ -35,18 +35,31 @@ aria-controls="topnav-wrap" aria-label="Close menu">
       </li>
 
       <% unless user_signed_in? %>
-        <li class="topnav__item ds-u-padding-right--1">
+        <li class="topnav__item topnav__item--buttons ds-u-padding-right--1">
           <%= link_to "Log in", new_session_path(User), class: "ds-c-button" %>
         </li>
-        <li class="topnav__item">
+        <li class="topnav__item topnav__item--buttons">
           <%= link_to "Request access", new_user_registration_path, class: "ds-c-button ds-c-button--primary" %>
         </li>
       <% else %>
-        <li class="topnav__item">
-          <a class="topnav__link"
-             id="sign-out" href="<%= destroy_user_session_path %>" data-method="delete">
-             Sign out
-          </a>
+        <li class="topnav__item usa-accordion">
+          <button class="topnav__link usa-accordion__button" type="button" aria-expanded="false"
+                  aria-controls="nav-1" data-test="my-account-menu">My account</button>
+          <ul id="nav-1" class="topnav__dropdown usa-accordion__content" hidden>
+            <li class="topnav__dropdown__item">
+              <%= link_to profile_path, class: "topnav__dropdown__link",
+                  data: { test: 'dpc-registrations-profile-link' } do %>
+                  Profile
+                <% end %>
+            </li>
+            <li class="topnav__dropdown__item">
+              <a class="topnav__dropdown__link" href="<%= destroy_user_session_path %>"
+                 id="sign-out" data-method="delete">
+                 Sign out
+              </a>
+            </li>
+          </ul>
+
         </li>
       <% end %>
     </ul>
