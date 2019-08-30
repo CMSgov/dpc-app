@@ -16,9 +16,12 @@ cache:
   directories:
     - $HOME/.m2
 
+jobs:
+  include:
+    - stage: test
+      script: make ci-app
+    - stage: test
+      script: make ci-web
+
 before_install:
   - sudo /etc/init.d/postgresql stop
-
-script:
-  - make ci-app
-  - make ci-web
