@@ -3,9 +3,9 @@ package gov.cms.dpc.api.cli;
 import gov.cms.dpc.api.AbstractApplicationTest;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
+import gov.cms.dpc.api.cli.organizations.OrganizationRegistration;
 import gov.cms.dpc.api.cli.tokens.TokenDelete;
 import gov.cms.dpc.api.cli.tokens.TokenList;
-import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -49,7 +49,7 @@ public class TokenTests extends AbstractApplicationTest {
 
         // Add commands you want to test
         final Bootstrap<DPCAPIConfiguration> bootstrap = new Bootstrap<>(new DPCAPIService());
-        bootstrap.addCommand(new OrgRegistrationCommand());
+        bootstrap.addCommand(new OrganizationRegistration());
         bootstrap.addCommand(new TokenList());
         bootstrap.addCommand(new TokenDelete());
 
