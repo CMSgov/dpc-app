@@ -35,6 +35,8 @@ import java.io.IOException;
  */
 public final class VarInt {
 
+    private static final String VARIABLE_LENGTH_QUANTITY_IS_TOO_LONG = "Variable length quantity is too long";
+
     private VarInt() {
     }
 
@@ -160,7 +162,7 @@ public final class VarInt {
             value |= (b & 0x7F) << i;
             i += 7;
             if (i > 63) {
-                throw new IllegalArgumentException("Variable length quantity is too long");
+                throw new IllegalArgumentException(VARIABLE_LENGTH_QUANTITY_IS_TOO_LONG);
             }
         }
         return value | (b << i);
@@ -200,7 +202,7 @@ public final class VarInt {
             value |= (b & 0x7F) << i;
             i += 7;
             if (i > 35) {
-                throw new IllegalArgumentException("Variable length quantity is too long");
+                throw new IllegalArgumentException(VARIABLE_LENGTH_QUANTITY_IS_TOO_LONG);
             }
         }
         return value | (b << i);
@@ -228,7 +230,7 @@ public final class VarInt {
             value |= (b & 0x7f) << i;
             i += 7;
             if (i > 35) {
-                throw new IllegalArgumentException("Variable length quantity is too long");
+                throw new IllegalArgumentException(VARIABLE_LENGTH_QUANTITY_IS_TOO_LONG);
             }
         }
         return value | (rb << i);

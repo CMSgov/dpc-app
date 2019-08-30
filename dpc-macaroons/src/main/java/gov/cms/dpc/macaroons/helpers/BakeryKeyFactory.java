@@ -8,6 +8,10 @@ import org.whispersystems.curve25519.Curve25519KeyPair;
  */
 public class BakeryKeyFactory {
 
+    private BakeryKeyFactory() {
+        // Not used
+    }
+
     public static Curve25519KeyPair generateKeyPair() {
         return Curve25519.getInstance(Curve25519.BEST).generateKeyPair();
     }

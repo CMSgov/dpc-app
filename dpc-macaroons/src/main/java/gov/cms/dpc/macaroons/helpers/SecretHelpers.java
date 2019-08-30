@@ -10,6 +10,10 @@ public class SecretHelpers {
     private static final String VALID_PW_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+{}[]|:;<>?,./";
     private static final int ROOT_KEY_LENGTH = 24;
 
+    private SecretHelpers() {
+        // Not used
+    }
+
     /**
      * Securely generate a random password string
      * Borrowing from: https://stackoverflow.com/questions/29756660/create-random-password-using-java-securerandom-class

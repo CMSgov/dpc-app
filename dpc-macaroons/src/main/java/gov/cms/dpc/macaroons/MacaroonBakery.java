@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.function.Consumer;
@@ -221,8 +220,17 @@ public class MacaroonBakery {
         return MacaroonsBuilder.deserialize(new String(decodedString, StandardCharsets.UTF_8));
     }
 
+    /**
+     * Discharge are provided {@link Macaroon} using the provided {@link MacaroonDischarger}
+     * This will recursively decrypt the provided caveats, verify them and discharge any returned caveats.
+     * The returned Macaroons are bound to the 'root macaroon' which is the first member of the input {@link List}
+     *
+     * @param macaroons  - {@link List} of {@link Macaroon} to discharge
+     * @param discharger - {@link MacaroonDischarger} which handles processing the caveats
+     * @return
+     */
     public List<Macaroon> dischargeAll(List<Macaroon> macaroons, MacaroonDischarger discharger) {
-        final List<Macaroon> macaroons1 = dischargeAllInner(macaroons, discharger);
+        final List<Macaroon> macaroons1 = dischargeAllImpl(macaroons, discharger);
 
         final Macaroon rootMacaroon = macaroons1.get(0);
 
@@ -231,23 +239,28 @@ public class MacaroonBakery {
         // Add the root Macaroon, which everything else binds to
         boundMacaroons.add(rootMacaroon);
 
-        final Macaroon builder = new MacaroonsBuilder(rootMacaroon)
-                .prepare_for_request(macaroons1.get(1))
-                .getMacaroon();
-
-        boundMacaroons.add(builder);
+        final MacaroonsBuilder builder = new MacaroonsBuilder(rootMacaroon);
 
         // Bind each of the discharge macaroons to the root macaroon
-//        macaroons1.subList(1, macaroons1.size())
-//                .stream()
-//                .map(builder::prepare_for_request)
-//                .map(MacaroonsBuilder::getMacaroon)
-//                .forEach(boundMacaroons::add);
+        macaroons1.subList(1, macaroons1.size())
+                .stream()
+                .map(builder::prepare_for_request)
+                .map(MacaroonsBuilder::getMacaroon)
+                .forEach(boundMacaroons::add);
 
         return boundMacaroons;
     }
 
-    public List<Macaroon> dischargeAllInner(List<Macaroon> macaroons, MacaroonDischarger discharger) {
+    /**
+     * Implementation of discharge logic.
+     * Recursively iterates through the provided {@link List} of {@link Macaroon} and discharges any third-party caveats
+     * The returned Macaroon List is not bound to the root macaroon
+     *
+     * @param macaroons  - {@link List} of {@link Macaroon} to discharge
+     * @param discharger - {@link MacaroonDischarger} which handles the actual caveat discharging.
+     * @return - {@link List} of discharged (but un-bound) {@link Macaroon}
+     */
+    private List<Macaroon> dischargeAllImpl(List<Macaroon> macaroons, MacaroonDischarger discharger) {
         if (macaroons.isEmpty()) {
             throw new BakeryException("No macaroons to discharge");
         }
@@ -282,7 +295,7 @@ public class MacaroonBakery {
         return discharged;
     }
 
-    public Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
+    Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
         final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
 
         // Create a discharge macaroon
@@ -305,10 +318,18 @@ public class MacaroonBakery {
     }
 
     /**
-     * Encodes a third-party caveat using the public key of the
+     * Encodes a third-party caveat using the public key of the third-party
+     * <p>
+     * The caveat format is:
+     * version (1 byte)
+     * Prefix of third party public key (4-bytes)
+     * First party public key (32-bytes)
+     * Random nonce (24-bytes)
+     * Secret part of message
      *
-     * @param caveat
-     * @return
+     * @param caveat - {@link MacaroonCaveat} to encode
+     * @return - {@link Byte} encrypted third-party caveat
+     * @see MacaroonBakery#encodeSecretPart(byte[], byte[], byte[], String, String)
      */
     private byte[] encodeThirdPartyCaveat(MacaroonCaveat caveat, String rootKey) {
 
@@ -320,7 +341,6 @@ public class MacaroonBakery {
         final byte[] thirdPartyKeyBytes = this.thirdPartyKeyStore.getPublicKey(caveat.getLocation())
                 .orElseThrow(() -> new BakeryException(String.format("Cannot find public key for %s", caveat.getLocation())));
 
-//        final byte[] thirdPartyKeyBytes = publicKey.getEncoded();
         final byte[] privateKeyBytes = this.keyPair.getPrivateKey();
         final byte[] publicKeyBytes = this.keyPair.getPublicKey();
 
@@ -353,8 +373,8 @@ public class MacaroonBakery {
      * <p>
      * The box format is:
      * version (1 byte)
-     * varint encoded root key length
-     * root key
+     * varint of encoded root key length
+     * root key (24-bytes)
      * caveat string
      *
      * @param thirdPartyKey - {@link Byte} third-party public key to use
@@ -389,6 +409,13 @@ public class MacaroonBakery {
         return secretBox.seal(nonce, msgBuffer.array());
     }
 
+    /**
+     * Decodes the encrypted caveat using the private key which corresponds to the public key signature provided in the caveat structure
+     *
+     * @param encryptedCaveat - {@link Byte} array of encrypted caveat
+     * @return - {@link Pair} of {@link String} caveat key and {@link MacaroonCondition} to validate
+     * @see MacaroonBakery#encodeThirdPartyCaveat(MacaroonCaveat, String)
+     */
     private Pair<String, MacaroonCondition> decodeCaveat(byte[] encryptedCaveat) {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(encryptedCaveat);
         // Advance by one to skip the version
@@ -423,6 +450,13 @@ public class MacaroonBakery {
         return decodeCaveatSecretPart(secretPart);
     }
 
+    /**
+     * Decodes the secret part of the provided caveat
+     *
+     * @param secretPart - {@link Byte} array of secret part of caveat
+     * @return - {@link Pair} of {@link String} caveat key and {@link MacaroonCondition} to validate
+     * @see MacaroonBakery#encodeSecretPart(byte[], byte[], byte[], String, String)
+     */
     private static Pair<String, MacaroonCondition> decodeCaveatSecretPart(byte[] secretPart) {
         final ByteBuffer buffer = ByteBuffer.wrap(secretPart);
         // Advance because we already know the version
@@ -479,8 +513,8 @@ public class MacaroonBakery {
         /**
          * Default parameters for {@link MacaroonBakery}
          *
-         * @param serverLocation - {@link String} Server URL to use when creating {@link Macaroon}
-         * @param keyStore       - {@link IRootKeyStore} to use for handling {@link Macaroon} secret keys
+         * @param serverLocation     - {@link String} Server URL to use when creating {@link Macaroon}
+         * @param keyStore           - {@link IRootKeyStore} to use for handling {@link Macaroon} secret keys
          * @param thirdPartyKeyStore - {@link IThirdPartyKeyStore} to use for handling public keys of third parties
          */
         public MacaroonBakeryBuilder(String serverLocation, IRootKeyStore keyStore, IThirdPartyKeyStore thirdPartyKeyStore) {
