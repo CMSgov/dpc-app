@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TokenTests extends AbstractApplicationTest {
+class TokenTests extends AbstractApplicationTest {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -77,8 +78,13 @@ public class TokenTests extends AbstractApplicationTest {
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("eyJ2IjoyLCJsIjoiaHR0"), "Should have token"));
 
+        // Pull out the organization ID
+        final Matcher matcher = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}").matcher(stdOut.toString());
+
+        assertTrue(matcher.find(), "Should find Organization ID");
+
         // List the tokens
-        final String organizationID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+        final String organizationID = matcher.group(0);
         final List<UUID> matchedTokenIDs = getTokenIDs(organizationID);
         assertEquals(1, matchedTokenIDs.size(), "Should have a single token id");
 

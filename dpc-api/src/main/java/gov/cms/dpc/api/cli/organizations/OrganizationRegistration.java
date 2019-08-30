@@ -76,6 +76,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
                     .execute();
 
             organizationID = UUID.fromString(createdOrg.getIdElement().getIdPart());
+            System.out.println(String.format("Registered organization: %s", organizationID));
 
         } catch (Exception e) {
             System.err.println(String.format("Unable to register organization. %s", e.getMessage()));
