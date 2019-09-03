@@ -730,7 +730,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
 {
   "meta": {
     "profile": [
-      "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+      "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
     ],
     "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
     "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
@@ -844,9 +844,11 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
   "resourceType": "Patient",
   "id": "728b270d-d7de-4143-82fe-d3ccd92cebe4",
   "meta": {
-    "versionId": "MTU1NDgxMjczNTM5MjYwMDAwMA",
-    "lastUpdated": "2019-04-09T12:25:35.392600+00:00"
-  },
+      "profile": [
+        "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+      ],
+      "lastUpdated": "2019-04-09T12:25:36.450182+00:00"
+    },
   "identifier": [
     {
       "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
