@@ -5,7 +5,7 @@
     <div class="card card--border-top card--shadow">
       <h1 class="ds-u-margin-top--0">Log in</h1>
 
-      <%= form_for(resource, as: resource_name, url: session_path(resource_name), data: { test: 'user-sign-in-form' }) do |f| %>
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), data: { test: 'internal-user-sign-in-form' }) do |f| %>
       <%= devise_error_messages! %>
         <div class="field">
           <%= f.label :email, class: "ds-c-label" %>
@@ -35,7 +35,7 @@
 <div class="ds-l-row">
   <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-x--auto">
     <div class="card">
-      <%= render "devise/shared/links" %>
+      <%= render "internal/auth/shared/links" %>
     </div>
   </div>
 </div>
