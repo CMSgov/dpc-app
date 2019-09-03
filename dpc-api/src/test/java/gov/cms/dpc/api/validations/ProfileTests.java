@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -108,6 +109,39 @@ class ProfileTests extends AbstractSecureApplicationTest {
                 .encodedJson();
 
         assertThrows(UnprocessableEntityException.class, practitionerSubmission::execute, "Should throw a submission exception");
+    }
+
+    @Test
+    void testAttributionProfile() {
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
+
+        final Group invalidGroup = new Group();
+        invalidGroup.addMember().setEntity(new Reference("Patient/strange-patient"));
+
+        final ICreateTyped groupCreation = client
+                .create()
+                .resource(invalidGroup)
+                .encodedJson();
+
+        final UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, groupCreation::execute, "Should throw a creation exception");
+
+        final Group validGroup = invalidGroup.copy();
+        validGroup.setType(Group.GroupType.PERSON);
+        validGroup.setActive(true);
+        validGroup.setActual(true);
+        final CodeableConcept concept = new CodeableConcept();
+        concept.addCoding().setCode("attributed-to");
+        validGroup.addCharacteristic().setCode(concept).setExclude(false).setValue(new BooleanType(false));
+
+        final ICreateTyped groupCreation2 = client
+                .create()
+                .resource(validGroup)
+                .encodedJson();
+
+        // Since we're creating a group with a patient that doesn't exist, we should throw an error, just not a validation one.
+        assertThrows(InternalErrorException.class, groupCreation2::execute, "Should thrown internal error");
+
+
     }
 
 }
