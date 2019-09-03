@@ -2,7 +2,6 @@ package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
@@ -12,10 +11,8 @@ import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.sql.Date;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,6 +44,7 @@ class PatientValidationTest {
         final ValidationResult result = fhirValidator.validateWithResult(patientDefinition);
         // There should be a single failure, but we know about it.
         // This needs to stay until https://github.com/jamesagnew/hapi-fhir/pull/1375 lands in upstream.
+        // Apparently, the patch was not sufficient, so this error remains.
         assertAll(() -> assertEquals(1, result.getMessages().size(), "Should have a single failure"),
                 () -> assertEquals("URI values cannot have whitespace", result.getMessages().get(0).getMessage(), "Should have URI failure"));
     }
