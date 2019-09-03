@@ -41,7 +41,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
         this.validator = validator;
     }
 
-    @Override
     @GET
     @FHIR
     @Timed
@@ -49,6 +48,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Search for providers", notes = "FHIR endpoint to search for Practitioner resources." +
             "<p>If a provider NPI is given, the results are filtered accordingly. " +
             "Otherwise, the method returns all Practitioners associated to the given Organization")
+    @Override
     public Bundle practitionerSearch(@ApiParam(hidden = true)
                                      @Auth OrganizationPrincipal organization,
                                      @ApiParam(value = "Provider NPI")
@@ -77,7 +77,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
                 .execute();
     }
 
-    @Override
     @GET
     @FHIR
     @Path("/{providerID}")
@@ -89,6 +88,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No matching Practitioner resource was found", response = OperationOutcome.class)
     })
+    @Override
     public Practitioner getProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID) {
         return this.client
                 .read()
@@ -98,13 +98,13 @@ public class PractitionerResource extends AbstractPractitionerResource {
                 .execute();
     }
 
-    @Override
     @POST
     @FHIR
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
     @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
+    @Override
     public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
 
         APIHelpers.addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
@@ -134,8 +134,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return bulkResourceClient(Practitioner.class, client, entryHandler, providerBundle);
     }
 
-
-    @Override
     @DELETE
     @Path("/{providerID}")
     @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
@@ -146,6 +144,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No matching Practitioner resource was found", response = OperationOutcome.class)
     })
+    @Override
     public Response deleteProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID) {
         this.client
                 .delete()
@@ -156,7 +155,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return Response.ok().build();
     }
 
-    @Override
     @PUT
     @Path("/{providerID}")
     @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
@@ -164,6 +162,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
+    @Override
     public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, Practitioner provider) {
         return null;
     }

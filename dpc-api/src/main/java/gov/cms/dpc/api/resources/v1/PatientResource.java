@@ -13,11 +13,14 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
@@ -87,7 +90,7 @@ public class PatientResource extends AbstractPatientResource {
     @ExceptionMetered
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @Override
-    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, Patient patient) {
+    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient) {
 
         // Set the Managing Organization on the Patient
         final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getId()));
