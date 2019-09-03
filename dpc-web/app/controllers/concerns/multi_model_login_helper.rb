@@ -9,7 +9,6 @@ module MultiModelLoginHelper
   protected
 
   def check_user
-    # binding.pry
     if current_internal_user
       flash.clear
       redirect_to(authenticated_internal_root_path) && return
