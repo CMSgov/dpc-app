@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   devise_for :internal_users, path: 'internal', controllers: {
-    sessions: "internal/devise/sessions",
-    passwords: "internal/devise/passwords"
+    sessions: "internal/auth/sessions",
+    passwords: "internal/auth/passwords"
   }
   devise_for :users, path: 'users', controllers: {
     sessions: "users/sessions",

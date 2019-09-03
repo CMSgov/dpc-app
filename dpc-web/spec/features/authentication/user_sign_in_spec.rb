@@ -6,7 +6,7 @@ RSpec.feature 'user signs in' do
   let!(:user) { create :user, password: '123456', password_confirmation: '123456' }
   let!(:dpc_registration) { create :dpc_registration, user: user }
 
-  scenario 'the user logs in' do
+  scenario 'when successful' do
     visit new_user_session_path
     fill_in 'user_email', with: user.email
     fill_in 'user_password', with: '123456'
@@ -15,7 +15,7 @@ RSpec.feature 'user signs in' do
     expect(page).to have_css('[data-test="my-account-menu"]')
   end
 
-  scenario 'user cannot sign in and then sign in as internal user' do
+  scenario 'user cannot then sign in as internal user' do
     visit new_user_session_path
     fill_in 'user_email', with: user.email
     fill_in 'user_password', with: '123456'

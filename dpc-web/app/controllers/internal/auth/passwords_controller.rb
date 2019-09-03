@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Internal
-  module Devise
+  module Auth
     class PasswordsController < Devise::PasswordsController
       include InternalUserDeviseHelper
       include MultiModelLoginHelper
