@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
@@ -17,6 +18,7 @@ import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -167,7 +169,7 @@ public class PatientResource extends AbstractPatientResource {
             "<p>Currently, this method only allows for updating of the Patient first/last name, and BirthDate.")
     @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to update"))
     @Override
-    public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
+    public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient) {
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(patient)
@@ -184,19 +186,15 @@ public class PatientResource extends AbstractPatientResource {
 
     private static void validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator, String profileURL) {
         {
-            if (!APIHelpers.hasProfile(patient, profileURL)) {
-                throw new WebApplicationException("Patient must have correct profile", Response.Status.BAD_REQUEST);
-            }
             // Set the Managing Org, since we need it for the validation
             patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
-            final ValidationResult result = validator.validateWithResult(patient);
+            final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(profileURL));
             if (!result.isSuccessful()) {
                 // Temporary until DPC-536 is merged in
                 if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
-                    throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
+                    throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
                 }
             }
         }
-
     }
 }

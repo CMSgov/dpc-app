@@ -38,5 +38,5 @@ public abstract class AbstractPatientResource {
 
     @PUT
     @Path("/{patientID}")
-    public abstract Patient updatePatient(UUID patientID, Patient patient);
+    public abstract Patient updatePatient(UUID patientID, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
 }

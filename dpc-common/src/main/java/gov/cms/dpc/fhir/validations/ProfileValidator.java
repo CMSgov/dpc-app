@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import org.hl7.fhir.dstu3.model.BaseResource;
@@ -34,38 +35,22 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
         // Disable default error messages, as we want to generate our own
         context.disableDefaultConstraintViolation();
 
-        final boolean hasProfile = value
-                .getMeta()
-                .getProfile()
-                .stream()
-                .anyMatch(pred -> pred.getValueAsString().equals(profileURI));
+        // Create a validation option object which forces validation against the given profile.
+        final ValidationOptions options = new ValidationOptions();
+        options.addProfile(profileURI);
+        final ValidationResult result = this.validator.validateWithResult(value, options);
 
-        // Check to ensure that the resource has the necessary profile
-        if (hasProfile) {
-            final ValidationResult result = this.validator.validateWithResult(value);
-
-            if (result.isSuccessful()) {
-                return true;
-            }
-
-            // If we failed, tell us why
-            result.getMessages()
-                    .forEach(msg -> context
-                            .buildConstraintViolationWithTemplate(
-                                    VALIDATION_CONSTANT +
-                                            msg.getMessage() + "}")
-                            .addConstraintViolation());
-
-
-            // If they don't have the profile, fail them.
-        } else {
-            context
-                    .buildConstraintViolationWithTemplate(
-                            VALIDATION_CONSTANT +
-                                    "Must have attached profile.}")
-                    .addConstraintViolation();
+        if (result.isSuccessful()) {
+            return true;
         }
 
+        // If we failed, tell us why
+        result.getMessages()
+                .forEach(msg -> context
+                        .buildConstraintViolationWithTemplate(
+                                VALIDATION_CONSTANT +
+                                        msg.getMessage() + "}")
+                        .addConstraintViolation());
         return false;
     }
 }
