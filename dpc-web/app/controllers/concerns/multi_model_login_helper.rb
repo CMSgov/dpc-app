@@ -10,11 +10,8 @@ module MultiModelLoginHelper
 
   def check_user
     if current_internal_user
-      flash.clear
       redirect_to(authenticated_internal_root_path) && return
     elsif current_user
-      flash.clear
-      # The authenticated root path can be defined in your routes.rb in: devise_scope :user do...
       redirect_to(authenticated_root_path) && return
     end
   end
