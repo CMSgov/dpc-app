@@ -108,7 +108,10 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
-    @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Successfully created provider"),
+            @ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile")
+    })
     @Override
     public Response submitProvider(@Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
 
@@ -128,6 +131,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ExceptionMetered
     @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization." +
             "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
+    @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
     @Override
     public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
@@ -167,6 +171,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
+    @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
     @Override
     public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
         return null;

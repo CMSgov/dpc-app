@@ -91,6 +91,7 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
+    @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
     public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient) {
 
@@ -113,6 +114,7 @@ public class PatientResource extends AbstractPatientResource {
     @ExceptionMetered
     @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization." +
             "<p> Each Patient resource MUST implement the " + PATIENT_PROFILE + "profile.")
+    @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
     public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
@@ -167,7 +169,10 @@ public class PatientResource extends AbstractPatientResource {
     @ExceptionMetered
     @ApiOperation(value = "Update Patient record", notes = "Update specific Patient record." +
             "<p>Currently, this method only allows for updating of the Patient first/last name, and BirthDate.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to update"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Unable to find Patient to update"),
+            @ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile")
+    })
     @Override
     public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient) {
         final MethodOutcome outcome = this.client
