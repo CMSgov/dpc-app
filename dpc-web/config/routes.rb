@@ -1,8 +1,7 @@
 Rails.application.routes.draw do
   devise_for :internal_users, path: 'internal', controllers: {
-    sessions: "internal/sessions",
-    registrations: "internal/registrations",
-    passwords: "internal/passwords"
+    sessions: "internal/devise/sessions",
+    passwords: "internal/devise/passwords"
   }
   devise_for :users, path: 'users', controllers: {
     sessions: "users/sessions",
@@ -10,8 +9,16 @@ Rails.application.routes.draw do
     passwords: "users/passwords"
   }
 
+  namespace 'internal' do
+    resources :users, only: [:index]
+  end
+
   authenticated :user do
     root 'dpc_registrations#show', as: :authenticated_root
+  end
+
+  authenticated :internal_user do
+    root 'internal/users#index', as: :authenticated_internal_root
   end
 
   get '/dpc_registrations' => "dpc_registrations#new", as: :user_root

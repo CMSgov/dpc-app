@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-class InternalUsers::OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  include Accessible
+class Internal::Devise::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+  include InternalUserDeviseHelper
+  include MultiModelLoginHelper
   # You should configure your model like this:
   # devise :omniauthable, omniauth_providers: [:twitter]
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Users::PasswordsController < Devise::PasswordsController
-  include Accessible
+  include MultiModelLoginHelper
   # GET /resource/password/new
   # def new
   #   super
