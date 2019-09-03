@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
@@ -10,16 +11,20 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -105,7 +110,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
     @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
     @Override
-    public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
+    public Response submitProvider(@Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
 
         APIHelpers.addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
         final var providerCreate = this.client
@@ -126,7 +131,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Override
     public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Practitioner> entryHandler = (resource) -> validateAndTagProvider(resource,
+        final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
                 organization.getOrganization().getId(),
                 validator,
                 PRACTITIONER_PROFILE);
@@ -163,18 +168,15 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ExceptionMetered
     @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
     @Override
-    public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, Practitioner provider) {
+    public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
         return null;
     }
 
-    private static void validateAndTagProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
+    private static void validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
         logger.debug("Validating Practitioner {}", provider.toString());
-        if (!APIHelpers.hasProfile(provider, profileURL)) {
-            throw new WebApplicationException("Provider must have correct profile", Response.Status.BAD_REQUEST);
-        }
-        final ValidationResult result = validator.validateWithResult(provider);
+        final ValidationResult result = validator.validateWithResult(provider, new ValidationOptions().addProfile(profileURL));
         if (!result.isSuccessful()) {
-            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
         APIHelpers.addOrganizationTag(provider, organizationID);
     }
