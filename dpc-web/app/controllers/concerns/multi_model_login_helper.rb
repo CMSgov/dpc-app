@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MultiModelLoginHelper
   extend ActiveSupport::Concern
   included do
@@ -5,6 +7,7 @@ module MultiModelLoginHelper
   end
 
   protected
+
   def check_user
     # binding.pry
     if current_internal_user
