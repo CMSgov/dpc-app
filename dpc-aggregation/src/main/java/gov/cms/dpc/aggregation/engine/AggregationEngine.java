@@ -12,11 +12,9 @@ import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobResult;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
-import io.reactivex.schedulers.Schedulers;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
@@ -28,7 +26,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Implementation Notes:
  * - There is a single flow that does the work for a job
  * - It starts with an iteration of resource types in a job and produces a series of JobResult for that resource type
- * - The flow is mainly sequential, with parallel sections for I/O operations.
  * - Because the flow has parallel parts JobResults can be produced out sequence and errors can happen on separate branches.
  */
 public class AggregationEngine implements Runnable {
@@ -51,8 +47,6 @@ public class AggregationEngine implements Runnable {
     private final FhirContext fhirContext;
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
-    private final Scheduler fetchScheduler;
-    private final Scheduler writeScheduler;
     private Disposable subscribe;
 
     /**
@@ -71,18 +65,6 @@ public class AggregationEngine implements Runnable {
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
 
-        // Thread pools
-        if (operationsConfig.isParallelEnabled()) {
-            final var cpuCount = Runtime.getRuntime().availableProcessors();
-            final int fetchCount = Math.max((int) (cpuCount * operationsConfig.getFetchThreadFactor()), 1);
-            fetchScheduler = Schedulers.from(Executors.newFixedThreadPool(fetchCount));
-            final int writeCount = Math.max((int) (cpuCount * operationsConfig.getWriteThreadFactor()), 1);
-            writeScheduler = Schedulers.from(Executors.newFixedThreadPool(writeCount));
-        } else {
-            fetchScheduler = null;
-            writeScheduler = null;
-        }
-
         // Metrics
         final var metricFactory = new MetricMaker(metricRegistry, AggregationEngine.class);
         resourceMeter = metricFactory.registerMeter("resourceFetched");
@@ -95,10 +77,9 @@ public class AggregationEngine implements Runnable {
     @Override
     public void run() {
         // Run loop
-        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} parallelEnabled:{} ",
+        logger.info("Starting aggregation engine with exportPath:\"{}\" resourcesPerFile:{} ",
                 operationsConfig.getExportPath(),
-                operationsConfig.getResourcesPerFileCount(),
-                operationsConfig.isParallelEnabled());
+                operationsConfig.getResourcesPerFileCount());
         setGlobalErrorHandler();
         this.pollQueue();
     }
@@ -166,16 +147,7 @@ public class AggregationEngine implements Runnable {
 
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), resourceType, operationsConfig);
-        final Flowable<Resource> mixedFlow;
-        if (operationsConfig.isParallelEnabled()) {
-            mixedFlow = Flowable.fromIterable(job.getPatients())
-                    .parallel()
-                    .runOn(fetchScheduler)
-                    .flatMap(fetcher::fetchResources)
-                    .sequential();
-        } else {
-            mixedFlow = Flowable.fromIterable(job.getPatients()).flatMap(fetcher::fetchResources);
-        }
+        final Flowable<Resource> mixedFlow = Flowable.fromIterable(job.getPatients()).flatMap(fetcher::fetchResources);
         final var connectableMixedFlow = mixedFlow.publish().autoConnect(2);
 
         // Batch the non-error resources into files
@@ -200,22 +172,11 @@ public class AggregationEngine implements Runnable {
      * @return a transformed flow
      */
     private Publisher<JobResult> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger counter, Meter meter) {
-        if (operationsConfig.isParallelEnabled()) {
-            return upstream
-                    .filter(r -> r.getResourceType() == writer.getResourceType())
-                    .buffer(operationsConfig.getResourcesPerFileCount())
-                    .doOnNext(outcomes -> meter.mark(outcomes.size()))
-                    .parallel()
-                    .runOn(writeScheduler)
-                    .map(batch -> writer.writeBatch(counter, batch))
-                    .sequential();
-        } else {
-            return upstream
-                    .filter(r -> r.getResourceType() == writer.getResourceType())
-                    .buffer(operationsConfig.getResourcesPerFileCount())
-                    .doOnNext(outcomes -> meter.mark(outcomes.size()))
-                    .map(batch -> writer.writeBatch(counter, batch));
-        }
+        return upstream
+                .filter(r -> r.getResourceType() == writer.getResourceType())
+                .buffer(operationsConfig.getResourcesPerFileCount())
+                .doOnNext(outcomes -> meter.mark(outcomes.size()))
+                .map(batch -> writer.writeBatch(counter, batch));
     }
 
     /**

@@ -8,36 +8,24 @@ public class OperationsConfig {
     private int resourcesPerFileCount;
     private String exportPath;
     private boolean encryptionEnabled;
-    private boolean parallelEnabled;
-    private float writeThreadFactor;
-    private float fetchThreadFactor;
 
 
     public OperationsConfig(int resourcesPerFileCount,
                             String exportPath,
                             int retryCount,
-                            boolean encryptionEnabled,
-                            boolean parallelEnabled,
-                            float writeThreadFactor,
-                            float fetchThreadFactor) {
+                            boolean encryptionEnabled) {
         this.retryCount = retryCount;
         this.resourcesPerFileCount = resourcesPerFileCount;
-        this.parallelEnabled = parallelEnabled;
         this.exportPath = exportPath;
         this.encryptionEnabled = encryptionEnabled;
-        this.writeThreadFactor = writeThreadFactor;
-        this.fetchThreadFactor = fetchThreadFactor;
     }
 
     public OperationsConfig(int resourcesPerFileCount,
                             String exportPath) {
         this.retryCount = 3;
         this.resourcesPerFileCount = resourcesPerFileCount;
-        this.parallelEnabled = true;
         this.exportPath = exportPath;
         this.encryptionEnabled = false;
-        this.writeThreadFactor = 0.5f;
-        this.fetchThreadFactor = 2.5f;
     }
 
     public int getRetryCount() {
@@ -54,17 +42,5 @@ public class OperationsConfig {
 
     public boolean isEncryptionEnabled() {
         return encryptionEnabled;
-    }
-
-    public boolean isParallelEnabled() {
-        return parallelEnabled;
-    }
-
-    public float getWriteThreadFactor() {
-        return writeThreadFactor;
-    }
-
-    public float getFetchThreadFactor() {
-        return fetchThreadFactor;
     }
 }

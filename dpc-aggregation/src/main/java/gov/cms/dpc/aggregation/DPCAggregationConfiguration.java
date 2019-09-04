@@ -46,15 +46,6 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     // Enable file encryption per BCDA
     private boolean encryptionEnabled = false;
 
-    // Enable parallel operation
-    private boolean parallelEnabled = false;
-
-    // Number of threads to create for fetching = factor * number of cpu cores
-    private Number fetchThreadFactor = 2.5;
-
-    // Number of threads to create for writing = factor * number of cpu cores
-    private Number writeThreadFactor = 0.5;
-
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -82,18 +73,6 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     public int getResourcesPerFileCount() {
         return resourcesPerFileCount;
-    }
-
-    public boolean isParallelEnabled() {
-        return parallelEnabled;
-    }
-
-    public float getWriteThreadFactor() {
-        return writeThreadFactor.floatValue();
-    }
-
-    public float getFetchThreadFactor() {
-        return fetchThreadFactor.floatValue();
     }
 
     @Override

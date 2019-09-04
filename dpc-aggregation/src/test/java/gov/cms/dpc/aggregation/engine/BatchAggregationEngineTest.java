@@ -42,8 +42,7 @@ class BatchAggregationEngineTest {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        // TODO: Re-enable parallelism with DPC-465
-        operationsConfig = new OperationsConfig(10, exportPath, 3, false, false, 0.5f, 2.5f);
+        operationsConfig = new OperationsConfig(10, exportPath, 3, false);
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
     }
