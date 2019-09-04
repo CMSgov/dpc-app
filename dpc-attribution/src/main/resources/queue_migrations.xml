@@ -67,8 +67,27 @@
             <column name="complete_time" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
+        <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_job_id">
+            <column name="job_id"></column>
+        </createIndex>
+
+        <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_queue_next_item">
+            <column name="status"></column>
+            <column name="priority"></column>
+            <column name="submit_time"></column>
+        </createIndex>
+
+        <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_aggregator">
+            <column name="status"></column>
+            <column name="aggregator_id"></column>
+            <column name="update_time"></column>
+        </createIndex>
+
         <createTable tableName="JOB_QUEUE_BATCH_FILE">
             <column name="batch_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
             <column name="resource_type" type="INTEGER"/>
@@ -78,6 +97,10 @@
 
         <addPrimaryKey tableName="JOB_QUEUE_BATCH_FILE"
                        columnNames="batch_id, resource_type"/>
+
+        <createIndex tableName="JOB_QUEUE_BATCH_FILE" indexName="job_queue_batch_file_job_id">
+            <column name="job_id"></column>
+        </createIndex>
 
         <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH_FILE" baseColumnNames="batch_id" constraintName="fk_job_batch_id_file"
                                  referencedTableName="JOB_QUEUE_BATCH" referencedColumnNames="batch_id"/>
