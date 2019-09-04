@@ -10,5 +10,6 @@ public class OrganizationCommand extends AbstractCommandTree {
         // Register subcommands
         registerSubCommand(new OrganizationList());
         registerSubCommand(new OrganizationDelete());
+        registerSubCommand(new OrganizationRegistration());
     }
 }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
-import gov.cms.dpc.api.cli.OrgRegistrationCommand;
 import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.setup.Bootstrap;
