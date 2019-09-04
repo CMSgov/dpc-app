@@ -14,16 +14,6 @@ public class OrganizationDelete extends AbstractAttributionCommand {
     }
 
     @Override
-    public void configure(Subparser subparser) {
-        // Address of the Attribution Service, which handles organization deletion
-        subparser
-                .addArgument("--host")
-                .dest(ATTR_HOSTNAME)
-                .setDefault("http://localhost:3500/v1")
-                .help("Address of the Attribution Service, which handles organization registration");
-    }
-
-    @Override
     public void addAdditionalOptions(Subparser subparser) {
         subparser
                 .addArgument("id")

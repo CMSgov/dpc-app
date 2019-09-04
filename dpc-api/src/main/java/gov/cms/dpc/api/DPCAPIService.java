@@ -7,7 +7,6 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.DemoCommand;
-import gov.cms.dpc.api.cli.OrgRegistrationCommand;
 import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
@@ -52,7 +51,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         });
 
         bootstrap.addCommand(new DemoCommand());
-        bootstrap.addCommand(new OrgRegistrationCommand());
         bootstrap.addCommand(new OrganizationCommand());
         bootstrap.addCommand(new TokenCommand());
     }
