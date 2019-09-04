@@ -23,7 +23,7 @@ jobs:
   include:
     - script: make ci-app
       name: "API Build"
-    - script: make ci-website
+    - script: make ci-web
       name: "Website Build"
 
 before_install:
