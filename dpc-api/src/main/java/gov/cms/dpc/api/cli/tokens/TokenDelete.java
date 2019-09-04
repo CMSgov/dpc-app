@@ -52,7 +52,7 @@ public class TokenDelete extends AbstractAttributionCommand {
 
         // Delete the token
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpDelete tokenDelete = new HttpDelete(String.format("%s/Organization/%s/token/%s", client.getServerBase(), organization.getIdElement().getIdPart(), tokenID));
+            final HttpDelete tokenDelete = new HttpDelete(String.format("%s/Token/%s/%s", client.getServerBase(), organization.getIdElement().getIdPart(), tokenID));
 
             try (CloseableHttpResponse response = httpClient.execute(tokenDelete)) {
                 if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {

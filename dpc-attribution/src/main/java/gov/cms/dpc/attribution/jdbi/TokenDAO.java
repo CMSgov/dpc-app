@@ -12,8 +12,6 @@ import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,7 +43,7 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
         final CriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
         final Root<TokenEntity> root = query.from(TokenEntity.class);
 
-        query.where(builder.equal(root.get(TokenEntity_.organization), organizationID));
+        query.where(builder.equal(root.get(TokenEntity_.organization).get(OrganizationEntity_.ID), organizationID));
         return this.list(query);
     }
 
@@ -55,8 +53,8 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
         final Root<TokenEntity> root = query.from(TokenEntity.class);
 
         query.where(builder.and(
-                builder.equal(root.get(TokenEntity_.id), tokenID),
-                builder.equal(root.get(TokenEntity_.organization), organizationID)));
+                builder.equal(root.get(TokenEntity_.id), tokenID.toString()),
+                builder.equal(root.get(TokenEntity_.organization).get(OrganizationEntity_.id), organizationID)));
 
         return this.list(query);
     }

@@ -87,8 +87,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
 
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-            final HttpPost httpPost = new HttpPost(String.format("%s/Organization/%s/token", attributionService, organizationID.toString()));
-            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+            final HttpPost httpPost = new HttpPost(String.format("%s/Token/%s", attributionService, organizationID.toString()));
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 final String token = EntityUtils.toString(response.getEntity());
