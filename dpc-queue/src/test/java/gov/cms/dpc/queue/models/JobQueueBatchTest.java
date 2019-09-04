@@ -2,6 +2,7 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,8 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class JobQueueBatchTest {
 
     private static final UUID jobID = UUID.randomUUID();
-    private static final UUID batchID = UUID.randomUUID();
     private static final UUID orgID = UUID.randomUUID();
+    private static final String providerID = "providerID";
+    private static final List<ResourceType> resourceTypes = JobQueueBatch.validResourceTypes;
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final List<String> patientList = List.of("1", "2", "3");
 
@@ -285,7 +287,7 @@ public class JobQueueBatchTest {
     }
 
     JobQueueBatch createJobQueueBatch() {
-        return new JobQueueBatch(jobID, batchID, orgID, patientList);
+        return new JobQueueBatch(jobID, orgID, providerID, patientList, resourceTypes);
     }
 
 }

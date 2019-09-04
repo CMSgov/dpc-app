@@ -2,6 +2,7 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
@@ -46,11 +47,11 @@ public class JobQueueBatch implements Serializable {
     }
 
     /**
-     * The unique job batch identifier. Exists because Hibernate is terrible with composite keys
+     * The unique batch identifier
      */
     @Id
-    @Column(name = "job_batch_id")
-    private UUID jobBatchID;
+    @Column(name = "batch_id")
+    private UUID batchID;
 
     /**
      * The unique job identifier
@@ -59,16 +60,16 @@ public class JobQueueBatch implements Serializable {
     private UUID jobID;
 
     /**
-     * The unique batch identifier
-     */
-    @Column(name = "batch_id")
-    private UUID batchID;
-
-    /**
      * The unique organization identifier
      */
     @Column(name = "organization_id")
     private UUID orgID;
+
+    /**
+     * The provider-id from the request
+     */
+    @Column(name = "provider_id")
+    private String providerID;
 
     /**
      * The current status of this job
@@ -92,6 +93,13 @@ public class JobQueueBatch implements Serializable {
      */
     @Column(name = "patient_index")
     protected Integer patientIndex;
+
+    /**
+     * The list of resources for this job. Set at job creation.
+     */
+    @Convert(converter = ResourceTypeListConverter.class)
+    @Column(name = "resource_types")
+    private List<ResourceType> resourceTypes;
 
     /**
      * The current aggregator processing the batch. Null indicates no aggregator is processing the batch.
@@ -132,25 +140,20 @@ public class JobQueueBatch implements Serializable {
     public JobQueueBatch() {
     }
 
-    protected JobQueueBatch(UUID jobID, UUID batchID, UUID orgID, List<String> patients) {
-        this.jobBatchID = UUID.randomUUID();
+    protected JobQueueBatch(UUID jobID, UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes) {
+        this.batchID = UUID.randomUUID();
         this.jobID = jobID;
-        this.batchID = batchID;
         this.orgID = orgID;
+        this.providerID = providerID;
         this.patients = patients;
+        this.resourceTypes = resourceTypes;
         this.status = JobStatus.QUEUED;
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
-    public JobQueueBatch(UUID jobID, UUID batchID, UUID orgID, List<String> patients, RSAPublicKey pubKey) {
-        this.jobBatchID = UUID.randomUUID();
-        this.jobID = jobID;
-        this.batchID = batchID;
-        this.orgID = orgID;
-        this.patients = patients;
-        this.status = JobStatus.QUEUED;
+    public JobQueueBatch(UUID jobID, UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes, RSAPublicKey pubKey) {
+        this(jobID, orgID, providerID, patients, resourceTypes);
         this.rsaPublicKey = pubKey.getEncoded();
-        this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
     /**
@@ -172,20 +175,20 @@ public class JobQueueBatch implements Serializable {
         }
     }
 
-    public UUID getJobBatchID() {
-        return jobBatchID;
+    public UUID getBatchID() {
+        return batchID;
     }
 
     public UUID getJobID() {
         return jobID;
     }
 
-    public UUID getBatchID() {
-        return batchID;
-    }
-
     public UUID getOrgID() {
         return orgID;
+    }
+
+    public String getProviderID() {
+        return providerID;
     }
 
     public JobStatus getStatus() {
@@ -202,6 +205,10 @@ public class JobQueueBatch implements Serializable {
 
     public Optional<Integer> getPatientIndex() {
         return Optional.ofNullable(patientIndex);
+    }
+
+    public List<ResourceType> getResourceTypes() {
+        return resourceTypes;
     }
 
     public Optional<UUID> getAggregatorID() {
