@@ -39,7 +39,7 @@
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
         <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
         <hapi.fhir.groupID>${jitpack.groupID}.hapi-fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>jitpack-SNAPSHOT</hapi.fhir.version>
+        <hapi.fhir.version>f8e3716809dd02e90ecdac411abeee2f76f8d4dd</hapi.fhir.version>
         <pgsql.version>42.2.5</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
