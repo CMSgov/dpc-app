@@ -10,6 +10,8 @@ This data is made available through a set of [FHIR](http://hl7.org/fhir/STU3/) c
 
 This guide serves as a starting point for users to begin working with the API by introducing the core APIs as well as two key concepts of [Bulk Data](#bulk-data) and [Patient Attribution](#attribution).
 
+Documentation is also available in a comprehensive [OpenAPI format](/api/swagger) as well as a FHIR [implementation guide](/ig/index.html) 
+
 ## Bulk Data
 
 This project provides an implementation of the FHIR [Bulk Data Access](http://hl7.org/fhir/us/bulkdata/2019May/index.html) specification, which provides an async interface over the existing Blue Button 2.0 data model.
@@ -1120,3 +1122,10 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
 The DPC team has created a FHIR Implementation Guide which provides detailed information regarding the FHIR APIs and Data Models.
 
 <a href="/ig/index.html" class="ds-c-button">Read the Implementation Guide</a>
+
+## OpenAPI Documentation
+
+The DPC team has created comprehensive [OpenAPI](https://swagger.io/docs/specification/about/) (formerly Swagger) documentation which provides detailed information regarding public endpoints avilable for the DPC project.
+In addition, this documentation allows organizations to interactively explore the API, using their own access tokens and datasets.
+
+<a href="api/swagger" class="ds-c-button">View the OpenAPI Documentation</a>
