@@ -11,7 +11,7 @@ module Internal
       def github
         if valid_org_team?
           @internal_user = InternalUser.from_omniauth(request.env['omniauth.auth'])
-          signin_and_redirect_internal_user(@internal_user)
+          sign_in_and_redirect @internal_user
         else
           redirect_to new_internal_user_session_path, error: 'No can do.'
         end
@@ -39,7 +39,7 @@ module Internal
 
       def valid_org_team?
         github_client.user_teams.any? do |team|
-          team[:id] == ENV['GITHUB_ORG_TEAM_ID'] && team[:organization][:id] == ENV['GITHUB_ORG_ID']
+          team[:id].to_s == ENV.fetch('GITHUB_ORG_TEAM_ID')
         end
       end
 

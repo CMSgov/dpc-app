@@ -69,6 +69,7 @@ GEM
       xpath (~> 3.2)
     childprocess (1.0.1)
       rake (< 13.0)
+    climate_control (0.2.0)
     coderay (1.1.2)
     coffee-rails (4.2.2)
       coffee-script (>= 2.2.0)
@@ -341,6 +342,7 @@ DEPENDENCIES
   brakeman
   byebug
   capybara
+  climate_control
   coffee-rails (~> 4.2)
   daemons
   database_cleaner
