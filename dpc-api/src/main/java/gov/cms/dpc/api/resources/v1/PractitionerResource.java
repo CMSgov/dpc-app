@@ -11,10 +11,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +25,7 @@ import java.util.function.Consumer;
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
+@Api(value = "Practitioner")
 public class PractitionerResource extends AbstractPractitionerResource {
 
     private static final String PRACTITIONER_PROFILE = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner";
