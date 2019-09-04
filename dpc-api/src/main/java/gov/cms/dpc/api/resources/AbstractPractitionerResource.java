@@ -11,6 +11,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
+@Path("/Practitioner")
 @FHIR
 public abstract class AbstractPractitionerResource {
 
