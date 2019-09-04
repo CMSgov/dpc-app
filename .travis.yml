@@ -18,10 +18,10 @@ cache:
 
 jobs:
   include:
-    - stage: test
-      script: ./dpc-test.sh Application
-    - stage: test
-      script: ./dpc-web-test.sh Website
+    - script: ./dpc-test.sh Application
+      name: "API Build"
+    - script: ./dpc-web-test.sh Website
+      name: "Website Build"
 
 before_install:
   - sudo /etc/init.d/postgresql stop
