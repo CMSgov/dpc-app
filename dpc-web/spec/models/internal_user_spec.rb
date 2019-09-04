@@ -3,7 +3,18 @@
 require 'rails_helper'
 
 RSpec.describe InternalUser, type: :model do
-  # TODO validate uniquness of UID per provider
+  describe 'validations' do
+    describe 'uid uniqueness validation' do
+      it 'does not allow internal user with already extant uid per provider' do
+        _internal_user = create(:internal_user, uid: '111', provider: 'github')
+        new_internal_user = build(:internal_user, uid: '111', provider: 'github')
+        other_internal_user = build(:internal_user, uid: '222', provider: 'github')
+
+        expect(new_internal_user).not_to be_valid
+        expect(other_internal_user).to be_valid
+      end
+    end
+  end
 
   describe '.from_omniauth(auth)' do
     it 'finds existing internal user based on uid and provider' do
