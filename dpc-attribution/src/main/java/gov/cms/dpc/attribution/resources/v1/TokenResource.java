@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -31,6 +32,7 @@ import java.util.UUID;
 public class TokenResource extends AbstractTokenResource {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
+    private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
@@ -92,7 +94,12 @@ public class TokenResource extends AbstractTokenResource {
         final OrganizationEntity organization = new OrganizationEntity();
         organization.setId(organizationID);
 
-        this.dao.persistToken(new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON));
+        try {
+
+            this.dao.persistToken(new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON));
+        } catch (NoResultException e) {
+            throw new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND);
+        }
 
         return new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8);
     }

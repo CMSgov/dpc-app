@@ -16,8 +16,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -26,7 +24,6 @@ import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 class OrganizationResourceTest extends AbstractAttributionTest {
 
     private OrganizationResourceTest() {
@@ -87,7 +84,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         // Create a token and save it
         String macaroon;
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Organization/%s/token", organization.getIdElement().getIdPart()));
+            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s", organization.getIdElement().getIdPart()));
 
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
@@ -107,20 +104,6 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute();
 
         assertEquals(1, execute.getEntry().size(), "Should have found an organization");
-    }
-
-    @Test
-    void testEmptyTokenSearch() {
-        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-
-        final IQuery<Bundle> query = client
-                .search()
-                .forResource(Organization.class)
-                .returnBundle(Bundle.class)
-                .encodedJson();
-
-        final InvalidRequestException exception = assertThrows(InvalidRequestException.class, query::execute, "Should fail on empty token");
-        assertEquals(HttpStatus.BAD_REQUEST_400, exception.getStatusCode(), "Should be bad request");
     }
 
     @Test

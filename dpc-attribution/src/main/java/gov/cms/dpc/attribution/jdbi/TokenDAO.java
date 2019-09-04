@@ -1,14 +1,19 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.entities.TokenEntity;
 import gov.cms.dpc.common.entities.TokenEntity_;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import org.hibernate.query.Query;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +25,18 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
     }
 
     public TokenEntity persistToken(TokenEntity entity) {
+        // Check to ensure that the organization exists
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<Boolean> query = builder.createQuery(Boolean.class);
+        final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
+
+        query.select(builder.literal(true))
+                .where(builder.equal(root.get(OrganizationEntity_.id), entity.getOrganization().getId()));
+
+        final Query<Boolean> query1 = this.currentSession().createQuery(query);
+
+        query1.getSingleResult();
+
         return persist(entity);
     }
 

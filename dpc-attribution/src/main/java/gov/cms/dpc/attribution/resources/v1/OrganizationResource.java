@@ -39,7 +39,6 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
-    private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
     private final OrganizationDAO dao;
     private final MacaroonBakery bakery;
 
@@ -160,107 +159,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
         this.dao.deleteOrganization(organizationEntity);
         return Response.ok().build();
-    }
-
-//    @GET
-//    @Path("/{organizationID}/token")
-//    @UnitOfWork
-//    @Override
-//    @Timed
-//    @ExceptionMetered
-//    @ApiOperation(value = "Fetch organization tokens", notes = "Method to retrieve the authentication tokens associated to the given Organization. This searches by resource ID")
-//    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
-//    public List<TokenResponse> getOrganizationTokens(
-//            @ApiParam(value = "Organization resource ID", required = true)
-//            @PathParam("organizationID") UUID organizationID) {
-//        final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
-//
-//        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
-//
-//        return entity
-//                .getTokens()
-//                .stream()
-//                .map(te -> new TokenResponse(te.getId(), te.getTokenType(), "never"))
-//                .collect(Collectors.toList());
-//    }
-//
-//    @POST
-//    @Path("/{organizationID}/token")
-//    @UnitOfWork
-//    @Override
-//    @Timed
-//    @ExceptionMetered
-//    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)")
-//    public String createOrganizationToken(
-//            @ApiParam(value = "Organization resource ID", required = true)
-//            @PathParam("organizationID") UUID organizationID) {
-//        final Optional<OrganizationEntity> entityOptional = this.dao.fetchOrganization(organizationID);
-//
-//        final OrganizationEntity entity = entityOptional.orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
-//
-//        final Macaroon macaroon = generateMacaroon(organizationID);
-//
-//        // Add the macaroon ID to the organization and update it
-//        entity.addToken();
-//        this.dao.updateOrganization(entity);
-//
-//        // Return the base64 encoded Macaroon
-//        return new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8);
-//    }
-
-//    @DELETE
-//    @Path("/{organizationID}/token/{tokenID}")
-//    @UnitOfWork
-//    @Timed
-//    @ExceptionMetered
-//    @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
-//    @Override
-//    public Response deleteOrganizationToken(
-//            @ApiParam(value = "Organization resource ID", required = true) @NotNull @PathParam("organizationID") UUID organizationID,
-//            @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
-//        final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)
-//                .orElseThrow(() -> new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND));
-//
-//        final TokenEntity foundToken = organizationEntity
-//                .getTokens()
-//                .stream()
-//                .filter(token -> token.getId().equals(tokenID.toString()))
-//                .findAny()
-//                .orElseThrow(() -> new WebApplicationException("Cannot find token by ID", Response.Status.NOT_FOUND));
-//
-//        organizationEntity.removeToken(foundToken);
-//        this.dao.updateOrganization(organizationEntity);
-//
-//        return Response.ok().build();
-//    }
-
-//    @Override
-//    @GET
-//    @Timed
-//    @ExceptionMetered
-//    @Path("/{organizationID}/token/verify")
-//    @ApiOperation(value = "Verify authentication token", notes = "Verify an authentication token with a given Organization. " +
-//            "This allows for checking if a given token is correctly to the organization if the token is valid.")
-//    @ApiResponses(value = @ApiResponse(code = 401, message = "Token is not valid for the given Organization"))
-//    public Response verifyOrganizationToken(
-//            @ApiParam(value = "Organization resource ID", required = true)
-//            @PathParam("organizationID") UUID organizationID,
-//            @ApiParam(value = "Authentication token to verify", required = true)
-//            @NotEmpty @QueryParam("token") String token) {
-//        final boolean valid = validateMacaroon(organizationID, parseMacaroonToken(token));
-//        if (valid) {
-//            return Response.ok().build();
-//        }
-//
-//        return Response.status(Response.Status.UNAUTHORIZED).build();
-//    }
-
-    private Macaroon generateMacaroon(UUID organizationID) {
-        // Create some caveats
-        final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("organization_id", MacaroonCaveat.Operator.EQ, organizationID.toString())
-        );
-        return this.bakery.createMacaroon(caveats);
     }
 
     private Bundle searchAndValidationByToken(String token) {
