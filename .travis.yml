@@ -16,9 +16,15 @@ cache:
   directories:
     - $HOME/.m2
 
+# Skip build in Maven install, which we run ourselves
+install: true
+
+jobs:
+  include:
+    - script: make ci-app
+      name: "API Build"
+    - script: make ci-web
+      name: "Website Build"
+
 before_install:
   - sudo /etc/init.d/postgresql stop
-
-script:
-  - make ci-app
-  - make ci-web
