@@ -65,40 +65,40 @@ public abstract class AbstractOrganizationResource {
     @Path("/{organizationID}")
     public abstract Response deleteOrganization(UUID organizationID);
 
-    /**
-     * Get authentication token for {@link Organization}.
-     * If no token exists, returns an empty {@link List}
-     *
-     * @param organizationID - {@link UUID} organization ID
-     * @return - {@link List} {@link String} base64 (URL) encoded token
-     */
-    @GET
-    @Path("/{organizationID}/token")
-    public abstract List<TokenResponse> getOrganizationTokens(UUID organizationID);
+//    /**
+//     * Get authentication token for {@link Organization}.
+//     * If no token exists, returns an empty {@link List}
+//     *
+//     * @param organizationID - {@link UUID} organization ID
+//     * @return - {@link List} {@link String} base64 (URL) encoded token
+//     */
+//    @GET
+//    @Path("/{organizationID}/token")
+//    public abstract List<TokenResponse> getOrganizationTokens(UUID organizationID);
 
-    /**
-     * Create authentication token for {@link Organization}.
-     * This token is designed to be long-lived and delegatable.
-     *
-     * @param organizationID - {@link UUID} organization ID
-     * @return - {@link String} base64 (URL) encoded token
-     */
-    @POST
-    @Path("/{organizationID}/token")
-    public abstract String createOrganizationToken(@PathParam("organizationID") UUID organizationID);
+//    /**
+//     * Create authentication token for {@link Organization}.
+//     * This token is designed to be long-lived and delegatable.
+//     *
+//     * @param organizationID - {@link UUID} organization ID
+//     * @return - {@link String} base64 (URL) encoded token
+//     */
+//    @POST
+//    @Path("/{organizationID}/token")
+//    public abstract String createOrganizationToken(@PathParam("organizationID") UUID organizationID);
+//
+//    @DELETE
+//    @Path("/{organizationID}/token/{tokenID}")
+//    public abstract Response deleteOrganizationToken(@NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID);
 
-    @DELETE
-    @Path("/{organizationID}/token/{tokenID}")
-    public abstract Response deleteOrganizationToken(@NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID);
-
-    /**
-     * Verify that the provided token is valid
-     *
-     * @param organizationID - {@link UUID} organization ID
-     * @param token          - {@link String} representation of authorization token (optionally base64 encoded)
-     * @return - {@link Response} with status {@link Response.Status#OK} if token is valid. {@link Response.Status#UNAUTHORIZED} if token is not valid
-     */
-    @GET
-    @Path("/{organizationID}/token/verify")
-    public abstract Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @NotEmpty @QueryParam("token") String token);
+//    /**
+//     * Verify that the provided token is valid
+//     *
+//     * @param organizationID - {@link UUID} organization ID
+//     * @param token          - {@link String} representation of authorization token (optionally base64 encoded)
+//     * @return - {@link Response} with status {@link Response.Status#OK} if token is valid. {@link Response.Status#UNAUTHORIZED} if token is not valid
+//     */
+//    @GET
+//    @Path("/{organizationID}/token/verify")
+//    public abstract Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @NotEmpty @QueryParam("token") String token);
 }
