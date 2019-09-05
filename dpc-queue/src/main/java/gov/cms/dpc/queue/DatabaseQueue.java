@@ -94,7 +94,6 @@ public class DatabaseQueue extends JobQueueCommon {
     public Optional<JobQueueBatch> getBatch( UUID batchID) {
         // Get from Postgres
         try (final Session session = this.factory.openSession()) {
-
             final Transaction tx = session.beginTransaction();
             try {
                 final JobQueueBatch batch = session.get(JobQueueBatch.class, batchID);
@@ -113,7 +112,6 @@ public class DatabaseQueue extends JobQueueCommon {
     public List<JobQueueBatch> getJobBatches(UUID jobID) {
         // Get from Postgres
         try (final Session session = this.factory.openSession()) {
-
             final Transaction tx = session.beginTransaction();
             try {
                 final CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -140,17 +138,41 @@ public class DatabaseQueue extends JobQueueCommon {
 
     @Override
     public void pauseBatch(JobQueueBatch job, UUID aggregatorID) {
-
+        try (final Session session = this.factory.openSession()) {
+            final Transaction tx = session.beginTransaction();
+            try {
+                job.setPausedStatus(aggregatorID);
+                session.persist(job);
+            } finally {
+                tx.commit();
+            }
+        }
     }
 
     @Override
     public void completePartialBatch(JobQueueBatch job, UUID aggregatorID) {
-
+        try (final Session session = this.factory.openSession()) {
+            final Transaction tx = session.beginTransaction();
+            try {
+                // We just need to persist the job, as any results will be attached to the job and cascade
+                session.persist(job);
+            } finally {
+                tx.commit();
+            }
+        }
     }
 
     @Override
     public void failBatch(JobQueueBatch job, UUID aggregatorID) {
-
+        try (final Session session = this.factory.openSession()) {
+            final Transaction tx = session.beginTransaction();
+            try {
+                job.setFailedStatus(aggregatorID);
+                session.persist(job);
+            } finally {
+                tx.commit();
+            }
+        }
     }
 
     @Override
