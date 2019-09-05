@@ -43,7 +43,7 @@ RSpec.feature 'internal user signs in' do
           info: {
             nickname: 'whereisnemo',
             email: 'test@cms.hhs.gov',
-            name: 'Nemo',
+            name: 'New Nemo',
             image: 'https://avatars3.githubusercontent.com/u/111'
           },
           credentials: { token: 'abcdefg' }
@@ -53,6 +53,7 @@ RSpec.feature 'internal user signs in' do
         find('[data-test="internal-user-sign-in-form"]').click
 
         expect(page).to have_css('[data-test="internal-user-signout"]')
+        expect(page).to have_content('New Nemo')
       end
 
       scenario 'logs in returning internal user' do
@@ -62,18 +63,18 @@ RSpec.feature 'internal user signs in' do
           info: {
             nickname: 'foundnemo',
             email: 'nemo@cms.hhs.gov',
-            name: 'Nemo',
             image: 'https://avatars3.githubusercontent.com/u/111'
           },
           credentials: { token: 'abcdefg' }
         })
 
-        internal_user = create(:internal_user, provider: 'github', uid: '56789')
+        internal_user = create(:internal_user, provider: 'github', uid: '56789', name: 'Found Nemo')
 
         visit new_internal_user_session_path
         find('[data-test="internal-user-sign-in-form"]').click
 
         expect(page).to have_css('[data-test="internal-user-signout"]')
+        expect(page).to have_content(internal_user.name)
       end
 
       scenario 'internal user cannot then sign in as user' do
