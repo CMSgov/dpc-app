@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   devise_for :internal_users, path: 'internal', controllers: {
     sessions: "internal/auth/sessions",
-    passwords: "internal/auth/passwords"
+    omniauth_callbacks: "internal/auth/omniauth_callbacks"
   }
   devise_for :users, path: 'users', controllers: {
     sessions: "users/sessions",
