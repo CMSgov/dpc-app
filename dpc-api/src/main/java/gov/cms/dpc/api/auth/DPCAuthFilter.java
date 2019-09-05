@@ -67,7 +67,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
 
-        logger.warn("Making request to validate token.");
+        logger.trace("Making request to validate token.");
         final Bundle returnedBundle = this
                 .client
                 .search()
@@ -77,7 +77,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
                 .encodedJson()
                 .execute();
 
-        logger.warn("Found {} matching organizations", returnedBundle.getTotal());
+        logger.trace("Found {} matching organizations", returnedBundle.getTotal());
         if (returnedBundle.getTotal() == 0) {
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
