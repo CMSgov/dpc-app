@@ -93,7 +93,6 @@ You also need to set the Github ENV variables to enable Github OAuth login for i
 export GITHUB_APP_ID=xxx
 export GITHUB_APP_SECRET=yyy
 export GITHUB_ORG_TEAM_ID=123
-export GITHUB_ORG_ID=456
 ```
 
 
