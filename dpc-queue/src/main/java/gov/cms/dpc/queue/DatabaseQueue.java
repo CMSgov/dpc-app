@@ -5,10 +5,10 @@ import com.codahale.metrics.Timer;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
+import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -28,7 +28,7 @@ import java.util.UUID;
 /**
  * Implements a distributed {@link gov.cms.dpc.queue.models.JobQueueBatch} using a Postgres database
  */
-public class DatabaseQueue implements JobQueueInterface {
+public class DatabaseQueue extends JobQueueCommon {
 
     // Statics
     private static final Logger logger = LoggerFactory.getLogger(DatabaseQueue.class);
@@ -47,9 +47,12 @@ public class DatabaseQueue implements JobQueueInterface {
     @Inject
     public DatabaseQueue(
             DPCManagedSessionFactory factory,
+            @QueueBatchSize int batchSize,
             @HealthCheckQuery String healthQuery,
             MetricRegistry metricRegistry
     ) {
+        super(batchSize);
+
         this.factory = factory.getSessionFactory();
         this.healthQuery = healthQuery;
 
@@ -62,51 +65,44 @@ public class DatabaseQueue implements JobQueueInterface {
     }
 
     @Override
-    public void submitJob(JobQueueBatch job) {
-        assert (job.getStatus() == JobStatus.QUEUED);
-        logger.debug("Adding jobID {} batchID {} to the queue at {} with for organization {}.",
-                job.getJobID(),
-                job.getBatchID(),
-                job.getSubmitTime().orElseThrow().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                job.getOrgID());
+    public void submitJobBatches(List<JobQueueBatch> jobBatches) {
+        JobQueueBatch firstBatch = jobBatches.stream().findFirst().orElseThrow();
 
-        // Persist the job in postgres
+        logger.debug("Adding jobID {} ({} batches) to the queue at {} with for organization {}.",
+                firstBatch.getJobID(),
+                jobBatches.size(),
+                firstBatch.getSubmitTime().orElseThrow().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                firstBatch.getOrgID());
+
+        // Persist the batches in postgres
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                session.persist(job);
+                for ( JobQueueBatch batch : jobBatches ) {
+                    session.persist(batch);
+                }
                 tx.commit();
             } catch (Exception e) {
-                logger.error("Cannot add job to database", e);
+                logger.error("Cannot add job batches to database", e);
                 tx.rollback();
-                throw new JobQueueFailure(job.getJobID(), job.getBatchID(), e);
+                throw new JobQueueFailure(firstBatch.getJobID(), firstBatch.getBatchID(), e);
             }
         }
     }
 
     @Override
-    public Optional<JobQueueBatch> getJobBatch(UUID jobID, UUID batchID) {
+    public Optional<JobQueueBatch> getBatch( UUID batchID) {
         // Get from Postgres
         try (final Session session = this.factory.openSession()) {
 
             final Transaction tx = session.beginTransaction();
             try {
-                final CriteriaBuilder builder = session.getCriteriaBuilder();
-                final CriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
-                final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
-
-                query.select(root);
-                query.where(
-                        builder.equal(root.get("jobID"), jobID),
-                        builder.equal(root.get("batchId"), batchID)
-                );
-
-                final JobQueueBatch job = session.createQuery(query).uniqueResult();
-                if (job == null) {
+                final JobQueueBatch batch = session.get(JobQueueBatch.class, batchID);
+                if ( batch == null ) {
                     return Optional.empty();
                 }
-                session.refresh(job);
-                return Optional.of(job);
+                session.refresh(batch);
+                return Optional.of(batch);
             } finally {
                 tx.commit();
             }
@@ -138,12 +134,22 @@ public class DatabaseQueue implements JobQueueInterface {
     }
 
     @Override
-    public Optional<JobQueueBatch> workJob() {
+    public Optional<JobQueueBatch> workBatch(UUID aggregatorID) {
         return Optional.empty();
     }
 
     @Override
-    public void completeJob(JobQueueBatch job, List<JobQueueBatchFile> results) {
+    public void pauseBatch(JobQueueBatch job, UUID aggregatorID) {
+
+    }
+
+    @Override
+    public void completePartialBatch(JobQueueBatch job, UUID aggregatorID) {
+
+    }
+
+    @Override
+    public void failBatch(JobQueueBatch job, UUID aggregatorID) {
 
     }
 

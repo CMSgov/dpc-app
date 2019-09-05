@@ -364,6 +364,7 @@ public class JobQueueBatch implements Serializable {
                 .append(submitTime, that.submitTime)
                 .append(startTime, that.startTime)
                 .append(completeTime, that.completeTime)
+                .append(jobQueueBatchFiles, that.jobQueueBatchFiles)
                 .isEquals();
     }
 
