@@ -40,12 +40,12 @@ public class FHIRValidationModule extends AbstractModule {
 
         bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class).asEagerSingleton();
         bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
-        bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class).in(Scopes.SINGLETON);
+        bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class).asEagerSingleton();
 
         bind(FHIRValidationExceptionHandler.class);
 
-        bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
-        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
+        bind(DPCProfileSupport.class).asEagerSingleton();
+        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).asEagerSingleton();
     }
 
     @Provides
