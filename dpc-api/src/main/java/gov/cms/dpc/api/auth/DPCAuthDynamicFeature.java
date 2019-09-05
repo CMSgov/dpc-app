@@ -54,7 +54,6 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
         final boolean annotationOnMethod = am.isAnnotationPresent(PathAuthorizer.class);
 
         if (annotationOnClass || annotationOnMethod) {
-            logger.warn("Setting path authorizer");
             final PathAuthorizer pa = am.getAnnotation(PathAuthorizer.class);
             context.register(this.factory.createPathAuthorizer(pa));
         }

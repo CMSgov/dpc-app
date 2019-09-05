@@ -1,12 +1,15 @@
 package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
@@ -24,7 +27,7 @@ public abstract class AbstractPatientResource {
     public abstract Bundle patientSearch(OrganizationPrincipal organization, String patientMBI);
 
     @POST
-    public abstract Response submitPatient(OrganizationPrincipal organization, Patient patient);
+    public abstract Response submitPatient(OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
     @POST
     @Path("/$submit")
     public abstract Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params);
@@ -39,5 +42,5 @@ public abstract class AbstractPatientResource {
 
     @PUT
     @Path("/{patientID}")
-    public abstract Patient updatePatient(UUID patientID, Patient patient);
+    public abstract Patient updatePatient(UUID patientID, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
 }

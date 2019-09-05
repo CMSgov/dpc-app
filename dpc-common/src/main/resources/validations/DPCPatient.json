@@ -78,7 +78,8 @@
         "id": "Patient.managingOrganization",
         "path": "Patient.managingOrganization",
         "definition": "Organization which is responsible for the patient",
-        "min": 1,
+        "min": 0,
+        "max": 1,
         "type": [
           {
             "code": "Reference",
