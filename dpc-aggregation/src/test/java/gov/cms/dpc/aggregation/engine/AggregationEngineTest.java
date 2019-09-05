@@ -219,7 +219,7 @@ class AggregationEngineTest {
     @Test
     void sequentialJobTest() {
         // Make an engine with parallel threads turned off
-        final var operationalConfig = new OperationsConfig(1000, exportPath, 3, false);
+        final var operationalConfig = new OperationsConfig(1000, exportPath, 3);
         final var sequentialEngine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
         AggregationEngine.setGlobalErrorHandler();
 

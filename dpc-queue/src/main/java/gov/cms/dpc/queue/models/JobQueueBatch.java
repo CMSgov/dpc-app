@@ -10,7 +10,6 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -107,12 +106,6 @@ public class JobQueueBatch implements Serializable {
     protected UUID aggregatorID;
 
     /**
-     * The public key used to encrypt the files
-     */
-    @Column(name = "rsa_public_key")
-    private byte[] rsaPublicKey;
-
-    /**
      * The time the job was last processed
      */
     @Column(name = "update_time", nullable = true)
@@ -158,11 +151,6 @@ public class JobQueueBatch implements Serializable {
         this.status = JobStatus.QUEUED;
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.jobQueueBatchFiles = new ArrayList<>();
-    }
-
-    public JobQueueBatch(UUID jobID, UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes, RSAPublicKey pubKey) {
-        this(jobID, orgID, providerID, patients, resourceTypes);
-        this.rsaPublicKey = pubKey.getEncoded();
     }
 
     /**
@@ -222,14 +210,6 @@ public class JobQueueBatch implements Serializable {
 
     public Optional<UUID> getAggregatorID() {
         return Optional.ofNullable(aggregatorID);
-    }
-
-    public byte[] getRsaPublicKey() {
-        if (rsaPublicKey == null) {
-            throw new NullPointerException("This Job was created without a public key!");
-        } else {
-            return rsaPublicKey;
-        }
     }
 
     public Optional<OffsetDateTime> getUpdateTime() {
@@ -380,7 +360,6 @@ public class JobQueueBatch implements Serializable {
                 .append(patientIndex, that.patientIndex)
                 .append(resourceTypes, that.resourceTypes)
                 .append(aggregatorID, that.aggregatorID)
-                .append(rsaPublicKey, that.rsaPublicKey)
                 .append(updateTime, that.updateTime)
                 .append(submitTime, that.submitTime)
                 .append(startTime, that.startTime)
@@ -401,7 +380,6 @@ public class JobQueueBatch implements Serializable {
                 .append(patientIndex)
                 .append(resourceTypes)
                 .append(aggregatorID)
-                .append(rsaPublicKey)
                 .append(updateTime)
                 .append(submitTime)
                 .append(startTime)
@@ -422,7 +400,6 @@ public class JobQueueBatch implements Serializable {
                 ", patientIndex=" + patientIndex +
                 ", resourceTypes=" + resourceTypes +
                 ", aggregatorID=" + aggregatorID +
-                ", rsaPublicKey=" + Arrays.toString(rsaPublicKey) +
                 ", updateTime=" + updateTime +
                 ", submitTime=" + submitTime +
                 ", startTime=" + startTime +

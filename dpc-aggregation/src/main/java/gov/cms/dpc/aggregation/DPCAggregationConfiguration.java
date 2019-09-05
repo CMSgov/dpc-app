@@ -43,9 +43,6 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Max(100000) // Keep files under a GB
     private int resourcesPerFileCount = 10000;
 
-    // Enable file encryption per BCDA
-    private boolean encryptionEnabled = false;
-
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -65,10 +62,6 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     public void setRetryCount(Integer retryCount) {
         this.retryCount = retryCount;
-    }
-
-    public boolean isEncryptionEnabled() {
-        return encryptionEnabled;
     }
 
     public int getResourcesPerFileCount() {

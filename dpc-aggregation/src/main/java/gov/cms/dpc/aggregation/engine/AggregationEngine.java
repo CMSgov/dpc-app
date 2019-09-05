@@ -7,6 +7,8 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.Pair;
+import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
@@ -105,6 +107,10 @@ public class AggregationEngine implements Runnable {
                     return completed.delay(2, TimeUnit.SECONDS);
                 })
                 .subscribe(this::completeJobBatch, error -> logger.error("Unable to complete job.", error));
+    }
+
+    void completeJob(Pair<UUID, JobModel> pair) {
+
     }
 
     void completeJobBatch(JobQueueBatch job) {

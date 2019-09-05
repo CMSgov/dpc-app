@@ -7,17 +7,14 @@ public class OperationsConfig {
     private int retryCount;
     private int resourcesPerFileCount;
     private String exportPath;
-    private boolean encryptionEnabled;
 
 
     public OperationsConfig(int resourcesPerFileCount,
                             String exportPath,
-                            int retryCount,
-                            boolean encryptionEnabled) {
+                            int retryCount) {
         this.retryCount = retryCount;
         this.resourcesPerFileCount = resourcesPerFileCount;
         this.exportPath = exportPath;
-        this.encryptionEnabled = encryptionEnabled;
     }
 
     public OperationsConfig(int resourcesPerFileCount,
@@ -25,7 +22,6 @@ public class OperationsConfig {
         this.retryCount = 3;
         this.resourcesPerFileCount = resourcesPerFileCount;
         this.exportPath = exportPath;
-        this.encryptionEnabled = false;
     }
 
     public int getRetryCount() {
@@ -38,9 +34,5 @@ public class OperationsConfig {
 
     public String getExportPath() {
         return exportPath;
-    }
-
-    public boolean isEncryptionEnabled() {
-        return encryptionEnabled;
     }
 }

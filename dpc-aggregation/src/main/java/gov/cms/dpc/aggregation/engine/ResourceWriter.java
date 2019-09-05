@@ -9,13 +9,11 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.CipherOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -87,12 +85,8 @@ class ResourceWriter {
             final var byteStream = new ByteArrayOutputStream();
             final var sequence = counter.getAndIncrement();
             final var jsonParser = fhirContext.newJsonParser();
-            OutputStream writer = config.isEncryptionEnabled() ?
-                    formCipherStream(byteStream, job, resourceType, sequence):
-                    byteStream;
-            String outputPath = config.isEncryptionEnabled() ?
-                    formEncryptedOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence):
-                    formOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence);
+            OutputStream writer = byteStream;
+            String outputPath = formOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence);
 
             logger.debug("Start writing to {}", outputPath);
             for (var resource: batch) {
@@ -112,28 +106,6 @@ class ResourceWriter {
             throw new JobQueueFailure(job.getJobID(), job.getBatchID(), "Error encrypting a resource", ex);
         } catch(Exception ex) {
             throw new JobQueueFailure(job.getJobID(), job.getBatchID(), "General failure consuming a resource", ex);
-        }
-    }
-
-    /**
-     * Build an encrypting stream that contains an inner stream.
-     *
-     * @param writer is the inner stream to write to
-     * @param job is the context including the RSA key
-     * @param resourceType is the type of resource being written
-     * @param sequence is the batch sequence being written
-     * @return a output stream to write to
-     * @throws GeneralSecurityException if there is something wrong with the encryption config
-     * @throws IOException if there is something wrong with the file io.
-     */
-    private OutputStream formCipherStream(OutputStream writer, JobQueueBatch job, ResourceType resourceType, int sequence) throws GeneralSecurityException, IOException {
-        final var metadataPath = formEncryptedMetadataPath(config.getExportPath(), job.getJobID(), resourceType, sequence);
-        try(final CipherBuilder cipherBuilder = new CipherBuilder();
-            final FileOutputStream metadataWriter = new FileOutputStream(metadataPath)) {
-            cipherBuilder.generateKeyMaterial();
-            final String json = cipherBuilder.getMetadata(job.getRsaPublicKey());
-            metadataWriter.write(json.getBytes(StandardCharsets.UTF_8));
-            return new CipherOutputStream(writer, cipherBuilder.formCipher());
         }
     }
 
