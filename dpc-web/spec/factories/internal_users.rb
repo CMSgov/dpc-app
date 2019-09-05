@@ -3,8 +3,6 @@
 FactoryBot.define do
   factory :internal_user do
     sequence(:email) { |n| "user#{n}@example.com" }
-    sequence(:last_name) { |n| "last_name_#{n}" }
-    sequence(:first_name) { |n| "first_name_#{n}" }
 
     password { '123456' }
     password_confirmation { '123456' }
