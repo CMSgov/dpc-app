@@ -40,3 +40,7 @@ plugins:
     channel: rubocop-0-67
     config:
       file: "dpc-web/.rubocop.yml"
+  bundler-audit:
+    enabled: true
+    config:
+      path: "dpc-web/Gemfile.lock"
