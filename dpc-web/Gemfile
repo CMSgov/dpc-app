@@ -38,6 +38,7 @@ end
 
 group :test do
   gem 'selenium-webdriver'
+  gem 'climate_control'
 end
 
 group :development do
@@ -55,3 +56,5 @@ end
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem 'delayed_job_active_record'
 gem 'daemons'
+gem 'omniauth-github'
+gem 'octokit'
