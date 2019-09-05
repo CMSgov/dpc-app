@@ -8,6 +8,7 @@ import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -43,4 +44,8 @@ public abstract class AbstractPatientResource {
     @PUT
     @Path("/{patientID}")
     public abstract Patient updatePatient(UUID patientID, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
+
+    @POST
+    @Path("/$validate")
+    public abstract IBaseOperationOutcome validatePatient(OrganizationPrincipal organization, Parameters parameters);
 }

@@ -8,6 +8,7 @@ import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -43,4 +44,8 @@ public abstract class AbstractPractitionerResource {
     @PUT
     @Path("/{providerID}")
     public abstract Practitioner updateProvider(UUID providerID, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider);
+
+    @POST
+    @Path("/$validate")
+    public abstract IBaseOperationOutcome validateProvider(OrganizationPrincipal organization, Parameters parameters);
 }
