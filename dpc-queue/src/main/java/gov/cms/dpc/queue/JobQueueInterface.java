@@ -1,7 +1,7 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,27 +11,31 @@ import java.util.UUID;
  * Interface for submitting/retrieving export jobs to a backing queue.
  */
 public interface JobQueueInterface {
-    /**
-     * Submit a job into the queue. The job's {@link JobStatus} will be set to `QUEUED`, meaning
-     * that the job is ready to run.
-     *
-     * @param job - the job model that describes the job
-     */
-    void submitJob(JobQueueBatch job);
 
     /**
-     * Find a job in the queue, regardless of job status. Does not alter the job.
+     * Create and submit a job into the queue. The job will be broken into batches, prioritized,
+     * and set to the QUEUED status.
      *
-     * @param jobID - the id of the job to search
-     * @param batchID = the id of the batch to search
+     * @param orgID - The organization submitting the job
+     * @param providerID - The provider submitting the job
+     * @param patients - The list of patients to fetch data for
+     * @param resourceTypes - The resource types to fetch patient data for
+     * @return The UUID of the created job
+     */
+    UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes);
+
+    /**
+     * Find a batch in the queue, regardless of job status. Does not alter the batch.
+     *
+     * @param batchID - the id of the batch to search
      * @return Optional that contains the found job if present
      */
-    Optional<JobQueueBatch> getJobBatch(UUID jobID, UUID batchID);
+    Optional<JobQueueBatch> getBatch(UUID batchID);
 
     /**
      * Find all the batches of a given job, regardless of job status. Does not alter the job.
      *
-     * @param jobID
+     * @param jobID - the id of the job to search
      * @return a list of batches part of the job if present
      */
     List<JobQueueBatch> getJobBatches(UUID jobID);
@@ -41,15 +45,31 @@ public interface JobQueueInterface {
      *
      * @return The job to work, if present.
      */
-    Optional<JobQueueBatch> workJob();
+    Optional<JobQueueBatch> workBatch(UUID aggregatorID);
 
     /**
-     * Alter the job's {@link JobStatus} to passed status. Called when the job batch is finished.
+     * Pauses the current progress and allows another aggregator to pick up the batch.
      *
-     * @param job - the job
-     * @param results - The new counts for each job resource type.
+     * @param job - the job to pause
+     * @param aggregatorID - the current aggregator working the job
      */
-    void completeJob(JobQueueBatch job, List<JobQueueBatchFile> results);
+    void pauseBatch(JobQueueBatch job, UUID aggregatorID);
+
+    /**
+     * Alter the job's {@link JobStatus} to passed status. Called when the job batch is finished partially processing.
+     *
+     * @param job - the job to add progress to
+     * @param aggregatorID - the current aggregator working the job
+     */
+    void completePartialBatch(JobQueueBatch job, UUID aggregatorID);
+
+    /**
+     * Fails the current batch. A failed batch will have to be manually restarted.
+     *
+     * @param job - the job batch to fail
+     * @param aggregatorID - the current aggregator working the job
+     */
+    void failBatch(JobQueueBatch job, UUID aggregatorID);
 
     /**
      * Number of items in the queue.
