@@ -39,14 +39,6 @@ public class APIHelpers {
                 .execute();
     }
 
-    public static boolean hasProfile(BaseResource value, String profileURI) {
-        return value
-                .getMeta()
-                .getProfile()
-                .stream()
-                .anyMatch(pred -> pred.getValueAsString().equals(profileURI));
-    }
-
     public static String formatValidationMessages(List<SingleValidationMessage> messages) {
         return messages
                 .stream()
