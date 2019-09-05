@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3c283cb5-e6b5-4c0f-bfc7-da6e028dfb27",
+		"_postman_id": "6e2079b2-1878-4fac-95da-fa78bcb4c00e",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -219,6 +219,9 @@
 								"exec": [
 									"var group = {",
 									"  \"resourceType\": \"Group\",",
+									"  \"actual\": true,",
+									"  \"active\": true,",
+									"  \"type\": \"person\",",
 									"  \"characteristic\": [",
 									"    {",
 									"      \"code\": {",

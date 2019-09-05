@@ -79,7 +79,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, ATTRIBUTION_URL);
 
         // Update the Macaroons interceptor to use the new Organization token
-        ((APITestHelpers.MacaroonsInterceptor) client.getInterceptors().get(0)).setMacaroon(m2);
+        ((APITestHelpers.MacaroonsInterceptor) client.getInterceptorService().getAllRegisteredInterceptors().get(0)).setMacaroon(m2);
 
         final Bundle otherPractitioners = client
                 .search()
