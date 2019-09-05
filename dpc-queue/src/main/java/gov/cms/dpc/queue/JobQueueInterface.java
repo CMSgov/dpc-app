@@ -64,6 +64,14 @@ public interface JobQueueInterface {
     void completePartialBatch(JobQueueBatch job, UUID aggregatorID);
 
     /**
+     * Completes the current batch.
+     *
+     * @param job - the job batch to compelte
+     * @param aggregatorID - the current aggregator working the job
+     */
+    void completeBatch(JobQueueBatch job, UUID aggregatorID);
+
+    /**
      * Fails the current batch. A failed batch will have to be manually restarted.
      *
      * @param job - the job batch to fail

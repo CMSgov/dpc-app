@@ -20,10 +20,13 @@ import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implements a distributed {@link gov.cms.dpc.queue.models.JobQueueBatch} using a Postgres database
@@ -40,6 +43,7 @@ public class DatabaseQueue extends JobQueueCommon {
 
     // Metrics
     private final Timer waitTimer; // The wait time for a job to start
+    private final Timer partialTimer; // The time to complete each partial of a batch
     private final Timer successTimer; // The work time a successful job takes
     private final Timer failureTimer; // The work time a failed job takes
 
@@ -59,6 +63,7 @@ public class DatabaseQueue extends JobQueueCommon {
         // Metrics
         final var metricBuilder = new MetricMaker(metricRegistry, DatabaseQueue.class);
         this.waitTimer = metricBuilder.registerTimer("waitTime");
+        this.partialTimer = metricBuilder.registerTimer("partialTime");
         this.successTimer = metricBuilder.registerTimer("successTime");
         this.failureTimer = metricBuilder.registerTimer("failureTime");
         metricBuilder.registerCachedGauge("queueLength", this::queueSize);
@@ -165,6 +170,11 @@ public class DatabaseQueue extends JobQueueCommon {
                     JobQueueBatch batch = session.get(JobQueueBatch.class, batchID.get());
                     batch.setRunningStatus(aggregatorID);
                     session.persist(batch);
+                    session.refresh(batch);
+
+                    final var delay = Duration.between(batch.getStartTime().orElseThrow(), batch.getUpdateTime().orElseThrow());
+                    waitTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
+
                     return Optional.of(batch);
                 } else {
                     return Optional.empty();
@@ -193,8 +203,31 @@ public class DatabaseQueue extends JobQueueCommon {
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
+                final Optional<OffsetDateTime> lastUpdate = job.getUpdateTime();
+
                 // We just need to persist the job, as any results will be attached to the job and cascade
                 session.persist(job);
+                session.refresh(job);
+
+                final var delay = Duration.between(lastUpdate.orElseThrow(), job.getUpdateTime().orElseThrow());
+                partialTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
+            } finally {
+                tx.commit();
+            }
+        }
+    }
+
+    @Override
+    public void completeBatch(JobQueueBatch job, UUID aggregatorID) {
+        try (final Session session = this.factory.openSession()) {
+            final Transaction tx = session.beginTransaction();
+            try {
+                job.setCompletedStatus(aggregatorID);
+                session.persist(job);
+                session.refresh(job);
+
+                final var delay = Duration.between(job.getStartTime().orElseThrow(), job.getCompleteTime().orElseThrow());
+                successTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
             } finally {
                 tx.commit();
             }
@@ -208,6 +241,10 @@ public class DatabaseQueue extends JobQueueCommon {
             try {
                 job.setFailedStatus(aggregatorID);
                 session.persist(job);
+                session.refresh(job);
+
+                final var delay = Duration.between(job.getStartTime().orElseThrow(), job.getUpdateTime().orElseThrow());
+                failureTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
             } finally {
                 tx.commit();
             }
