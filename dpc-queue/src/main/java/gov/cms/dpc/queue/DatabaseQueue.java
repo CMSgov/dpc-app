@@ -133,7 +133,28 @@ public class DatabaseQueue extends JobQueueCommon {
 
     @Override
     public Optional<JobQueueBatch> workBatch(UUID aggregatorID) {
-        return Optional.empty();
+        try (final Session session = this.factory.openSession()) {
+            final Transaction tx = session.beginTransaction();
+            try {
+                // TODO: Handle stuck batches
+
+                // Claim a new batch
+                Optional<String> batchID = session.createSQLQuery("SELECT batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
+                        .uniqueResultOptional()
+                        .map(Object::toString);
+
+                if ( batchID.isPresent() ) {
+                    JobQueueBatch batch = session.get(JobQueueBatch.class, batchID.get());
+                    batch.setRunningStatus(aggregatorID);
+                    session.persist(batch);
+                    return Optional.of(batch);
+                } else {
+                    return Optional.empty();
+                }
+            } finally {
+                tx.commit();
+            }
+        }
     }
 
     @Override
