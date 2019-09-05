@@ -1,7 +1,7 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public interface JobQueueInterface {
      * @param job - the job
      * @param results - The new counts for each job resource type.
      */
-    void completeJob(JobQueueBatch job, List<JobResult> results);
+    void completeJob(JobQueueBatch job, List<JobQueueBatchFile> results);
 
     /**
      * Number of items in the queue.

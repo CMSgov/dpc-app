@@ -12,7 +12,7 @@ import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
-import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 
 import javax.inject.Singleton;
 import java.util.List;
@@ -36,7 +36,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         final var fhirContext = FhirContext.forDstu3();
 
         // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
-        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
         return fhirContext;
     }
 

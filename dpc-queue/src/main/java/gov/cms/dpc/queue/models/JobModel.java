@@ -60,7 +60,7 @@ public class JobModel implements Serializable {
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name="jobid")
-    private List<JobResult> jobResults;
+    private List<JobQueueBatchFile> jobQueueBatchFiles;
 
     /**
      * The provider-id from the request
@@ -119,7 +119,7 @@ public class JobModel implements Serializable {
         this.jobID = jobID;
         this.orgID = orgID;
         this.resourceTypes = resourceTypes;
-        this.jobResults = new ArrayList<>();
+        this.jobQueueBatchFiles = new ArrayList<>();
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -130,7 +130,7 @@ public class JobModel implements Serializable {
         this.jobID = jobID;
         this.orgID = orgID;
         this.resourceTypes = resourceTypes;
-        this.jobResults = new ArrayList<>();
+        this.jobQueueBatchFiles = new ArrayList<>();
         this.providerID = providerID;
         this.patients = patients;
         this.status = JobStatus.QUEUED;
@@ -167,12 +167,12 @@ public class JobModel implements Serializable {
         return resourceTypes;
     }
 
-    public List<JobResult> getJobResults() {
-        return jobResults;
+    public List<JobQueueBatchFile> getJobQueueBatchFiles() {
+        return jobQueueBatchFiles;
     }
 
-    public Optional<JobResult> getJobResult(ResourceType forResourceType) {
-        return jobResults.stream().filter(result -> result.getResourceType().equals(forResourceType)).findFirst();
+    public Optional<JobQueueBatchFile> getJobResult(ResourceType forResourceType) {
+        return jobQueueBatchFiles.stream().filter(result -> result.getResourceType().equals(forResourceType)).findFirst();
     }
 
     public String getProviderID() {
@@ -225,13 +225,13 @@ public class JobModel implements Serializable {
      * @param status - the new status
      * @param results - the job results to add the finished state
      */
-    public void setFinishedStatus(JobStatus status, List<JobResult> results) {
+    public void setFinishedStatus(JobStatus status, List<JobQueueBatchFile> results) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
-        if (this.status != JobStatus.RUNNING || jobResults.size() != 0) {
+        if (this.status != JobStatus.RUNNING || jobQueueBatchFiles.size() != 0) {
             throw new JobQueueFailure(jobID, String.format("Cannot complete. JobStatus: %s", this.status));
         }
         this.status = status;
-        jobResults.addAll(results);
+        jobQueueBatchFiles.addAll(results);
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
@@ -243,7 +243,7 @@ public class JobModel implements Serializable {
         return new EqualsBuilder()
                 .append(jobID, other.jobID)
                 .append(orgID, other.orgID)
-                .append(jobResults, other.jobResults)
+                .append(jobQueueBatchFiles, other.jobQueueBatchFiles)
                 .append(resourceTypes, other.resourceTypes)
                 .append(providerID, other.providerID)
                 .append(patients, other.patients)
@@ -260,7 +260,7 @@ public class JobModel implements Serializable {
         return Objects.hash(jobID,
                 orgID,
                 resourceTypes,
-                jobResults,
+                jobQueueBatchFiles,
                 providerID,
                 patients,
                 status,
@@ -280,7 +280,7 @@ public class JobModel implements Serializable {
                 ", patients=" + patients +
                 ", status=" + status +
                 ", rsaPublicKey=" + Arrays.toString(rsaPublicKey) +
-                ", jobResult=" + jobResults +
+                ", jobResult=" + jobQueueBatchFiles +
                 ", submitTime=" + submitTime +
                 ", startTime=" + startTime +
                 ", completeTime=" + completeTime +

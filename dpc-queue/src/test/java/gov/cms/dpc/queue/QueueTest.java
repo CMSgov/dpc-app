@@ -4,7 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -116,14 +116,14 @@ class QueueTest {
                 () -> assertEquals(JobStatus.RUNNING, runningJob.orElseThrow().getStatus(), "Job should be running"));
 
         // Complete the job
-        final var results = List.of(new JobResult(firstID, ResourceType.Patient, 0, 1));
+        final var results = List.of(new JobQueueBatchFile(firstID, null, ResourceType.Patient, 0, 1));
         queue.completeJob(workJob.get().getLeft(), JobStatus.COMPLETED, results);
 
         // Check that the status is COMPLETED and with JobResults
         final Optional<JobModel> completedOptional = queue.getJob(workJob.get().getLeft());
         completedOptional.ifPresent(completedJob -> {
             assertEquals(JobStatus.COMPLETED, completedJob.getStatus());
-            assertEquals(1, completedJob.getJobResults().size());
+            assertEquals(1, completedJob.getJobQueueBatchFiles().size());
             assertTrue(completedJob.getJobResult(ResourceType.Patient).isPresent());
         });
 
@@ -143,7 +143,7 @@ class QueueTest {
         Optional<JobModel> failedJob = queue.getJob(workJob.get().getLeft());
         assertAll(() -> assertTrue(failedJob.isPresent(), "Should have job in the queue"),
                 () -> assertEquals(JobStatus.FAILED, failedJob.orElseThrow().getStatus(), "Job should have failed"),
-                () -> assertEquals(0, failedJob.orElseThrow().getJobResults().size(), "FAILED jobs should have empty results"));
+                () -> assertEquals(0, failedJob.orElseThrow().getJobQueueBatchFiles().size(), "FAILED jobs should have empty results"));
 
         // After working two jobs the queue should be empty
         assertEquals(0, queue.queueSize(), "Worked all jobs in the queue, but the queue is not empty");
@@ -158,8 +158,8 @@ class QueueTest {
 
         // Retrieve the job with both resources
         final var workJob = queue.workJob().orElseThrow().getRight();
-        final var results = List.of(new JobResult(jobID, ResourceType.Patient, 0, 1),
-                new JobResult(jobID, ResourceType.ExplanationOfBenefit, 0, 1));
+        final var results = List.of(new JobQueueBatchFile(jobID, null, ResourceType.Patient, 0, 1),
+                new JobQueueBatchFile(jobID, null, ResourceType.ExplanationOfBenefit, 0, 1));
 
         // Complete job
         queue.completeJob(workJob.getJobID(), JobStatus.COMPLETED, results);
@@ -169,7 +169,7 @@ class QueueTest {
         assertTrue(actualJob.isPresent());
         actualJob.ifPresent(job -> {
             assertEquals(JobStatus.COMPLETED, job.getStatus());
-            assertEquals(2, job.getJobResults().size());
+            assertEquals(2, job.getJobQueueBatchFiles().size());
             assertEquals(1, job.getJobResult(ResourceType.Patient).orElseThrow().getCount());
         });
     }

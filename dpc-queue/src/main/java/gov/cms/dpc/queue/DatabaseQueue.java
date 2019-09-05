@@ -8,7 +8,7 @@ import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -143,7 +143,7 @@ public class DatabaseQueue implements JobQueueInterface {
     }
 
     @Override
-    public void completeJob(JobQueueBatch job, List<JobResult> results) {
+    public void completeJob(JobQueueBatch job, List<JobQueueBatchFile> results) {
 
     }
 

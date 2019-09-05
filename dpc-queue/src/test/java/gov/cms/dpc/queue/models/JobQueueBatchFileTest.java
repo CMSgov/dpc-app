@@ -1,0 +1,45 @@
+package gov.cms.dpc.queue.models;
+
+import org.hl7.fhir.dstu3.model.ResourceType;
+import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class JobQueueBatchFileTest {
+    @Test
+    void testEqual() {
+        final var jobID = UUID.randomUUID();
+        final var batchID = UUID.randomUUID();
+        final var a = new JobQueueBatchFile(jobID, batchID, ResourceType.Patient, 0, 1);
+        final var b = new JobQueueBatchFile(jobID, batchID, ResourceType.Patient, 0, 1);
+        final var c = new JobQueueBatchFile(jobID, batchID, ResourceType.ExplanationOfBenefit, 0, 1);
+        assertTrue(a.equals(b), "expected a to equal b");
+        assertFalse(a.equals(c), "expected a to not equal c");
+        assertTrue(a.equals(a));
+    }
+
+    @Test
+    void testHash() {
+        final var jobID = UUID.randomUUID();
+        final var batchID = UUID.randomUUID();
+        final var a = new JobQueueBatchFile(jobID, batchID, ResourceType.Patient, 0, 1);
+        final var b = new JobQueueBatchFile(jobID, batchID, ResourceType.Patient, 0, 1);
+        final var c = new JobQueueBatchFile(jobID, batchID, ResourceType.ExplanationOfBenefit, 0, 1);
+        assertEquals(a.hashCode(), b.hashCode(), "expected a to equal b");
+        assertNotEquals(a.hashCode(), c.hashCode(), "expected a to not equal c");
+    }
+
+    @Test
+    void testGet() {
+        final var jobID = UUID.randomUUID();
+        final var batchID = UUID.randomUUID();
+        final var a = new JobQueueBatchFile(jobID, batchID, ResourceType.Patient, 0, 1);
+        assertEquals(jobID, a.getJobID());
+        assertEquals(ResourceType.Patient, a.getResourceType());
+        assertEquals(0, a.getSequence());
+        assertEquals(1, a.getCount());
+        assertEquals(new JobQueueBatchFile.JobQueueBatchFileID(batchID, ResourceType.Patient, 0), a.getJobQueueBatchFileID());;
+    }
+}

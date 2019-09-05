@@ -7,12 +7,14 @@ import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.queue.models.JobModel;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +106,11 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
+    public UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes) {
+        return null;
+    }
+
+    @Override
     public Optional<JobModel> getJob(UUID jobID) {
         // Get from Postgres
         try (final Session session = this.factory.openSession()) {
@@ -141,10 +148,15 @@ public class DistributedQueue implements JobQueue {
     }
 
     @Override
-    public void completeJob(UUID jobID, JobStatus status, List<JobResult> jobResults) {
+    public Optional<JobQueueBatch> workJobBatch(UUID aggregatorID) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void completeJob(UUID jobID, JobStatus status, List<JobQueueBatchFile> jobQueueBatchFiles) {
         assert (status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         final OffsetDateTime completionTime = OffsetDateTime.now(ZoneOffset.UTC);
-        final JobModel updatedJob = updateModel(jobID, job -> job.setFinishedStatus(status, jobResults));
+        final JobModel updatedJob = updateModel(jobID, job -> job.setFinishedStatus(status, jobQueueBatchFiles));
         final Duration workDuration = Duration.between(updatedJob.getStartTime().orElseThrow(), updatedJob.getCompleteTime().orElseThrow());
         if (status == JobStatus.COMPLETED) {
             successTimer.update(workDuration.toMillis(), TimeUnit.MILLISECONDS);

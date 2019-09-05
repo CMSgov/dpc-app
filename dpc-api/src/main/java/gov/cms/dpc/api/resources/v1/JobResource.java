@@ -11,7 +11,7 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobModel;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -119,10 +119,10 @@ public class JobResource extends AbstractJobResource {
      * @return the list of OutputEntry
      */
     private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, boolean forOperationalOutcomes) {
-        return job.getJobResults().stream()
+        return job.getJobQueueBatchFiles().stream()
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
-                        String.format("%s/Data/%s", this.baseURL, JobResult.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
+                        String.format("%s/Data/%s", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
                         result.getCount()))
                 .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)

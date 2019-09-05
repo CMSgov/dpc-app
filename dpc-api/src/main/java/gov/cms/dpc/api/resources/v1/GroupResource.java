@@ -13,7 +13,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
@@ -241,12 +241,11 @@ public class GroupResource extends AbstractGroupResource {
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
 
         // Generate a job ID and submit it to the queue
-        final UUID jobID = UUID.randomUUID();
         final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
 
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
-        this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, rosterID, attributedPatients));
+        final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources);
 
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
@@ -275,7 +274,7 @@ public class GroupResource extends AbstractGroupResource {
     private List<ResourceType> handleTypeQueryParam(String resourcesListParam) {
         // If the query param is omitted, the FHIR spec states that all resources should be returned
         if (resourcesListParam == null || resourcesListParam.isEmpty()) {
-            return JobModel.validResourceTypes;
+            return JobQueueBatch.validResourceTypes;
         }
 
         final var resources = new ArrayList<ResourceType>();
@@ -317,7 +316,7 @@ public class GroupResource extends AbstractGroupResource {
     private static Optional<ResourceType> matchResourceType(String queryResourceType) {
         final var canonical = queryResourceType.trim().toUpperCase();
         // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
-        return JobModel.validResourceTypes.stream()
+        return JobQueueBatch.validResourceTypes.stream()
                 .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
                 .findFirst();
     }

@@ -91,12 +91,13 @@
                 <constraints nullable="false"/>
             </column>
             <column name="resource_type" type="INTEGER"/>
+            <column name="sequence" type="INTEGER"/>
             <column name="file_name" type="TEXT"/>
             <column name="count" type="INTEGER"/>
         </createTable>
 
         <addPrimaryKey tableName="JOB_QUEUE_BATCH_FILE"
-                       columnNames="batch_id, resource_type"/>
+                       columnNames="batch_id, resource_type, sequence"/>
 
         <createIndex tableName="JOB_QUEUE_BATCH_FILE" indexName="job_queue_batch_file_job_id">
             <column name="job_id"></column>

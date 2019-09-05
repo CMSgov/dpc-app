@@ -4,6 +4,8 @@ import gov.cms.dpc.common.converters.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.*;
@@ -11,10 +13,7 @@ import java.io.Serializable;
 import java.security.interfaces.RSAPublicKey;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The JobQueueBatch tracks the work done on a bulk export request. It contains the essential details of the request and
@@ -137,10 +136,19 @@ public class JobQueueBatch implements Serializable {
     @Column(name = "complete_time", nullable = true)
     protected OffsetDateTime completeTime;
 
+    /**
+     * The list of job results
+     *
+     * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name="job_id")
+    private List<JobQueueBatchFile> jobQueueBatchFiles;
+
     public JobQueueBatch() {
     }
 
-    protected JobQueueBatch(UUID jobID, UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes) {
+    public JobQueueBatch(UUID jobID, UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes) {
         this.batchID = UUID.randomUUID();
         this.jobID = jobID;
         this.orgID = orgID;
@@ -149,6 +157,7 @@ public class JobQueueBatch implements Serializable {
         this.resourceTypes = resourceTypes;
         this.status = JobStatus.QUEUED;
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
+        this.jobQueueBatchFiles = new ArrayList<>();
     }
 
     public JobQueueBatch(UUID jobID, UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes, RSAPublicKey pubKey) {
@@ -239,6 +248,14 @@ public class JobQueueBatch implements Serializable {
         return Optional.ofNullable(completeTime);
     }
 
+    public List<JobQueueBatchFile> getJobQueueBatchFiles() {
+        return jobQueueBatchFiles;
+    }
+
+    public Optional<JobQueueBatchFile> getJobQueueFile(ResourceType forResourceType) {
+        return jobQueueBatchFiles.stream().filter(result -> result.getResourceType().equals(forResourceType)).findFirst();
+    }
+
     /**
      * Transition this job to running status. This job should be in the QUEUED state.
      */
@@ -325,6 +342,9 @@ public class JobQueueBatch implements Serializable {
         this.completeTime = null;
     }
 
+    /**
+     * Verifies that the aggregator is still assigned to the batch, if not throw exception
+     */
     protected void verifyAggregatorID(UUID aggregatorID) throws JobQueueFailure {
         if ( this.aggregatorID != null && !this.aggregatorID.equals(aggregatorID) ) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot update job. Cannot process a job owned by another aggregator. Existing Aggregator: %s Aggregator Claiming: %s", jobID, batchID, this.aggregatorID, aggregatorID));
@@ -339,5 +359,74 @@ public class JobQueueBatch implements Serializable {
         if ( startTime != null ) {
             updateTime = OffsetDateTime.now(ZoneOffset.UTC);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JobQueueBatch that = (JobQueueBatch) o;
+
+        return new EqualsBuilder()
+                .append(batchID, that.batchID)
+                .append(jobID, that.jobID)
+                .append(orgID, that.orgID)
+                .append(providerID, that.providerID)
+                .append(status, that.status)
+                .append(priority, that.priority)
+                .append(patients, that.patients)
+                .append(patientIndex, that.patientIndex)
+                .append(resourceTypes, that.resourceTypes)
+                .append(aggregatorID, that.aggregatorID)
+                .append(rsaPublicKey, that.rsaPublicKey)
+                .append(updateTime, that.updateTime)
+                .append(submitTime, that.submitTime)
+                .append(startTime, that.startTime)
+                .append(completeTime, that.completeTime)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(batchID)
+                .append(jobID)
+                .append(orgID)
+                .append(providerID)
+                .append(status)
+                .append(priority)
+                .append(patients)
+                .append(patientIndex)
+                .append(resourceTypes)
+                .append(aggregatorID)
+                .append(rsaPublicKey)
+                .append(updateTime)
+                .append(submitTime)
+                .append(startTime)
+                .append(completeTime)
+                .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "JobQueueBatch{" +
+                "batchID=" + batchID +
+                ", jobID=" + jobID +
+                ", orgID=" + orgID +
+                ", providerID='" + providerID + '\'' +
+                ", status=" + status +
+                ", priority=" + priority +
+                ", patients=" + patients +
+                ", patientIndex=" + patientIndex +
+                ", resourceTypes=" + resourceTypes +
+                ", aggregatorID=" + aggregatorID +
+                ", rsaPublicKey=" + Arrays.toString(rsaPublicKey) +
+                ", updateTime=" + updateTime +
+                ", submitTime=" + submitTime +
+                ", startTime=" + startTime +
+                ", completeTime=" + completeTime +
+                '}';
     }
 }

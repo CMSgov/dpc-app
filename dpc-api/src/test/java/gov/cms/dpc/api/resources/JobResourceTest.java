@@ -1,26 +1,24 @@
 package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.ws.rs.core.Response;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JobResourceTest {
     static final String TEST_PROVIDER_ID = "1";
@@ -98,6 +96,7 @@ public class JobResourceTest {
     @Test
     public void testSuccessfulJob() {
         final var jobID = UUID.randomUUID();
+        final var batchID = UUID.randomUUID();
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryQueue();
@@ -111,7 +110,7 @@ public class JobResourceTest {
         queue.workJob();
         final var results = JobModel.validResourceTypes
                 .stream()
-                .map(resourceType -> new JobResult(jobID, resourceType, 0, 1))
+                .map(resourceType -> new JobQueueBatchFile(jobID, batchID, resourceType, 0, 1))
                 .collect(Collectors.toList());
         queue.completeJob(jobID, JobStatus.COMPLETED, results);
 
@@ -125,7 +124,7 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobResult.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
         }
     }
 
@@ -136,6 +135,7 @@ public class JobResourceTest {
     @Test
     public void testJobWithError() {
         final var jobID = UUID.randomUUID();
+        final var batchID = UUID.randomUUID();
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryQueue();
@@ -147,7 +147,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        queue.completeJob(jobID, JobStatus.COMPLETED, List.of(new JobResult(jobID, ResourceType.OperationOutcome, 0, 1)));
+        queue.completeJob(jobID, JobStatus.COMPLETED, List.of(new JobQueueBatchFile(jobID, batchID, ResourceType.OperationOutcome, 0, 1)));
 
         // Test the response for ok
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -160,7 +160,7 @@ public class JobResourceTest {
                 () -> assertEquals(1, completion.getError().size()));
         JobCompletionModel.OutputEntry entry = completion.getError().get(0);
         assertEquals(ResourceType.OperationOutcome, entry.getType());
-        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobResult.formOutputFileName(jobID, ResourceType.OperationOutcome, 0)), entry.getUrl());
+        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(jobID, ResourceType.OperationOutcome, 0)), entry.getUrl());
     }
 
     /**
@@ -180,7 +180,7 @@ public class JobResourceTest {
                 List.of(TEST_PATIENT_ID));
         queue.submitJob(jobID, job);
         queue.workJob();
-        queue.completeJob(jobID, JobStatus.FAILED, job.getJobResults());
+        queue.completeJob(jobID, JobStatus.FAILED, job.getJobQueueBatchFiles());
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -194,6 +194,7 @@ public class JobResourceTest {
     @Test
     public void testWrongOrgJobAccess() {
         final var jobID = UUID.randomUUID();
+        final var batchID = UUID.randomUUID();
         final var organizationPrincipalCorrect = APITestHelpers.makeOrganizationPrincipal();
         final var orgIDCorrect = FHIRExtractors.getEntityUUID(organizationPrincipalCorrect.getOrganization().getId());
         final var organizationPrincipalWrong = APITestHelpers.makeOrganizationPrincipal(OTHER_ORGANIZATION);
@@ -209,7 +210,7 @@ public class JobResourceTest {
         queue.workJob();
         final var results = JobModel.validResourceTypes
                 .stream()
-                .map(resourceType -> new JobResult(jobID, resourceType, 0, 1))
+                .map(resourceType -> new JobQueueBatchFile(jobID, batchID, resourceType, 0, 1))
                 .collect(Collectors.toList());
         queue.completeJob(jobID, JobStatus.COMPLETED, results);
 
@@ -227,7 +228,7 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobResult.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
         }
     }
 }

@@ -1,8 +1,10 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.queue.models.JobModel;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,11 @@ public class MemoryQueue implements JobQueue {
         assert(jobID.equals(job.getJobID()) && job.getStatus() == JobStatus.QUEUED);
         logger.debug("Submitting job: {}", jobID);
         this.queue.put(jobID, job);
+    }
+
+    @Override
+    public synchronized UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes) {
+        return null;
     }
 
     @Override
@@ -67,13 +74,18 @@ public class MemoryQueue implements JobQueue {
     }
 
     @Override
-    public synchronized void completeJob(UUID jobID, JobStatus status, List<JobResult> jobResults) {
+    public Optional<JobQueueBatch> workJobBatch(UUID aggregatorID) {
+        return Optional.empty();
+    }
+
+    @Override
+    public synchronized void completeJob(UUID jobID, JobStatus status, List<JobQueueBatchFile> jobQueueBatchFiles) {
         assert(status == JobStatus.COMPLETED || status == JobStatus.FAILED);
         final JobModel job = this.queue.get(jobID);
         if (job == null) {
             throw new JobQueueFailure(jobID, "Job does not exist in queue");
         }
-        job.setFinishedStatus(status, jobResults);
+        job.setFinishedStatus(status, jobQueueBatchFiles);
         this.queue.replace(jobID, job);
 
         final var workDuration = Duration.between(job.getStartTime().orElseThrow(), job.getCompleteTime().orElseThrow());

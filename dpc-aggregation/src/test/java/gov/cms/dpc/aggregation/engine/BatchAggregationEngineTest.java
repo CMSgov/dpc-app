@@ -10,7 +10,8 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +45,7 @@ class BatchAggregationEngineTest {
         exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(10, exportPath, 3, false);
         AggregationEngine.setGlobalErrorHandler();
-        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
 
     @BeforeEach
@@ -74,7 +75,7 @@ class BatchAggregationEngineTest {
         // Look at the result
         final var completeJob = queue.getJob(jobId).orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final List<JobResult> sorted = completeJob.getJobResults().stream().sorted(Comparator.comparingInt(JobResult::getSequence)).collect(Collectors.toList());
+        final List<JobQueueBatchFile> sorted = completeJob.getJobQueueBatchFiles().stream().sorted(Comparator.comparingInt(JobQueueBatchFile::getSequence)).collect(Collectors.toList());
         assertAll(() -> assertEquals(4, sorted.size()),
                 () -> assertEquals(10, sorted.get(0).getCount()),
                 () -> assertEquals(2, sorted.get(3).getCount()));
@@ -135,7 +136,7 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJob(jobId).orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(5, completeJob.getJobResults().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
                 () -> assertTrue(completeJob.getJobResult(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
                 () -> assertTrue(completeJob.getJobResult(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
 

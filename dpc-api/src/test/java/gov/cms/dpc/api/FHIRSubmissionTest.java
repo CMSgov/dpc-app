@@ -10,9 +10,8 @@ import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
-import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -23,7 +22,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import javax.ws.rs.client.WebTarget;
@@ -58,10 +56,10 @@ class FHIRSubmissionTest {
 
     // Test data
     private static List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private static final JobModel testJobModel = new JobModel(UUID.randomUUID(), UUID.randomUUID(),
-            Collections.singletonList(ResourceType.Patient),
+    private static final JobQueueBatch testJobQueueBatch = new JobQueueBatch(UUID.randomUUID(), UUID.randomUUID(),
             TEST_PROVIDER_ID,
-            testBeneficiaries);
+            testBeneficiaries,
+            Collections.singletonList(ResourceType.Patient));
 
     private ResourceExtension groupResource = ResourceExtension.builder()
             .addResource(new GroupResource(queue, client, TEST_BASE_URL))
@@ -77,10 +75,10 @@ class FHIRSubmissionTest {
         mockClient();
 
         doAnswer(answer -> {
-            final JobModel data = answer.getArgument(1);
-            assertEquals(testJobModel.getPatients().size(), data.getPatients().size(), "Should have 4 patients");
+            final UUID batchID = answer.getArgument(1);
+            assertNotNull(batchID, "Should have created a batchID");
             return answer.callRealMethod();
-        }).when(queue).submitJob(Mockito.any(UUID.class), Mockito.any(JobModel.class));
+        }).when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList());
     }
 
     @Test
@@ -100,8 +98,8 @@ class FHIRSubmissionTest {
 
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
-        final var job = queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getRight();
-        queue.completeJob(job.getJobID(), JobStatus.COMPLETED, job.getJobResults());
+//        final var job = queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getRight();
+//        queue.completeJob(job.getJobID(), JobStatus.COMPLETED, job.getJobQueueBatchFiles());
 
         jobTarget = groupResource.target(jobURL);
         jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
@@ -210,7 +208,7 @@ class FHIRSubmissionTest {
         var job = queue.workJob();
         assertTrue(job.isPresent());
         var resources = job.get().getRight().getResourceTypes();
-        assertAll(() -> assertEquals(resources.size(), JobModel.validResourceTypes.size()));
+        assertAll(() -> assertEquals(resources.size(), JobQueueBatch.validResourceTypes.size()));
     }
 
 

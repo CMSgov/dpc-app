@@ -2,8 +2,8 @@ package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import gov.cms.dpc.queue.models.JobModel;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -29,27 +29,26 @@ class ResourceWriter {
 
     private FhirContext fhirContext;
     private OperationsConfig config;
-    private JobModel job;
-    private UUID jobID;
+    private JobQueueBatch job;
     private ResourceType resourceType;
 
     /**
      * Form the full file name of an output file
-     * @param jobID        - {@link UUID} ID of export job
+     * @param batchID      - {@link UUID} ID of the batch job
      * @param resourceType - {@link ResourceType} to append to filename
      * @param sequence     - batch sequence number
      * @return return the path
      */
-    static String formOutputFilePath(String exportPath, UUID jobID, ResourceType resourceType, int sequence) {
-        return String.format("%s/%s.ndjson", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
+    static String formOutputFilePath(String exportPath, UUID batchID, ResourceType resourceType, int sequence) {
+        return String.format("%s/%s.ndjson", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
     }
 
-    static String formEncryptedOutputFilePath(String exportPath, UUID jobID, ResourceType resourceType, int sequence) {
-        return String.format("%s/%s.ndjson.enc", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
+    static String formEncryptedOutputFilePath(String exportPath, UUID batchID, ResourceType resourceType, int sequence) {
+        return String.format("%s/%s.ndjson.enc", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
     }
 
-    static String formEncryptedMetadataPath(String exportPath, UUID jobID, ResourceType resourceType, int sequence) {
-        return String.format("%s/%s-metadata.json", exportPath, JobResult.formOutputFileName(jobID, resourceType, sequence));
+    static String formEncryptedMetadataPath(String exportPath, UUID batchID, ResourceType resourceType, int sequence) {
+        return String.format("%s/%s-metadata.json", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
     }
 
     /**
@@ -60,13 +59,12 @@ class ResourceWriter {
      * @param resourceType - the resource type to fetch
      */
     ResourceWriter(FhirContext fhirContext,
-                    JobModel job,
+                    JobQueueBatch job,
                     ResourceType resourceType,
                     OperationsConfig config) {
         this.fhirContext = fhirContext;
         this.config = config;
         this.job = job;
-        this.jobID = job.getJobID();
         this.resourceType = resourceType;
     }
 
@@ -84,7 +82,7 @@ class ResourceWriter {
      * @param counter is general counter for batch number
      * @return The JobResult associated with this file
      */
-    JobResult writeBatch(AtomicInteger counter, List<Resource> batch) {
+    JobQueueBatchFile writeBatch(AtomicInteger counter, List<Resource> batch) {
         try {
             final var byteStream = new ByteArrayOutputStream();
             final var sequence = counter.getAndIncrement();
@@ -93,8 +91,8 @@ class ResourceWriter {
                     formCipherStream(byteStream, job, resourceType, sequence):
                     byteStream;
             String outputPath = config.isEncryptionEnabled() ?
-                    formEncryptedOutputFilePath(config.getExportPath(), jobID, resourceType, sequence):
-                    formOutputFilePath(config.getExportPath(), jobID, resourceType, sequence);
+                    formEncryptedOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence):
+                    formOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence);
 
             logger.debug("Start writing to {}", outputPath);
             for (var resource: batch) {
@@ -107,13 +105,13 @@ class ResourceWriter {
             writeToFile(byteStream.toByteArray(), outputPath);
 
             logger.debug("Finished writing to '{}'", outputPath);
-            return new JobResult(jobID, resourceType, sequence, batch.size());
+            return new JobQueueBatchFile(job.getJobID(), job.getBatchID(), resourceType, sequence, batch.size());
         } catch(IOException ex) {
-            throw new JobQueueFailure(jobID, "IO error writing a resource", ex);
+            throw new JobQueueFailure(job.getJobID(), job.getBatchID(), "IO error writing a resource", ex);
         } catch(SecurityException ex) {
-            throw new JobQueueFailure(jobID, "Error encrypting a resource", ex);
+            throw new JobQueueFailure(job.getJobID(), job.getBatchID(), "Error encrypting a resource", ex);
         } catch(Exception ex) {
-            throw new JobQueueFailure(jobID, "General failure consuming a resource", ex);
+            throw new JobQueueFailure(job.getJobID(), job.getBatchID(), "General failure consuming a resource", ex);
         }
     }
 
@@ -128,7 +126,7 @@ class ResourceWriter {
      * @throws GeneralSecurityException if there is something wrong with the encryption config
      * @throws IOException if there is something wrong with the file io.
      */
-    private OutputStream formCipherStream(OutputStream writer, JobModel job, ResourceType resourceType, int sequence) throws GeneralSecurityException, IOException {
+    private OutputStream formCipherStream(OutputStream writer, JobQueueBatch job, ResourceType resourceType, int sequence) throws GeneralSecurityException, IOException {
         final var metadataPath = formEncryptedMetadataPath(config.getExportPath(), job.getJobID(), resourceType, sequence);
         try(final CipherBuilder cipherBuilder = new CipherBuilder();
             final FileOutputStream metadataWriter = new FileOutputStream(metadataPath)) {

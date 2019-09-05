@@ -12,6 +12,7 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -61,7 +62,7 @@ class EncryptingAggregationEngineTest {
         final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(1000, exportPath, 3, true);
-        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
 
     @BeforeEach

@@ -1,7 +1,9 @@
 package gov.cms.dpc.queue;
 
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.queue.models.JobModel;
+import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,18 @@ public interface JobQueue {
     void submitJob(UUID jobID, JobModel job);
 
     /**
+     * Create and submit a job into the queue. The job will be broken into batches, prioritized,
+     * and set to the QUEUED status.
+     *
+     * @param orgID - The organization submitting the job
+     * @param providerID - The provider submitting the job
+     * @param patients - The list of patients to fetch data for
+     * @param resourceTypes - The resource types to fetch patient data for
+     * @return The UUID of the created job
+     */
+    UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes);
+
+    /**
      * Find a job in the queue, regardless of job status. Does not alter the job.
      *
      * @param jobID - the id of the job to search
@@ -37,13 +51,20 @@ public interface JobQueue {
     Optional<Pair<UUID, JobModel>> workJob();
 
     /**
+     * Find the next job batch that is ready to run. Alters the status of the job.
+     *
+     * @return The job batch to work, if present.
+     */
+    Optional<JobQueueBatch> workJobBatch(UUID aggregatorID);
+
+    /**
      * Alter the job's {@link JobStatus} to passed status. Called when the job's is finished.
      *
      * @param jobID - the job
      * @param status - the new  {@link JobStatus} of the job. Must be `COMPLETED` or `FAILED`.
      * @param results - The new counts for each job resource type.
      */
-    void completeJob(UUID jobID, JobStatus status, List<JobResult> results);
+    void completeJob(UUID jobID, JobStatus status, List<JobQueueBatchFile> results);
 
     /**
      * Number of items in the queue.

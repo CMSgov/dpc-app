@@ -7,9 +7,8 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
-import gov.cms.dpc.queue.Pair;
-import gov.cms.dpc.queue.models.JobModel;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -36,10 +35,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Implementation Notes:
  * - There is a single flow that does the work for a job
  * - It starts with an iteration of resource types in a job and produces a series of JobResult for that resource type
- * - Because the flow has parallel parts JobResults can be produced out sequence and errors can happen on separate branches.
  */
 public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
+
+    private final UUID aggregatorID = UUID.randomUUID();
 
     private final JobQueue queue;
     private final BlueButtonClient bbclient;
@@ -96,7 +96,7 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine.
      */
     private void pollQueue() {
-        subscribe = Observable.fromCallable(this.queue::workJob)
+        subscribe = Observable.fromCallable(() -> this.queue.workJobBatch(aggregatorID))
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -104,32 +104,25 @@ public class AggregationEngine implements Runnable {
                     logger.debug("No job, retrying in 2 seconds");
                     return completed.delay(2, TimeUnit.SECONDS);
                 })
-                .subscribe(this::completeJob, error -> logger.error("Unable to complete job.", error));
+                .subscribe(this::completeJobBatch, error -> logger.error("Unable to complete job.", error));
     }
 
-    /**
-     * Work a single job in the queue to completion.
-     *
-     * @param jobPair - the job to execute
-     */
-    void completeJob(Pair<UUID, JobModel> jobPair) {
-        final UUID jobID = jobPair.getLeft();
-        final JobModel job = jobPair.getRight();
+    void completeJobBatch(JobQueueBatch job) {
         try {
-            logger.info("Processing job {}, exporting to: {}.", jobID, this.operationsConfig.getExportPath());
+            logger.info("Processing job {} batch {}, exporting to: {}.", job.getJobID(), job.getBatchID(), this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
             final var errorCounter = new AtomicInteger();
             final var results = Flowable.fromIterable(job.getResourceTypes())
-                    .flatMap(resourceType -> completeResource(job, resourceType, errorCounter))
+                    .flatMap(resourceType -> completeResource(job, null, resourceType, errorCounter)) // TODO: Handle patient id
                     .toList()
                     .blockingGet(); // Wait on the main thread until completion
 
-            logger.info("COMPLETED job {}", jobID);
-            this.queue.completeJob(jobID, JobStatus.COMPLETED, results);
+            logger.info("COMPLETED job {} batch {}", job.getJobID(), job.getBatchID());
+            this.queue.completeJob(job.getJobID(), JobStatus.COMPLETED, results);
         } catch(Exception error) {
-            logger.error("FAILED job {}", jobID, error);
-            this.queue.completeJob(jobID, JobStatus.FAILED, List.of());
+            logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
+            this.queue.completeJob(job.getJobID(), JobStatus.FAILED, List.of());
         }
     }
 
@@ -140,24 +133,20 @@ public class AggregationEngine implements Runnable {
      * @param errorCounter to count the OperationalOutcome JobResults
      * @return A new job result observable
      */
-    private Flowable<JobResult> completeResource(JobModel job, ResourceType resourceType, AtomicInteger errorCounter) {
-        if (job.getPatients().size() == 0) {
-            return Flowable.empty();
-        }
-
+    private Flowable<JobQueueBatchFile> completeResource(JobQueueBatch job, String patientID, ResourceType resourceType, AtomicInteger errorCounter) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
-        final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), resourceType, operationsConfig);
-        final Flowable<Resource> mixedFlow = Flowable.fromIterable(job.getPatients()).flatMap(fetcher::fetchResources);
+        final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), job.getBatchID(), resourceType, operationsConfig);
+        final Flowable<Resource> mixedFlow = fetcher.fetchResources(patientID);
         final var connectableMixedFlow = mixedFlow.publish().autoConnect(2);
 
         // Batch the non-error resources into files
         final var counter = new AtomicInteger();
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-        final Flowable<JobResult> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, counter, resourceMeter));
+        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, counter, resourceMeter));
 
         // Batch the error resources into files
         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-        final Flowable<JobResult> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorCounter, operationalOutcomeMeter));
+        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorCounter, operationalOutcomeMeter));
 
         // Merge the resultant flows
         return resourceFlow.mergeWith(outcomeFlow);
@@ -171,7 +160,7 @@ public class AggregationEngine implements Runnable {
      * @param meter - a meter on the number of resources
      * @return a transformed flow
      */
-    private Publisher<JobResult> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger counter, Meter meter) {
+    private Publisher<JobQueueBatchFile> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger counter, Meter meter) {
         return upstream
                 .filter(r -> r.getResourceType() == writer.getResourceType())
                 .buffer(operationsConfig.getResourcesPerFileCount())

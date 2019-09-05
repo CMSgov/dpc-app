@@ -23,8 +23,8 @@
         <property name="hibernate.connection.autocommit">true</property>
 
         <!-- Annotated entity classes -->
-        <mapping class="gov.cms.dpc.queue.models.JobModel"/>
-        <mapping class="gov.cms.dpc.queue.models.JobResult"/>
+        <mapping class="gov.cms.dpc.queue.models.JobQueueBatch"/>
+        <mapping class="gov.cms.dpc.queue.models.JobQueueBatchFile"/>
 
     </session-factory>
 </hibernate-configuration>

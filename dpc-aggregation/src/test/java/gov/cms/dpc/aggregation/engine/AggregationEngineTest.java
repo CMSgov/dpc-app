@@ -11,6 +11,7 @@ import gov.cms.dpc.queue.JobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,7 +46,7 @@ class AggregationEngineTest {
         final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         AggregationEngine.setGlobalErrorHandler();
-        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
 
     @BeforeEach
@@ -139,7 +140,7 @@ class AggregationEngineTest {
         assertFalse(queue.getJob(jobID).isEmpty(), "Unable to retrieve job from queue.");
         queue.getJob(jobID).ifPresent(retrievedJob -> {
             assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus());
-            assertEquals(0, retrievedJob.getJobResults().size());
+            assertEquals(0, retrievedJob.getJobQueueBatchFiles().size());
             assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.Patient, 0))));
             assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0))));
         });
@@ -207,7 +208,7 @@ class AggregationEngineTest {
         final var actual = queue.getJob(jobID).get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(4, actual.getJobResults().size(), "expected 4 (= 2 output + 2 error)"),
+                () -> assertEquals(4, actual.getJobQueueBatchFiles().size(), "expected 4 (= 2 output + 2 error)"),
                 () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 for the one bad patient"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
@@ -283,7 +284,7 @@ class AggregationEngineTest {
         final var actual = queue.getJob(jobID).get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(1, actual.getJobResults().size(), "expected just a operational outcome"),
+                () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
                 () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
