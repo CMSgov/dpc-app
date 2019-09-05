@@ -10,6 +10,7 @@ import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -112,6 +113,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled // Disabled until DPC-614 and DPC-616 are merged.
     void testAttributionProfile() {
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
 
