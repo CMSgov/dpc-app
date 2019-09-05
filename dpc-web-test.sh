@@ -3,7 +3,7 @@ set -e
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
-echo "│        Running Website Tests...          │"
+echo "│  Running Website Tests & Bundler Aduit   │"
 echo "│                                          │"
 echo "└──────────────────────────────────────────┘"
 
@@ -17,6 +17,6 @@ docker-compose -f dpc-web/docker-compose.yml run web rails spec
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
-echo "│        All Website Tests Complete        │"
+echo "│     All Website Tests & AuditComplete    │"
 echo "│                                          │"
 echo "└──────────────────────────────────────────┘"
