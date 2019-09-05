@@ -15,6 +15,9 @@ import java.util.UUID;
 @Consumes(value = MediaType.APPLICATION_JSON)
 public abstract class AbstractTokenResource {
 
+    protected AbstractTokenResource() {
+        // Not used
+    }
 
     /**
      * Get authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.

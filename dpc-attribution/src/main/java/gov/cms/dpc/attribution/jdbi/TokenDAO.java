@@ -30,10 +30,9 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
 
         query.select(builder.literal(true))
                 .where(builder.equal(root.get(OrganizationEntity_.id), entity.getOrganization().getId()));
-
-        final Query<Boolean> query1 = this.currentSession().createQuery(query);
-
-        query1.getSingleResult();
+        final Query<Boolean> orgExists = this.currentSession().createQuery(query);
+        // If the org is not present, an exception will be thrown, which we can catch in the caller
+        orgExists.getSingleResult();
 
         return persist(entity);
     }
