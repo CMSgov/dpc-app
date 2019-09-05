@@ -58,6 +58,11 @@ public class DPCProfileSupport implements IValidationSupport {
     }
 
     @Override
+    public ValueSet fetchValueSet(FhirContext fhirContext, String s) {
+        return null;
+    }
+
+    @Override
     public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
         if (theClass.equals(StructureDefinition.class)) {
             final StructureDefinition definition = this.structureMap.get(theUri);
@@ -82,6 +87,16 @@ public class DPCProfileSupport implements IValidationSupport {
 
     @Override
     public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+        return null;
+    }
+
+    @Override
+    public LookupCodeResult lookupCode(FhirContext fhirContext, String s, String s1) {
+        return null;
+    }
+
+    @Override
+    public StructureDefinition generateSnapshot(StructureDefinition structureDefinition, String s, String s1) {
         return null;
     }
 

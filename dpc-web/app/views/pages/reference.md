@@ -711,7 +711,7 @@ This is accomplished by executing a `POST` request against the `Practitioner` re
 POST /api/v1/Practitioner
 ~~~
 
-Details on the exact data format are given in the [implementation guide]() but at a minimum, each resource must include:
+Details on the exact data format are given in the [implementation guide](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) but at a minimum, each resource must include:
 
 - The [NPI](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) of the provider
 - The provider's first and last name
@@ -775,6 +775,8 @@ The `Practitioner.identifier` value of the returned resource can be used in the 
 
 The `Practitioner` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
 
+Each `Practioner` resource in the Bundle *MUST* satisfy the [dpc-practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) profile, otherwise a `422 - Unprocessable Entity` error will be returned.
+
 ~~~sh
 POST /api/v1/Practitioner/$submit
 ~~~
@@ -823,7 +825,7 @@ The organization is also required to maintain a list of [Patient](http://hl7.org
 POST /api/v1/Patient
 ~~~
 
-Details on the exact data format are given in the [implementation guide]() but at a minimum, each resource must include:
+Details on the exact data format are given in the [implementation guide](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html) but at a minimum, each resource must include:
 
 - The MBI of the patient
 - The patient's first and last name
@@ -936,6 +938,8 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
 The `Patient.id` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
 
 The `Patient` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
+
+Each `Patient` resource in the Bundle *MUST* satisfy the [dpc-patient](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html) profile, otherwise a `422 - Unprocessable Entity` error will be returned.
 
 ~~~sh
 POST /api/v1/Patient/$submit
