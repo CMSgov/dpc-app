@@ -136,7 +136,25 @@ public class DatabaseQueue extends JobQueueCommon {
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                // TODO: Handle stuck batches
+                // Find stuck batches
+                List<String> stuckBatchIDs = session.createSQLQuery("SELECT batch_id FROM job_queue_batch WHERE status = 1 AND update_time > current_time - interval '5 minutes' FOR UPDATE SKIP LOCKED")
+                        .getResultList();
+
+                // Unstick stuck batches
+                if ( stuckBatchIDs != null && !stuckBatchIDs.isEmpty() ) {
+                    final CriteriaBuilder builder = session.getCriteriaBuilder();
+                    final CriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
+                    final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
+
+                    query.select(root);
+                    query.where(root.get("batchID").in(stuckBatchIDs));
+                    final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
+
+                    for ( JobQueueBatch stuckJob : stuckJobList ) {
+                        stuckJob.restartBatch();
+                        session.persist(stuckJob);
+                    }
+                }
 
                 // Claim a new batch
                 Optional<String> batchID = session.createSQLQuery("SELECT batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")

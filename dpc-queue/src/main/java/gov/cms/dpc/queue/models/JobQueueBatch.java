@@ -307,6 +307,7 @@ public class JobQueueBatch implements Serializable {
         this.status = JobStatus.FAILED;
         this.aggregatorID = null;
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);
+        this.getJobQueueBatchFiles().clear();
     }
 
     /**
