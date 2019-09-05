@@ -221,7 +221,7 @@
 									"  \"resourceType\": \"Group\",",
 									"  \"actual\": true,",
 									"  \"active\": true,",
-									"  \"type\": \"Person\",",
+									"  \"type\": \"person\",",
 									"  \"characteristic\": [",
 									"    {",
 									"      \"code\": {",
