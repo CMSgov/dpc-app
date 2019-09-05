@@ -3,7 +3,7 @@ set -e
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
-echo "│  Running Website Tests & Bundler Aduit   │"
+echo "│  Running Website Tests & Bundler Audit   │"
 echo "│                                          │"
 echo "└──────────────────────────────────────────┘"
 
@@ -15,8 +15,12 @@ docker-compose -f dpc-web/docker-compose.yml up start_core_dependencies
 docker-compose -f dpc-web/docker-compose.yml run web rails db:create db:migrate db:seed
 docker-compose -f dpc-web/docker-compose.yml run web rails spec
 
+# Run bundler audit
+docker-compose -f dpc-web/docker-compose.yml run web gem install bundler-audit && bundle audit update && bundle audit check --ignore CVE-2015-9284
+docker-compose -f dpc-web/docker-compose.yml down
+
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
-echo "│     All Website Tests & AuditComplete    │"
+echo "│    All Website Tests & Audit Complete    │"
 echo "│                                          │"
 echo "└──────────────────────────────────────────┘"
