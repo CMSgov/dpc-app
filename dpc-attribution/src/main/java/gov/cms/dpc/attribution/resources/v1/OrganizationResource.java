@@ -34,6 +34,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
+import static gov.cms.dpc.attribution.utils.RESTUtils.tokenTagToUUID;
 
 @Api(value = "Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
@@ -80,8 +81,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
             organizationEntityList.forEach(entity -> bundle.addEntry().setResource(entity.toFHIR()));
             return bundle;
         }
-
-        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(identifier);
+        // Pull out the NPI, keeping it as a string.
+        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parseTokenTag((tag) -> tag, identifier));
 
         if (!queryList.isEmpty()) {
             bundle.setTotal(queryList.size());

@@ -33,7 +33,8 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testBasicRegistration() {
         final Organization organization = AttributionTestHelpers.createOrganization(ctx, getServerURL());
-        assertNotNull(organization, "Should have org");
+        assertAll(() -> assertNotNull(organization, "Should have an org back"),
+                () -> assertFalse(organization.getEndpoint().isEmpty(), "Should have endpoints"));
     }
 
     @Test
