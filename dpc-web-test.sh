@@ -14,7 +14,6 @@ make website
 docker-compose -f dpc-web/docker-compose.yml up start_core_dependencies
 docker-compose -f dpc-web/docker-compose.yml run web rails db:create db:migrate db:seed
 docker-compose -f dpc-web/docker-compose.yml run web rails spec
-docker-compose -f dpc-web/docker-compose.yml down
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
