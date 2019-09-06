@@ -66,14 +66,9 @@ public class FHIRHelpers {
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
                 // Now, create a Macaroon
-                final HttpPost tokenPost = new HttpPost(String.format("%s/%s/token", attributionURL, organization.getId()));
-                tokenPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+                final HttpPost tokenPost = new HttpPost(String.format("%s/Token/%s", attributionURL, organization.getIdElement().getIdPart()));
 
                 try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
-                    if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
-                        throw new IllegalStateException("Should have succeeded");
-                    }
-
                     if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
                         throw new IllegalStateException("Should have succeeded");
                     }
