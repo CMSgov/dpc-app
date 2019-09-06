@@ -12,11 +12,13 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.ValidationHelpers;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,6 +175,18 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Override
     public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
         return null;
+    }
+
+    @POST
+    @Path("/$validate")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Validate Practitioner resource", notes = "Validates the given resource against the " + PractitionerProfile.PROFILE_URI + " profile." +
+            "<p>This method always returns a 200 status, even in respond to a non-conformant resource.")
+    @Override
+    public IBaseOperationOutcome validateProvider(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, Parameters parameters) {
+        return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PractitionerProfile.PROFILE_URI);
     }
 
     private static void validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
