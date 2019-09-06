@@ -14,6 +14,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.reactivex.disposables.Disposable;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -178,6 +179,40 @@ class AggregationEngineTest {
             var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), resourceType, 0);
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
+    }
+
+    /**
+     * Test if the engine can handle appending to a batch file with multiple patients
+     */
+    @Test
+    void appendBatchFileTest() {
+        final var orgID = UUID.randomUUID();
+
+        // build a job with multiple resource types
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_IDS,
+                Arrays.asList(ResourceType.Patient)
+        );
+
+        // Work the batch
+        queue.workBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        assertAll(
+                () -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus())
+        );
+        var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), ResourceType.Patient, 0);
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        try {
+            final String fileContents = Files.readString(Path.of(outputFilePath));
+            assertEquals(MockBlueButtonClient.TEST_PATIENT_IDS.size(), Arrays.stream(fileContents.split("\n")).count(), "Contains multiple patients in file output");
+        } catch ( Exception e ) {
+            Assert.fail("Failed to read output file");
+        }
     }
 
     /**

@@ -112,7 +112,7 @@ class ResourceWriter {
         if (bytes.length == 0) {
             return;
         }
-        try (final var outputFile = new FileOutputStream(fileName)) {
+        try (final var outputFile = new FileOutputStream(fileName, true)) {
             outputFile.write(bytes);
             outputFile.flush();
         }
