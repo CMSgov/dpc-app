@@ -236,6 +236,23 @@ public class JobQueueBatch implements Serializable {
         return jobQueueBatchFiles.stream().filter(result -> result.getResourceType().equals(forResourceType)).findFirst();
     }
 
+    public Optional<JobQueueBatchFile> getJobQueueFile(String fileName) {
+        return jobQueueBatchFiles.stream().filter(result -> result.getFileName().equals(fileName)).findFirst();
+    }
+
+    public JobQueueBatchFile addJobQueueFile(ResourceType resourceType, int sequence, int batchSize) {
+        Optional<JobQueueBatchFile> existingFile = this.getJobQueueFile(JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
+
+        if ( existingFile.isPresent() ) {
+            existingFile.get().appendCount(batchSize);
+            return existingFile.get();
+        } else {
+            JobQueueBatchFile file = new JobQueueBatchFile(jobID, batchID, resourceType, sequence, batchSize);
+            this.jobQueueBatchFiles.add(file);
+            return file;
+        }
+    }
+
     /**
      * Transition this job to running status. This job should be in the QUEUED state.
      */

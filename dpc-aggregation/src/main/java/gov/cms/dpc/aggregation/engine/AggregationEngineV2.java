@@ -158,7 +158,6 @@ public class AggregationEngineV2 implements Runnable {
      * @param job context
      * @param resourceType to process
      * @param errorCounter to count the OperationalOutcome JobQueueBatchFile
-     * @return A new job result observable
      */
     private Flowable<JobQueueBatchFile> completeResource(JobQueueBatch job, String patientID, ResourceType resourceType, AtomicInteger errorCounter) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach

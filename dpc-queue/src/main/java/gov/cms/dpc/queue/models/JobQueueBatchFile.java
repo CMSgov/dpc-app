@@ -153,6 +153,10 @@ public class JobQueueBatchFile implements Serializable {
         return count;
     }
 
+    public void appendCount(int count) {
+        this.count += count;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -165,7 +169,7 @@ public class JobQueueBatchFile implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jobQueueBatchFileID, jobID, count);
+        return Objects.hash(jobQueueBatchFileID, jobID);
     }
 
     @Override

@@ -41,14 +41,6 @@ class ResourceWriter {
         return String.format("%s/%s.ndjson", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
     }
 
-    static String formEncryptedOutputFilePath(String exportPath, UUID batchID, ResourceType resourceType, int sequence) {
-        return String.format("%s/%s.ndjson.enc", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
-    }
-
-    static String formEncryptedMetadataPath(String exportPath, UUID batchID, ResourceType resourceType, int sequence) {
-        return String.format("%s/%s-metadata.json", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
-    }
-
     /**
      * Create a context for fetching FHIR resources
      * @param fhirContext - the single context for the engine
@@ -78,7 +70,7 @@ class ResourceWriter {
      *
      * @param batch is the list of resources to write
      * @param counter is general counter for batch number
-     * @return The JobResult associated with this file
+     * @return The JobQueueBatchFile associated with this file
      */
     JobQueueBatchFile writeBatch(AtomicInteger counter, List<Resource> batch) {
         try {
@@ -99,7 +91,7 @@ class ResourceWriter {
             writeToFile(byteStream.toByteArray(), outputPath);
 
             logger.debug("Finished writing to '{}'", outputPath);
-            return new JobQueueBatchFile(job.getJobID(), job.getBatchID(), resourceType, sequence, batch.size());
+            return job.addJobQueueFile(resourceType, sequence, batch.size());
         } catch(IOException ex) {
             throw new JobQueueFailure(job.getJobID(), job.getBatchID(), "IO error writing a resource", ex);
         } catch(SecurityException ex) {
