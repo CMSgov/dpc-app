@@ -120,16 +120,20 @@ public class AggregationEngineV2 implements Runnable {
             Optional<String> nextPatientID = job.fetchNextBatch(aggregatorID);
 
             // Stop processing when no patients or early shutdown
-            while ( nextPatientID.isPresent() && this.subscribe.isDisposed() ) {
+            Boolean queueRunning = true;
+            while ( nextPatientID.isPresent() ) {
                 this.processJobBatchPartial(job, nextPatientID.get(), errorCounter);
-                nextPatientID = job.fetchNextBatch(aggregatorID);
+
+                // Check if the subscriber is still running before getting the next part of the batch
+                queueRunning = !this.subscribe.isDisposed();
+                nextPatientID = queueRunning ? job.fetchNextBatch(aggregatorID) : Optional.empty();
             }
 
             // Finish processing the batch
-            if ( nextPatientID.isEmpty() ) {
+            if ( queueRunning ) {
                 logger.info("COMPLETED job {} batch {}", job.getJobID(), job.getBatchID());
                 this.queue.completeBatch(job, aggregatorID);
-            } else if ( this.subscribe.isDisposed() ) {
+            } else {
                 logger.info("PAUSED job {} batch {}", job.getJobID(), job.getBatchID());
                 this.queue.pauseBatch(job, aggregatorID);
             }

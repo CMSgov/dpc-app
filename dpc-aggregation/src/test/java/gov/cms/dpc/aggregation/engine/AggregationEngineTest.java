@@ -11,7 +11,6 @@ import gov.cms.dpc.queue.JobQueueInterface;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -23,13 +22,11 @@ import org.mockito.Mockito;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 class AggregationEngineTest {
@@ -58,7 +55,8 @@ class AggregationEngineTest {
         var operationalConfig = new OperationsConfig(1000, exportPath);
         engine = new AggregationEngineV2(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
         AggregationEngineV2.setGlobalErrorHandler();
-        subscribe = Observable.empty().subscribe();
+        subscribe = Mockito.mock(Disposable.class);
+        doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);
     }
 
@@ -121,6 +119,61 @@ class AggregationEngineTest {
         // Look at the result
         assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
                 () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
+        JobQueueBatch.validResourceTypes.forEach(resourceType -> {
+            var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), resourceType, 0);
+            assertTrue(Files.exists(Path.of(outputFilePath)));
+        });
+    }
+
+    /**
+     * Test if the engine can split a job into multiple batches
+     */
+    @Test
+    void multipleBatchJobTest() {
+        final var orgID = UUID.randomUUID();
+
+        // build a job with multiple resource types
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"),
+                JobQueueBatch.validResourceTypes
+        );
+
+        // Assert the queue size
+        assertEquals(2, queue.queueSize());
+    }
+
+    /**
+     * Test if the engine can handle a pausing a job on shutdown
+     */
+    @Test
+    void pauseJobTest() {
+        final var orgID = UUID.randomUUID();
+
+        // build a job with multiple resource types
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_IDS,
+                JobQueueBatch.validResourceTypes
+        );
+
+        // Work the batch
+        engine.stop();
+        doReturn(true).when(subscribe).isDisposed();
+        queue.workBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Verify disposed call
+        Mockito.verify(subscribe).dispose();
+
+        // Look at the result
+        assertAll(
+                () -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
+                () -> assertEquals(JobStatus.QUEUED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()),
+                () -> assertEquals(0, queue.getJobBatches(jobID).stream().findFirst().get().getPatientIndex().get(), "Has processed one patient before pausing")
+        );
         JobQueueBatch.validResourceTypes.forEach(resourceType -> {
             var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), resourceType, 0);
             assertTrue(Files.exists(Path.of(outputFilePath)));
