@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public abstract class JobQueueCommon implements JobQueueInterface {
     // Object variables
     private final int batchSize;
 
-    public abstract void submitJobBatches(List<JobQueueBatch> jobBatches);
+    protected abstract void submitJobBatches(List<JobQueueBatch> jobBatches);
 
     public JobQueueCommon(int batchSize) {
         this.batchSize = batchSize;
@@ -32,6 +33,11 @@ public abstract class JobQueueCommon implements JobQueueInterface {
                 .map(patientBatch -> this.createJobBatch(jobID, orgID, providerID, patientBatch, resourceTypes))
                 .toList()
                 .blockingGet();
+
+        // Expect a single empty job when no patients passed
+        if ( jobBatches.isEmpty() && patients.isEmpty() ) {
+            jobBatches.add(this.createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes));
+        }
 
         this.submitJobBatches(jobBatches);
         return jobBatches.stream().map(JobQueueBatch::getJobID).findFirst().orElse(null);

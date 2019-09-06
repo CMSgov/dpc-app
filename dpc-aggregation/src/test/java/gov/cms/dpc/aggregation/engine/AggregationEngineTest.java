@@ -7,11 +7,12 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
-import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.queue.JobQueueInterface;
 import gov.cms.dpc.queue.JobStatus;
-import gov.cms.dpc.queue.MemoryQueue;
-import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,8 +35,9 @@ import static org.mockito.Mockito.atLeastOnce;
 class AggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private BlueButtonClient bbclient;
-    private JobQueue queue;
-    private AggregationEngine engine;
+    private JobQueueInterface queue;
+    private AggregationEngineV2 engine;
+    private Disposable subscribe;
 
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private MetricRegistry metricRegistry = new MetricRegistry();
@@ -45,17 +47,19 @@ class AggregationEngineTest {
     static void setupAll() {
         final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        AggregationEngine.setGlobalErrorHandler();
+        AggregationEngineV2.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
 
     @BeforeEach
     void setupEach() {
-        queue = new MemoryQueue();
+        queue = new MemoryBatchQueue(10);
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath);
-        engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
-        AggregationEngine.setGlobalErrorHandler();
+        engine = new AggregationEngineV2(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        AggregationEngineV2.setGlobalErrorHandler();
+        subscribe = Observable.empty().subscribe();
+        engine.setSubscribe(subscribe);
     }
 
     /**
@@ -72,24 +76,26 @@ class AggregationEngineTest {
      */
     @Test
     void simpleJobTest() {
-        // Make a simple job with one resource type
-        final var jobID = UUID.randomUUID();
         final var orgID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID, orgID,
-                Collections.singletonList(ResourceType.Patient),
-                TEST_PROVIDER_ID,
-                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)));
 
-        // Do the job
-        queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
+        // Work the batch
+        queue.workBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
 
         // Look at the result
-        final var completeJob = queue.getJob(jobID).orElseThrow();
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.Patient, 0);
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
@@ -98,23 +104,25 @@ class AggregationEngineTest {
      */
     @Test
     void multipleFileJobTest() {
-        // build a job with multiple resource types
-        final var jobID = UUID.randomUUID();
         final var orgID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID, orgID,
-                JobModel.validResourceTypes,
-                TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_IDS);
 
-        // Do the job
-        queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
+        // build a job with multiple resource types
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)),
+                JobQueueBatch.validResourceTypes
+        );
+
+        // Work the batch
+        queue.workBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobID).get().getStatus()));
-        JobModel.validResourceTypes.forEach(resourceType -> {
-            var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, resourceType, 0);
+        assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
+        JobQueueBatch.validResourceTypes.forEach(resourceType -> {
+            var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), resourceType, 0);
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
     }
@@ -124,25 +132,27 @@ class AggregationEngineTest {
      */
     @Test
     void emptyJobTest() {
-        // Job with a unsupported resource type
-        final var jobID = UUID.randomUUID();
         final var orgID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID, orgID,
-                List.of(ResourceType.Patient),
-                TEST_PROVIDER_ID,
-                List.of());
 
-        // Do the job
-        queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
+        // Job with a unsupported resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                List.of(),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
+        // Work the batch
+        queue.workBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
 
         // Look at the result
-        assertFalse(queue.getJob(jobID).isEmpty(), "Unable to retrieve job from queue.");
-        queue.getJob(jobID).ifPresent(retrievedJob -> {
+        assertFalse(queue.getJobBatches(jobID).stream().findFirst().isEmpty(), "Unable to retrieve job from queue.");
+        queue.getJobBatches(jobID).stream().findFirst().ifPresent(retrievedJob -> {
             assertEquals(JobStatus.COMPLETED, retrievedJob.getStatus());
             assertEquals(0, retrievedJob.getJobQueueBatchFiles().size());
-            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.Patient, 0))));
-            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0))));
+            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, retrievedJob.getBatchID(), ResourceType.Patient, 0))));
+            assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(exportPath, retrievedJob.getBatchID(), ResourceType.OperationOutcome, 0))));
         });
     }
 
@@ -152,21 +162,23 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTest() {
-        // Job with a unsupported resource type
-        final var jobID = UUID.randomUUID();
         final var orgID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID, orgID,
-                List.of(ResourceType.Schedule),
-                TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_IDS);
 
-        // Do the job
-        queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
+        // Job with a unsupported resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_IDS,
+                Collections.singletonList(ResourceType.Schedule)
+        );
+
+        // Work the batch
+        queue.workBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent(), "Unable to retrieve job from queue."),
-                () -> assertEquals(JobStatus.FAILED, queue.getJob(jobID).get().getStatus()));
+        assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent(), "Unable to retrieve job from queue."),
+                () -> assertEquals(JobStatus.FAILED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
     }
 
     /**
@@ -179,20 +191,23 @@ class AggregationEngineTest {
         patientIDs.add("-1");
         assertEquals(3, patientIDs.size());
 
-        final var jobID = UUID.randomUUID();
         final var orgID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID, orgID,
-                List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
-                TEST_PROVIDER_ID,
-                patientIDs);
 
-        // Do the job
-        queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                patientIDs,
+                List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient)
+        );
+
+        // Work the batch
+        queue.workBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobID).get().getStatus()));
+        assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
 
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
@@ -204,44 +219,13 @@ class AggregationEngineTest {
                 "Should be 6 invalid ids, 3 retries per method x 2 method calls x 1 bad-id");
 
         // Look at the result. It should have one error, but be successful otherwise.
-        assertTrue(queue.getJob(jobID).isPresent());
-        final var actual = queue.getJob(jobID).get();
-        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
+        assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
+        final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
+        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
                 () -> assertEquals(4, actual.getJobQueueBatchFiles().size(), "expected 4 (= 2 output + 2 error)"),
-                () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 for the one bad patient"),
+                () -> assertEquals(1, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 for the one bad patient"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
-    }
-
-    /**
-     * Test if a engine can handle parallelEnabled off
-     */
-    @Test
-    void sequentialJobTest() {
-        // Make an engine with parallel threads turned off
-        final var operationalConfig = new OperationsConfig(1000, exportPath, 3);
-        final var sequentialEngine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
-        AggregationEngine.setGlobalErrorHandler();
-
-        // Make a simple job with one resource type
-        final var jobID = UUID.randomUUID();
-        final var orgID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID, orgID,
-                Collections.singletonList(ResourceType.Patient),
-                TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_IDS);
-
-        // Do the job
-        queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> sequentialEngine.completeJob(pair));
-
-        // Look at the result
-        final var completeJob = queue.getJob(jobID).orElseThrow();
-        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.Patient, 0);
-        assertTrue(Files.exists(Path.of(outputFilePath)));
-        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
-        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
     @Test
@@ -259,20 +243,23 @@ class AggregationEngineTest {
         // Override throwing an error on fetching a patient
         Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString());
 
-        final var jobID = UUID.randomUUID();
         final var orgID = UUID.randomUUID();
-        JobModel job = new JobModel(jobID, orgID,
-                Collections.singletonList(ResourceType.Patient),
-                TEST_PROVIDER_ID,
-                Collections.singletonList("1"));
 
-        // Do the job
-        queue.submitJob(jobID, job);
-        queue.workJob().ifPresent(pair -> engine.completeJob(pair));
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList("1"),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
+        // Work the batch
+        queue.workBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
 
         // Look at the result
-        assertAll(() -> assertTrue(queue.getJob(jobID).isPresent()),
-                () -> assertEquals(JobStatus.COMPLETED, queue.getJob(jobID).get().getStatus()));
+        assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
 
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
@@ -280,12 +267,12 @@ class AggregationEngineTest {
         assertEquals(3, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called 3 times to get the patient, but with errors instead");
 
         // Look at the result. It should have one error, but be successful otherwise.
-        assertTrue(queue.getJob(jobID).isPresent());
-        final var actual = queue.getJob(jobID).get();
-        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, jobID, ResourceType.OperationOutcome, 0);
+        assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
+        final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
+        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
                 () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
-                () -> assertEquals(1, actual.getJobResult(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),
+                () -> assertEquals(1, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 }

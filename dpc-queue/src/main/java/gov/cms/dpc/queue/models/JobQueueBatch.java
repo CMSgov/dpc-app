@@ -84,13 +84,13 @@ public class JobQueueBatch implements Serializable {
      */
     @Convert(converter = StringListConverter.class)
     @Column(name = "patients", columnDefinition = "text")
-    private List<String> patients;
+    List<String> patients;
 
     /**
      * The last processed patient index. Null indicates no patients have been processed yet.
      */
     @Column(name = "patient_index")
-    protected Integer patientIndex;
+    Integer patientIndex;
 
     /**
      * The list of resources for this job. Set at job creation.
@@ -304,7 +304,9 @@ public class JobQueueBatch implements Serializable {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. JobStatus: %s", this.status));
         }
         if (this.patientIndex == null || this.getPatients().size() != this.patientIndex+1) {
-            throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. Job processing not finished. Only on patient %d of %d", this.getPatientIndex().orElse(-1)+1, patients.size()));
+            if ( !this.patients.isEmpty() ) {
+                throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. Job processing not finished. Only on patient %d of %d", this.getPatientIndex().orElse(-1) + 1, patients.size()));
+            }
         }
         this.verifyAggregatorID(aggregatorID);
         this.status = JobStatus.COMPLETED;

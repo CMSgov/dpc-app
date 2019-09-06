@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -140,6 +141,23 @@ public class JobQueueBatchTest {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.RUNNING;
         job.patientIndex = 2;
+
+        job.setCompletedStatus(aggregatorID);
+
+        assertEquals(JobStatus.COMPLETED, job.getStatus());
+        assertFalse(job.getAggregatorID().isPresent());
+        assertNotNull(job.getCompleteTime());
+        assertNull(job.patientIndex);
+
+        Mockito.verify(job).verifyAggregatorID(aggregatorID);
+    }
+
+    @Test
+    void testSetCompletedStatus_EmptyPatientList() {
+        final var job = Mockito.spy(createJobQueueBatch());
+        job.status = JobStatus.RUNNING;
+        job.patientIndex = null;
+        job.patients = Collections.emptyList();
 
         job.setCompletedStatus(aggregatorID);
 

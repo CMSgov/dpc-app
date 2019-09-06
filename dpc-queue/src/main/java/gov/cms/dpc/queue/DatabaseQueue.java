@@ -70,7 +70,7 @@ public class DatabaseQueue extends JobQueueCommon {
     }
 
     @Override
-    public void submitJobBatches(List<JobQueueBatch> jobBatches) {
+    protected void submitJobBatches(List<JobQueueBatch> jobBatches) {
         JobQueueBatch firstBatch = jobBatches.stream().findFirst().orElseThrow();
 
         logger.debug("Adding jobID {} ({} batches) to the queue at {} with for organization {}.",
