@@ -3,6 +3,9 @@
 module Internal
   class UsersController < ApplicationController
     before_action :authenticate_internal_user!
-    def index; end
+
+    def index
+      @users = User.all
+    end
   end
 end

@@ -1,3 +1,13 @@
 <p>
   Hello, <%= current_internal_user.name ||  current_internal_user.email %>
 </p>
+
+<div>
+  <h1>Viewing <%= @users.count %> provider users</h1>
+
+  <% @users.each do |user| %>
+    <%= user.id %>
+    <%= user.name %>
+    SIgned up: <%= user.created_at %>
+  <% end %>
+</div>

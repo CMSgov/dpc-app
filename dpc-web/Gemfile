@@ -39,6 +39,7 @@ end
 group :test do
   gem 'selenium-webdriver'
   gem 'climate_control'
+  gem 'rails-controller-testing'
 end
 
 group :development do
