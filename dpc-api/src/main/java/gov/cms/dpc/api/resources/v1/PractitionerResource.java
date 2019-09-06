@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
@@ -10,13 +11,17 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -39,7 +44,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
         this.validator = validator;
     }
 
-    @Override
     @GET
     @FHIR
     @Timed
@@ -47,6 +51,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Search for providers", notes = "FHIR endpoint to search for Practitioner resources." +
             "<p>If a provider NPI is given, the results are filtered accordingly. " +
             "Otherwise, the method returns all Practitioners associated to the given Organization")
+    @Override
     public Bundle practitionerSearch(@ApiParam(hidden = true)
                                      @Auth OrganizationPrincipal organization,
                                      @ApiParam(value = "Provider NPI")
@@ -75,7 +80,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
                 .execute();
     }
 
-    @Override
     @GET
     @FHIR
     @Path("/{providerID}")
@@ -87,6 +91,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No matching Practitioner resource was found", response = OperationOutcome.class)
     })
+    @Override
     public Practitioner getProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID) {
         return this.client
                 .read()
@@ -96,14 +101,17 @@ public class PractitionerResource extends AbstractPractitionerResource {
                 .execute();
     }
 
-    @Override
     @POST
     @FHIR
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system")
-    @ApiResponses(@ApiResponse(code = 201, message = "Successfully created organization"))
-    public Response submitProvider(@Auth OrganizationPrincipal organization, Practitioner provider) {
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Successfully created provider"),
+            @ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile")
+    })
+    @Override
+    public Response submitProvider(@Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
 
         APIHelpers.addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
         final var providerCreate = this.client
@@ -121,10 +129,11 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ExceptionMetered
     @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization." +
             "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
+    @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
     @Override
     public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Practitioner> entryHandler = (resource) -> validateAndTagProvider(resource,
+        final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
                 organization.getOrganization().getId(),
                 validator,
                 PRACTITIONER_PROFILE);
@@ -132,8 +141,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return bulkResourceClient(Practitioner.class, client, entryHandler, providerBundle);
     }
 
-
-    @Override
     @DELETE
     @Path("/{providerID}")
     @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
@@ -144,6 +151,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "No matching Practitioner resource was found", response = OperationOutcome.class)
     })
+    @Override
     public Response deleteProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID) {
         this.client
                 .delete()
@@ -154,7 +162,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return Response.ok().build();
     }
 
-    @Override
     @PUT
     @Path("/{providerID}")
     @PathAuthorizer(type = ResourceType.Practitioner, pathParam = "providerID")
@@ -162,18 +169,17 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
-    public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, Practitioner provider) {
+    @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
+    @Override
+    public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
         return null;
     }
 
-    private static void validateAndTagProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
+    private static void validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
         logger.debug("Validating Practitioner {}", provider.toString());
-        if (!APIHelpers.hasProfile(provider, profileURL)) {
-            throw new WebApplicationException("Provider must have correct profile", Response.Status.BAD_REQUEST);
-        }
-        final ValidationResult result = validator.validateWithResult(provider);
+        final ValidationResult result = validator.validateWithResult(provider, new ValidationOptions().addProfile(profileURL));
         if (!result.isSuccessful()) {
-            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
         APIHelpers.addOrganizationTag(provider, organizationID);
     }
