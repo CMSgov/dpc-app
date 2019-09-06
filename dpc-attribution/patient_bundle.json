@@ -148,7 +148,7 @@
             "value": "X51147095X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002901"
           }
         ],
@@ -364,7 +364,7 @@
             "value": "X19416767X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002902"
           }
         ],
@@ -552,7 +552,7 @@
             "value": "999-14-5453"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002903"
           }
         ],
@@ -765,7 +765,7 @@
             "value": "X23669981X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002904"
           }
         ],
@@ -991,7 +991,7 @@
             "value": "X47846892X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002905"
           }
         ],
@@ -1189,7 +1189,7 @@
             "value": "999-94-3248"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002906"
           }
         ],
@@ -1402,7 +1402,7 @@
             "value": "X72082859X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003001"
           }
         ],
@@ -1628,7 +1628,7 @@
             "value": "X2149378X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002907"
           }
         ],
@@ -1844,7 +1844,7 @@
             "value": "X82348403X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003002"
           }
         ],
@@ -2070,7 +2070,7 @@
             "value": "X63445870X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002908"
           }
         ],
@@ -2286,7 +2286,7 @@
             "value": "X39620919X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003003"
           }
         ],
@@ -2512,7 +2512,7 @@
             "value": "X75201367X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002909"
           }
         ],
@@ -2710,7 +2710,7 @@
             "value": "999-78-6315"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003004"
           }
         ],
@@ -2923,7 +2923,7 @@
             "value": "X5159861X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002910"
           }
         ],
@@ -3149,7 +3149,7 @@
             "value": "X7209357X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003005"
           }
         ],
@@ -3375,7 +3375,7 @@
             "value": "X70569062X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003006"
           }
         ],
@@ -3591,7 +3591,7 @@
             "value": "X30597689X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003007"
           }
         ],
@@ -3807,7 +3807,7 @@
             "value": "X87664340X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003008"
           }
         ],
@@ -4024,7 +4024,7 @@
             "value": "X3754877X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003009"
           }
         ],
@@ -4241,7 +4241,7 @@
             "value": "X84351788X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003010"
           }
         ],
@@ -4457,7 +4457,7 @@
             "value": "X2074231X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002201"
           }
         ],
@@ -4655,7 +4655,7 @@
             "value": "999-47-7848"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002202"
           }
         ],
@@ -4868,7 +4868,7 @@
             "value": "X48076271X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002203"
           }
         ],
@@ -5094,7 +5094,7 @@
             "value": "X80347960X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002204"
           }
         ],
@@ -5293,7 +5293,7 @@
             "value": "999-75-9587"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002205"
           }
         ],
@@ -5507,7 +5507,7 @@
             "value": "X22332887X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002206"
           }
         ],
@@ -5695,7 +5695,7 @@
             "value": "999-50-2988"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002207"
           }
         ],
@@ -5908,7 +5908,7 @@
             "value": "X26317384X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002208"
           }
         ],
@@ -6134,7 +6134,7 @@
             "value": "X67329112X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002209"
           }
         ],
@@ -6350,7 +6350,7 @@
             "value": "X44526701X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002210"
           }
         ],
@@ -6566,7 +6566,7 @@
             "value": "X57250963X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002911"
           }
         ],
@@ -6785,7 +6785,7 @@
             "value": "X30842864X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002912"
           }
         ],
@@ -7001,7 +7001,7 @@
             "value": "X2440474X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002913"
           }
         ],
@@ -7217,7 +7217,7 @@
             "value": "X47537883X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002914"
           }
         ],
@@ -7433,7 +7433,7 @@
             "value": "X53241249X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002915"
           }
         ],
@@ -7635,7 +7635,7 @@
             "value": "S99936398"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003011"
           }
         ],
@@ -7851,7 +7851,7 @@
             "value": "X33659309X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002916"
           }
         ],
@@ -8067,7 +8067,7 @@
             "value": "X56428661X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003012"
           }
         ],
@@ -8293,7 +8293,7 @@
             "value": "X76491126X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002917"
           }
         ],
@@ -8481,7 +8481,7 @@
             "value": "999-44-8136"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003013"
           }
         ],
@@ -8666,7 +8666,7 @@
             "value": "999-26-5313"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002918"
           }
         ],
@@ -8879,7 +8879,7 @@
             "value": "X19589408X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003014"
           }
         ],
@@ -9105,7 +9105,7 @@
             "value": "X46064521X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002919"
           }
         ],
@@ -9303,7 +9303,7 @@
             "value": "999-76-7324"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003015"
           }
         ],
@@ -9516,7 +9516,7 @@
             "value": "X53781369X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002920"
           }
         ],
@@ -9732,7 +9732,7 @@
             "value": "X86317859X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003016"
           }
         ],
@@ -9948,7 +9948,7 @@
             "value": "X28084890X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003017"
           }
         ],
@@ -10136,7 +10136,7 @@
             "value": "999-53-1645"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003018"
           }
         ],
@@ -10349,7 +10349,7 @@
             "value": "X2069988X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003019"
           }
         ],
@@ -10575,7 +10575,7 @@
             "value": "X38727135X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-9876543210987"
           }
         ],
@@ -10791,7 +10791,7 @@
             "value": "X43727232X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002902"
           }
         ],
@@ -11008,7 +11008,7 @@
             "value": "X57807058X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002903"
           }
         ],
@@ -11224,7 +11224,7 @@
             "value": "X68477052X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002904"
           }
         ],
@@ -11450,7 +11450,7 @@
             "value": "X10280649X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002905"
           }
         ],
@@ -11676,7 +11676,7 @@
             "value": "X46950610X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002906"
           }
         ],
@@ -11902,7 +11902,7 @@
             "value": "X48076673X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003001"
           }
         ],
@@ -12100,7 +12100,7 @@
             "value": "999-72-4537"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002907"
           }
         ],
@@ -12313,7 +12313,7 @@
             "value": "X86459445X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003002"
           }
         ],
@@ -12539,7 +12539,7 @@
             "value": "X53212457X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002908"
           }
         ],
@@ -12755,7 +12755,7 @@
             "value": "X38450250X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003003"
           }
         ],
@@ -12981,7 +12981,7 @@
             "value": "X55250110X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006831"
           }
         ],
@@ -13197,7 +13197,7 @@
             "value": "X78346837X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006832"
           }
         ],
@@ -13413,7 +13413,7 @@
             "value": "X39596015X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006833"
           }
         ],
@@ -13629,7 +13629,7 @@
             "value": "X38336293X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006834"
           }
         ],
@@ -13855,7 +13855,7 @@
             "value": "X44426380X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006835"
           }
         ],
@@ -14071,7 +14071,7 @@
             "value": "X9823944X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006836"
           }
         ],
@@ -14297,7 +14297,7 @@
             "value": "X35671859X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006837"
           }
         ],
@@ -14485,7 +14485,7 @@
             "value": "999-27-5489"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006838"
           }
         ],
@@ -14698,7 +14698,7 @@
             "value": "X41264943X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006839"
           }
         ],
@@ -14914,7 +14914,7 @@
             "value": "X47852817X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006840"
           }
         ],
@@ -15131,7 +15131,7 @@
             "value": "X82123365X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006841"
           }
         ],
@@ -15347,7 +15347,7 @@
             "value": "X48805258X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006842"
           }
         ],
@@ -15563,7 +15563,7 @@
             "value": "X33407092X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006843"
           }
         ],
@@ -15780,7 +15780,7 @@
             "value": "X18699616X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006844"
           }
         ],
@@ -15982,7 +15982,7 @@
             "value": "S99920247"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006845"
           }
         ],
@@ -16195,7 +16195,7 @@
             "value": "X44885337X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006846"
           }
         ],
@@ -16411,7 +16411,7 @@
             "value": "X88733730X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002363"
           }
         ],
@@ -16637,7 +16637,7 @@
             "value": "X8676793X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002364"
           }
         ],
@@ -16854,7 +16854,7 @@
             "value": "X33216219X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002365"
           }
         ],
@@ -17042,7 +17042,7 @@
             "value": "999-39-8024"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002366"
           }
         ],
@@ -17255,7 +17255,7 @@
             "value": "X16987819X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002367"
           }
         ],
@@ -17481,7 +17481,7 @@
             "value": "X54496565X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002368"
           }
         ],
@@ -17697,7 +17697,7 @@
             "value": "X65140065X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002369"
           }
         ],
@@ -17923,7 +17923,7 @@
             "value": "X24201049X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002370"
           }
         ],
@@ -18111,7 +18111,7 @@
             "value": "999-30-7719"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002371"
           }
         ],
@@ -18324,7 +18324,7 @@
             "value": "X68817775X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001809"
           }
         ],
@@ -18543,7 +18543,7 @@
             "value": "X69424227X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001810"
           }
         ],
@@ -18745,7 +18745,7 @@
             "value": "S99995555"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001811"
           }
         ],
@@ -18958,7 +18958,7 @@
             "value": "X5743671X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001812"
           }
         ],
@@ -19174,7 +19174,7 @@
             "value": "X31362456X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001813"
           }
         ],
@@ -19390,7 +19390,7 @@
             "value": "X81537674X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001814"
           }
         ],
@@ -19616,7 +19616,7 @@
             "value": "X57085085X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001815"
           }
         ],
@@ -19832,7 +19832,7 @@
             "value": "X48816977X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001816"
           }
         ],
@@ -20020,7 +20020,7 @@
             "value": "999-24-3448"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001817"
           }
         ],
@@ -20233,7 +20233,7 @@
             "value": "X26487807X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001818"
           }
         ],
@@ -20449,7 +20449,7 @@
             "value": "X85737684X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001819"
           }
         ],
@@ -20675,7 +20675,7 @@
             "value": "X34207634X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001820"
           }
         ],
@@ -20902,7 +20902,7 @@
             "value": "X45703841X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001821"
           }
         ],
@@ -21128,7 +21128,7 @@
             "value": "X80675863X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001822"
           }
         ],
@@ -21344,7 +21344,7 @@
             "value": "X73287368X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001823"
           }
         ],
@@ -21559,7 +21559,7 @@
             "value": "X51147095X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002901"
           }
         ],
@@ -21771,7 +21771,7 @@
             "value": "X19416767X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002902"
           }
         ],
@@ -21955,7 +21955,7 @@
             "value": "999-14-5453"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002903"
           }
         ],
@@ -22164,7 +22164,7 @@
             "value": "X23669981X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002904"
           }
         ],
@@ -22386,7 +22386,7 @@
             "value": "X47846892X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002905"
           }
         ],
@@ -22580,7 +22580,7 @@
             "value": "999-94-3248"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002906"
           }
         ],
@@ -22789,7 +22789,7 @@
             "value": "X72082859X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003001"
           }
         ],
@@ -23011,7 +23011,7 @@
             "value": "X2149378X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002907"
           }
         ],
@@ -23223,7 +23223,7 @@
             "value": "X82348403X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003002"
           }
         ],
@@ -23445,7 +23445,7 @@
             "value": "X63445870X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002908"
           }
         ],
@@ -23657,7 +23657,7 @@
             "value": "X39620919X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003003"
           }
         ],
@@ -23879,7 +23879,7 @@
             "value": "X75201367X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002909"
           }
         ],
@@ -24073,7 +24073,7 @@
             "value": "999-78-6315"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003004"
           }
         ],
@@ -24282,7 +24282,7 @@
             "value": "X5159861X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002910"
           }
         ],
@@ -24504,7 +24504,7 @@
             "value": "X7209357X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003005"
           }
         ],
@@ -24726,7 +24726,7 @@
             "value": "X70569062X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003006"
           }
         ],
@@ -24938,7 +24938,7 @@
             "value": "X30597689X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003007"
           }
         ],
@@ -25150,7 +25150,7 @@
             "value": "X87664340X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003008"
           }
         ],
@@ -25363,7 +25363,7 @@
             "value": "X3754877X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003009"
           }
         ],
@@ -25576,7 +25576,7 @@
             "value": "X84351788X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003010"
           }
         ],
@@ -25788,7 +25788,7 @@
             "value": "X2074231X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002201"
           }
         ],
@@ -25982,7 +25982,7 @@
             "value": "999-47-7848"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002202"
           }
         ],
@@ -26191,7 +26191,7 @@
             "value": "X48076271X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002203"
           }
         ],
@@ -26413,7 +26413,7 @@
             "value": "X80347960X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002204"
           }
         ],
@@ -26608,7 +26608,7 @@
             "value": "999-75-9587"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002205"
           }
         ],
@@ -26818,7 +26818,7 @@
             "value": "X22332887X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002206"
           }
         ],
@@ -27002,7 +27002,7 @@
             "value": "999-50-2988"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002207"
           }
         ],
@@ -27211,7 +27211,7 @@
             "value": "X26317384X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002208"
           }
         ],
@@ -27433,7 +27433,7 @@
             "value": "X67329112X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002209"
           }
         ],
@@ -27645,7 +27645,7 @@
             "value": "X44526701X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002210"
           }
         ],
@@ -27857,7 +27857,7 @@
             "value": "X57250963X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002911"
           }
         ],
@@ -28072,7 +28072,7 @@
             "value": "X30842864X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002912"
           }
         ],
@@ -28284,7 +28284,7 @@
             "value": "X2440474X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002913"
           }
         ],
@@ -28496,7 +28496,7 @@
             "value": "X47537883X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002914"
           }
         ],
@@ -28708,7 +28708,7 @@
             "value": "X53241249X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002915"
           }
         ],
@@ -28906,7 +28906,7 @@
             "value": "S99936398"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003011"
           }
         ],
@@ -29118,7 +29118,7 @@
             "value": "X33659309X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002916"
           }
         ],
@@ -29330,7 +29330,7 @@
             "value": "X56428661X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003012"
           }
         ],
@@ -29552,7 +29552,7 @@
             "value": "X76491126X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002917"
           }
         ],
@@ -29736,7 +29736,7 @@
             "value": "999-44-8136"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003013"
           }
         ],
@@ -29917,7 +29917,7 @@
             "value": "999-26-5313"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002918"
           }
         ],
@@ -30126,7 +30126,7 @@
             "value": "X19589408X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003014"
           }
         ],
@@ -30348,7 +30348,7 @@
             "value": "X46064521X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002919"
           }
         ],
@@ -30542,7 +30542,7 @@
             "value": "999-76-7324"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003015"
           }
         ],
@@ -30751,7 +30751,7 @@
             "value": "X53781369X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002920"
           }
         ],
@@ -30963,7 +30963,7 @@
             "value": "X86317859X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003016"
           }
         ],
@@ -31175,7 +31175,7 @@
             "value": "X28084890X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003017"
           }
         ],
@@ -31359,7 +31359,7 @@
             "value": "999-53-1645"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003018"
           }
         ],
@@ -31568,7 +31568,7 @@
             "value": "X2069988X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003019"
           }
         ],
@@ -31790,7 +31790,7 @@
             "value": "X38727135X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-9876543210987"
           }
         ],
@@ -32002,7 +32002,7 @@
             "value": "X43727232X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002902"
           }
         ],
@@ -32215,7 +32215,7 @@
             "value": "X57807058X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002903"
           }
         ],
@@ -32427,7 +32427,7 @@
             "value": "X68477052X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002904"
           }
         ],
@@ -32649,7 +32649,7 @@
             "value": "X10280649X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002905"
           }
         ],
@@ -32871,7 +32871,7 @@
             "value": "X46950610X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002906"
           }
         ],
@@ -33093,7 +33093,7 @@
             "value": "X48076673X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003001"
           }
         ],
@@ -33287,7 +33287,7 @@
             "value": "999-72-4537"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002907"
           }
         ],
@@ -33496,7 +33496,7 @@
             "value": "X86459445X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003002"
           }
         ],
@@ -33718,7 +33718,7 @@
             "value": "X53212457X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002908"
           }
         ],
@@ -33930,7 +33930,7 @@
             "value": "X38450250X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000003003"
           }
         ],
@@ -34152,7 +34152,7 @@
             "value": "X55250110X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006831"
           }
         ],
@@ -34364,7 +34364,7 @@
             "value": "X78346837X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006832"
           }
         ],
@@ -34576,7 +34576,7 @@
             "value": "X39596015X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006833"
           }
         ],
@@ -34788,7 +34788,7 @@
             "value": "X38336293X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006834"
           }
         ],
@@ -35010,7 +35010,7 @@
             "value": "X44426380X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006835"
           }
         ],
@@ -35222,7 +35222,7 @@
             "value": "X9823944X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006836"
           }
         ],
@@ -35444,7 +35444,7 @@
             "value": "X35671859X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006837"
           }
         ],
@@ -35628,7 +35628,7 @@
             "value": "999-27-5489"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006838"
           }
         ],
@@ -35837,7 +35837,7 @@
             "value": "X41264943X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006839"
           }
         ],
@@ -36049,7 +36049,7 @@
             "value": "X47852817X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006840"
           }
         ],
@@ -36262,7 +36262,7 @@
             "value": "X82123365X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006841"
           }
         ],
@@ -36474,7 +36474,7 @@
             "value": "X48805258X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006842"
           }
         ],
@@ -36686,7 +36686,7 @@
             "value": "X33407092X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006843"
           }
         ],
@@ -36899,7 +36899,7 @@
             "value": "X18699616X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006844"
           }
         ],
@@ -37097,7 +37097,7 @@
             "value": "S99920247"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006845"
           }
         ],
@@ -37306,7 +37306,7 @@
             "value": "X44885337X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000006846"
           }
         ],
@@ -37518,7 +37518,7 @@
             "value": "X88733730X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002363"
           }
         ],
@@ -37740,7 +37740,7 @@
             "value": "X8676793X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002364"
           }
         ],
@@ -37953,7 +37953,7 @@
             "value": "X33216219X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002365"
           }
         ],
@@ -38137,7 +38137,7 @@
             "value": "999-39-8024"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002366"
           }
         ],
@@ -38346,7 +38346,7 @@
             "value": "X16987819X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002367"
           }
         ],
@@ -38568,7 +38568,7 @@
             "value": "X54496565X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002368"
           }
         ],
@@ -38780,7 +38780,7 @@
             "value": "X65140065X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002369"
           }
         ],
@@ -39002,7 +39002,7 @@
             "value": "X24201049X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002370"
           }
         ],
@@ -39186,7 +39186,7 @@
             "value": "999-30-7719"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "19990000002371"
           }
         ],
@@ -39395,7 +39395,7 @@
             "value": "X68817775X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001809"
           }
         ],
@@ -39610,7 +39610,7 @@
             "value": "X69424227X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001810"
           }
         ],
@@ -39808,7 +39808,7 @@
             "value": "S99995555"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001811"
           }
         ],
@@ -40017,7 +40017,7 @@
             "value": "X5743671X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001812"
           }
         ],
@@ -40229,7 +40229,7 @@
             "value": "X31362456X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001813"
           }
         ],
@@ -40441,7 +40441,7 @@
             "value": "X81537674X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001814"
           }
         ],
@@ -40663,7 +40663,7 @@
             "value": "X57085085X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001815"
           }
         ],
@@ -40875,7 +40875,7 @@
             "value": "X48816977X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001816"
           }
         ],
@@ -41059,7 +41059,7 @@
             "value": "999-24-3448"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001817"
           }
         ],
@@ -41268,7 +41268,7 @@
             "value": "X26487807X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001818"
           }
         ],
@@ -41480,7 +41480,7 @@
             "value": "X85737684X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001819"
           }
         ],
@@ -41702,7 +41702,7 @@
             "value": "X34207634X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001820"
           }
         ],
@@ -41925,7 +41925,7 @@
             "value": "X45703841X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001821"
           }
         ],
@@ -42147,7 +42147,7 @@
             "value": "X80675863X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001822"
           }
         ],
@@ -42359,7 +42359,7 @@
             "value": "X73287368X"
           },
           {
-            "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "20000000001823"
           }
         ],
