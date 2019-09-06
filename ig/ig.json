@@ -151,10 +151,20 @@
       "defns": "OperationDefinition-dpc-operation-practitioner-submit-definition.html",
       "source": "dpc-practitioner-submit.json"
     },
+    "OperationDefinition/dpc-operation-practitioner-validate": {
+      "base": "OperationDefinition-dpc-operation-practitioner-validate.html",
+      "defns": "OperationDefinition-dpc-operation-practitioner-validate-definition.html",
+      "source": "dpc-practitioner-validate.json"
+    },
     "OperationDefinition/dpc-operation-patient-submit": {
       "base": "OperationDefinition-dpc-operation-patient-submit.html",
       "defns": "OperationDefinition-dpc-operation-patient-submit-definition.html",
       "source": "dpc-patient-submit.json"
+    },
+    "OperationDefinition/dpc-operation-patient-validate": {
+      "base": "OperationDefinition-dpc-operation-patient-validate.html",
+      "defns": "OperationDefinition-dpc-operation-patient-validate-definition.html",
+      "source": "dpc-patient-validate.json"
     }
   },
   "version": "3.0.1",

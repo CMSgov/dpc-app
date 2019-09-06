@@ -88,8 +88,22 @@
         <resource>
             <example value="false"/>
             <sourceReference>
+                <reference value="OperationDefinition/dpc-practitioner-validate"/>
+                <display value="dpc-practitioner-validate.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
                 <reference value="OperationDefinition/dpc-patient-submit"/>
                 <display value="dpc-patient-submit.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="OperationDefinition/dpc-patient-validate"/>
+                <display value="dpc-patient-validate.json"/>
             </sourceReference>
         </resource>
     </package>
