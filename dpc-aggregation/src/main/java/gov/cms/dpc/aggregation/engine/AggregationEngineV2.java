@@ -111,7 +111,7 @@ public class AggregationEngineV2 implements Runnable {
      * Loops over the partials of a job batch and handles completed, error, and paused job scenarios
      * @param job - the job to process
      */
-    private void processJobBatch(JobQueueBatch job) {
+    protected void processJobBatch(JobQueueBatch job) {
         try {
             logger.info("Processing job {} batch {}, exporting to: {}.", job.getJobID(), job.getBatchID(), this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
@@ -120,7 +120,7 @@ public class AggregationEngineV2 implements Runnable {
             Optional<String> nextPatientID = job.fetchNextBatch(aggregatorID);
 
             // Stop processing when no patients or early shutdown
-            while ( nextPatientID.isPresent() && !this.subscribe.isDisposed() ) {
+            while ( nextPatientID.isPresent() && this.subscribe.isDisposed() ) {
                 this.processJobBatchPartial(job, nextPatientID.get(), errorCounter);
                 nextPatientID = job.fetchNextBatch(aggregatorID);
             }
@@ -197,7 +197,7 @@ public class AggregationEngineV2 implements Runnable {
     /**
      * Setup a global handler to catch the UndeliverableException case. Can be called from anywhere.
      */
-    private static void setGlobalErrorHandler() {
+    public static void setGlobalErrorHandler() {
         RxJavaPlugins.setErrorHandler(AggregationEngineV2::errorHandler);
     }
 
@@ -234,5 +234,13 @@ public class AggregationEngineV2 implements Runnable {
             return;
         }
         logger.warn("Undeliverable exception received: ", e);
+    }
+
+    protected UUID getAggregatorID() {
+        return aggregatorID;
+    }
+
+    protected void setSubscribe(Disposable subscribe) {
+        this.subscribe = subscribe;
     }
 }
