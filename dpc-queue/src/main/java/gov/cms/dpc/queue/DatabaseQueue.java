@@ -35,7 +35,7 @@ public class DatabaseQueue extends JobQueueCommon {
 
     // Statics
     private static final Logger logger = LoggerFactory.getLogger(DatabaseQueue.class);
-    static final String DB_UNHEALTHY = "Database cluster is not responding";
+    private static final String DB_UNHEALTHY = "Database cluster is not responding";
 
     // Object variables
     private final SessionFactory factory;
@@ -128,14 +128,14 @@ public class DatabaseQueue extends JobQueueCommon {
                         builder.equal(root.get("jobID"), jobID)
                 );
 
-                final List<JobQueueBatch> jobList = session.createQuery(query).getResultList();
-                return jobList;
+                return session.createQuery(query).getResultList();
             } finally {
                 tx.commit();
             }
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<JobQueueBatch> workBatch(UUID aggregatorID) {
         try (final Session session = this.factory.openSession()) {
