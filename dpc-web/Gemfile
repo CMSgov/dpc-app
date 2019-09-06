@@ -34,6 +34,8 @@ group :development, :test do
   gem 'simplecov', require: false
   gem 'vcr'
   gem 'webmock'
+
+  gem 'bundler-audit'
 end
 
 group :test do
