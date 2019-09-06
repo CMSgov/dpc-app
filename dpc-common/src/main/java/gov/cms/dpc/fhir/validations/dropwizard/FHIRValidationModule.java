@@ -10,9 +10,11 @@ import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfigu
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
+import org.glassfish.jersey.server.internal.inject.ConfiguredValidator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorFactory;
+import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 /**
@@ -36,17 +38,23 @@ public class FHIRValidationModule extends AbstractModule {
         Multibinder<ConstraintValidator<?, ?>> constraintBinder = Multibinder.newSetBinder(binder(), constraintType);
         constraintBinder.addBinding().to(ProfileValidator.class);
 
+        bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class).asEagerSingleton();
         bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
-        bind(ConstraintValidatorFactory.class).to(InjectingConstraintValidatorFactory.class);
-        bind(ValidationConfigurationContextResolver.class);
+        bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class).asEagerSingleton();
+
         bind(FHIRValidationExceptionHandler.class);
 
-        bind(DPCProfileSupport.class).in(Scopes.SINGLETON);
-        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).in(Scopes.SINGLETON);
+        bind(DPCProfileSupport.class).asEagerSingleton();
+        bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class).asEagerSingleton();
     }
 
     @Provides
     FHIRValidationConfiguration provideValidationConfig() {
         return this.config;
+    }
+
+    @Provides
+    Validator provideValidator(ValidatorFactory factory) {
+        return factory.getValidator();
     }
 }

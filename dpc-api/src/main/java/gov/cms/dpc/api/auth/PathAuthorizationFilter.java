@@ -26,7 +26,6 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
 
     PathAuthorizationFilter(IGenericClient client, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, PathAuthorizer pa) {
         super(client, auth);
-        logger.warn("CONSTRUCTING");
         this.pa = pa;
     }
 
