@@ -35,6 +35,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
         binder.bind(GroupResource.class);
+        binder.bind(TokenResource.class);
 
         // DAOs
         binder.bind(EndpointDAO.class);
@@ -42,6 +43,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(PatientDAO.class);
         binder.bind(ProviderDAO.class);
         binder.bind(RosterDAO.class);
+        binder.bind(TokenDAO.class);
 
         // Tasks
         binder.bind(TruncateDatabase.class);
