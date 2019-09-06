@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,20 +79,20 @@ public class JobQueueBatchTest {
         job.setRunningStatus(aggregatorID);
         Mockito.reset(job);
 
-        final String firstResult = job.fetchNextBatch(aggregatorID);
-        assertEquals("1", firstResult);
+        final Optional<String> firstResult = job.fetchNextBatch(aggregatorID);
+        assertEquals("1", firstResult.get());
         assertEquals(0, job.getPatientIndex().get());
 
-        final String secondResult = job.fetchNextBatch(aggregatorID);
-        assertEquals("2", secondResult);
+        final Optional<String> secondResult = job.fetchNextBatch(aggregatorID);
+        assertEquals("2", secondResult.get());
         assertEquals(1, job.getPatientIndex().get());
 
-        final String thirdResult = job.fetchNextBatch(aggregatorID);
-        assertEquals("3", thirdResult);
+        final Optional<String> thirdResult = job.fetchNextBatch(aggregatorID);
+        assertEquals("3", thirdResult.get());
         assertEquals(2, job.getPatientIndex().get());
 
-        final String done = job.fetchNextBatch(aggregatorID);
-        assertNull(done);
+        final Optional<String> done = job.fetchNextBatch(aggregatorID);
+        assertTrue(done.isEmpty());
         assertEquals(2, job.getPatientIndex().get());
 
         Mockito.verify(job, Mockito.times(job.getPatients().size() + 1)).verifyAggregatorID(aggregatorID);
@@ -275,10 +276,10 @@ public class JobQueueBatchTest {
                 () -> assertTrue(job.getAggregatorID().isPresent())
         );
 
-        String result;
+        Optional<String> result;
         do {
             result = job.fetchNextBatch(aggregatorID);
-        } while (result != null);
+        } while (result.isPresent());
 
         job.setCompletedStatus(aggregatorID);
         assertAll(

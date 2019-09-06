@@ -74,7 +74,7 @@ class ResourceWriter {
     }
 
     /**
-     * Write a batch of resources to a file. Encrypt if the encryption is enabled.
+     * Write a batch of resources to a file.
      *
      * @param batch is the list of resources to write
      * @param counter is general counter for batch number
