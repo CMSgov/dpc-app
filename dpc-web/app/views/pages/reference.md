@@ -855,7 +855,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
     },
   "identifier": [
     {
-      "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+      "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
       "value": "20000000001809"
     }
   ],
