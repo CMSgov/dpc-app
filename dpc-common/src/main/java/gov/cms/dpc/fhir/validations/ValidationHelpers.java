@@ -9,6 +9,10 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 public class ValidationHelpers {
 
+    private ValidationHelpers() {
+        // Not used
+    }
+
     /**
      * Validates the provided {@link Resource} against the given Profile
      *
