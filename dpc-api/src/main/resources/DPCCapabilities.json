@@ -72,7 +72,7 @@
             {
               "name": "member",
               "type": "reference",
-              "documentation": "Search for Attribution groups which which the given Patient resource is a member."
+              "documentation": "Search for Attribution groups in which the given Patient resource is a member."
             }
           ]
         },
@@ -176,9 +176,21 @@
           }
         },
         {
+          "name": "Practitioner validation",
+          "definition": {
+            "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-validate"
+          }
+        },
+        {
           "name": "Batch Practitioner Submission",
           "definition": {
             "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-submit"
+          }
+        },
+        {
+          "name": "Patient validation",
+          "definition": {
+            "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-validate"
           }
         },
         {

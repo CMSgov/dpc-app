@@ -15,11 +15,13 @@ import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.ValidationHelpers;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -38,7 +40,6 @@ public class PatientResource extends AbstractPatientResource {
     // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
-    private static final String PATIENT_PROFILE = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient";
 
     private final IGenericClient client;
     private final FhirValidator validator;
@@ -57,9 +58,9 @@ public class PatientResource extends AbstractPatientResource {
             "<p> If Patient Identifier is provided, results will be filtered to match the given property")
     @Override
     public Bundle patientSearch(@ApiParam(hidden = true)
-                              @Auth OrganizationPrincipal organization,
+                                @Auth OrganizationPrincipal organization,
                                 @ApiParam(value = "Patient MBI")
-                              @QueryParam(value = Patient.SP_IDENTIFIER) String patientMBI) {
+                                @QueryParam(value = Patient.SP_IDENTIFIER) String patientMBI) {
 
         final var request = this.client
                 .search()
@@ -113,12 +114,12 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization." +
-            "<p> Each Patient resource MUST implement the " + PATIENT_PROFILE + "profile.")
+            "<p> Each Patient resource MUST implement the " + PatientProfile.PROFILE_URI + "profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
     public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator, PATIENT_PROFILE);
+        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator, PatientProfile.PROFILE_URI);
 
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }
@@ -187,6 +188,18 @@ public class PatientResource extends AbstractPatientResource {
             throw new WebApplicationException("Unable to update Patient", Response.Status.INTERNAL_SERVER_ERROR);
         }
         return resource;
+    }
+
+    @POST
+    @Path("/$validate")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Validate Patient resource", notes = "Validates the given resource against the " + PatientProfile.PROFILE_URI + " profile." +
+            "<p>This method always returns a 200 status, even in respond to a non-conformant resource.")
+    @Override
+    public IBaseOperationOutcome validatePatient(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, Parameters parameters) {
+        return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
     }
 
     private static void validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator, String profileURL) {

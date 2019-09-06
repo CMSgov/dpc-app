@@ -15,11 +15,12 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ProfileTests extends AbstractSecureApplicationTest {
 
-    ProfileTests() {
+    private ProfileTests() {
         // Not used
     }
 
@@ -37,6 +38,20 @@ class ProfileTests extends AbstractSecureApplicationTest {
                 .encodedJson();
 
         final UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, patientCreate::execute, "Should fail with unfulfilled profile");
+
+        final Parameters vParams = new Parameters();
+        vParams.addParameter().setResource(invalidPatient);
+        // Check that validate works
+        final OperationOutcome outcome = client
+                .operation()
+                .onType(Patient.class)
+                .named("validate")
+                .withParameters(vParams)
+                .returnResourceType(OperationOutcome.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(3, outcome.getIssue().size(), "Should have validation failures");
 
         // Try for a valid patient
         final Patient validPatient = invalidPatient.copy();
@@ -85,6 +100,20 @@ class ProfileTests extends AbstractSecureApplicationTest {
 
         assertThrows(UnprocessableEntityException.class, practitionerCreate::execute, "Should fail profile validation");
 
+        final Parameters vParams = new Parameters();
+        vParams.addParameter().setResource(invalidPractitioner);
+        // Check that validate works
+        final OperationOutcome outcome = client
+                .operation()
+                .onType(Practitioner.class)
+                .named("validate")
+                .withParameters(vParams)
+                .returnResourceType(OperationOutcome.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(1, outcome.getIssue().size(), "Should have validation failures");
+
         final Practitioner validPractitioner = invalidPractitioner.copy();
         validPractitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-npi");
 
@@ -113,7 +142,8 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Disabled // Disabled until DPC-614 and DPC-616 are merged.
+    @Disabled
+        // Disabled until DPC-614 and DPC-616 are merged.
     void testAttributionProfile() {
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
 
@@ -142,8 +172,5 @@ class ProfileTests extends AbstractSecureApplicationTest {
 
         // Since we're creating a group with a patient that doesn't exist, we should throw an error, just not a validation one.
         assertThrows(InternalErrorException.class, groupCreation2::execute, "Should thrown internal error");
-
-
     }
-
 }
