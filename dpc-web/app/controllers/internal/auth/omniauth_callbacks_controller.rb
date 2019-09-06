@@ -11,6 +11,7 @@ module Internal
       def github
         if valid_org_team?
           @internal_user = InternalUser.from_omniauth(request.env['omniauth.auth'])
+          flash[:notice] = "You have successfully signed in as #{ @internal_user.email || @internal_user.name }"
           sign_in_and_redirect @internal_user
         else
           redirect_to new_internal_user_session_path, error: 'No can do.'

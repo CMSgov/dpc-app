@@ -1,13 +1,40 @@
-<p>
-  Hello, <%= current_internal_user.name ||  current_internal_user.email %>
-</p>
+<% title "Manage Users" %>
+<%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 
-<div>
-  <h1>Viewing <%= @users.count %> provider users</h1>
+<div class="ds-l-row">
+  <div class="ds-l-col--3">
+    Nav
+  </div>
 
-  <% @users.each do |user| %>
-    <%= user.id %>
-    <%= user.name %>
-    SIgned up: <%= user.created_at %>
-  <% end %>
+  <div class="ds-l-col--9">
+    <div class="ds-l-row">
+      <div class="ds-title">Viewing <%= @users.count %> provider users</div>
+    </div>
+
+    <section class="">
+        <% @users.each do |user| %>
+        <div class="ds-l-row">
+          <div class="ds-l-col user-list__item">
+
+            <div class="user-list__content">
+
+              <div class="user-id__content">
+                <%= user.id %>
+              </div>
+
+              <div class="user-info__content">
+                <div class="user-info__text user-name">
+                  <%= user.name %>
+                </div>
+
+                <div class="user-info__text user-signup">
+                  Signed up: <%= user.created_at %>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+        <% end %>
+    </section>
+  </div>
 </div>
