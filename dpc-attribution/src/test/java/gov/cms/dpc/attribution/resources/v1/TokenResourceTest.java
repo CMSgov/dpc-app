@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
@@ -37,7 +40,6 @@ class TokenResourceTest extends AbstractAttributionTest {
         this.mapper = new ObjectMapper();
     }
 
-
     @Test
     void testTokenGeneration() throws IOException {
 
@@ -53,8 +55,6 @@ class TokenResourceTest extends AbstractAttributionTest {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token should be valid");
             }
         }
-
-        // Verify token only works for the given organization
 
         // Verify that it's unauthorized.
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -112,8 +112,6 @@ class TokenResourceTest extends AbstractAttributionTest {
 
         assertAll(() -> assertEquals(String.format("Token for organization %s.", orgID), token.getLabel(), "Should have auto-generated label"),
                 () -> assertEquals(LocalDate.now().plus(1, ChronoUnit.YEARS), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"));
-
-
     }
 
     @Test
@@ -126,10 +124,7 @@ class TokenResourceTest extends AbstractAttributionTest {
         final String customLabel = "custom token label";
         // Create a new token with a custom label
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-
             final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s?label=%s", orgID, URLEncoder.encode(customLabel, StandardCharsets.UTF_8)));
-
-
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
             }
@@ -143,26 +138,66 @@ class TokenResourceTest extends AbstractAttributionTest {
                 .count(), "Should have token with custom label");
     }
 
-    Pair<Organization, String> createOrganization() throws IOException {
-        final Organization organization = AttributionTestHelpers.createOrganization(ctx, getServerURL());
-        final String org_id = organization.getIdElement().getIdPart();
-        String macaroon;
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s", org_id));
+    @Test
+    void testTokenCustomExpiration() throws IOException {
+        final Pair<Organization, String> pair = createOrganization();
+        final String orgID = pair.getLeft().getIdElement().getIdPart();
 
+        // Create a new token with an expiration greater than 1 year
+        // Should fail
+        OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).plusYears(5);
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s?expiration=%s", orgID, expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
-                macaroon = EntityUtils.toString(response.getEntity());
-                // Verify that the first few bytes are correct, to ensure we encoded correctly.
-                assertTrue(macaroon.startsWith("eyJ2IjoyLCJs"), "Should have correct starting string value");
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should fail with exceeding expiration time");
             }
         }
+
+        expires = OffsetDateTime.now(ZoneOffset.UTC).minusDays(10);
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s?expiration=%s", orgID, expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should fail with past expiration time");
+            }
+        }
+
+        final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s?expiration=%s", orgID, expiresFinal.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have been created.");
+            }
+        }
+
+        final List<TokenEntity> tokens = fetchTokens(orgID);
+        assertEquals(1, tokens.stream().filter(token -> token.getExpiresAt().toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
+    }
+
+    Pair<Organization, String> createOrganization() throws IOException {
+        final Organization organization = AttributionTestHelpers.createOrganization(ctx, getServerURL());
+        final String orgID = organization.getIdElement().getIdPart();
+        final String macaroon = generateToken(orgID);
         return Pair.of(organization, macaroon);
     }
 
-    List<TokenEntity> fetchTokens(String org_id) throws IOException {
+    String generateToken(String orgID) throws IOException {
+
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Token/%s", org_id));
+            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s", orgID));
+
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
+                final String macaroon = EntityUtils.toString(response.getEntity());
+                // Verify that the first few bytes are correct, to ensure we encoded correctly.
+                assertTrue(macaroon.startsWith("eyJ2IjoyLCJs"), "Should have correct starting string value");
+                return macaroon;
+            }
+        }
+    }
+
+    List<TokenEntity> fetchTokens(String orgID) throws IOException {
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Token/%s", orgID));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenEntity>>() {

@@ -13,6 +13,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -88,7 +89,6 @@ public class TokenResource extends AbstractTokenResource {
         return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
-    @Override
     @POST
     @Path("/{organizationID}")
     @UnitOfWork
@@ -97,10 +97,11 @@ public class TokenResource extends AbstractTokenResource {
     @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)." +
             "<p>" +
             "Token supports a custom human-readable label via the `label` query param.")
+    @Override
     public String createOrganizationToken(
             @ApiParam(value = "Organization resource ID", required = true)
             @NotNull @PathParam("organizationID") UUID organizationID,
-            @ApiParam(value = "Optional label for token") @QueryParam("label") Optional<String> tokenLabel) {
+            @ApiParam(value = "Optional label for token") @QueryParam("label") String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
@@ -108,13 +109,12 @@ public class TokenResource extends AbstractTokenResource {
         organization.setId(organizationID);
 
         final TokenEntity token = new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON);
+
         // Set the expiration time
-        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        final OffsetDateTime expires = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
-        token.setExpiresAt(expires);
+        token.setExpiresAt(handleExpirationTime(expiration));
 
         // Set the label, if provided, otherwise, generate a default one
-        token.setLabel(tokenLabel.orElse(String.format("Token for organization %s.", organizationID)));
+        token.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
         logger.info("Generating access token: {}", token);
         try {
             this.dao.persistToken(token);
@@ -169,7 +169,30 @@ public class TokenResource extends AbstractTokenResource {
             logger.error("Macaroon verification failed.", e);
             return false;
         }
-
         return true;
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private OffsetDateTime handleExpirationTime(Optional<OffsetDateTimeParam> expiresParam) {
+        // Compute default expiration
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        final OffsetDateTime defaultExpiration = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
+
+        // If a custom expiration is supplied use it, unless it violates our default policy
+        if (expiresParam.isPresent()) {
+            final OffsetDateTime customExpiration = expiresParam.get().get();
+
+            // Verify custom expiration is not greater than policy
+            if (customExpiration.isAfter(defaultExpiration)) {
+                throw new WebApplicationException("Cannot set expiration after policy default", Response.Status.BAD_REQUEST);
+            }
+
+            // Verify is not already expired
+            if (customExpiration.isBefore(now)) {
+                throw new WebApplicationException("Cannot set expiration before current time", Response.Status.BAD_REQUEST);
+            }
+            return customExpiration;
+        }
+        return defaultExpiration;
     }
 }
