@@ -73,7 +73,6 @@ rbenv gemset create {latest-ruby-version: eg 2.6.2} dpc-website
 
 The database is password encrypted. Credentials are passed via environment variables. See the "Running the Server" section for information on which environment variables to set.
 
-
 ### Running the server
 ```Bash
 rails db:create db:migrate db:seed
@@ -87,6 +86,15 @@ export DB_USER=postgres
 export DB_PASS=password
 export DATABASE_URL=postgresql://localhost/dpc-website_development
 ```
+
+You also need to set the Github ENV variables to enable Github OAuth login for internal users:
+
+```
+export GITHUB_APP_ID=xxx
+export GITHUB_APP_SECRET=yyy
+export GITHUB_ORG_TEAM_ID=123
+```
+
 
 #### Background job processing
 In order to process background jobs such as sending email, you need to make sure [DelayedJob](https://github.com/collectiveidea/delayed_job) is running:

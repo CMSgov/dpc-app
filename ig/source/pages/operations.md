@@ -31,8 +31,16 @@ active: profiles
 <td>Submit a Bundle of Practitioner resources</td>
 </tr>
 <tr>
+<td><a href="OperationDefinition-dpc-operation-practitioner-validate.html">Validate Practitioner</a></td>
+<td>Validate Practitioner resources</td>
+</tr>
+<tr>
 <td><a href="OperationDefinition-dpc-operation-patient-submit.html">Submit Patients</a></td>
 <td>Submit a Bundle of Patient resources</td>
+</tr>
+<tr>
+<td><a href="OperationDefinition-dpc-operation-patient-validate.html">Validate Patient</a></td>
+<td>Validate Patient resources</td>
 </tr>
 </tbody>
 </table>

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
-import gov.cms.dpc.api.cli.OrgRegistrationCommand;
+import gov.cms.dpc.common.entities.TokenEntity;
 import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.setup.Bootstrap;
@@ -61,8 +61,7 @@ public class TokenList extends AbstractAttributionCommand {
     private void listTokens(IGenericClient client, Organization organization) throws IOException {
         // List all the tokens, switching
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpGet tokenGet = new HttpGet(String.format("%s/Organization/%s/token", client.getServerBase(), organization.getIdElement().getIdPart()));
-            tokenGet.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+            final HttpGet tokenGet = new HttpGet(String.format("%s/Token/%s", client.getServerBase(), organization.getIdElement().getIdPart()));
 
             try (CloseableHttpResponse response = httpClient.execute(tokenGet)) {
                 if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
@@ -70,19 +69,20 @@ public class TokenList extends AbstractAttributionCommand {
                     System.exit(1);
                 }
 
-                List<TokenResponse> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenResponse>>() {
+                List<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenEntity>>() {
                 });
                 generateTable(tokens);
             }
         }
     }
 
-    private void generateTable(List<TokenResponse> tokens) {
+    private void generateTable(List<TokenEntity> tokens) {
         // Generate the table
-        final String[] headers = {"Token ID", "Type", "Expires"};
+        // TODO(nickrobison): We need to re-add the expiration date, once it's wired back in with DPC-617
+        final String[] headers = {"Token ID", "Type"};
 
         System.out.println(FlipTable.of(headers, tokens
                 .stream()
-                .map(token -> new String[]{token.getId(), token.getType().toString(), token.getExpires()}).toArray(String[][]::new)));
+                .map(token -> new String[]{token.getId(), token.getTokenType().toString()}).toArray(String[][]::new)));
     }
 }

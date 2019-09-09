@@ -1,8 +1,24 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :internal_users, path: 'internal', controllers: {
+    sessions: "internal/auth/sessions",
+    omniauth_callbacks: "internal/auth/omniauth_callbacks"
+  }
+  devise_for :users, path: 'users', controllers: {
+    sessions: "users/sessions",
+    registrations: "users/registrations",
+    passwords: "users/passwords"
+  }
+
+  namespace 'internal' do
+    resources :users, only: [:index]
+  end
 
   authenticated :user do
     root 'dpc_registrations#show', as: :authenticated_root
+  end
+
+  authenticated :internal_user do
+    root 'internal/users#index', as: :authenticated_internal_root
   end
 
   get '/dpc_registrations' => "dpc_registrations#new", as: :user_root
@@ -21,7 +37,4 @@ Rails.application.routes.draw do
   match '/profile', to: 'dpc_registrations#profile', via: :get
 
   resources :dpc_registrations, only: %i[new show]
-
-
-
 end

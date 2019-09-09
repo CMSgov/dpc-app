@@ -32,7 +32,7 @@ public class TokenCreate extends AbstractAttributionCommand {
         final String attributionService = namespace.getString(ATTR_HOSTNAME);
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-            final HttpPost httpPost = new HttpPost(String.format("%s/Organization/%s/token", attributionService, orgID.getIdPart()));
+            final HttpPost httpPost = new HttpPost(String.format("%s/Token/%s", attributionService, orgID.getIdPart()));
             httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {

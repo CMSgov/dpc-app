@@ -10,6 +10,8 @@ This data is made available through a set of [FHIR](http://hl7.org/fhir/STU3/) c
 
 This guide serves as a starting point for users to begin working with the API by introducing the core APIs as well as two key concepts of [Bulk Data](#bulk-data) and [Patient Attribution](#attribution).
 
+Documentation is also available in a comprehensive [OpenAPI format](/api/swagger) as well as a FHIR [implementation guide](/ig/index.html) 
+
 ## Bulk Data
 
 This project provides an implementation of the FHIR [Bulk Data Access](http://hl7.org/fhir/us/bulkdata/2019May/index.html) specification, which provides an async interface over the existing Blue Button 2.0 data model.
@@ -709,7 +711,7 @@ This is accomplished by executing a `POST` request against the `Practitioner` re
 POST /api/v1/Practitioner
 ~~~
 
-Details on the exact data format are given in the [implementation guide]() but at a minimum, each resource must include:
+Details on the exact data format are given in the [implementation guide](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) but at a minimum, each resource must include:
 
 - The [NPI](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) of the provider
 - The provider's first and last name
@@ -730,7 +732,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
 {
   "meta": {
     "profile": [
-      "https://dpc.cms.gov/fhir/v1/StructureDefinition/dpc-profile-practitioner"
+      "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
     ],
     "lastUpdated": "2019-04-09T12:25:36.450182+00:00",
     "versionId": "MTU1NDgxMjczNjQ1MDE4MjAwMA"
@@ -772,6 +774,8 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
 The `Practitioner.identifier` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
 
 The `Practitioner` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
+
+Each `Practioner` resource in the Bundle *MUST* satisfy the [dpc-practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) profile, otherwise a `422 - Unprocessable Entity` error will be returned.
 
 ~~~sh
 POST /api/v1/Practitioner/$submit
@@ -821,7 +825,7 @@ The organization is also required to maintain a list of [Patient](http://hl7.org
 POST /api/v1/Patient
 ~~~
 
-Details on the exact data format are given in the [implementation guide]() but at a minimum, each resource must include:
+Details on the exact data format are given in the [implementation guide](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html) but at a minimum, each resource must include:
 
 - The MBI of the patient
 - The patient's first and last name
@@ -844,12 +848,14 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
   "resourceType": "Patient",
   "id": "728b270d-d7de-4143-82fe-d3ccd92cebe4",
   "meta": {
-    "versionId": "MTU1NDgxMjczNTM5MjYwMDAwMA",
-    "lastUpdated": "2019-04-09T12:25:35.392600+00:00"
-  },
+      "profile": [
+        "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+      ],
+      "lastUpdated": "2019-04-09T12:25:36.450182+00:00"
+    },
   "identifier": [
     {
-      "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
+      "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
       "value": "20000000001809"
     }
   ],
@@ -932,6 +938,8 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
 The `Patient.id` value of the returned resource can be used in the attribution group created in a later [section](#create-an-attribution-group).
 
 The `Patient` endpoint also supports a `$submit` operation, which allows the user to upload a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) of resources for registration in a single batch operation.
+
+Each `Patient` resource in the Bundle *MUST* satisfy the [dpc-patient](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html) profile, otherwise a `422 - Unprocessable Entity` error will be returned.
 
 ~~~sh
 POST /api/v1/Patient/$submit
@@ -1118,3 +1126,10 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
 The DPC team has created a FHIR Implementation Guide which provides detailed information regarding the FHIR APIs and Data Models.
 
 <a href="/ig/index.html" class="ds-c-button">Read the Implementation Guide</a>
+
+## OpenAPI Documentation
+
+The DPC team has created comprehensive [OpenAPI](https://swagger.io/docs/specification/about/) (formerly Swagger) documentation which provides detailed information regarding public endpoints avilable for the DPC project.
+In addition, this documentation allows organizations to interactively explore the API, using their own access tokens and datasets.
+
+<a href="api/swagger" class="ds-c-button">View the OpenAPI Documentation</a>

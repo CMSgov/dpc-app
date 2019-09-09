@@ -47,11 +47,24 @@ public class AttributionTestHelpers {
     }
 
     public static Organization createOrganization(FhirContext ctx, String serverURL) {
+        final IGenericClient client = createFHIRClient(ctx, serverURL);
+
+        // Check to see if the organization already exists, otherwise, create it
+        final Bundle searchBundle = client
+                .search()
+                .forResource(Organization.class)
+                .where(Organization.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), "test-org-npi"))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        if (searchBundle.getTotal() > 0) {
+            return (Organization) searchBundle.getEntryFirstRep().getResource();
+        }
+
         // Read in the test file
         final InputStream inputStream = AttributionTestHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
         final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
-
-        final IGenericClient client = createFHIRClient(ctx, serverURL);
 
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(resource);

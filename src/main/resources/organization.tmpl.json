@@ -6,7 +6,6 @@
     {
       "resource": {
         "resourceType": "Organization",
-        "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
         "identifier": [
           {
             "system": "http://hl7.org/fhir/sid/us-npi",
@@ -14,7 +13,7 @@
           }
         ],
         "name": "Template Provider Organization",
-        "address": {
+        "address": [{
           "use": "work",
           "type": "both",
           "line": [
@@ -23,7 +22,7 @@
           "city": "Washington",
           "state": "DC",
           "postalCode": "20008"
-        },
+        }],
         "contact": [
           {
             "name": {

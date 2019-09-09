@@ -1,5 +1,7 @@
 package gov.cms.dpc.common.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -21,6 +23,7 @@ public class TokenEntity implements Serializable {
     private String id;
 
     @ManyToOne
+    @JsonIgnore
     private OrganizationEntity organization;
 
     @Column(name = "type")
