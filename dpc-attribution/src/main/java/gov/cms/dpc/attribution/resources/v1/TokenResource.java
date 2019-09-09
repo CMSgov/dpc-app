@@ -3,7 +3,8 @@ package gov.cms.dpc.attribution.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
-import com.github.nitram509.jmacaroons.MacaroonVersion;
+import gov.cms.dpc.attribution.DPCAttributionConfiguration;
+import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.attribution.jdbi.TokenDAO;
 import gov.cms.dpc.attribution.resources.AbstractTokenResource;
 import gov.cms.dpc.common.entities.OrganizationEntity;
@@ -25,8 +26,9 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Api(value = "Token")
@@ -37,11 +39,13 @@ public class TokenResource extends AbstractTokenResource {
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
+    private final TokenPolicy policy;
 
     @Inject
-    TokenResource(TokenDAO dao, MacaroonBakery bakery) {
+    TokenResource(TokenDAO dao, MacaroonBakery bakery, DPCAttributionConfiguration config) {
         this.dao = dao;
         this.bakery = bakery;
+        this.policy = config.getTokenPolicy();
     }
 
     @Override
@@ -99,9 +103,17 @@ public class TokenResource extends AbstractTokenResource {
         final OrganizationEntity organization = new OrganizationEntity();
         organization.setId(organizationID);
 
-        try {
+        // Set the expiration time
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        final OffsetDateTime expires = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
 
-            this.dao.persistToken(new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON));
+
+        final TokenEntity token = new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON);
+        token.setLabel(String.format("Token for organization %s.", organizationID));
+        token.setExpiresAt(expires);
+
+        try {
+            this.dao.persistToken(token);
         } catch (NoResultException e) {
             throw new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND);
         }
