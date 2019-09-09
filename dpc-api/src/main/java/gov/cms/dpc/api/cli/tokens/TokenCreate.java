@@ -5,12 +5,25 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.dstu3.model.IdType;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class TokenCreate extends AbstractAttributionCommand {
 
@@ -24,6 +37,16 @@ public class TokenCreate extends AbstractAttributionCommand {
                 .addArgument("id")
                 .dest("org-reference")
                 .help("ID of Organization to list tokens");
+
+        subparser
+                .addArgument("--label", "-l")
+                .dest("token-label")
+                .help("Label for access token");
+
+        subparser
+                .addArgument("--expiration", "-e")
+                .dest("token-expiration")
+                .help("Expiration time for access token (as Local Date)");
     }
 
     @Override
@@ -31,11 +54,24 @@ public class TokenCreate extends AbstractAttributionCommand {
         final IdType orgID = new IdType(namespace.getString("org-reference"));
         final String attributionService = namespace.getString(ATTR_HOSTNAME);
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            final URIBuilder builder = new URIBuilder(String.format("%s/Token/%s", attributionService, orgID.getIdPart()));
 
-            final HttpPost httpPost = new HttpPost(String.format("%s/Token/%s", attributionService, orgID.getIdPart()));
-            httpPost.setHeader("Accept", FHIRMediaTypes.FHIR_JSON);
+            final String label = namespace.getString("token-label");
+            if (label != null) {
+                builder.addParameter("label", label);
+            }
 
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+            final String expiration = namespace.getString("token-expiration");
+            if (expiration != null) {
+                final LocalDate offset = LocalDate.parse(expiration);
+                builder.addParameter("expiration", offset.atStartOfDay(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+            }
+
+            final HttpPost post = new HttpPost(builder.build());
+            post.addHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+            post.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+            try (CloseableHttpResponse response = httpClient.execute(post)) {
                 final String token = EntityUtils.toString(response.getEntity());
                 System.out.println(String.format("Organization token: %s", token));
             }

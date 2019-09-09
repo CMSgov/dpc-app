@@ -44,7 +44,7 @@ public abstract class AbstractTokenResource {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
     @Path("/{organizationID}")
-    public abstract String createOrganizationToken(@PathParam("organizationID") @NotNull UUID organizationID, @QueryParam("label") String label, Optional<OffsetDateTimeParam> expiration);
+    public abstract String createOrganizationToken(@PathParam("organizationID") @NotNull UUID organizationID, String label, Optional<OffsetDateTimeParam> expiration);
 
     @DELETE
     @Path("/{organizationID}/{tokenID}")
