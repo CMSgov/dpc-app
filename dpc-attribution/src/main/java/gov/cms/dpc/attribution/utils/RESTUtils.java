@@ -67,7 +67,7 @@ public class RESTUtils {
     public static <T> T parseTokenTag(Function<String, T> builder, String tokenTag) {
         final int idx = tokenTag.indexOf('|');
         if (idx < 0) {
-            throw new WebApplicationException("Malformed tokenTag", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException("Malformed tokenTag", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
 
         return builder.apply(tokenTag.substring(idx + 1));

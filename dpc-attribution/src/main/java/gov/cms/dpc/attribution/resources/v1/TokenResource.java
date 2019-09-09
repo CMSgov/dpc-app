@@ -13,6 +13,7 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
@@ -64,7 +65,11 @@ public class TokenResource extends AbstractTokenResource {
     @Path("/{organizationID}/verify")
     @ApiOperation(value = "Verify authentication token", notes = "Verify an authentication token with a given Organization. " +
             "This allows for checking if a given token is correctly to the organization if the token is valid.")
-    @ApiResponses(value = @ApiResponse(code = 401, message = "Token is not valid for the given Organization"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Token cannot be empty"),
+            @ApiResponse(code = 401, message = "Token is not valid for the given Organization"),
+            @ApiResponse(code = 422, message = "Token is malformed")
+    })
     public Response verifyOrganizationToken(
             @ApiParam(value = "Organization resource ID", required = true)
             @PathParam("organizationID") UUID organizationID,
@@ -132,10 +137,12 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     private Macaroon parseMacaroonToken(String token) {
-        if (token == null || Objects.equals(token, "")) {
-            throw new WebApplicationException("Cannot have empty token string", Response.Status.BAD_REQUEST);
+        try {
+            return this.bakery.deserializeMacaroon(token);
+        } catch (BakeryException e) {
+            logger.error("Cannot deserialize Macaroon", e);
+            throw new WebApplicationException("Cannot deserialize Macaroon", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
-        return this.bakery.deserializeMacaroon(token);
     }
 
     private boolean validateMacaroon(UUID organizationID, Macaroon macaroon) {
