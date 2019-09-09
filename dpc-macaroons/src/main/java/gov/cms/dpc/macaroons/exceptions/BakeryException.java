@@ -10,4 +10,8 @@ public class BakeryException extends RuntimeException {
     public BakeryException(String message) {
         super(message);
     }
+
+    public BakeryException(String message, Exception e) {
+        super(message, e);
+    }
 }
