@@ -168,7 +168,11 @@ public class MacaroonBakery {
         } else {
             decodedString = serializedString.getBytes(CAVEAT_CHARSET);
         }
-        return MacaroonsBuilder.deserialize(new String(decodedString, StandardCharsets.UTF_8));
+        try {
+            return MacaroonsBuilder.deserialize(new String(decodedString, StandardCharsets.UTF_8));
+        } catch (NotDeSerializableException e) {
+            throw new BakeryException("Cannot deserialize Macaroon", e);
+        }
     }
 
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {

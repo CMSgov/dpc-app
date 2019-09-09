@@ -3,11 +3,14 @@ package gov.cms.dpc.api;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
@@ -25,7 +28,6 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
     void testBasicAuthentication() throws IOException {
         // Manually setup the required org functions
         final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
-        FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), BAD_ORG_ID, ATTRIBUTION_URL);
 
         // Now, try to read the organization, which should succeed
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
@@ -46,6 +48,31 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
                 .encodedJson();
 
         assertThrows(AuthenticationException.class, orgRequest::execute, "Should be unauthorized");
+    }
+
+    @Test
+    void testMalformedTokens() throws IOException {
+        final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
+
+        // Try for empty Macaroon
+        IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), "");
+
+        final IReadExecutable<Organization> fetchOrg = client
+                .read()
+                .resource(Organization.class)
+                .withId(ORGANIZATION_ID)
+                .encodedJson();
+
+        assertThrows(AuthenticationException.class, fetchOrg::execute, "Should throw exception with empty Token");
+
+        final IGenericClient c2 = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), Base64.getUrlEncoder().encodeToString("not a valid {token}".getBytes(StandardCharsets.UTF_8)));
+
+        final IReadExecutable<Organization> fo2 = c2
+                .read()
+                .resource(Organization.class)
+                .withId(ORGANIZATION_ID)
+                .encodedJson();
+        assertThrows(AuthenticationException.class, fo2::execute, "Should throw exception with malformed token");
     }
 
 
