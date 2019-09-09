@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -137,6 +139,18 @@ class OrganizationRegistrationTest extends AbstractAttributionTest {
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should not be able to verify empty token");
+            }
+        }
+    }
+
+    @Test
+    void testNonMacaroonHandling() throws IOException {
+        final String badToken = Base64.getUrlEncoder().encodeToString(new String("This is not a macaroon").getBytes(StandardCharsets.UTF_8));
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Token/%s/verify?token=%s", ORGANIZATION_ID, badToken));
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatusLine().getStatusCode(), "Should not be able to verify empty token");
             }
         }
     }
