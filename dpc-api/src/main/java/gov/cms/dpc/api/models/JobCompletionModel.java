@@ -3,12 +3,10 @@ package gov.cms.dpc.api.models;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import gov.cms.dpc.api.converters.OffsetDateTimeToStringConverter;
-import gov.cms.dpc.queue.models.JobResult;
+import gov.cms.dpc.common.converters.OffsetDateTimeToStringConverter;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

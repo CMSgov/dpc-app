@@ -1,6 +1,11 @@
 package gov.cms.dpc.common.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import gov.cms.dpc.common.converters.OffsetDateTimeToStringConverter;
+import gov.cms.dpc.common.converters.StringToOffsetDateTimeConverter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
@@ -35,10 +40,14 @@ public class TokenEntity implements Serializable {
     private String label;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
+    @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
     @CreationTimestamp
     private OffsetDateTime createdAt;
 
     @Column(name = "expires_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
+    @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
     private OffsetDateTime expiresAt;
 
 
