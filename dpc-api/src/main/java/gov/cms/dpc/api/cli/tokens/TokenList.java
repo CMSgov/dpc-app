@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
 import gov.cms.dpc.common.entities.TokenEntity;
-import gov.cms.dpc.common.models.TokenResponse;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -79,10 +77,12 @@ public class TokenList extends AbstractAttributionCommand {
     private void generateTable(List<TokenEntity> tokens) {
         // Generate the table
         // TODO(nickrobison): We need to re-add the expiration date, once it's wired back in with DPC-617
-        final String[] headers = {"Token ID", "Type"};
+        final String[] headers = {"Token ID", "Label", "Type"};
 
         System.out.println(FlipTable.of(headers, tokens
                 .stream()
-                .map(token -> new String[]{token.getId(), token.getTokenType().toString()}).toArray(String[][]::new)));
+                .map(token -> new String[]{token.getId(),
+                        token.getLabel(),
+                        token.getTokenType().toString()}).toArray(String[][]::new)));
     }
 }

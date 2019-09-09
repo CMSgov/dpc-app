@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.TokenEntity;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -16,6 +17,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -38,20 +40,10 @@ class TokenResourceTest extends AbstractAttributionTest {
 
     @Test
     void testTokenGeneration() throws IOException {
-        final Organization organization = AttributionTestHelpers.createOrganization(ctx, getServerURL());
-        final String org_id = organization.getIdElement().getIdPart();
-        String macaroon;
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s", org_id));
 
-
-            try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
-                macaroon = EntityUtils.toString(response.getEntity());
-                // Verify that the first few bytes are correct, to ensure we encoded correctly.
-                assertTrue(macaroon.startsWith("eyJ2IjoyLCJs"), "Should have correct starting string value");
-            }
-        }
+        final Pair<Organization, String> pair = createOrganization();
+        final String org_id = pair.getLeft().getIdElement().getIdPart();
+        final String macaroon = pair.getRight();
 
         // Verify that it's correct.
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -111,12 +103,52 @@ class TokenResourceTest extends AbstractAttributionTest {
     @Test
     void testTokenList() throws IOException {
 
+        final Pair<Organization, String> pair = createOrganization();
+        final String orgID = pair.getLeft().getIdElement().getIdPart();
+
+        final List<TokenEntity> tokens = fetchTokens(orgID);
+        assertFalse(tokens.isEmpty(), "Should have tokens");
+        final TokenEntity token = tokens.get(0);
+
+        assertAll(() -> assertEquals(String.format("Token for organization %s.", orgID), token.getLabel(), "Should have auto-generated label"),
+                () -> assertEquals(LocalDate.now().plus(1, ChronoUnit.YEARS), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"));
+
+
+    }
+
+    @Test
+    void testTokenCustomLabel() throws IOException {
+
+        final Pair<Organization, String> pair = createOrganization();
+        final String orgID = pair.getLeft().getIdElement().getIdPart();
+        // List the tokens
+
+        final String customLabel = "custom token label";
+        // Create a new token with a custom label
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+
+            final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s?label=%s", orgID, URLEncoder.encode(customLabel, StandardCharsets.UTF_8)));
+
+
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
+            }
+        }
+
+        // List the tokens
+        final List<TokenEntity> tokens = fetchTokens(orgID);
+        assertEquals(1, tokens
+                .stream()
+                .filter(token -> token.getLabel().equals(customLabel))
+                .count(), "Should have token with custom label");
+    }
+
+    Pair<Organization, String> createOrganization() throws IOException {
         final Organization organization = AttributionTestHelpers.createOrganization(ctx, getServerURL());
         final String org_id = organization.getIdElement().getIdPart();
         String macaroon;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getServerURL() + String.format("/Token/%s", org_id));
-
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
@@ -125,19 +157,16 @@ class TokenResourceTest extends AbstractAttributionTest {
                 assertTrue(macaroon.startsWith("eyJ2IjoyLCJs"), "Should have correct starting string value");
             }
         }
+        return Pair.of(organization, macaroon);
+    }
 
+    List<TokenEntity> fetchTokens(String org_id) throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Token/%s", org_id));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                final List<TokenEntity> tokens = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenEntity>>() {
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenEntity>>() {
                 });
-
-                assertEquals(2, tokens.size(), "Should have tokens");
-                final TokenEntity token = tokens.get(0);
-
-                assertAll(() -> assertEquals(String.format("Token for organization %s.", org_id), token.getLabel(), "Should have auto-generated label"),
-                        () -> assertEquals(LocalDate.now().plus(1, ChronoUnit.YEARS), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"));
             }
         }
     }

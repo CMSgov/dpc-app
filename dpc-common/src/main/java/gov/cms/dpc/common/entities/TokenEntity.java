@@ -1,7 +1,6 @@
 package gov.cms.dpc.common.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.OffsetDateTimeToStringConverter;
@@ -14,7 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.Objects;
 
 @Entity(name = "organization_tokens")
 public class TokenEntity implements Serializable {
@@ -107,5 +106,35 @@ public class TokenEntity implements Serializable {
 
     public void setExpiresAt(OffsetDateTime expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TokenEntity that = (TokenEntity) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(organization, that.organization) &&
+                tokenType == that.tokenType &&
+                Objects.equals(label, that.label) &&
+                Objects.equals(createdAt, that.createdAt) &&
+                Objects.equals(expiresAt, that.expiresAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, organization, tokenType, label, createdAt, expiresAt);
+    }
+
+    @Override
+    public String toString() {
+        return "TokenEntity{" +
+                "id='" + id + '\'' +
+                ", organization=" + organization +
+                ", tokenType=" + tokenType +
+                ", label='" + label + '\'' +
+                ", createdAt=" + createdAt +
+                ", expiresAt=" + expiresAt +
+                '}';
     }
 }

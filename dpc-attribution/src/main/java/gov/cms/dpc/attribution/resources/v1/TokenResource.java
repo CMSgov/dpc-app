@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Api(value = "Token")
@@ -93,25 +94,28 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)")
+    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)." +
+            "<p>" +
+            "Token supports a custom human-readable label via the `label` query param.")
     public String createOrganizationToken(
             @ApiParam(value = "Organization resource ID", required = true)
-            @NotNull @PathParam("organizationID") UUID organizationID) {
+            @NotNull @PathParam("organizationID") UUID organizationID,
+            @ApiParam(value = "Optional label for token") @QueryParam("label") Optional<String> tokenLabel) {
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
         final OrganizationEntity organization = new OrganizationEntity();
         organization.setId(organizationID);
 
+        final TokenEntity token = new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON);
         // Set the expiration time
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final OffsetDateTime expires = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
-
-
-        final TokenEntity token = new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON);
-        token.setLabel(String.format("Token for organization %s.", organizationID));
         token.setExpiresAt(expires);
 
+        // Set the label, if provided, otherwise, generate a default one
+        token.setLabel(tokenLabel.orElse(String.format("Token for organization %s.", organizationID)));
+        logger.info("Generating access token: {}", token);
         try {
             this.dao.persistToken(token);
         } catch (NoResultException e) {
