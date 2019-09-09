@@ -133,10 +133,10 @@ class TokenResourceTest extends AbstractAttributionTest {
                 final List<TokenEntity> tokens = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenEntity>>() {
                 });
 
-                assertEquals(1, tokens.size(), "Should have a single token");
+                assertEquals(2, tokens.size(), "Should have tokens");
                 final TokenEntity token = tokens.get(0);
 
-                assertAll(() -> assertEquals(String.format("Access token for organization %s.", org_id), token.getLabel(), "Should have auto-generated label"),
+                assertAll(() -> assertEquals(String.format("Token for organization %s.", org_id), token.getLabel(), "Should have auto-generated label"),
                         () -> assertEquals(LocalDate.now().plus(1, ChronoUnit.YEARS), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"));
             }
         }
