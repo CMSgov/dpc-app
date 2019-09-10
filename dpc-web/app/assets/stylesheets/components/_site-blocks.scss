@@ -80,66 +80,27 @@
   padding: $spacer-2;
 }
 
-.user-list__item {
-  padding: $spacer-2;
-  height: 123px;
-}
-
-.user-list__content {
-  border: 1px solid $color-gray-lighter;
-  border-radius: 3px;
+.height--full {
   height: 100%;
 }
 
-.user-id__content {
-  background: $color-gray-lightest;
-  border-radius: 3px 0 0 3px;
-  width: 42px;
-  height: 100%;
+.admin-list-subection {
+  width: 100%;
   display: inline-block;
 }
 
-.user-org_content {
-  background: #FFF1D1;
-  border-radius: 0 3px 0 0;
-  height: 100%;
-  width: 317px;
+.admin-list-subsection--left {
+  max-width: 42px;
+  float: left;
 }
 
-
-.user-info__content {
-  display: inline-block;
+.admin-list-subsection--right {
+  max-width: 317px;
+  float: right;
 }
 
-.user-info__text {
-  display: inline-block;
+.admin-list-heading--orange {
+  font-size: 14px;
+  color: #E27100;
+  font-weight: bold;
 }
-// H2 "Viewing..."
-// font-family: Helvetica;
-// font-size: 24px;
-// color: #323A44;
-// line-height: 31.2px;
-
-// Results
-// font-family: Helvetica;
-// font-size: 16px;
-// color: #5B616A;
-
-// Side box
-// background: #F1F1F1;
-// border-radius: 3px 0 0 3px;
-// 42 W - 121 H
-
-// Name
-// font-family: Helvetica;
-// font-size: 18px;
-// color: #0071BB;
-// line-height: 23.4px;
-
-// Org box
-
-
-// Org name
-// font-family: Helvetica;
-// font-size: 14px;
-// color: #E27100;

@@ -3,7 +3,6 @@
 
 <div class="ds-l-row">
   <div class="ds-l-col--3">
-    Nav
   </div>
 
   <div class="ds-l-col--9">
@@ -11,30 +10,35 @@
       <div class="ds-title">Viewing <%= @users.count %> provider users</div>
     </div>
 
-    <section class="">
-        <% @users.each do |user| %>
+      <% @users.each do |user| %>
         <div class="ds-l-row">
-          <div class="ds-l-col user-list__item">
-
-            <div class="user-list__content">
-
-              <div class="user-id__content">
-                <%= user.id %>
+          <div class="ds-l-col ds-u-flex-wrap--wrap ds-u-display--flex-sm ds-u-padding--1">
+            <div class="ds-u-border--1 ds-u-radius height--full">
+              <div class="ds-u-fill--gray-lightest height--full admin-list-subection admin-list-subsection--left">
+                <div class="ds-u-padding--1">
+                  <%= user.id %>
+                </div>
               </div>
-
-              <div class="user-info__content">
-                <div class="user-info__text user-name">
-                  <%= user.name %>
+              <div class="ds-u-padding--1 ds-u-display--inline-block">
+                <div class="ds-u-font-size--lead">
+                  <%= link_to user.name, internal_user_path(user) %>
                 </div>
 
-                <div class="user-info__text user-signup">
+                <div class="ds-u-align-items--end ds-u-font-style--italic">
                   Signed up: <%= user.created_at %>
+                </div>
+              </div>
+              <div class="ds-u-border-left--1 admin-list-subection admin-list-subsection--right">
+                <div class="ds-u-padding--1 ds-u-fill--gold-lightest admin-list-heading--orange">Requested Organization</div>
+                <div class="ds-u-padding--1 ds-u-font-size--small">
+                  <div><%= user.organization %> </div>
+                  <div><%= user.organization_type.titleize %> </div>
+                  <div><%= city_state(user) %> </div>
                 </div>
               </div>
             </div>
           </div>
-      </div>
-        <% end %>
-    </section>
+        </div>
+      <% end %>
   </div>
 </div>
