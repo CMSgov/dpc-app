@@ -26,6 +26,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
         jobBatches.forEach(batch -> {
             logger.debug("Submitting batch {}", batch.getBatchID());
             this.queue.put(batch.getBatchID(), batch);
+            batch.setUpdateTime();
         });
     }
 
@@ -62,21 +63,24 @@ public class MemoryBatchQueue extends JobQueueCommon {
     @Override
     public synchronized void pauseBatch(JobQueueBatch job, UUID aggregatorID) {
         job.setPausedStatus(aggregatorID);
+        job.setUpdateTime();
     }
 
     @Override
     public synchronized void completePartialBatch(JobQueueBatch job, UUID aggregatorID) {
-        // Do nothing (nothing to persist)
+        job.setUpdateTime();
     }
 
     @Override
     public synchronized void completeBatch(JobQueueBatch job, UUID aggregatorID) {
         job.setCompletedStatus(aggregatorID);
+        job.setUpdateTime();
     }
 
     @Override
     public synchronized void failBatch(JobQueueBatch job, UUID aggregatorID) {
         job.setFailedStatus(aggregatorID);
+        job.setUpdateTime();
     }
 
     @Override

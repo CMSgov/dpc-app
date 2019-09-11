@@ -12,7 +12,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
-import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.queue.JobQueueInterface;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
@@ -41,12 +41,12 @@ public class GroupResource extends AbstractGroupResource {
     // The delimiter for the '_types' list query param.
     static final String LIST_DELIMITER = ",";
 
-    private final JobQueue queue;
+    private final JobQueueInterface queue;
     private final IGenericClient client;
     private final String baseURL;
 
     @Inject
-    public GroupResource(JobQueue queue, IGenericClient client, @APIV1 String baseURL) {
+    public GroupResource(JobQueueInterface queue, IGenericClient client, @APIV1 String baseURL) {
         this.queue = queue;
         this.client = client;
         this.baseURL = baseURL;
@@ -75,7 +75,6 @@ public class GroupResource extends AbstractGroupResource {
         return handleMethodOutcome(outcome);
     }
 
-    @SuppressWarnings("unchecked")
     @GET
     @FHIR
     @Timed

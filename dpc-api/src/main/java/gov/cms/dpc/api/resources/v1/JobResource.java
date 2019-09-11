@@ -7,10 +7,10 @@ import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.queue.JobQueueInterface;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.Api;
@@ -27,8 +27,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,11 +42,11 @@ public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
 
-    private final JobQueue queue;
+    private final JobQueueInterface queue;
     private final String baseURL;
 
     @Inject
-    public JobResource(JobQueue queue, @APIV1 String baseURL) {
+    public JobResource(JobQueueInterface queue, @APIV1 String baseURL) {
         this.queue = queue;
         this.baseURL = baseURL;
     }
@@ -67,62 +69,70 @@ public class JobResource extends AbstractJobResource {
     public Response checkJobStatus(@Auth OrganizationPrincipal organizationPrincipal, @PathParam("jobID") String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
         final UUID orgUUID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final Optional<JobModel> maybeJob = this.queue.getJob(jobUUID);
+        final List<JobQueueBatch> batches = this.queue.getJobBatches(jobUUID);
 
-        // Return a response based on status
-        return maybeJob.map(job -> {
-            logger.debug("Fetched Job: {}", job);
-            if (!job.getOrgID().equals(orgUUID)) {
+        if ( batches.isEmpty() ) {
+            return Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build();
+        }
+
+        // Validate the batches
+        for ( JobQueueBatch batch : batches ) {
+            logger.debug("Fetched Batch: {}", batch);
+            if (!batch.getOrgID().equals(orgUUID)) {
                 return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
             }
-            if (!job.isValid()) {
-                throw new JobQueueFailure(jobUUID, "Fetched an invalid job model");
+            if (!batch.isValid()) {
+                throw new JobQueueFailure(jobUUID, batch.getBatchID(), "Fetched an invalid job model");
             }
-            Response.ResponseBuilder builder = Response.noContent();
-            JobStatus jobStatus = job.getStatus();
-            switch (jobStatus) {
-                case RUNNING:
-                case QUEUED: {
-                    builder = builder.status(HttpStatus.ACCEPTED_202).header("X-Progress", jobStatus);
-                    break;
-                }
-                case COMPLETED: {
-                    assert (job.getCompleteTime().isPresent());
-                    final String resourceQueryParam = job.getResourceTypes().stream()
-                            .map(ResourceType::toString)
-                            .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
-                    final JobCompletionModel completionModel = new JobCompletionModel(
-                            job.getStartTime().orElseThrow(),
-                            String.format("%s/Group/%s/$export?_type=%s", baseURL, job.getProviderID(), resourceQueryParam),
-                            formOutputList(job, false),
-                            formOutputList(job, true));
-                    builder = builder.status(HttpStatus.OK_200).entity(completionModel);
-                    break;
-                }
-                case FAILED: {
-                    builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
-                    break;
-                }
-                default: {
-                    builder = builder.status(HttpStatus.ACCEPTED_202);
-                }
-            }
-            return builder.build();
-        }).orElse(Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build());
+        }
+
+        Response.ResponseBuilder builder = Response.noContent();
+        Set<JobStatus> jobStatusSet = batches.stream().map(JobQueueBatch::getStatus).collect(Collectors.toSet());
+
+        if ( jobStatusSet.contains(JobStatus.FAILED) ) {
+            // If any part of the job has failed, report a failed status
+            builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
+        } else if ( jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.QUEUED) ) {
+            // The job is still being processed
+            // TODO: Report on the status
+            builder = builder.header("X-Progress", jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.QUEUED) ? JobStatus.QUEUED : JobStatus.RUNNING)
+                    .status(HttpStatus.ACCEPTED_202);
+        } else if ( jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED) ) {
+            // All batches in the job have finished
+            JobQueueBatch firstBatch = batches.get(0);
+            final String resourceQueryParam = firstBatch.getResourceTypes().stream()
+                    .map(ResourceType::toString)
+                    .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
+            final JobCompletionModel completionModel = new JobCompletionModel(
+                    batches.stream().map(JobQueueBatch::getStartTime).map(Optional::get).min(OffsetDateTime::compareTo).orElseThrow(),
+                    String.format("%s/Group/%s/$export?_type=%s", baseURL, firstBatch.getProviderID(), resourceQueryParam),
+                    formOutputList(batches, false),
+                    formOutputList(batches, true));
+            builder = builder.status(HttpStatus.OK_200).entity(completionModel);
+        } else {
+            builder = builder.status(HttpStatus.ACCEPTED_202);
+        }
+
+        return builder.build();
     }
 
     /**
      * Form a list of output entries for the output file
      *
-     * @param job                    - The job with its job result list
+     * @param batchList              - The list of all batches in a job
      * @param forOperationalOutcomes - Only return operational outcomes if true, don't include them otherwise
      * @return the list of OutputEntry
      */
-    private List<JobCompletionModel.OutputEntry> formOutputList(JobModel job, boolean forOperationalOutcomes) {
-        return job.getJobQueueBatchFiles().stream()
+    private List<JobCompletionModel.OutputEntry> formOutputList(List<JobQueueBatch> batchList, boolean forOperationalOutcomes) {
+        // Assert batches are from the same job
+        assert ( batchList.stream().map(JobQueueBatch::getJobID).collect(Collectors.toSet()).size() == 1 );
+
+        return batchList.stream()
+                .map(JobQueueBatch::getJobQueueBatchFiles)
+                .flatMap(List::stream)
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
-                        String.format("%s/Data/%s", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getJobID(), result.getResourceType(), result.getSequence())),
+                        String.format("%s/Data/%s", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getBatchID(), result.getResourceType(), result.getSequence())),
                         result.getCount()))
                 .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)

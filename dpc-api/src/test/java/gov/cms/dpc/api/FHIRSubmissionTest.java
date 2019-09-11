@@ -9,8 +9,8 @@ import gov.cms.dpc.api.auth.StaticAuthenticator;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.queue.JobQueue;
-import gov.cms.dpc.queue.MemoryQueue;
+import gov.cms.dpc.queue.JobQueueInterface;
+import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -27,7 +27,6 @@ import org.mockito.Mockito;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,8 +43,8 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("rawtypes")
 class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
-    private static final String TEST_PROVIDER_ID = "1";
-    private static final JobQueue queue = spy(MemoryQueue.class);
+    private static final UUID AGGREGATOR_ID = UUID.randomUUID();
+    private static final JobQueueInterface queue = spy(MemoryBatchQueue.class);
     private static IGenericClient client = mock(IGenericClient.class);
     private static IRead mockRead = mock(IRead.class);
     private static IReadTyped mockTypedRead = mock(IReadTyped.class);
@@ -56,10 +55,6 @@ class FHIRSubmissionTest {
 
     // Test data
     private static List<String> testBeneficiaries = List.of("1", "2", "3", "4");
-    private static final JobQueueBatch testJobQueueBatch = new JobQueueBatch(UUID.randomUUID(), UUID.randomUUID(),
-            TEST_PROVIDER_ID,
-            testBeneficiaries,
-            Collections.singletonList(ResourceType.Patient));
 
     private ResourceExtension groupResource = ResourceExtension.builder()
             .addResource(new GroupResource(queue, client, TEST_BASE_URL))
@@ -98,8 +93,8 @@ class FHIRSubmissionTest {
 
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
-//        final var job = queue.workJob().orElseThrow(() -> new IllegalStateException("Should have a job")).getRight();
-//        queue.completeJob(job.getJobID(), JobStatus.COMPLETED, job.getJobQueueBatchFiles());
+        final var job = queue.workBatch(AGGREGATOR_ID).orElseThrow(() -> new IllegalStateException("Should have a job"));
+        queue.completeBatch(job, AGGREGATOR_ID);
 
         jobTarget = groupResource.target(jobURL);
         jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
@@ -122,9 +117,9 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
-        final var job = queue.workJob();
+        final var job = queue.workBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
-        final var resources = job.get().getRight().getResourceTypes();
+        final var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 1),
                 () -> assertTrue(resources.contains(ResourceType.Patient)));
     }
@@ -145,9 +140,9 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
-        var job = queue.workJob();
+        var job = queue.workBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getResourceTypes();
+        var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 2),
                 () -> assertTrue(resources.contains(ResourceType.Patient)),
                 () -> assertTrue(resources.contains(ResourceType.ExplanationOfBenefit)));
@@ -166,9 +161,9 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
-        var job = queue.workJob();
+        var job = queue.workBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getResourceTypes();
+        var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(3, resources.size()),
                 () -> assertTrue(resources.contains(ResourceType.Patient)),
                 () -> assertTrue(resources.contains(ResourceType.Coverage)),
@@ -205,9 +200,9 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with all resource types
-        var job = queue.workJob();
+        var job = queue.workBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
-        var resources = job.get().getRight().getResourceTypes();
+        var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), JobQueueBatch.validResourceTypes.size()));
     }
 

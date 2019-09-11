@@ -5,8 +5,9 @@ import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.JobStatus;
-import gov.cms.dpc.queue.MemoryQueue;
+import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JobResourceTest {
+    static final UUID AGGREGATOR_ID = UUID.randomUUID();
     static final String TEST_PROVIDER_ID = "1";
     static final String TEST_PATIENT_ID = "1";
     static final String TEST_BASEURL = "http://localhost:8080";
@@ -32,7 +34,7 @@ public class JobResourceTest {
     @Test
     public void testNonExistentJob() {
         final var jobID = UUID.randomUUID();
-        final var queue = new MemoryQueue();
+        final var queue = new MemoryBatchQueue(100);
         final var resource = new JobResource(queue, TEST_BASEURL);
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
@@ -46,17 +48,12 @@ public class JobResourceTest {
      */
     @Test
     public void testQueuedJob() {
-        final var jobID = UUID.randomUUID();
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final var queue = new MemoryQueue();
+        final var queue = new MemoryBatchQueue(100);
 
         // Setup a queued job
-        final var job = new JobModel(jobID, orgID,
-                JobModel.validResourceTypes,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID));
-        queue.submitJob(jobID, job);
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -70,18 +67,14 @@ public class JobResourceTest {
      */
     @Test
     public void testRunningJob() {
-        final var jobID = UUID.randomUUID();
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final var queue = new MemoryQueue();
+        final var queue = new MemoryBatchQueue(100);
 
         // Setup a running job
-        final var job = new JobModel(jobID, orgID,
-                JobModel.validResourceTypes,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID));
-        queue.submitJob(jobID, job);
-        queue.workJob();
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        final var runningJob = queue.workBatch(AGGREGATOR_ID);
+        queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -95,24 +88,21 @@ public class JobResourceTest {
      */
     @Test
     public void testSuccessfulJob() {
-        final var jobID = UUID.randomUUID();
-        final var batchID = UUID.randomUUID();
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final var queue = new MemoryQueue();
+        final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
-        final var job = new JobModel(jobID, orgID,
-                JobModel.validResourceTypes,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID));
-        queue.submitJob(jobID, job);
-        queue.workJob();
-        final var results = JobModel.validResourceTypes
-                .stream()
-                .map(resourceType -> new JobQueueBatchFile(jobID, batchID, resourceType, 0, 1))
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        queue.workBatch(AGGREGATOR_ID);
+
+        final var runningJob = queue.getJobBatches(jobID).get(0);
+        runningJob.fetchNextBatch(AGGREGATOR_ID);
+        final var results = JobQueueBatch.validResourceTypes.stream()
+                .map(resourceType -> runningJob.addJobQueueFile(resourceType, 0, 1))
                 .collect(Collectors.toList());
-        queue.completeJob(jobID, JobStatus.COMPLETED, results);
+
+        queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -124,7 +114,7 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
         }
     }
 
@@ -134,20 +124,19 @@ public class JobResourceTest {
      */
     @Test
     public void testJobWithError() {
-        final var jobID = UUID.randomUUID();
-        final var batchID = UUID.randomUUID();
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final var queue = new MemoryQueue();
+        final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job with one error
-        final var job = new JobModel(jobID, orgID,
-                List.of(ResourceType.Patient),
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID));
-        queue.submitJob(jobID, job);
-        queue.workJob();
-        queue.completeJob(jobID, JobStatus.COMPLETED, List.of(new JobQueueBatchFile(jobID, batchID, ResourceType.OperationOutcome, 0, 1)));
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        queue.workBatch(AGGREGATOR_ID);
+
+        final var runningJob = queue.getJobBatches(jobID).get(0);
+        runningJob.fetchNextBatch(AGGREGATOR_ID);
+        runningJob.addJobQueueFile(ResourceType.OperationOutcome, 0, 1);
+
+        queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response for ok
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -160,7 +149,7 @@ public class JobResourceTest {
                 () -> assertEquals(1, completion.getError().size()));
         JobCompletionModel.OutputEntry entry = completion.getError().get(0);
         assertEquals(ResourceType.OperationOutcome, entry.getType());
-        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(jobID, ResourceType.OperationOutcome, 0)), entry.getUrl());
+        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), ResourceType.OperationOutcome, 0)), entry.getUrl());
     }
 
     /**
@@ -168,19 +157,16 @@ public class JobResourceTest {
      */
     @Test
     public void testFailedJob() {
-        final var jobID = UUID.randomUUID();
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final var queue = new MemoryQueue();
+        final var queue = new MemoryBatchQueue(100);
 
         // Setup a failed job
-        final var job = new JobModel(jobID, orgID,
-                JobModel.validResourceTypes,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID));
-        queue.submitJob(jobID, job);
-        queue.workJob();
-        queue.completeJob(jobID, JobStatus.FAILED, job.getJobQueueBatchFiles());
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        queue.workBatch(AGGREGATOR_ID);
+
+        final var runningJob = queue.getJobBatches(jobID).get(0);
+        queue.failBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -193,26 +179,23 @@ public class JobResourceTest {
      */
     @Test
     public void testWrongOrgJobAccess() {
-        final var jobID = UUID.randomUUID();
-        final var batchID = UUID.randomUUID();
         final var organizationPrincipalCorrect = APITestHelpers.makeOrganizationPrincipal();
         final var orgIDCorrect = FHIRExtractors.getEntityUUID(organizationPrincipalCorrect.getOrganization().getId());
         final var organizationPrincipalWrong = APITestHelpers.makeOrganizationPrincipal(OTHER_ORGANIZATION);
 
-        final var queue = new MemoryQueue();
+        final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
-        final var job = new JobModel(jobID, orgIDCorrect,
-                JobModel.validResourceTypes,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID));
-        queue.submitJob(jobID, job);
-        queue.workJob();
-        final var results = JobModel.validResourceTypes
-                .stream()
-                .map(resourceType -> new JobQueueBatchFile(jobID, batchID, resourceType, 0, 1))
+        final var jobID = queue.createJob(orgIDCorrect, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        queue.workBatch(AGGREGATOR_ID);
+
+        final var runningJob = queue.getJobBatches(jobID).get(0);
+        runningJob.fetchNextBatch(AGGREGATOR_ID);
+        final var results = JobQueueBatch.validResourceTypes.stream()
+                .map(resourceType -> runningJob.addJobQueueFile(resourceType, 0, 1))
                 .collect(Collectors.toList());
-        queue.completeJob(jobID, JobStatus.COMPLETED, results);
+
+        queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Try accessing it with the wrong org (should be unauthorized)
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -228,7 +211,7 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(jobID, entry.getType(), 0)), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
         }
     }
 }
