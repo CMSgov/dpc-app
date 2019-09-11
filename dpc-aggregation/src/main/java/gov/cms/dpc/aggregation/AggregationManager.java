@@ -1,6 +1,6 @@
 package gov.cms.dpc.aggregation;
 
-import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.AggregationEngineV2;
 import io.dropwizard.lifecycle.Managed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +12,10 @@ public class AggregationManager implements Managed {
     private static final Logger logger = LoggerFactory.getLogger(AggregationManager.class);
 
     private final Thread thread;
-    private final AggregationEngine engine;
+    private final AggregationEngineV2 engine;
 
     @Inject
-    public AggregationManager(AggregationEngine engine) {
+    public AggregationManager(AggregationEngineV2 engine) {
         logger.info("Instantiating Aggregation Manager");
         this.engine = engine;
         thread = new Thread(this.engine);

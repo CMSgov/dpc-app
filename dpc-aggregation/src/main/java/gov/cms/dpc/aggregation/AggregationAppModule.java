@@ -6,7 +6,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
-import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.AggregationEngineV2;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
@@ -26,7 +26,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Override
     public void configure(Binder binder) {
         binder.requestStaticInjection(DPCHibernateBundle.class);
-        binder.bind(AggregationEngine.class);
+        binder.bind(AggregationEngineV2.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
     }
 

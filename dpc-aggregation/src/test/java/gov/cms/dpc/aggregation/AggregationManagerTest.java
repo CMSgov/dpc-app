@@ -1,6 +1,6 @@
 package gov.cms.dpc.aggregation;
 
-import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.AggregationEngineV2;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,11 +10,11 @@ import static org.mockito.Mockito.verify;
 
 class AggregationManagerTest {
 
-    private AggregationEngine engine;
+    private AggregationEngineV2 engine;
 
     @BeforeEach
     void setup() {
-        engine = mock(AggregationEngine.class);
+        engine = mock(AggregationEngineV2.class);
         Mockito.reset(engine);
     }
 
