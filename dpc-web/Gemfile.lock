@@ -132,6 +132,18 @@ GEM
       thor (>= 0.14, < 2.0)
     json (2.2.0)
     jwt (2.2.1)
+    kaminari (1.1.1)
+      activesupport (>= 4.1.0)
+      kaminari-actionview (= 1.1.1)
+      kaminari-activerecord (= 1.1.1)
+      kaminari-core (= 1.1.1)
+    kaminari-actionview (1.1.1)
+      actionview
+      kaminari-core (= 1.1.1)
+    kaminari-activerecord (1.1.1)
+      activerecord
+      kaminari-core (= 1.1.1)
+    kaminari-core (1.1.1)
     kramdown (2.1.0)
     launchy (2.4.3)
       addressable (~> 2.3)
@@ -360,6 +372,7 @@ DEPENDENCIES
   health_check
   jbuilder (~> 2.5)
   jquery-rails
+  kaminari
   kramdown (~> 2.1)
   letter_opener
   listen (>= 3.0.5, < 3.2)

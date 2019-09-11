@@ -5,7 +5,7 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      @users = User.all
+      @users = User.order('created_at DESC').page params[:page]
     end
 
     def show
