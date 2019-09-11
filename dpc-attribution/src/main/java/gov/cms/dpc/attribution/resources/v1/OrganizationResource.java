@@ -10,6 +10,7 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
@@ -21,9 +22,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
@@ -190,7 +189,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     private boolean validateMacaroon(UUID organizationID, Macaroon macaroon) {
         try {
             final String caveatString = String.format("organization_id = %s", organizationID.toString());
-            this.bakery.verifyMacaroon(macaroon, caveatString);
+            this.bakery.verifyMacaroon(Collections.singletonList(macaroon), caveatString);
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed.", e);
             return false;

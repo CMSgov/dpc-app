@@ -3,7 +3,7 @@ package gov.cms.dpc.macaroons;
 import java.util.Optional;
 
 /**
- * Interface for verifying the correctness of a given {@link MacaroonCaveat}
+ * Interface for verifying the correctness of a given {@link MacaroonCondition}
  * When implementing, the user should make sure that the {@link CaveatVerifier} returns successfully
  * when given a caveat that it does not recognize.
  * <p>
@@ -14,11 +14,11 @@ import java.util.Optional;
 public interface CaveatVerifier {
 
     /**
-     * Verify that the given {@link MacaroonCaveat} is correct.
+     * Verify that the given {@link MacaroonCondition} is correct.
      * Should only return an optional {@link String} when the caveat FAILS verification
      *
-     * @param caveat -{@link MacaroonCaveat} to verify
+     * @param caveat -{@link MacaroonCondition} to verify
      * @return - {@link Optional} {@link String} of verification error message
      */
-    Optional<String> check(MacaroonCaveat caveat);
+    Optional<String> check(MacaroonCondition caveat);
 }
