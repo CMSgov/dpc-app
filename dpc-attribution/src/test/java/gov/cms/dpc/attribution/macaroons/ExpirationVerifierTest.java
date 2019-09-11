@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.macaroons;
 
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 import org.junit.jupiter.api.Disabled;
 
 import java.time.LocalDate;
@@ -16,17 +17,17 @@ class ExpirationVerifierTest extends AbstractVerifierTest<ExpirationCaveatVerifi
 
     @Override
     MacaroonCaveat getNonMatchingCaveat() {
-        return new MacaroonCaveat("nothing", MacaroonCaveat.Operator.EQ, "nothing");
+        return new MacaroonCaveat(new MacaroonCondition("nothing", MacaroonCondition.Operator.EQ, "nothing"));
     }
 
     @Override
     MacaroonCaveat getWrongCaveat() {
-        return new MacaroonCaveat("expires", MacaroonCaveat.Operator.EQ, LocalDate.of(1990, 1, 1).atStartOfDay().atOffset(ZoneOffset.UTC).toString());
+        return new MacaroonCaveat(new MacaroonCondition("expires", MacaroonCondition.Operator.EQ, LocalDate.of(1990, 1, 1).atStartOfDay().atOffset(ZoneOffset.UTC).toString()));
     }
 
     @Override
     MacaroonCaveat getCorrectCaveat() {
-        return new MacaroonCaveat("expires", MacaroonCaveat.Operator.EQ, OffsetDateTime.now(ZoneOffset.UTC).plus(2, ChronoUnit.YEARS).toString());
+        return new MacaroonCaveat(new MacaroonCondition("expires", MacaroonCondition.Operator.EQ, OffsetDateTime.now(ZoneOffset.UTC).plus(2, ChronoUnit.YEARS).toString()));
     }
 
     @Override

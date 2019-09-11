@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.macaroons;
 
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 
 public class VersionVerifierTest extends AbstractVerifierTest<VersionCaveatVerifier> {
 
@@ -9,17 +10,17 @@ public class VersionVerifierTest extends AbstractVerifierTest<VersionCaveatVerif
     }
     @Override
     MacaroonCaveat getNonMatchingCaveat() {
-        return new MacaroonCaveat("nothing", MacaroonCaveat.Operator.EQ, "nothing");
+        return new MacaroonCaveat(new MacaroonCondition("nothing", MacaroonCondition.Operator.EQ, "nothing"));
     }
 
     @Override
     MacaroonCaveat getWrongCaveat() {
-        return new MacaroonCaveat("dpc_macaroon_version", MacaroonCaveat.Operator.EQ, "0");
+        return new MacaroonCaveat(new MacaroonCondition("dpc_macaroon_version", MacaroonCondition.Operator.EQ, "0"));
     }
 
     @Override
     MacaroonCaveat getCorrectCaveat() {
-        return new MacaroonCaveat("dpc_macaroon_version", MacaroonCaveat.Operator.EQ, "1");
+        return new MacaroonCaveat(new MacaroonCondition("dpc_macaroon_version", MacaroonCondition.Operator.EQ, "1"));
     }
 
     @Override
