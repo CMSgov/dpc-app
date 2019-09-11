@@ -7,32 +7,25 @@ import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
-import gov.cms.dpc.common.entities.TokenEntity;
-import gov.cms.dpc.common.models.TokenResponse;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.macaroons.MacaroonBakery;
-import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
-import static gov.cms.dpc.attribution.utils.RESTUtils.tokenTagToUUID;
 
 @Api(value = "Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
@@ -57,8 +50,9 @@ public class OrganizationResource extends AbstractOrganizationResource {
                     "<p>The *_tag* parameter is used to convey the token, which is half-way between FHIR and REST.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Organization matching (valid) token was found."),
+            @ApiResponse(code = 401, message = "Organization was found, but token was invalid", response = OperationOutcome.class),
             @ApiResponse(code = 404, message = "Organization was not found matching token", response = OperationOutcome.class),
-            @ApiResponse(code = 401, message = "Organization was found, but token was invalid", response = OperationOutcome.class)
+            @ApiResponse(code = 422, message = "Access token is malformed, or unprocessable", response = OperationOutcome.class)
     })
     public Bundle searchOrganizations(
             @ApiParam(value = "NPI of Organization")
@@ -161,7 +155,13 @@ public class OrganizationResource extends AbstractOrganizationResource {
     }
 
     private Bundle searchAndValidationByToken(String token) {
-        final Macaroon macaroon = parseTokenTag(this.bakery::deserializeMacaroon, token);
+        final Macaroon macaroon;
+        try {
+            macaroon = parseTokenTag(this.bakery::deserializeMacaroon, token);
+        } catch (BakeryException e) {
+            logger.error("Cannot parse Token tag", e);
+            throw new WebApplicationException("Token is malformed", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
 
         final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
 

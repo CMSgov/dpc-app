@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.auth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
@@ -68,14 +68,21 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
 
         logger.trace("Making request to validate token.");
-        final Bundle returnedBundle = this
-                .client
-                .search()
-                .forResource(Organization.class)
-                .withTag("http://cms.gov/token", macaroon)
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
+        final Bundle returnedBundle;
+        try {
+            returnedBundle = this
+                    .client
+                    .search()
+                    .forResource(Organization.class)
+                    .withTag("http://cms.gov/token", macaroon)
+                    .returnBundle(Bundle.class)
+                    .encodedJson()
+                    .execute();
+            // Catch and handle any 422 error codes, which means that the provided token was malformed or otherwise unprocessable.
+        } catch (UnprocessableEntityException e) {
+            logger.error("Cannot validate Token", e);
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
 
         logger.trace("Found {} matching organizations", returnedBundle.getTotal());
         if (returnedBundle.getTotal() == 0) {
