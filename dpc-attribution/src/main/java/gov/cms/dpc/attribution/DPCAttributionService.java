@@ -62,7 +62,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
-//        environment.jersey().getResourceConfig().register(new InjectionBinder());
     }
 
     private void migrateDatabase(DPCAttributionConfiguration configuration, Environment environment) throws SQLException {

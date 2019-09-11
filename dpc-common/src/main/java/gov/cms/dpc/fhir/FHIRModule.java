@@ -9,8 +9,7 @@ import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.MethodOutcomeHandler;
-import gov.cms.dpc.fhir.paramtests.ParamFactory;
-import gov.cms.dpc.fhir.paramtests.ParamValueFactory;
+import gov.cms.dpc.fhir.paramtests.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.Configuration;
 import org.slf4j.Logger;
@@ -43,11 +42,7 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(FHIRExceptionHandler.class);
         binder.bind(FHIRRequestFeature.class);
 
-//        binder.bind(FHIRParamValueFactoryProvider.class);
-//        binder.bind(GuiceFeature.class).asEagerSingleton();
-//        binder.bind(ContextProvider.class);
-//        binder.bind(ParamFactory.class);
-        binder.bind(ParamValueFactory.class);
+        binder.bind(FHIRParamValueFactory.class);
 
         // Validator
         final FHIRValidationConfiguration validationConfig = getConfiguration().getFHIRConfiguration().getValidation();
