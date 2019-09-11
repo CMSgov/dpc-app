@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.macaroons;
 import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 
 /**
  * Implementation of {@link CaveatSupplier} which generates a version token based on the provided {@link TokenPolicy}
@@ -19,6 +20,6 @@ public class VersionCaveatSupplier implements CaveatSupplier {
 
     @Override
     public MacaroonCaveat get() {
-        return new MacaroonCaveat(VERSION_KEY, MacaroonCaveat.Operator.EQ, this.tokenVersion);
+        return new MacaroonCaveat(new MacaroonCondition(VERSION_KEY, MacaroonCondition.Operator.EQ, this.tokenVersion));
     }
 }

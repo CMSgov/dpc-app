@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.macaroons;
 import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatVerifier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 
 import java.util.Optional;
 
@@ -20,7 +21,7 @@ public class VersionCaveatVerifier implements CaveatVerifier {
     }
 
     @Override
-    public Optional<String> check(MacaroonCaveat caveat) {
+    public Optional<String> check(MacaroonCondition caveat) {
 
         if (caveat.getKey().equals(VersionCaveatSupplier.VERSION_KEY)) {
             final int tokenVersion = Integer.parseInt(caveat.getValue());

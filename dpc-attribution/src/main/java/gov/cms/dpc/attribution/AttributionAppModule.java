@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution;
 
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.macaroons.BakeryProvider;
@@ -11,6 +12,8 @@ import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
@@ -85,5 +88,11 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @AdditionalPaths
     List<String> provideAdditionalPaths() {
         return List.of("gov.cms.dpc.macaroons.store.hibernate.entities");
+    }
+
+    @Provides
+    @Singleton
+    IThirdPartyKeyStore thirdPartyKeyStore() {
+        return new MemoryThirdPartyKeyStore();
     }
 }

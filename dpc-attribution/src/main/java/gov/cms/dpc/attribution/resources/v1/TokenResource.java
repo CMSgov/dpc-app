@@ -11,6 +11,7 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.TokenEntity;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
@@ -29,6 +30,7 @@ import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -147,7 +149,7 @@ public class TokenResource extends AbstractTokenResource {
     private Macaroon generateMacaroon(UUID organizationID) {
         // Create some caveats
         final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("organization_id", MacaroonCaveat.Operator.EQ, organizationID.toString())
+                new MacaroonCaveat("", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString()))
         );
         return this.bakery.createMacaroon(caveats);
     }
@@ -164,7 +166,7 @@ public class TokenResource extends AbstractTokenResource {
     private boolean validateMacaroon(UUID organizationID, Macaroon macaroon) {
         try {
             final String caveatString = String.format("organization_id = %s", organizationID.toString());
-            this.bakery.verifyMacaroon(macaroon, caveatString);
+            this.bakery.verifyMacaroon(Collections.singletonList(macaroon), caveatString);
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed.", e);
             return false;
