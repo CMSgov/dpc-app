@@ -34,7 +34,7 @@ class AggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private BlueButtonClient bbclient;
     private JobQueueInterface queue;
-    private AggregationEngineV2 engine;
+    private AggregationEngine engine;
     private Disposable subscribe;
 
     static private FhirContext fhirContext = FhirContext.forDstu3();
@@ -45,7 +45,7 @@ class AggregationEngineTest {
     static void setupAll() {
         final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        AggregationEngineV2.setGlobalErrorHandler();
+        AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
 
@@ -54,8 +54,8 @@ class AggregationEngineTest {
         queue = new MemoryBatchQueue(10);
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath);
-        engine = new AggregationEngineV2(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
-        AggregationEngineV2.setGlobalErrorHandler();
+        engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);

@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * - Partial job batches are saved out and written along the way
  * - When the aggregator shuts down, a batch is paused and another aggregator can claim the batch to continue processing
  */
-public class AggregationEngineV2 implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(AggregationEngineV2.class);
+public class AggregationEngine implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
 
     private final UUID aggregatorID = UUID.randomUUID();
 
@@ -59,14 +59,14 @@ public class AggregationEngineV2 implements Runnable {
      * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
      */
     @Inject
-    public AggregationEngineV2(BlueButtonClient bbclient, JobQueueInterface queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
+    public AggregationEngine(BlueButtonClient bbclient, JobQueueInterface queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
 
         // Metrics
-        final var metricFactory = new MetricMaker(metricRegistry, AggregationEngineV2.class);
+        final var metricFactory = new MetricMaker(metricRegistry, AggregationEngine.class);
         resourceMeter = metricFactory.registerMeter("resourceFetched");
         operationalOutcomeMeter = metricFactory.registerMeter("operationalOutcomes");
     }
@@ -233,7 +233,7 @@ public class AggregationEngineV2 implements Runnable {
      * Setup a global handler to catch the UndeliverableException case. Can be called from anywhere.
      */
     public static void setGlobalErrorHandler() {
-        RxJavaPlugins.setErrorHandler(AggregationEngineV2::errorHandler);
+        RxJavaPlugins.setErrorHandler(AggregationEngine::errorHandler);
     }
 
     /**

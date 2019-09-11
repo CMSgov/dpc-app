@@ -32,7 +32,7 @@ import static org.mockito.Mockito.doReturn;
 class BatchAggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private JobQueueInterface queue;
-    private AggregationEngineV2 engine;
+    private AggregationEngine engine;
     private Disposable subscribe;
 
     static private FhirContext fhirContext = FhirContext.forDstu3();
@@ -46,7 +46,7 @@ class BatchAggregationEngineTest {
         final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         operationsConfig = new OperationsConfig(10, exportPath, 3);
-        AggregationEngineV2.setGlobalErrorHandler();
+        AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
 
@@ -54,7 +54,7 @@ class BatchAggregationEngineTest {
     void setupEach() {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        engine = new AggregationEngineV2(bbclient, queue, fhirContext, metricRegistry, operationsConfig);
+        engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationsConfig);
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);
