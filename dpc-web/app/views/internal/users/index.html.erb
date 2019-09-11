@@ -2,10 +2,10 @@
 <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 
 <div class="ds-l-row">
-  <div class="ds-l-col--3">
+  <div class="ds-l-row--12 ds-l-md-col--3">
   </div>
 
-  <div class="ds-l-col--9">
+  <div class="ds-l-row--12 ds-l-md-col--9">
     <div class="ds-l-row">
       <div class="ds-title">Viewing <%= @users.count %> provider users</div>
     </div>
@@ -13,8 +13,8 @@
       <% @users.each do |user| %>
         <div class="ds-l-row">
           <div class="ds-l-col ds-u-flex-wrap--wrap ds-u-display--flex-sm ds-u-padding--1">
-            <div class="ds-u-border--1 ds-u-radius height--full">
-              <div class="ds-u-fill--gray-lightest height--full admin-list-subection admin-list-subsection--left">
+            <div class="ds-u-border--1 ds-u-radius height-sm--auto height-md--full">
+              <div class="ds-u-fill--gray-lightest height-md--full admin-list-subection admin-list-subsection--left">
                 <div class="ds-u-padding--1">
                   <%= user.id %>
                 </div>

@@ -53,7 +53,7 @@ RSpec.feature 'internal user signs in' do
         find('[data-test="internal-user-sign-in-form"]').click
 
         expect(page).to have_css('[data-test="internal-user-signout"]')
-        expect(page).to have_content('New Nemo')
+        expect(page).to have_content('test@cms.hhs.gov')
       end
 
       scenario 'logs in returning internal user' do
@@ -74,7 +74,7 @@ RSpec.feature 'internal user signs in' do
         find('[data-test="internal-user-sign-in-form"]').click
 
         expect(page).to have_css('[data-test="internal-user-signout"]')
-        expect(page).to have_content(internal_user.name)
+        expect(page).to have_content(internal_user.email)
       end
 
       scenario 'internal user cannot then sign in as user' do

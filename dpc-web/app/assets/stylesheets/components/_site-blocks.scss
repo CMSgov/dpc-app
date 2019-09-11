@@ -80,8 +80,16 @@
   padding: $spacer-2;
 }
 
-.height--full {
-  height: 100%;
+.height-sm--auto {
+  @media (max-width: $width-md) {
+    height: auto;
+  }
+}
+
+.height-md--full {
+  @media (min-width: $width-md) {
+    height: 100%;
+  }
 }
 
 .admin-list-subection {
