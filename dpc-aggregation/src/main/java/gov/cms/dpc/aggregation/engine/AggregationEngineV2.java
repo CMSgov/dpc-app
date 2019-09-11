@@ -122,7 +122,7 @@ public class AggregationEngineV2 implements Runnable {
             // Stop processing when no patients or early shutdown
             Boolean queueRunning = true;
             while ( nextPatientID.isPresent() ) {
-                this.processJobBatchPartial(job, nextPatientID.get(), errorCounter);
+                this.processJobBatchPartial(job, nextPatientID.get());
 
                 // Check if the subscriber is still running before getting the next part of the batch
                 queueRunning = !this.subscribe.isDisposed();
@@ -147,11 +147,10 @@ public class AggregationEngineV2 implements Runnable {
      * Processes a partial of a job batch. Marks the partial as completed upon processing
      * @param job - the job to process
      * @param patientID - The current patient id processing
-     * @param errorCounter - The current error count
      */
-    private void processJobBatchPartial(JobQueueBatch job, String patientID, AtomicInteger errorCounter) {
+    private void processJobBatchPartial(JobQueueBatch job, String patientID) {
         final var results = Flowable.fromIterable(job.getResourceTypes())
-                .flatMap(resourceType -> completeResource(job, patientID, resourceType, errorCounter))
+                .flatMap(resourceType -> completeResource(job, patientID, resourceType))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
         this.queue.completePartialBatch(job, aggregatorID);
@@ -161,22 +160,32 @@ public class AggregationEngineV2 implements Runnable {
      * Fetch and write a specific resource type
      * @param job context
      * @param resourceType to process
-     * @param errorCounter to count the OperationalOutcome JobQueueBatchFile
      */
-    private Flowable<JobQueueBatchFile> completeResource(JobQueueBatch job, String patientID, ResourceType resourceType, AtomicInteger errorCounter) {
+    private Flowable<JobQueueBatchFile> completeResource(JobQueueBatch job, String patientID, ResourceType resourceType) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), job.getBatchID(), resourceType, operationsConfig);
         final Flowable<Resource> mixedFlow = fetcher.fetchResources(patientID);
         final var connectableMixedFlow = mixedFlow.publish().autoConnect(2);
 
         // Batch the non-error resources into files
-        final var counter = new AtomicInteger();
+        final var resourceCount = new AtomicInteger();
+        final var sequenceCount = new AtomicInteger();
+        job.getJobQueueFileLatest(resourceType).ifPresent(file -> {
+            resourceCount.set(file.getCount());
+            sequenceCount.set(file.getSequence());
+        });
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, counter, resourceMeter));
+        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount, resourceMeter));
 
         // Batch the error resources into files
+        final var errorResourceCount = new AtomicInteger();
+        final var errorSequenceCount = new AtomicInteger();
+        job.getJobQueueFileLatest(ResourceType.OperationOutcome).ifPresent(file -> {
+            errorResourceCount.set(file.getCount());
+            errorSequenceCount.set(file.getSequence());
+        });
         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorCounter, operationalOutcomeMeter));
+        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter));
 
         // Merge the resultant flows
         return resourceFlow.mergeWith(outcomeFlow);
@@ -186,16 +195,38 @@ public class AggregationEngineV2 implements Runnable {
      * This part of the flow chain buffers resources and writes them in batches to a file
      *
      * @param writer - the writer to use
-     * @param counter - the sequence counter
+     * @param resourceCount - the number of resources in the current file
+     * @param sequenceCount - the sequence counter
      * @param meter - a meter on the number of resources
      * @return a transformed flow
      */
-    private Publisher<JobQueueBatchFile> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger counter, Meter meter) {
+    private Publisher<JobQueueBatchFile> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger resourceCount, AtomicInteger sequenceCount, Meter meter) {
+        final Flowable<Resource> filteredUpstream = upstream.filter(r -> r.getResourceType() == writer.getResourceType());
+        final var connectableMixedFlow = filteredUpstream.publish().autoConnect(2);
+
+        var resourcesInCurrentFileCount = resourceCount.getAndSet(0);
+        var resourcesPerFile = operationsConfig.getResourcesPerFileCount();
+        var firstResourceBatchCount = resourcesInCurrentFileCount < resourcesPerFile ? resourcesPerFile - resourcesInCurrentFileCount : resourcesPerFile;
+
+        if ( resourcesInCurrentFileCount == resourcesPerFile ) {
+            // Start a new file since the file has been filled up
+            sequenceCount.incrementAndGet();
+        }
+
+        // Handle the scenario where a previous file was already written by breaking up the flow into the first batch and the buffered batch
+        final Flowable<JobQueueBatchFile> partialBatch = connectableMixedFlow
+                .compose(stream -> writeResources(stream.take(firstResourceBatchCount), writer, sequenceCount, meter));
+        final Flowable<JobQueueBatchFile> bufferedBatch = connectableMixedFlow
+                .compose(stream -> writeResources(stream.skip(firstResourceBatchCount), writer, sequenceCount, meter));
+
+        return partialBatch.mergeWith(bufferedBatch);
+    }
+
+    private Flowable<JobQueueBatchFile> writeResources(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger sequenceCount, Meter meter) {
         return upstream
-                .filter(r -> r.getResourceType() == writer.getResourceType())
                 .buffer(operationsConfig.getResourcesPerFileCount())
                 .doOnNext(outcomes -> meter.mark(outcomes.size()))
-                .map(batch -> writer.writeBatch(counter, batch));
+                .map(batch -> writer.writeBatch(sequenceCount, batch));
     }
 
     /**
