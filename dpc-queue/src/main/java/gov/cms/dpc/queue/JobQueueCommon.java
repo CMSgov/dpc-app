@@ -39,6 +39,11 @@ public abstract class JobQueueCommon implements JobQueueInterface {
             jobBatches.add(this.createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes));
         }
 
+        // Set the priority of a job batch
+        // Single patients will have first priority to support patient everything
+        final int priority = patients.size() == 1 ? 1000 : 5000;
+        jobBatches.forEach(batch -> batch.setPriority(priority));
+
         this.submitJobBatches(jobBatches);
         return jobBatches.stream().map(JobQueueBatch::getJobID).findFirst().orElse(null);
     }

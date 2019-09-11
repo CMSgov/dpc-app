@@ -92,6 +92,7 @@ class AggregationEngineTest {
         // Look at the result
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertEquals(1000, completeJob.getPriority());
         final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
@@ -143,6 +144,7 @@ class AggregationEngineTest {
 
         // Assert the queue size
         assertEquals(2, queue.queueSize());
+        assertEquals(5000, queue.getJobBatches(jobID).get(0).getPriority());
     }
 
     /**
