@@ -5,8 +5,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
-import gov.cms.dpc.queue.IJobQueue;
-import gov.cms.dpc.queue.annotations.AggregatorID;
+import gov.cms.dpc.queue.JobQueueInterface;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -41,8 +39,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
 
-    private final UUID aggregatorID;
-    private final IJobQueue queue;
+    private final UUID aggregatorID = UUID.randomUUID();
+
+    private final JobQueueInterface queue;
     private final BlueButtonClient bbclient;
     private final OperationsConfig operationsConfig;
     private final FhirContext fhirContext;
@@ -53,16 +52,14 @@ public class AggregationEngine implements Runnable {
     /**
      * Create an engine.
      *
-     * @param aggregatorID - The ID of the current working aggregator
      * @param bbclient    - {@link BlueButtonClient } to use
-     * @param queue       - {@link IJobQueue} that will direct the work done
+     * @param queue       - {@link JobQueueInterface} that will direct the work done
      * @param fhirContext - {@link FhirContext} for DSTU3 resources
      * @param metricRegistry - {@link MetricRegistry} for metrics
      * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
      */
     @Inject
-    public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, IJobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
-        this.aggregatorID = aggregatorID;
+    public AggregationEngine(BlueButtonClient bbclient, JobQueueInterface queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
         this.queue = queue;
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;
@@ -99,13 +96,13 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine.
      */
     private void pollQueue() {
-        subscribe = Observable.fromCallable(() -> this.queue.claimBatch(aggregatorID))
+        subscribe = Observable.fromCallable(() -> this.queue.workBatch(aggregatorID))
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .repeatWhen(completed -> {
-                    logger.debug(String.format("No job, polling again in %d milliseconds", operationsConfig.getPollingFrequency()));
-                    return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
+                    logger.debug("No job, polling again in 2 seconds");
+                    return completed.delay(2, TimeUnit.SECONDS);
                 })
                 .subscribe(this::processJobBatch, error -> logger.error("Unable to complete job.", error));
     }
@@ -119,7 +116,8 @@ public class AggregationEngine implements Runnable {
             logger.info("Processing job {} batch {}, exporting to: {}.", job.getJobID(), job.getBatchID(), this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
-            Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
+            final var errorCounter = new AtomicInteger();
+            Optional<String> nextPatientID = job.fetchNextBatch(aggregatorID);
 
             // Stop processing when no patients or early shutdown
             Boolean queueRunning = true;
@@ -128,7 +126,7 @@ public class AggregationEngine implements Runnable {
 
                 // Check if the subscriber is still running before getting the next part of the batch
                 queueRunning = !this.subscribe.isDisposed();
-                nextPatientID = queueRunning ? job.fetchNextPatient(aggregatorID) : Optional.empty();
+                nextPatientID = queueRunning ? job.fetchNextBatch(aggregatorID) : Optional.empty();
             }
 
             // Finish processing the batch
@@ -150,13 +148,12 @@ public class AggregationEngine implements Runnable {
      * @param job - the job to process
      * @param patientID - The current patient id processing
      */
-    private List<JobQueueBatchFile> processJobBatchPartial(JobQueueBatch job, String patientID) {
+    private void processJobBatchPartial(JobQueueBatch job, String patientID) {
         final var results = Flowable.fromIterable(job.getResourceTypes())
                 .flatMap(resourceType -> completeResource(job, patientID, resourceType))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
         this.queue.completePartialBatch(job, aggregatorID);
-        return results;
     }
 
     /**
