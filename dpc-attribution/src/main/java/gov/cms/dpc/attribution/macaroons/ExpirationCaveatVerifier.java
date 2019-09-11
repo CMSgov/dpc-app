@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.macaroons;
 import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatVerifier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -19,7 +20,7 @@ public class ExpirationCaveatVerifier implements CaveatVerifier {
     ExpirationCaveatVerifier(TokenPolicy policy) { }
 
     @Override
-    public Optional<String> check(MacaroonCaveat caveat) {
+    public Optional<String> check(MacaroonCondition caveat) {
 
         if (caveat.getKey().equals(ExpirationCaveatSupplier.EXPIRATION_KEY)) {
 

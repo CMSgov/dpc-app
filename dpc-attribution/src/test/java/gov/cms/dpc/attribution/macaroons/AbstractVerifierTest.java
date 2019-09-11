@@ -23,7 +23,7 @@ abstract class AbstractVerifierTest<V extends CaveatVerifier> {
     @Test
     final void testNonMatchingCaveat() {
         final MacaroonCaveat caveat = getNonMatchingCaveat();
-        final Optional<String> response = this.verifier.check(caveat);
+        final Optional<String> response = this.verifier.check(caveat.getCondition());
         assertAll(() -> assertTrue(response.isPresent(), "Should have failure message"),
                 () -> assertEquals(VerifierConstants.NO_MATCH, response.get(), "Should have not found caveat"));
     }
@@ -31,14 +31,14 @@ abstract class AbstractVerifierTest<V extends CaveatVerifier> {
     @Test
     final void testWrongCaveat() {
         final MacaroonCaveat caveat = getWrongCaveat();
-        final Optional<String> response = this.verifier.check(caveat);
+        final Optional<String> response = this.verifier.check(caveat.getCondition());
         assertTrue(response.isPresent(), "Should have failure message");
     }
 
     @Test
     final void testCorrectCaveat() {
         final MacaroonCaveat caveat = getCorrectCaveat();
-        final Optional<String> response = this.verifier.check(caveat);
+        final Optional<String> response = this.verifier.check(caveat.getCondition());
         assertTrue(response.isEmpty(), "Should not have failure message");
     }
 

@@ -38,7 +38,15 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
         </dependency>
+        <dependency>
+            <groupId>com.codahale</groupId>
+            <artifactId>xsalsa20poly1305</artifactId>
+            <version>0.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.whispersystems</groupId>
+            <artifactId>curve25519-java</artifactId>
+            <version>0.5.0</version>
+        </dependency>
     </dependencies>
-
-
 </project>
