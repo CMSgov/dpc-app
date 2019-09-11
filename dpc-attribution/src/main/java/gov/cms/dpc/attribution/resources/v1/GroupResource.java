@@ -14,6 +14,7 @@ import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.tuple.Pair;
@@ -161,27 +162,84 @@ public class GroupResource extends AbstractGroupResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Group updateRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+        throw new UnsupportedOperationException("Nope, denied");
+//        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
+//                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+//
+//        // Verify that we don't have any duplicated patient references, which causes havoc with the merge logic.
+//        final Set<Reference> memberReferences = groupUpdate
+//                .getMember()
+//                .stream()
+//                .map(Group.GroupMemberComponent::getEntity)
+//                .filter(distinctByKey(Reference::getReference))
+//                .collect(Collectors.toSet());
+//
+//        if (memberReferences.size() < groupUpdate.getMember().size()) {
+//            throw new WebApplicationException("Cannot have a Patient listed twice in Group update", Response.Status.BAD_REQUEST);
+//        }
+//
+//        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+//        // Add and remove Roster members
+//        processGroupMembers(existingRoster, groupUpdate);
+//
+//        existingRoster.setAttributions(existingAttributions);
+//
+//        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+    }
+
+    @POST
+    @Path("/{rosterID}/$add")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Add roster members", notes = "FHIR endpoint to update the given Group resource by adding the members included in the supplied Group.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
+    @Override
+    public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
-        // Verify that we don't have any duplicated patient references, which causes havoc with the merge logic.
-        final Set<Reference> memberReferences = groupUpdate
+        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+        groupUpdate
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
-                .filter(distinctByKey(Reference::getReference))
-                .collect(Collectors.toSet());
-
-        if (memberReferences.size() < groupUpdate.getMember().size()) {
-            throw new WebApplicationException("Cannot have a Patient listed twice in Group update", Response.Status.BAD_REQUEST);
-        }
-
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-        // Add and remove Roster members
-        processGroupMembers(existingRoster, groupUpdate);
+                .map(ref -> {
+                    final PatientEntity pe = new PatientEntity();
+                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
+                    return pe;
+                })
+                .map(pe -> new AttributionRelationship(existingRoster, pe))
+                .forEach(relationship -> {
+                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
+                    if (found.isEmpty()) {
+                        existingAttributions.add(relationship);
+                    }
+                });
 
         existingRoster.setAttributions(existingAttributions);
+        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+    }
 
+    @POST
+    @Path("/{rosterID}/$remove")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Remove roster members", notes = "FHIR endpoint to update the given Group resource by removing the members included in the supplied Group.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
+    @Override
+    public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
+        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+        groupUpdate
+                .getMember()
+                .stream()
+                .filter(Group.GroupMemberComponent::getInactive)
+                .map(Group.GroupMemberComponent::getEntity)
+                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
+
+        existingRoster.setAttributions(existingAttributions);
         return this.rosterDAO.updateRoster(existingRoster).toFHIR();
     }
 

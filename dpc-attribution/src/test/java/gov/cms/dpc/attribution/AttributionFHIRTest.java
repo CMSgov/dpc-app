@@ -195,14 +195,18 @@ class AttributionFHIRTest {
         final Reference patientReference = new Reference(newPatient.getId());
         newRoster.addMember().setEntity(patientReference);
 
+        final Parameters addParam = new Parameters();
+        addParam.addParameter().setResource(newRoster);
+
         // Update the roster
-        final IUpdateExecutable updateGroupRequest = client
-                .update()
-                .resource(newRoster)
-                .withId(groupID)
+        final IOperationUntypedWithInput<Parameters> addMemberRequest = client
+                .operation()
+                .onInstance(new IdType(groupID))
+                .named("add")
+                .withParameters(addParam)
                 .encodedJson();
 
-        updateGroupRequest.execute();
+        addMemberRequest.execute();
 
         // Check how many are attributed
 
@@ -231,12 +235,25 @@ class AttributionFHIRTest {
 
         // Remove the patient
         final Group.GroupMemberComponent removeEntity = new Group.GroupMemberComponent().setEntity(patientReference).setInactive(true);
-        newRoster
-                .addMember(removeEntity);
-
-        assertThrows(InvalidRequestException.class, updateGroupRequest::execute, "Should have a bad request");
         newRoster.setMember(List.of(removeEntity));
-        updateGroupRequest.execute();
+        final Parameters removeParams = new Parameters();
+        removeParams.addParameter().setResource(newRoster);
+
+        final IOperationUntypedWithInput<Parameters> removeMemberRequest = client
+                .operation()
+                .onInstance(new IdType(groupID))
+                .named("remove")
+                .withParameters(removeParams)
+                .encodedJson();
+
+        removeMemberRequest.execute();
+//
+//        newRoster
+//                .addMember(removeEntity);
+//
+//        assertThrows(InvalidRequestException.class, removeMemberRequest::execute, "Should have a bad request");
+//
+//        removeMemberRequest.execute();
 
         assertEquals(bundle.getEntry().size() - 1,
                 getUpdatedGroup.execute().getMember().size(),
