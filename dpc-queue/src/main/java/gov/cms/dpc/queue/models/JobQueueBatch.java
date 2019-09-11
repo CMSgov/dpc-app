@@ -240,7 +240,13 @@ public class JobQueueBatch implements Serializable {
         return jobQueueBatchFiles.stream().filter(result -> result.getFileName().equals(fileName)).findFirst();
     }
 
-    public JobQueueBatchFile addJobQueueFile(ResourceType resourceType, int sequence, int batchSize) {
+    public synchronized Optional<JobQueueBatchFile> getJobQueueFileLatest(ResourceType forResourceType) {
+        return jobQueueBatchFiles.stream()
+                .filter(result -> result.getResourceType().equals(forResourceType))
+                .max(Comparator.comparingInt(JobQueueBatchFile::getSequence));
+    }
+
+    public synchronized JobQueueBatchFile addJobQueueFile(ResourceType resourceType, int sequence, int batchSize) {
         Optional<JobQueueBatchFile> existingFile = this.getJobQueueFile(JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
 
         if ( existingFile.isPresent() ) {
