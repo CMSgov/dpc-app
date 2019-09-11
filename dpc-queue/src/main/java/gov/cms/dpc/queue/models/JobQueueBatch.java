@@ -357,6 +357,10 @@ public class JobQueueBatch implements Serializable {
         this.priority = priority;
     }
 
+    public void setPriority(Integer priority) {
+        this.priority = priority;
+    }
+
     /**
      * Verifies that the aggregator is still assigned to the batch, if not throw exception
      */
