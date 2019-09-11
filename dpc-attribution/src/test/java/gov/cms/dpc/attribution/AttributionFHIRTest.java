@@ -173,8 +173,6 @@ class AttributionFHIRTest {
                 .encodedJson()
                 .execute();
 
-//        assertTrue(patientCreated.getCreated(), "Should be created");
-
         final Patient newPatient = (Patient) patientCreated.getResource();
 
         // Find the existing Roster ID
@@ -209,7 +207,6 @@ class AttributionFHIRTest {
         addMemberRequest.execute();
 
         // Check how many are attributed
-
         final IReadExecutable<Group> getUpdatedGroup = client
                 .read()
                 .resource(Group.class)
@@ -247,15 +244,20 @@ class AttributionFHIRTest {
                 .encodedJson();
 
         removeMemberRequest.execute();
-//
-//        newRoster
-//                .addMember(removeEntity);
-//
-//        assertThrows(InvalidRequestException.class, removeMemberRequest::execute, "Should have a bad request");
-//
-//        removeMemberRequest.execute();
 
         assertEquals(bundle.getEntry().size() - 1,
+                getUpdatedGroup.execute().getMember().size(),
+                "Should have a missing patient");
+
+        // Replace the roster and ensure the numbers are correct.
+        client
+                .update()
+                .resource(newRoster)
+                .withId(new IdType(groupID))
+                .encodedJson()
+                .execute();
+
+        assertEquals(1,
                 getUpdatedGroup.execute().getMember().size(),
                 "Should have a missing patient");
     }

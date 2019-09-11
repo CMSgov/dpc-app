@@ -162,29 +162,27 @@ public class GroupResource extends AbstractGroupResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Group updateRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
-        throw new UnsupportedOperationException("Nope, denied");
-//        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-//                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
-//
-//        // Verify that we don't have any duplicated patient references, which causes havoc with the merge logic.
-//        final Set<Reference> memberReferences = groupUpdate
-//                .getMember()
-//                .stream()
-//                .map(Group.GroupMemberComponent::getEntity)
-//                .filter(distinctByKey(Reference::getReference))
-//                .collect(Collectors.toSet());
-//
-//        if (memberReferences.size() < groupUpdate.getMember().size()) {
-//            throw new WebApplicationException("Cannot have a Patient listed twice in Group update", Response.Status.BAD_REQUEST);
-//        }
-//
-//        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-//        // Add and remove Roster members
-//        processGroupMembers(existingRoster, groupUpdate);
-//
-//        existingRoster.setAttributions(existingAttributions);
-//
-//        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+        existingAttributions.clear();
+
+        final List<AttributionRelationship> overwriteAttributions = groupUpdate
+                .getMember()
+                .stream()
+                .map(Group.GroupMemberComponent::getEntity)
+                .map(ref -> {
+                    final PatientEntity pe = new PatientEntity();
+                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
+                    return pe;
+                })
+                .map(pe -> new AttributionRelationship(existingRoster, pe))
+                .collect(Collectors.toList());
+
+        existingAttributions.addAll(overwriteAttributions);
+
+        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
     }
 
     @POST
