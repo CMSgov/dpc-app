@@ -22,13 +22,13 @@ RSpec.feature 'internal user signs in' do
           [
             {
               name: 'dpc-test',
-              id: 111222333,
+              id: '111222333',
               slug: 'dpc-test',
               privacy: 'closed',
               url: 'https://api.github.com/teams/111222333',
               organization: {
                 login: 'CMSgov',
-                id: 999888777,
+                id: '999888777',
                 url: 'https://api.github.com/orgs/CMSgov'
               }
             }
@@ -37,7 +37,7 @@ RSpec.feature 'internal user signs in' do
       end
 
       scenario 'creates new internal user' do
-        OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new({
+        OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
           provider: 'github',
           uid: '123545',
           info: {
@@ -47,7 +47,7 @@ RSpec.feature 'internal user signs in' do
             image: 'https://avatars3.githubusercontent.com/u/111'
           },
           credentials: { token: 'abcdefg' }
-        })
+        )
 
         visit new_internal_user_session_path
         find('[data-test="internal-user-sign-in-form"]').click
@@ -57,7 +57,7 @@ RSpec.feature 'internal user signs in' do
       end
 
       scenario 'logs in returning internal user' do
-        OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new({
+        OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
           provider: 'github',
           uid: '56789',
           info: {
@@ -66,7 +66,7 @@ RSpec.feature 'internal user signs in' do
             image: 'https://avatars3.githubusercontent.com/u/111'
           },
           credentials: { token: 'abcdefg' }
-        })
+        )
 
         internal_user = create(:internal_user, provider: 'github', uid: '56789', name: 'Found Nemo')
 
@@ -78,7 +78,7 @@ RSpec.feature 'internal user signs in' do
       end
 
       scenario 'internal user cannot then sign in as user' do
-        OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new({
+        OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
           provider: 'github',
           uid: '123545',
           info: {
@@ -88,7 +88,7 @@ RSpec.feature 'internal user signs in' do
             image: 'https://avatars3.githubusercontent.com/u/111'
           },
           credentials: { token: 'abcdefg' }
-        })
+        )
 
         visit new_internal_user_session_path
         find('[data-test="internal-user-sign-in-form"]').click
@@ -105,7 +105,7 @@ RSpec.feature 'internal user signs in' do
     context 'when unsuccessful' do
       context 'when user has valid github credentials' do
         before(:each) do
-          OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new({
+          OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(
             provider: 'github',
             uid: '123545',
             info: {
@@ -115,7 +115,7 @@ RSpec.feature 'internal user signs in' do
               image: 'https://avatars3.githubusercontent.com/u/111'
             },
             credentials: { token: 'abcdefg' }
-          })
+          )
         end
 
         scenario 'when user does not have any github teams' do
@@ -137,13 +137,13 @@ RSpec.feature 'internal user signs in' do
             [
               {
                 name: 'invalidteam',
-                id: 77777777,
+                id: '77777777',
                 slug: 'invalidteam',
                 privacy: 'closed',
                 url: 'https://api.github.com/teams/77777777',
                 organization: {
                   login: 'CMSgov',
-                  id: 999888777,
+                  id: '999888777',
                   url: 'https://api.github.com/orgs/CMSgov'
                 }
               }
@@ -169,6 +169,5 @@ RSpec.feature 'internal user signs in' do
         end
       end
     end
-
   end
 end

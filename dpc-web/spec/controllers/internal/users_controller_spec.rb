@@ -13,7 +13,7 @@ RSpec.describe Internal::UsersController, type: :controller do
       it 'assigns @users to all users' do
         users = create_list(:user, 2)
         get :index
-        expect(assigns(:users)).to eq(users)
+        expect(assigns(:users)).to eq(users.reverse)
       end
 
       it 'renders the index template' do
@@ -22,7 +22,7 @@ RSpec.describe Internal::UsersController, type: :controller do
       end
     end
 
-    # TODO write shared examples for user and no user or internal user
+    # TODO: Write shared examples for user and no user or internal user
     # context 'invalud authentication'
   end
 end
