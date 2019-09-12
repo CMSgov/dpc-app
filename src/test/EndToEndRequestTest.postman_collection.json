@@ -545,7 +545,7 @@
 								"$add"
 							]
 						},
-						"description": "Remove a patient from the attribution roster."
+						"description": "Add the previously removed patient back to the attribution roster."
 					},
 					"response": []
 				},
@@ -621,7 +621,7 @@
 								"{{attribution_group_id}}"
 							]
 						},
-						"description": "Remove a patient from the attribution roster."
+						"description": "Use the /Group PUT operation to replace the current roster contents with the submitted membership."
 					},
 					"response": []
 				},
@@ -634,8 +634,8 @@
 								"id": "72634c6f-4d6b-49b9-b4db-b172af0f04f1",
 								"exec": [
 									"// Status should be 201",
-									"pm.test(\"Status is 201\", function () {",
-									"    pm.response.to.have.status(201);",
+									"pm.test(\"Status is 200\", function () {",
+									"    pm.response.to.have.status(200);",
 									"});",
 									"",
 									"pm.test(\"Response Body is correct\", () => {",
@@ -702,7 +702,7 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -716,7 +716,7 @@
 							"raw": "{{roster_body}}"
 						},
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -724,7 +724,8 @@
 							"port": "{{api_port}}",
 							"path": [
 								"v1",
-								"Group"
+								"Group",
+								"{{attribution_group_id}}"
 							]
 						},
 						"description": "This request submits the roster for the provider. The roster data is in the `body` field of the request. It's easier to see in the Postman GUI."

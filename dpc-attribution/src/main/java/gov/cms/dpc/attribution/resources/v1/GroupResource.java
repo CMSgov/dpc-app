@@ -167,6 +167,8 @@ public class GroupResource extends AbstractGroupResource {
 
         final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
         existingAttributions.clear();
+        // TODO: This is a temporary workaround until we get DPC-564 merged in, this avoids unique constraint violations due to the current transaction not being committed yet.
+        this.rosterDAO.updateRoster(existingRoster);
 
         final List<AttributionRelationship> overwriteAttributions = groupUpdate
                 .getMember()
