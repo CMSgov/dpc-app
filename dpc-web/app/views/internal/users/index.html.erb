@@ -9,8 +9,18 @@
     <div class="ds-l-row">
       <h1 class="ds-h1">Viewing <b><%= @users.total_count %></b> provider users</h1>
     </div>
+
     <div class="ds-l-row">
       <p class="ds-u-padding-x--1"><%= page_entries_info @users %></p>
+    </div>
+
+    <div class="ds-l-row">
+      <a href="#" class="ds-u-padding-x--1" data-modal-show="filter-modal" id="filter-modal-trigger">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#filter"></use>
+        </svg>
+        Filter
+      </a>
     </div>
 
     <% @users.each do |user| %>
@@ -46,3 +56,5 @@
     <%= paginate @users %>
   </div>
 </div>
+
+ <%= render 'filter_modal' %>
