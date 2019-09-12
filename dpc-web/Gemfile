@@ -39,6 +39,7 @@ end
 group :test do
   gem 'selenium-webdriver'
   gem 'climate_control'
+  gem 'rails-controller-testing'
 end
 
 group :development do
@@ -59,3 +60,4 @@ gem 'daemons'
 gem 'omniauth-github'
 gem 'omniauth-rails_csrf_protection', '~> 0.1'
 gem 'octokit'
+gem 'kaminari'
