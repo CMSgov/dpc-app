@@ -3,7 +3,8 @@ package gov.cms.dpc.attribution.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
-import com.github.nitram509.jmacaroons.MacaroonVersion;
+import gov.cms.dpc.attribution.DPCAttributionConfiguration;
+import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.attribution.jdbi.TokenDAO;
 import gov.cms.dpc.attribution.resources.AbstractTokenResource;
 import gov.cms.dpc.common.entities.OrganizationEntity;
@@ -13,6 +14,7 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
+import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -26,9 +28,11 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Api(value = "Token")
@@ -39,11 +43,13 @@ public class TokenResource extends AbstractTokenResource {
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
+    private final TokenPolicy policy;
 
     @Inject
-    TokenResource(TokenDAO dao, MacaroonBakery bakery) {
+    TokenResource(TokenDAO dao, MacaroonBakery bakery, DPCAttributionConfiguration config) {
         this.dao = dao;
         this.bakery = bakery;
+        this.policy = config.getTokenPolicy();
     }
 
     @Override
@@ -85,25 +91,35 @@ public class TokenResource extends AbstractTokenResource {
         return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
-    @Override
     @POST
     @Path("/{organizationID}")
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)")
+    @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)." +
+            "<p>" +
+            "Token supports a custom human-readable label via the `label` query param.")
+    @Override
     public String createOrganizationToken(
             @ApiParam(value = "Organization resource ID", required = true)
-            @NotNull @PathParam("organizationID") UUID organizationID) {
+            @NotNull @PathParam("organizationID") UUID organizationID,
+            @ApiParam(value = "Optional label for token") @QueryParam("label") String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
         final OrganizationEntity organization = new OrganizationEntity();
         organization.setId(organizationID);
 
-        try {
+        final TokenEntity token = new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON);
 
-            this.dao.persistToken(new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON));
+        // Set the expiration time
+        token.setExpiresAt(handleExpirationTime(expiration));
+
+        // Set the label, if provided, otherwise, generate a default one
+        token.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
+        logger.info("Generating access token: {}", token);
+        try {
+            this.dao.persistToken(token);
         } catch (NoResultException e) {
             throw new WebApplicationException(String.format(ORG_NOT_FOUND, organizationID), Response.Status.NOT_FOUND);
         }
@@ -155,7 +171,30 @@ public class TokenResource extends AbstractTokenResource {
             logger.error("Macaroon verification failed.", e);
             return false;
         }
-
         return true;
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private OffsetDateTime handleExpirationTime(Optional<OffsetDateTimeParam> expiresParam) {
+        // Compute default expiration
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        final OffsetDateTime defaultExpiration = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
+
+        // If a custom expiration is supplied use it, unless it violates our default policy
+        if (expiresParam.isPresent()) {
+            final OffsetDateTime customExpiration = expiresParam.get().get();
+
+            // Verify custom expiration is not greater than policy
+            if (customExpiration.isAfter(defaultExpiration)) {
+                throw new WebApplicationException("Cannot set expiration after policy default", Response.Status.BAD_REQUEST);
+            }
+
+            // Verify is not already expired
+            if (customExpiration.isBefore(now)) {
+                throw new WebApplicationException("Cannot set expiration before current time", Response.Status.BAD_REQUEST);
+            }
+            return customExpiration;
+        }
+        return defaultExpiration;
     }
 }
