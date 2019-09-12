@@ -65,7 +65,8 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "dpc-website_#{Rails.env}"
 
   config.action_mailer.perform_caching = false
-  config.action_mailer.asset_host = "https://dpc.cms.gov"
+  config.action_mailer.default_url_options = { host: ENV['HOST_NAME'], port: ENV['PORT'] }
+  config.action_mailer.asset_host = "https://#{ENV['HOST_NAME']}:#{ENV['PORT']}"
 
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
@@ -103,8 +104,4 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
-
-  # Devise requires mailer
-  config.action_mailer.default_url_options = { host: ENV['HOST_NAME'], port: ENV['PORT'] }
-  config.action_mailer.asset_host = "http://#{ENV['HOST_NAME']}:#{ENV['PORT']}"
 end
