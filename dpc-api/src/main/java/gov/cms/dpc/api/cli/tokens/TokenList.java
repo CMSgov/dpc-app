@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
 import gov.cms.dpc.common.entities.TokenEntity;
-import gov.cms.dpc.common.models.TokenResponse;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -20,6 +18,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class TokenList extends AbstractAttributionCommand {
@@ -78,11 +77,14 @@ public class TokenList extends AbstractAttributionCommand {
 
     private void generateTable(List<TokenEntity> tokens) {
         // Generate the table
-        // TODO(nickrobison): We need to re-add the expiration date, once it's wired back in with DPC-617
-        final String[] headers = {"Token ID", "Type"};
+        final String[] headers = {"Token ID", "Label", "Type", "Created At", "Expires At"};
 
         System.out.println(FlipTable.of(headers, tokens
                 .stream()
-                .map(token -> new String[]{token.getId(), token.getTokenType().toString()}).toArray(String[][]::new)));
+                .map(token -> new String[]{token.getId(),
+                        token.getLabel(),
+                        token.getTokenType().toString(),
+                        token.getCreatedAt().format(DateTimeFormatter.ISO_DATE_TIME),
+                        token.getExpiresAt().format(DateTimeFormatter.ISO_DATE_TIME)}).toArray(String[][]::new)));
     }
 }
