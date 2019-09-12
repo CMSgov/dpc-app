@@ -8,8 +8,10 @@ import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +33,7 @@ class BakeryTests {
         final DPCAttributionConfiguration config = new DPCAttributionConfiguration();
         config.setPublicServerURL("http://test.cms");
         config.setTokenPolicy(generateTokenPolicy());
-        bakery = new BakeryProvider(config, new MemoryRootKeyStore(new SecureRandom())).get();
+        bakery = new BakeryProvider(config, new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore()).get();
     }
 
 
@@ -40,10 +42,10 @@ class BakeryTests {
 
         final Macaroon macaroon = bakery
                 .createMacaroon(Collections.singletonList(
-                        new MacaroonCaveat("organization_id",
-                                MacaroonCaveat.Operator.EQ, ORGANIZATION_ID)));
+                        new MacaroonCaveat(new MacaroonCondition("organization_id",
+                                MacaroonCondition.Operator.EQ, ORGANIZATION_ID))));
 
-        assertThrows(BakeryException.class, () -> bakery.verifyMacaroon(macaroon, String.format("organization_id = %s", BAD_ORG_ID)));
+        assertThrows(BakeryException.class, () -> bakery.verifyMacaroon(Collections.singletonList(macaroon), String.format("organization_id = %s", BAD_ORG_ID)));
     }
 
     private TokenPolicy generateTokenPolicy() {

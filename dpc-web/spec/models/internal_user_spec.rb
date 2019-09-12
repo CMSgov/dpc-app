@@ -21,7 +21,7 @@ RSpec.describe InternalUser, type: :model do
       _irrelevant_internal_user = create(:internal_user, uid: '919191', provider: 'github')
       existing_internal_user = create(:internal_user, uid: '828282', provider: 'github')
 
-      auth = OmniAuth::AuthHash.new({
+      auth = OmniAuth::AuthHash.new(
         provider: 'github',
         uid: '828282',
         info: {
@@ -30,13 +30,13 @@ RSpec.describe InternalUser, type: :model do
           name: 'Nemo',
           image: 'https://avatars3.githubusercontent.com/u/111'
         }
-      })
+      )
 
       expect(InternalUser.from_omniauth(auth)).to eq(existing_internal_user)
     end
 
     it 'creates new internal user based on auth hash' do
-      auth = OmniAuth::AuthHash.new({
+      auth = OmniAuth::AuthHash.new(
         provider: 'github',
         uid: '828282',
         info: {
@@ -45,12 +45,12 @@ RSpec.describe InternalUser, type: :model do
           name: 'Nemo',
           image: 'https://avatars3.githubusercontent.com/u/111'
         }
-      })
+      )
 
-      expect{ InternalUser.from_omniauth(auth) }.to change(InternalUser, :count).by(1)
+      expect { InternalUser.from_omniauth(auth) }.to change(InternalUser, :count).by(1)
       expect(
-        InternalUser.last.attributes.
-          fetch_values('github_nickname', 'email', 'name', 'uid', 'provider')
+        InternalUser.last.attributes
+          .fetch_values('github_nickname', 'email', 'name', 'uid', 'provider')
       ).to eq(['whereisnemo', 'test@cms.hhs.gov', 'Nemo', '828282', 'github'])
     end
   end

@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.converters;
+package gov.cms.dpc.common.converters;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
 import gov.cms.dpc.fhir.FHIRFormatters;
