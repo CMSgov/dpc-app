@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   }
 
   namespace 'internal' do
-    resources :users, only: [:index]
+    resources :users, only: [:index, :show]
   end
 
   authenticated :user do
