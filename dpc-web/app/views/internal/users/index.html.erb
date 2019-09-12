@@ -1,3 +1,48 @@
-<p>
-  Hello, <%= current_internal_user.name ||  current_internal_user.email %>
-</p>
+<% title "Manage Users" %>
+<%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
+
+<div class="ds-l-row">
+  <div class="ds-l-row--12 ds-l-md-col--3">
+  </div>
+
+  <div class="ds-l-row--12 ds-l-md-col--9">
+    <div class="ds-l-row">
+      <h1 class="ds-h1">Viewing <b><%= @users.total_count %></b> provider users</h1>
+    </div>
+    <div class="ds-l-row">
+      <p class="ds-u-padding-x--1"><%= page_entries_info @users %></p>
+    </div>
+
+    <% @users.each do |user| %>
+      <div class="ds-l-row">
+        <div class="ds-l-col ds-u-flex-wrap--wrap ds-u-display--flex-sm ds-u-padding--1">
+          <div class="ds-u-border--1 ds-u-radius height-sm--auto height-md--full">
+            <div class="ds-u-fill--gray-lightest height-md--full admin-list-subection admin-list-subsection--left">
+              <div class="ds-u-padding--1">
+                <%= user.id %>
+              </div>
+            </div>
+            <div class="ds-u-padding--1 ds-u-display--inline-block">
+              <div class="ds-u-font-size--lead">
+                <%= link_to user.name, internal_user_path(user) %>
+              </div>
+
+              <div class="ds-u-align-items--end ds-u-font-style--italic">
+                Signed up: <%= user.created_at %>
+              </div>
+            </div>
+            <div class="ds-u-border-left--1 admin-list-subection admin-list-subsection--right">
+              <div class="ds-u-padding--1 ds-u-fill--gold-lightest admin-list-heading--orange">Requested Organization</div>
+              <div class="ds-u-padding--1 ds-u-font-size--small">
+                <div><%= user.organization %> </div>
+                <div><%= user.organization_type.titleize %> </div>
+                <div><%= city_state(user) %> </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    <%= paginate @users %>
+  </div>
+</div>

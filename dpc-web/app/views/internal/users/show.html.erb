@@ -1,0 +1,70 @@
+
+<% title @user.name %>
+
+<section class="ds-l-container ds-u-border--1 ds-u-radius">
+  <div class="ds-l-row">
+    <h2 class="ds-u-padding-x--2">Signup info</h2>
+  </div>
+
+  <div class="ds-l-row">
+    <div class="ds-l-row--12 ds-l-md-col--6">
+      <h3 class="ds-u-color--muted">Personal info</h3>
+      <p>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#user-alt"></use>
+        </svg>
+        <%= @user.name %>
+      </p>
+      <p>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#envelope"></use>
+        </svg>
+        <%= @user.email %>
+      </p>
+    </div>
+
+    <div class="ds-l-row--12 ds-l-md-col--6">
+      <h3 class="ds-u-color--muted">Requested organization</h3>
+
+      <p>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+        </svg>
+        <%= @user.organization %>
+      </p>
+
+      <% unless @user.organization_type == "health_it_vendor" %>
+        <p>
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <use xlink:href="/assets/solid.svg#users"></use>
+          </svg>
+          <%= @user.num_providers %>
+        </p>
+      <% end %>
+
+      <p>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#shapes"></use>
+        </svg>
+        <%= @user.organization_type.titleize %>
+      </p>
+
+      <p>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+        </svg>
+
+        <%= @user.address_1 %>
+      </p>
+
+      <% if @user.address_2.length > 1 %>
+        <p class="ds-u-padding-x--3">
+          <%= @user.address_2 %>
+        <p>
+      <% end %>
+      <p class="ds-u-padding-x--3">
+        <%= @user.city %>, <%= @user.state %> <%= @user.zip %>
+      </p>
+    </div>
+  </div>
+</section>
