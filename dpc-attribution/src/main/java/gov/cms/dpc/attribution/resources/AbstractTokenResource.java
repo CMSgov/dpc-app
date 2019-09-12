@@ -1,13 +1,16 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.common.entities.TokenEntity;
+import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Path("/Token")
@@ -35,11 +38,13 @@ public abstract class AbstractTokenResource {
      * This token is designed to be long-lived and delegatable.
      *
      * @param organizationID - {@link UUID} organization ID
+     * @param label          - {@link Optional} {@link String} to use as token label
      * @return - {@link String} base64 (URL) encoded token
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
     @Path("/{organizationID}")
-    public abstract String createOrganizationToken(@PathParam("organizationID") @NotNull UUID organizationID);
+    public abstract String createOrganizationToken(@PathParam("organizationID") @NotNull UUID organizationID, String label, Optional<OffsetDateTimeParam> expiration);
 
     @DELETE
     @Path("/{organizationID}/{tokenID}")

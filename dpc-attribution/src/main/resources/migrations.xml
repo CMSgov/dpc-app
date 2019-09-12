@@ -373,4 +373,16 @@
                     defaultValueComputed="current_timestamp"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="add-token-label-expiration" author="nickrobison-usds">
+        <addColumn tableName="ORGANIZATION_TOKENS">
+            <column name="label" type="VARCHAR"/>
+            <column name="created_at"
+                    type="TIMESTAMP WITH TIME ZONE"
+                    defaultValueComputed="current_timestamp"/>
+            <column name="expires_at"
+                    type="TIMESTAMP WITH TIME ZONE"
+                    defaultValueComputed="current_timestamp + ( 1 || ' year')::interval"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
