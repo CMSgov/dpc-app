@@ -170,33 +170,45 @@
       ],
       "operation": [
         {
-          "name": "Group level data export",
+          "name": "export",
           "definition": {
             "reference": "http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export"
           }
         },
         {
-          "name": "Practitioner validation",
+          "name": "validate",
           "definition": {
             "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-validate"
           }
         },
         {
-          "name": "Batch Practitioner Submission",
+          "name": "submit",
           "definition": {
             "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-submit"
           }
         },
         {
-          "name": "Patient validation",
+          "name": "validate",
           "definition": {
             "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-validate"
           }
         },
         {
-          "name": "Batch Patient Submission",
+          "name": "submit",
           "definition": {
             "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-submit"
+          }
+        },
+        {
+          "name": "add",
+          "definition": {
+            "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-add"
+          }
+        },
+        {
+          "name": "remove",
+          "definition": {
+            "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-remove"
           }
         }
       ]
