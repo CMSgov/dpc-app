@@ -7,7 +7,7 @@
   },
   "identifier": [
     {
-      "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
+      "system": "http://bluebutton.cms.hhs.gov/identifier#bene_id",
       "value": "20000000001809"
     }
   ],

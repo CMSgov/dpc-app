@@ -42,7 +42,7 @@
         "id": "Patient.identifier[x]:system",
         "path": "Patient.identifier.system",
         "min": 1,
-        "fixedCode": "https://bluebutton.cms.gov/resources/variables/bene_id"
+        "fixedCode": "http://bluebutton.cms.hhs.gov/identifier#bene_id"
       },
       {
         "id": "Patient.name",
