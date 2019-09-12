@@ -134,7 +134,7 @@ public class GroupResource extends AbstractGroupResource {
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
-        // We have to do this because Hibernate/Dropwizard get confused when returning a single type (link String)
+        // We have to do this because Hibernate/Dropwizard get confused when returning a single type (like String)
         @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(existingRoster.getId());
 
         final List<Bundle.BundleEntryComponent> patients = patientMBIs
@@ -233,7 +233,6 @@ public class GroupResource extends AbstractGroupResource {
         groupUpdate
                 .getMember()
                 .stream()
-                .filter(Group.GroupMemberComponent::getInactive)
                 .map(Group.GroupMemberComponent::getEntity)
                 .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
 
@@ -319,18 +318,6 @@ public class GroupResource extends AbstractGroupResource {
         return r1.getRoster().getId().equals(r2.getRoster().getId()) && r1.getPatient().getPatientID().equals(r2.getPatient().getPatientID());
     }
 
-    /**
-     * Stateful {@link Predicate} filter that allows us to verify if we've seen a {@link Reference} before, since HAPI doesn't let us do directly object equality.
-     *
-     * @param keyExtractor - {@link Function} for extracting the value to compare
-     * @param <T>          - {@link T} type of comparison value
-     * @return - {@link Predicate} for use with streams.
-     */
-    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Set<Object> seen = ConcurrentHashMap.newKeySet();
-        return t -> seen.add(keyExtractor.apply(t));
-    }
-
     private static Pair<IdType, IdType> parseCompositeID(String queryParam) {
         final String[] split = queryParam.split("\\$", -1);
         if (split.length != 2) {
@@ -347,36 +334,4 @@ public class GroupResource extends AbstractGroupResource {
         return Pair.of(leftID, rightID);
     }
 
-    private static void processGroupMembers(RosterEntity existingRoster, Group groupUpdate) {
-        // Do we really have to do a linear search to figure out who to add/remove?
-        // This should not be here for long
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-
-        // Remove patients first
-        groupUpdate
-                .getMember()
-                .stream()
-                .filter(Group.GroupMemberComponent::getInactive)
-                .map(Group.GroupMemberComponent::getEntity)
-                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
-
-        // Now, add all the new ones
-        groupUpdate
-                .getMember()
-                .stream()
-                .filter(member -> !member.getInactive())
-                .map(Group.GroupMemberComponent::getEntity)
-                .map(ref -> {
-                    final PatientEntity pe = new PatientEntity();
-                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
-                    return pe;
-                })
-                .map(pe -> new AttributionRelationship(existingRoster, pe))
-                .forEach(relationship -> {
-                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
-                    if (found.isEmpty()) {
-                        existingAttributions.add(relationship);
-                    }
-                });
-    }
 }
