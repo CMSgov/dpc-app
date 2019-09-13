@@ -17,12 +17,12 @@
     <div class="ds-l-row">
       <%= form_tag internal_users_path, method: "get" do %>
         <%= text_field_tag :keyword, params[:keyword], placeholder: "first name, last name, or email" %>
-        <%= submit_tag "Search" %>
+        <%= submit_tag "Search", data: { test: 'users-keyword-search-submit' } %>
       <% end %>
     </div>
 
     <div class="ds-l-row">
-      <a href="#" class="ds-u-padding-x--1" data-modal-show="filter-modal" id="filter-modal-trigger">
+      <a href="#" id="filter-modal-trigger" class="ds-u-padding-x--1" data-modal-show="filter-modal" data-test="filter-modal-trigger">
         <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <use xlink:href="/assets/solid.svg#filter"></use>
         </svg>
