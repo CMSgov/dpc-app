@@ -67,7 +67,7 @@ public class JobCompletionModel {
      * The full request of the original request URL
      */
     private String request;
-    private final boolean requiresAccessToken = false;
+    private final boolean requiresAccessToken = true;
     private List<OutputEntry> output;
     private List<OutputEntry> error;
 
