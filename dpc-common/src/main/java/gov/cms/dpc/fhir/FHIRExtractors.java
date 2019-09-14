@@ -1,12 +1,14 @@
 package gov.cms.dpc.fhir;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.WebApplicationException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -143,15 +145,19 @@ public class FHIRExtractors {
     }
 
     public static String getAttributedNPI(Group group) {
-        return group
+        final Group.GroupCharacteristicComponent component = group
                 .getCharacteristic()
                 .stream()
                 .filter(concept -> concept.getCode().getCodingFirstRep().getCode().equals("attributed-to"))
-                .map(Group.GroupCharacteristicComponent::getValue)
-                .flatMap(value -> ((CodeableConcept) value).getCoding().stream())
+                .findFirst()
+                .orElseThrow(() -> new WebApplicationException("Must have 'attributed-to' concept", HttpStatus.UNPROCESSABLE_ENTITY_422));
+
+        return ((CodeableConcept) component.getValue()).getCoding()
+                .stream()
                 .filter(code -> code.getSystem().equals(DPCIdentifierSystem.NPPES.getSystem()))
                 .map(Coding::getCode)
+                .filter(Objects::nonNull)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
+                .orElseThrow(() -> new WebApplicationException("Roster MUST have attributed Provider", HttpStatus.UNPROCESSABLE_ENTITY_422));
     }
 }
