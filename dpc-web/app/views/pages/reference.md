@@ -742,7 +742,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
   "identifier": [
     {
       "system": "http://hl7.org/fhir/sid/us-npi",
-      "value": "3116145044854423862"
+      "code": "3116145044854423862"
     }
   ],
   "address": [
