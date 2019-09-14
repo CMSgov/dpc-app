@@ -1,5 +1,6 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
@@ -33,12 +34,23 @@ public class FHIRExceptionHandler extends LoggingExceptionMapper<Throwable> {
 
         // If it's a FHIR resource, create a custom operation outcome, when it's an error
         if (isFHIRResource()) {
-            final OperationOutcome outcome = new OperationOutcome();
-            outcome.addIssue()
-                    .setSeverity(OperationOutcome.IssueSeverity.FATAL)
-                    .setDetails(new CodeableConcept().setText(exception.getMessage()));
+            final OperationOutcome outcome;
+            final int status;
+            // If the error is a HAPI error, we can pull out the existing operation outcome and send forward that, along with the existing status code
+            if (BaseServerResponseException.class.isAssignableFrom(exception.getClass())) {
+                final BaseServerResponseException fhirException = (BaseServerResponseException) exception;
+                status = fhirException.getStatusCode();
+                outcome = (OperationOutcome) fhirException.getOperationOutcome();
+            } else {
+                status = response.getStatus();
+                outcome = new OperationOutcome();
+                outcome.addIssue()
+                        .setSeverity(OperationOutcome.IssueSeverity.FATAL)
+                        .setDetails(new CodeableConcept().setText(exception.getMessage()));
+            }
 
             return Response.fromResponse(response)
+                    .status(status)
                     .type(FHIRMediaTypes.FHIR_JSON)
                     .entity(outcome)
                     .build();
