@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6e2079b2-1878-4fac-95da-fa78bcb4c00e",
+		"_postman_id": "d553e433-459a-485a-8055-62e7f93df565",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -548,8 +548,8 @@
 						"id": "5497fa12-aefd-44c2-9254-2beb51c52e31",
 						"exec": [
 							"// Status should be 204",
-							"pm.test(\"Status is 204\", function () {",
-							"    pm.response.to.have.status(204);",
+							"pm.test(\"Status is 202\", function () {",
+							"    pm.response.to.have.status(202);",
 							"});",
 							"",
 							"// Url for job response should be in content-location header.",
