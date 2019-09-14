@@ -56,7 +56,7 @@ public class JobResource extends AbstractJobResource {
     @ExceptionMetered
     @ApiOperation(value = "Check export job status",
             notes = "This endpoint is used to query the status of a given Export operation. " +
-                    "When the job is in progress, the API returns a 204 status." +
+                    "When the job is in progress, the API returns a 202 status." +
                     "When completed, an output response is returned, which contains the necessary metadata for retrieving any output files.")
     @ApiResponses({
             @ApiResponse(code = 202, message = "Export job is in progress"),
