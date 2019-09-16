@@ -1,6 +1,6 @@
 package gov.cms.dpc.queue.models;
 
-import gov.cms.dpc.common.converters.StringListConverter;
+import gov.cms.dpc.common.converters.hibernate.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;

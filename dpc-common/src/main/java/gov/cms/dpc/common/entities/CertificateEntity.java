@@ -3,8 +3,8 @@ package gov.cms.dpc.common.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import gov.cms.dpc.common.converters.OffsetDateTimeToStringConverter;
-import gov.cms.dpc.common.converters.StringToOffsetDateTimeConverter;
+import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
+import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
