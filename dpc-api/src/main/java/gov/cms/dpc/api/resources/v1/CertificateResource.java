@@ -6,7 +6,7 @@ import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.jdbi.CertificateDAO;
 import gov.cms.dpc.api.resources.AbstractCertificateResource;
-import gov.cms.dpc.common.entities.CertificateEntity;
+import gov.cms.dpc.api.entities.CertificateEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -92,12 +92,7 @@ public class CertificateResource extends AbstractCertificateResource {
 
         certificateEntity.setManagingOrganization(organizationEntity);
         certificateEntity.setId(UUID.randomUUID());
-        try {
-            certificateEntity.setCertificate(publicKey.getEncoded());
-        } catch (IOException e) {
-            logger.error("Cannot encode public key to bytes.", e);
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
-        }
+        certificateEntity.setCertificate(publicKey);
 
         return this.dao.persistCertificate(certificateEntity);
     }

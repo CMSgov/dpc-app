@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.common.entities.CertificateEntity;
+import gov.cms.dpc.api.entities.CertificateEntity;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;

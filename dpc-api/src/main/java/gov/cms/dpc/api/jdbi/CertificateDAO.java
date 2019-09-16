@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.jdbi;
 
-import gov.cms.dpc.common.entities.CertificateEntity;
-import gov.cms.dpc.common.entities.CertificateEntity_;
+import gov.cms.dpc.api.entities.CertificateEntity;
+import gov.cms.dpc.api.entities.CertificateEntity_;
 import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;

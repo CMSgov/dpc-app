@@ -1,10 +1,13 @@
-package gov.cms.dpc.common.entities;
+package gov.cms.dpc.api.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import gov.cms.dpc.api.converters.CertificateByesConverter;
+import gov.cms.dpc.api.converters.CertificateSerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
-import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
+import gov.cms.dpc.common.entities.OrganizationEntity;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -28,12 +31,14 @@ public class CertificateEntity implements Serializable {
     private OrganizationEntity managingOrganization;
 
     @NotNull
-    private byte[] certificate;
+    @Convert(converter = CertificateByesConverter.class)
+    @JsonSerialize(converter = CertificateSerializer.class)
+    private SubjectPublicKeyInfo certificate;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
     @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
-    @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
+    @JsonDeserialize(converter = OffsetDateTimeToStringConverter.class)
     private OffsetDateTime createdAt;
 
     public CertificateEntity() {
@@ -56,11 +61,11 @@ public class CertificateEntity implements Serializable {
         this.managingOrganization = managingOrganization;
     }
 
-    public byte[] getCertificate() {
+    public SubjectPublicKeyInfo getCertificate() {
         return certificate;
     }
 
-    public void setCertificate(byte[] certificate) {
+    public void setCertificate(SubjectPublicKeyInfo certificate) {
         this.certificate = certificate;
     }
 

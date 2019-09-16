@@ -91,7 +91,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Provides
     @AdditionalPaths
     public List<String> provideAdditionalPaths() {
-        return List.of("gov.cms.dpc.queue.models");
+        return List.of("gov.cms.dpc.queue.models", "gov.cms.dpc.api.entities");
     }
 
     @Provides
