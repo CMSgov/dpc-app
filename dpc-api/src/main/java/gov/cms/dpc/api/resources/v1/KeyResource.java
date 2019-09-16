@@ -50,6 +50,15 @@ public class KeyResource extends AbstractKeyResource {
     @GET
     @Timed
     @ExceptionMetered
+    @UnitOfWork
+    @Override
+    public List<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
+        return this.dao.fetchPublicKeys(organizationPrincipal.getID());
+    }
+
+    @GET
+    @Timed
+    @ExceptionMetered
     @Path("/{keyID}")
     @UnitOfWork
     @Override

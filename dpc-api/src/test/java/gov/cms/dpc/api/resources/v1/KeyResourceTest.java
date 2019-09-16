@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -21,6 +22,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,11 +62,18 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
                 assertEquals(key.replaceAll("\\n", "").replaceAll("\\r", ""),
                         fetched.publicKey.replaceAll("\\n", "").replaceAll("\\r", ""), "Fetch should be equal");
             }
+
+            final HttpGet keyGet = new HttpGet(String.format("%s/Key", getBaseURL()));
+            keyGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            keyGet.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+
+            try (CloseableHttpResponse response = client.execute(keyGet)) {
+                final List<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<KeyView>>() {
+                });
+                assertEquals(1, fetched.size(), "Should have a single key");
+            }
         }
     }
-
-    @Test
-
 
     private String generatePublicKey() throws NoSuchAlgorithmException {
         final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");

@@ -24,16 +24,25 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         return persist(entity);
     }
 
+    public List<PublicKeyEntity> fetchPublicKeys(UUID organizationID) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
+        final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
+
+        query.where(builder.equal(root.get(PublicKeyEntity_.MANAGING_ORGANIZATION).get(OrganizationEntity_.ID), organizationID));
+
+        return list(query);
+    }
+
     public List<PublicKeyEntity> fetchPublicKey(UUID certificateID, UUID organizationID) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
         final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-//        query.where(builder.equal(root.get(CertificateEntity_.id.organization).get(OrganizationEntity_.ID), organizationID));
         query.where(builder.and(
                 builder.equal(root.get(PublicKeyEntity_.id), certificateID),
                 builder.equal(root.get(PublicKeyEntity_.MANAGING_ORGANIZATION).get(OrganizationEntity_.ID), organizationID)));
-
+        
         return list(query);
     }
 }

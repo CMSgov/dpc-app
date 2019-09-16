@@ -6,10 +6,14 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/Key")
 public abstract class AbstractKeyResource {
+
+    @GET
+    public abstract List<PublicKeyEntity> getPublicKeys(OrganizationPrincipal organizationPrincipal);
 
     @GET
     @Path("/{keyID}")
