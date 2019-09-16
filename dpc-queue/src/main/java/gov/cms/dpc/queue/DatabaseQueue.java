@@ -4,7 +4,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.utils.MetricMaker;
-import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
@@ -36,10 +35,10 @@ public class DatabaseQueue extends JobQueueCommon {
     // Statics
     private static final Logger logger = LoggerFactory.getLogger(DatabaseQueue.class);
     private static final String DB_UNHEALTHY = "Database cluster is not responding";
+    private static final String JOB_UNHEALTHY = "Aggregator is not making progress on the queue";
 
     // Object variables
     private final SessionFactory factory;
-    private final String healthQuery;
 
     // Metrics
     private final Timer waitTimer; // The wait time for a job to start
@@ -52,13 +51,11 @@ public class DatabaseQueue extends JobQueueCommon {
     public DatabaseQueue(
             DPCManagedSessionFactory factory,
             @QueueBatchSize int batchSize,
-            @HealthCheckQuery String healthQuery,
             MetricRegistry metricRegistry
     ) {
         super(batchSize);
 
         this.factory = factory.getSessionFactory();
-        this.healthQuery = healthQuery;
 
         // Metrics
         final var metricBuilder = new MetricMaker(metricRegistry, DatabaseQueue.class);
@@ -142,7 +139,7 @@ public class DatabaseQueue extends JobQueueCommon {
             final Transaction tx = session.beginTransaction();
             try {
                 // Find stuck batches
-                List<String> stuckBatchIDs = session.createSQLQuery("SELECT batch_id FROM job_queue_batch WHERE status = 1 AND update_time > current_time - interval '5 minutes' FOR UPDATE SKIP LOCKED")
+                List<String> stuckBatchIDs = session.createSQLQuery("SELECT batch_id FROM job_queue_batch WHERE status = 1 AND update_time > current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED")
                         .getResultList();
 
                 // Unstick stuck batches
@@ -277,11 +274,17 @@ public class DatabaseQueue extends JobQueueCommon {
     }
 
     @Override
-    public void assertHealthy() {
+    public void assertHealthy(UUID aggregatorID) {
         try (final Session session = this.factory.openSession()) {
             try {
-                @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery(healthQuery);
-                healthCheck.getFirstResult();
+                @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery("select count(*) from job_queue_batch where aggregatorID = '" + aggregatorID.toString() + "' and job_status == 1 and update_time < current_timestamp - interval '3 minutes'");
+                int stuckBatches = healthCheck.getFirstResult();
+                if (stuckBatches > 0) {
+                    throw new JobQueueUnhealthy(JOB_UNHEALTHY);
+                }
+            } catch (JobQueueUnhealthy e) {
+                // Rethrow
+                throw e;
             } catch (Exception e) {
                 throw new JobQueueUnhealthy(DB_UNHEALTHY, e);
             }
