@@ -16,12 +16,14 @@ RSpec.feature 'searching and filtering users' do
 
     fill_in 'user_first_name', with: 'Crabby'
     fill_in 'user_last_name', with: 'Graham'
+    fill_in 'user_email', with: 'newemail@example.com'
 
     find('[data-test="user-form-submit"]').click
 
     # No longer on edit page
     expect(page).not_to have_css('[data-test="user-form-submit"]')
     expect(page.body).to have_content('Crabby Graham')
+    expect(page.body).to have_content('newemail@example.com')
   end
 
   scenario 'trying to update a user with invalid attributes ' do

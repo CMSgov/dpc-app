@@ -12,6 +12,11 @@
         <%= f.text_field :last_name, class: "ds-c-field" %>
       </div>
 
+      <div class="field">
+        <%= f.label :email, class: "ds-c-label" %>
+        <%= f.text_field :email, class: "ds-c-field" %>
+      </div>
+
       <div class="actions ds-u-margin-top--3">
         <%= f.submit "Save", class: "ds-c-button ds-c-button--primary", data: { test: "user-form-submit" } %>
         <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
