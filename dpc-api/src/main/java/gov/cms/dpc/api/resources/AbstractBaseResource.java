@@ -14,6 +14,9 @@ public abstract class AbstractBaseResource {
 //        Not used
     }
 
+    @Path("/Certificate")
+    public abstract AbstractCertificateResource certificateOperations();
+
     @Path("/Data")
     public abstract AbstractDataResource dataOperations();
 

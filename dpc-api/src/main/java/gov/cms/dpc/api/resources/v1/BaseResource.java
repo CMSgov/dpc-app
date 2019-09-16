@@ -16,6 +16,7 @@ import javax.ws.rs.Path;
 @Api(value = "Metadata")
 public class BaseResource extends AbstractBaseResource {
 
+    private final AbstractCertificateResource cr;
     private final AbstractGroupResource gr;
     private final AbstractJobResource jr;
     private final AbstractDataResource dr;
@@ -26,7 +27,8 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractDefinitionResource sdr;
 
     @Inject
-    public BaseResource(GroupResource gr,
+    public BaseResource(CertificateResource cr,
+                        GroupResource gr,
                         JobResource jr,
                         DataResource dr,
                         EndpointResource er,
@@ -34,6 +36,7 @@ public class BaseResource extends AbstractBaseResource {
                         PatientResource par,
                         PractitionerResource pr,
                         DefinitionResource sdr) {
+        this.cr = cr;
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
@@ -60,6 +63,11 @@ public class BaseResource extends AbstractBaseResource {
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     public CapabilityStatement metadata() {
         return Capabilities.getCapabilities();
+    }
+
+    @Override
+    public AbstractCertificateResource certificateOperations() {
+        return this.cr;
     }
 
     @Override

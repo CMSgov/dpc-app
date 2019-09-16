@@ -80,6 +80,16 @@
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.63</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.63</version>
+        </dependency>
         <!--        Validations use the R4 validator, even for STU3 resources-->
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>

@@ -8,6 +8,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.api.jdbi.CertificateDAO;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -40,6 +41,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(TestResource.class);
         // V1 Resources
         binder.bind(BaseResource.class);
+        binder.bind(CertificateResource.class);
         binder.bind(DataResource.class);
         binder.bind(DefinitionResource.class);
         binder.bind(EndpointResource.class);
@@ -48,6 +50,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(OrganizationResource.class);
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
+
+        // DAO
+        binder.bind(CertificateDAO.class);
 
         // Healthchecks
         // TODO: Fix with DPC-538
