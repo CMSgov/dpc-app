@@ -8,10 +8,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Binds a health check query which is used to ensure that the DB connection is working correctly.
+ * Binds an aggregator ID which is used to track aggregator differentiation.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD})
 @BindingAnnotation
-public @interface HealthCheckQuery {
+public @interface AggregatorID {
 }

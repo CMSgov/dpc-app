@@ -96,7 +96,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
     }
 
     @Override
-    public void assertHealthy() {
+    public void assertHealthy(UUID aggregatorID) {
         // Memory is always healthy
     }
 }

@@ -42,7 +42,7 @@ class QueueTest {
                         // Create the session factory
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
-                        return new DatabaseQueue(new DPCManagedSessionFactory(sessionFactory), 100, "SELECT 1", new MetricRegistry());
+                        return new DatabaseQueue(new DPCManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
                     } else {
                         throw new IllegalArgumentException("I'm not that kind of queue");
                     }

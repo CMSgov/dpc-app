@@ -4,7 +4,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.common.utils.MetricMaker;
-import gov.cms.dpc.queue.annotations.HealthCheckQuery;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -56,7 +55,7 @@ public class DistributedQueue implements JobQueue {
     @Inject
     DistributedQueue(RedissonClient client,
                      DPCManagedSessionFactory factory,
-                     @HealthCheckQuery String healthQuery,
+                     String healthQuery,
                      MetricRegistry metricRegistry) {
         this.client = client;
         this.queue = client.getQueue("jobqueue");

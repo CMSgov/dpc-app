@@ -31,6 +31,7 @@ import static org.mockito.Mockito.doReturn;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 class AggregationEngineTest {
+    private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_PROVIDER_ID = "1";
     private BlueButtonClient bbclient;
     private JobQueueInterface queue;
@@ -54,7 +55,7 @@ class AggregationEngineTest {
         queue = new MemoryBatchQueue(10);
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath);
-        engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();

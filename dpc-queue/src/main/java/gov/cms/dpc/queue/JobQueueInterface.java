@@ -98,8 +98,10 @@ public interface JobQueueInterface {
      * Determines if the underlying queue is healthy or not.
      * This is accomplished by
      * throws if not healthy
+     *
+     * @param aggregatorID - the current aggregator
      */
-    void assertHealthy();
+    void assertHealthy(UUID aggregatorID);
 }
 
 

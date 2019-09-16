@@ -6,6 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.JobQueueInterface;
+import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
@@ -39,8 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
 
-    private final UUID aggregatorID = UUID.randomUUID();
-
+    private final UUID aggregatorID;
     private final JobQueueInterface queue;
     private final BlueButtonClient bbclient;
     private final OperationsConfig operationsConfig;
@@ -52,6 +52,7 @@ public class AggregationEngine implements Runnable {
     /**
      * Create an engine.
      *
+     * @param aggregatorID - The ID of the current working aggregator
      * @param bbclient    - {@link BlueButtonClient } to use
      * @param queue       - {@link JobQueueInterface} that will direct the work done
      * @param fhirContext - {@link FhirContext} for DSTU3 resources
@@ -59,7 +60,8 @@ public class AggregationEngine implements Runnable {
      * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
      */
     @Inject
-    public AggregationEngine(BlueButtonClient bbclient, JobQueueInterface queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
+    public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, JobQueueInterface queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
+        this.aggregatorID = aggregatorID;
         this.queue = queue;
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;

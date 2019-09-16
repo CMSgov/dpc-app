@@ -4,13 +4,15 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
-import gov.cms.dpc.queue.annotations.HealthCheckQuery;
+import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import io.dropwizard.Configuration;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+
+import java.util.UUID;
 
 public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends DropwizardAwareModule<T> {
 
@@ -49,15 +51,14 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
     }
 
     @Provides
-    @HealthCheckQuery
-    String provideHealthQuery() {
-        // TODO: Eventually, this should get pulled out into the config file
-        return "SELECT 1 from job_queue;";
-    }
-
-    @Provides
     @QueueBatchSize
     int provideBatchSize() {
         return batchSize;
+    }
+
+    @Provides
+    @AggregatorID
+    UUID provideAggregatorID() {
+        return UUID.randomUUID();
     }
 }

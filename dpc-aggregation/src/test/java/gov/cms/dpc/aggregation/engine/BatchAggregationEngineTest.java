@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 
 class BatchAggregationEngineTest {
+    private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_PROVIDER_ID = "1";
     private JobQueueInterface queue;
     private AggregationEngine engine;
@@ -54,7 +55,7 @@ class BatchAggregationEngineTest {
     void setupEach() {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        engine = new AggregationEngine(bbclient, queue, fhirContext, metricRegistry, operationsConfig);
+        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationsConfig);
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);
