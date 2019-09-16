@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.feature 'searching and filtering users' do
+RSpec.feature 'updating users' do
   let!(:internal_user) { create :internal_user }
 
   before(:each) do
@@ -40,5 +40,33 @@ RSpec.feature 'searching and filtering users' do
 
     # Still on edit page
     expect(page).to have_css('[data-test="user-form-submit"]')
+  end
+
+  scenario 'adding tags to a user' do
+    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
+
+    create(:tag, name: 'Red')
+    create(:tag, name: 'Yellow')
+
+    visit internal_user_path(crabby)
+
+    within('[data-test="user-tags"]') do
+      expect(page).to have_content('No tags')
+    end
+
+    select 'Red', from: 'tagging_tag_id'
+    find('[data-test="add-tag-submit"]').click
+
+    within('[data-test="user-tags"]') do
+      expect(page).to have_content('Red')
+    end
+
+    select 'Yellow', from: 'tagging_tag_id'
+    find('[data-test="add-tag-submit"]').click
+
+    within('[data-test="user-tags"]') do
+      expect(page).to have_content('Red')
+      expect(page).to have_content('Yellow')
+    end
   end
 end
