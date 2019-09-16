@@ -8,9 +8,12 @@ import org.bouncycastle.util.io.pem.PemWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 
-public class CertificateSerializer extends StdConverter<SubjectPublicKeyInfo, String> {
+/**
+ * {@link StdConverter} that serializes the given {@link SubjectPublicKeyInfo} as a PEM encoded {@link String}
+ */
+public class PublicKeySerializer extends StdConverter<SubjectPublicKeyInfo, String> {
 
-    CertificateSerializer() {
+    PublicKeySerializer() {
         // Not used
     }
 

@@ -16,7 +16,7 @@ import javax.ws.rs.Path;
 @Api(value = "Metadata")
 public class BaseResource extends AbstractBaseResource {
 
-    private final AbstractCertificateResource cr;
+    private final AbstractKeyResource kr;
     private final AbstractGroupResource gr;
     private final AbstractJobResource jr;
     private final AbstractDataResource dr;
@@ -27,7 +27,7 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractDefinitionResource sdr;
 
     @Inject
-    public BaseResource(CertificateResource cr,
+    public BaseResource(KeyResource kr,
                         GroupResource gr,
                         JobResource jr,
                         DataResource dr,
@@ -36,7 +36,7 @@ public class BaseResource extends AbstractBaseResource {
                         PatientResource par,
                         PractitionerResource pr,
                         DefinitionResource sdr) {
-        this.cr = cr;
+        this.kr = kr;
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
@@ -66,8 +66,8 @@ public class BaseResource extends AbstractBaseResource {
     }
 
     @Override
-    public AbstractCertificateResource certificateOperations() {
-        return this.cr;
+    public AbstractKeyResource keyOperations() {
+        return this.kr;
     }
 
     @Override

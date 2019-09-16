@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * {@link AttributeConverter} which stores a {@link SubjectPublicKeyInfo} as a {@link Byte} array.
  */
-public class CertificateByesConverter implements AttributeConverter<SubjectPublicKeyInfo, byte[]> {
+public class PublicKeyBytesConverter implements AttributeConverter<SubjectPublicKeyInfo, byte[]> {
     @Override
     public byte[] convertToDatabaseColumn(SubjectPublicKeyInfo attribute) {
         try {

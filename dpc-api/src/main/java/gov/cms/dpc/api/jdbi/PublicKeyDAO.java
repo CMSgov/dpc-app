@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.jdbi;
 
-import gov.cms.dpc.api.entities.CertificateEntity;
-import gov.cms.dpc.api.entities.CertificateEntity_;
+import gov.cms.dpc.api.entities.PublicKeyEntity;
+import gov.cms.dpc.api.entities.PublicKeyEntity_;
 import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
@@ -13,26 +13,26 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.UUID;
 
-public class CertificateDAO extends AbstractDAO<CertificateEntity> {
+public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
 
     @Inject
-    CertificateDAO(DPCManagedSessionFactory factory) {
+    PublicKeyDAO(DPCManagedSessionFactory factory) {
         super(factory.getSessionFactory());
     }
 
-    public CertificateEntity persistCertificate(CertificateEntity entity) {
+    public PublicKeyEntity persistPublicKey(PublicKeyEntity entity) {
         return persist(entity);
     }
 
-    public List<CertificateEntity> fetchCertificate(UUID certificateID, UUID organizationID) {
+    public List<PublicKeyEntity> fetchPublicKey(UUID certificateID, UUID organizationID) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<CertificateEntity> query = builder.createQuery(CertificateEntity.class);
-        final Root<CertificateEntity> root = query.from(CertificateEntity.class);
+        final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
+        final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
 //        query.where(builder.equal(root.get(CertificateEntity_.id.organization).get(OrganizationEntity_.ID), organizationID));
         query.where(builder.and(
-                builder.equal(root.get(CertificateEntity_.id), certificateID),
-                builder.equal(root.get(CertificateEntity_.MANAGING_ORGANIZATION).get(OrganizationEntity_.ID), organizationID)));
+                builder.equal(root.get(PublicKeyEntity_.id), certificateID),
+                builder.equal(root.get(PublicKeyEntity_.MANAGING_ORGANIZATION).get(OrganizationEntity_.ID), organizationID)));
 
         return list(query);
     }

@@ -4,9 +4,9 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.jdbi.CertificateDAO;
-import gov.cms.dpc.api.resources.AbstractCertificateResource;
-import gov.cms.dpc.api.entities.CertificateEntity;
+import gov.cms.dpc.api.entities.PublicKeyEntity;
+import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.resources.AbstractKeyResource;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -31,17 +31,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Certificate", tags = {"Auth"})
-public class CertificateResource extends AbstractCertificateResource {
+@Api(value = "Key", tags = {"Auth"})
+public class KeyResource extends AbstractKeyResource {
 
-    private static final Logger logger = LoggerFactory.getLogger(CertificateResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);
 
     private final Base64.Decoder decoder;
     private final Base64.Encoder encoder;
-    private final CertificateDAO dao;
+    private final PublicKeyDAO dao;
 
     @Inject
-    CertificateResource(CertificateDAO dao) {
+    KeyResource(PublicKeyDAO dao) {
         this.dao = dao;
         this.decoder = Base64.getUrlDecoder();
         this.encoder = Base64.getUrlEncoder();
@@ -50,11 +50,11 @@ public class CertificateResource extends AbstractCertificateResource {
     @GET
     @Timed
     @ExceptionMetered
-    @Path("/{certificateID}")
+    @Path("/{keyID}")
     @UnitOfWork
     @Override
-    public CertificateEntity getCertificate(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @PathParam(value = "certificateID") UUID certificateID) {
-        final List<CertificateEntity> certificates = this.dao.fetchCertificate(certificateID, organizationPrincipal.getID());
+    public PublicKeyEntity getPublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @PathParam(value = "keyID") UUID keyID) {
+        final List<PublicKeyEntity> certificates = this.dao.fetchPublicKey(keyID, organizationPrincipal.getID());
         if (certificates.isEmpty()) {
             throw new WebApplicationException("Cannot find certificate", Response.Status.NOT_FOUND);
         }
@@ -68,9 +68,9 @@ public class CertificateResource extends AbstractCertificateResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @UnitOfWork
     @Override
-    public CertificateEntity submitCertificate(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, String certificate) {
+    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, String key) {
         final SubjectPublicKeyInfo publicKey;
-        final ByteArrayInputStream bas = new ByteArrayInputStream(certificate.getBytes(StandardCharsets.ISO_8859_1));
+        final ByteArrayInputStream bas = new ByteArrayInputStream(key.getBytes(StandardCharsets.ISO_8859_1));
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bas))) {
             try (PEMParser pemParser = new PEMParser(bufferedReader)) {
                 final Object object = pemParser.readObject();
@@ -86,14 +86,14 @@ public class CertificateResource extends AbstractCertificateResource {
         }
 
         // Validate Certificate
-        final CertificateEntity certificateEntity = new CertificateEntity();
+        final PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         final OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(organizationPrincipal.getID());
 
-        certificateEntity.setManagingOrganization(organizationEntity);
-        certificateEntity.setId(UUID.randomUUID());
-        certificateEntity.setCertificate(publicKey);
+        publicKeyEntity.setManagingOrganization(organizationEntity);
+        publicKeyEntity.setId(UUID.randomUUID());
+        publicKeyEntity.setPublicKey(publicKey);
 
-        return this.dao.persistCertificate(certificateEntity);
+        return this.dao.persistPublicKey(publicKeyEntity);
     }
 }

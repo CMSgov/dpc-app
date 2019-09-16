@@ -3,8 +3,8 @@ package gov.cms.dpc.api.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import gov.cms.dpc.api.converters.CertificateByesConverter;
-import gov.cms.dpc.api.converters.CertificateSerializer;
+import gov.cms.dpc.api.converters.PublicKeyBytesConverter;
+import gov.cms.dpc.api.converters.PublicKeySerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -16,8 +16,8 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@Entity(name = "auth.organization_certificates")
-public class CertificateEntity implements Serializable {
+@Entity(name = "auth.organization_keys")
+public class PublicKeyEntity implements Serializable {
     public static final long serialVersionUID = 42L;
 
     @Id
@@ -31,9 +31,10 @@ public class CertificateEntity implements Serializable {
     private OrganizationEntity managingOrganization;
 
     @NotNull
-    @Convert(converter = CertificateByesConverter.class)
-    @JsonSerialize(converter = CertificateSerializer.class)
-    private SubjectPublicKeyInfo certificate;
+    @Convert(converter = PublicKeyBytesConverter.class)
+    @JsonSerialize(converter = PublicKeySerializer.class)
+    @Column(name = "public_key")
+    private SubjectPublicKeyInfo publicKey;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
@@ -41,7 +42,7 @@ public class CertificateEntity implements Serializable {
     @JsonDeserialize(converter = OffsetDateTimeToStringConverter.class)
     private OffsetDateTime createdAt;
 
-    public CertificateEntity() {
+    public PublicKeyEntity() {
         // Hibernate required
     }
 
@@ -61,12 +62,12 @@ public class CertificateEntity implements Serializable {
         this.managingOrganization = managingOrganization;
     }
 
-    public SubjectPublicKeyInfo getCertificate() {
-        return certificate;
+    public SubjectPublicKeyInfo getPublicKey() {
+        return publicKey;
     }
 
-    public void setCertificate(SubjectPublicKeyInfo certificate) {
-        this.certificate = certificate;
+    public void setPublicKey(SubjectPublicKeyInfo publicKey) {
+        this.publicKey = publicKey;
     }
 
     public OffsetDateTime getCreatedAt() {

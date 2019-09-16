@@ -26,42 +26,45 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class CertificateResourceTest extends AbstractSecureApplicationTest {
+class KeyResourceTest extends AbstractSecureApplicationTest {
 
     private final ObjectMapper mapper;
 
-    private CertificateResourceTest() {
+    private KeyResourceTest() {
         this.mapper = new ObjectMapper();
     }
 
     @Test
-    void roundTrip() throws NoSuchAlgorithmException, IOException {
+    void testRoundTrip() throws NoSuchAlgorithmException, IOException {
         final String key = generatePublicKey();
 
-        CertificateView entity = null;
+        KeyView entity = null;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost post = new HttpPost(String.format("%s/Certificate", getBaseURL()));
+            final HttpPost post = new HttpPost(String.format("%s/Key", getBaseURL()));
             post.setEntity(new StringEntity(key));
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
             post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token should be valid");
-                entity = this.mapper.readValue(response.getEntity().getContent(), CertificateView.class);
+                entity = this.mapper.readValue(response.getEntity().getContent(), KeyView.class);
             }
             assertNotNull(entity, "Should have retrieved entity");
-            final HttpGet get = new HttpGet(String.format("%s/Certificate/%s", getBaseURL(), entity.id));
+            final HttpGet get = new HttpGet(String.format("%s/Key/%s", getBaseURL(), entity.id));
             get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
             get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(get)) {
-                final CertificateView fetched = this.mapper.readValue(response.getEntity().getContent(), CertificateView.class);
+                final KeyView fetched = this.mapper.readValue(response.getEntity().getContent(), KeyView.class);
                 // Verify the keys are equal, aside from different new line characters
                 assertEquals(key.replaceAll("\\n", "").replaceAll("\\r", ""),
-                        fetched.certificate.replaceAll("\\n", "").replaceAll("\\r", ""), "Fetch should be equal");
+                        fetched.publicKey.replaceAll("\\n", "").replaceAll("\\r", ""), "Fetch should be equal");
             }
         }
     }
+
+    @Test
+
 
     private String generatePublicKey() throws NoSuchAlgorithmException {
         final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
@@ -72,14 +75,14 @@ class CertificateResourceTest extends AbstractSecureApplicationTest {
         return String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
     }
 
-    static class CertificateView {
+    static class KeyView {
 
         public UUID id;
-        public String certificate;
+        public String publicKey;
         @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
         public OffsetDateTime createdAt;
 
-        CertificateView() {
+        KeyView() {
             // Not used
         }
     }
