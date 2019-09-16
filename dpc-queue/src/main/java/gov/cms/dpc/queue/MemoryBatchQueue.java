@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,14 +74,16 @@ public class MemoryBatchQueue extends JobQueueCommon {
 
     @Override
     public synchronized void completeBatch(JobQueueBatch job, UUID aggregatorID) {
-        job.setCompletedStatus(aggregatorID);
-        job.setUpdateTime();
+        if ( job != null ) {
+            job.setCompletedStatus(aggregatorID);
+        } else {
+            throw new JobQueueFailure("Empty job passed");
+        }
     }
 
     @Override
     public synchronized void failBatch(JobQueueBatch job, UUID aggregatorID) {
         job.setFailedStatus(aggregatorID);
-        job.setUpdateTime();
     }
 
     @Override

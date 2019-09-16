@@ -135,7 +135,7 @@ public class JobQueueBatch implements Serializable {
      * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name="job_id")
+    @JoinColumn(name="batch_id")
     private List<JobQueueBatchFile> jobQueueBatchFiles;
 
     public JobQueueBatch() {
@@ -270,6 +270,7 @@ public class JobQueueBatch implements Serializable {
         status = JobStatus.RUNNING;
         this.aggregatorID = aggregatorID;
         startTime = OffsetDateTime.now(ZoneOffset.UTC);
+        this.setUpdateTime();
     }
 
     /**
@@ -281,6 +282,7 @@ public class JobQueueBatch implements Serializable {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot fetch next batch. JobStatus: %s", this.status));
         }
         this.verifyAggregatorID(aggregatorID);
+        this.setUpdateTime();
         Integer index = this.getPatientIndex().orElse(-1) + 1;
         if ( index < this.patients.size() ) {
             // Patient index should be set to the last successful fetched result
@@ -300,6 +302,8 @@ public class JobQueueBatch implements Serializable {
         this.verifyAggregatorID(aggregatorID);
         this.status = JobStatus.QUEUED;
         this.aggregatorID = null;
+
+        this.setUpdateTime();
     }
 
     /**
@@ -319,6 +323,8 @@ public class JobQueueBatch implements Serializable {
         this.aggregatorID = null;
         this.patientIndex = null;
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);
+
+        this.setUpdateTime();
     }
 
     /**
@@ -333,19 +339,20 @@ public class JobQueueBatch implements Serializable {
         this.aggregatorID = null;
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.getJobQueueBatchFiles().clear();
+
+        this.setUpdateTime();
     }
 
     /**
      * Restarts the batch so it can be freshly picked up by a new aggregator.
      */
     public void restartBatch() {
-        if (!Arrays.asList(JobStatus.COMPLETED, JobStatus.FAILED).contains(this.status)) {
-            throw new JobQueueFailure(jobID, batchID, String.format("Cannot restart batch. JobStatus: %s", this.status));
-        }
         this.status = JobStatus.QUEUED;
         this.patientIndex = null;
         this.startTime = null;
         this.completeTime = null;
+
+        this.setUpdateTime();
     }
 
     public void setPriority(Integer priority) {
@@ -364,7 +371,6 @@ public class JobQueueBatch implements Serializable {
     /**
      * Keep the update time in sync whenever a change occurs after the start time
      */
-    @PreUpdate
     public void setUpdateTime() {
         if ( startTime != null ) {
             updateTime = OffsetDateTime.now(ZoneOffset.UTC);

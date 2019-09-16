@@ -2,7 +2,6 @@ package gov.cms.dpc.queue.models;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Immutable;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.Column;
@@ -17,7 +16,6 @@ import java.util.UUID;
  * A JobQueueBatchFile represents the output of a job. There is a one-to-one relationship with export files.
  * The object is immutable.
  */
-@Immutable
 @Entity(name = "job_queue_batch_file")
 public class JobQueueBatchFile implements Serializable {
     public static final long serialVersionUID = 42L;

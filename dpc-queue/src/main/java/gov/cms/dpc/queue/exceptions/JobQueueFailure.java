@@ -6,19 +6,8 @@ public class JobQueueFailure extends RuntimeException {
 
     public static final long serialVersionUID = 42L;
 
-    @Deprecated
-    public JobQueueFailure(UUID jobID, String message) {
-        super(String.format("Operation on Job(%s) failed for reason: %s", jobID, message));
-    }
-
-    @Deprecated
-    public JobQueueFailure(UUID jobId, Throwable t) {
-        super(String.format("Operation on Job(%s) failed.", jobId), t);
-    }
-
-    @Deprecated
-    public JobQueueFailure(UUID jobId, String message, Throwable throwable) {
-        super(String.format("Operation on Job(%s) failed for reason: %s", jobId, message), throwable);
+    public JobQueueFailure(String message) {
+        super(message);
     }
 
     public JobQueueFailure(UUID jobID, UUID batchID, String message) {

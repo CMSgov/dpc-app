@@ -241,18 +241,6 @@ public class JobQueueBatchTest {
     }
 
     @Test
-    void testRestartBatch_InvalidStatus() {
-        final var job = createJobQueueBatch();
-
-        try {
-            job.restartBatch();
-            Assertions.fail();
-        } catch (JobQueueFailure e) {
-            assertTrue(e.getMessage().contains("Cannot restart batch"));
-        }
-    }
-
-    @Test
     void testVerifyAggregatorID_NoneSet() throws Exception {
         final var job = createJobQueueBatch();
         job.verifyAggregatorID(aggregatorID);
