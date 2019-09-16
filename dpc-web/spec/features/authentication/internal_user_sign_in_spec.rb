@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require './spec/shared_examples/authenticable_page'
-
 RSpec.feature 'internal user signs in' do
   around do |example|
     OmniAuth.config.test_mode = true
