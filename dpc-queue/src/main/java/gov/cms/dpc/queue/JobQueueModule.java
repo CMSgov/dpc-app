@@ -8,9 +8,6 @@ import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import io.dropwizard.Configuration;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 
 import java.util.UUID;
 
@@ -18,7 +15,6 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
 
     private final boolean inMemory;
     private final int batchSize;
-    private Config config;
 
     public JobQueueModule() {
         this.inMemory = false;
@@ -27,8 +23,6 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
 
     @Override
     public void configure(Binder binder) {
-        this.config = getConfiguration().getQueueConfig();
-
         // Manually bind
         // to the Memory Queue, as a Singleton
         if (this.inMemory) {
@@ -43,11 +37,6 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
 
         // Bind the healthcheck
         binder.bind(JobQueueHealthCheck.class);
-    }
-
-    @Provides
-    RedissonClient provideClient() {
-        return Redisson.create(config);
     }
 
     @Provides

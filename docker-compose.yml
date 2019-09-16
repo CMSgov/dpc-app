@@ -2,11 +2,6 @@ version: '3'
 
 services:
 
-  redis:
-    image: redis
-    ports:
-      - "6379:6379"
-
   db:
     image: postgres
     environment:
@@ -24,7 +19,6 @@ services:
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
       - db
-      - redis
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -60,9 +54,8 @@ services:
   start_core_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:
-      - redis
       - db
-    command: redis:6379 db:5432
+    command: db:5432
 
   start_api_dependencies:
     image: dadarek/wait-for-dependencies
