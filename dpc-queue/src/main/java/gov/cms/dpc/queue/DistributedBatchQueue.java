@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Implements a distributed {@link gov.cms.dpc.queue.models.JobQueueBatch} using a Postgres database
@@ -139,7 +140,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final Transaction tx = session.beginTransaction();
             try {
                 // Find stuck batches
-                List<String> stuckBatchIDs = session.createSQLQuery("SELECT batch_id FROM job_queue_batch WHERE status = 1 AND update_time > current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED")
+                List<String> stuckBatchIDs = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 1 AND update_time < current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED")
                         .getResultList();
 
                 // Unstick stuck batches
@@ -149,25 +150,24 @@ public class DistributedBatchQueue extends JobQueueCommon {
                     final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
                     query.select(root);
-                    query.where(root.get("batchID").in(stuckBatchIDs));
+                    query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).collect(Collectors.toList())));
                     final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
 
                     for ( JobQueueBatch stuckJob : stuckJobList ) {
                         stuckJob.restartBatch();
-                        session.persist(stuckJob);
+                        session.merge(stuckJob);
                     }
                 }
 
                 // Claim a new batch
-                Optional<String> batchID = session.createSQLQuery("SELECT batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
+                Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
                         .uniqueResultOptional()
                         .map(Object::toString);
 
                 if ( batchID.isPresent() ) {
-                    JobQueueBatch batch = session.get(JobQueueBatch.class, batchID.get());
+                    JobQueueBatch batch = session.get(JobQueueBatch.class, UUID.fromString(batchID.get()));
                     batch.setRunningStatus(aggregatorID);
-                    session.persist(batch);
-                    session.refresh(batch);
+                    session.merge(batch);
 
                     final var delay = Duration.between(batch.getStartTime().orElseThrow(), batch.getUpdateTime().orElseThrow());
                     waitTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
@@ -188,7 +188,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final Transaction tx = session.beginTransaction();
             try {
                 job.setPausedStatus(aggregatorID);
-                session.persist(job);
+                session.merge(job);
             } finally {
                 tx.commit();
             }
@@ -203,8 +203,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 final Optional<OffsetDateTime> lastUpdate = job.getUpdateTime();
 
                 // We just need to persist the job, as any results will be attached to the job and cascade
-                session.persist(job);
-                session.refresh(job);
+                session.merge(job);
 
                 final var delay = Duration.between(lastUpdate.orElseThrow(), job.getUpdateTime().orElseThrow());
                 partialTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
@@ -216,12 +215,15 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
     @Override
     public void completeBatch(JobQueueBatch job, UUID aggregatorID) {
+        if ( job == null ) {
+            throw new JobQueueFailure("Empty job passed");
+        }
+
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
                 job.setCompletedStatus(aggregatorID);
-                session.persist(job);
-                session.refresh(job);
+                session.merge(job);
 
                 final var delay = Duration.between(job.getStartTime().orElseThrow(), job.getCompleteTime().orElseThrow());
                 successTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
@@ -237,8 +239,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final Transaction tx = session.beginTransaction();
             try {
                 job.setFailedStatus(aggregatorID);
-                session.persist(job);
-                session.refresh(job);
+                session.merge(job);
 
                 final var delay = Duration.between(job.getStartTime().orElseThrow(), job.getUpdateTime().orElseThrow());
                 failureTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
