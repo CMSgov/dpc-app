@@ -68,12 +68,7 @@ class FHIRSubmissionTest {
     @BeforeAll
     static void setup() {
         mockClient();
-
-        doAnswer(answer -> {
-            final UUID batchID = answer.getArgument(1);
-            assertNotNull(batchID, "Should have created a batchID");
-            return answer.callRealMethod();
-        }).when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList());
+        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList());
     }
 
     @Test
@@ -94,6 +89,9 @@ class FHIRSubmissionTest {
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
         final var job = queue.workBatch(AGGREGATOR_ID).orElseThrow(() -> new IllegalStateException("Should have a job"));
+        while ( job.fetchNextBatch(AGGREGATOR_ID).isPresent() ) {
+            queue.completePartialBatch(job, AGGREGATOR_ID);
+        }
         queue.completeBatch(job, AGGREGATOR_ID);
 
         jobTarget = groupResource.target(jobURL);
