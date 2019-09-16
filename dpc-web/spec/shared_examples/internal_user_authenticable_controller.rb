@@ -6,7 +6,7 @@ RSpec.shared_examples 'an internal user authenticable controller action' do |met
       logout(:internal_user)
 
       if resource
-        params.merge!(id: create(resource).id)
+        params[:id] = create(resource).id
       end
 
       send meth, action, params: params
@@ -25,7 +25,7 @@ RSpec.shared_examples 'an internal user authenticable controller action' do |met
       sign_in user, scope: :user
 
       if resource
-        params.merge!(id: create(resource).id)
+        params[:id] = create(resource).id
       end
 
       send meth, action, params: params
@@ -41,7 +41,7 @@ RSpec.shared_examples 'an internal user authenticable controller action' do |met
       logout(:internal_user)
 
       if resource
-        params.merge!(id: create(resource).id)
+        params[:id] = create(resource).id
       end
 
       @internal_user = InternalUser.last || create(:internal_user)
@@ -50,8 +50,10 @@ RSpec.shared_examples 'an internal user authenticable controller action' do |met
       send meth, action, params: params
     end
 
-    scenario 'renders the requested page' do
-      expect(response).to render_template(action)
+    if action == :get
+      scenario 'renders the requested page' do
+        expect(response).to render_template(action)
+      end
     end
   end
 end
