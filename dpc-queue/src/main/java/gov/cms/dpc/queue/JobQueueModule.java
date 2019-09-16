@@ -37,7 +37,7 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
                     .in(Scopes.SINGLETON);
         } else {
             binder.bind(JobQueueInterface.class)
-                    .to(DatabaseQueue.class)
+                    .to(DistributedBatchQueue.class)
                     .in(Scopes.SINGLETON);
         }
 

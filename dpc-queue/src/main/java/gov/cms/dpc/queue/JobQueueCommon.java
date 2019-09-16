@@ -13,7 +13,7 @@ import java.util.UUID;
 public abstract class JobQueueCommon implements JobQueueInterface {
 
     // Statics
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseQueue.class);
+    private static final Logger logger = LoggerFactory.getLogger(DistributedBatchQueue.class);
 
     // Object variables
     private final int batchSize;

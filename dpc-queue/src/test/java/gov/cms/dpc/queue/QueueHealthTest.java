@@ -41,7 +41,7 @@ public class QueueHealthTest {
         when(query.getFirstResult())
                 .thenReturn(0);
 
-        final DatabaseQueue queue = new DatabaseQueue(managedSessionFactory, 100, metrics);
+        final DistributedBatchQueue queue = new DistributedBatchQueue(managedSessionFactory, 100, metrics);
         assertDoesNotThrow(() -> queue.assertHealthy(UUID.randomUUID()), "Queue should be healthy");
 
         // Healthcheck should pass
@@ -54,7 +54,7 @@ public class QueueHealthTest {
         when(query.getFirstResult())
                 .thenReturn(2);
 
-        final DatabaseQueue queue = new DatabaseQueue(managedSessionFactory, 100, metrics);
+        final DistributedBatchQueue queue = new DistributedBatchQueue(managedSessionFactory, 100, metrics);
         assertThrows(JobQueueUnhealthy.class, () -> queue.assertHealthy(UUID.randomUUID()), "Queue should be unhealthy");
 
         // Healthcheck should pass

@@ -30,10 +30,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Implements a distributed {@link gov.cms.dpc.queue.models.JobQueueBatch} using a Postgres database
  */
-public class DatabaseQueue extends JobQueueCommon {
+public class DistributedBatchQueue extends JobQueueCommon {
 
     // Statics
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseQueue.class);
+    private static final Logger logger = LoggerFactory.getLogger(DistributedBatchQueue.class);
     private static final String DB_UNHEALTHY = "Database cluster is not responding";
     private static final String JOB_UNHEALTHY = "Aggregator is not making progress on the queue";
 
@@ -48,7 +48,7 @@ public class DatabaseQueue extends JobQueueCommon {
 
 
     @Inject
-    public DatabaseQueue(
+    public DistributedBatchQueue(
             DPCManagedSessionFactory factory,
             @QueueBatchSize int batchSize,
             MetricRegistry metricRegistry
@@ -58,7 +58,7 @@ public class DatabaseQueue extends JobQueueCommon {
         this.factory = factory.getSessionFactory();
 
         // Metrics
-        final var metricBuilder = new MetricMaker(metricRegistry, DatabaseQueue.class);
+        final var metricBuilder = new MetricMaker(metricRegistry, DistributedBatchQueue.class);
         this.waitTimer = metricBuilder.registerTimer("waitTime");
         this.partialTimer = metricBuilder.registerTimer("partialTime");
         this.successTimer = metricBuilder.registerTimer("successTime");
