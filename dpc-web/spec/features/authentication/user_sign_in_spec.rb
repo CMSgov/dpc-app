@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require './spec/shared_examples/authenticable_page'
-
 RSpec.feature 'user signs in' do
   let!(:user) { create :user, password: '123456', password_confirmation: '123456' }
   let!(:dpc_registration) { create :dpc_registration, user: user }
