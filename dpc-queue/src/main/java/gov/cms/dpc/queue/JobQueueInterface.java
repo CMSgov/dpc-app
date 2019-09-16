@@ -81,7 +81,7 @@ public interface JobQueueInterface {
 
     /**
      * Number of items in the queue.
-     * For the {@link MemoryQueue}, this returns the number of jobs with the {@link JobStatus#QUEUED}.
+     * For the {@link MemoryBatchQueue}, this returns the number of jobs with the {@link JobStatus#QUEUED}.
      *
      * @return - {@link long} number of jobs waiting to be run
      */

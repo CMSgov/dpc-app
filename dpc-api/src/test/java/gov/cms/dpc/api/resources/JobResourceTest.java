@@ -6,7 +6,6 @@ import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
-import gov.cms.dpc.queue.models.JobModel;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.eclipse.jetty.http.HttpStatus;
@@ -111,7 +110,7 @@ public class JobResourceTest {
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
-        assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
+        assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
@@ -208,7 +207,7 @@ public class JobResourceTest {
 
         // Test the completion model
         final var completion = (JobCompletionModel) responseRight.getEntity();
-        assertAll(() -> assertEquals(JobModel.validResourceTypes.size(), completion.getOutput().size()),
+        assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
             assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
