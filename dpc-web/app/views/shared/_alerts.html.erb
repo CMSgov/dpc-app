@@ -1,11 +1,15 @@
 <% if notice %>
   <div class="ds-c-alert ds-u-margin-bottom--5"">
-  <div class="ds-c-alert__body">
-    <h3 class="ds-c-alert__heading"><%= notice %></h3>
+    <div class="ds-c-alert__body">
+      <h3 class="ds-c-alert__heading"><%= notice %></h3>
+    </div>
   </div>
-</div>
 <% end %>
 
 <% if alert %>
-  <div><%= alert %></div>
+  <div class="ds-c-alert ds-c-alert--error ds-u-margin-bottom--5"">
+    <div class="ds-c-alert__body">
+      <h3 class="ds-c-alert__heading"><%= alert %></h3>
+    </div>
+  </div>
 <% end %>
