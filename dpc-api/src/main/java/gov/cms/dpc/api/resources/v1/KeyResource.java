@@ -4,6 +4,7 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.PublicKeyHandler;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
@@ -78,23 +79,8 @@ public class KeyResource extends AbstractKeyResource {
     @UnitOfWork
     @Override
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, String key) {
-        final SubjectPublicKeyInfo publicKey;
-        final ByteArrayInputStream bas = new ByteArrayInputStream(key.getBytes(StandardCharsets.ISO_8859_1));
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bas))) {
-            try (PEMParser pemParser = new PEMParser(bufferedReader)) {
-                final Object object = pemParser.readObject();
-                if (!(object instanceof SubjectPublicKeyInfo)) {
-                    logger.error("Cannot convert {} to {}.", object.getClass().getName(), SubjectPublicKeyInfo.class.getName());
-                    throw new WebApplicationException("Must submit public key", Response.Status.BAD_REQUEST);
-                }
-                publicKey = (SubjectPublicKeyInfo) object;
-            }
-        } catch (IOException e) {
-            logger.error("Unable to read Certificate input", e);
-            throw new WebApplicationException("Cannot read Certificate input", Response.Status.BAD_REQUEST);
-        }
+        final SubjectPublicKeyInfo publicKey = PublicKeyHandler.parsePEMString(key);
 
-        // Validate Certificate
         final PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         final OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(organizationPrincipal.getID());
