@@ -51,6 +51,14 @@
                 <%= link_to user.name, internal_user_path(user) %>
               </div>
 
+              <div class="ds-u-padding-y--1">
+                <% user.taggings.each do |tagging| %>
+                  <span class="ds-c-badge ds-u-fill--primary-alt">
+                    <%= tagging.tag_name %>
+                  </span>
+                <% end %>
+              </div>
+
               <div class="ds-u-align-items--end ds-u-font-style--italic">
                 Signed up: <%= user.created_at %>
               </div>
