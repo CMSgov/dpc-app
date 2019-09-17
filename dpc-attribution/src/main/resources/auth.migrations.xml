@@ -9,7 +9,7 @@
 
     <changeSet id="create-certificate-table" author="nickrobison-usds">
         <sql dbms="postgresql" endDelimiter=";">
-            CREATE SCHEMA auth
+            CREATE SCHEMA IF NOT EXISTS auth
         </sql>
 
         <createTable schemaName="auth" tableName="ORGANIZATION_KEYS">
