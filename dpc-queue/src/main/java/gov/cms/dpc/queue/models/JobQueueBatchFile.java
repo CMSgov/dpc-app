@@ -53,6 +53,7 @@ public class JobQueueBatchFile implements Serializable {
         }
 
         @Override
+        @SuppressWarnings("EqualsGetClass")
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof JobQueueBatchFileID)) return false;
@@ -145,6 +146,7 @@ public class JobQueueBatchFile implements Serializable {
     }
 
     @Override
+    @SuppressWarnings("EqualsGetClass")
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof JobQueueBatchFile)) return false;
