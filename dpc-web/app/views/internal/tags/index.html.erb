@@ -1,0 +1,68 @@
+<% title "Manage Tags" %>
+
+
+<div class="ds-l-row">
+  <div class="ds-l-row--12 ds-l-md-col--3">
+    <ul class="ds-c-vertical-nav">
+      <li class="ds-c-vertical-nav__item">
+        <%= link_to "Users", internal_users_path, class: "ds-c-vertical-nav__label" %>
+      </li>
+      <li class="ds-c-vertical-nav__item">
+        <%= link_to "Tags", internal_tags_path, class: "ds-c-vertical-nav__label ds-c-vertical-nav__label--current" %>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ds-l-row--12 ds-l-md-col--9 ds-u-padding-bottom--2">
+
+    <div class="ds-l-row">
+      <h2 class="ds-u-padding-x--2">Existing Tags</h2>
+      <p>
+        Gray tags indicate currently unused tags.
+        Blue tags are being used, and the number with the tag indicates the number of records with that tag.
+      </p>
+    </div>
+
+    <div class="ds-l-row">
+      <ul class="ds-c-list ds-c-list--bare">
+        <% @tags.each do |tag| %>
+          <li>
+            <% if tag.taggings.count == 0 %>
+
+              <span class="ds-c-badge">
+                <%= tag.name %>
+                <%= link_to(internal_tag_url(tag), method: :delete, data: {test: "delete-tag-#{tag.id}"}) do %>
+                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <use xlink:href="/assets/solid.svg#times"></use>
+                  </svg>
+                <% end %>
+              </span>
+
+            <% else %>
+
+              <span class="ds-c-badge ds-u-fill--primary-alt">
+                <%= tag.name %> - <%= tag.taggings.count %>
+
+                <%= link_to(internal_tag_url(tag), method: :delete, data: { confirm: confirm_text(tag), test: "delete-tag-#{tag.id}" }) do %>
+                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <use xlink:href="/assets/solid.svg#times"></use>
+                  </svg>
+                <% end %>
+              </span>
+
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <div class="ds-l-row ds-u-margin-y--3 ds-u-border--1 ds-u-radius">
+      <%= form_for Tag.new, url: internal_tags_path, html: { method: :post } do |f| %>
+        <%= f.label :name, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
+        <%= f.text_field :name, class: "ds-c-field" %>
+        <%= f.submit "Create", data: { test: "add-tag-submit" } %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

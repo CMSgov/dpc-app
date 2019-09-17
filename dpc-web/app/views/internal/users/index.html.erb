@@ -2,6 +2,14 @@
 
 <div class="ds-l-row">
   <div class="ds-l-row--12 ds-l-md-col--3">
+    <ul class="ds-c-vertical-nav">
+      <li class="ds-c-vertical-nav__item">
+        <%= link_to "Users", internal_users_path, class: "ds-c-vertical-nav__label ds-c-vertical-nav__label--current" %>
+      </li>
+      <li class="ds-c-vertical-nav__item">
+        <%= link_to "Tags", internal_tags_path, class: "ds-c-vertical-nav__label" %>
+      </li>
+    </ul>
   </div>
 
   <div class="ds-l-row--12 ds-l-md-col--9">

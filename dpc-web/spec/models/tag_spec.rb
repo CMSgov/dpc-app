@@ -10,6 +10,11 @@ RSpec.describe Tag, type: :model do
   end
 
   describe 'validations' do
+    it 'requires a name' do
+      subject.name = nil
+      expect(subject).not_to be_valid
+    end
+
     it 'requires a unique name' do
       create(:tag, name: 'Same')
       tag = build(:tag, name: 'Same')

@@ -63,6 +63,8 @@ RSpec.describe Internal::TaggingsController, type: :controller do
   describe '#destroy' do
     let!(:internal_user) { create(:internal_user) }
 
+    it_behaves_like 'an internal user authenticable controller action', :delete, :destroy, :tagging
+
     context 'authenticated internal user' do
       before(:each) do
         sign_in internal_user, scope: :internal_user
