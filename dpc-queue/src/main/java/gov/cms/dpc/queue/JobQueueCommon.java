@@ -3,17 +3,12 @@ package gov.cms.dpc.queue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.reactivex.Observable;
 import org.hl7.fhir.dstu3.model.ResourceType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 public abstract class JobQueueCommon implements JobQueueInterface {
-
-    // Statics
-    private static final Logger logger = LoggerFactory.getLogger(DistributedBatchQueue.class);
 
     // Object variables
     private final int batchSize;

@@ -364,7 +364,7 @@ public class JobQueueBatch implements Serializable {
      */
     protected void verifyAggregatorID(UUID aggregatorID) throws JobQueueFailure {
         if ( this.aggregatorID != null && !this.aggregatorID.equals(aggregatorID) ) {
-            throw new JobQueueFailure(jobID, batchID, String.format("Cannot update job. Cannot process a job owned by another aggregator. Existing Aggregator: %s Aggregator Claiming: %s", jobID, batchID, this.aggregatorID, aggregatorID));
+            throw new JobQueueFailure(jobID, batchID, String.format("Cannot update job. Cannot process a job owned by another aggregator. Existing Aggregator: %s Aggregator Claiming: %s", this.aggregatorID, aggregatorID));
         }
     }
 
@@ -381,7 +381,7 @@ public class JobQueueBatch implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
 
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof JobQueueBatch)) return false;
 
         JobQueueBatch that = (JobQueueBatch) o;
 
