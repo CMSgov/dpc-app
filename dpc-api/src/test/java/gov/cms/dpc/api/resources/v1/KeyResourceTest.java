@@ -7,6 +7,7 @@ import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -71,6 +72,22 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
                 final List<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<KeyView>>() {
                 });
                 assertEquals(1, fetched.size(), "Should have a single key");
+            }
+
+            // Delete it
+            final HttpDelete keyDeletion = new HttpDelete(String.format("%s/Key/%s", getBaseURL(), entity.id));
+            keyDeletion.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            keyDeletion.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+
+            try (CloseableHttpResponse response = client.execute(keyDeletion)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+            }
+
+            // Check to see everything is gone.
+            try (CloseableHttpResponse response = client.execute(keyGet)) {
+                final List<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<KeyView>>() {
+                });
+                assertEquals(0, fetched.size(), "Should not have any keys");
             }
         }
     }
