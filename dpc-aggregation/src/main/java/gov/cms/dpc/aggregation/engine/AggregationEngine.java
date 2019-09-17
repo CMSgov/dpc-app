@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -118,7 +119,6 @@ public class AggregationEngine implements Runnable {
             logger.info("Processing job {} batch {}, exporting to: {}.", job.getJobID(), job.getBatchID(), this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
-            final var errorCounter = new AtomicInteger();
             Optional<String> nextPatientID = job.fetchNextBatch(aggregatorID);
 
             // Stop processing when no patients or early shutdown
@@ -150,12 +150,13 @@ public class AggregationEngine implements Runnable {
      * @param job - the job to process
      * @param patientID - The current patient id processing
      */
-    private void processJobBatchPartial(JobQueueBatch job, String patientID) {
+    private List<JobQueueBatchFile> processJobBatchPartial(JobQueueBatch job, String patientID) {
         final var results = Flowable.fromIterable(job.getResourceTypes())
                 .flatMap(resourceType -> completeResource(job, patientID, resourceType))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
         this.queue.completePartialBatch(job, aggregatorID);
+        return results;
     }
 
     /**

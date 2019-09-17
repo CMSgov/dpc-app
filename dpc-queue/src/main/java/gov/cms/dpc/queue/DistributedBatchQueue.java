@@ -161,8 +161,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
                 // Claim a new batch
                 Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
-                        .uniqueResultOptional()
-                        .map(Object::toString);
+                        .uniqueResultOptional();
 
                 if ( batchID.isPresent() ) {
                     JobQueueBatch batch = session.get(JobQueueBatch.class, UUID.fromString(batchID.get()));
