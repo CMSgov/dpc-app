@@ -1,7 +1,5 @@
 package gov.cms.dpc.queue.models;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.persistence.Column;
@@ -57,25 +55,16 @@ public class JobQueueBatchFile implements Serializable {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-
             if (o == null || getClass() != o.getClass()) return false;
-
             JobQueueBatchFileID that = (JobQueueBatchFileID) o;
-
-            return new EqualsBuilder()
-                    .append(sequence, that.sequence)
-                    .append(batchID, that.batchID)
-                    .append(resourceType, that.resourceType)
-                    .isEquals();
+            return sequence == that.sequence &&
+                    batchID.equals(that.batchID) &&
+                    resourceType == that.resourceType;
         }
 
         @Override
         public int hashCode() {
-            return new HashCodeBuilder(17, 37)
-                    .append(batchID)
-                    .append(resourceType)
-                    .append(sequence)
-                    .toHashCode();
+            return Objects.hash(batchID, resourceType, sequence);
         }
 
         @Override
@@ -160,8 +149,7 @@ public class JobQueueBatchFile implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JobQueueBatchFile that = (JobQueueBatchFile) o;
-        return count == that.count &&
-                jobQueueBatchFileID.equals(that.jobQueueBatchFileID) &&
+        return jobQueueBatchFileID.equals(that.jobQueueBatchFileID) &&
                 jobID.equals(that.jobID);
     }
 
