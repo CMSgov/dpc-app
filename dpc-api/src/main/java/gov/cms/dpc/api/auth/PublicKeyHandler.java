@@ -24,7 +24,7 @@ public class PublicKeyHandler {
      */
     public static SubjectPublicKeyInfo parsePEMString(String pem) {
         final ByteArrayInputStream bas = new ByteArrayInputStream(pem.getBytes(StandardCharsets.ISO_8859_1));
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bas))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bas, StandardCharsets.UTF_8))) {
             try (PEMParser pemParser = new PEMParser(bufferedReader)) {
                 try {
                     final Object object = pemParser.readObject();
