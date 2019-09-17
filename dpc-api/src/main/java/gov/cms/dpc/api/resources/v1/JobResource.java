@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -61,7 +62,7 @@ public class JobResource extends AbstractJobResource {
                     "When the job is in progress, the API returns a 202 status." +
                     "When completed, an output response is returned, which contains the necessary metadata for retrieving any output files.")
     @ApiResponses({
-            @ApiResponse(code = 202, message = "Export job is in progress"),
+            @ApiResponse(code = 202, message = "Export job is in progress. X-Progress header is present with the format \"<STATUS>: <50.00%>\""),
             @ApiResponse(code = 404, message = "Export job cannot be found"),
             @ApiResponse(code = 500, message = "Export job has failed with no results"),
             @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class)
@@ -94,8 +95,17 @@ public class JobResource extends AbstractJobResource {
             builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
         } else if ( jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.QUEUED) ) {
             // The job is still being processed
-            // TODO: Report on the status
-            builder = builder.header("X-Progress", jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.QUEUED) ? JobStatus.QUEUED : JobStatus.RUNNING)
+            String progress = "QUEUED: 0.00%";
+            if ( jobStatusSet.contains(JobStatus.RUNNING) ) {
+                AtomicInteger done = new AtomicInteger();
+                AtomicInteger total = new AtomicInteger();
+                for ( JobQueueBatch batch : batches ) {
+                    batch.getPatientIndex().ifPresent(value -> done.addAndGet(value + 1));
+                    total.addAndGet(batch.getPatients().size());
+                }
+                progress = String.format("RUNNING: %.2f%%", total.get() > 0 ? (done.get() * 100.0f) / total.get() : 0f);
+            }
+            builder = builder.header("X-Progress", progress)
                     .status(HttpStatus.ACCEPTED_202);
         } else if ( jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED) ) {
             // All batches in the job have finished

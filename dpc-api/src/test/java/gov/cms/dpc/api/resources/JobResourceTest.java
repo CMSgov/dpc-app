@@ -4,7 +4,6 @@ import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
@@ -58,7 +57,7 @@ public class JobResourceTest {
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
-                () -> assertEquals(JobStatus.QUEUED.toString(), response.getHeaderString("X-Progress")));
+                () -> assertEquals("QUEUED: 0.00%", response.getHeaderString("X-Progress")));
     }
 
     /**
@@ -71,15 +70,16 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a running job
-        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID, TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
         final var runningJob = queue.workBatch(AGGREGATOR_ID);
+        runningJob.get().fetchNextBatch(AGGREGATOR_ID);
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
-                () -> assertEquals(JobStatus.RUNNING.toString(), response.getHeaderString("X-Progress")));
+                () -> assertEquals("RUNNING: 50.00%", response.getHeaderString("X-Progress")));
     }
 
     /**
