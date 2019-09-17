@@ -6,4 +6,6 @@ class Tagging < ApplicationRecord
 
   validates :tag, presence: true
   validates :taggable, presence: true
+
+  delegate :name, to: :tag, prefix: true
 end

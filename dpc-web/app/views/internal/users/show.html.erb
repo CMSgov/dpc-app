@@ -13,11 +13,19 @@
   </div>
 
   <div class="ds-l-row--12" data-test="user-tags">
-    <% if @user.tags.count == 0 %>
+    <% if @user.taggings.count == 0 %>
       <p>No tags</p>
     <% else %>
-      <% @user.tags.each do |tag| %>
-        <span class="ds-c-badge"><%= tag.name %></span>
+      <% @user.taggings.each do |tagging| %>
+        <span class="ds-c-badge ds-u-fill--primary-alt">
+          <%= tagging.tag_name %>
+
+          <%= link_to(internal_tagging_url(tagging), method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#times"></use>
+            </svg>
+          <% end %>
+        </span>
       <% end %>
     <% end %>
   </div>

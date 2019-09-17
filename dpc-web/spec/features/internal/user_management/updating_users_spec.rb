@@ -42,10 +42,10 @@ RSpec.feature 'updating users' do
     expect(page).to have_css('[data-test="user-form-submit"]')
   end
 
-  scenario 'adding tags to a user' do
+  scenario 'adding and removing tags from a user' do
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
 
-    create(:tag, name: 'Red')
+    red_tag = create(:tag, name: 'Red')
     create(:tag, name: 'Yellow')
 
     visit internal_user_path(crabby)
@@ -66,6 +66,12 @@ RSpec.feature 'updating users' do
 
     within('[data-test="user-tags"]') do
       expect(page).to have_content('Red')
+      expect(page).to have_content('Yellow')
+    end
+
+    find("[data-test=\"delete-tag-#{red_tag.id}\"]").click
+
+    within('[data-test="user-tags"]') do
       expect(page).to have_content('Yellow')
     end
   end

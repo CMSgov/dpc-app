@@ -11,7 +11,7 @@ Rails.application.routes.draw do
 
   namespace 'internal' do
     resources :users, only: [:index, :show, :edit, :update]
-    resources :taggings, only: [:create]
+    resources :taggings, only: [:create, :destroy]
   end
 
   authenticated :user do

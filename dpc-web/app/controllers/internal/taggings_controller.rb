@@ -11,14 +11,24 @@ module Internal
       else
         flash[:alert] = "Tag could not be added. Errors:#{@tagging.errors.full_messages.join(', ')}"
       end
-      redirect_to taggable_path
+      redirect_back(fallback_location: taggable_path)
+    end
+
+    def destroy
+      @tagging = Tagging.find(params[:id])
+      if @tagging.destroy
+        flash[:notice] = 'Tag removed.'
+      else
+        flash[:alert] = "Tag could not be removed. Errors:#{@tagging.errors.full_messages.join(', ')}"
+      end
+      redirect_back(fallback_location: taggable_path)
     end
 
     private
 
     # Right now only users are taggable
     def taggable_path
-      internal_user_path(id: tagging_params[:taggable_id])
+      internal_user_path(id: @tagging.taggable_id)
     end
 
     def tagging_params

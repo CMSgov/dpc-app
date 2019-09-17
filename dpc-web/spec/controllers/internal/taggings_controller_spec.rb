@@ -59,4 +59,19 @@ RSpec.describe Internal::TaggingsController, type: :controller do
       end
     end
   end
+
+  describe '#destroy' do
+    let!(:internal_user) { create(:internal_user) }
+
+    context 'authenticated internal user' do
+      before(:each) do
+        sign_in internal_user, scope: :internal_user
+      end
+
+      it 'destroys the tagging' do
+        tagging = create(:tagging)
+        expect { delete :destroy, params: { id: tagging.id } }.to change(Tagging, :count).by(-1)
+      end
+    end
+  end
 end
