@@ -6,16 +6,15 @@ import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 public class PublicKeyHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(PublicKeyHandler.class);
-
+    private PublicKeyHandler() {
+        // Not used
+    }
 
     /**
      * Parse and validate PEM encoded Public Key
@@ -30,22 +29,19 @@ public class PublicKeyHandler {
                 try {
                     final Object object = pemParser.readObject();
                     if (object == null) {
-                        throw new PublicKeyException("Not a valid public key");
+                        throw new PublicKeyException("Cannot parse public key, returned value is null");
                     }
                     if (!(object instanceof SubjectPublicKeyInfo)) {
-                        logger.error("Cannot convert {} to {}.", object.getClass().getName(), SubjectPublicKeyInfo.class.getName());
-                        throw new PublicKeyException("Must submit public key");
+                        throw new PublicKeyException(String.format("Cannot convert %s to %s.", object.getClass().getName(), SubjectPublicKeyInfo.class.getName()));
                     }
                     return (SubjectPublicKeyInfo) object;
                 } catch (PEMException e) {
-                    logger.error("Cannot parse PEM key.", e);
-                    throw new PublicKeyException("Not a valid public key");
+                    throw new PublicKeyException("Not a valid public key", e);
                 }
 
             }
         } catch (IOException e) {
-            logger.error("Unable to read Certificate input", e);
-            throw new PublicKeyException("Cannot parse Public Key input");
+            throw new PublicKeyException("Cannot parse Public Key input", e);
         }
     }
 
@@ -65,8 +61,7 @@ public class PublicKeyHandler {
                 return stringWriter.toString();
             }
         } catch (IOException e) {
-            logger.error("Cannot PEM encode public key", e);
-            throw new PublicKeyException("Cannot convert public key to PEM");
+            throw new PublicKeyException("Cannot convert public key to PEM", e);
         }
     }
 }
