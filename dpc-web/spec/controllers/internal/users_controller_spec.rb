@@ -8,7 +8,7 @@ RSpec.describe Internal::UsersController, type: :controller do
   describe '#index' do
     let!(:internal_user) { create(:internal_user) }
 
-    it_behaves_like "an internal user authenticable controller action", :get, :index
+    it_behaves_like 'an internal user authenticable controller action', :get, :index
 
     context 'authenticated internal user' do
       before(:each) do
@@ -21,11 +21,18 @@ RSpec.describe Internal::UsersController, type: :controller do
         expect(assigns(:users)).to eq(users.reverse)
       end
     end
-
-    # context 'invalud authentication'
   end
 
   describe '#show' do
-    it_behaves_like "an internal user authenticable controller action", :get, :show, :user
+    it_behaves_like 'an internal user authenticable controller action', :get, :show, :user
+  end
+
+  describe '#edit' do
+    it_behaves_like 'an internal user authenticable controller action', :get, :edit, :user
+  end
+
+  describe '#update' do
+    it_behaves_like 'an internal user authenticable controller action',
+                    :put, :update, :user, params: { user: { first_name: 'Riley' } }
   end
 end
