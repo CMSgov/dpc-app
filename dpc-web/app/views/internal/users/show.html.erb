@@ -1,6 +1,12 @@
 
 <% title @user.name %>
 
+<section class="ds-u-margin--2">
+  <div class="ds-l-row ds-u-justify-content--end">
+    <%= link_to "Edit details", edit_internal_user_url(@user), class: "ds-c-button  ds-c-button--big ds-c-button--primary" %>
+  </div>
+</section>
+
 <section class="ds-l-container ds-u-border--1 ds-u-radius">
   <div class="ds-l-row">
     <h2 class="ds-u-padding-x--2">Signup info</h2>
