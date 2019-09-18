@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rails_helper'
+
 RSpec.feature 'new user signs up for account' do
   let(:user) { build :user }
 

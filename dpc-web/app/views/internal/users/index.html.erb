@@ -2,6 +2,14 @@
 
 <div class="ds-l-row">
   <div class="ds-l-row--12 ds-l-md-col--3">
+    <ul class="ds-c-vertical-nav">
+      <li class="ds-c-vertical-nav__item">
+        <%= link_to "Users", internal_users_path, class: "ds-c-vertical-nav__label ds-c-vertical-nav__label--current" %>
+      </li>
+      <li class="ds-c-vertical-nav__item">
+        <%= link_to "Tags", internal_tags_path, class: "ds-c-vertical-nav__label" %>
+      </li>
+    </ul>
   </div>
 
   <div class="ds-l-row--12 ds-l-md-col--9">
@@ -41,6 +49,14 @@
             <div class="ds-u-padding--1 ds-u-display--inline-block">
               <div class="ds-u-font-size--lead">
                 <%= link_to user.name, internal_user_path(user) %>
+              </div>
+
+              <div class="ds-u-padding-y--1">
+                <% user.taggings.each do |tagging| %>
+                  <span class="ds-c-badge ds-u-fill--primary-alt">
+                    <%= tagging.tag_name %>
+                  </span>
+                <% end %>
               </div>
 
               <div class="ds-u-align-items--end ds-u-font-style--italic">
