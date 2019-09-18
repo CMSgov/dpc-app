@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './spec/shared_examples/authenticable_page'
+require 'rails_helper'
 
 RSpec.feature 'internal user signs in' do
   around do |example|

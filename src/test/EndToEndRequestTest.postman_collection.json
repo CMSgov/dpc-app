@@ -743,8 +743,8 @@
 						"id": "5497fa12-aefd-44c2-9254-2beb51c52e31",
 						"exec": [
 							"// Status should be 204",
-							"pm.test(\"Status is 204\", function () {",
-							"    pm.response.to.have.status(204);",
+							"pm.test(\"Status is 202\", function () {",
+							"    pm.response.to.have.status(202);",
 							"});",
 							"",
 							"// Url for job response should be in content-location header.",

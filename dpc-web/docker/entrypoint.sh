@@ -19,4 +19,4 @@ bin/delayed_job start
 
 # Start the database service (and make accessible outside the Docker container)
 echo "Starting Rails server..."
-rails server -b 0.0.0.0
+rails server -b 0.0.0.0 -p 3000

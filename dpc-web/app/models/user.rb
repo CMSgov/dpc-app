@@ -2,6 +2,9 @@
 
 class User < ApplicationRecord
   has_one :dpc_registration, inverse_of: :user
+  has_many :taggings, as: :taggable
+  has_many :tags, through: :taggings
+
   before_save :num_providers_to_zero_if_blank
 
   STATES = {

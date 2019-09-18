@@ -199,7 +199,7 @@ public class GroupResource extends AbstractGroupResource {
 
     /**
      * Begin export process for the given provider
-     * On success, returns a {@link org.eclipse.jetty.http.HttpStatus#NO_CONTENT_204} response with no content in the result.
+     * On success, returns a {@link org.eclipse.jetty.http.HttpStatus#ACCEPTED_202} response with no content in the result.
      * The `Content-Location` header contains the URI to call when checking job status. On failure, return an {@link OperationOutcome}.
      *
      * @param rosterID      {@link String} ID of provider to retrieve data for
@@ -220,7 +220,7 @@ public class GroupResource extends AbstractGroupResource {
     @ApiImplicitParams(
             @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", value = "respond-async"))
     @ApiResponses(
-            @ApiResponse(code = 204, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
+            @ApiResponse(code = 202, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
     )
     public Response export(@ApiParam(hidden = true)
                            @Auth OrganizationPrincipal organizationPrincipal,
@@ -248,7 +248,7 @@ public class GroupResource extends AbstractGroupResource {
         final var resources = handleTypeQueryParam(resourceTypes);
         this.queue.submitJob(jobID, new JobModel(jobID, orgID, resources, rosterID, attributedPatients));
 
-        return Response.status(Response.Status.NO_CONTENT)
+        return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
 

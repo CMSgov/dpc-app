@@ -89,7 +89,7 @@ class FHIRSubmissionTest {
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
-        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+        assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus(), "Should have 202 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Check that the job is in progress
@@ -120,7 +120,7 @@ class FHIRSubmissionTest {
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
-        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+        assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus(), "Should have 202 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
@@ -143,7 +143,7 @@ class FHIRSubmissionTest {
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
-        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+        assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus(), "Should have 202 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
@@ -164,7 +164,7 @@ class FHIRSubmissionTest {
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
-        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+        assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus(), "Should have 202 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
@@ -203,7 +203,7 @@ class FHIRSubmissionTest {
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
-        assertAll(() -> assertEquals(HttpStatus.NO_CONTENT_204, response.getStatus(), "Should have 204 status"),
+        assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus(), "Should have 202 status"),
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with all resource types

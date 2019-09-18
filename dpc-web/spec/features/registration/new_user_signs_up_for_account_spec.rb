@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './spec/shared_examples/authenticable_page'
+require 'rails_helper'
 
 RSpec.feature 'new user signs up for account' do
   let(:user) { build :user }
