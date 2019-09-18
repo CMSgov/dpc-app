@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rails_helper'
+
 RSpec.feature 'searching and filtering users' do
   let!(:internal_user) { create :internal_user }
 
