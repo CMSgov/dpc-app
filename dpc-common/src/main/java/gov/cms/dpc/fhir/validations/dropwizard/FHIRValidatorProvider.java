@@ -4,9 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.Enumerations;
@@ -24,15 +22,32 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
 
     private static final Logger logger = LoggerFactory.getLogger(FHIRValidatorProvider.class);
 
+    private static final Object lock = new Object();
+    private static volatile boolean initialized = false;
+
     private final FhirContext ctx;
-    private final DPCProfileSupport dpcModule;
     private final FHIRValidationConfiguration validationConfiguration;
+    private final ValidationSupportChain supportChain;
 
     @Inject
-    public FHIRValidatorProvider(FhirContext ctx, DPCProfileSupport dpcModule, FHIRValidationConfiguration config) {
+    public FHIRValidatorProvider(FhirContext ctx, FHIRValidationConfiguration config, ValidationSupportChain supportChain) {
+        logger.warn("Initializing provider");
         this.ctx = ctx;
-        this.dpcModule = dpcModule;
         this.validationConfiguration = config;
+        this.supportChain = supportChain;
+
+        // Double lock check to eagerly init the validator
+        // Since we can't inject the provider as a singleton, we need a way to prime the validator on first use, but only once.
+        if (!initialized) {
+            synchronized (lock) {
+                if (!initialized) {
+                    // Initialize
+                    final FhirValidator fhirValidator = get();
+                    initialize(fhirValidator);
+                    initialized = true;
+                }
+            }
+        }
     }
 
 
@@ -45,9 +60,7 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
         fhirValidator.setValidateAgainstStandardSchema(validationConfiguration.isSchemaValidation());
         fhirValidator.registerValidatorModule(instanceValidator);
 
-        final ValidationSupportChain chain = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
-        instanceValidator.setValidationSupport(chain);
-        initialize(fhirValidator);
+        instanceValidator.setValidationSupport(this.supportChain);
         return fhirValidator;
     }
 
