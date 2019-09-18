@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@Entity(name = "auth.organization_keys")
+@Entity(name = "organization_keys")
 public class PublicKeyEntity implements Serializable {
     public static final long serialVersionUID = 42L;
 

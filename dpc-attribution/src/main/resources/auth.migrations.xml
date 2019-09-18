@@ -3,16 +3,10 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
-        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="create-certificate-table" author="nickrobison-usds">
-        <sql dbms="postgresql" endDelimiter=";">
-            CREATE SCHEMA IF NOT EXISTS auth
-        </sql>
-
-        <createTable schemaName="auth" tableName="ORGANIZATION_KEYS">
+    <changeSet id="create-public-key-table" author="nickrobison-usds">
+        <createTable schemaName="public" tableName="ORGANIZATION_KEYS">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -23,11 +17,16 @@
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
-        <addForeignKeyConstraint baseTableSchemaName="auth" baseTableName="ORGANIZATION_KEYS" baseColumnNames="organization_id"
+        <addForeignKeyConstraint baseTableSchemaName="public" baseTableName="ORGANIZATION_KEYS"
+                                 baseColumnNames="organization_id"
                                  constraintName="fk_certificates_key"
                                  referencedTableSchemaName="public"
                                  referencedTableName="ORGANIZATIONS"
                                  referencedColumnNames="id"/>
-    </changeSet>
 
+        <createIndex tableName="ORGANIZATION_KEYS" indexName="IDX_ORGANIZATION_KEY">
+            <column name="organization_id"/>
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
