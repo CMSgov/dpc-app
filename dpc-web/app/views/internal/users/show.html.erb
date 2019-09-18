@@ -9,6 +9,40 @@
 
 <section class="ds-l-container ds-u-border--1 ds-u-radius">
   <div class="ds-l-row">
+    <h2 class="ds-u-padding-x--2">Tags</h2>
+  </div>
+
+  <div class="ds-l-row--12" data-test="user-tags">
+    <% if @user.taggings.count == 0 %>
+      <p>No tags</p>
+    <% else %>
+      <% @user.taggings.each do |tagging| %>
+        <span class="ds-c-badge ds-u-fill--primary-alt">
+          <%= tagging.tag_name %>
+
+          <%= link_to(internal_tagging_url(tagging), method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#times"></use>
+            </svg>
+          <% end %>
+        </span>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="ds-l-row--12">
+    <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
+      <%= f.label :tag_id, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
+      <%= f.collection_select :tag_id, available_tags(@user), :id, :name, { include_blank: true }, class: "ds-c-field" %>
+      <%= f.hidden_field :taggable_id, value: @user.id %>
+      <%= f.hidden_field :taggable_type, value: 'User' %>
+      <%= f.submit "Add tag", data: { test: "add-tag-submit" } %>
+    <% end %>
+  </div>
+</section>
+
+<section class="ds-l-container ds-u-border--1 ds-u-radius">
+  <div class="ds-l-row">
     <h2 class="ds-u-padding-x--2">Signup info</h2>
   </div>
 
