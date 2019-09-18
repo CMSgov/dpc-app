@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rails_helper'
+
 RSpec.feature 'updating users' do
   let!(:internal_user) { create :internal_user }
 
@@ -69,7 +71,8 @@ RSpec.feature 'updating users' do
       expect(page).to have_content('Yellow')
     end
 
-    find("[data-test=\"delete-tag-#{red_tag.id}\"]").click
+    tagging = crabby.taggings.find_by(tag_id: red_tag.id)
+    find("[data-test=\"delete-tag-#{tagging.id}\"]").click
 
     within('[data-test="user-tags"]') do
       expect(page).to have_content('Yellow')

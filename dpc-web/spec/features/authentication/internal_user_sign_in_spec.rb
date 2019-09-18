@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rails_helper'
+
 RSpec.feature 'internal user signs in' do
   around do |example|
     OmniAuth.config.test_mode = true
