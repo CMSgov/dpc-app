@@ -2,7 +2,6 @@ package gov.cms.dpc.common.hibernate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import gov.cms.dpc.common.annotations.AdditionalPaths;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -22,8 +21,6 @@ import java.util.stream.Collectors;
 /**
  * Custom Hibernate bundle, which allows us to inject the {@link org.hibernate.SessionFactory} into non-resource types.
  * By default, the bundle scans the {@link DPCHibernateBundle#PREFIX_STRING} for a list of annotated entities.
- * Additional paths can be added by injecting a {@link List} of {@link String} paths using the {@link AdditionalPaths}.
- * In order for this to work, the injector needs to request static binding using the {@link com.google.inject.Binder#requestStaticInjection(Class[])} method.
  *
  * @param <T> - Configuration class type
  */

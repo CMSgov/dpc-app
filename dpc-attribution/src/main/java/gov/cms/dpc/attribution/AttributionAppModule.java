@@ -8,7 +8,6 @@ import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.macaroons.BakeryProvider;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
-import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -22,7 +21,6 @@ import org.jooq.conf.Settings;
 
 import java.security.SecureRandom;
 import java.time.Duration;
-import java.util.List;
 
 @SuppressWarnings("rawtypes")
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
@@ -81,12 +79,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @SuppressWarnings("CloseableProvides")
     SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
         return factory.getSessionFactory();
-    }
-
-    @Provides
-    @AdditionalPaths
-    List<String> provideAdditionalPaths() {
-        return List.of("gov.cms.dpc.macaroons.store.hibernate.entities");
     }
 
     @Provides
