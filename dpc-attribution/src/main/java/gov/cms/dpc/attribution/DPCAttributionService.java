@@ -11,27 +11,18 @@ import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import io.dropwizard.Application;
-import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -62,40 +53,9 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) throws DatabaseException, SQLException {
-        migrateDatabase(configuration, environment);
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
-    }
-
-    private void migrateDatabase(DPCAttributionConfiguration configuration, Environment environment) throws SQLException {
-        if (configuration.getMigrationEnabled()) {
-            logger.info("Migrating Database Schema");
-            final ManagedDataSource dataSource = createMigrationDataSource(configuration, environment);
-
-            try (final Connection connection = dataSource.getConnection()) {
-                final JdbcConnection conn = new JdbcConnection(connection);
-
-                final Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn);
-                final Liquibase liquibase = new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), database);
-                liquibase.update("");
-            } catch (LiquibaseException e) {
-                throw new IllegalStateException("Unable to migrate database", e);
-            } finally {
-                try {
-                    dataSource.stop();
-                } catch (Exception e) {
-                    logger.error("Unable to stop migration datasource", e);
-                }
-            }
-        } else {
-            logger.info("Skipping Database Migration");
-        }
-    }
-
-    private ManagedDataSource createMigrationDataSource(DPCAttributionConfiguration configuration, Environment environment) {
-        final DataSourceFactory dataSourceFactory = configuration.getDatabase();
-        return dataSourceFactory.build(environment.metrics(), "migration-ds");
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
