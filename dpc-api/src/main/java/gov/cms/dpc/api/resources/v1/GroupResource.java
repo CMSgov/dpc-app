@@ -152,6 +152,32 @@ public class GroupResource extends AbstractGroupResource {
         return (Group) outcome.getResource();
     }
 
+    @PUT
+    @Path("/{rosterID}/$add")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Add roster members", notes = "Update specific Attribution roster by adding members given in the provided resource.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @Override
+    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+        return this.executeGroupOperation(rosterID, groupUpdate, "add");
+    }
+
+    @PUT
+    @Path("/{rosterID}/$remove")
+    @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Remove roster members", notes = "Update specific Attribution roster by removing members given in the provided resource.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @Override
+    public Group removeRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+        return this.executeGroupOperation(rosterID, groupUpdate, "remove");
+    }
+
     @DELETE
     @FHIR
     @Path("/{rosterID}")
@@ -224,6 +250,19 @@ public class GroupResource extends AbstractGroupResource {
 
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
+    }
+
+    private Group executeGroupOperation(UUID rosterID, Group groupUpdate, String operationName) {
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(groupUpdate);
+        return this.client
+                .operation()
+                .onInstance(new IdType("Group", rosterID.toString()))
+                .named(operationName)
+                .withParameters(parameters)
+                .returnResourceType(Group.class)
+                .encodedJson()
+                .execute();
     }
 
     /**
