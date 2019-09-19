@@ -14,6 +14,7 @@ import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.tuple.Pair;
@@ -133,7 +134,7 @@ public class GroupResource extends AbstractGroupResource {
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
-        // We have to do this because Hibernate/Dropwizard get confused when returning a single type (link String)
+        // We have to do this because Hibernate/Dropwizard get confused when returning a single type (like String)
         @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(existingRoster.getId());
 
         final List<Bundle.BundleEntryComponent> patients = patientMBIs
@@ -164,24 +165,80 @@ public class GroupResource extends AbstractGroupResource {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
-        // Verify that we don't have any duplicated patient references, which causes havoc with the merge logic.
-        final Set<Reference> memberReferences = groupUpdate
+        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+        existingAttributions.clear();
+        // TODO: This is a temporary workaround until we get DPC-564 merged in, this avoids unique constraint violations due to the current transaction not being committed yet.
+        this.rosterDAO.updateRoster(existingRoster);
+
+        final List<AttributionRelationship> overwriteAttributions = groupUpdate
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
-                .filter(distinctByKey(Reference::getReference))
-                .collect(Collectors.toSet());
+                .map(ref -> {
+                    final PatientEntity pe = new PatientEntity();
+                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
+                    return pe;
+                })
+                .map(pe -> new AttributionRelationship(existingRoster, pe))
+                .collect(Collectors.toList());
 
-        if (memberReferences.size() < groupUpdate.getMember().size()) {
-            throw new WebApplicationException("Cannot have a Patient listed twice in Group update", Response.Status.BAD_REQUEST);
-        }
+        existingAttributions.addAll(overwriteAttributions);
+
+        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+    }
+
+    @POST
+    @Path("/{rosterID}/$add")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Add roster members", notes = "FHIR endpoint to update the given Group resource by adding the members included in the supplied Group.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
+    @Override
+    public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
+        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
         final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-        // Add and remove Roster members
-        processGroupMembers(existingRoster, groupUpdate);
+        groupUpdate
+                .getMember()
+                .stream()
+                .map(Group.GroupMemberComponent::getEntity)
+                .map(ref -> {
+                    final PatientEntity pe = new PatientEntity();
+                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
+                    return pe;
+                })
+                .map(pe -> new AttributionRelationship(existingRoster, pe))
+                .forEach(relationship -> {
+                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
+                    if (found.isEmpty()) {
+                        existingAttributions.add(relationship);
+                    }
+                });
 
         existingRoster.setAttributions(existingAttributions);
+        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+    }
 
+    @POST
+    @Path("/{rosterID}/$remove")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Remove roster members", notes = "FHIR endpoint to update the given Group resource by removing the members included in the supplied Group.")
+    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
+    @Override
+    public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
+        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+        groupUpdate
+                .getMember()
+                .stream()
+                .map(Group.GroupMemberComponent::getEntity)
+                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
+
+        existingRoster.setAttributions(existingAttributions);
         return this.rosterDAO.updateRoster(existingRoster).toFHIR();
     }
 
@@ -263,18 +320,6 @@ public class GroupResource extends AbstractGroupResource {
         return r1.getRoster().getId().equals(r2.getRoster().getId()) && r1.getPatient().getPatientID().equals(r2.getPatient().getPatientID());
     }
 
-    /**
-     * Stateful {@link Predicate} filter that allows us to verify if we've seen a {@link Reference} before, since HAPI doesn't let us do directly object equality.
-     *
-     * @param keyExtractor - {@link Function} for extracting the value to compare
-     * @param <T>          - {@link T} type of comparison value
-     * @return - {@link Predicate} for use with streams.
-     */
-    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Set<Object> seen = ConcurrentHashMap.newKeySet();
-        return t -> seen.add(keyExtractor.apply(t));
-    }
-
     private static Pair<IdType, IdType> parseCompositeID(String queryParam) {
         final String[] split = queryParam.split("\\$", -1);
         if (split.length != 2) {
@@ -291,36 +336,4 @@ public class GroupResource extends AbstractGroupResource {
         return Pair.of(leftID, rightID);
     }
 
-    private static void processGroupMembers(RosterEntity existingRoster, Group groupUpdate) {
-        // Do we really have to do a linear search to figure out who to add/remove?
-        // This should not be here for long
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-
-        // Remove patients first
-        groupUpdate
-                .getMember()
-                .stream()
-                .filter(Group.GroupMemberComponent::getInactive)
-                .map(Group.GroupMemberComponent::getEntity)
-                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
-
-        // Now, add all the new ones
-        groupUpdate
-                .getMember()
-                .stream()
-                .filter(member -> !member.getInactive())
-                .map(Group.GroupMemberComponent::getEntity)
-                .map(ref -> {
-                    final PatientEntity pe = new PatientEntity();
-                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
-                    return pe;
-                })
-                .map(pe -> new AttributionRelationship(existingRoster, pe))
-                .forEach(relationship -> {
-                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
-                    if (found.isEmpty()) {
-                        existingAttributions.add(relationship);
-                    }
-                });
-    }
 }

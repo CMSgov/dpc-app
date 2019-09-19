@@ -106,5 +106,19 @@
                 <display value="dpc-patient-validate.json"/>
             </sourceReference>
         </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="OperationDefinition/dpc-group-add"/>
+                <display value="dpc-group-add.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
+                <reference value="OperationDefinition/dpc-group-remove"/>
+                <display value="dpc-group-remove.json"/>
+            </sourceReference>
+        </resource>
     </package>
 </ImplementationGuide>
