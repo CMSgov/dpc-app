@@ -165,6 +165,16 @@
       "base": "OperationDefinition-dpc-operation-patient-validate.html",
       "defns": "OperationDefinition-dpc-operation-patient-validate-definition.html",
       "source": "dpc-patient-validate.json"
+    },
+    "OperationDefinition/dpc-operation-group-add": {
+      "base": "OperationDefinition-dpc-operation-group-add.html",
+      "defns": "OperationDefinition-dpc-operation-group-add-definition.html",
+      "source": "dpc-group-add.json"
+    },
+    "OperationDefinition/dpc-operation-group-remove": {
+      "base": "OperationDefinition-dpc-operation-group-remove.html",
+      "defns": "OperationDefinition-dpc-operation-group-remove-definition.html",
+      "source": "dpc-group-remove.json"
     }
   },
   "version": "3.0.1",

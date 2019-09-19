@@ -42,5 +42,13 @@ active: profiles
 <td><a href="OperationDefinition-dpc-operation-patient-validate.html">Validate Patient</a></td>
 <td>Validate Patient resources</td>
 </tr>
+<tr>
+<td><a href="OperationDefinition-dpc-operation-group-add.html">Add Roster Members</a></td>
+<td>Add members to existing Attribution Roster</td>
+</tr>
+<tr>
+<td><a href="OperationDefinition-dpc-operation-group-remove.html">Remove Roster Members</a></td>
+<td>Remove members from existing Attribution Roster</td>
+</tr>
 </tbody>
 </table>

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d553e433-459a-485a-8055-62e7f93df565",
+		"_postman_id": "5632e905-505e-495a-aad5-5df28b0c07a3",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -407,15 +407,13 @@
 									"console.log(\"Group:\", group);",
 									"console.log(\"Pat: \", patientID);",
 									"",
-									"// Find the patient in the group and set it inactive.",
+									"// Remove everything but a single patient, which we can then submit to the $remove endpoint",
 									"console.log(group.member);",
-									"group.member.forEach(member => {",
-									"    var m  = member.entity.reference;",
-									"    console.log(\"id: \" + m + \" pat: \" + patientID);",
-									"    if (m === patientID) {",
-									"        member.inactive = true;",
-									"    }",
+									"group.member = group.member.filter(member => {",
+									"    var m = member.entity.reference;",
+									"    return m === patientID;",
 									"});",
+									"console.log(group.member);",
 									"",
 									"pm.environment.set(\"roster_body\", JSON.stringify(group))"
 								],
@@ -457,7 +455,7 @@
 							"raw": "{{roster_body}}"
 						},
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}/$remove",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -466,7 +464,8 @@
 							"path": [
 								"v1",
 								"Group",
-								"{{attribution_group_id}}"
+								"{{attribution_group_id}}",
+								"$remove"
 							]
 						},
 						"description": "Remove a patient from the attribution roster."
@@ -481,7 +480,19 @@
 							"script": {
 								"id": "f6abd191-547c-476b-b6f9-778097f05b8e",
 								"exec": [
-									"pm.environment.set(\"roster_body\", pm.globals.get(\"attribution_group\"))"
+									"var group = JSON.parse(pm.globals.get(\"attribution_group\"));",
+									"var patientID = pm.globals.get(\"single_patient_id\");",
+									"console.log(\"Group:\", group);",
+									"console.log(\"Pat: \", patientID);",
+									"",
+									"// Remove everything but a single patient, which we can then submit to the $add endpoint",
+									"console.log(group.member);",
+									"group.member = group.member.filter(member => {",
+									"    var m = member.entity.reference;",
+									"    return m === patientID;",
+									"})",
+									"",
+									"pm.environment.set(\"roster_body\", JSON.stringify(group))"
 								],
 								"type": "text/javascript"
 							}
@@ -521,6 +532,83 @@
 							"raw": "{{roster_body}}"
 						},
 						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}/$add",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Group",
+								"{{attribution_group_id}}",
+								"$add"
+							]
+						},
+						"description": "Add the previously removed patient back to the attribution roster."
+					},
+					"response": []
+				},
+				{
+					"name": "Overwrite roster",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f6abd191-547c-476b-b6f9-778097f05b8e",
+								"exec": [
+									"var group = JSON.parse(pm.globals.get(\"attribution_group\"));",
+									"var patientID = pm.globals.get(\"single_patient_id\");",
+									"console.log(\"Group:\", group);",
+									"console.log(\"Pat: \", patientID);",
+									"",
+									"// Remove everything but a single patient, which we can then submit to overwite everyting",
+									"console.log(group.member);",
+									"group.member = group.member.filter(member => {",
+									"    var m = member.entity.reference;",
+									"    return m === patientID;",
+									"})",
+									"",
+									"pm.environment.set(\"roster_body\", JSON.stringify(group))"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "b4c73864-2ec4-4bae-82cd-383a965c9eac",
+								"exec": [
+									"// Status should be 200",
+									"pm.test(\"Status is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Group should have a single member\", function() {",
+									"    var response = pm.response.json();",
+									"    ",
+									"    // Should be a search set with 4 entries",
+									"    pm.expect(response.member).to.have.lengthOf(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{roster_body}}"
+						},
+						"url": {
 							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}",
 							"protocol": "http",
 							"host": [
@@ -533,7 +621,114 @@
 								"{{attribution_group_id}}"
 							]
 						},
-						"description": "Remove a patient from the attribution roster."
+						"description": "Use the /Group PUT operation to replace the current roster contents with the submitted membership."
+					},
+					"response": []
+				},
+				{
+					"name": "Re-submit original roster",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "72634c6f-4d6b-49b9-b4db-b172af0f04f1",
+								"exec": [
+									"// Status should be 201",
+									"pm.test(\"Status is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response Body is correct\", () => {",
+									"    // Check to ensure that each member id matches what we previously had",
+									"    var response = pm.response.json();",
+									"    ",
+									"    // Ensure that the Patient IDs haven't changed.",
+									"    pm.expect(response.member.length).to.equal(4);",
+									"    var ids = new Set(JSON.parse(pm.globals.get(\"patient_ids\")));",
+									"    response.member.forEach(member => {",
+									"        pm.expect(ids.has(member.entity.reference)).to.be.true;",
+									"    });",
+									"",
+									"    pm.globals.set(\"attribution_group_id\", response.id);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b6f1696a-ac0b-472e-af63-2215ba3231a1",
+								"exec": [
+									"var group = {",
+									"  \"resourceType\": \"Group\",",
+									"  \"actual\": true,",
+									"  \"active\": true,",
+									"  \"type\": \"person\",",
+									"  \"characteristic\": [",
+									"    {",
+									"      \"code\": {",
+									"        \"coding\": [",
+									"          {",
+									"            \"code\": \"attributed-to\"",
+									"          }",
+									"        ]",
+									"      },",
+									"      \"valueCodeableConcept\": {",
+									"          \"coding\": [",
+									"            {",
+									"              \"system\": \"http://hl7.org/fhir/sid/us-npi\",",
+									"              \"code\": \"3116145044854423862\"",
+									"            }",
+									"          ]",
+									"      }",
+									"    }",
+									"  ],",
+									"  \"member\": []",
+									"};",
+									"",
+									"JSON.parse(pm.globals.get(\"patient_ids\")).forEach(id => group.member.push(",
+									"    {",
+									"      \"entity\": {",
+									"        \"reference\": id",
+									"      }",
+									"    }))",
+									"    ",
+									"console.log(\"Group:\", group);",
+									"pm.environment.set(\"roster_body\", JSON.stringify(group));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{roster_body}}"
+						},
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Group",
+								"{{attribution_group_id}}"
+							]
+						},
+						"description": "This request submits the roster for the provider. The roster data is in the `body` field of the request. It's easier to see in the Postman GUI."
 					},
 					"response": []
 				}
