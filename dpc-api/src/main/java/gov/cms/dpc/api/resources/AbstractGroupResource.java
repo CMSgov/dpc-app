@@ -32,6 +32,13 @@ public abstract class AbstractGroupResource {
     @Path("/{rosterID}")
     public abstract Group updateRoster(UUID rosterID, Group rosterUpdate);
 
+    @POST
+    @Path("/{rosterID}/$add")
+    public abstract Group addRosterMembers(UUID rosterID, Group groupUpdate);
+    @POST
+    @Path("/{rosterID}/$remove")
+    public abstract Group removeRosterMembers(UUID rosterID, Group groupUpdate);
+
     @DELETE
     @Path("/{rosterID}")
     public abstract Response deleteRoster(UUID rosterID);

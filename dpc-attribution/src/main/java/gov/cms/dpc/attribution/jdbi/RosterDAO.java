@@ -60,6 +60,8 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
 
     public RosterEntity updateRoster(RosterEntity existingRoster) {
         this.currentSession().merge(existingRoster);
+        // TODO: This need to come out as part of DPC-564, we should not be flushing on each update.
+        this.currentSession().flush();
         return existingRoster;
     }
 
