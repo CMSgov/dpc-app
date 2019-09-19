@@ -2,7 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
@@ -50,7 +50,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
     @Inject
     public DistributedBatchQueue(
-            DPCManagedSessionFactory factory,
+            DPCQueueManagedSessionFactory factory,
             @QueueBatchSize int batchSize,
             MetricRegistry metricRegistry
     ) {

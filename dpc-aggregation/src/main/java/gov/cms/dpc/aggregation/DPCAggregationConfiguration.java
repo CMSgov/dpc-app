@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.IDPCDatabase;
+import gov.cms.dpc.common.hibernate.IDPCQueueDatabase;
 import gov.cms.dpc.queue.DPCQueueConfig;
 import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -14,12 +15,17 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-public class DPCAggregationConfiguration extends TypesafeConfiguration implements BlueButtonBundleConfiguration, IDPCDatabase, DPCQueueConfig {
+public class DPCAggregationConfiguration extends TypesafeConfiguration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
     @JsonProperty("database")
     private DataSourceFactory database = new DataSourceFactory();
+
+    @Valid
+    @NotNull
+    @JsonProperty("queuedb")
+    private DataSourceFactory queueDatabase = new DataSourceFactory();
 
     @Valid
     @NotNull
@@ -43,6 +49,11 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
+    }
+
+    @Override
+    public DataSourceFactory getQueueDatabase() {
+        return queueDatabase;
     }
 
     public String getExportPath() {

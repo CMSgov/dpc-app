@@ -12,6 +12,7 @@ import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.store.hibernate.HibernateKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
@@ -19,19 +20,21 @@ import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
 
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.List;
 
 @SuppressWarnings("rawtypes")
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
-    AttributionAppModule() {
+    private final DPCHibernateBundle<DPCAttributionConfiguration> hibernate;
+
+    public AttributionAppModule(DPCHibernateBundle<DPCAttributionConfiguration> hibernate) {
+        this.hibernate = hibernate;
     }
 
     @Override
     public void configure(Binder binder) {
-        binder.requestStaticInjection(DPCHibernateBundle.class);
-
         // Resources
         binder.bind(V1AttributionResource.class);
         binder.bind(EndpointResource.class);
@@ -39,6 +42,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(PractitionerResource.class);
         binder.bind(GroupResource.class);
         binder.bind(TokenResource.class);
+        binder.bind(OrganizationResource.class);
 
         // DAOs
         binder.bind(EndpointDAO.class);
@@ -47,6 +51,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(ProviderDAO.class);
         binder.bind(RosterDAO.class);
         binder.bind(TokenDAO.class);
+        binder.bind(RelationshipDAO.class);
 
         // Tasks
         binder.bind(TruncateDatabase.class);
@@ -56,15 +61,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     }
 
     @Provides
-    OrganizationResource provideOrganizationResource(DPCHibernateBundle hibernate, OrganizationDAO dao, MacaroonBakery bakery) {
+    HibernateKeyStore provideRootKeyStore(DPCManagedSessionFactory factory, SecureRandom secureRandom) {
         return new UnitOfWorkAwareProxyFactory(hibernate)
-                .create(OrganizationResource.class, new Class<?>[]{OrganizationDAO.class, MacaroonBakery.class}, new Object[]{dao, bakery});
-    }
-
-    @Provides
-    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle hibernateModule, DPCManagedSessionFactory factory) {
-        return new UnitOfWorkAwareProxyFactory(hibernateModule)
-                .create(RelationshipDAO.class, SessionFactory.class, factory);
+                .create(HibernateKeyStore.class, new Class<?>[]{SessionFactory.class, SecureRandom.class}, new Object[]{factory.getSessionFactory(), secureRandom});
     }
 
     @Provides

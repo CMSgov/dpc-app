@@ -27,5 +27,8 @@ fi
 
 CMDLINE="java ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.aggregation.DPCAggregationService"
 
+echo "Migrating the database"
+eval ${CMDLINE} db migrate
+
 echo "Running server via entrypoint!"
 exec ${CMDLINE} "$@"

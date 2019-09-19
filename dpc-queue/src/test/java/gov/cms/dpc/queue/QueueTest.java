@@ -1,7 +1,7 @@
 package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.hibernate.Session;
@@ -42,7 +42,7 @@ class QueueTest {
                         // Create the session factory
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
-                        return new DistributedBatchQueue(new DPCManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
+                        return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
                     } else {
                         throw new IllegalArgumentException("I'm not that kind of queue");
                     }

@@ -5,6 +5,7 @@ import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListene
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
+import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.DPCHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
@@ -32,10 +33,13 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAttributionService.class);
+
+    private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>(List.of("gov.cms.dpc.macaroons.store.hibernate.entities"));
 
     public static void main(final String[] args) throws Exception {
         new DPCAttributionService().run(args);
@@ -96,11 +100,14 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
-                .modules(new AttributionAppModule(),
-                        new DPCHibernateModule<>(),
+                .modules(
+                        new DPCHibernateModule<>(hibernateBundle),
+                        new AttributionAppModule(hibernateBundle),
                         new FHIRModule<>(),
                         new BakeryModule())
                 .build();
+
+        bootstrap.addBundle(hibernateBundle); // Needs to be before guice
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.attribution"));
         bootstrap.addBundle(new MigrationsBundle<DPCAttributionConfiguration>() {
