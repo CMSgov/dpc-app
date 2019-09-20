@@ -45,7 +45,7 @@ public interface IJobQueue {
      *
      * @return The job to work, if present.
      */
-    Optional<JobQueueBatch> claimBatch(UUID aggregatorID);
+    Optional<JobQueueBatch> workBatch(UUID aggregatorID);
 
     /**
      * Pauses the current progress and allows another aggregator to pick up the batch.
