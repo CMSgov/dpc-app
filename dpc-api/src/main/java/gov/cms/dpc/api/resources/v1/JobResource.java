@@ -95,35 +95,65 @@ public class JobResource extends AbstractJobResource {
             builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
         } else if ( jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.QUEUED) ) {
             // The job is still being processed
-            String progress = "QUEUED: 0.00%";
-            if ( jobStatusSet.contains(JobStatus.RUNNING) ) {
-                AtomicInteger done = new AtomicInteger();
-                AtomicInteger total = new AtomicInteger();
-                for ( JobQueueBatch batch : batches ) {
-                    batch.getPatientIndex().ifPresent(value -> done.addAndGet(value + 1));
-                    total.addAndGet(batch.getPatients().size());
-                }
-                progress = String.format("RUNNING: %.2f%%", total.get() > 0 ? (done.get() * 100.0f) / total.get() : 0f);
-            }
-            builder = builder.header("X-Progress", progress)
-                    .status(HttpStatus.ACCEPTED_202);
+            builder = buildJobStatusInProgress(builder, batches, jobStatusSet);
         } else if ( jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED) ) {
             // All batches in the job have finished
-            JobQueueBatch firstBatch = batches.get(0);
-            final String resourceQueryParam = firstBatch.getResourceTypes().stream()
-                    .map(ResourceType::toString)
-                    .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
-            final JobCompletionModel completionModel = new JobCompletionModel(
-                    batches.stream().map(JobQueueBatch::getStartTime).map(Optional::get).min(OffsetDateTime::compareTo).orElseThrow(),
-                    String.format("%s/Group/%s/$export?_type=%s", baseURL, firstBatch.getProviderID(), resourceQueryParam),
-                    formOutputList(batches, false),
-                    formOutputList(batches, true));
-            builder = builder.status(HttpStatus.OK_200).entity(completionModel);
+            builder = buildJobStatusCompleted(builder, batches);
         } else {
             builder = builder.status(HttpStatus.ACCEPTED_202);
         }
 
         return builder.build();
+    }
+
+    /**
+     * Builds a job status response for an in progress job. Includes the current progress in the X-Progress header.
+     *
+     * @param builder - The current response builder
+     * @param batches - The list of batches made up in a job
+     * @param jobStatusSet - The list of all possible statuses in the job
+     *
+     * @return the response builder
+     */
+    private Response.ResponseBuilder buildJobStatusInProgress(Response.ResponseBuilder builder, List<JobQueueBatch> batches, Set<JobStatus> jobStatusSet) {
+        String progress = "QUEUED: 0.00%";
+
+        if ( jobStatusSet.contains(JobStatus.RUNNING) ) {
+            AtomicInteger done = new AtomicInteger();
+            AtomicInteger total = new AtomicInteger();
+            for ( JobQueueBatch batch : batches ) {
+                batch.getPatientIndex().ifPresent(value -> done.addAndGet(value + 1));
+                total.addAndGet(batch.getPatients().size());
+            }
+            progress = String.format("RUNNING: %.2f%%", total.get() > 0 ? (done.get() * 100.0f) / total.get() : 0f);
+        }
+
+        return builder.header("X-Progress", progress)
+                .status(HttpStatus.ACCEPTED_202);
+    }
+
+    /**
+     *  Builds a job status response for a completed job. Includes the list of files created from the job.
+     *
+     * @param builder - The current response builder
+     * @param batches - The list of batches made up in a job
+     *
+     * @return the response builder
+     */
+    private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches) {
+        JobQueueBatch firstBatch = batches.get(0);
+
+        final String resourceQueryParam = firstBatch.getResourceTypes().stream()
+                .map(ResourceType::toString)
+                .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
+
+        final JobCompletionModel completionModel = new JobCompletionModel(
+                batches.stream().map(JobQueueBatch::getStartTime).map(Optional::get).min(OffsetDateTime::compareTo).orElseThrow(),
+                String.format("%s/Group/%s/$export?_type=%s", baseURL, firstBatch.getProviderID(), resourceQueryParam),
+                formOutputList(batches, false),
+                formOutputList(batches, true));
+
+        return builder.status(HttpStatus.OK_200).entity(completionModel);
     }
 
     /**
