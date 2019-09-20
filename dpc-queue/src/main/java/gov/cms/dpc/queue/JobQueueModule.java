@@ -26,11 +26,11 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
         // Manually bind
         // to the Memory Queue, as a Singleton
         if (this.inMemory) {
-            binder.bind(JobQueueInterface.class)
+            binder.bind(IJobQueue.class)
                     .to(MemoryBatchQueue.class)
                     .in(Scopes.SINGLETON);
         } else {
-            binder.bind(JobQueueInterface.class)
+            binder.bind(IJobQueue.class)
                     .to(DistributedBatchQueue.class)
                     .in(Scopes.SINGLETON);
         }

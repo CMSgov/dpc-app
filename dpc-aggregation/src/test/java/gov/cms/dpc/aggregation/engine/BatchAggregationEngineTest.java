@@ -6,7 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
-import gov.cms.dpc.queue.JobQueueInterface;
+import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.doReturn;
 class BatchAggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_PROVIDER_ID = "1";
-    private JobQueueInterface queue;
+    private IJobQueue queue;
     private AggregationEngine engine;
     private Disposable subscribe;
 

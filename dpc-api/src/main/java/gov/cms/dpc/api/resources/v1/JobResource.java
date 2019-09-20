@@ -7,7 +7,7 @@ import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.queue.JobQueueInterface;
+import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -43,11 +43,11 @@ public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
 
-    private final JobQueueInterface queue;
+    private final IJobQueue queue;
     private final String baseURL;
 
     @Inject
-    public JobResource(JobQueueInterface queue, @APIV1 String baseURL) {
+    public JobResource(IJobQueue queue, @APIV1 String baseURL) {
         this.queue = queue;
         this.baseURL = baseURL;
     }

@@ -32,7 +32,7 @@ class QueueTest {
     @TestFactory
     Stream<DynamicTest> testSource() {
 
-        BiFunction<JobQueueInterface, String, String> nameGenerator = (queue, operation) -> String.format("Testing operation: %s on queue: %s", operation, queue.queueType());
+        BiFunction<IJobQueue, String, String> nameGenerator = (queue, operation) -> String.format("Testing operation: %s on queue: %s", operation, queue.queueType());
         return queues
                 .stream()
                 .map(queueName -> {
@@ -76,7 +76,7 @@ class QueueTest {
         sessionFactory.close();
     }
 
-    void testSimpleSubmissionCompletion(JobQueueInterface queue) {
+    void testSimpleSubmissionCompletion(IJobQueue queue) {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();
 
@@ -139,7 +139,7 @@ class QueueTest {
         assertEquals(0, queue.queueSize(), "Worked all jobs in the queue, but the queue is not empty");
     }
 
-    void testPatientAndEOBSubmission(JobQueueInterface queue) {
+    void testPatientAndEOBSubmission(IJobQueue queue) {
         // Add a job with a EOB resource
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit));
@@ -165,7 +165,7 @@ class QueueTest {
         });
     }
 
-    void testMissingJob(JobQueueInterface queue) {
+    void testMissingJob(IJobQueue queue) {
         UUID batchID = UUID.randomUUID();
 
         // Check that things are empty

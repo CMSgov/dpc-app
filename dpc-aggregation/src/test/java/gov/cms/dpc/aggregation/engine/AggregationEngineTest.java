@@ -7,7 +7,7 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
-import gov.cms.dpc.queue.JobQueueInterface;
+import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -34,7 +34,7 @@ class AggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_PROVIDER_ID = "1";
     private BlueButtonClient bbclient;
-    private JobQueueInterface queue;
+    private IJobQueue queue;
     private AggregationEngine engine;
     private Disposable subscribe;
 

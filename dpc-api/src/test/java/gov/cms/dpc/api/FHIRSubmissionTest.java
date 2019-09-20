@@ -9,7 +9,7 @@ import gov.cms.dpc.api.auth.StaticAuthenticator;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.queue.JobQueueInterface;
+import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.AuthFilter;
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.*;
 class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private static final UUID AGGREGATOR_ID = UUID.randomUUID();
-    private static final JobQueueInterface queue = spy(MemoryBatchQueue.class);
+    private static final IJobQueue queue = spy(MemoryBatchQueue.class);
     private static IGenericClient client = mock(IGenericClient.class);
     private static IRead mockRead = mock(IRead.class);
     private static IReadTyped mockTypedRead = mock(IReadTyped.class);

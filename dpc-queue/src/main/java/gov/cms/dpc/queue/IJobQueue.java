@@ -10,7 +10,7 @@ import java.util.UUID;
 /**
  * Interface for submitting/retrieving export jobs to a backing queue.
  */
-public interface JobQueueInterface {
+public interface IJobQueue {
 
     /**
      * Create and submit a job into the queue. The job will be broken into batches, prioritized,
