@@ -313,10 +313,8 @@ public class JobQueueBatch implements Serializable {
         if (this.status != JobStatus.RUNNING) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. JobStatus: %s", this.status));
         }
-        if (this.patientIndex == null || this.getPatients().size() != this.patientIndex+1) {
-            if ( !this.patients.isEmpty() ) {
-                throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. Job processing not finished. Only on patient %d of %d", this.getPatientIndex().orElse(-1) + 1, patients.size()));
-            }
+        if ( !this.patients.isEmpty() && (this.patientIndex == null || this.getPatients().size() != this.patientIndex+1) ) {
+            throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. Job processing not finished. Only on patient %d of %d", this.getPatientIndex().orElse(-1) + 1, patients.size()));
         }
         this.verifyAggregatorID(aggregatorID);
         this.status = JobStatus.COMPLETED;

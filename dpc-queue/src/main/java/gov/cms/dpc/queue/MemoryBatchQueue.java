@@ -93,7 +93,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
     @Override
     public synchronized long queueSize() {
         return this.queue.values().stream()
-                .filter(queue -> queue.getStatus().equals(JobStatus.QUEUED))
+                .filter(batch -> batch.getStatus().equals(JobStatus.QUEUED))
                 .count();
     }
 
