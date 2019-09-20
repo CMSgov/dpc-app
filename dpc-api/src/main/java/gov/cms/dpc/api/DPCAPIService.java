@@ -53,8 +53,11 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                 )
                 .build();
 
-        bootstrap.addBundle(hibernateBundle); // Needs to be before guice
-        bootstrap.addBundle(hibernateQueueBundle); // Needs to be before guice
+        // The Hibernate bundle must be initialized before Guice.
+        // The Hibernate Guice module requires an initialized SessionFactory,
+        // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
+        bootstrap.addBundle(hibernateBundle);
+        bootstrap.addBundle(hibernateQueueBundle);
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
