@@ -52,7 +52,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
             @Override
             public String getMigrationsFileName() {
-                return "migrations/queue_v2.xml";
+                return "migrations/queue.migrations.xml";
             }
         });
     }
