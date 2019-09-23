@@ -1,12 +1,11 @@
 package gov.cms.dpc.fhir.converters.entities;
 
+import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Group;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,17 +34,29 @@ public class RosterEntityConverter {
         final List<Group.GroupMemberComponent> patients = entity
                 .getAttributions()
                 .stream()
-                .map(relationship -> {
-                    final IdType id = new IdType("Patient", relationship.getPatient().getPatientID().toString());
-                    final Reference reference = new Reference(id);
-                    final Group.GroupMemberComponent component = new Group.GroupMemberComponent();
-                    component.setInactive(relationship.isInactive());
-                    return component;
-                })
+                .map(RosterEntityConverter::buildComponent)
                 .collect(Collectors.toList());
 
         group.setMember(patients);
 
         return group;
+    }
+
+    private static Group.GroupMemberComponent buildComponent(AttributionRelationship relationship) {
+        final IdType id = new IdType("Patient", relationship.getPatient().getPatientID().toString());
+        final Reference reference = new Reference(id);
+        final Group.GroupMemberComponent component = new Group.GroupMemberComponent();
+        component.setInactive(relationship.isInactive());
+
+        // Set the period begin, end
+        final Period period = new Period();
+        period.setStart(Date.from(relationship.getCreated().toInstant()));
+        if (relationship.isInactive()) {
+            period.setEnd(Date.from(relationship.getRemoved().toInstant()));
+        } else {
+            period.setEnd(Date.from(relationship.getExpires().toInstant()));
+        }
+        component.setPeriod(period);
+        return component;
     }
 }
