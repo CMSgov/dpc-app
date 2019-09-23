@@ -4,13 +4,16 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Entity(name = "attributions")
-public class AttributionRelationship {
+public class AttributionRelationship implements Serializable {
+
+    public static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +40,7 @@ public class AttributionRelationship {
     @Column(name = "removed_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime removed;
 
-    public AttributionRelationship() {
+    AttributionRelationship() {
         // Hibernate required
     }
 

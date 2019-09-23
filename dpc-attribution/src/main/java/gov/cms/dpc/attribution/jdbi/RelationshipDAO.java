@@ -8,12 +8,12 @@ import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
@@ -30,17 +30,17 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
     }
 
     /**
-     * Attempts to retrieve the attribution relationship between the given provider and patient pair.
+     * Attempts to retrieve the attribution relationship between the given rosterID and patient pair.
      * If no relationship exists, an exception is raised.
      *
-     * @param provider - {@link Practitioner} provider to determine attribution with
+     * @param rosterID - {@link Group} rosterID to determine attribution with
      * @param patient  - {@link Patient} patient to determine attribution for
      * @return - {@link AttributionRelationship} if one exists
      * @throws UnknownRelationship - thrown if attribution is missing
      */
-    public AttributionRelationship lookupAttributionRelationship(UUID provider, UUID patient) {
+    public AttributionRelationship lookupAttributionRelationship(UUID rosterID, UUID patient) {
 
-        logger.debug("Looking up attribution for Group/{} and Patient/{}", provider, patient);
+        logger.debug("Looking up attribution for Group/{} and Patient/{}", rosterID, patient);
 
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<AttributionRelationship> query = builder.createQuery(AttributionRelationship.class);
@@ -48,17 +48,27 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
         query.select(root);
 
         query.where(builder.and(
-                builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), provider),
+                builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID),
                 builder.equal(root.get(AttributionRelationship_.patient).get(PatientEntity_.patientID), patient)));
 
         final AttributionRelationship relationship = uniqueResult(query);
 
         if (relationship == null) {
-            logger.debug("Unknown attribution relationship between Group/{} and Patient/{}", provider, patient);
-            throw new UnknownRelationship(provider.toString(), patient.toString());
+            logger.debug("Unknown attribution relationship between Group/{} and Patient/{}", rosterID, patient);
+            throw new UnknownRelationship(rosterID.toString(), patient.toString());
         }
 
         return relationship;
+    }
+
+    public void removeRosterAttributions(UUID rosterID) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaDelete<AttributionRelationship> query = builder.createCriteriaDelete(AttributionRelationship.class);
+        final Root<AttributionRelationship> root = query.from(AttributionRelationship.class);
+
+        query.where(builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID));
+
+        this.currentSession().createQuery(query).executeUpdate();
     }
 
     public void updateAttributionRelationship(AttributionRelationship relationship) {

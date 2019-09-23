@@ -34,7 +34,7 @@ public abstract class AbstractGroupResource {
 
     @PUT
     @Path("/{rosterID}")
-    public abstract Group updateRoster(UUID rosterID, Group groupUpdate);
+    public abstract Group replaceRoster(UUID rosterID, Group groupUpdate);
 
     @POST
     @Path("/{rosterID}/$add")

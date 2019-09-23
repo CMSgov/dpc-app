@@ -79,8 +79,8 @@ class AttributionFHIRTest {
                 .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateAttributionBundle(entry, orgID))
                 .flatMap((bundle) -> Stream.of(
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
-                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle))));
-//                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Remove"), () -> removeRoster(bundle))));
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle)),
+                        DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Remove"), () -> removeRoster(bundle))));
     }
 
     private void submitRoster(Bundle bundle) {
@@ -271,7 +271,7 @@ class AttributionFHIRTest {
 
         assertEquals(1,
                 getUpdatedGroup.execute().getMember().size(),
-                "Should have a missing patient");
+                "Should only have a single member");
     }
 
     private void removeRoster(Bundle bundle) {

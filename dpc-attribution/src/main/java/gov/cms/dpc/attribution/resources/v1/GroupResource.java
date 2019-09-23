@@ -170,16 +170,14 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Update roster", notes = "FHIR endpoint to update the given Group resource with members to add or remove.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
-    public Group updateRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+    public Group replaceRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-        existingAttributions.clear();
-        // TODO: This is a temporary workaround until we get DPC-564 merged in, this avoids unique constraint violations due to the current transaction not being committed yet.
-        this.rosterDAO.updateRoster(existingRoster);
+        // Remove all roster relationships
+        this.relationshipDAO.removeRosterAttributions(rosterID);
 
-        final List<AttributionRelationship> overwriteAttributions = groupUpdate
+        groupUpdate
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
@@ -189,11 +187,12 @@ public class GroupResource extends AbstractGroupResource {
                     return pe;
                 })
                 .map(pe -> new AttributionRelationship(existingRoster, pe))
-                .collect(Collectors.toList());
+                .peek(relationship -> relationship.setExpires(generateExpirationTime()))
+                .forEach(relationshipDAO::addAttributionRelationship);
 
-        existingAttributions.addAll(overwriteAttributions);
-
-        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+        return this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION)
+                .toFHIR();
     }
 
     @POST
