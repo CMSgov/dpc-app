@@ -10,8 +10,10 @@ fi
 
 CMDLINE="java ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.attribution.DPCAttributionService"
 
-echo "Migrating the database"
-eval ${CMDLINE} db migrate
+if [ $DB_MIGRATION -eq 1 ]; then
+  echo "Migrating the database"
+  eval ${CMDLINE} db migrate
+fi
 
 if [ -n "$SEED" ]; then
     echo "Loading seeds"
