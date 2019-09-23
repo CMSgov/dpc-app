@@ -386,7 +386,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="add-roster-expirations" author="nickrobison-usds">
+    <changeSet id="add-roster-expiration" author="nickrobison-usds">
         <addColumn tableName="ATTRIBUTIONS">
             <column name="expires_at"
                     type="TIMESTAMP WITH TIME ZONE"
@@ -395,5 +395,12 @@
                     type="TIMESTAMP WITH TIME ZONE"/>
             <column name="inactive" type="BOOLEAN" defaultValueBoolean="false"/>
         </addColumn>
+    </changeSet>
+    
+    <changeSet id="add-roster-idx" author="nickrobison-usds">
+        <createIndex tableName="ATTRIBUTIONS" indexName="">
+            <column name="roster_id"/>
+            <column name="patient_id"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>
