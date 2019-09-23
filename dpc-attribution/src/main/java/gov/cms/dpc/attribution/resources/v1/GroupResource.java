@@ -13,6 +13,7 @@ import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.RosterEntity;
+import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -21,7 +22,10 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -218,7 +222,11 @@ public class GroupResource extends AbstractGroupResource {
                     return this.patientDAO.getPatient(patientID).orElseThrow(() -> new WebApplicationException(String.format("Cannot find patient with ID %s",
                             patientID.toString()), Response.Status.BAD_REQUEST));
                 })
-                .map(patient -> new AttributionRelationship(existingRoster, patient))
+                .map(patient -> {
+                    final AttributionRelationship relationship = new AttributionRelationship(existingRoster, patient);
+                    relationship.setExpires(generateExpirationTime());
+                    return relationship;
+                })
                 .forEach(this.relationshipDAO::addAttributionRelationship);
 
 
@@ -250,7 +258,10 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Remove roster members", notes = "FHIR endpoint to update the given Group resource by removing the members included in the supplied Group.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find attribution roster"),
+            @ApiResponse(code = 400, message = "Cannot find attribution relationship to remove")
+    })
     @Override
     public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
@@ -261,10 +272,26 @@ public class GroupResource extends AbstractGroupResource {
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
-                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
+                .map(entity -> {
+                    final PatientEntity patientEntity = new PatientEntity();
+                    final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
+                    patientEntity.setPatientID(patientID);
+                    try {
+                        return this.relationshipDAO.lookupAttributionRelationship(rosterID, patientID);
+                    } catch (UnknownRelationship e) {
+                        logger.error("Cannot find relationship to remove.", e);
+                        throw new WebApplicationException("Cannot find attribution relationship.", Response.Status.BAD_REQUEST);
+                    }
+                })
+                .peek(relationship -> {
+                    relationship.setInactive(true);
+                    relationship.setRemoved(OffsetDateTime.now(ZoneOffset.UTC));
+                })
+                .forEach(this.relationshipDAO::updateAttributionRelationship);
 
         existingRoster.setAttributions(existingAttributions);
-        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+        return this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION).toFHIR();
     }
 
     @DELETE
@@ -314,15 +341,15 @@ public class GroupResource extends AbstractGroupResource {
      * @param relationships   - {@link List} of {@link AttributionRelationship} entities to find in list
      * @param entityReference - {{@link AttributionRelationship} to find in list
      */
-    private static void removeAttributedPatients(List<AttributionRelationship> relationships, Reference entityReference) {
-        final IdType idType = new IdType(entityReference.getReference());
-        final Optional<AttributionRelationship> maybeAttributed = relationships
-                .stream()
-                .filter(relationship -> relationship.getPatient().getPatientID().toString().equals(idType.getIdPart()))
-                .findAny();
-
-        maybeAttributed.ifPresent(relationships::remove);
-    }
+//    private static void removeAttributedPatients(List<AttributionRelationship> relationships, Reference entityReference) {
+//        final IdType idType = new IdType(entityReference.getReference());
+//        final Optional<AttributionRelationship> maybeAttributed = relationships
+//                .stream()
+//                .filter(relationship -> relationship.getPatient().getPatientID().toString().equals(idType.getIdPart()))
+//                .findAny();
+//
+//        maybeAttributed.ifPresent(relationships::remove);
+//    }
 
     /**
      * Find a matching {@link AttributionRelationship} from a {@link List} of {@link AttributionRelationship} entities

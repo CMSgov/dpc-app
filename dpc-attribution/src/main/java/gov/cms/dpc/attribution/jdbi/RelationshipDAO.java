@@ -1,18 +1,23 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.common.entities.AttributionRelationship_;
+import gov.cms.dpc.common.entities.PatientEntity_;
+import gov.cms.dpc.common.entities.RosterEntity_;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
-import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
-import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
@@ -33,24 +38,31 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
      * @return - {@link AttributionRelationship} if one exists
      * @throws UnknownRelationship - thrown if attribution is missing
      */
-    public AttributionRelationship lookupAttributionRelationship(Practitioner provider, Patient patient) {
+    public AttributionRelationship lookupAttributionRelationship(UUID provider, UUID patient) {
 
-        final String providerNPI = FHIRExtractors.getProviderNPI(provider);
-        final String patientMPI = FHIRExtractors.getPatientMPI(patient);
-        logger.debug("Looking up attribution between {} and {}", providerNPI, patientMPI);
+        logger.debug("Looking up attribution for Group/{} and Patient/{}", provider, patient);
 
-        final Query<AttributionRelationship> query = namedQuery("findRelationship");
-        query.setParameter("provID", providerNPI);
-        query.setParameter("patID", patientMPI);
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<AttributionRelationship> query = builder.createQuery(AttributionRelationship.class);
+        final Root<AttributionRelationship> root = query.from(AttributionRelationship.class);
+        query.select(root);
+
+        query.where(builder.and(
+                builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), provider),
+                builder.equal(root.get(AttributionRelationship_.patient).get(PatientEntity_.patientID), patient)));
 
         final AttributionRelationship relationship = uniqueResult(query);
 
         if (relationship == null) {
-            logger.debug("Unknown attribution relationship between {} and {}", providerNPI, patientMPI);
-            throw new UnknownRelationship(providerNPI, patientMPI);
+            logger.debug("Unknown attribution relationship between Group/{} and Patient/{}", provider, patient);
+            throw new UnknownRelationship(provider.toString(), patient.toString());
         }
 
         return relationship;
+    }
+
+    public void updateAttributionRelationship(AttributionRelationship relationship) {
+        this.currentSession().update(relationship);
     }
 
     public AttributionRelationship addAttributionRelationship(AttributionRelationship relationship) {

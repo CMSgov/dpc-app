@@ -35,9 +35,13 @@ public class RosterEntityConverter {
         final List<Group.GroupMemberComponent> patients = entity
                 .getAttributions()
                 .stream()
-                .map(relationships -> new IdType("Patient", relationships.getPatient().getPatientID().toString()))
-                .map(Reference::new)
-                .map(Group.GroupMemberComponent::new)
+                .map(relationship -> {
+                    final IdType id = new IdType("Patient", relationship.getPatient().getPatientID().toString());
+                    final Reference reference = new Reference(id);
+                    final Group.GroupMemberComponent component = new Group.GroupMemberComponent();
+                    component.setInactive(relationship.isInactive());
+                    return component;
+                })
                 .collect(Collectors.toList());
 
         group.setMember(patients);
