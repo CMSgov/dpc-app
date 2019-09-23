@@ -137,14 +137,15 @@ public class GroupResource extends AbstractGroupResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Bundle getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID) {
-        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        if (!this.rosterDAO.rosterExists(rosterID)) {
+            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+        }
 
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
         // We have to do this because Hibernate/Dropwizard get confused when returning a single type (like String)
-        @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(existingRoster.getId());
+        @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(rosterID);
 
         final List<Bundle.BundleEntryComponent> patients = patientMBIs
                 .stream()
@@ -171,8 +172,12 @@ public class GroupResource extends AbstractGroupResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
     public Group replaceRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
-        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        if (!this.rosterDAO.rosterExists(rosterID)) {
+            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+        }
+
+        final RosterEntity rosterEntity = new RosterEntity();
+        rosterEntity.setId(rosterID);
 
         // Remove all roster relationships
         this.relationshipDAO.removeRosterAttributions(rosterID);
@@ -186,7 +191,7 @@ public class GroupResource extends AbstractGroupResource {
                     pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
                     return pe;
                 })
-                .map(pe -> new AttributionRelationship(existingRoster, pe))
+                .map(pe -> new AttributionRelationship(rosterEntity, pe))
                 .peek(relationship -> relationship.setExpires(generateExpirationTime()))
                 .forEach(relationshipDAO::addAttributionRelationship);
 
@@ -206,8 +211,12 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
-        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        if (!this.rosterDAO.rosterExists(rosterID)) {
+            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+        }
+
+        final RosterEntity rosterEntity = new RosterEntity();
+        rosterEntity.setId(rosterID);
 
         // For each group member, check to see if the patient exists, if not, throw an exception
         // Check to see if they're already rostered, if so, ignore
@@ -222,7 +231,7 @@ public class GroupResource extends AbstractGroupResource {
                             patientID.toString()), Response.Status.BAD_REQUEST));
                 })
                 .map(patient -> {
-                    final AttributionRelationship relationship = new AttributionRelationship(existingRoster, patient);
+                    final AttributionRelationship relationship = new AttributionRelationship(rosterEntity, patient);
                     relationship.setExpires(generateExpirationTime());
                     return relationship;
                 })
@@ -263,10 +272,10 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
-        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        if (!this.rosterDAO.rosterExists(rosterID)) {
+            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+        }
 
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
         groupUpdate
                 .getMember()
                 .stream()
@@ -288,7 +297,6 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .forEach(this.relationshipDAO::updateAttributionRelationship);
 
-        existingRoster.setAttributions(existingAttributions);
         return this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION).toFHIR();
     }

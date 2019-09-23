@@ -145,6 +145,16 @@ class AttributionFHIRTest {
                 .execute();
 
         assertEquals(group2.getMember().size(), attributed.getTotal(), "Should have the same number of patients");
+
+        // Try to get a non-existent roster
+
+        final IReadExecutable<Group> badRead = client
+                .read()
+                .resource(Group.class)
+                .withId(UUID.randomUUID().toString())
+                .encodedJson();
+
+        assertThrows(ResourceNotFoundException.class, badRead::execute, "Should not have found roster");
     }
 
 
