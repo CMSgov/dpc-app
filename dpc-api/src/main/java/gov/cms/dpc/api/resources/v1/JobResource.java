@@ -121,10 +121,10 @@ public class JobResource extends AbstractJobResource {
         if ( jobStatusSet.contains(JobStatus.RUNNING) ) {
             AtomicInteger done = new AtomicInteger();
             AtomicInteger total = new AtomicInteger();
-            for ( JobQueueBatch batch : batches ) {
+            batches.forEach(batch -> {
                 batch.getPatientIndex().ifPresent(value -> done.addAndGet(value + 1));
                 total.addAndGet(batch.getPatients().size());
-            }
+            });
             progress = String.format("RUNNING: %.2f%%", total.get() > 0 ? (done.get() * 100.0f) / total.get() : 0f);
         }
 
