@@ -47,6 +47,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(ProviderDAO.class);
         binder.bind(RosterDAO.class);
         binder.bind(TokenDAO.class);
+        binder.bind(RelationshipDAO.class);
 
         // Tasks
         binder.bind(TruncateDatabase.class);
@@ -61,11 +62,11 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
                 .create(OrganizationResource.class, new Class<?>[]{OrganizationDAO.class, MacaroonBakery.class}, new Object[]{dao, bakery});
     }
 
-    @Provides
-    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle hibernateModule, DPCManagedSessionFactory factory) {
-        return new UnitOfWorkAwareProxyFactory(hibernateModule)
-                .create(RelationshipDAO.class, SessionFactory.class, factory);
-    }
+//    @Provides
+//    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle hibernateModule, DPCManagedSessionFactory factory) {
+//        return new UnitOfWorkAwareProxyFactory(hibernateModule)
+//                .create(RelationshipDAO.class, SessionFactory.class, factory);
+//    }
 
     @Provides
     Duration provideExpiration(DPCAttributionConfiguration config) {

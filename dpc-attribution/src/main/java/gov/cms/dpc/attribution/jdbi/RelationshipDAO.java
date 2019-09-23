@@ -5,7 +5,6 @@ import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
-import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -54,8 +53,8 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
         return relationship;
     }
 
-    public void addAttributionRelationship(AttributionRelationship relationship) {
-        persist(relationship);
+    public AttributionRelationship addAttributionRelationship(AttributionRelationship relationship) {
+        return persist(relationship);
     }
 
     /**

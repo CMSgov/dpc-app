@@ -2,8 +2,10 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
+import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterDAO;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.attribution.utils.RESTUtils;
@@ -27,13 +29,11 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Api(value = "Group")
@@ -45,12 +45,16 @@ public class GroupResource extends AbstractGroupResource {
     private final ProviderDAO providerDAO;
     private final PatientDAO patientDAO;
     private final RosterDAO rosterDAO;
+    private final RelationshipDAO relationshipDAO;
+    private final DPCAttributionConfiguration config;
 
     @Inject
-    GroupResource(ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO) {
+    GroupResource(ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO, RelationshipDAO relationshipDAO, DPCAttributionConfiguration config) {
         this.rosterDAO = rosterDAO;
         this.providerDAO = providerDAO;
         this.patientDAO = patientDAO;
+        this.relationshipDAO = relationshipDAO;
+        this.config = config;
     }
 
     @POST
@@ -77,7 +81,8 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
-        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0));
+        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
+
         // Add the first provider
         final RosterEntity persisted = this.rosterDAO.persistEntity(rosterEntity);
         final Group persistedGroup = persisted.toFHIR();
@@ -192,32 +197,52 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Add roster members", notes = "FHIR endpoint to update the given Group resource by adding the members included in the supplied Group.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find attribution roster"),
+            @ApiResponse(code = 400, message = "Unable to add patient to roster")
+    })
     @Override
     public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+        // For each group member, check to see if the patient exists, if not, throw an exception
+        // Check to see if they're already rostered, if so, ignore
         groupUpdate
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
-                .map(ref -> {
-                    final PatientEntity pe = new PatientEntity();
-                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
-                    return pe;
+                // Check to see if patient exists, if not, throw an exception
+                .map(entity -> {
+                    final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
+                    return this.patientDAO.getPatient(patientID).orElseThrow(() -> new WebApplicationException(String.format("Cannot find patient with ID %s",
+                            patientID.toString()), Response.Status.BAD_REQUEST));
                 })
-                .map(pe -> new AttributionRelationship(existingRoster, pe))
-                .forEach(relationship -> {
-                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
-                    if (found.isEmpty()) {
-                        existingAttributions.add(relationship);
-                    }
-                });
+                .map(patient -> new AttributionRelationship(existingRoster, patient))
+                .forEach(this.relationshipDAO::addAttributionRelationship);
 
-        existingRoster.setAttributions(existingAttributions);
-        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+
+//        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+//        groupUpdate
+//                .getMember()
+//                .stream()
+//                .map(Group.GroupMemberComponent::getEntity)
+//                .map(ref -> {
+//                    final PatientEntity pe = new PatientEntity();
+//                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
+//                    return pe;
+//                })
+//                .map(pe -> new AttributionRelationship(existingRoster, pe))
+//                .forEach(relationship -> {
+//                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
+//                    if (found.isEmpty()) {
+//                        existingAttributions.add(relationship);
+//                    }
+//                });
+
+//        existingRoster.setAttributions(existingAttributions);
+        return this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION).toFHIR();
     }
 
     @POST
@@ -277,6 +302,10 @@ public class GroupResource extends AbstractGroupResource {
         return this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION)
                 .toFHIR();
+    }
+
+    private OffsetDateTime generateExpirationTime() {
+        return OffsetDateTime.now(ZoneOffset.UTC).plus(config.getExpirationThreshold());
     }
 
     /**

@@ -3,6 +3,7 @@ package gov.cms.dpc.common.entities;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -23,12 +24,21 @@ public class AttributionRelationship {
     @ManyToOne(fetch = FetchType.LAZY)
     private PatientEntity patient;
 
+    private boolean inactive = false;
+
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
     private OffsetDateTime created;
 
+    @Column(name = "expires_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @NotNull
+    private OffsetDateTime expires;
+
+    @Column(name = "removed_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private OffsetDateTime removed;
+
     public AttributionRelationship() {
-        this.created = OffsetDateTime.now(ZoneOffset.UTC);
+        // Hibernate required
     }
 
     public AttributionRelationship(RosterEntity roster, PatientEntity patient) {
@@ -78,6 +88,30 @@ public class AttributionRelationship {
 
     public void setCreated(OffsetDateTime created) {
         this.created = created;
+    }
+
+    public boolean isInactive() {
+        return inactive;
+    }
+
+    public void setInactive(boolean inactive) {
+        this.inactive = inactive;
+    }
+
+    public OffsetDateTime getExpires() {
+        return expires;
+    }
+
+    public void setExpires(OffsetDateTime expires) {
+        this.expires = expires;
+    }
+
+    public OffsetDateTime getRemoved() {
+        return removed;
+    }
+
+    public void setRemoved(OffsetDateTime removed) {
+        this.removed = removed;
     }
 
     @Override

@@ -385,4 +385,15 @@
                     defaultValueComputed="current_timestamp + ( 1 || ' year')::interval"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="add-roster-expirations" author="nickrobison-usds">
+        <addColumn tableName="ATTRIBUTIONS">
+            <column name="expires_at"
+                    type="TIMESTAMP WITH TIME ZONE"
+                    defaultValueComputed="current_timestamp + ( 1 || ' year')::interval"/>
+            <column name="removed_at"
+                    type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="inactive" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
