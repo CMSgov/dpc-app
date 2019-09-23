@@ -36,7 +36,6 @@ import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -237,26 +236,6 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .forEach(this.relationshipDAO::addAttributionRelationship);
 
-
-//        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-//        groupUpdate
-//                .getMember()
-//                .stream()
-//                .map(Group.GroupMemberComponent::getEntity)
-//                .map(ref -> {
-//                    final PatientEntity pe = new PatientEntity();
-//                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
-//                    return pe;
-//                })
-//                .map(pe -> new AttributionRelationship(existingRoster, pe))
-//                .forEach(relationship -> {
-//                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
-//                    if (found.isEmpty()) {
-//                        existingAttributions.add(relationship);
-//                    }
-//                });
-
-//        existingRoster.setAttributions(existingAttributions);
         return this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION).toFHIR();
     }
@@ -340,47 +319,6 @@ public class GroupResource extends AbstractGroupResource {
 
     private OffsetDateTime generateExpirationTime() {
         return OffsetDateTime.now(ZoneOffset.UTC).plus(config.getExpirationThreshold());
-    }
-
-    /**
-     * Remove {@link AttributionRelationship} from the given {@link List} of {@link AttributionRelationship}, if it matches
-     *
-     * @param relationships   - {@link List} of {@link AttributionRelationship} entities to find in list
-     * @param entityReference - {{@link AttributionRelationship} to find in list
-     */
-//    private static void removeAttributedPatients(List<AttributionRelationship> relationships, Reference entityReference) {
-//        final IdType idType = new IdType(entityReference.getReference());
-//        final Optional<AttributionRelationship> maybeAttributed = relationships
-//                .stream()
-//                .filter(relationship -> relationship.getPatient().getPatientID().toString().equals(idType.getIdPart()))
-//                .findAny();
-//
-//        maybeAttributed.ifPresent(relationships::remove);
-//    }
-
-    /**
-     * Find a matching {@link AttributionRelationship} from a {@link List} of {@link AttributionRelationship} entities
-     *
-     * @param relationships - {@link List} of {@link AttributionRelationship} entities to match against
-     * @param relationship  - {@link AttributionRelationship} to compare against the list
-     * @return - {@link Optional} if {@link AttributionRelationship} is in the list
-     */
-    private static Optional<AttributionRelationship> findAttributionRelationship(List<AttributionRelationship> relationships, AttributionRelationship relationship) {
-        return relationships
-                .stream()
-                .filter(r1 -> matchAttribution(r1, relationship))
-                .findAny();
-    }
-
-    /**
-     * Determines if two {@link AttributionRelationship} entity are equal, by looking at the {@link RosterEntity} and {@link PatientEntity} in both entities.
-     *
-     * @param r1 - {@link AttributionRelationship} left side of the comparison
-     * @param r2 - {@link AttributionRelationship} right side of the comparison
-     * @return - {@code true} relationships are equal. {@code false} relationships are not equal
-     */
-    private static boolean matchAttribution(AttributionRelationship r1, AttributionRelationship r2) {
-        return r1.getRoster().getId().equals(r2.getRoster().getId()) && r1.getPatient().getPatientID().equals(r2.getPatient().getPatientID());
     }
 
     private static Pair<IdType, IdType> parseCompositeID(String queryParam) {

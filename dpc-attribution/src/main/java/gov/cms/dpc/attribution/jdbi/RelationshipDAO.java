@@ -7,7 +7,6 @@ import gov.cms.dpc.common.entities.RosterEntity_;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,6 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("unchecked")
 public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
 
     private static final Logger logger = LoggerFactory.getLogger(RelationshipDAO.class);
@@ -33,8 +31,8 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
      * Attempts to retrieve the attribution relationship between the given rosterID and patient pair.
      * If no relationship exists, an exception is raised.
      *
-     * @param rosterID - {@link Group} rosterID to determine attribution with
-     * @param patient  - {@link Patient} patient to determine attribution for
+     * @param rosterID - {@link UUID} rosterID to determine attribution with
+     * @param patient  - {@link UUID} patientID to determine attribution for
      * @return - {@link AttributionRelationship} if one exists
      * @throws UnknownRelationship - thrown if attribution is missing
      */
@@ -61,6 +59,11 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
         return relationship;
     }
 
+    /**
+     * Remove all {@link AttributionRelationship} for the given attribution roster
+     *
+     * @param rosterID - {@link UUID} of roster to remove attributions from
+     */
     public void removeRosterAttributions(UUID rosterID) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaDelete<AttributionRelationship> query = builder.createCriteriaDelete(AttributionRelationship.class);
@@ -71,21 +74,22 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
         this.currentSession().createQuery(query).executeUpdate();
     }
 
+    /**
+     * Update existing {@link AttributionRelationship}. Mostly used to set patients as inactive
+     *
+     * @param relationship - {@link AttributionRelationship} to update
+     */
     public void updateAttributionRelationship(AttributionRelationship relationship) {
         this.currentSession().update(relationship);
     }
 
-    public AttributionRelationship addAttributionRelationship(AttributionRelationship relationship) {
-        return persist(relationship);
-    }
-
     /**
-     * Remove the given attribution relationship
+     * Create new {@link AttributionRelationship}
      *
-     * @param relationship - {@link AttributionRelationship} to remove
+     * @param relationship - {@link AttributionRelationship} to add
      */
-    public void removeAttributionRelationship(AttributionRelationship relationship) {
-        currentSession().delete(relationship);
+    public void addAttributionRelationship(AttributionRelationship relationship) {
+        persist(relationship);
     }
 
     /**
