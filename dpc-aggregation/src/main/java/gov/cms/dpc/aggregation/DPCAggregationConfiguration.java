@@ -46,6 +46,10 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Max(100000) // Keep files under a GB
     private int resourcesPerFileCount = 10000;
 
+    // How often in milliseconds to check the queue for new batches
+    @Min(50)
+    private int pollingFrequency = 500;
+
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -79,5 +83,10 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
         return this.clientConfiguration;
+    }
+
+    @Override
+    public int getPollingFrequency() {
+        return pollingFrequency;
     }
 }

@@ -6,7 +6,6 @@ import gov.cms.dpc.common.hibernate.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.IDPCQueueDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
-import gov.cms.dpc.queue.DPCQueueConfig;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
@@ -15,7 +14,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig, IDPCFHIRConfiguration {
+public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, IDPCFHIRConfiguration {
 
     @NotEmpty
     private String exportPath;

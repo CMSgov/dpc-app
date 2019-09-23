@@ -57,8 +57,11 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     OperationsConfig provideOperationsConfig() {
         final var config = getConfiguration();
 
-        return new OperationsConfig(config.getResourcesPerFileCount(),
+        return new OperationsConfig(
+                config.getResourcesPerFileCount(),
                 config.getExportPath(),
-                config.getRetryCount());
+                config.getRetryCount(),
+                config.getPollingFrequency()
+        );
     }
 }
