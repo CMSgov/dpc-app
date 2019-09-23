@@ -104,8 +104,8 @@ public class AggregationEngine implements Runnable {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .repeatWhen(completed -> {
-                    logger.debug("No job, polling again in 2 seconds");
-                    return completed.delay(2, TimeUnit.SECONDS);
+                    logger.debug(String.format("No job, polling again in %d milliseconds", operationsConfig.getPollingFrequency()));
+                    return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
                 })
                 .subscribe(this::processJobBatch, error -> logger.error("Unable to complete job.", error));
     }
