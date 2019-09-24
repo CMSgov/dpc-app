@@ -47,6 +47,7 @@ public class RosterEntityConverter {
         final Reference reference = new Reference(id);
         final Group.GroupMemberComponent component = new Group.GroupMemberComponent();
         component.setInactive(relationship.isInactive());
+        component.setEntity(reference);
 
         // Set the period begin, end
         final Period period = new Period();
