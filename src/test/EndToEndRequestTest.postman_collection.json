@@ -473,11 +473,77 @@
 						"description": "Remove a patient from the attribution roster."
 					},
 					"response": []
+				},
+				{
+					"name": "Add unknown patient to Roster",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f6abd191-547c-476b-b6f9-778097f05b8e",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "b4c73864-2ec4-4bae-82cd-383a965c9eac",
+								"exec": [
+									"// Status should be 200",
+									"pm.test(\"Status is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Outcome has a useful error message\", function() {",
+									"    var response = pm.response.json();",
+									"    ",
+									"    // Should be a search set with one less entry",
+									"    pm.expect(response.issue).to.have.length(1);",
+									"    pm.expect(response.issue[0].details.text).to.have.string('Cannot find patient with ID');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/fhir+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Group\",\n  \"actual\": true,\n  \"active\": true,\n  \"type\": \"person\",\n  \"characteristic\": [\n    {\n      \"code\": {\n        \"coding\": [\n          {\n            \"code\": \"attributed-to\"\n          }\n        ]\n      },\n      \"valueCodeableConcept\": {\n          \"coding\": [\n            {\n              \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n              \"code\": \"3116145044854423862\"\n            }\n          ]\n      }\n    }\n  ],\n  \"member\": [{\n  \"entity\": {\n        \"reference\": \"Patient/c22044f0-3b8e-488c-bcd4-fcbc630d9c19\"\n      }\n  }]\n}"
+						},
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}/$add",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Group",
+								"{{attribution_group_id}}",
+								"$add"
+							]
+						},
+						"description": "Try to add a patient to the roster, but one that doesn't actually exist."
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "Retry export after submitting roster",
+			"name": "Try export after submitting roster",
 			"event": [
 				{
 					"listen": "test",
