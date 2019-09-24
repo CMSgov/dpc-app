@@ -218,7 +218,6 @@ public class GroupResource extends AbstractGroupResource {
         final RosterEntity rosterEntity = new RosterEntity();
         rosterEntity.setId(rosterID);
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-
         // For each group member, check to see if the patient exists, if not, throw an exception
         // Check to see if they're already rostered, if so, ignore
         groupUpdate
@@ -235,7 +234,6 @@ public class GroupResource extends AbstractGroupResource {
                     // Check to see if the attribution already exists, if so, re-extend the expiration time
                     final AttributionRelationship relationship = this.relationshipDAO.lookupAttributionRelationship(rosterID, patient.getPatientID())
                             .orElse(new AttributionRelationship(rosterEntity, patient, now));
-
                     // If the relationship is inactive, then we need to update the period begin for the new membership span
                     if (relationship.isInactive()) {
                         relationship.setPeriodBegin(now);

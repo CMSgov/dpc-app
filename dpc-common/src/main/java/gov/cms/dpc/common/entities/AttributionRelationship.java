@@ -107,7 +107,7 @@ public class AttributionRelationship implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof AttributionRelationship)) return false;
         AttributionRelationship that = (AttributionRelationship) o;
         return inactive == that.inactive &&
                 Objects.equals(attributionID, that.attributionID) &&

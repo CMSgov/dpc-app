@@ -62,12 +62,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
                 .create(OrganizationResource.class, new Class<?>[]{OrganizationDAO.class, MacaroonBakery.class}, new Object[]{dao, bakery});
     }
 
-//    @Provides
-//    RelationshipDAO provideRelationshipDAO(DPCHibernateBundle hibernateModule, DPCManagedSessionFactory factory) {
-//        return new UnitOfWorkAwareProxyFactory(hibernateModule)
-//                .create(RelationshipDAO.class, SessionFactory.class, factory);
-//    }
-
     @Provides
     Duration provideExpiration(DPCAttributionConfiguration config) {
         return config.getExpirationThreshold();
