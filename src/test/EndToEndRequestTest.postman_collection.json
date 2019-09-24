@@ -409,12 +409,10 @@
 									"",
 									"// Find the patient in the group and set it inactive.",
 									"console.log(group.member);",
-									"group.member.forEach(member => {",
+									"group.member = group.member.filter(member => {",
 									"    var m  = member.entity.reference;",
 									"    console.log(\"id: \" + m + \" pat: \" + patientID);",
-									"    if (m === patientID) {",
-									"        member.inactive = true;",
-									"    }",
+									"    return m === patientID;",
 									"});",
 									"",
 									"pm.environment.set(\"roster_body\", JSON.stringify(group))"
@@ -446,7 +444,7 @@
 						}
 					],
 					"request": {
-						"method": "PUT",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Accept",
@@ -459,7 +457,7 @@
 							"raw": "{{roster_body}}"
 						},
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}/$remove",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -468,7 +466,8 @@
 							"path": [
 								"v1",
 								"Group",
-								"{{attribution_group_id}}"
+								"{{attribution_group_id}}",
+								"$remove"
 							]
 						},
 						"description": "Remove a patient from the attribution roster."
@@ -573,13 +572,13 @@
 							"        pm.expect(pm.response.json().error).to.have.lengthOf(0);",
 							"        pm.expect(pm.response.json().output).to.have.lengthOf(3);",
 							"        pm.expect(pm.response.json().output[0].type).to.equal(\"Patient\");",
-							"        pm.expect(pm.response.json().output[0].count).to.equal(4);",
+							"        pm.expect(pm.response.json().output[0].count).to.equal(3);",
 							"        pm.environment.set(\"patient_url\", pm.response.json().output[0].url);",
 							"        pm.expect(pm.response.json().output[1].type).to.equal(\"ExplanationOfBenefit\");",
-							"        pm.expect(pm.response.json().output[1].count).to.equal(152);",
+							"        pm.expect(pm.response.json().output[1].count).to.equal(102);",
 							"        pm.environment.set(\"eob_url\", pm.response.json().output[1].url);",
 							"        pm.expect(pm.response.json().output[2].type).to.equal(\"Coverage\");",
-							"        pm.expect(pm.response.json().output[2].count).to.equal(16);",
+							"        pm.expect(pm.response.json().output[2].count).to.equal(12);",
 							"        pm.environment.set(\"coverage_url\", pm.response.json().output[2].url);",
 							"    })",
 							"} else {",
@@ -619,7 +618,7 @@
 							"pm.test(\"Patient data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(4);",
+							"    pm.expect(responseLines).to.have.lengthOf(3);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"Patient\");",
@@ -655,7 +654,7 @@
 							"pm.test(\"Explanation of Benefits data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(152);",
+							"    pm.expect(responseLines).to.have.lengthOf(102);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"ExplanationOfBenefit\");",
@@ -691,7 +690,7 @@
 							"pm.test(\"Coverage data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(16);",
+							"    pm.expect(responseLines).to.have.lengthOf(12);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"Coverage\");",
