@@ -53,8 +53,7 @@ public class ExpireAttributions extends Job {
             final int updated = context
                     .update(Attributions.ATTRIBUTIONS)
                     .set(Attributions.ATTRIBUTIONS.INACTIVE, true)
-                    .set(Attributions.ATTRIBUTIONS.REMOVED_AT, expirationTemporal)
-                    .where(Attributions.ATTRIBUTIONS.EXPIRES_AT.le(expirationTemporal))
+                    .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal))
                     .execute();
             logger.debug("Expired {} attribution relationships.", updated);
         } catch (SQLException e) {
@@ -65,7 +64,7 @@ public class ExpireAttributions extends Job {
         try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
             final int removed = context
                     .delete(Attributions.ATTRIBUTIONS)
-                    .where(Attributions.ATTRIBUTIONS.REMOVED_AT.le(expirationTemporal.minus(6, ChronoUnit.MONTHS))
+                    .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal.minus(6, ChronoUnit.MONTHS))
                             .and(Attributions.ATTRIBUTIONS.INACTIVE.eq(true)))
                     .execute();
             logger.debug("Removed {} attribution relationships.", removed);

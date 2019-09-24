@@ -3,7 +3,6 @@ package gov.cms.dpc.common.entities;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
@@ -29,16 +28,12 @@ public class AttributionRelationship implements Serializable {
 
     private boolean inactive = false;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @Column(name = "period_begin", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
-    private OffsetDateTime created;
+    private OffsetDateTime periodBegin;
 
-    @Column(name = "expires_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    @NotNull
-    private OffsetDateTime expires;
-
-    @Column(name = "removed_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime removed;
+    @Column(name = "period_end", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private OffsetDateTime periodEnd;
 
     AttributionRelationship() {
         // Hibernate required
@@ -52,13 +47,13 @@ public class AttributionRelationship implements Serializable {
     public AttributionRelationship(RosterEntity roster, PatientEntity patient, OffsetDateTime created) {
         this.roster = roster;
         this.patient = patient;
-        this.created = created;
+        this.periodBegin = created;
     }
 
     public AttributionRelationship(RosterEntity roster, PatientEntity patient, Timestamp created) {
         this.roster = roster;
         this.patient = patient;
-        this.created = OffsetDateTime.ofInstant(created.toInstant(), ZoneOffset.UTC);
+        this.periodBegin = OffsetDateTime.ofInstant(created.toInstant(), ZoneOffset.UTC);
     }
 
     public Long getAttributionID() {
@@ -85,14 +80,6 @@ public class AttributionRelationship implements Serializable {
         this.patient = patient;
     }
 
-    public OffsetDateTime getCreated() {
-        return created;
-    }
-
-    public void setCreated(OffsetDateTime created) {
-        this.created = created;
-    }
-
     public boolean isInactive() {
         return inactive;
     }
@@ -101,34 +88,38 @@ public class AttributionRelationship implements Serializable {
         this.inactive = inactive;
     }
 
-    public OffsetDateTime getExpires() {
-        return expires;
+    public OffsetDateTime getPeriodBegin() {
+        return periodBegin;
     }
 
-    public void setExpires(OffsetDateTime expires) {
-        this.expires = expires;
+    public void setPeriodBegin(OffsetDateTime periodBegin) {
+        this.periodBegin = periodBegin;
     }
 
-    public OffsetDateTime getRemoved() {
-        return removed;
+    public OffsetDateTime getPeriodEnd() {
+        return periodEnd;
     }
 
-    public void setRemoved(OffsetDateTime removed) {
-        this.removed = removed;
+    public void setPeriodEnd(OffsetDateTime periodEnd) {
+        this.periodEnd = periodEnd;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AttributionRelationship)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         AttributionRelationship that = (AttributionRelationship) o;
-        return Objects.equals(roster, that.roster) &&
-                Objects.equals(patient, that.patient);
+        return inactive == that.inactive &&
+                Objects.equals(attributionID, that.attributionID) &&
+                Objects.equals(roster, that.roster) &&
+                Objects.equals(patient, that.patient) &&
+                Objects.equals(periodBegin, that.periodBegin) &&
+                Objects.equals(periodEnd, that.periodEnd);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roster, patient);
+        return Objects.hash(attributionID, roster, patient, inactive, periodBegin, periodEnd);
     }
 
     @Override
@@ -137,7 +128,9 @@ public class AttributionRelationship implements Serializable {
                 "attributionID=" + attributionID +
                 ", roster=" + roster +
                 ", patient=" + patient +
-                ", created=" + created +
+                ", inactive=" + inactive +
+                ", begin=" + periodBegin +
+                ", end=" + periodEnd +
                 '}';
     }
 }

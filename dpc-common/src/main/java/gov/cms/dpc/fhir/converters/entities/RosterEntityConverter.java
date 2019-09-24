@@ -51,12 +51,8 @@ public class RosterEntityConverter {
 
         // Set the period begin, end
         final Period period = new Period();
-        period.setStart(Date.from(relationship.getCreated().toInstant()));
-        if (relationship.isInactive()) {
-            period.setEnd(Date.from(relationship.getRemoved().toInstant()));
-        } else {
-            period.setEnd(Date.from(relationship.getExpires().toInstant()));
-        }
+        period.setStart(Date.from(relationship.getPeriodBegin().toInstant()));
+        period.setEnd(Date.from(relationship.getPeriodEnd().toInstant()));
         component.setPeriod(period);
         return component;
     }

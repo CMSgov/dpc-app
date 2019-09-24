@@ -191,7 +191,7 @@ public class GroupResource extends AbstractGroupResource {
                     return pe;
                 })
                 .map(pe -> new AttributionRelationship(rosterEntity, pe))
-                .peek(relationship -> relationship.setExpires(generateExpirationTime()))
+                .peek(relationship -> relationship.setPeriodEnd(generateExpirationTime()))
                 .forEach(relationshipDAO::addAttributionRelationship);
 
         return this.rosterDAO.getEntity(rosterID)
@@ -231,7 +231,7 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .map(patient -> {
                     final AttributionRelationship relationship = new AttributionRelationship(rosterEntity, patient);
-                    relationship.setExpires(generateExpirationTime());
+                    relationship.setPeriodEnd(generateExpirationTime());
                     return relationship;
                 })
                 .forEach(this.relationshipDAO::addAttributionRelationship);
@@ -272,7 +272,7 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .peek(relationship -> {
                     relationship.setInactive(true);
-                    relationship.setRemoved(OffsetDateTime.now(ZoneOffset.UTC));
+                    relationship.setPeriodEnd(OffsetDateTime.now(ZoneOffset.UTC));
                 })
                 .forEach(this.relationshipDAO::updateAttributionRelationship);
 

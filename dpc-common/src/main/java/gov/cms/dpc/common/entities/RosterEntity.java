@@ -160,7 +160,7 @@ public class RosterEntity implements Serializable {
                     final PatientEntity patientEntity = new PatientEntity();
                     patientEntity.setPatientID(UUID.fromString(id.getIdPart()));
                     final AttributionRelationship relationship = new AttributionRelationship(roster, patientEntity, expires);
-                    relationship.setExpires(expires);
+                    relationship.setPeriodEnd(expires);
                     return relationship;
                 })
                 .collect(Collectors.toList());
