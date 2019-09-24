@@ -1,8 +1,7 @@
 package gov.cms.dpc.common.entities;
 
-import org.hibernate.annotations.CreationTimestamp;
-
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
@@ -28,10 +27,11 @@ public class AttributionRelationship implements Serializable {
 
     private boolean inactive = false;
 
+    @NotNull
     @Column(name = "period_begin", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    @CreationTimestamp
     private OffsetDateTime periodBegin;
 
+    @NotNull
     @Column(name = "period_end", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime periodEnd;
 

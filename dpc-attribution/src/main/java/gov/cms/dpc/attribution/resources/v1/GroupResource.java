@@ -13,7 +13,6 @@ import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.RosterEntity;
-import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -177,6 +176,7 @@ public class GroupResource extends AbstractGroupResource {
 
         final RosterEntity rosterEntity = new RosterEntity();
         rosterEntity.setId(rosterID);
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
         // Remove all roster relationships
         this.relationshipDAO.removeRosterAttributions(rosterID);
@@ -192,6 +192,7 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .map(pe -> new AttributionRelationship(rosterEntity, pe))
                 .peek(relationship -> relationship.setPeriodEnd(generateExpirationTime()))
+                .peek(relationship -> relationship.setPeriodBegin(now))
                 .forEach(relationshipDAO::addAttributionRelationship);
 
         return this.rosterDAO.getEntity(rosterID)
@@ -216,6 +217,7 @@ public class GroupResource extends AbstractGroupResource {
 
         final RosterEntity rosterEntity = new RosterEntity();
         rosterEntity.setId(rosterID);
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
         // For each group member, check to see if the patient exists, if not, throw an exception
         // Check to see if they're already rostered, if so, ignore
@@ -230,7 +232,15 @@ public class GroupResource extends AbstractGroupResource {
                             patientID.toString()), Response.Status.BAD_REQUEST));
                 })
                 .map(patient -> {
-                    final AttributionRelationship relationship = new AttributionRelationship(rosterEntity, patient);
+                    // Check to see if the attribution already exists, if so, re-extend the expiration time
+                    final AttributionRelationship relationship = this.relationshipDAO.lookupAttributionRelationship(rosterID, patient.getPatientID())
+                            .orElse(new AttributionRelationship(rosterEntity, patient, now));
+
+                    // If the relationship is inactive, then we need to update the period begin for the new membership span
+                    if (relationship.isInactive()) {
+                        relationship.setPeriodBegin(now);
+                    }
+                    relationship.setInactive(false);
                     relationship.setPeriodEnd(generateExpirationTime());
                     return relationship;
                 })
@@ -263,13 +273,9 @@ public class GroupResource extends AbstractGroupResource {
                     final PatientEntity patientEntity = new PatientEntity();
                     final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
                     patientEntity.setPatientID(patientID);
-                    try {
-                        return this.relationshipDAO.lookupAttributionRelationship(rosterID, patientID);
-                    } catch (UnknownRelationship e) {
-                        logger.error("Cannot find relationship to remove.", e);
-                        throw new WebApplicationException("Cannot find attribution relationship.", Response.Status.BAD_REQUEST);
-                    }
+                    return this.relationshipDAO.lookupAttributionRelationship(rosterID, patientID);
                 })
+                .map(rOptional -> rOptional.orElseThrow(() -> new WebApplicationException("Cannot find attribution relationship.", Response.Status.BAD_REQUEST)))
                 .peek(relationship -> {
                     relationship.setInactive(true);
                     relationship.setPeriodEnd(OffsetDateTime.now(ZoneOffset.UTC));

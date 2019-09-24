@@ -4,7 +4,6 @@ import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.AttributionRelationship_;
 import gov.cms.dpc.common.entities.PatientEntity_;
 import gov.cms.dpc.common.entities.RosterEntity_;
-import gov.cms.dpc.common.exceptions.UnknownRelationship;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
@@ -29,14 +29,13 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
 
     /**
      * Attempts to retrieve the attribution relationship between the given rosterID and patient pair.
-     * If no relationship exists, an exception is raised.
+     * If no relationship exists, an empty optional is returned
      *
      * @param rosterID - {@link UUID} rosterID to determine attribution with
      * @param patient  - {@link UUID} patientID to determine attribution for
-     * @return - {@link AttributionRelationship} if one exists
-     * @throws UnknownRelationship - thrown if attribution is missing
+     * @return - {@link Optional} of {@link AttributionRelationship} if one exists
      */
-    public AttributionRelationship lookupAttributionRelationship(UUID rosterID, UUID patient) {
+    public Optional<AttributionRelationship> lookupAttributionRelationship(UUID rosterID, UUID patient) {
 
         logger.debug("Looking up attribution for Group/{} and Patient/{}", rosterID, patient);
 
@@ -49,14 +48,7 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
                 builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID),
                 builder.equal(root.get(AttributionRelationship_.patient).get(PatientEntity_.patientID), patient)));
 
-        final AttributionRelationship relationship = uniqueResult(query);
-
-        if (relationship == null) {
-            logger.debug("Unknown attribution relationship between Group/{} and Patient/{}", rosterID, patient);
-            throw new UnknownRelationship(rosterID.toString(), patient.toString());
-        }
-
-        return relationship;
+        return Optional.ofNullable(uniqueResult(query));
     }
 
     /**
@@ -89,7 +81,11 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
      * @param relationship - {@link AttributionRelationship} to add
      */
     public void addAttributionRelationship(AttributionRelationship relationship) {
-        persist(relationship);
+        if (relationship.getAttributionID() == null) {
+            persist(relationship);
+        } else {
+            this.currentSession().merge(relationship);
+        }
     }
 
     /**
