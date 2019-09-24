@@ -30,7 +30,7 @@ public abstract class AbstractGroupResource {
 
     @GET
     @Path("/{rosterID}/$patients")
-    public abstract Bundle getAttributedPatients(@NotNull UUID rosterID);
+    public abstract Bundle getAttributedPatients(@NotNull UUID rosterID, boolean activeOnly);
 
     @PUT
     @Path("/{rosterID}")

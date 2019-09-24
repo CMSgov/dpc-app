@@ -134,7 +134,7 @@ public class GroupResource extends AbstractGroupResource {
             "It returns empty Patient resources with only the MBI added as an identifier.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
-    public Bundle getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID) {
+    public Bundle getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID, @ApiParam(name = "active", value = "Return only active patients", defaultValue = "false") @QueryParam(value = "active") boolean activeOnly) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
@@ -142,8 +142,8 @@ public class GroupResource extends AbstractGroupResource {
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
-        // We have to do this because Hibernate/Dropwizard get confused when returning a single type (like String)
-        @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(rosterID);
+        // We have to do this because Hibernate/Dropwizard gets confused when returning a single type (like String)
+        @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(rosterID, activeOnly);
 
         final List<Bundle.BundleEntryComponent> patients = patientMBIs
                 .stream()

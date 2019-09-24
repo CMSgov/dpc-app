@@ -152,7 +152,7 @@ public class GroupResource extends AbstractGroupResource {
         return (Group) outcome.getResource();
     }
 
-    @PUT
+    @POST
     @Path("/{rosterID}/$add")
     @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @FHIR
@@ -165,7 +165,7 @@ public class GroupResource extends AbstractGroupResource {
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
-    @PUT
+    @POST
     @Path("/{rosterID}/$remove")
     @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @FHIR
@@ -335,12 +335,15 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
         }
 
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setValue(new BooleanType(true)).setName("active");
+
         // Get the patients, along with their MBIs
         final Bundle patients = this.client
                 .operation()
                 .onInstance(new IdType(attributionRoster.getId()))
                 .named("patients")
-                .withNoParameters(Parameters.class)
+                .withParameters(parameters)
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
                 .encodedJson()
