@@ -279,7 +279,8 @@ class AttributionFHIRTest {
                 () -> assertEquals(bundle.getEntry().size() - 1, activeMembers.size(), "Should have 1 less active member"),
                 () -> assertEquals(1, inactiveMembers.size(), "Should have a single inactive"),
                 () -> assertEquals(1, offsetNow.compareTo(inactiveMembers.get(0).getPeriod().getEnd()), "Period end should be today"),
-                () -> assertEquals(-1, offsetNow.compareTo(activeMembers.get(0).getPeriod().getEnd()), "Active member should have period end after today"));
+                () -> assertEquals(-1, offsetNow.compareTo(activeMembers.get(0).getPeriod().getEnd()), "Active member should have period end after today"),
+                () -> assertNotEquals(activeMembers.get(0).getPeriod().getStart(), activeMembers.get(0).getPeriod().getEnd(), "Period should not be equal"));
 
         // Re-add the patient, which should force them to be re-created
         final Group.GroupMemberComponent reAddEntity = new Group.GroupMemberComponent().setEntity(patientReference);

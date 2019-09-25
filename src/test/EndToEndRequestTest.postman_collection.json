@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d553e433-459a-485a-8055-62e7f93df565",
+		"_postman_id": "47e5ad82-3507-410c-9ed8-98e60abac489",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -63,7 +63,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Roster tests",
@@ -196,6 +197,7 @@
 									"});",
 									"",
 									"pm.test(\"Response Body is correct\", () => {",
+									"    console.log(\"Body correct?\");",
 									"    // Check to ensure that each member id matches what we previously had",
 									"    var response = pm.response.json();",
 									"    ",
@@ -204,6 +206,8 @@
 									"    var ids = new Set(JSON.parse(pm.globals.get(\"patient_ids\")));",
 									"    response.member.forEach(member => {",
 									"        pm.expect(ids.has(member.entity.reference)).to.be.true;",
+									"        // Ensure that the period temporals are not the same",
+									"        pm.expect(member.period.start).to.not.equal(member.period.end);",
 									"    });",
 									"",
 									"    pm.globals.set(\"attribution_group_id\", response.id);",
@@ -264,13 +268,18 @@
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/fhir+json",
+								"value": "application/json",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{{roster_body}}"
+							"raw": "{{roster_body}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "http://{{hostname}}:{{api_port}}/v1/Group",
@@ -540,7 +549,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Try export after submitting roster",
@@ -828,5 +838,6 @@
 			"value": "3500",
 			"type": "string"
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }

@@ -12,6 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -149,6 +150,7 @@ public class RosterEntity implements Serializable {
     }
 
     private static List<AttributionRelationship> getAttributedPatients(Group attributionRoster, RosterEntity roster, OffsetDateTime expires) {
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         return attributionRoster
                 .getMember()
                 .stream()
@@ -159,7 +161,7 @@ public class RosterEntity implements Serializable {
                 .map(id -> {
                     final PatientEntity patientEntity = new PatientEntity();
                     patientEntity.setPatientID(UUID.fromString(id.getIdPart()));
-                    final AttributionRelationship relationship = new AttributionRelationship(roster, patientEntity, expires);
+                    final AttributionRelationship relationship = new AttributionRelationship(roster, patientEntity, now);
                     relationship.setPeriodEnd(expires);
                     return relationship;
                 })
