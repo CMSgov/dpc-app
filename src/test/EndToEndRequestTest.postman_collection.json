@@ -87,6 +87,7 @@
 									"    pm.response.to.be.ok;",
 									"    var responseOutput = pm.response.json();",
 									"    pm.expect(responseOutput.total).to.equal(1);",
+									"    pm.expect(responseOutput.entry[0].resource.identifier[0].system).to.equal(\"http://hl7.org/fhir/sid/us-npi\");",
 									"    pm.environment.set(\"provider_npi\", responseOutput.entry[0].resource.identifier[0].value);",
 									"});"
 								],
