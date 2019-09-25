@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './spec/shared_examples/authenticable_page'
+require 'rails_helper'
 
 RSpec.feature 'user signs in' do
   let!(:user) { create :user, password: '123456', password_confirmation: '123456' }

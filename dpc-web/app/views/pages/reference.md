@@ -742,7 +742,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
   "identifier": [
     {
       "system": "http://hl7.org/fhir/sid/us-npi",
-      "code": "3116145044854423862"
+      "value": "3116145044854423862"
     }
   ],
   "address": [
@@ -984,7 +984,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/$submit
 
 Once the Provider and Patient records have been created, the final step is to associate the records into an attribution [Group](http://hl7.org/fhir/STU3/patient.html) resource, also known as a Patient roster.
 
-Details on the exact data format are given in the [implementation guide]() but at a minimum, each resource must include:
+Details on the exact data format are given in the [implementation guide](/ig/index.html) but at a minimum, each resource must include:
 
 - A list of `Patient` references
 - The NPI of the provider which the patients are being attributed to
@@ -1050,22 +1050,120 @@ The `Group.id` value of the returned resource can be used by the client to initi
 
 Patient attribution relationships automatically expire after 90 days and must be re-attested by the provider.
 This is accomplished by resubmitting the patient to the provider's attribution Group.
-This can be accomplished through the same endpoint described in the previous [section](#create-an-attribution-group).
-Removing patients from the attribution Group is done by setting the `Group.member.inactive` value to `true` when resubmitting the Patient reference (as shown below).
 
-Membership changes submitted to an existing attribution Group are always merged with the existing group state.
-Consider the example Group resource shown below. From the previous example, we know that the provider with NPI *110001029483* has two attributed patients: 
+#### Adding patients to roster
 
-	Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d
-	Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874
+Roster additions are handled through a custom `$add` operation on the *Group* endpoint.
+This takes the members listed into given resource and adds them to the existing attribution list. 
 
-By submitting a new roster with the information show below, the result with be `Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d` being removed from the roster and `Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1` being added.
-The final state would be the provider having the following patients attributed:
+~~~sh
+PUT /api/v1/Group/{Group.id}/$add
+~~~
 
-	Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874
-	Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1
+**cURL command**
 
-***Add and remove attributed Patients***
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/$add
+-H 'Authorization: Bearer {token}' \
+-H 'Accept: application/fhir+json' \
+-X PUT \
+-d @group_addition.json
+~~~
+
+**updated_group.json**
+
+~~~json
+"resource": {
+        "resourceType": "Group",
+        "type": "person",
+        "actual": true,
+        "characteristic": {
+          "code": {
+            "coding": [
+              {
+                "code": "attributed-to"
+              }
+            ]
+          },
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/us-npi",
+                "value": "110001029483"
+              }
+            ]
+          }
+        },
+        "member": [
+          {
+            "entity": {
+              "reference": "Patient/bb151edf-a8b5-4f5c-9867-69794bcb48d1"
+            }
+           }
+        ]
+      }
+~~~
+
+
+#### Removing patients from a roster
+
+Roster removals are handled through a custom `remove` operation on the *Group* endpoint.
+This takes the members listed into given resource and removes them from the existing attribution list.
+
+~~~sh
+PUT /api/v1/Group/{Group.id}/$remove
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/$remove
+-H 'Authorization: Bearer {token}' \
+-H 'Accept: application/fhir+json' \
+-X PUT \
+-d @group_removal.json
+~~~
+
+**group_removal.json**
+
+~~~json
+"resource": {
+        "resourceType": "Group",
+        "type": "person",
+        "actual": true,
+        "characteristic": {
+          "code": {
+            "coding": [
+              {
+                "code": "attributed-to"
+              }
+            ]
+          },
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/sid/us-npi",
+                "value": "110001029483"
+              }
+            ]
+          }
+        },
+        "member": [
+          {
+              "entity": {
+                "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
+              },
+            },
+        ]
+      }
+~~~
+
+
+#### Replacing roster membership
+
+Users can also submit a `Group` resource which completely replaces the existing attribution roster.
+This results in the current group membership being *completely* replaced with the members listed in the given resource.
+This endpoint does *not* merge with the existing membership state, it completely replaces whatever currently exists.
 
 ~~~sh
 PUT /api/v1/Group/{Group.id}
@@ -1110,7 +1208,6 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
             "entity": {
               "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
             },
-            "inactive": true
           },
           {
             "entity": {

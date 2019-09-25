@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'an authenticable page' do |path, resource|
+RSpec.shared_examples 'a user authenticable page' do |path, resource|
   context 'an unauthenticated user' do
     before(:each) do
       logout(:user)

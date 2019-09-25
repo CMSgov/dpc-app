@@ -5,7 +5,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.*;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
@@ -22,10 +21,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -35,7 +38,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class APITestHelpers {
     public static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
@@ -129,8 +131,10 @@ public class APITestHelpers {
             config.setSchematronValidation(true);
             config.setSchemaValidation(true);
 
+            final DPCProfileSupport dpcModule = new DPCProfileSupport(ctx);
+            final ValidationSupportChain support = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
             final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
-                    Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, new DPCProfileSupport(ctx), config).get())));
+                    Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config, support).get())));
 
             builder.setValidator(provideValidator(constraintFactory));
             builder.addProvider(FHIRValidationExceptionHandler.class);

@@ -173,8 +173,6 @@ class AttributionFHIRTest {
                 .encodedJson()
                 .execute();
 
-//        assertTrue(patientCreated.getCreated(), "Should be created");
-
         final Patient newPatient = (Patient) patientCreated.getResource();
 
         // Find the existing Roster ID
@@ -195,17 +193,20 @@ class AttributionFHIRTest {
         final Reference patientReference = new Reference(newPatient.getId());
         newRoster.addMember().setEntity(patientReference);
 
+        final Parameters addParam = new Parameters();
+        addParam.addParameter().setResource(newRoster);
+
         // Update the roster
-        final IUpdateExecutable updateGroupRequest = client
-                .update()
-                .resource(newRoster)
-                .withId(groupID)
+        final IOperationUntypedWithInput<Parameters> addMemberRequest = client
+                .operation()
+                .onInstance(new IdType(groupID))
+                .named("add")
+                .withParameters(addParam)
                 .encodedJson();
 
-        updateGroupRequest.execute();
+        addMemberRequest.execute();
 
         // Check how many are attributed
-
         final IReadExecutable<Group> getUpdatedGroup = client
                 .read()
                 .resource(Group.class)
@@ -231,14 +232,32 @@ class AttributionFHIRTest {
 
         // Remove the patient
         final Group.GroupMemberComponent removeEntity = new Group.GroupMemberComponent().setEntity(patientReference).setInactive(true);
-        newRoster
-                .addMember(removeEntity);
-
-        assertThrows(InvalidRequestException.class, updateGroupRequest::execute, "Should have a bad request");
         newRoster.setMember(List.of(removeEntity));
-        updateGroupRequest.execute();
+        final Parameters removeParams = new Parameters();
+        removeParams.addParameter().setResource(newRoster);
+
+        final IOperationUntypedWithInput<Parameters> removeMemberRequest = client
+                .operation()
+                .onInstance(new IdType(groupID))
+                .named("remove")
+                .withParameters(removeParams)
+                .encodedJson();
+
+        removeMemberRequest.execute();
 
         assertEquals(bundle.getEntry().size() - 1,
+                getUpdatedGroup.execute().getMember().size(),
+                "Should have a missing patient");
+
+        // Replace the roster and ensure the numbers are correct.
+        client
+                .update()
+                .resource(newRoster)
+                .withId(new IdType(groupID))
+                .encodedJson()
+                .execute();
+
+        assertEquals(1,
                 getUpdatedGroup.execute().getMember().size(),
                 "Should have a missing patient");
     }
