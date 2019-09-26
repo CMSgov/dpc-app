@@ -21,7 +21,7 @@ else
 fi
 
 if [ -n "$BOOTSTRAP" ]; then
-  echo "hello"
+  echo "Bootstrapping image from S3"
   bootstrap_config
 fi
 
