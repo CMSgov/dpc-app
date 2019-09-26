@@ -1,0 +1,40 @@
+<% title "Organizations" %>
+
+<div class="ds-l-row">
+  <div class="ds-l-row--12 ds-l-md-col--3">
+    <%= render "shared/internal/sidenav", current: :organizations %>
+  </div>
+
+  <div class="ds-l-row--12 ds-l-md-col--9">
+    <div class="ds-l-row">
+      <h1 class="ds-h1">Viewing <b><%= @organizations.total_count %></b> provider organizations</h1>
+    </div>
+
+    <div class="ds-l-row">
+      <p class="ds-u-padding-x--1"><%= page_entries_info @organizations %></p>
+    </div>
+
+    <div class="ds-l-row">
+      <%= form_tag internal_organizations_path, method: "get" do %>
+        <%= text_field_tag :keyword, params[:keyword], placeholder: "name" %>
+        <%= submit_tag "Search", data: { test: 'organizations-keyword-search-submit' } %>
+      <% end %>
+    </div>
+
+    <% @organizations.each do |org| %>
+      <div class="ds-l-row">
+        <div class="ds-l-col ds-u-flex-wrap--wrap ds-u-display--flex-sm ds-u-padding--1">
+          <div class="ds-u-border--1 ds-u-radius height-sm--auto height-md--full">
+            <div class="ds-u-padding--1 ds-u-display--inline-block">
+              <div class="ds-u-font-size--lead">
+                <%= link_to org.name, internal_organization_path(org) %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    <%= paginate @organizations %>
+  </div>
+</div>
+

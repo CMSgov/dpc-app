@@ -1,0 +1,9 @@
+<% title "Editing #{@organization.name}" %>
+
+<div class="ds-l-row">
+  <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-bottom--1 ds-u-margin-x--auto ds-u-border--1 ds-u-padding-bottom--2 ds-u-radius">
+    <%= form_for @organization, url: internal_organization_path(@organization), html: { method: :put } do |f| %>
+      <%= render 'internal/organizations/fields', f: f %>
+    <% end %>
+  </div>
+</div>

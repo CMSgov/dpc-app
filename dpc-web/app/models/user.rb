@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  include OrganizationTypable
   has_one :dpc_registration, inverse_of: :user
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
@@ -32,17 +33,8 @@ class User < ApplicationRecord
          :validatable, :trackable, :registerable,
          :timeoutable, :recoverable
 
-  enum organization_type: {
-    primary_care_clinic: 0, speciality_clinic: 1,
-    multispecialty_clinic: 2, inpatient_facility: 3,
-    emergency_room: 4, urgent_care: 5,
-    academic_facility: 6, health_it_vendor: 7,
-    other: 8
-  }
-
   validates :last_name, :first_name, presence: true
   validates :organization, presence: true
-  validates :organization_type, inclusion: { in: organization_types.keys }
   validates :num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
   validates :address_1, presence: true
   validates :city, presence: true
