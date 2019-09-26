@@ -69,7 +69,7 @@
         <div class="field">
           <%= f.label :state, class: "ds-c-label" %>
           <%= f.select :state,
-                User::STATES.each_with_object([]) { |state, memo| memo << [state[1], state[0]] },
+                states_for_select,
                 { include_blank: 'Please select a state' },
                 class: "ds-c-field",
                 value: @user.state

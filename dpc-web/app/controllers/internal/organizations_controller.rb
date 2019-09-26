@@ -19,6 +19,7 @@ module Internal
 
     def new
       @organization = Organization.new
+      @organization.build_address
     end
 
     def create
@@ -65,7 +66,7 @@ module Internal
     private
 
     def organization_params
-      params.fetch(:organization).permit(:name, :organization_type)
+      params.fetch(:organization).permit(:name, :organization_type, address_attributes: [:id, :street, :street_2, :city, :state, :zip])
     end
   end
 end

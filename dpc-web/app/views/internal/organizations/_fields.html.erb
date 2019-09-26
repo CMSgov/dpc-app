@@ -21,7 +21,7 @@
     <%= ff.text_field :city, class: "ds-c-field" %>
 
     <%= ff.label :state, class: "ds-c-label" %>
-    <%= ff.text_field :state, class: "ds-c-field" %>
+    <%= ff.select :state, states_for_select, {}, class: "ds-c-field" %>
 
     <%= ff.label :zip, class: "ds-c-label" %>
     <%= ff.text_field :zip, class: "ds-c-field" %>
