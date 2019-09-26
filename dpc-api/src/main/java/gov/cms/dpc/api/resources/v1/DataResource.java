@@ -3,13 +3,11 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.ExportPath;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +34,7 @@ public class DataResource extends AbstractDataResource {
 
 
     @Override
-    @Path("/{fileID}/")
+    @Path("/{fileID}.ndjson")
     @GET
     @Timed
     @ExceptionMetered

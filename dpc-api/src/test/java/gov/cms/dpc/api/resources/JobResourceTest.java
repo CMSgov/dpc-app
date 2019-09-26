@@ -113,7 +113,7 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
         }
     }
 
@@ -148,7 +148,7 @@ public class JobResourceTest {
                 () -> assertEquals(1, completion.getError().size()));
         JobCompletionModel.OutputEntry entry = completion.getError().get(0);
         assertEquals(ResourceType.OperationOutcome, entry.getType());
-        assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), ResourceType.OperationOutcome, 0)), entry.getUrl());
+        assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), ResourceType.OperationOutcome, 0)), entry.getUrl());
     }
 
     /**
@@ -210,7 +210,7 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
         for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
-            assertEquals(String.format("%s/Data/%s", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
+            assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
         }
     }
 }

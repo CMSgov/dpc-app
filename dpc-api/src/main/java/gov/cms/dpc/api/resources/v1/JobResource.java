@@ -172,7 +172,7 @@ public class JobResource extends AbstractJobResource {
                 .flatMap(List::stream)
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
-                        String.format("%s/Data/%s", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getBatchID(), result.getResourceType(), result.getSequence())),
+                        String.format("%s/Data/%s.ndjson", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getBatchID(), result.getResourceType(), result.getSequence())),
                         result.getCount()))
                 .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)
