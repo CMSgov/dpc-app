@@ -13,17 +13,23 @@ RSpec.feature 'creating and updating organizations' do
     visit new_internal_organization_path
 
     fill_in 'organization_name', with: 'Good Health'
-    fill_in 'organization_type', with: 'Primary Care Provider'
+    select 'Primary Care Clinic', from: 'organization_organization_type'
 
     find('[data-test="form-submit"]').click
 
-    # No longer on edit page
     expect(page).not_to have_css('[data-test="form-submit"]')
     expect(page.body).to have_content('Good Health')
-    expect(page.body).to have_content('Primary Care Provider')
+    expect(page.body).to have_content('Primary Care Clinic')
 
-    # Click edit link
-    # TODO: finish
+    find('[data-test="edit-link"]').click
+
+    fill_in 'organization_name', with: 'Health Revisited'
+    select 'Multispecialty Clinic', from: 'organization_organization_type'
+    find('[data-test="form-submit"]').click
+
+    expect(page).not_to have_css('[data-test="form-submit"]')
+    expect(page.body).to have_content('Health Revisited')
+    expect(page.body).to have_content('Multispecialty Clinic')
   end
 
   scenario 'trying to update a organization with invalid attributes ' do

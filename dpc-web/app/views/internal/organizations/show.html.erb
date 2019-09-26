@@ -3,7 +3,7 @@
 
 <section class="ds-u-margin--2">
   <div class="ds-l-row ds-u-justify-content--end">
-    <%= link_to "Edit details", edit_internal_organization_url(@organization), class: "ds-c-button  ds-c-button--big ds-c-button--primary" %>
+    <%= link_to "Edit details", edit_internal_organization_url(@organization), class: "ds-c-button  ds-c-button--big ds-c-button--primary", data: { test: "edit-link" } %>
   </div>
 </section>
 
@@ -24,7 +24,7 @@
         <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <use xlink:href="/assets/solid.svg#envelope"></use>
         </svg>
-        <%= @organization.organization_type %>
+        <%= @organization.organization_type.titleize %>
       </p>
     </div>
   </div>

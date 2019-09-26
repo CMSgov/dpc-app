@@ -25,10 +25,11 @@ module Internal
       @organization = Organization.new organization_params
       if @organization.save
         flash[:notice] = 'Organization created.'
+        redirect_to internal_organization_path(@organization)
       else
         flash[:alert] = "Organization could not be created: #{@organization.errors.full_messages.join(', ')}"
+        render :new
       end
-      redirect_to index
     end
 
     def show
