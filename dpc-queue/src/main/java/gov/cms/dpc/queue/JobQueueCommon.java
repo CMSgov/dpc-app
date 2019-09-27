@@ -1,5 +1,6 @@
 package gov.cms.dpc.queue;
 
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.reactivex.Observable;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -40,7 +41,7 @@ public abstract class JobQueueCommon implements IJobQueue {
         jobBatches.forEach(batch -> batch.setPriority(priority));
 
         this.submitJobBatches(jobBatches);
-        return jobBatches.stream().map(JobQueueBatch::getJobID).findFirst().orElse(null);
+        return jobBatches.stream().map(JobQueueBatch::getJobID).findFirst().orElseThrow(() -> new JobQueueFailure("Unable to create job. No batches to submit."));
     }
 
     protected JobQueueBatch createJobBatch(UUID jobID, UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes) {
