@@ -1,8 +1,12 @@
 package gov.cms.dpc.api;
 
+import com.codahale.metrics.annotation.ExceptionMetered;
+import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableSet;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
+import gov.cms.dpc.api.resources.TestResource;
+import gov.cms.dpc.api.resources.v1.BaseResource;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,12 +21,10 @@ import javax.ws.rs.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Ensure that all resources have the appropriate handlers and annotations
 class APIResourceAnnotationTest {
@@ -49,9 +51,19 @@ class APIResourceAnnotationTest {
 
         methods = methods.stream()
                 .filter(method -> !Modifier.isAbstract(method.getModifiers()))
+                .filter(method -> !BaseResource.class.equals(method.getDeclaringClass()))
+                .filter(method -> !TestResource.class.equals(method.getDeclaringClass()))
                 .collect(Collectors.toUnmodifiableSet());
 
         assertFalse(methods.isEmpty(), "Should have annotated methods");
+    }
+
+    @Test
+    void allResourcesHaveMonitoringAnnotations() {
+        methods.forEach(method -> assertAll(
+            () -> assertTrue(method.isAnnotationPresent(Timed.class), String.format("Method: %s in Class: %s must have @Timed annotation", method.getName(), method.getDeclaringClass())),
+            () -> assertTrue(method.isAnnotationPresent(ExceptionMetered.class), String.format("Method: %s in Class: %s must have @ExceptionMetered annotation", method.getName(), method.getDeclaringClass()))
+        ));
     }
 
     @Test
