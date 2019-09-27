@@ -23,7 +23,7 @@ public class DPCQueueHibernateModule<T extends Configuration & IDPCQueueDatabase
 
     @Provides
     @Singleton
-    DPCQueueManagedSessionFactory getSessionFactor() {
+    DPCQueueManagedSessionFactory getSessionFactory() {
         return new DPCQueueManagedSessionFactory(this.hibernate.getSessionFactory());
     }
 
