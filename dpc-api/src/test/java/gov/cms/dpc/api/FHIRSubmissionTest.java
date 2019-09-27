@@ -89,7 +89,7 @@ class FHIRSubmissionTest {
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
         final var job = queue.workBatch(AGGREGATOR_ID).orElseThrow(() -> new IllegalStateException("Should have a job"));
-        while ( job.fetchNextBatch(AGGREGATOR_ID).isPresent() ) {
+        while ( job.fetchNextPatient(AGGREGATOR_ID).isPresent() ) {
             queue.completePartialBatch(job, AGGREGATOR_ID);
         }
         queue.completeBatch(job, AGGREGATOR_ID);

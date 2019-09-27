@@ -102,7 +102,7 @@ class QueueTest {
                 () -> assertEquals(JobStatus.RUNNING, runningJob.orElseThrow().getStatus(), "Job should be running"));
 
         // Complete the job
-        while ( workBatch.get().fetchNextBatch(aggregatorID).isPresent() ) {
+        while ( workBatch.get().fetchNextPatient(aggregatorID).isPresent() ) {
             queue.completePartialBatch(workBatch.get(), aggregatorID);
         }
         workBatch.get().addJobQueueFile(ResourceType.Patient, 0, 1);
@@ -150,7 +150,7 @@ class QueueTest {
         workBatch.addJobQueueFile(ResourceType.ExplanationOfBenefit, 0, 1);
 
         // Complete job
-        while ( workBatch.fetchNextBatch(aggregatorID).isPresent() ) {
+        while ( workBatch.fetchNextPatient(aggregatorID).isPresent() ) {
             queue.completePartialBatch(workBatch, aggregatorID);
         }
         queue.completeBatch(workBatch, aggregatorID);

@@ -277,7 +277,7 @@ public class JobQueueBatch implements Serializable {
      * Fetch the next patient in the batch and increment the patient index.
      * Returns null if at the end of the list.
      */
-    public Optional<String> fetchNextBatch(UUID aggregatorID) {
+    public Optional<String> fetchNextPatient(UUID aggregatorID) {
         if ( this.status != JobStatus.RUNNING ) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot fetch next batch. JobStatus: %s", this.status));
         }

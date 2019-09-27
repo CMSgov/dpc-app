@@ -80,19 +80,19 @@ public class JobQueueBatchTest {
         job.setRunningStatus(aggregatorID);
         Mockito.reset(job);
 
-        final Optional<String> firstResult = job.fetchNextBatch(aggregatorID);
+        final Optional<String> firstResult = job.fetchNextPatient(aggregatorID);
         assertEquals("1", firstResult.get());
         assertEquals(0, job.getPatientIndex().get());
 
-        final Optional<String> secondResult = job.fetchNextBatch(aggregatorID);
+        final Optional<String> secondResult = job.fetchNextPatient(aggregatorID);
         assertEquals("2", secondResult.get());
         assertEquals(1, job.getPatientIndex().get());
 
-        final Optional<String> thirdResult = job.fetchNextBatch(aggregatorID);
+        final Optional<String> thirdResult = job.fetchNextPatient(aggregatorID);
         assertEquals("3", thirdResult.get());
         assertEquals(2, job.getPatientIndex().get());
 
-        final Optional<String> done = job.fetchNextBatch(aggregatorID);
+        final Optional<String> done = job.fetchNextPatient(aggregatorID);
         assertTrue(done.isEmpty());
         assertEquals(2, job.getPatientIndex().get());
 
@@ -104,7 +104,7 @@ public class JobQueueBatchTest {
         final var job = Mockito.spy(createJobQueueBatch());
 
         try {
-            job.fetchNextBatch(aggregatorID);
+            job.fetchNextPatient(aggregatorID);
             Assertions.fail();
         } catch ( JobQueueFailure e ) {
             assertTrue(e.getMessage().contains("Cannot fetch next batch."));
@@ -284,7 +284,7 @@ public class JobQueueBatchTest {
 
         Optional<String> result;
         do {
-            result = job.fetchNextBatch(aggregatorID);
+            result = job.fetchNextPatient(aggregatorID);
         } while (result.isPresent());
 
         job.setCompletedStatus(aggregatorID);

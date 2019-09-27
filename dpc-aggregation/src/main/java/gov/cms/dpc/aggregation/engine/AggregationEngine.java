@@ -119,7 +119,7 @@ public class AggregationEngine implements Runnable {
             logger.info("Processing job {} batch {}, exporting to: {}.", job.getJobID(), job.getBatchID(), this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
-            Optional<String> nextPatientID = job.fetchNextBatch(aggregatorID);
+            Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
 
             // Stop processing when no patients or early shutdown
             Boolean queueRunning = true;
@@ -128,7 +128,7 @@ public class AggregationEngine implements Runnable {
 
                 // Check if the subscriber is still running before getting the next part of the batch
                 queueRunning = !this.subscribe.isDisposed();
-                nextPatientID = queueRunning ? job.fetchNextBatch(aggregatorID) : Optional.empty();
+                nextPatientID = queueRunning ? job.fetchNextPatient(aggregatorID) : Optional.empty();
             }
 
             // Finish processing the batch
