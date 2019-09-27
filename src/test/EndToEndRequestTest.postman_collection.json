@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "47e5ad82-3507-410c-9ed8-98e60abac489",
+		"_postman_id": "56162763-cb03-4d1d-8fe2-b53b3d3df354",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -31,6 +31,11 @@
 						"header": [
 							{
 								"key": "Accept",
+								"value": "application/fhir+json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
 								"value": "application/fhir+json",
 								"type": "text"
 							}
@@ -102,6 +107,11 @@
 								"key": "Accept",
 								"value": "application/fhir+json",
 								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -159,6 +169,11 @@
 						"header": [
 							{
 								"key": "Accept",
+								"value": "application/fhir+json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
 								"value": "application/fhir+json",
 								"type": "text"
 							}
@@ -269,7 +284,7 @@
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/json",
+								"value": "application/fhir+json",
 								"type": "text"
 							}
 						],
@@ -460,6 +475,11 @@
 								"key": "Accept",
 								"value": "application/fhir+json",
 								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -502,7 +522,7 @@
 							"script": {
 								"id": "b4c73864-2ec4-4bae-82cd-383a965c9eac",
 								"exec": [
-									"// Status should be 200",
+									"// Status should be 400",
 									"pm.test(\"Status is 400\", function () {",
 									"    pm.response.to.have.status(400);",
 									"});",
@@ -524,6 +544,11 @@
 						"header": [
 							{
 								"key": "Accept",
+								"type": "text",
+								"value": "application/fhir+json"
+							},
+							{
+								"key": "Content-Type",
 								"value": "application/fhir+json",
 								"type": "text"
 							}
