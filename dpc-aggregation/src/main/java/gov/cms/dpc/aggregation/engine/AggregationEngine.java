@@ -99,7 +99,7 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine.
      */
     private void pollQueue() {
-        subscribe = Observable.fromCallable(() -> this.queue.workBatch(aggregatorID))
+        subscribe = Observable.fromCallable(() -> this.queue.claimBatch(aggregatorID))
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

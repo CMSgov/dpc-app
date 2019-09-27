@@ -87,7 +87,7 @@ class AggregationEngineTest {
         );
 
         // Work the batch
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result
@@ -116,7 +116,7 @@ class AggregationEngineTest {
         );
 
         // Work the batch
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result
@@ -166,7 +166,7 @@ class AggregationEngineTest {
         // Work the batch
         engine.stop();
         doReturn(true).when(subscribe).isDisposed();
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Verify disposed call
@@ -200,7 +200,7 @@ class AggregationEngineTest {
         );
 
         // Work the batch
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result
@@ -234,7 +234,7 @@ class AggregationEngineTest {
         );
 
         // Work the batch
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result
@@ -264,7 +264,7 @@ class AggregationEngineTest {
         );
 
         // Work the batch
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result
@@ -293,7 +293,7 @@ class AggregationEngineTest {
         );
 
         // Work the batch
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result
@@ -345,7 +345,7 @@ class AggregationEngineTest {
         );
 
         // Work the batch
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result

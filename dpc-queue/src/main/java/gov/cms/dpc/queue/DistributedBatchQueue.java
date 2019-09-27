@@ -135,49 +135,70 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<JobQueueBatch> workBatch(UUID aggregatorID) {
+    public Optional<JobQueueBatch> claimBatch(UUID aggregatorID) {
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                // Find stuck batches
-                List<String> stuckBatchIDs = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 1 AND update_time < current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED")
-                        .getResultList();
-
-                // Unstick stuck batches
-                if ( stuckBatchIDs != null && !stuckBatchIDs.isEmpty() ) {
-                    final CriteriaBuilder builder = session.getCriteriaBuilder();
-                    final CriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
-                    final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
-
-                    query.select(root);
-                    query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).collect(Collectors.toList())));
-                    final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
-
-                    for ( JobQueueBatch stuckJob : stuckJobList ) {
-                        stuckJob.restartBatch();
-                        session.merge(stuckJob);
-                    }
-                }
-
-                // Claim a new batch
-                Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
-                        .uniqueResultOptional();
-
-                if ( batchID.isPresent() ) {
-                    JobQueueBatch batch = session.get(JobQueueBatch.class, UUID.fromString(batchID.get()));
-                    batch.setRunningStatus(aggregatorID);
-                    session.merge(batch);
-
-                    final var delay = Duration.between(batch.getStartTime().orElseThrow(), batch.getUpdateTime().orElseThrow());
-                    waitTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
-
-                    return Optional.of(batch);
-                } else {
-                    return Optional.empty();
-                }
+                this.restartStuckBatches(session);
+                return this.claimBatchFromDatabase(session, aggregatorID);
             } finally {
                 tx.commit();
             }
+        }
+    }
+
+    /**
+     * Looks for any job batches that have stopped processing and are stuck in a running state. Restart those batches
+     * so they can be picked up again.
+     *
+     * @param session - The active database session
+     */
+    private void restartStuckBatches(Session session) {
+        // Find stuck batches
+        List<String> stuckBatchIDs = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 1 AND update_time < current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED")
+                .getResultList();
+
+        // Unstick stuck batches
+        if ( stuckBatchIDs != null && !stuckBatchIDs.isEmpty() ) {
+            final CriteriaBuilder builder = session.getCriteriaBuilder();
+            final CriteriaQuery<JobQueueBatch> query = builder.createQuery(JobQueueBatch.class);
+            final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
+
+            query.select(root);
+            query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).collect(Collectors.toList())));
+            final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
+
+            for ( JobQueueBatch stuckJob : stuckJobList ) {
+                stuckJob.restartBatch();
+                session.merge(stuckJob);
+            }
+        }
+    }
+
+
+    /**
+     * Claim a new batch to process from the database
+     *
+     * @param session - The active database session
+     * @param aggregatorID - The ID of the aggregator processing the job
+     * @return the claimed job batch
+     */
+    private Optional<JobQueueBatch> claimBatchFromDatabase(Session session, UUID aggregatorID) {
+        // Claim a new batch
+        Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
+                .uniqueResultOptional();
+
+        if ( batchID.isPresent() ) {
+            JobQueueBatch batch = session.get(JobQueueBatch.class, UUID.fromString(batchID.get()));
+            batch.setRunningStatus(aggregatorID);
+            session.merge(batch);
+
+            final var delay = Duration.between(batch.getStartTime().orElseThrow(), batch.getUpdateTime().orElseThrow());
+            waitTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
+
+            return Optional.of(batch);
+        } else {
+            return Optional.empty();
         }
     }
 

@@ -76,7 +76,7 @@ class BatchAggregationEngineTest {
         );
 
         // Do the job
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result
@@ -109,7 +109,7 @@ class BatchAggregationEngineTest {
         );
 
         // Do the job
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result
@@ -138,7 +138,7 @@ class BatchAggregationEngineTest {
         );
 
         // Do the job
-        queue.workBatch(engine.getAggregatorID())
+        queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
         // Look at the result

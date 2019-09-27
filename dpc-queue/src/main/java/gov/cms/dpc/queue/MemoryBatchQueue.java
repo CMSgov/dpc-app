@@ -50,7 +50,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
     }
 
     @Override
-    public synchronized Optional<JobQueueBatch> workBatch(UUID aggregatorID) {
+    public synchronized Optional<JobQueueBatch> claimBatch(UUID aggregatorID) {
         logger.debug("Pulling first QUEUED job");
         final Optional<JobQueueBatch> first = this.queue.entrySet()
                 .stream()

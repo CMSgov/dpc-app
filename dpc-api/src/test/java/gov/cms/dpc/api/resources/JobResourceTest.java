@@ -71,7 +71,7 @@ public class JobResourceTest {
 
         // Setup a running job
         final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID, TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
-        final var runningJob = queue.workBatch(AGGREGATOR_ID);
+        final var runningJob = queue.claimBatch(AGGREGATOR_ID);
         runningJob.get().fetchNextPatient(AGGREGATOR_ID);
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
 
@@ -93,7 +93,7 @@ public class JobResourceTest {
 
         // Setup a completed job
         final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
-        queue.workBatch(AGGREGATOR_ID);
+        queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
         runningJob.fetchNextPatient(AGGREGATOR_ID);
@@ -129,7 +129,7 @@ public class JobResourceTest {
 
         // Setup a completed job with one error
         final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
-        queue.workBatch(AGGREGATOR_ID);
+        queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
         runningJob.fetchNextPatient(AGGREGATOR_ID);
@@ -162,7 +162,7 @@ public class JobResourceTest {
 
         // Setup a failed job
         final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
-        queue.workBatch(AGGREGATOR_ID);
+        queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
         queue.failBatch(runningJob, AGGREGATOR_ID);
@@ -186,7 +186,7 @@ public class JobResourceTest {
 
         // Setup a completed job
         final var jobID = queue.createJob(orgIDCorrect, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
-        queue.workBatch(AGGREGATOR_ID);
+        queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
         runningJob.fetchNextPatient(AGGREGATOR_ID);

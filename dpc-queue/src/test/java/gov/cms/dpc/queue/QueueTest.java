@@ -92,7 +92,7 @@ class QueueTest {
                 () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be in queue"));
 
         // Work the job
-        Optional<JobQueueBatch> workBatch = queue.workBatch(aggregatorID);
+        Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
         assertTrue(workBatch.isPresent(), "Should have a job to work");
         final UUID firstBatchID = workBatch.orElseThrow().getBatchID();
 
@@ -117,11 +117,11 @@ class QueueTest {
         });
 
         // Work the second job
-        workBatch = queue.workBatch(aggregatorID);
+        workBatch = queue.claimBatch(aggregatorID);
         assertTrue(workBatch.isPresent(), "Should have a 2nd job to work");
 
         // Try to work again last job again, this should return no job
-        var emptyBatch = queue.workBatch(aggregatorID);
+        var emptyBatch = queue.claimBatch(aggregatorID);
         assertTrue(emptyBatch.isEmpty(), "The queue should not have ANY ready items");
 
         // Fail the second job and check its status
@@ -145,7 +145,7 @@ class QueueTest {
         final var jobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit));
 
         // Retrieve the job with both resources
-        final var workBatch = queue.workBatch(aggregatorID).get();
+        final var workBatch = queue.claimBatch(aggregatorID).get();
         workBatch.addJobQueueFile(ResourceType.Patient, 0, 1);
         workBatch.addJobQueueFile(ResourceType.ExplanationOfBenefit, 0, 1);
 
@@ -169,7 +169,7 @@ class QueueTest {
         UUID batchID = UUID.randomUUID();
 
         // Check that things are empty
-        assertAll(() -> assertTrue(queue.workBatch(aggregatorID).isEmpty(), "Should not have a job to work"),
+        assertAll(() -> assertTrue(queue.claimBatch(aggregatorID).isEmpty(), "Should not have a job to work"),
                 () -> assertEquals(0, queue.queueSize(), "Should have an empty queue"));
 
         assertTrue(queue.getBatch(batchID).isEmpty(), "Should not be able to get a missing batch");

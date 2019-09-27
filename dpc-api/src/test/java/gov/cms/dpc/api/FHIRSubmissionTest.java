@@ -88,7 +88,7 @@ class FHIRSubmissionTest {
 
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
-        final var job = queue.workBatch(AGGREGATOR_ID).orElseThrow(() -> new IllegalStateException("Should have a job"));
+        final var job = queue.claimBatch(AGGREGATOR_ID).orElseThrow(() -> new IllegalStateException("Should have a job"));
         while ( job.fetchNextPatient(AGGREGATOR_ID).isPresent() ) {
             queue.completePartialBatch(job, AGGREGATOR_ID);
         }
@@ -115,7 +115,7 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
-        final var job = queue.workBatch(AGGREGATOR_ID);
+        final var job = queue.claimBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
         final var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 1),
@@ -138,7 +138,7 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
-        var job = queue.workBatch(AGGREGATOR_ID);
+        var job = queue.claimBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
         var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), 2),
@@ -159,7 +159,7 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with Patient and EOB resources
-        var job = queue.workBatch(AGGREGATOR_ID);
+        var job = queue.claimBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
         var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(3, resources.size()),
@@ -198,7 +198,7 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Should yield a job with all resource types
-        var job = queue.workBatch(AGGREGATOR_ID);
+        var job = queue.claimBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
         var resources = job.get().getResourceTypes();
         assertAll(() -> assertEquals(resources.size(), JobQueueBatch.validResourceTypes.size()));
