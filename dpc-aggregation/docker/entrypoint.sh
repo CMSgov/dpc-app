@@ -11,7 +11,7 @@ bootstrap_config() {
   mkdir -p /config
 
   # Sync the aws bucket
-  aws s3 sync s3://dpc-${ENV}-app-config/ config/
+  aws s3 sync s3://dpc-$ENV-app-config/ config/
 }
 
 if [ -n "$JACOCO" ]; then
@@ -25,7 +25,7 @@ if [ -n "$BOOTSTRAP" ]; then
   bootstrap_config
 fi
 
-CMDLINE="java ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.aggregation.DPCAggregationService"
+CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.aggregation.DPCAggregationService"
 
 echo "Running server via entrypoint!"
 exec ${CMDLINE} "$@"
