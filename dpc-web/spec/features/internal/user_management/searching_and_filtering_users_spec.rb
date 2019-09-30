@@ -79,7 +79,7 @@ RSpec.feature 'searching and filtering users' do
 
     find('[data-test="filter-modal-trigger"]').click
     fill_in 'requested_org', with: ''
-    select '', from: 'requested_org_type'
+    select 'All organization types', from: 'requested_org_type'
     fill_in 'created_after', with: 6.days.ago
     fill_in 'created_before', with: 4.days.ago
     find('[data-test="users-filter-submit"]').click
