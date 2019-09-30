@@ -298,7 +298,7 @@ This returns a [Bundle](https://hl7.org/fhir/STU3/bundle.html) resource which co
             "coding": [
               {
                 "system": "http://hl7.org/fhir/sid/us-npi",
-                "value": "{provider NPI}"
+                "code": "{provider NPI}"
               }
             ]
           }
@@ -1023,7 +1023,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group
         "coding": [
           {
             "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "110001029483"
+            "code": "110001029483"
           }
         ]
       }
@@ -1089,7 +1089,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/$add
             "coding": [
               {
                 "system": "http://hl7.org/fhir/sid/us-npi",
-                "value": "110001029483"
+                "code": "110001029483"
               }
             ]
           }
@@ -1143,7 +1143,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/$remove
             "coding": [
               {
                 "system": "http://hl7.org/fhir/sid/us-npi",
-                "value": "110001029483"
+                "code": "110001029483"
               }
             ]
           }
@@ -1198,7 +1198,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
             "coding": [
               {
                 "system": "http://hl7.org/fhir/sid/us-npi",
-                "value": "110001029483"
+                "code": "110001029483"
               }
             ]
           }
