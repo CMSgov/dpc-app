@@ -80,6 +80,10 @@ class ResourceWriter {
             OutputStream writer = byteStream;
             String outputPath = formOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence);
 
+            JobQueueBatchFile file = job.addJobQueueFile(resourceType, sequence, batch.size());
+            Boolean isStartOfFile = batch.size() == file.getCount();
+            Boolean shouldAppendToFile = !isStartOfFile;
+
             logger.debug("Start writing to {}", outputPath);
             for (var resource: batch) {
                 final String str = jsonParser.encodeResourceToString(resource);
@@ -88,10 +92,10 @@ class ResourceWriter {
             }
             writer.flush();
             writer.close();
-            writeToFile(byteStream.toByteArray(), outputPath);
-
+            writeToFile(byteStream.toByteArray(), outputPath, shouldAppendToFile);
             logger.debug("Finished writing to '{}'", outputPath);
-            return job.addJobQueueFile(resourceType, sequence, batch.size());
+
+            return file;
         } catch(IOException ex) {
             throw new JobQueueFailure(job.getJobID(), job.getBatchID(), "IO error writing a resource", ex);
         } catch(SecurityException ex) {
@@ -106,13 +110,14 @@ class ResourceWriter {
      *
      * @param bytes - Bytes to write
      * @param fileName - The fileName to write too
+     * @param append - If the
      * @throws IOException - If the write fails
      */
-    private void writeToFile(byte[] bytes, String fileName) throws IOException {
+    private void writeToFile(byte[] bytes, String fileName, Boolean append) throws IOException {
         if (bytes.length == 0) {
             return;
         }
-        try (final var outputFile = new FileOutputStream(fileName, true)) {
+        try (final var outputFile = new FileOutputStream(fileName, append)) {
             outputFile.write(bytes);
             outputFile.flush();
         }

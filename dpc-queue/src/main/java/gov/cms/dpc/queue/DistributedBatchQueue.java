@@ -133,7 +133,6 @@ public class DistributedBatchQueue extends JobQueueCommon {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<JobQueueBatch> claimBatch(UUID aggregatorID) {
         try (final Session session = this.factory.openSession()) {
@@ -153,6 +152,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
      *
      * @param session - The active database session
      */
+    @SuppressWarnings("unchecked")
     private void restartStuckBatches(Session session) {
         // Find stuck batches
         List<String> stuckBatchIDs = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 1 AND update_time < current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED")
@@ -183,6 +183,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
      * @param aggregatorID - The ID of the aggregator processing the job
      * @return the claimed job batch
      */
+    @SuppressWarnings("unchecked")
     private Optional<JobQueueBatch> claimBatchFromDatabase(Session session, UUID aggregatorID) {
         // Claim a new batch
         Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
