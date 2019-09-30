@@ -343,7 +343,7 @@ The dollar sign (‘$’) before the word “export” in the URL indicates that
 **cURL command**
 
 ~~~ sh
-curl -v https://sandbox.DPC.cms.gov/api/v1/Group/64d0cd85-7767-425a-a3b8-dcc9bdfd5402\$export \
+curl -v https://sandbox.DPC.cms.gov/api/v1/Group/64d0cd85-7767-425a-a3b8-dcc9bdfd5402/\$export \
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Prefer: respond-async'
@@ -784,7 +784,7 @@ POST /api/v1/Practitioner/$submit
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/$submit
+curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/\$submit
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
@@ -804,7 +804,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/$submit
                       "entry": [
                         {
                           "resource": {
-                            "type": "Practitioner",
+                            "resourceType": "Practitioner",
                             ... Omitted for Brevity ...
                           }
                         }
@@ -948,7 +948,7 @@ POST /api/v1/Patient/$submit
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/$submit
+curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/\$submit
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
@@ -969,7 +969,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/$submit
         "entry": [
           {
             "resource": {
-              "type": "Patient",
+              "resourceType": "Patient",
               ... Omitted for Brevity ...
             }
           }
@@ -1063,7 +1063,7 @@ PUT /api/v1/Group/{Group.id}/$add
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/$add
+curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X PUT \
@@ -1117,7 +1117,7 @@ PUT /api/v1/Group/{Group.id}/$remove
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/$remove
+curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -X PUT \
