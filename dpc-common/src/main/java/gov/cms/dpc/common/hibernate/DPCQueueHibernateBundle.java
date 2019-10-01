@@ -11,6 +11,7 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Singleton;
 import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,30 +21,24 @@ import java.util.stream.Collectors;
 
 /**
  * Custom Hibernate bundle, which allows us to inject the {@link org.hibernate.SessionFactory} into non-resource types.
- * By default, the bundle scans the {@link DPCHibernateBundle#PREFIX_STRING} for a list of annotated entities.
+ * By default, the bundle scans the {@link DPCQueueHibernateBundle#PREFIX_STRING} for a list of annotated entities.
  *
  * @param <T> - Configuration class type
  */
-public class DPCHibernateBundle<T extends Configuration & IDPCDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
+@Singleton
+public class DPCQueueHibernateBundle<T extends Configuration & IDPCQueueDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DPCHibernateModule.class);
-    public static String PREFIX_STRING = "gov.cms.dpc.common.entities";
+    private static final Logger logger = LoggerFactory.getLogger(DPCQueueHibernateBundle.class);
+    public static String PREFIX_STRING = "gov.cms.dpc.queue.models";
 
     @Inject
-    public DPCHibernateBundle() {
-        this(null);
+    public DPCQueueHibernateBundle() {
+        super(applicationEntities(), new SessionFactoryFactory());
     }
 
-    public DPCHibernateBundle(List<String> additionalPaths) {
-        super(applicationEntities(additionalPaths), new SessionFactoryFactory());
-    }
-
-    private static ImmutableList<Class<?>> applicationEntities(List<String> additionalPaths) {
+    private static ImmutableList<Class<?>> applicationEntities() {
         // Build a list of class paths to add
         List<String> paths = new ArrayList<>(List.of(PREFIX_STRING));
-        if (additionalPaths != null) {
-            paths.addAll(additionalPaths);
-        }
 
         final List<Class<?>> collect = paths
                 .stream()
@@ -65,6 +60,11 @@ public class DPCHibernateBundle<T extends Configuration & IDPCDatabase> extends 
 
     @Override
     public PooledDataSourceFactory getDataSourceFactory(T configuration) {
-        return configuration.getDatabase();
+        return configuration.getQueueDatabase();
+    }
+
+    @Override
+    protected String name() {
+        return "hibernate.queue";
     }
 }

@@ -1,0 +1,71 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+    <changeSet id="queue-v2-design" author="ronaldheft-usds">
+        <createTable tableName="JOB_QUEUE_BATCH">
+            <column name="batch_id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="job_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider_id" type="VARCHAR(50)"/>
+            <column name="status" type="TINYINT"/>
+            <column name="priority" type="INTEGER"/>
+            <column name="patients" type="TEXT"/>
+            <column name="patient_index" type="INTEGER"/>
+            <column name="resource_types" type="VARCHAR"/>
+            <column name="aggregator_id" type="UUID" />
+            <column name="update_time" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="submit_time" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="start_time" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="complete_time" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_job_id">
+            <column name="job_id"></column>
+        </createIndex>
+
+        <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_queue_next_item">
+            <column name="status"></column>
+            <column name="priority"></column>
+            <column name="submit_time"></column>
+        </createIndex>
+
+        <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_aggregator">
+            <column name="status"></column>
+            <column name="aggregator_id"></column>
+            <column name="update_time"></column>
+        </createIndex>
+
+        <createTable tableName="JOB_QUEUE_BATCH_FILE">
+            <column name="batch_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource_type" type="INTEGER"/>
+            <column name="sequence" type="INTEGER"/>
+            <column name="file_name" type="TEXT"/>
+            <column name="count" type="INTEGER"/>
+        </createTable>
+
+        <addPrimaryKey tableName="JOB_QUEUE_BATCH_FILE"
+                       columnNames="batch_id, resource_type, sequence"/>
+
+        <createIndex tableName="JOB_QUEUE_BATCH_FILE" indexName="job_queue_batch_file_job_id">
+            <column name="job_id"></column>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH_FILE" baseColumnNames="batch_id" constraintName="fk_job_batch_id_file"
+                                 referencedTableName="JOB_QUEUE_BATCH" referencedColumnNames="batch_id"/>
+    </changeSet>
+
+</databaseChangeLog>

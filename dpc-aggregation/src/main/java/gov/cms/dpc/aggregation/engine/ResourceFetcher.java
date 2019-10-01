@@ -26,17 +26,20 @@ class ResourceFetcher {
     private BlueButtonClient blueButtonClient;
     private RetryConfig retryConfig;
     private UUID jobID;
+    private UUID batchID;
     private ResourceType resourceType;
 
     /**
      * Create a context for fetching FHIR resources
      * @param blueButtonClient - client to BlueButton to use
      * @param jobID - the jobID for logging and reporting
+     * @param batchID - the batchID for logging and reporting
      * @param resourceType - the resource type to fetch
      *
      */
     ResourceFetcher(BlueButtonClient blueButtonClient,
                            UUID jobID,
+                           UUID batchID,
                            ResourceType resourceType,
                     OperationsConfig config) {
         this.blueButtonClient = blueButtonClient;
@@ -44,6 +47,7 @@ class ResourceFetcher {
                 .maxAttempts(config.getRetryCount())
                 .build();
         this.jobID = jobID;
+        this.batchID = batchID;
         this.resourceType = resourceType;
     }
 
@@ -128,7 +132,7 @@ class ResourceFetcher {
             case Coverage:
                 return blueButtonClient.requestCoverageFromServer(patientID);
             default:
-                throw new JobQueueFailure(jobID, "Unexpected resource type: " + resourceType.toString());
+                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
         }
     }
 
