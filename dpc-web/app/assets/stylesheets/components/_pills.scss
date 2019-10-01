@@ -28,6 +28,21 @@
   }
 }
 
+.site-pills__item--small {
+  font-size: 12px;
+  margin: $spacer-1 / 4;
+  padding: .5em 1em;
+  text-transform: none;
+
+  @media (min-width: $width-md) {
+    font-size: 12px;
+  }
+
+  @media (min-width: $width-lg) {
+    font-size: 12px;
+  }
+}
+
 .site-pills__item--orange {
   background-color: rgba($color-warn-lightest, .9);
   color: $color-warn-alt;

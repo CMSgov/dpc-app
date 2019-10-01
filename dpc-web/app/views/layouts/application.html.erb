@@ -3,24 +3,29 @@
 
   <%= render partial: 'shared/head' %>
 
-  <body class="ds-base">
+  <body class="ds-base <% if controller_name == "users" %>ds-u-fill--gray-ultra-light<% end %>">
     <!-- nav -->
     <%= render partial: 'shared/navbar' %>
 
+    <% if controller_name == "users" %>
+    <div class="header-seperator"></div>
+    <% else %>
     <header class="page-header">
       <div class="ds-l-container">
         <h1 class="page-header__heading">
           <%= content_for?(:banner_title) ? yield(:banner_title) : yield(:title) %>
         </h1>
-
         <%= render :partial =>  yield(:tabs_set) rescue nil %>
-
       </div>
     </header>
+    <% end %>
+
+
+
     <%= render partial: 'shared/alerts', locals: { notice: flash[:notice], alert: flash[:alert] } %>
 
     <!-- content -->
-    <section class="ds-l-container ds-u-padding-top--7 ds-u-margin-bottom--7" id="main">
+    <section class="ds-l-container ds-u-padding-top--7 ds-u-margin-bottom--7 <% if controller_name == "users" %>ds-u-max-width--none<% end %>" id="main">
       <%= yield %>
     </section>
 
