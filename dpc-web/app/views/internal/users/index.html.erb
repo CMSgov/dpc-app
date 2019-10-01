@@ -12,71 +12,76 @@
     </ul>
   </div>
 
-  <div class="ds-l-row--12 ds-l-md-col--9">
-    <div class="ds-l-row">
-      <h1 class="ds-h1">Viewing <b><%= @users.total_count %></b> provider users</h1>
-    </div>
+  <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
 
-    <div class="ds-l-row">
-      <p class="ds-u-padding-x--1"><%= page_entries_info @users %></p>
-    </div>
+    <h1 class="ds-h1">Viewing <strong><%= @users.total_count %></strong> provider users</h1>
+    <p class=""><%= page_entries_info @users %></p>
+    <%= form_tag internal_users_path, method: "get", class: "ds-u-display--flex" do %>
+      <%= text_field_tag :keyword, params[:keyword], placeholder: "first name, last name, or email", class: "ds-c-field ds-u-margin--0" %>
+      <%= submit_tag "Search", data: { test: 'users-keyword-search-submit' }, class: "ds-c-button ds-c-button--primary ds-u-margin-left--1" %>
+    <% end %>
 
-    <div class="ds-l-row">
-      <%= form_tag internal_users_path, method: "get" do %>
-        <%= text_field_tag :keyword, params[:keyword], placeholder: "first name, last name, or email" %>
-        <%= submit_tag "Search", data: { test: 'users-keyword-search-submit' } %>
-      <% end %>
-    </div>
+    <div class="ds-u-margin-top--5 ds-u-margin-bottom--2">
 
-    <div class="ds-l-row">
-      <a href="#" id="filter-modal-trigger" class="ds-u-padding-x--1" data-modal-show="filter-modal" data-test="filter-modal-trigger">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#filter"></use>
-        </svg>
-        Filter
-      </a>
+    <button type="button" id="filter-modal-trigger" class="list-control-button" data-modal-show="filter-modal" data-test="filter-modal-trigger">
+      <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#filter"></use>
+      </svg>
+      Filter
+    </button>
+
     </div>
 
     <% @users.each do |user| %>
-      <div class="ds-l-row">
-        <div class="ds-l-col ds-u-flex-wrap--wrap ds-u-display--flex-sm ds-u-padding--1">
-          <div class="ds-u-border--1 ds-u-radius height-sm--auto height-md--full">
-            <div class="ds-u-fill--gray-lightest height-md--full admin-list-subection admin-list-subsection--left">
-              <div class="ds-u-padding--1">
-                <%= user.id %>
-              </div>
+      <div class="module-container">
+        <div class="module-container__id">
+          <%= user.id %>
+        </div>
+        <div class="module-container__primary">
+          <h3 class="module-container__heading"><%= link_to user.name, internal_user_path(user) %></h3>
+          <div class="site-pills ds-u-margin--0 ds-u-padding-x--2">
+          <% user.taggings.each do |tagging| %>
+            <span class="site-pills__item site-pills__item--small">
+              <%= tagging.tag_name %>
+            </span>
+          <% end %>
+          </div>
+          <div class="module-container__primary__footer">
+            <div class="ds-u-color--gray">
+              Signed up: <%= user.created_at.strftime("%m/%d/%Y") %>
             </div>
-            <div class="ds-u-padding--1 ds-u-display--inline-block">
-              <div class="ds-u-font-size--lead">
-                <%= link_to user.name, internal_user_path(user) %>
-              </div>
-
-              <div class="ds-u-padding-y--1">
-                <% user.taggings.each do |tagging| %>
-                  <span class="ds-c-badge ds-u-fill--primary-alt">
-                    <%= tagging.tag_name %>
-                  </span>
-                <% end %>
-              </div>
-
-              <div class="ds-u-align-items--end ds-u-font-style--italic">
-                Signed up: <%= user.created_at %>
-              </div>
+            <div class="ds-u-color--gray module-container__notes-summary">
+              <svg class="icon ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#sticky-note"></use>
+              </svg> <span aria-label="Notes">0</span>
             </div>
-            <div class="ds-u-border-left--1 admin-list-subection admin-list-subsection--right">
-              <div class="ds-u-padding--1 ds-u-fill--gold-lightest admin-list-heading--orange">Requested Organization</div>
-              <div class="ds-u-padding--1 ds-u-font-size--small">
-                <div><%= user.organization %> </div>
-                <div><%= user.organization_type.titleize %> </div>
-                <div><%= city_state(user) %> </div>
-              </div>
+          </div>
+        </div>
+        <div class="module-container__secondary">
+          <div class="module-container__indicator module-container__indicator--warn">Requested organization</div>
+          <div class="module-container__content-wrap">
+            <div>
+              <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+              </svg>
+              <%= user.organization %> </div>
+            <div>
+              <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#shapes"></use>
+              </svg>
+              <%= user.organization_type.titleize %> </div>
+            <div>
+              <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+              </svg>
+              <%= city_state(user) %>
             </div>
           </div>
         </div>
       </div>
     <% end %>
     <%= paginate @users %>
-  </div>
+  </section>
 </div>
 
  <%= render 'filter_modal' %>

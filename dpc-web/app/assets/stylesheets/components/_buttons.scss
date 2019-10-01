@@ -29,3 +29,21 @@
     color: $color-white;
   }
 }
+
+
+.list-control-button {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  align-items: center;
+  background: none;
+  border: 0;
+  color: $color-base;
+  cursor: pointer;
+  display: flex;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
