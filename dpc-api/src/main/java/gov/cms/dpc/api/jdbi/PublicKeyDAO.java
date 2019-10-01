@@ -3,6 +3,7 @@ package gov.cms.dpc.api.jdbi;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.PublicKeyEntity_;
 import gov.cms.dpc.common.entities.OrganizationEntity_;
+import gov.cms.dpc.common.hibernate.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
 
     @Inject
-    PublicKeyDAO(DPCManagedSessionFactory factory) {
+    PublicKeyDAO(DPCAuthManagedSessionFactory factory) {
         super(factory.getSessionFactory());
     }
 
