@@ -1,15 +1,17 @@
 package gov.cms.dpc.common.entities;
 
-import org.hibernate.annotations.CreationTimestamp;
-
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Entity(name = "attributions")
-public class AttributionRelationship {
+public class AttributionRelationship implements Serializable {
+
+    public static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,12 +25,18 @@ public class AttributionRelationship {
     @ManyToOne(fetch = FetchType.LAZY)
     private PatientEntity patient;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    @CreationTimestamp
-    private OffsetDateTime created;
+    private boolean inactive = false;
 
-    public AttributionRelationship() {
-        this.created = OffsetDateTime.now(ZoneOffset.UTC);
+    @NotNull
+    @Column(name = "period_begin", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private OffsetDateTime periodBegin;
+
+    @NotNull
+    @Column(name = "period_end", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private OffsetDateTime periodEnd;
+
+    AttributionRelationship() {
+        // Hibernate required
     }
 
     public AttributionRelationship(RosterEntity roster, PatientEntity patient) {
@@ -39,13 +47,13 @@ public class AttributionRelationship {
     public AttributionRelationship(RosterEntity roster, PatientEntity patient, OffsetDateTime created) {
         this.roster = roster;
         this.patient = patient;
-        this.created = created;
+        this.periodBegin = created;
     }
 
     public AttributionRelationship(RosterEntity roster, PatientEntity patient, Timestamp created) {
         this.roster = roster;
         this.patient = patient;
-        this.created = OffsetDateTime.ofInstant(created.toInstant(), ZoneOffset.UTC);
+        this.periodBegin = OffsetDateTime.ofInstant(created.toInstant(), ZoneOffset.UTC);
     }
 
     public Long getAttributionID() {
@@ -72,12 +80,28 @@ public class AttributionRelationship {
         this.patient = patient;
     }
 
-    public OffsetDateTime getCreated() {
-        return created;
+    public boolean isInactive() {
+        return inactive;
     }
 
-    public void setCreated(OffsetDateTime created) {
-        this.created = created;
+    public void setInactive(boolean inactive) {
+        this.inactive = inactive;
+    }
+
+    public OffsetDateTime getPeriodBegin() {
+        return periodBegin;
+    }
+
+    public void setPeriodBegin(OffsetDateTime periodBegin) {
+        this.periodBegin = periodBegin;
+    }
+
+    public OffsetDateTime getPeriodEnd() {
+        return periodEnd;
+    }
+
+    public void setPeriodEnd(OffsetDateTime periodEnd) {
+        this.periodEnd = periodEnd;
     }
 
     @Override
@@ -85,13 +109,17 @@ public class AttributionRelationship {
         if (this == o) return true;
         if (!(o instanceof AttributionRelationship)) return false;
         AttributionRelationship that = (AttributionRelationship) o;
-        return Objects.equals(roster, that.roster) &&
-                Objects.equals(patient, that.patient);
+        return inactive == that.inactive &&
+                Objects.equals(attributionID, that.attributionID) &&
+                Objects.equals(roster, that.roster) &&
+                Objects.equals(patient, that.patient) &&
+                Objects.equals(periodBegin, that.periodBegin) &&
+                Objects.equals(periodEnd, that.periodEnd);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roster, patient);
+        return Objects.hash(attributionID, roster, patient, inactive, periodBegin, periodEnd);
     }
 
     @Override
@@ -100,7 +128,9 @@ public class AttributionRelationship {
                 "attributionID=" + attributionID +
                 ", roster=" + roster +
                 ", patient=" + patient +
-                ", created=" + created +
+                ", inactive=" + inactive +
+                ", begin=" + periodBegin +
+                ", end=" + periodEnd +
                 '}';
     }
 }

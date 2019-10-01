@@ -1,21 +1,23 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.AttributionRelationship;
-import gov.cms.dpc.common.exceptions.UnknownRelationship;
+import gov.cms.dpc.common.entities.AttributionRelationship_;
+import gov.cms.dpc.common.entities.PatientEntity_;
+import gov.cms.dpc.common.entities.RosterEntity_;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
-import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
-import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-@SuppressWarnings("unchecked")
 public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
 
     private static final Logger logger = LoggerFactory.getLogger(RelationshipDAO.class);
@@ -26,45 +28,64 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
     }
 
     /**
-     * Attempts to retrieve the attribution relationship between the given provider and patient pair.
-     * If no relationship exists, an exception is raised.
+     * Attempts to retrieve the attribution relationship between the given rosterID and patient pair.
+     * If no relationship exists, an empty optional is returned
      *
-     * @param provider - {@link Practitioner} provider to determine attribution with
-     * @param patient  - {@link Patient} patient to determine attribution for
-     * @return - {@link AttributionRelationship} if one exists
-     * @throws UnknownRelationship - thrown if attribution is missing
+     * @param rosterID - {@link UUID} rosterID to determine attribution with
+     * @param patient  - {@link UUID} patientID to determine attribution for
+     * @return - {@link Optional} of {@link AttributionRelationship} if one exists
      */
-    public AttributionRelationship lookupAttributionRelationship(Practitioner provider, Patient patient) {
+    public Optional<AttributionRelationship> lookupAttributionRelationship(UUID rosterID, UUID patient) {
 
-        final String providerNPI = FHIRExtractors.getProviderNPI(provider);
-        final String patientMPI = FHIRExtractors.getPatientMPI(patient);
-        logger.debug("Looking up attribution between {} and {}", providerNPI, patientMPI);
+        logger.debug("Looking up attribution for Group/{} and Patient/{}", rosterID, patient);
 
-        final Query<AttributionRelationship> query = namedQuery("findRelationship");
-        query.setParameter("provID", providerNPI);
-        query.setParameter("patID", patientMPI);
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<AttributionRelationship> query = builder.createQuery(AttributionRelationship.class);
+        final Root<AttributionRelationship> root = query.from(AttributionRelationship.class);
+        query.select(root);
 
-        final AttributionRelationship relationship = uniqueResult(query);
+        query.where(builder.and(
+                builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID),
+                builder.equal(root.get(AttributionRelationship_.patient).get(PatientEntity_.patientID), patient)));
 
-        if (relationship == null) {
-            logger.debug("Unknown attribution relationship between {} and {}", providerNPI, patientMPI);
-            throw new UnknownRelationship(providerNPI, patientMPI);
-        }
-
-        return relationship;
-    }
-
-    public void addAttributionRelationship(AttributionRelationship relationship) {
-        persist(relationship);
+        return Optional.ofNullable(uniqueResult(query));
     }
 
     /**
-     * Remove the given attribution relationship
+     * Remove all {@link AttributionRelationship} for the given attribution roster
      *
-     * @param relationship - {@link AttributionRelationship} to remove
+     * @param rosterID - {@link UUID} of roster to remove attributions from
      */
-    public void removeAttributionRelationship(AttributionRelationship relationship) {
-        currentSession().delete(relationship);
+    public void removeRosterAttributions(UUID rosterID) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaDelete<AttributionRelationship> query = builder.createCriteriaDelete(AttributionRelationship.class);
+        final Root<AttributionRelationship> root = query.from(AttributionRelationship.class);
+
+        query.where(builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID));
+
+        this.currentSession().createQuery(query).executeUpdate();
+    }
+
+    /**
+     * Update existing {@link AttributionRelationship}. Mostly used to set patients as inactive
+     *
+     * @param relationship - {@link AttributionRelationship} to update
+     */
+    public void updateAttributionRelationship(AttributionRelationship relationship) {
+        this.currentSession().update(relationship);
+    }
+
+    /**
+     * Create new {@link AttributionRelationship}
+     *
+     * @param relationship - {@link AttributionRelationship} to add
+     */
+    public void addAttributionRelationship(AttributionRelationship relationship) {
+        if (relationship.getAttributionID() == null) {
+            persist(relationship);
+        } else {
+            this.currentSession().merge(relationship);
+        }
     }
 
     /**

@@ -30,11 +30,11 @@ public abstract class AbstractGroupResource {
 
     @GET
     @Path("/{rosterID}/$patients")
-    public abstract Bundle getAttributedPatients(@NotNull UUID rosterID);
+    public abstract Bundle getAttributedPatients(@NotNull UUID rosterID, boolean activeOnly);
 
     @PUT
     @Path("/{rosterID}")
-    public abstract Group updateRoster(UUID rosterID, Group groupUpdate);
+    public abstract Group replaceRoster(UUID rosterID, Group groupUpdate);
 
     @POST
     @Path("/{rosterID}/$add")

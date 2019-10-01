@@ -16,7 +16,7 @@ public class AttributionTestHelpers {
 
     public static Practitioner createPractitionerResource(String NPI) {
         final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(NPI);
+        practitioner.addIdentifier().setValue(NPI).setSystem(DPCIdentifierSystem.NPPES.getSystem());
         practitioner.addName()
                 .setFamily("Practitioner").addGiven("Test");
 
