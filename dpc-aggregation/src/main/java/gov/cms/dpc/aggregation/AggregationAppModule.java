@@ -8,14 +8,11 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
-import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
-import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
-import gov.cms.dpc.queue.models.JobModel;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 
 import javax.inject.Singleton;
-import java.util.List;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
 
@@ -25,7 +22,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
     @Override
     public void configure(Binder binder) {
-        binder.requestStaticInjection(DPCHibernateBundle.class);
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
     }
@@ -36,7 +32,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         final var fhirContext = FhirContext.forDstu3();
 
         // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
-        ContextUtils.prefetchResourceModels(fhirContext, JobModel.validResourceTypes);
+        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
         return fhirContext;
     }
 
@@ -58,21 +54,14 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    @AdditionalPaths
-    public List<String> provideAdditionalPaths() {
-        return List.of("gov.cms.dpc.queue.models");
-    }
-
-    @Provides
     OperationsConfig provideOperationsConfig() {
         final var config = getConfiguration();
 
-        return new OperationsConfig(config.getResourcesPerFileCount(),
+        return new OperationsConfig(
+                config.getResourcesPerFileCount(),
                 config.getExportPath(),
                 config.getRetryCount(),
-                config.isEncryptionEnabled(),
-                config.isParallelEnabled(),
-                config.getWriteThreadFactor(),
-                config.getFetchThreadFactor());
+                config.getPollingFrequency()
+        );
     }
 }

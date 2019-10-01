@@ -80,35 +80,4 @@
   padding: $spacer-2;
 }
 
-.height-sm--auto {
-  @media (max-width: $width-md) {
-    height: auto;
-  }
-}
 
-.height-md--full {
-  @media (min-width: $width-md) {
-    height: 100%;
-  }
-}
-
-.admin-list-subection {
-  width: 100%;
-  display: inline-block;
-}
-
-.admin-list-subsection--left {
-  max-width: 42px;
-  float: left;
-}
-
-.admin-list-subsection--right {
-  max-width: 317px;
-  float: right;
-}
-
-.admin-list-heading--orange {
-  font-size: 14px;
-  color: #E27100;
-  font-weight: bold;
-}

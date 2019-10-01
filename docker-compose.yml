@@ -2,18 +2,16 @@ version: '3'
 
 services:
 
-  redis:
-    image: redis
-    ports:
-      - "6379:6379"
-
   db:
     image: postgres
     environment:
-      - POSTGRES_DB=dpc_attribution
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
     ports:
       - "5432:5432"
+    volumes:
+      - ./docker/postgres:/docker-entrypoint-initdb.d
 
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
@@ -24,7 +22,6 @@ services:
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
       - db
-      - redis
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -60,9 +57,8 @@ services:
   start_core_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:
-      - redis
       - db
-    command: redis:6379 db:5432
+    command: db:5432
 
   start_api_dependencies:
     image: dadarek/wait-for-dependencies
