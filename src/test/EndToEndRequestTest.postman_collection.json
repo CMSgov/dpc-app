@@ -715,8 +715,8 @@
 						"exec": [
 							"if (pm.response.code == 200) {",
 							"    // Response should have FHIR Content-Type",
-							"    pm.test(\"Content-type is application/fhir+json\", function() {",
-							"       pm.response.to.have.header(\"Content-Type\", \"application/fhir+json\"); ",
+							"    pm.test(\"Content-type is application/json\", function() {",
+							"       pm.response.to.have.header(\"Content-Type\", \"application/json\"); ",
 							"    });",
 							"    ",
 							"    // If response code is 200, check the response and load the urls.",
