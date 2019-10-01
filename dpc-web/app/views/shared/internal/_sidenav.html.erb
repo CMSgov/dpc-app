@@ -1,11 +1,11 @@
 <ul class="ds-c-vertical-nav">
   <li class="ds-c-vertical-nav__item">
-    <%= link_to "Users", internal_users_path, class: "ds-c-vertical-nav__label ds-c-vertical-nav__label--current" %>
+    <%= link_to "Users", internal_users_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:users, current)}" %>
   </li>
   <li class="ds-c-vertical-nav__item">
-    <%= link_to "Organizations", internal_organizations_path, class: "ds-c-vertical-nav__label" %>
+    <%= link_to "Organizations", internal_organizations_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:organizations, current)}" %>
   </li>
   <li class="ds-c-vertical-nav__item">
-    <%= link_to "Tags", internal_tags_path, class: "ds-c-vertical-nav__label" %>
+    <%= link_to "Tags", internal_tags_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:tags, current)}" %>
   </li>
 </ul>
