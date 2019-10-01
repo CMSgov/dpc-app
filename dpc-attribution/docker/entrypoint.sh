@@ -8,8 +8,6 @@ else
   JACOCO=""
 fi
 
-CMDLINE="java ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.attribution.DPCAttributionService"
-
 if [ -n "$SEED" ]; then
     echo "Loading seeds"
     ${CMDLINE} db migrate
@@ -17,5 +15,7 @@ if [ -n "$SEED" ]; then
 fi
 
 echo "Running server"
+
+CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.attribution.DPCAttributionService"
 
 exec ${CMDLINE} "$@"

@@ -8,8 +8,8 @@ else
   JACOCO=""
 fi
 
-CMDLINE="java ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
-
 echo "Running server via entrypoint!"
+
+CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
 
 exec ${CMDLINE} "$@"
