@@ -2,8 +2,10 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
+import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterDAO;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
 import gov.cms.dpc.attribution.utils.RESTUtils;
@@ -19,7 +21,10 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +32,10 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Api(value = "Group")
@@ -45,12 +47,16 @@ public class GroupResource extends AbstractGroupResource {
     private final ProviderDAO providerDAO;
     private final PatientDAO patientDAO;
     private final RosterDAO rosterDAO;
+    private final RelationshipDAO relationshipDAO;
+    private final DPCAttributionConfiguration config;
 
     @Inject
-    GroupResource(ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO) {
+    GroupResource(ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO, RelationshipDAO relationshipDAO, DPCAttributionConfiguration config) {
         this.rosterDAO = rosterDAO;
         this.providerDAO = providerDAO;
         this.patientDAO = patientDAO;
+        this.relationshipDAO = relationshipDAO;
+        this.config = config;
     }
 
     @POST
@@ -77,7 +83,8 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
-        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0));
+        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
+
         // Add the first provider
         final RosterEntity persisted = this.rosterDAO.persistEntity(rosterEntity);
         final Group persistedGroup = persisted.toFHIR();
@@ -127,15 +134,16 @@ public class GroupResource extends AbstractGroupResource {
             "It returns empty Patient resources with only the MBI added as an identifier.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
-    public Bundle getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID) {
-        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+    public Bundle getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID, @ApiParam(name = "active", value = "Return only active patients", defaultValue = "false") @QueryParam(value = "active") boolean activeOnly) {
+        if (!this.rosterDAO.rosterExists(rosterID)) {
+            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+        }
 
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
-        // We have to do this because Hibernate/Dropwizard get confused when returning a single type (like String)
-        @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(existingRoster.getId());
+        // We have to do this because Hibernate/Dropwizard gets confused when returning a single type (like String)
+        @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(rosterID, activeOnly);
 
         final List<Bundle.BundleEntryComponent> patients = patientMBIs
                 .stream()
@@ -161,16 +169,19 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Update roster", notes = "FHIR endpoint to update the given Group resource with members to add or remove.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
-    public Group updateRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
-        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+    public Group replaceRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+        if (!this.rosterDAO.rosterExists(rosterID)) {
+            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+        }
 
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
-        existingAttributions.clear();
-        // TODO: This is a temporary workaround until we get DPC-564 merged in, this avoids unique constraint violations due to the current transaction not being committed yet.
-        this.rosterDAO.updateRoster(existingRoster);
+        final RosterEntity rosterEntity = new RosterEntity();
+        rosterEntity.setId(rosterID);
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
-        final List<AttributionRelationship> overwriteAttributions = groupUpdate
+        // Remove all roster relationships
+        this.relationshipDAO.removeRosterAttributions(rosterID);
+
+        groupUpdate
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
@@ -179,12 +190,14 @@ public class GroupResource extends AbstractGroupResource {
                     pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
                     return pe;
                 })
-                .map(pe -> new AttributionRelationship(existingRoster, pe))
-                .collect(Collectors.toList());
+                .map(pe -> new AttributionRelationship(rosterEntity, pe))
+                .peek(relationship -> relationship.setPeriodEnd(generateExpirationTime()))
+                .peek(relationship -> relationship.setPeriodBegin(now))
+                .forEach(relationshipDAO::addAttributionRelationship);
 
-        existingAttributions.addAll(overwriteAttributions);
-
-        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+        return this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION)
+                .toFHIR();
     }
 
     @POST
@@ -192,32 +205,47 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Add roster members", notes = "FHIR endpoint to update the given Group resource by adding the members included in the supplied Group.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find attribution roster"),
+            @ApiResponse(code = 400, message = "Unable to add patient to roster")
+    })
     @Override
     public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
-        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        if (!this.rosterDAO.rosterExists(rosterID)) {
+            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+        }
 
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
+        final RosterEntity rosterEntity = new RosterEntity();
+        rosterEntity.setId(rosterID);
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        // For each group member, check to see if the patient exists, if not, throw an exception
+        // Check to see if they're already rostered, if so, ignore
         groupUpdate
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
-                .map(ref -> {
-                    final PatientEntity pe = new PatientEntity();
-                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
-                    return pe;
+                // Check to see if patient exists, if not, throw an exception
+                .map(entity -> {
+                    final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
+                    return this.patientDAO.getPatient(patientID).orElseThrow(() -> new WebApplicationException(String.format("Cannot find patient with ID %s",
+                            patientID.toString()), Response.Status.BAD_REQUEST));
                 })
-                .map(pe -> new AttributionRelationship(existingRoster, pe))
-                .forEach(relationship -> {
-                    final Optional<AttributionRelationship> found = findAttributionRelationship(existingAttributions, relationship);
-                    if (found.isEmpty()) {
-                        existingAttributions.add(relationship);
+                .map(patient -> {
+                    // Check to see if the attribution already exists, if so, re-extend the expiration time
+                    final AttributionRelationship relationship = this.relationshipDAO.lookupAttributionRelationship(rosterID, patient.getPatientID())
+                            .orElse(new AttributionRelationship(rosterEntity, patient, now));
+                    // If the relationship is inactive, then we need to update the period begin for the new membership span
+                    if (relationship.isInactive()) {
+                        relationship.setPeriodBegin(now);
                     }
-                });
+                    relationship.setInactive(false);
+                    relationship.setPeriodEnd(generateExpirationTime());
+                    return relationship;
+                })
+                .forEach(this.relationshipDAO::addAttributionRelationship);
 
-        existingRoster.setAttributions(existingAttributions);
-        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+        return this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION).toFHIR();
     }
 
     @POST
@@ -225,21 +253,35 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Remove roster members", notes = "FHIR endpoint to update the given Group resource by removing the members included in the supplied Group.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find attribution roster"),
+            @ApiResponse(code = 400, message = "Cannot find attribution relationship to remove")
+    })
     @Override
     public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
-        final RosterEntity existingRoster = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+        if (!this.rosterDAO.rosterExists(rosterID)) {
+            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+        }
 
-        final List<AttributionRelationship> existingAttributions = existingRoster.getAttributions();
         groupUpdate
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
-                .forEach(entity -> removeAttributedPatients(existingAttributions, entity));
+                .map(entity -> {
+                    final PatientEntity patientEntity = new PatientEntity();
+                    final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
+                    patientEntity.setPatientID(patientID);
+                    return this.relationshipDAO.lookupAttributionRelationship(rosterID, patientID);
+                })
+                .map(rOptional -> rOptional.orElseThrow(() -> new WebApplicationException("Cannot find attribution relationship.", Response.Status.BAD_REQUEST)))
+                .peek(relationship -> {
+                    relationship.setInactive(true);
+                    relationship.setPeriodEnd(OffsetDateTime.now(ZoneOffset.UTC));
+                })
+                .forEach(this.relationshipDAO::updateAttributionRelationship);
 
-        existingRoster.setAttributions(existingAttributions);
-        return this.rosterDAO.updateRoster(existingRoster).toFHIR();
+        return this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION).toFHIR();
     }
 
     @DELETE
@@ -279,45 +321,8 @@ public class GroupResource extends AbstractGroupResource {
                 .toFHIR();
     }
 
-    /**
-     * Remove {@link AttributionRelationship} from the given {@link List} of {@link AttributionRelationship}, if it matches
-     *
-     * @param relationships   - {@link List} of {@link AttributionRelationship} entities to find in list
-     * @param entityReference - {{@link AttributionRelationship} to find in list
-     */
-    private static void removeAttributedPatients(List<AttributionRelationship> relationships, Reference entityReference) {
-        final IdType idType = new IdType(entityReference.getReference());
-        final Optional<AttributionRelationship> maybeAttributed = relationships
-                .stream()
-                .filter(relationship -> relationship.getPatient().getPatientID().toString().equals(idType.getIdPart()))
-                .findAny();
-
-        maybeAttributed.ifPresent(relationships::remove);
-    }
-
-    /**
-     * Find a matching {@link AttributionRelationship} from a {@link List} of {@link AttributionRelationship} entities
-     *
-     * @param relationships - {@link List} of {@link AttributionRelationship} entities to match against
-     * @param relationship  - {@link AttributionRelationship} to compare against the list
-     * @return - {@link Optional} if {@link AttributionRelationship} is in the list
-     */
-    private static Optional<AttributionRelationship> findAttributionRelationship(List<AttributionRelationship> relationships, AttributionRelationship relationship) {
-        return relationships
-                .stream()
-                .filter(r1 -> matchAttribution(r1, relationship))
-                .findAny();
-    }
-
-    /**
-     * Determines if two {@link AttributionRelationship} entity are equal, by looking at the {@link RosterEntity} and {@link PatientEntity} in both entities.
-     *
-     * @param r1 - {@link AttributionRelationship} left side of the comparison
-     * @param r2 - {@link AttributionRelationship} right side of the comparison
-     * @return - {@code true} relationships are equal. {@code false} relationships are not equal
-     */
-    private static boolean matchAttribution(AttributionRelationship r1, AttributionRelationship r2) {
-        return r1.getRoster().getId().equals(r2.getRoster().getId()) && r1.getPatient().getPatientID().equals(r2.getPatient().getPatientID());
+    private OffsetDateTime generateExpirationTime() {
+        return OffsetDateTime.now(ZoneOffset.UTC).plus(config.getExpirationThreshold());
     }
 
     private static Pair<IdType, IdType> parseCompositeID(String queryParam) {

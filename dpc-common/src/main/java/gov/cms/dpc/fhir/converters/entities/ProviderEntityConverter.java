@@ -1,12 +1,11 @@
 package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Practitioner;
-
-import java.sql.Date;
 
 import static gov.cms.dpc.fhir.FHIRFormatters.INSTANT_FORMATTER;
 
@@ -25,7 +24,10 @@ public class ProviderEntityConverter {
                 setFamily(entity.getProviderLastName())
                 .addGiven(entity.getProviderFirstName());
 
-        practitioner.addIdentifier().setValue(entity.getProviderNPI());
+        practitioner.addIdentifier()
+                .setSystem(DPCIdentifierSystem.NPPES.getSystem())
+                .setValue(entity.getProviderNPI());
+
         final Meta meta = new Meta();
 
         if (entity.getUpdatedAt() != null) {

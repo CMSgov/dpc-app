@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 /**
  * This job runs every day at midnight to expire (remove) attribution relationships which are older than a certain threshold.
@@ -36,30 +36,38 @@ public class ExpireAttributions extends Job {
     private ManagedDataSource dataSource;
     @Inject
     private Settings settings;
-    @Inject
-    private Duration expirationThreshold;
-    private OffsetDateTime expirationTemporal;
 
     public ExpireAttributions() {
         // Manually load the Guice injector. Since the job loads at the beginning of the startup process, Guice is not automatically injected.
         final Injector attribute = (Injector) SundialJobScheduler.getServletContext().getAttribute("com.google.inject.Injector");
         attribute.injectMembers(this);
-        logger.debug("Expiration threshold: {} days", expirationThreshold.toDays());
-        // Calculate the expiration date (e.g. all relationships created BEFORE this time will be removed
-        this.expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC).minus(this.expirationThreshold);
     }
 
     @Override
     public void doRun() throws JobInterruptException {
+        final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC);
         // Find all the jobs and remove them
-        logger.debug("Removing attribution relationships created before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
+        logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
+        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
+            final int updated = context
+                    .update(Attributions.ATTRIBUTIONS)
+                    .set(Attributions.ATTRIBUTIONS.INACTIVE, true)
+                    .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal))
+                    .execute();
+            logger.debug("Expired {} attribution relationships.", updated);
+        } catch (SQLException e) {
+            throw new AttributionException("Unable to open connection to database.", e);
+        }
+
+//        Remove everything that is inactive and has been expired for more than 6 months
         try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
             final int removed = context
                     .delete(Attributions.ATTRIBUTIONS)
-                    .where(Attributions.ATTRIBUTIONS.CREATED_AT.le(this.expirationTemporal))
+                    .where(Attributions.ATTRIBUTIONS.PERIOD_END.le(expirationTemporal.minus(6, ChronoUnit.MONTHS))
+                            .and(Attributions.ATTRIBUTIONS.INACTIVE.eq(true)))
                     .execute();
-            logger.debug("Expired {} attribution relationships.", removed);
+            logger.debug("Removed {} attribution relationships.", removed);
         } catch (SQLException e) {
             throw new AttributionException("Unable to open connection to database.", e);
         }
