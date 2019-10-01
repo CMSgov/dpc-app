@@ -59,7 +59,7 @@ module Internal
         redirect_to internal_organizations_path
       else
         flash[:alert] = "Organization could not be deleted: #{@organization.errors.full_messages.join(', ')}"
-        redirect_to internal_organizations_path
+        redirect_to internal_organization_path(@organization)
       end
     end
 
