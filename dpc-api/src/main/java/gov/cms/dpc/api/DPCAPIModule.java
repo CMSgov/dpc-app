@@ -11,17 +11,14 @@ import com.typesafe.config.Config;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.common.annotations.APIV1;
-import gov.cms.dpc.common.annotations.AdditionalPaths;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
-import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
-import java.util.List;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
@@ -33,9 +30,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Override
     public void configure(Binder binder) {
-
-        binder.requestStaticInjection(DPCHibernateBundle.class);
-
         // TODO: This will eventually go away.
         binder.bind(TestResource.class);
         // V1 Resources
@@ -81,12 +75,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @APIV1
     public String provideV1URL(@ServiceBaseURL String baseURL) {
         return baseURL + "/v1";
-    }
-
-    @Provides
-    @AdditionalPaths
-    public List<String> provideAdditionalPaths() {
-        return List.of("gov.cms.dpc.queue.models");
     }
 
     @Provides

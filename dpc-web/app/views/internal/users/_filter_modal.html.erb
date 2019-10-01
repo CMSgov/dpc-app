@@ -1,5 +1,5 @@
 <div class="ds-c-dialog-wrap" aria-labelledby="dialog-title" aria-hidden="true" role="dialog" id="filter-modal">
-  <div class="ds-c-dialog" role="document">
+  <div class="ds-c-dialog ds-c-dialog--full" role="document">
     <header class="ds-c-dialog__header" role="banner">
       <h1 class="ds-h2" id="dialog-title">Filter provider users</h1>
       <button class="ds-c-button ds-c-button--transparent ds-c-dialog__close" aria-label="Close modal dialog">Close</button>
@@ -7,29 +7,44 @@
 
     <%= form_tag internal_users_path, method: "get" do %>
       <main role="main ds-text">
-        <div class="ds-l-row">
-          <div class="ds-u-padding-x--2">Signup dates</div>
-          <%= date_field_tag :created_after, params[:created_after] %>
-          thru
-          <%= date_field_tag :created_before, params[:created_before] %>
-        </div>
 
-        <div class="ds-l-row">
-          <div class="ds-h5 ds-u-padding-top--2 ds-u-padding-left--2">Unassigned users</div>
 
-          <div class="ds-u-display--flex">
-            <div class="ds-u-padding-x--2">Requested organization</div>
-            <%= text_field_tag :requested_org, params[:requested_org] %>
+        <div class="ds-l-row filter-group">
+          <div class="ds-l-col--3">
+            <div class="filter-group__heading">Signup dates</div>
           </div>
 
-          <div class="ds-u-display--flex">
-            <div class="ds-u-padding-x--2">Requested organization type</div>
-            <%= select_tag :requested_org_type, options_for_select(organization_types_for_select, params[:requested_org_type]), include_blank: true %>
+          <div class="ds-l-col--9 filter-group__fields">
+            <div class="ds-u-display--flex ds-u-align-items--center">
+            <%= date_field_tag :created_after, params[:created_after], class: "ds-c-field ds-c-field--medium " %>
+            <span class="ds-u-display--inline-block ds-u-padding-x--1">thru</span>
+            <%= date_field_tag :created_before, params[:created_before], class: "ds-c-field ds-c-field--medium" %>
+
+            </div>
+            <p class="filter-group__hint">Leave the second field blank to filter a single day</p>
           </div>
         </div>
+
+        <div class="ds-l-row filter-group">
+          <div class="ds-l-col--3">
+            <div class="filter-group__heading">Unassigned users</div>
+          </div>
+          <div class="ds-l-col--9 filter-group__fields">
+            <%= label_tag :requested_org, 'Requested organization', class: "ds-c-label ds-u-margin-top--0" %>
+            <%= text_field_tag :requested_org, params[:requested_org], class: "ds-c-field" %>
+            <%= label_tag :requested_org_type, 'Requested organization type', class: "ds-c-label" %>
+            <%= select_tag(:requested_org_type, options_for_select(organization_types_for_select, params[:requested_org_type]), :class => 'ds-c-field', include_blank: 'All organization types') %>
+          </div>
+        </div>
+
       </main>
-      <aside class="ds-c-dialog__actions" role="complementary">
-        <%= submit_tag "Apply filters", class: "ds-c-button ds-c-button--danger", data: { test: 'users-filter-submit' } %>
+      <aside class="ds-l-row ds-c-dialog__actions" role="complementary">
+        <div class="ds-l-col--3">
+
+        </div>
+        <div class="ds-l-col--9 ds-u-padding-x--0">
+          <%= submit_tag "Apply filters", class: "ds-c-button ds-c-button--primary", data: { test: 'users-filter-submit' } %>
+        </div>
       </aside>
     <% end %>
   </div>
