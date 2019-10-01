@@ -2,6 +2,9 @@
 <% title @organization.name %>
 
 <section class="ds-u-margin--2">
+  <div class="ds-l-row">
+    <%= link_to "Back to index", internal_organizations_path %>
+  </div>
   <div class="ds-l-row ds-u-justify-content--end">
     <%= link_to "Edit details", edit_internal_organization_url(@organization), class: "ds-c-button  ds-c-button--big ds-c-button--primary", data: { test: "edit-link" } %>
   </div>
