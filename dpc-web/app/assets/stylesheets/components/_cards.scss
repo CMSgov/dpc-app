@@ -1,0 +1,17 @@
+.card {
+  background-color: $color-white;
+  box-shadow: 0 0 0 rbga(0,0,0, .5);
+  padding: $spacer-3 $spacer-4;
+}
+
+.card--border-top {
+  border-top: 4px solid $color-success-light;
+}
+
+.card--border-top--red {
+  border-top: 4px solid $color-secondary;
+}
+
+.card--shadow {
+  box-shadow: 0px 0px 50px rgba(0,0,0,0.5);
+}
