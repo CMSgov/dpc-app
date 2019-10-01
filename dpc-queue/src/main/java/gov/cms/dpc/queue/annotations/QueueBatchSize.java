@@ -1,3 +1,5 @@
+
+
 package gov.cms.dpc.queue.annotations;
 
 import com.google.inject.BindingAnnotation;
@@ -8,10 +10,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Binds a health check query which is used to ensure that the DB connection is working correctly.
+ * Binds the queue batch size variable.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD})
 @BindingAnnotation
-public @interface HealthCheckQuery {
+public @interface QueueBatchSize {
 }
+
