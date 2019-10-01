@@ -9,10 +9,4 @@ class Organization < ApplicationRecord
 
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address
-
-  def num_providers=(input)
-    if input.blank?
-      self[:num_providers] = 0
-    end
-  end
 end

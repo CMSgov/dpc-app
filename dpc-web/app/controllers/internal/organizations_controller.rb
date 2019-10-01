@@ -54,19 +54,22 @@ module Internal
 
     def destroy
       @organization = Organization.find params[:id]
-      if @organization.update organization_params
+      if @organization.destroy
         flash[:notice] = 'Organization deleted.'
-        redirect_to index
+        redirect_to internal_organizations_path
       else
         flash[:alert] = "Organization could not be deleted: #{@organization.errors.full_messages.join(', ')}"
-        redirect_to internal_organization_path(@organization)
+        redirect_to internal_organizations_path
       end
     end
 
     private
 
     def organization_params
-      params.fetch(:organization).permit(:name, :organization_type, address_attributes: [:id, :street, :street_2, :city, :state, :zip])
+      params.fetch(:organization).permit(
+        :name, :organization_type, :num_providers,
+        address_attributes: %i[id street street_2 city state zip]
+      )
     end
   end
 end

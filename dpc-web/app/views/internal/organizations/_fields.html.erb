@@ -8,6 +8,15 @@
   <%= f.select :organization_type, organization_types_for_select, {}, class: "ds-c-field" %>
 </div>
 
+<div class="field">
+  <%= f.label :num_providers, class: "ds-c-label" do %>
+  Number of Providers
+  <span class="ds-c-field__hint">You may use an approximate number.<br/>If organization is a vendor, leave blank.</span>
+  <% end %>
+  <%= f.number_field :num_providers,
+    min: 0, class: "ds-c-field ds-c-field--small" %>
+</div>
+
 <div>
   <%= f.fields_for :address do |ff| %>
     <%= ff.label :street, class: "ds-c-label" %>
