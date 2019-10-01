@@ -19,6 +19,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -212,6 +213,7 @@ class FHIRSubmissionTest {
         final IOperationUnnamed unnamed = mock(IOperationUnnamed.class);
         final IOperationUntyped untypedOperation = mock(IOperationUntyped.class);
         final IOperationUntypedWithInput inputOp = mock(IOperationUntypedWithInput.class);
+        final IOperationUntypedWithInputAndPartialOutput<IBaseParameters> paramOp = mock(IOperationUntypedWithInputAndPartialOutput.class);
 
         Mockito.when(client.read()).thenReturn(mockRead);
         Mockito.when(mockRead.resource(Group.class)).thenReturn(mockTypedRead);
@@ -232,8 +234,8 @@ class FHIRSubmissionTest {
         Mockito.when(client.operation()).thenReturn(mockOperation);
         Mockito.when(mockOperation.onInstance(Mockito.any())).thenReturn(unnamed);
         Mockito.when(unnamed.named("patients")).thenReturn(untypedOperation);
-        Mockito.when(untypedOperation.withNoParameters(Mockito.any())).thenReturn(inputOp);
-        Mockito.when(inputOp.returnResourceType(Bundle.class)).thenReturn(inputOp);
+        Mockito.when(untypedOperation.withParameters(Mockito.any())).thenReturn(paramOp);
+        Mockito.when(paramOp.returnResourceType(Bundle.class)).thenReturn(inputOp);
         Mockito.when(inputOp.useHttpGet()).thenReturn(inputOp);
         Mockito.when(inputOp.encodedJson()).thenReturn(inputOp);
         Mockito.when(inputOp.execute()).thenAnswer(answer -> {

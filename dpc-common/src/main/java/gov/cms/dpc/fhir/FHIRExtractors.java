@@ -37,8 +37,7 @@ public class FHIRExtractors {
      * @return - {@link String} provider NPI
      */
     public static String getProviderNPI(Practitioner provider) {
-        // This should probably find the ID with the correct URI, instead of just pulling the first value
-        return provider.getIdentifierFirstRep().getValue();
+        return findMatchingIdentifier(provider.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
     }
 
     /**
@@ -121,7 +120,7 @@ public class FHIRExtractors {
     private static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) {
         return identifiers
                 .stream()
-                .filter(id -> id.getSystem().equals(DPCIdentifierSystem.MBI.getSystem()))
+                .filter(id -> id.getSystem().equals(system.getSystem()))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Cannot find identifier for system: %s", system.getSystem())));
     }

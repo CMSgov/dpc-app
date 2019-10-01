@@ -385,4 +385,21 @@
                     defaultValueComputed="current_timestamp + ( 1 || ' year')::interval"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="add-roster-expiration" author="nickrobison-usds">
+        <addColumn tableName="ATTRIBUTIONS">
+            <column name="period_end"
+                    type="TIMESTAMP WITH TIME ZONE"
+                    defaultValueComputed="current_timestamp + ( 90 || ' day')::interval"/>
+            <column name="inactive" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+        <renameColumn tableName="ATTRIBUTIONS" oldColumnName="created_at" newColumnName="period_begin"/>
+    </changeSet>
+    
+    <changeSet id="add-roster-idx" author="nickrobison-usds">
+        <createIndex tableName="ATTRIBUTIONS" indexName="">
+            <column name="roster_id"/>
+            <column name="patient_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
