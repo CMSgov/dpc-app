@@ -24,7 +24,7 @@ public class SharedMethods {
 
         // Create the provider with the necessary fields
         final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(providerID).setSystem(DPCIdentifierSystem.MBI.getSystem());
+        practitioner.addIdentifier().setValue(providerID).setSystem(DPCIdentifierSystem.NPPES.getSystem());
         practitioner.addName().addGiven("Test").setFamily("Provider");
 
         final Meta meta = new Meta();

@@ -4,6 +4,7 @@ import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
+import org.hibernate.query.Query;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.*;
@@ -58,11 +59,17 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         return this.list(query);
     }
 
-    public RosterEntity updateRoster(RosterEntity existingRoster) {
-        this.currentSession().merge(existingRoster);
-        // TODO: This need to come out as part of DPC-564, we should not be flushing on each update.
-        this.currentSession().flush();
-        return existingRoster;
+    public boolean rosterExists(UUID rosterID) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<Boolean> query = builder.createQuery(Boolean.class);
+        final Root<RosterEntity> root = query.from(RosterEntity.class);
+        query.select(builder.literal(true));
+
+        query.where(builder.equal(root.get(RosterEntity_.id), rosterID));
+
+        final Query<Boolean> booleanQuery = this.currentSession().createQuery(query);
+
+        return booleanQuery.getSingleResult();
     }
 
     public void delete(RosterEntity rosterEntity) {
