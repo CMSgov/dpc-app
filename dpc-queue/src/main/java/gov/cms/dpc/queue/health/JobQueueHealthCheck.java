@@ -1,28 +1,33 @@
 package gov.cms.dpc.queue.health;
 
 import com.codahale.metrics.health.HealthCheck;
-import gov.cms.dpc.queue.JobQueue;
+import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.annotations.AggregatorID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.UUID;
 
 /**
- * Simple check for validating at the {@link JobQueue} is healthy
+ * Simple check for validating at the {@link IJobQueue} is healthy
  */
 @Singleton
 public class JobQueueHealthCheck extends HealthCheck {
 
-    private final JobQueue queue;
+    private final IJobQueue queue;
+
+    private final UUID aggregatorID;
 
     @Inject
-    public JobQueueHealthCheck(JobQueue queue) {
+    public JobQueueHealthCheck(IJobQueue queue, @AggregatorID UUID aggregatorID) {
         this.queue = queue;
+        this.aggregatorID = aggregatorID;
     }
 
     @Override
     public Result check() {
         try {
-            this.queue.assertHealthy();
+            this.queue.assertHealthy(aggregatorID);
             return Result.healthy();
         } catch (Exception e) {
             return Result.unhealthy(e.getMessage());
