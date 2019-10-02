@@ -2,10 +2,13 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.BaseResource;
 
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -19,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 
 @Provider
 @FHIR
+@Consumes({FHIRMediaTypes.FHIR_JSON})
+@Produces({FHIRMediaTypes.FHIR_JSON})
 public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBodyWriter<BaseResource> {
 
     private final FhirContext ctx;

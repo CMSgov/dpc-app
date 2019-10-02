@@ -722,6 +722,7 @@ Details on the exact data format are given in the [implementation guide](https:/
 curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
+-H 'Content-Type: application/fhir+json' \
 -X POST \
 -d @provider.json
 ~~~
@@ -787,6 +788,7 @@ POST /api/v1/Practitioner/$submit
 curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/\$submit
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
+-H 'Content-Type: application/fhir+json' \
 -X POST \
 -d @provider_bundle.json
 ~~~
@@ -837,6 +839,7 @@ Details on the exact data format are given in the [implementation guide](https:/
 curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
+-H 'Content-Type: application/fhir+json' \
 -X POST \
 -d @patient.json
 ~~~
@@ -951,6 +954,7 @@ POST /api/v1/Patient/$submit
 curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/\$submit
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
+-H 'Content-Type: application/fhir+json' \
 -X POST \
 -d @patient_bundle.json
 ~~~
@@ -999,6 +1003,7 @@ POST /api/v1/Group
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
+-H 'Content-Type: application/fhir+json' \
 -X POST \
 -d @group.json
 ~~~
