@@ -5,8 +5,8 @@ import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListene
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
-import gov.cms.dpc.common.hibernate.DPCHibernateBundle;
-import gov.cms.dpc.common.hibernate.DPCHibernateModule;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;

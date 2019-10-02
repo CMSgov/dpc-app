@@ -2,7 +2,7 @@ package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
-import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hl7.fhir.dstu3.model.Organization;
 

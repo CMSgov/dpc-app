@@ -5,7 +5,7 @@ services:
   db:
     image: postgres
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
     ports:
