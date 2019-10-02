@@ -14,6 +14,8 @@ import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
+import gov.cms.dpc.common.hibernate.DPCAuthHibernateBundle;
+import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +27,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAPIModule.class);
 
-    DPCAPIModule() {
-        // Not used
+    private final DPCAuthHibernateBundle<DPCAPIConfiguration> authHibernateBundle;
+
+    DPCAPIModule(DPCAuthHibernateBundle<DPCAPIConfiguration> authHibernateBundle) {
+        this.authHibernateBundle = authHibernateBundle;
     }
 
     @Override
@@ -35,7 +39,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(TestResource.class);
         // V1 Resources
         binder.bind(BaseResource.class);
-        binder.bind(KeyResource.class);
+//        binder.bind(KeyResource.class);
         binder.bind(DataResource.class);
         binder.bind(DefinitionResource.class);
         binder.bind(EndpointResource.class);
@@ -51,6 +55,12 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         // Healthchecks
         // TODO: Fix with DPC-538
 //        binder.bind(AttributionHealthCheck.class);
+    }
+
+    @Provides
+    public KeyResource provideKeyResource(PublicKeyDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(KeyResource.class, new Class<?>[]{PublicKeyDAO.class}, new Object[]{dao});
     }
 
     @Provides

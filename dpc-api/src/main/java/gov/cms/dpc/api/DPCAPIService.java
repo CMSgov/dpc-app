@@ -48,7 +48,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
                         new DPCAuthHibernateModule<>(hibernateAuthBundle),
                         new AuthModule(),
-                        new DPCAPIModule(),
+                        new DPCAPIModule(hibernateAuthBundle),
                         new JobQueueModule<>(),
                         new FHIRModule<>()
                 )
