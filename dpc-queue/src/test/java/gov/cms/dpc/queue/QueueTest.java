@@ -1,7 +1,7 @@
 package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.dpc.common.hibernate.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.hibernate.Session;

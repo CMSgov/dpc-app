@@ -8,11 +8,14 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
+import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +27,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAPIModule.class);
 
-    DPCAPIModule() {
-        // Not used
+    private final DPCAuthHibernateBundle<DPCAPIConfiguration> authHibernateBundle;
+
+    DPCAPIModule(DPCAuthHibernateBundle<DPCAPIConfiguration> authHibernateBundle) {
+        this.authHibernateBundle = authHibernateBundle;
     }
 
     @Override
@@ -43,9 +48,20 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
 
+        // DAO
+        binder.bind(PublicKeyDAO.class);
+
         // Healthchecks
         // TODO: Fix with DPC-538
 //        binder.bind(AttributionHealthCheck.class);
+    }
+
+    // Since the KeyResource requires access to the Auth DB, we have to manually do the creation and resource injection,
+    // in order to ensure that the @UnitOfWork annotations are tied to the correct SessionFactory
+    @Provides
+    public KeyResource provideKeyResource(PublicKeyDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(KeyResource.class, new Class<?>[]{PublicKeyDAO.class}, new Object[]{dao});
     }
 
     @Provides

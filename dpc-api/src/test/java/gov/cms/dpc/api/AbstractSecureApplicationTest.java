@@ -39,7 +39,7 @@ public class AbstractSecureApplicationTest {
     }
 
     @BeforeAll
-    public static void setup() throws IOException {
+    public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
         ctx = FhirContext.forDstu3();
         // Register a test organization for us

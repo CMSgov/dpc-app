@@ -4,7 +4,7 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.entities.TokenEntity;
 import gov.cms.dpc.common.entities.TokenEntity_;
-import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.query.Query;
 
