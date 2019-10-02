@@ -10,10 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_16_190939) do
+ActiveRecord::Schema.define(version: 2019_09_18_195851) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "addresses", force: :cascade do |t|
+    t.string "street", null: false
+    t.string "street_2"
+    t.string "city", null: false
+    t.string "state", null: false
+    t.string "zip", null: false
+    t.string "addressable_type", null: false
+    t.bigint "addressable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["addressable_type", "addressable_id"], name: "index_addresses_on_addressable_type_and_addressable_id"
+  end
 
   create_table "delayed_jobs", force: :cascade do |t|
     t.integer "priority", default: 0, null: false
@@ -55,6 +68,14 @@ ActiveRecord::Schema.define(version: 2019_09_16_190939) do
     t.string "name"
     t.string "github_nickname"
     t.index ["uid", "provider"], name: "index_internal_users_on_uid_and_provider", unique: true
+  end
+
+  create_table "organizations", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "organization_type", null: false
+    t.integer "num_providers", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "taggings", force: :cascade do |t|
