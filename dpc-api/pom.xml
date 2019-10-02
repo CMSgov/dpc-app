@@ -212,6 +212,9 @@
                         <ports>
                             <port>8080</port>
                         </ports>
+                        <environment>
+                            <DB_MIGRATION>1</DB_MIGRATION>
+                        </environment>
                         <entrypoint>/entrypoint.sh</entrypoint>
                     </container>
                     <extraDirectories>
