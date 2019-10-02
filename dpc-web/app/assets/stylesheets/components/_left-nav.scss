@@ -1,0 +1,41 @@
+.usa-accordion .ds-c-vertical-nav__item {
+  list-style: none;
+}
+
+.ds-c-vertical-nav__item.usa-accordion + .usa-accordion {
+  margin-top: 0;
+}
+
+.usa-accordion__button.ds-c-vertical-nav__label {
+  background-color: transparent;
+  border-left: $spacer-1/2 solid transparent;
+  background-position: right $spacer-1 center;
+  font-weight: $font-normal;
+  padding: $spacer-1 $spacer-2;
+
+  &.ds-c-vertical-nav__label--parent {
+    background-image: url("../images/arrow-down.svg");
+
+    &[aria-expanded="true"] {
+      background-image: url("../images/arrow-up.svg");
+    }
+  }
+  &.ds-c-vertical-nav__label--current {
+    border-left-color: $color-primary;
+    color: $color-primary;
+    font-weight: $font-bold;
+  }
+
+  &:hover {
+    background-color: $color-gray-lightest;
+    color: $color-primary;
+  }
+}
+
+.usa-accordion .ds-c-vertical-nav__subnav .ds-c-vertical-nav__item {
+  border-top: none;
+}
+
+.usa-accordion .ds-c-vertical-nav__subnav .ds-c-vertical-nav__label--current {
+    border-color: transparent;
+}
