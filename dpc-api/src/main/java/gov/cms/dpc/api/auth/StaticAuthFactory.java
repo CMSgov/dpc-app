@@ -14,7 +14,7 @@ public class StaticAuthFactory implements AuthFactory {
     private final Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator;
 
     @Inject
-    StaticAuthFactory(Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
+    public StaticAuthFactory(Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
         this.authenticator = auth;
     }
 

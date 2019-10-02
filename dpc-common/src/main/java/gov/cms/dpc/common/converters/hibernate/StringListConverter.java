@@ -1,4 +1,4 @@
-package gov.cms.dpc.common.converters;
+package gov.cms.dpc.common.converters.hibernate;
 
 import javax.persistence.AttributeConverter;
 import java.util.ArrayList;

@@ -3,7 +3,7 @@ package gov.cms.dpc.api.models;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import gov.cms.dpc.common.converters.OffsetDateTimeToStringConverter;
+import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.time.OffsetDateTime;

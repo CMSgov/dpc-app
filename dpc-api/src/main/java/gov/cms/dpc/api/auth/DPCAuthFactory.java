@@ -12,7 +12,7 @@ public class DPCAuthFactory implements AuthFactory {
     private final Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator;
 
     @Inject
-    DPCAuthFactory(IGenericClient client, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator) {
+    public DPCAuthFactory(IGenericClient client, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator) {
         this.client = client;
         this.authenticator = authenticator;
     }

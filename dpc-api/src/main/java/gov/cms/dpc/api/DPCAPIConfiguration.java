@@ -2,8 +2,9 @@ package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.cms.dpc.common.hibernate.IDPCDatabase;
-import gov.cms.dpc.common.hibernate.IDPCQueueDatabase;
+import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
+import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
+import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -14,7 +15,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, IDPCFHIRConfiguration {
+public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, IDPCAuthDatabase, IDPCFHIRConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -32,6 +33,11 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @NotNull
     @JsonProperty("queuedb")
     private DataSourceFactory queueDatabase = new DataSourceFactory();
+
+    @Valid
+    @NotNull
+    @JsonProperty("authdb")
+    private DataSourceFactory authDatabase = new DataSourceFactory();
 
     @NotEmpty
     @NotNull
@@ -55,7 +61,12 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     @Override
     public DataSourceFactory getQueueDatabase() {
-        return queueDatabase;
+        return this.queueDatabase;
+    }
+
+    @Override
+    public DataSourceFactory getAuthDatabase() {
+        return this.authDatabase;
     }
 
     public DPCAPIConfiguration() {
