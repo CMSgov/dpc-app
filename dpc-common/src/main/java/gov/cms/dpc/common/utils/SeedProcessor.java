@@ -90,7 +90,7 @@ public class SeedProcessor {
 
         // Create the provider with the necessary fields
         final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(entry.getKey());
+        practitioner.addIdentifier().setValue(entry.getKey()).setSystem(DPCIdentifierSystem.NPPES.getSystem());
         practitioner.addName().addGiven("Test").setFamily("Provider");
 
         // Add the Organization ID
