@@ -8,8 +8,13 @@ else
   JACOCO=""
 fi
 
-echo "Running server via entrypoint!"
-
 CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
+
+if [ $DB_MIGRATION -eq 1 ]; then
+  echo "Migrating the database"
+  eval ${CMDLINE} db migrate
+fi
+
+echo "Running server via entrypoint!"
 
 exec ${CMDLINE} "$@"

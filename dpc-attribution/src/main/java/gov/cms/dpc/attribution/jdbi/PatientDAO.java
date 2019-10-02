@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.*;
-import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
@@ -86,7 +86,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
 
     // We have to suppress this because the list returned is actually Strings, but we can't prove it to the compiler
     @SuppressWarnings("rawtypes")
-    public List fetchPatientMBIByRosterID(UUID rosterID) {
+    public List fetchPatientMBIByRosterID(UUID rosterID, boolean activeOnly) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
         final Root<PatientEntity> root = query.from(PatientEntity.class);
@@ -98,8 +98,13 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
 
         query.select(root.get(PatientEntity_.BENEFICIARY_ID));
 
-        query.where(builder.equal(rosterJoin.get(RosterEntity_.id), rosterID));
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(builder.equal(rosterJoin.get(RosterEntity_.id), rosterID));
 
+        if (activeOnly) {
+            predicates.add(builder.equal(attrJoins.get(AttributionRelationship_.inactive), false));
+        }
+        query.where(predicates.toArray(new Predicate[0]));
         return this.list(query);
     }
 

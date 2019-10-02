@@ -14,6 +14,9 @@ public abstract class AbstractBaseResource {
 //        Not used
     }
 
+    @Path("/Key")
+    public abstract AbstractKeyResource keyOperations();
+
     @Path("/Data")
     public abstract AbstractDataResource dataOperations();
 

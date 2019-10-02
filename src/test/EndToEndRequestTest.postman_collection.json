@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "5632e905-505e-495a-aad5-5df28b0c07a3",
+		"_postman_id": "47e5ad82-3507-410c-9ed8-98e60abac489",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -63,7 +63,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Roster tests",
@@ -86,6 +87,7 @@
 									"    pm.response.to.be.ok;",
 									"    var responseOutput = pm.response.json();",
 									"    pm.expect(responseOutput.total).to.equal(1);",
+									"    pm.expect(responseOutput.entry[0].resource.identifier[0].system).to.equal(\"http://hl7.org/fhir/sid/us-npi\");",
 									"    pm.environment.set(\"provider_npi\", responseOutput.entry[0].resource.identifier[0].value);",
 									"});"
 								],
@@ -196,6 +198,7 @@
 									"});",
 									"",
 									"pm.test(\"Response Body is correct\", () => {",
+									"    console.log(\"Body correct?\");",
 									"    // Check to ensure that each member id matches what we previously had",
 									"    var response = pm.response.json();",
 									"    ",
@@ -204,6 +207,8 @@
 									"    var ids = new Set(JSON.parse(pm.globals.get(\"patient_ids\")));",
 									"    response.member.forEach(member => {",
 									"        pm.expect(ids.has(member.entity.reference)).to.be.true;",
+									"        // Ensure that the period temporals are not the same",
+									"        pm.expect(member.period.start).to.not.equal(member.period.end);",
 									"    });",
 									"",
 									"    pm.globals.set(\"attribution_group_id\", response.id);",
@@ -264,13 +269,18 @@
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/fhir+json",
+								"value": "application/json",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{{roster_body}}"
+							"raw": "{{roster_body}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "http://{{hostname}}:{{api_port}}/v1/Group",
@@ -407,13 +417,13 @@
 									"console.log(\"Group:\", group);",
 									"console.log(\"Pat: \", patientID);",
 									"",
-									"// Remove everything but a single patient, which we can then submit to the $remove endpoint",
+									"// Find the patient in the group and set it inactive.",
 									"console.log(group.member);",
 									"group.member = group.member.filter(member => {",
-									"    var m = member.entity.reference;",
+									"    var m  = member.entity.reference;",
+									"    console.log(\"id: \" + m + \" pat: \" + patientID);",
 									"    return m === patientID;",
 									"});",
-									"console.log(group.member);",
 									"",
 									"pm.environment.set(\"roster_body\", JSON.stringify(group))"
 								],
@@ -430,11 +440,13 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"pm.test(\"Group should have one less member\", function() {",
+									"pm.test(\"Group should have one inactive member\", function() {",
 									"    var response = pm.response.json();",
 									"    ",
 									"    // Should be a search set with one less entry",
-									"    pm.expect(response.member).to.have.lengthOf(3);",
+									"    console.debug(response.member);",
+									"    pm.expect(response.member.filter(member => member.inactive === false)).to.have.lengthOf(3);",
+									"    pm.expect(response.member.filter(member => member.inactive === true)).to.have.lengthOf(1);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -442,7 +454,7 @@
 						}
 					],
 					"request": {
-						"method": "PUT",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Accept",
@@ -473,26 +485,14 @@
 					"response": []
 				},
 				{
-					"name": "Re-add patient to roster",
+					"name": "Add unknown patient to Roster",
 					"event": [
 						{
 							"listen": "prerequest",
 							"script": {
 								"id": "f6abd191-547c-476b-b6f9-778097f05b8e",
 								"exec": [
-									"var group = JSON.parse(pm.globals.get(\"attribution_group\"));",
-									"var patientID = pm.globals.get(\"single_patient_id\");",
-									"console.log(\"Group:\", group);",
-									"console.log(\"Pat: \", patientID);",
-									"",
-									"// Remove everything but a single patient, which we can then submit to the $add endpoint",
-									"console.log(group.member);",
-									"group.member = group.member.filter(member => {",
-									"    var m = member.entity.reference;",
-									"    return m === patientID;",
-									"})",
-									"",
-									"pm.environment.set(\"roster_body\", JSON.stringify(group))"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -503,15 +503,16 @@
 								"id": "b4c73864-2ec4-4bae-82cd-383a965c9eac",
 								"exec": [
 									"// Status should be 200",
-									"pm.test(\"Status is 200\", function () {",
-									"    pm.response.to.have.status(200);",
+									"pm.test(\"Status is 400\", function () {",
+									"    pm.response.to.have.status(400);",
 									"});",
 									"",
-									"pm.test(\"Group should have all members\", function() {",
+									"pm.test(\"Outcome has a useful error message\", function() {",
 									"    var response = pm.response.json();",
 									"    ",
-									"    // Should be a search set with 4 entries",
-									"    pm.expect(response.member).to.have.lengthOf(4);",
+									"    // Should be a search set with one less entry",
+									"    pm.expect(response.issue).to.have.length(1);",
+									"    pm.expect(response.issue[0].details.text).to.have.string('Cannot find patient with ID');",
 									"});"
 								],
 								"type": "text/javascript"
@@ -519,17 +520,17 @@
 						}
 					],
 					"request": {
-						"method": "PUT",
+						"method": "POST",
 						"header": [
 							{
 								"key": "Accept",
-								"type": "text",
-								"value": "application/fhir+json"
+								"value": "application/fhir+json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{{roster_body}}"
+							"raw": "{\n  \"resourceType\": \"Group\",\n  \"actual\": true,\n  \"active\": true,\n  \"type\": \"person\",\n  \"characteristic\": [\n    {\n      \"code\": {\n        \"coding\": [\n          {\n            \"code\": \"attributed-to\"\n          }\n        ]\n      },\n      \"valueCodeableConcept\": {\n          \"coding\": [\n            {\n              \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n              \"code\": \"3116145044854423862\"\n            }\n          ]\n      }\n    }\n  ],\n  \"member\": [{\n  \"entity\": {\n        \"reference\": \"Patient/c22044f0-3b8e-488c-bcd4-fcbc630d9c19\"\n      }\n  }]\n}"
 						},
 						"url": {
 							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}/$add",
@@ -545,197 +546,15 @@
 								"$add"
 							]
 						},
-						"description": "Add the previously removed patient back to the attribution roster."
-					},
-					"response": []
-				},
-				{
-					"name": "Overwrite roster",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "f6abd191-547c-476b-b6f9-778097f05b8e",
-								"exec": [
-									"var group = JSON.parse(pm.globals.get(\"attribution_group\"));",
-									"var patientID = pm.globals.get(\"single_patient_id\");",
-									"console.log(\"Group:\", group);",
-									"console.log(\"Pat: \", patientID);",
-									"",
-									"// Remove everything but a single patient, which we can then submit to overwite everyting",
-									"console.log(group.member);",
-									"group.member = group.member.filter(member => {",
-									"    var m = member.entity.reference;",
-									"    return m === patientID;",
-									"})",
-									"",
-									"pm.environment.set(\"roster_body\", JSON.stringify(group))"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"id": "b4c73864-2ec4-4bae-82cd-383a965c9eac",
-								"exec": [
-									"// Status should be 200",
-									"pm.test(\"Status is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Group should have a single member\", function() {",
-									"    var response = pm.response.json();",
-									"    ",
-									"    // Should be a search set with 4 entries",
-									"    pm.expect(response.member).to.have.lengthOf(1);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Accept",
-								"type": "text",
-								"value": "application/fhir+json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{{roster_body}}"
-						},
-						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}",
-							"protocol": "http",
-							"host": [
-								"{{hostname}}"
-							],
-							"port": "{{api_port}}",
-							"path": [
-								"v1",
-								"Group",
-								"{{attribution_group_id}}"
-							]
-						},
-						"description": "Use the /Group PUT operation to replace the current roster contents with the submitted membership."
-					},
-					"response": []
-				},
-				{
-					"name": "Re-submit original roster",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "72634c6f-4d6b-49b9-b4db-b172af0f04f1",
-								"exec": [
-									"// Status should be 201",
-									"pm.test(\"Status is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response Body is correct\", () => {",
-									"    // Check to ensure that each member id matches what we previously had",
-									"    var response = pm.response.json();",
-									"    ",
-									"    // Ensure that the Patient IDs haven't changed.",
-									"    pm.expect(response.member.length).to.equal(4);",
-									"    var ids = new Set(JSON.parse(pm.globals.get(\"patient_ids\")));",
-									"    response.member.forEach(member => {",
-									"        pm.expect(ids.has(member.entity.reference)).to.be.true;",
-									"    });",
-									"",
-									"    pm.globals.set(\"attribution_group_id\", response.id);",
-									"})"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "b6f1696a-ac0b-472e-af63-2215ba3231a1",
-								"exec": [
-									"var group = {",
-									"  \"resourceType\": \"Group\",",
-									"  \"actual\": true,",
-									"  \"active\": true,",
-									"  \"type\": \"person\",",
-									"  \"characteristic\": [",
-									"    {",
-									"      \"code\": {",
-									"        \"coding\": [",
-									"          {",
-									"            \"code\": \"attributed-to\"",
-									"          }",
-									"        ]",
-									"      },",
-									"      \"valueCodeableConcept\": {",
-									"          \"coding\": [",
-									"            {",
-									"              \"system\": \"http://hl7.org/fhir/sid/us-npi\",",
-									"              \"code\": \"3116145044854423862\"",
-									"            }",
-									"          ]",
-									"      }",
-									"    }",
-									"  ],",
-									"  \"member\": []",
-									"};",
-									"",
-									"JSON.parse(pm.globals.get(\"patient_ids\")).forEach(id => group.member.push(",
-									"    {",
-									"      \"entity\": {",
-									"        \"reference\": id",
-									"      }",
-									"    }))",
-									"    ",
-									"console.log(\"Group:\", group);",
-									"pm.environment.set(\"roster_body\", JSON.stringify(group));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/fhir+json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{{roster_body}}"
-						},
-						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}",
-							"protocol": "http",
-							"host": [
-								"{{hostname}}"
-							],
-							"port": "{{api_port}}",
-							"path": [
-								"v1",
-								"Group",
-								"{{attribution_group_id}}"
-							]
-						},
-						"description": "This request submits the roster for the provider. The roster data is in the `body` field of the request. It's easier to see in the Postman GUI."
+						"description": "Try to add a patient to the roster, but one that doesn't actually exist."
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "Retry export after submitting roster",
+			"name": "Try export after submitting roster",
 			"event": [
 				{
 					"listen": "test",
@@ -830,13 +649,13 @@
 							"        pm.expect(pm.response.json().error).to.have.lengthOf(0);",
 							"        pm.expect(pm.response.json().output).to.have.lengthOf(3);",
 							"        pm.expect(pm.response.json().output[0].type).to.equal(\"Patient\");",
-							"        pm.expect(pm.response.json().output[0].count).to.equal(4);",
+							"        pm.expect(pm.response.json().output[0].count).to.equal(3);",
 							"        pm.environment.set(\"patient_url\", pm.response.json().output[0].url);",
 							"        pm.expect(pm.response.json().output[1].type).to.equal(\"ExplanationOfBenefit\");",
-							"        pm.expect(pm.response.json().output[1].count).to.equal(152);",
+							"        pm.expect(pm.response.json().output[1].count).to.equal(102);",
 							"        pm.environment.set(\"eob_url\", pm.response.json().output[1].url);",
 							"        pm.expect(pm.response.json().output[2].type).to.equal(\"Coverage\");",
-							"        pm.expect(pm.response.json().output[2].count).to.equal(16);",
+							"        pm.expect(pm.response.json().output[2].count).to.equal(12);",
 							"        pm.environment.set(\"coverage_url\", pm.response.json().output[2].url);",
 							"    })",
 							"} else {",
@@ -876,7 +695,7 @@
 							"pm.test(\"Patient data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(4);",
+							"    pm.expect(responseLines).to.have.lengthOf(3);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"Patient\");",
@@ -912,7 +731,7 @@
 							"pm.test(\"Explanation of Benefits data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(152);",
+							"    pm.expect(responseLines).to.have.lengthOf(102);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"ExplanationOfBenefit\");",
@@ -948,7 +767,7 @@
 							"pm.test(\"Coverage data correct\", function() {",
 							"    var responseOutput = pm.response.text();",
 							"    var responseLines = responseOutput.trim().split('\\n');",
-							"    pm.expect(responseLines).to.have.lengthOf(16);",
+							"    pm.expect(responseLines).to.have.lengthOf(12);",
 							"    for (var line of responseLines) {",
 							"        var lineData = JSON.parse(line);",
 							"        pm.expect(lineData.resourceType).to.equal(\"Coverage\");",
@@ -1020,5 +839,6 @@
 			"value": "3500",
 			"type": "string"
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
