@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.codahale.metrics.annotation.ExceptionMetered;
+import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractEndpointResource;
@@ -30,6 +32,8 @@ public class EndpointResource extends AbstractEndpointResource {
 
     @GET
     @FHIR
+    @Timed
+    @ExceptionMetered
     @ApiOperation(value = "Search for Endpoints", notes = "Search for public Endpoint resources associated to the given Organization.")
     @Override
     public Bundle getEndpoints(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization) {
@@ -46,6 +50,8 @@ public class EndpointResource extends AbstractEndpointResource {
     @Path("/{endpointID}")
     @PathAuthorizer(type = ResourceType.Endpoint, pathParam = "endpointID")
     @FHIR
+    @Timed
+    @ExceptionMetered
     @ApiOperation(value = "Fetch Endpoint resource", notes = "Fetch a specific Endpoint associated to an Organization.")
     @ApiResponses(@ApiResponse(code = 404, message = "Resource not found"))
     @Override

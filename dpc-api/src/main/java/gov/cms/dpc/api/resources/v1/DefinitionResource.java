@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.codahale.metrics.annotation.ExceptionMetered;
+import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.resources.AbstractDefinitionResource;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
@@ -33,6 +35,8 @@ public class DefinitionResource extends AbstractDefinitionResource {
 
     @Public
     @FHIR
+    @Timed
+    @ExceptionMetered
     @ApiOperation(value = "Fetch all structure definitions", notes = "FHIR endpoint which fetches all structure definitions from the server", response = Bundle.class)
     @Override
     public Bundle getStructureDefinitions() {
@@ -50,6 +54,8 @@ public class DefinitionResource extends AbstractDefinitionResource {
     @Path("/{definitionID}")
     @Public
     @FHIR
+    @Timed
+    @ExceptionMetered
     @ApiOperation(value = "Fetch specific structure definition", notes = "FHIR endpoint to fetch a specific structure definition from the server.", response = StructureDefinition.class)
     @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Structure Definition"))
     public StructureDefinition getStructureDefinition(@ApiParam(value = "Structure Definition Resource ID", required = true) @PathParam("definitionID") String definitionID) {
