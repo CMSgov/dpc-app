@@ -1,9 +1,70 @@
 <ul class="ds-c-vertical-nav">
   <li class="ds-c-vertical-nav__item">
-    <%= link_to "Users", internal_users_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:users, current)}" %>
+
   </li>
   <li class="ds-c-vertical-nav__item">
-    <%= link_to "Organizations", internal_organizations_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:organizations, current)}" %>
+
+  </li>
+
+</ul>
+
+
+<ul class="ds-c-vertical-nav">
+  <li class="ds-c-vertical-nav__item usa-accordion">
+    <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class?(:users, current) %>" aria-controls="nav-providers-main" aria-expanded="true">
+    Providers
+    </button>
+    <ul id="nav-providers-main" class="ds-c-vertical-nav__subnav">
+      <li class="ds-c-vertical-nav__item usa-accordion">
+        <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class?(:users, current) %>" aria-controls="provider-users" aria-expanded="true">
+        Users
+        </button>
+        <ul id="provider-users" class="ds-c-vertical-nav__subnav" aria-hidden="false">
+          <li class="ds-c-vertical-nav__item">
+            <%= link_to "All users", internal_users_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:users, current)}" %>
+          </li>
+          <li class="ds-c-vertical-nav__item">
+            <a href="#" class="ds-c-vertical-nav__label">
+              <span>
+                Unassigned users
+              </span>
+            </a>
+          </li>
+          <li class="ds-c-vertical-nav__item">
+            <a href="#" class="ds-c-vertical-nav__label">
+              <span>
+                Assigned users
+              </span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="ds-c-vertical-nav__item">
+        <%= link_to "Organizations", internal_organizations_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:organizations, current)}" %>
+      </li>
+    </ul>
+  </li>
+
+  <li class="ds-c-vertical-nav__item  usa-accordion">
+    <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent" aria-controls="nav-vendors" aria-expanded="false">
+    Vendors
+    </button>
+    <ul id="nav-vendors" class="ds-c-vertical-nav__subnav" aria-hidden="true">
+      <li class="ds-c-vertical-nav__item">
+        <a href="#" class="ds-c-vertical-nav__label">
+          <span>
+            Users
+          </span>
+        </a>
+      </li>
+      <li class="ds-c-vertical-nav__item">
+        <a href="#" class="ds-c-vertical-nav__label">
+          <span>
+            Organizations
+          </span>
+        </a>
+      </li>
+    </ul>
   </li>
   <li class="ds-c-vertical-nav__item">
     <%= link_to "Tags", internal_tags_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:tags, current)}" %>
