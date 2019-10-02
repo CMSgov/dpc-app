@@ -14,7 +14,7 @@ import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
-import gov.cms.dpc.common.hibernate.DPCAuthHibernateBundle;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(TestResource.class);
         // V1 Resources
         binder.bind(BaseResource.class);
-//        binder.bind(KeyResource.class);
         binder.bind(DataResource.class);
         binder.bind(DefinitionResource.class);
         binder.bind(EndpointResource.class);
@@ -57,6 +56,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 //        binder.bind(AttributionHealthCheck.class);
     }
 
+    // Since the KeyResource requires access to the Auth DB, we have to manually do the creation and resource injection,
+    // in order to ensure that the @UnitOfWork annotations are tied to the correct SessionFactory
     @Provides
     public KeyResource provideKeyResource(PublicKeyDAO dao) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)

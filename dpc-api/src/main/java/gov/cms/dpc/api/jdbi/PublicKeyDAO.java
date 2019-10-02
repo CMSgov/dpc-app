@@ -2,9 +2,7 @@ package gov.cms.dpc.api.jdbi;
 
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.PublicKeyEntity_;
-import gov.cms.dpc.common.entities.OrganizationEntity_;
-import gov.cms.dpc.common.hibernate.DPCAuthManagedSessionFactory;
-import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;

@@ -1,4 +1,4 @@
-package gov.cms.dpc.common.hibernate;
+package gov.cms.dpc.common.hibernate.auth;
 
 import com.google.inject.Binder;
 import com.google.inject.Provides;

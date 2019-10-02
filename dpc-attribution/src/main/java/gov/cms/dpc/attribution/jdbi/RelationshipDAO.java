@@ -2,10 +2,9 @@ package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.exceptions.UnknownRelationship;
-import gov.cms.dpc.common.hibernate.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
-import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;

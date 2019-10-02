@@ -9,7 +9,12 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.DemoCommand;
 import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
-import gov.cms.dpc.common.hibernate.*;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
+import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
+import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.queue.JobQueueModule;
@@ -21,8 +26,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-
-import java.util.List;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
@@ -41,20 +44,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     @Override
     public void initialize(final Bootstrap<DPCAPIConfiguration> bootstrap) {
-        // This is required for Guice to load correctly. Not entirely sure why
-        // https://github.com/dropwizard/dropwizard/issues/1772
-        JerseyGuiceUtils.reset();
-        GuiceBundle<DPCAPIConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
-                .modules(
-                        new DPCHibernateModule<>(hibernateBundle),
-                        new DPCQueueHibernateModule<>(hibernateQueueBundle),
-                        new DPCAuthHibernateModule<>(hibernateAuthBundle),
-                        new AuthModule(),
-                        new DPCAPIModule(hibernateAuthBundle),
-                        new JobQueueModule<>(),
-                        new FHIRModule<>()
-                )
-                .build();
+        // Setup Guice bundle and module injection
+        final GuiceBundle<DPCAPIConfiguration> guiceBundle = setupGuiceBundle();
 
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
@@ -66,6 +57,47 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
+        // Wrapper around some of the uglier bundle initialization commands
+        setupCustomBundles(bootstrap);
+
+        // Add CLI commands
+        addCLICommands(bootstrap);
+    }
+
+    @Override
+    public void run(final DPCAPIConfiguration configuration,
+                    final Environment environment) {
+        EnvironmentParser.getEnvironment("API");
+        final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
+        environment.jersey().getResourceConfig().register(listener);
+
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
+    }
+
+    private GuiceBundle<DPCAPIConfiguration> setupGuiceBundle() {
+        // This is required for Guice to load correctly. Not entirely sure why
+        // https://github.com/dropwizard/dropwizard/issues/1772
+        JerseyGuiceUtils.reset();
+        return GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
+                .modules(
+                        new DPCHibernateModule<>(hibernateBundle),
+                        new DPCQueueHibernateModule<>(hibernateQueueBundle),
+                        new DPCAuthHibernateModule<>(hibernateAuthBundle),
+                        new AuthModule(),
+                        new DPCAPIModule(hibernateAuthBundle),
+                        new JobQueueModule<>(),
+                        new FHIRModule<>()
+                )
+                .build();
+    }
+
+    private void addCLICommands(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+        bootstrap.addCommand(new DemoCommand());
+        bootstrap.addCommand(new OrganizationCommand());
+        bootstrap.addCommand(new TokenCommand());
+    }
+
+    private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         bootstrap.addBundle(new SwaggerBundle<DPCAPIConfiguration>() {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
@@ -83,19 +115,5 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                 return "migrations/auth.migrations.xml";
             }
         });
-
-        bootstrap.addCommand(new DemoCommand());
-        bootstrap.addCommand(new OrganizationCommand());
-        bootstrap.addCommand(new TokenCommand());
-    }
-
-    @Override
-    public void run(final DPCAPIConfiguration configuration,
-                    final Environment environment) {
-        EnvironmentParser.getEnvironment("API");
-        final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
-        environment.jersey().getResourceConfig().register(listener);
-
-        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
     }
 }
