@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     resources :users, only: [:index, :show, :edit, :update]
     resources :taggings, only: [:create, :destroy]
     resources :tags, only: [:index, :create, :destroy]
+    resources :organizations
   end
 
   authenticated :user do
