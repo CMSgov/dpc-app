@@ -9,6 +9,8 @@ import io.dropwizard.hibernate.SessionFactoryFactory;
 
 import javax.inject.Singleton;
 
+import java.util.Collections;
+
 import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 
 /**
@@ -24,7 +26,7 @@ public class DPCQueueHibernateBundle<T extends Configuration & IDPCQueueDatabase
 
     @Inject
     public DPCQueueHibernateBundle() {
-        super(applicationEntities(PREFIX_STRING), new SessionFactoryFactory());
+        super(applicationEntities(Collections.singletonList(PREFIX_STRING)), new SessionFactoryFactory());
     }
 
     @Override
