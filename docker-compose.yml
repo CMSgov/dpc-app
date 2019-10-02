@@ -18,7 +18,7 @@ services:
     ports:
       - "9901:9900"
     environment:
-      - ENV=dev
+      - ENV=local
       - JACOCO=${REPORT_COVERAGE}
     depends_on:
       - db
@@ -31,7 +31,7 @@ services:
     depends_on:
       - db
     environment:
-      - ENV=dev
+      - ENV=local
       - JACOCO=${REPORT_COVERAGE}
     ports:
       - "3500:8080"
@@ -45,7 +45,7 @@ services:
       - "3002:3002"
     environment:
       - attributionURL=http://attribution:8080/v1/
-      - ENV=dev
+      - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - exportPath=/app/data
     depends_on:
