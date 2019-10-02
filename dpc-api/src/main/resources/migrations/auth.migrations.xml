@@ -17,13 +17,6 @@
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
-        <addForeignKeyConstraint baseTableSchemaName="public" baseTableName="ORGANIZATION_KEYS"
-                                 baseColumnNames="organization_id"
-                                 constraintName="fk_certificates_key"
-                                 referencedTableSchemaName="public"
-                                 referencedTableName="ORGANIZATIONS"
-                                 referencedColumnNames="id"/>
-
         <createIndex tableName="ORGANIZATION_KEYS" indexName="IDX_ORGANIZATION_KEY">
             <column name="organization_id"/>
             <column name="id"/>

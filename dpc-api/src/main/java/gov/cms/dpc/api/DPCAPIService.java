@@ -15,6 +15,8 @@ import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
@@ -68,6 +70,17 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
                 return dpcapiConfiguration.getSwaggerBundleConfiguration();
+            }
+        });
+        bootstrap.addBundle(new MigrationsBundle<DPCAPIConfiguration>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration dpcAPIConfiguration) {
+                return dpcAPIConfiguration.getAuthDatabase();
+            }
+
+            @Override
+            public String getMigrationsFileName() {
+                return "migrations/auth.migrations.xml";
             }
         });
 

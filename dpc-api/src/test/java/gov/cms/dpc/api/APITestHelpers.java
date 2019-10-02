@@ -155,10 +155,11 @@ public class APITestHelpers {
     }
 
     static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
-            IOException {
+            Exception {
         ConfigFactory.invalidateCaches();
         truncateDatabase();
         application.before();
+        application.getApplication().run("db", "migrate");
     }
 
     private static void truncateDatabase() throws IOException {
