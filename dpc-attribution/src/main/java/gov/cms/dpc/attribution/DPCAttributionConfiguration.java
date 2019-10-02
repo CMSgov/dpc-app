@@ -3,7 +3,7 @@ package gov.cms.dpc.attribution;
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.attribution.config.TokenPolicy;
-import gov.cms.dpc.common.hibernate.IDPCDatabase;
+import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.db.DataSourceFactory;

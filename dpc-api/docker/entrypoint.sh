@@ -12,4 +12,9 @@ CMDLINE="java ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.
 
 echo "Running server via entrypoint!"
 
+if [ $DB_MIGRATION -eq 1 ]; then
+  echo "Migrating the database"
+  eval ${CMDLINE} db migrate
+fi
+
 exec ${CMDLINE} "$@"

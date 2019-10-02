@@ -33,7 +33,7 @@ public class AbstractApplicationTest {
     }
 
     @BeforeAll
-    public static void setup() throws IOException {
+    public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
     }
 

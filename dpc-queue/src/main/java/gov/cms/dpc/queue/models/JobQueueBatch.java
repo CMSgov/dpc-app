@@ -1,6 +1,6 @@
 package gov.cms.dpc.queue.models;
 
-import gov.cms.dpc.common.converters.StringListConverter;
+import gov.cms.dpc.common.converters.hibernate.StringListConverter;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.converters.ResourceTypeListConverter;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
@@ -17,7 +17,7 @@ import java.util.*;
 /**
  * The JobQueueBatch tracks the work done on a bulk export request. It contains the essential details of the request and
  * the results of the requests. The job is mutated between QUEUED to RUNNING to COMPLETE or FAILED states.
- *
+ * <p>
  * For additional information on the design: https://confluenceent.cms.gov/display/DAPC/Queue+v2+Notes
  */
 @Entity(name = "job_queue_batch")
@@ -131,11 +131,11 @@ public class JobQueueBatch implements Serializable {
 
     /**
      * The list of job results
-     *
+     * <p>
      * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name="batch_id")
+    @JoinColumn(name = "batch_id")
     private List<JobQueueBatchFile> jobQueueBatchFiles;
 
     public JobQueueBatch() {
@@ -249,7 +249,7 @@ public class JobQueueBatch implements Serializable {
     public synchronized JobQueueBatchFile addJobQueueFile(ResourceType resourceType, int sequence, int batchSize) {
         Optional<JobQueueBatchFile> existingFile = this.getJobQueueFile(JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
 
-        if ( existingFile.isPresent() ) {
+        if (existingFile.isPresent()) {
             existingFile.get().appendCount(batchSize);
             return existingFile.get();
         } else {
@@ -278,13 +278,13 @@ public class JobQueueBatch implements Serializable {
      * Returns null if at the end of the list.
      */
     public Optional<String> fetchNextPatient(UUID aggregatorID) {
-        if ( this.status != JobStatus.RUNNING ) {
+        if (this.status != JobStatus.RUNNING) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot fetch next batch. JobStatus: %s", this.status));
         }
         this.verifyAggregatorID(aggregatorID);
         this.setUpdateTime();
         Integer index = this.getPatientIndex().orElse(-1) + 1;
-        if ( index < this.patients.size() ) {
+        if (index < this.patients.size()) {
             // Patient index should be set to the last successful fetched result
             this.patientIndex = index;
             return Optional.of(this.patients.get(this.patientIndex));
@@ -296,7 +296,7 @@ public class JobQueueBatch implements Serializable {
      * Pauses the current batch and allows another aggregator to pickup where left off
      */
     public void setPausedStatus(UUID aggregatorID) {
-        if ( this.status != JobStatus.RUNNING ) {
+        if (this.status != JobStatus.RUNNING) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot pause batch. JobStatus: %s", this.status));
         }
         this.verifyAggregatorID(aggregatorID);
@@ -313,7 +313,7 @@ public class JobQueueBatch implements Serializable {
         if (this.status != JobStatus.RUNNING) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. JobStatus: %s", this.status));
         }
-        if ( !this.patients.isEmpty() && (this.patientIndex == null || this.getPatients().size() != this.patientIndex+1) ) {
+        if (!this.patients.isEmpty() && (this.patientIndex == null || this.getPatients().size() != this.patientIndex + 1)) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. Job processing not finished. Only on patient %d of %d", this.getPatientIndex().orElse(-1) + 1, patients.size()));
         }
         this.verifyAggregatorID(aggregatorID);
@@ -361,7 +361,7 @@ public class JobQueueBatch implements Serializable {
      * Verifies that the aggregator is still assigned to the batch, if not throw exception
      */
     protected void verifyAggregatorID(UUID aggregatorID) throws JobQueueFailure {
-        if ( this.aggregatorID != null && !this.aggregatorID.equals(aggregatorID) ) {
+        if (this.aggregatorID != null && !this.aggregatorID.equals(aggregatorID)) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot update job. Cannot process a job owned by another aggregator. Existing Aggregator: %s Aggregator Claiming: %s", this.aggregatorID, aggregatorID));
         }
     }
@@ -370,7 +370,7 @@ public class JobQueueBatch implements Serializable {
      * Keep the update time in sync whenever a change occurs after the start time
      */
     public void setUpdateTime() {
-        if ( startTime != null ) {
+        if (startTime != null) {
             updateTime = OffsetDateTime.now(ZoneOffset.UTC);
         }
     }
