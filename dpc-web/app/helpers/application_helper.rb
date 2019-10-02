@@ -21,6 +21,10 @@ module ApplicationHelper
     ''
   end
 
+  def current_sidenav_class?(nav_item, current)
+    'ds-c-vertical-nav__label--current' if nav_item == current
+  end
+
   def meta_tag(tag, text)
     content_for :"meta_#{tag}", text
   end
@@ -31,5 +35,9 @@ module ApplicationHelper
 
   def tabs_set(tabs_set)
     content_for(:tabs_set) { tabs_set }
+  end
+
+  def internal_page?
+    request.path[0..9] == '/internal/'
   end
 end

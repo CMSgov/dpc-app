@@ -1,0 +1,15 @@
+<% title "Edit Organization" %>
+
+<div class="ds-l-row">
+  <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
+
+    <%= link_to "Back to index", internal_organizations_path %>
+    <h1><%= @organization.name %></h1>
+
+    <div class="ds-u-border--1 ds-u-padding--2 ds-u-radius">
+      <%= form_for @organization, url: internal_organization_path(@organization), html: { method: :put } do |f| %>
+        <%= render 'internal/organizations/fields', f: f %>
+      <% end %>
+    </div>
+  <section>
+</div>
