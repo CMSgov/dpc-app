@@ -7,11 +7,12 @@ FactoryBot.define do
     sequence(:first_name) { |n| "first_name_#{n}" }
 
     organization { 'Amalgamated Lint' }
+    organization_type { 'primary_care_clinic' }
+
     address_1 { '1234 Shut the Door Ave.' }
     city { 'Pecoima' }
     state { 'AZ' }
     zip { '12345' }
-    organization_type { 0 }
     agree_to_terms { true }
 
     password { '123456' }
