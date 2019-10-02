@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -31,8 +32,9 @@ public class EntityScanner {
      * @return - {@link ImmutableList} of {@link Class}
      */
     public static ImmutableList<Class<?>> applicationEntities(String prefix, List<String> additionalPaths) {
-        additionalPaths.add(prefix);
-        return applicationEntities(additionalPaths);
+        final ArrayList<String> paths = new ArrayList<>(additionalPaths);
+        paths.add(prefix);
+        return applicationEntities(paths);
     }
 
     /**
