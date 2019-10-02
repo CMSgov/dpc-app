@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.codahale.metrics.annotation.ExceptionMetered;
+import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -28,6 +30,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @GET
     @Path("/{organizationID}")
     @FHIR
+    @Timed
+    @ExceptionMetered
     @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
     @ApiOperation(value = "Get organization details",
             notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",

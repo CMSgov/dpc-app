@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.dropwizard.CustomIDSerializer;
 import gov.cms.dpc.fhir.dropwizard.CustomResourceSerializer;
@@ -11,6 +12,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 
 import javax.inject.Inject;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -23,6 +25,7 @@ import java.lang.reflect.Type;
 
 @Provider
 @FHIR
+@Produces({FHIRMediaTypes.FHIR_JSON})
 public class MethodOutcomeHandler implements MessageBodyWriter<MethodOutcome> {
 
     private final ObjectMapper mapper;
