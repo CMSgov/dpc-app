@@ -11,12 +11,12 @@
 
 <ul class="ds-c-vertical-nav">
   <li class="ds-c-vertical-nav__item usa-accordion">
-    <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--current ds-c-vertical-nav__label--parent" aria-controls="nav-providers-main" aria-expanded="true">
+    <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class?(:users, current) %>" aria-controls="nav-providers-main" aria-expanded="true">
     Providers
     </button>
     <ul id="nav-providers-main" class="ds-c-vertical-nav__subnav">
       <li class="ds-c-vertical-nav__item usa-accordion">
-        <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--current ds-c-vertical-nav__label--parent" aria-controls="provider-users" aria-expanded="true">
+        <button class="usa-accordion__button ds-c-vertical-nav__label ds-c-vertical-nav__label--parent <%= current_sidenav_class?(:users, current) %>" aria-controls="provider-users" aria-expanded="true">
         Users
         </button>
         <ul id="provider-users" class="ds-c-vertical-nav__subnav" aria-hidden="false">
