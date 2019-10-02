@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.api.converters.PublicKeyBytesConverter;
 import gov.cms.dpc.api.converters.PublicKeySerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
-import gov.cms.dpc.common.entities.OrganizationEntity;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -25,10 +24,8 @@ public class PublicKeyEntity implements Serializable {
     private UUID id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
     @JsonIgnore
-    private OrganizationEntity managingOrganization;
+    private UUID organization_id;
 
     @NotNull
     @Convert(converter = PublicKeyBytesConverter.class)
@@ -54,12 +51,12 @@ public class PublicKeyEntity implements Serializable {
         this.id = id;
     }
 
-    public OrganizationEntity getManagingOrganization() {
-        return managingOrganization;
+    public UUID getOrganization_id() {
+        return organization_id;
     }
 
-    public void setManagingOrganization(OrganizationEntity managingOrganization) {
-        this.managingOrganization = managingOrganization;
+    public void setOrganization_id(UUID organization_id) {
+        this.organization_id = organization_id;
     }
 
     public SubjectPublicKeyInfo getPublicKey() {

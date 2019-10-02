@@ -111,7 +111,7 @@ public class KeyResource extends AbstractKeyResource {
         final OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(organizationPrincipal.getID());
 
-        publicKeyEntity.setManagingOrganization(organizationEntity);
+        publicKeyEntity.setOrganization_id(organizationEntity.getId());
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setPublicKey(publicKey);
 

@@ -157,9 +157,13 @@ public class APITestHelpers {
     static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
             Exception {
         ConfigFactory.invalidateCaches();
+        // Truncate attribution database
         truncateDatabase();
         application.before();
+        // Truncate the Auth DB
+        application.getApplication().run("db", "drop-all", "--confirm-delete-everything");
         application.getApplication().run("db", "migrate");
+
     }
 
     private static void truncateDatabase() throws IOException {

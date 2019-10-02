@@ -58,6 +58,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(get)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
                 final KeyView fetched = this.mapper.readValue(response.getEntity().getContent(), KeyView.class);
                 // Verify the keys are equal, aside from different new line characters
                 assertEquals(key.replaceAll("\\n", "").replaceAll("\\r", ""),
