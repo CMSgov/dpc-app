@@ -30,7 +30,7 @@
     <%= ff.text_field :city, class: "ds-c-field" %>
 
     <%= ff.label :state, class: "ds-c-label" %>
-    <%= ff.select :state, states_for_select, {}, class: "ds-c-field" %>
+    <%= ff.select :state, states_for_select, { include_blank: 'Please select' }, class: "ds-c-field" %>
 
     <%= ff.label :zip, class: "ds-c-label" %>
     <%= ff.text_field :zip, class: "ds-c-field" %>
@@ -38,6 +38,6 @@
 </div>
 
 <div class="actions ds-u-margin-top--3">
-  <%= f.submit "Create organization", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+  <%= f.submit locals[:button_label], class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
   <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
 </div>
