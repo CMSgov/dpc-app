@@ -1,23 +1,37 @@
 
     <%= form_for @user, url: internal_user_path(@user), html: { method: :put } do |f| %>
 
-      <div class="field">
-        <%= f.label :first_name, class: "ds-c-label" %>
-        <%= f.text_field :first_name, class: "ds-c-field" %>
+    <fieldset class="ds-l-row filter-group">
+      <div class="ds-l-col--3">
+        <legend class="filter-group__heading">Personal Info</legend>
       </div>
 
-      <div class="field">
-        <%= f.label :last_name, class: "ds-c-label" %>
-        <%= f.text_field :last_name, class: "ds-c-field" %>
+      <div class="ds-l-col--9 filter-group__fields">
+        <div class="field">
+          <%= f.label :first_name, class: "ds-c-label ds-u-margin-top--0" %>
+          <%= f.text_field :first_name, class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :last_name, class: "ds-c-label" %>
+          <%= f.text_field :last_name, class: "ds-c-field" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :email, class: "ds-c-label" %>
+          <%= f.text_field :email, class: "ds-c-field" %>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="ds-l-row filter-group actions">
+      <div class="ds-l-col--3">
+
       </div>
 
-      <div class="field">
-        <%= f.label :email, class: "ds-c-label" %>
-        <%= f.text_field :email, class: "ds-c-field" %>
-      </div>
-
-      <div class="actions ds-u-margin-top--3">
-        <%= f.submit "Save", class: "ds-c-button ds-c-button--primary", data: { test: "user-form-submit" } %>
+      <div class="ds-l-col--9 filter-group__fields ds-u-border--0">
+        <%= f.submit "Update user", class: "ds-c-button ds-c-button--primary", data: { test: "user-form-submit" } %>
         <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
       </div>
+
     <% end %>
