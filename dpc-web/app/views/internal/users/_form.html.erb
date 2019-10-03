@@ -1,12 +1,12 @@
 
     <%= form_for @user, url: internal_user_path(@user), html: { method: :put } do |f| %>
 
-    <fieldset class="ds-l-row filter-group">
+    <fieldset class="ds-l-row field-group">
       <div class="ds-l-col--3">
-        <legend class="filter-group__heading">Personal Info</legend>
+        <legend class="field-group__heading">Personal Info</legend>
       </div>
 
-      <div class="ds-l-col--9 filter-group__fields">
+      <div class="ds-l-col--9 field-group__fields">
         <div class="field">
           <%= f.label :first_name, class: "ds-c-label ds-u-margin-top--0" %>
           <%= f.text_field :first_name, class: "ds-c-field" %>
@@ -24,12 +24,12 @@
       </div>
     </fieldset>
 
-    <div class="ds-l-row filter-group actions">
+    <div class="ds-l-row field-group actions">
       <div class="ds-l-col--3">
 
       </div>
 
-      <div class="ds-l-col--9 filter-group__fields ds-u-border--0">
+      <div class="ds-l-col--9 field-group__fields ds-u-border--0">
         <%= f.submit "Update user", class: "ds-c-button ds-c-button--primary", data: { test: "user-form-submit" } %>
         <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
       </div>
