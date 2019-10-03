@@ -8,20 +8,16 @@ Data @ The Point of Care
 Required services
 ---
 
-DPC requires two external services to be running. *Postgres* and *Redis*
-
-Any version of Redis should suffice, but we require at least Postgres *9.5*.
+DPC requires an external Postgres database to be running.
 
 The `docker-compose` file includes the necessary applications and configurations, and can be started like so: 
 
 ```bash
-docker-compose up db redis
+docker-compose up start_core_dependencies
 ```
 
-By default, the application attempts to connect to the `dpc_attribution` database on the localhost as the `postgres` user with an empty password.
-This database needs to be manually created, but table setup and data migration will be handled by the DPC services.
-
-For Redis, we assume the server is running on the localhost, with the default port.
+By default, the application attempts to connect to the `dpc_attribution`, `dpc_queue`, and `dpc_auth` databases on the localhost as the `postgres` user with a password of `dpc-safe`.
+When using docker-compose, all the required databases will be created automatically. Upon container startup, the databases will be initialized automatically with all the correct data. If for some reason this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
 The defaults can be overridden in the configuration files.
 Common configuration options (such as database connection strings) are stored in a [server.conf](src/main/resources/server.conf) file and included in the various modules via the `include "server.conf"` attribute in module application config files.
@@ -37,11 +33,6 @@ dpc.attribution {
     url = "jdbc:postgresql://localhost:5432/dpc-dev"
     user = postgres
   }
-  queue {
-      singleServerConfig {
-        address = "redis://localhost:6379"
-      }
-    }
 }
 ```
 
@@ -52,12 +43,20 @@ This can be fixed by setting the working directory to the project root, but need
 Building DPC
 ---
 
-1. Run `mvn clean install` after cloning to build and test the application.
-This will also construct the *Docker* images for the various services.
-To skip the Docker build pass `-Djib.skip=True`
+There are two ways to build DPC.
 
 > Note: DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions.
 In addition, some of upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date. 
+
+### Option 1: Full Integration Test
+
+Run `make ci-app`. This will start the dependencies, build all components, run integration tests, and run a full end to end test. You will be left with compiled JARs for each component, as well as compiled Docker containers.
+
+### Option 2: Manually
+
+Run `mvn clean install` after cloning to build and test the application. Dependencies will need to be up and running for this option to succeed.
+
+This will also construct the *Docker* images for the various services. To skip the Docker build pass `-Djib.skip=True`
 
 Running DPC
 --- 
@@ -66,12 +65,12 @@ Once the JARs are built, they can be run in two ways either via [`docker-compose
 
 ## Running via Docker 
 
-The application (along with all required dependencies) can be automatically started with the following command: `docker-compose up`. [Install Docker](https://www.docker.com/products/docker-desktop)
+The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. [Install Docker](https://www.docker.com/products/docker-desktop)
 
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
 ```bash
-docker-compose up {db,redis,dpc-aggregation,dpc-attribution,dpc-api}
+docker-compose up {db,dpc-aggregation,dpc-attribution,dpc-api}
 ``` 
 
 ## Manual JAR execution
@@ -84,7 +83,7 @@ This file can be copied and used directly: `cp application.local.conf.sample app
 
 > Note: The API service requires authentication before performing actions. This will cause most integration tests to fail, as they expect the endpoints to be open.
 Authentication can be disabled in one of two ways: 
-Set the `ENV` environment variable to `dev` (which is the default when running under Docker).
+Set the `ENV` environment variable to `local` (which is the default when running under Docker).
 Or, set `dpc.api.authenticationDisabled=true` in the config file (the default from the sample config file).   
 
 Next start each service in a new terminal window, from within the the `dpc-app` root directory. 
@@ -96,7 +95,7 @@ java -jar dpc-api/target/dpc-api.jar server
 ```
 
 By default, the services will attempt to load the `local.application.conf` file from the current execution directory. 
-This can be overriden in two ways.
+This can be overridden in two ways.
 1. Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
 1. Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
 
@@ -176,13 +175,13 @@ You will need to set the *ACCEPT* header to `application/fhir+json` (per the FHI
         "request": "http://localhost:3002/v1/Job/de00da66-86cf-4be1-a2a8-0415b21a6a9b",
         "requiresAccessToken": false,
         "output": [
-            "http://localhost:3002/v1/Data/de00da66-86cf-4be1-a2a8-0415b21a6a9b"
+            "http://localhost:3002/v1/Data/de00da66-86cf-4be1-a2a8-0415b21a6a9b.ndjson"
         ],
         "error": []
     }
     ```
     The output array contains a list of URLs where the exported files can be downloaded from.
-1. Download the exported files by calling the `/Data` endpoint with URLs provided. e.g. `http://localhost:3002/v1/Data/de00da66-86cf-4be1-a2a8-0415b21a6a9b`.
+1. Download the exported files by calling the `/Data` endpoint with URLs provided. e.g. `http://localhost:3002/v1/Data/de00da66-86cf-4be1-a2a8-0415b21a6a9b.ndjson`.
 1. Enjoy your glorious ND-JSON formatted FHIR data.
 
 Building the Additional Services
