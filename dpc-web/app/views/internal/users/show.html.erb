@@ -2,6 +2,14 @@
 <% title @user.name %>
 
 <div class="ds-l-container ds-u-padding-x--0">
+  <div>
+    <a href="javascript:history.back()" class="back-button">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#arrow-left"></use>
+      </svg>
+      Go back
+    </a>
+  </div>
   <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
 
     <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0"><%= @user.name %></h1>

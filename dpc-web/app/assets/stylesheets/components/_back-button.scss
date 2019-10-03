@@ -1,0 +1,15 @@
+.back-button {
+  align-items: center;
+  display: inline-flex;
+  font-weight: $font-bold;
+  margin: 0 0 $spacer-2 0;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  svg {
+    margin-right: $spacer-1;
+  }
+}
