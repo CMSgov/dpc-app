@@ -1,5 +1,4 @@
-<div class="ds-l-row">
-  <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-bottom--1 ds-u-margin-x--auto ds-u-border--1 ds-u-padding-bottom--2 ds-u-radius">
+
     <%= form_for @user, url: internal_user_path(@user), html: { method: :put } do |f| %>
 
       <div class="field">
@@ -22,5 +21,3 @@
         <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
       </div>
     <% end %>
-  </div>
-</div>
