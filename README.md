@@ -8,13 +8,13 @@ Data @ The Point of Care
 Required services
 ---
 
-DPC requires an external Postgres database to be running.
-
-The `docker-compose` file includes the necessary applications and configurations, and can be started like so: 
+DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
 
 ```bash
 docker-compose up start_core_dependencies
 ```
+
+> Warning: If you do have an existing Postgres database running on port 5342, docker-compose WILL NOT alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
 
 By default, the application attempts to connect to the `dpc_attribution`, `dpc_queue`, and `dpc_auth` databases on the localhost as the `postgres` user with a password of `dpc-safe`.
 When using docker-compose, all the required databases will be created automatically. Upon container startup, the databases will be initialized automatically with all the correct data. If for some reason this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
