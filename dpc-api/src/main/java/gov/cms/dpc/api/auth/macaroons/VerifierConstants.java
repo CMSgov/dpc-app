@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.macaroons;
+package gov.cms.dpc.api.auth.macaroons;
 
 public class VerifierConstants {
 

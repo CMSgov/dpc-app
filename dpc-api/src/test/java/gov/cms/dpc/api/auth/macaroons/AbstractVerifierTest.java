@@ -1,9 +1,9 @@
-package gov.cms.dpc.attribution.macaroons;
+package gov.cms.dpc.api.auth.macaroons;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.attribution.config.TokenPolicy;
+import gov.cms.dpc.api.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatVerifier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import org.junit.jupiter.api.Test;

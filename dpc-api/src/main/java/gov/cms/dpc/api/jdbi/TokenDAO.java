@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.jdbi;
+package gov.cms.dpc.api.jdbi;
 
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity_;

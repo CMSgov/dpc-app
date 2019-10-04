@@ -1,12 +1,12 @@
-package gov.cms.dpc.attribution.resources.v1;
+package gov.cms.dpc.api.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
-import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.config.TokenPolicy;
-import gov.cms.dpc.attribution.jdbi.TokenDAO;
-import gov.cms.dpc.attribution.resources.AbstractTokenResource;
+import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.config.TokenPolicy;
+import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.TokenEntity;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -46,7 +46,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenPolicy policy;
 
     @Inject
-    TokenResource(TokenDAO dao, MacaroonBakery bakery, DPCAttributionConfiguration config) {
+    TokenResource(TokenDAO dao, MacaroonBakery bakery, DPCAPIConfiguration config) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = config.getTokenPolicy();

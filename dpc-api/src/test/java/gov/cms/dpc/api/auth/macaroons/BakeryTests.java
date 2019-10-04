@@ -1,11 +1,11 @@
-package gov.cms.dpc.attribution.macaroons;
+package gov.cms.dpc.api.auth.macaroons;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.config.TokenPolicy;
+import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.config.TokenPolicy;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -30,10 +30,9 @@ class BakeryTests {
     @BeforeEach
     void setup() {
         // Setup the config
-        final DPCAttributionConfiguration config = new DPCAttributionConfiguration();
-        config.setPublicServerURL("http://test.cms");
+        final DPCAPIConfiguration config = new DPCAPIConfiguration();
         config.setTokenPolicy(generateTokenPolicy());
-        bakery = new BakeryProvider(config, new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore()).get();
+        bakery = new BakeryProvider(config, new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore(), "http://test.local").get();
     }
 
 

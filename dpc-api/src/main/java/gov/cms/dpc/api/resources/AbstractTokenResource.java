@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.resources;
+package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.common.entities.TokenEntity;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;

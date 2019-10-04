@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.macaroons;
+package gov.cms.dpc.api.auth.macaroons;
 
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;

@@ -2,6 +2,7 @@ package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import gov.cms.dpc.api.config.TokenPolicy;
 import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
@@ -49,6 +50,19 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     private DPCFHIRConfiguration fhirConfig;
 
     private boolean authenticationDisabled;
+
+    @Valid
+    @NotNull
+    @JsonProperty("tokens")
+    private TokenPolicy tokenPolicy = new TokenPolicy();
+
+    public TokenPolicy getTokenPolicy() {
+        return tokenPolicy;
+    }
+
+    public void setTokenPolicy(TokenPolicy tokenPolicy) {
+        this.tokenPolicy = tokenPolicy;
+    }
 
     @Valid
     @JsonProperty("swagger")

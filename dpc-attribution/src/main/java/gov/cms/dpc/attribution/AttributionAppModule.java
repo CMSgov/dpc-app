@@ -5,12 +5,10 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.*;
-import gov.cms.dpc.attribution.macaroons.BakeryProvider;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.store.hibernate.HibernateKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
@@ -39,7 +37,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
         binder.bind(GroupResource.class);
-        binder.bind(TokenResource.class);
         binder.bind(OrganizationResource.class);
 
         // DAOs
@@ -48,14 +45,13 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(PatientDAO.class);
         binder.bind(ProviderDAO.class);
         binder.bind(RosterDAO.class);
-        binder.bind(TokenDAO.class);
         binder.bind(RelationshipDAO.class);
 
         // Tasks
         binder.bind(TruncateDatabase.class);
 
         // Services
-        binder.bind(MacaroonBakery.class).toProvider(BakeryProvider.class);
+
     }
 
     @Provides

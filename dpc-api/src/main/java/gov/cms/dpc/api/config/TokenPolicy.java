@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.config;
+package gov.cms.dpc.api.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

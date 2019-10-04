@@ -2,7 +2,6 @@ package gov.cms.dpc.attribution;
 
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
@@ -31,11 +30,6 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @NotNull
     @JsonProperty("sundial")
     private SundialConfiguration sundial = new SundialConfiguration();
-
-    @Valid
-    @NotNull
-    @JsonProperty("tokens")
-    private TokenPolicy tokenPolicy = new TokenPolicy();
 
     @NotEmpty
     private String publicServerURL;
@@ -74,14 +68,6 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
         this.publicServerURL = publicServerURL;
     }
 
-    public TokenPolicy getTokenPolicy() {
-        return tokenPolicy;
-    }
-
-    public void setTokenPolicy(TokenPolicy tokenPolicy) {
-        this.tokenPolicy = tokenPolicy;
-    }
-
     @Override
     public DPCFHIRConfiguration getFHIRConfiguration() {
         return this.fhirConfig;
@@ -91,6 +77,7 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     public void setFHIRConfiguration(DPCFHIRConfiguration config) {
         this.fhirConfig = config;
     }
+
     public Boolean getMigrationEnabled() {
         return migrationEnabled;
     }

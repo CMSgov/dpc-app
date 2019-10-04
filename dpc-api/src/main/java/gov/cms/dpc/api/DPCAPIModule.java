@@ -9,12 +9,14 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
+import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
         // DAO
         binder.bind(PublicKeyDAO.class);
+        binder.bind(TokenDAO.class);
 
         // Healthchecks
         // TODO: Fix with DPC-538
@@ -62,6 +65,14 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     public KeyResource provideKeyResource(PublicKeyDAO dao) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(KeyResource.class, new Class<?>[]{PublicKeyDAO.class}, new Object[]{dao});
+    }
+
+    @Provides
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(TokenResource.class,
+                        new Class<?>[]{TokenDAO.class, MacaroonBakery.class, DPCAPIConfiguration.class},
+                        new Object[]{dao, bakery, this.getConfiguration()});
     }
 
     @Provides

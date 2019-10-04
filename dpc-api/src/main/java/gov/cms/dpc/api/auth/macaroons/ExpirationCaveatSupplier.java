@@ -1,6 +1,6 @@
-package gov.cms.dpc.attribution.macaroons;
+package gov.cms.dpc.api.auth.macaroons;
 
-import gov.cms.dpc.attribution.config.TokenPolicy;
+import gov.cms.dpc.api.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
