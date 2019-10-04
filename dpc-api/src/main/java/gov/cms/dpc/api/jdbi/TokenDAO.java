@@ -5,6 +5,7 @@ import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.entities.TokenEntity;
 import gov.cms.dpc.common.entities.TokenEntity_;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.query.Query;
 
@@ -18,7 +19,7 @@ import java.util.UUID;
 public class TokenDAO extends AbstractDAO<TokenEntity> {
 
     @Inject
-    TokenDAO(DPCManagedSessionFactory factory) {
+    TokenDAO(DPCAuthManagedSessionFactory factory) {
         super(factory.getSessionFactory());
     }
 

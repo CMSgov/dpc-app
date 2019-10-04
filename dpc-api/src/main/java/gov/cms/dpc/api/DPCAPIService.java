@@ -17,6 +17,7 @@ import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
+import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -84,10 +85,10 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
                         new DPCAuthHibernateModule<>(hibernateAuthBundle),
                         new AuthModule(),
+                        new BakeryModule(),
                         new DPCAPIModule(hibernateAuthBundle),
                         new JobQueueModule<>(),
-                        new FHIRModule<>()
-                )
+                        new FHIRModule<>())
                 .build();
     }
 

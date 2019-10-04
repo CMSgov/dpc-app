@@ -15,9 +15,16 @@ import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.annotations.PublicURL;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
+import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,6 +109,31 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @APIV1
     public String provideV1URL(@ServiceBaseURL String baseURL) {
         return baseURL + "/v1";
+    }
+
+    @Provides
+    @PublicURL
+    public String providePublicURL() {
+        // FIXME: Remove this;
+        return "http://test.local";
+    }
+
+    @Provides
+    @Singleton
+    IThirdPartyKeyStore thirdPartyKeyStore() {
+        return new MemoryThirdPartyKeyStore();
+    }
+
+    @Provides
+    TokenPolicy providePolicy() {
+        return getConfiguration().getTokenPolicy();
+    }
+
+    @Provides
+    // We can suppress this because the SessionFactory is managed
+    @SuppressWarnings("CloseableProvides")
+    SessionFactory provideSessionFactory(DPCAuthManagedSessionFactory factory) {
+        return factory.getSessionFactory();
     }
 
     @Provides
