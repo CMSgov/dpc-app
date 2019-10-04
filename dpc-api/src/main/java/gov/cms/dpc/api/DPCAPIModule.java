@@ -12,6 +12,7 @@ import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
+import gov.cms.dpc.api.tasks.GenerateGoldenMacaroon;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
@@ -60,6 +61,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         // DAO
         binder.bind(PublicKeyDAO.class);
         binder.bind(TokenDAO.class);
+
+        // Tasks
+        binder.bind(GenerateGoldenMacaroon.class);
 
         // Healthchecks
         // TODO: Fix with DPC-538

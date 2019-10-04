@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -43,6 +44,7 @@ public class APITestHelpers {
     public static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     public static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
+    static final String MACAROON_TASK = "http://localhost:9900/tasks/generate-macaroon";
     public static String BASE_URL = "https://dpc.cms.gov/api";
 
     private APITestHelpers() {
@@ -152,6 +154,18 @@ public class APITestHelpers {
         client.registerInterceptor(new MacaroonsInterceptor(macaroon));
 
         return client;
+    }
+
+    public static String createGoldenMacaroon() throws IOException {
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost post = new HttpPost(MACAROON_TASK);
+
+            try (CloseableHttpResponse execute = client.execute(post)) {
+                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Generated macaroon");
+                return EntityUtils.toString(execute.getEntity());
+            }
+        }
     }
 
     static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws

@@ -43,6 +43,8 @@ public class AbstractSecureApplicationTest {
         APITestHelpers.setupApplication(APPLICATION);
         ctx = FhirContext.forDstu3();
         // Register a test organization for us
+        // First, create a Golden macaroon for admin uses
+        final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
     }

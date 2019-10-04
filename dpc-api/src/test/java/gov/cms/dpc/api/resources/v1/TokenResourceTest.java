@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.AbstractApplicationTest;
+import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.common.entities.TokenEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -28,7 +28,7 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TokenResourceTest extends AbstractApplicationTest {
+class TokenResourceTest extends AbstractSecureApplicationTest {
 
     private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
 
