@@ -31,11 +31,11 @@ public class FHIRHelpers {
      * @param client         - {@link IGenericClient} client to communicate to attribution service
      * @param parser         - {@link IParser} to use for reading {@link Bundle} JSON
      * @param organizationID - {@link String} organization ID to filter for
-     * @param attributionURL - {@link String} Attribution server to create Org at
+     * @param apiURL - {@link String} Attribution server to create Org at
      * @return - {@link String} Access token generated for the {@link Organization}
      * @throws IOException - Throws if HTTP client fails
      */
-    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String attributionURL) throws IOException {
+    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String apiURL) throws IOException {
         // Random number generator for Org NPI
         // Register an organization, and a token
         // Read in the test file
@@ -64,18 +64,18 @@ public class FHIRHelpers {
                     .execute();
 
             // FIXME: Token generation still needs to happen somehow.
-//            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-//
-//                // Now, create a Macaroon
-//                final HttpPost tokenPost = new HttpPost(String.format("%s/Token/%s", attributionURL, organization.getIdElement().getIdPart()));
-//
-//                try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
-//                    if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
-//                        throw new IllegalStateException("Should have succeeded");
-//                    }
-//                    macaroon = EntityUtils.toString(response.getEntity());
-//                }
-//            }
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+
+                // Now, create a Macaroon
+                final HttpPost tokenPost = new HttpPost(String.format("%s/Token/%s", apiURL, organization.getIdElement().getIdPart()));
+
+                try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
+                    if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
+                        throw new IllegalStateException("Should have succeeded");
+                    }
+                    macaroon = EntityUtils.toString(response.getEntity());
+                }
+            }
         }
         return macaroon;
     }

@@ -50,7 +50,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         searchParams.put("_id", Collections.singletonList(credentials.getPathValue()));
         searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
 
-        // Special handl ing of Group resources, which use tags instead of resource properties.
+        // Special handling of Group resources, which use tags instead of resource properties.
         // TODO: Remove with DPC-552
         if (credentials.getPathAuthorizer().type() == ResourceType.Group) {
             searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getId())));

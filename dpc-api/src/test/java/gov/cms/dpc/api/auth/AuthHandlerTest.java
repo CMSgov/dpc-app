@@ -6,9 +6,12 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.core.Capabilities;
+import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.BaseResource;
 import gov.cms.dpc.api.resources.v1.OrganizationResource;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
@@ -88,7 +91,9 @@ class AuthHandlerTest {
     private static ResourceExtension buildAuthResource() {
         // Setup mocks
         final IGenericClient client = mockGenericClient();
-        final DPCAuthFactory factory = new DPCAuthFactory(client, new MacaroonsAuthenticator(client));
+        final MacaroonBakery bakery = mock(MacaroonBakery.class);
+        final DPCAuthManagedSessionFactory sessionFactory = mock(DPCAuthManagedSessionFactory.class);
+        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), sessionFactory);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
         final FhirContext ctx = FhirContext.forDstu3();

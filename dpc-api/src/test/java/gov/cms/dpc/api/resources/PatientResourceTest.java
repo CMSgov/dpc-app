@@ -67,7 +67,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertTrue(foundPatient.equalsDeep(queriedProvider), "Search and GET should be identical");
 
         // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, ATTRIBUTION_URL);
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getBaseURL());
 
         // Update the Macaroons interceptor to use the new Organization token
         ((APITestHelpers.MacaroonsInterceptor) client.getInterceptorService().getAllRegisteredInterceptors().get(0)).setMacaroon(m2);
@@ -106,7 +106,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void testPatientRemoval() throws IOException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ATTRIBUTION_URL);
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getBaseURL());
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
 
         final Bundle patients = client
@@ -154,7 +154,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void testPatientUpdating() throws IOException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ATTRIBUTION_URL);
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getBaseURL());
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
 
         final Bundle patients = client

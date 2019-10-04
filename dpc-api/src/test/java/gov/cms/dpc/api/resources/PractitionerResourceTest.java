@@ -76,7 +76,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         assertThrows(AuthenticationException.class, clientQuery::execute, "Should not have practitioner");
 
         // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, ATTRIBUTION_URL);
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getBaseURL());
 
         // Update the Macaroons interceptor to use the new Organization token
         ((APITestHelpers.MacaroonsInterceptor) client.getInterceptorService().getAllRegisteredInterceptors().get(0)).setMacaroon(m2);

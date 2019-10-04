@@ -46,7 +46,7 @@ public class AbstractSecureApplicationTest {
         // First, create a Golden macaroon for admin uses
         final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
+        ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, String.format("http://localhost:%d/v1/", APPLICATION.getLocalPort()));
     }
 
     @BeforeEach
