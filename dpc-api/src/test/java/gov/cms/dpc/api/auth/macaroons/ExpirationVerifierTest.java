@@ -2,6 +2,7 @@ package gov.cms.dpc.api.auth.macaroons;
 
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
+import gov.cms.dpc.macaroons.caveats.ExpirationCaveatVerifier;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;

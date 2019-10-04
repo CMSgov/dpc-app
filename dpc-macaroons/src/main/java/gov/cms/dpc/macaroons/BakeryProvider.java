@@ -1,9 +1,11 @@
-package gov.cms.dpc.api.auth.macaroons;
+package gov.cms.dpc.macaroons;
 
-import gov.cms.dpc.api.DPCAPIConfiguration;
-import gov.cms.dpc.api.config.TokenPolicy;
-import gov.cms.dpc.common.annotations.APIV1;
-import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.annotations.PublicURL;
+import gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier;
+import gov.cms.dpc.macaroons.caveats.ExpirationCaveatVerifier;
+import gov.cms.dpc.macaroons.caveats.VersionCaveatSupplier;
+import gov.cms.dpc.macaroons.caveats.VersionCaveatVerifier;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 
@@ -17,14 +19,14 @@ import javax.inject.Singleton;
 @Singleton
 public class BakeryProvider implements Provider<MacaroonBakery> {
 
-    private final DPCAPIConfiguration configuration;
+    private final TokenPolicy tokenPolicy;
     private final IRootKeyStore store;
     private final IThirdPartyKeyStore thirdPartyKeyStore;
     private final String publicURL;
 
     @Inject
-    public BakeryProvider(DPCAPIConfiguration configuration, IRootKeyStore store, IThirdPartyKeyStore thirdPartyKeyStore, @APIV1 String publicURI) {
-        this.configuration = configuration;
+    public BakeryProvider(TokenPolicy tokenPolicy, IRootKeyStore store, IThirdPartyKeyStore thirdPartyKeyStore, @PublicURL String publicURI) {
+        this.tokenPolicy = tokenPolicy;
         this.store = store;
         this.thirdPartyKeyStore = thirdPartyKeyStore;
         this.publicURL = publicURI;
@@ -32,7 +34,6 @@ public class BakeryProvider implements Provider<MacaroonBakery> {
 
     @Override
     public MacaroonBakery get() {
-        final TokenPolicy tokenPolicy = this.configuration.getTokenPolicy();
         return new MacaroonBakery.MacaroonBakeryBuilder(publicURL, store, thirdPartyKeyStore)
                 .addDefaultCaveatSupplier(new VersionCaveatSupplier(tokenPolicy))
                 .addDefaultCaveatSupplier(new ExpirationCaveatSupplier(tokenPolicy))

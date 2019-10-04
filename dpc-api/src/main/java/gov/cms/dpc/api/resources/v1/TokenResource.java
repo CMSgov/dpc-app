@@ -4,7 +4,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.DPCAPIConfiguration;
-import gov.cms.dpc.api.config.TokenPolicy;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.entities.OrganizationEntity;

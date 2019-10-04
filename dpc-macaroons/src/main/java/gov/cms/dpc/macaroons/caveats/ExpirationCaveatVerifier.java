@@ -1,6 +1,6 @@
-package gov.cms.dpc.api.auth.macaroons;
+package gov.cms.dpc.macaroons.caveats;
 
-import gov.cms.dpc.api.config.TokenPolicy;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatVerifier;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 
@@ -14,9 +14,9 @@ import java.util.Optional;
  */
 public class ExpirationCaveatVerifier implements CaveatVerifier {
 
-    static final String CAVEAT_INVALID = "Caveat is expired";
+    public static final String CAVEAT_INVALID = "Caveat is expired";
 
-    ExpirationCaveatVerifier(TokenPolicy policy) { }
+    public ExpirationCaveatVerifier(TokenPolicy policy) { }
 
     @Override
     public Optional<String> check(MacaroonCondition caveat) {

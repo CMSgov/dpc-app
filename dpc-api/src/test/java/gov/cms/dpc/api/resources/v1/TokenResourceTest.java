@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.resources.v1;
+package gov.cms.dpc.api.resources.v1;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,7 +80,7 @@ class TokenResourceTest extends AbstractAttributionTest {
     @Test
     void testEmptyTokenHandling() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Token/%s/verify?token=%s", ORGANIZATION_ID, ""));
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Token/%s/verify?token=%s", AbstractAttributionTest.ORGANIZATION_ID, ""));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should not be able to verify empty token");
@@ -92,7 +92,7 @@ class TokenResourceTest extends AbstractAttributionTest {
     void testNonMacaroonHandling() throws IOException {
         final String badToken = Base64.getUrlEncoder().encodeToString(new String("This is not a macaroon").getBytes(StandardCharsets.UTF_8));
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Token/%s/verify?token=%s", ORGANIZATION_ID, badToken));
+            final HttpGet httpGet = new HttpGet(getServerURL() + String.format("/Token/%s/verify?token=%s", AbstractAttributionTest.ORGANIZATION_ID, badToken));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatusLine().getStatusCode(), "Should not be able to verify empty token");

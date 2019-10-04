@@ -9,6 +9,8 @@ import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.macaroons.annotations.PublicURL;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.store.hibernate.HibernateKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
@@ -81,5 +83,16 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Singleton
     IThirdPartyKeyStore thirdPartyKeyStore() {
         return new MemoryThirdPartyKeyStore();
+    }
+
+    @Provides
+    TokenPolicy providePolicy() {
+        return getConfiguration().getTokenPolicy();
+    }
+
+    @Provides
+    @PublicURL
+    String providePublicURL() {
+        return getConfiguration().getPublicServerURL();
     }
 }

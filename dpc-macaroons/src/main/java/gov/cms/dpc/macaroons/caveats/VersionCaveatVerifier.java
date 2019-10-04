@@ -1,12 +1,12 @@
-package gov.cms.dpc.api.auth.macaroons;
+package gov.cms.dpc.macaroons.caveats;
 
-import gov.cms.dpc.api.config.TokenPolicy;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatVerifier;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 
 import java.util.Optional;
 
-import static gov.cms.dpc.api.auth.macaroons.VerifierConstants.NO_MATCH;
+import static gov.cms.dpc.macaroons.caveats.VerifierConstants.NO_MATCH;
 
 /**
  * Implementation of {@link CaveatVerifier} which verifies that token version meets a minimum threshold
@@ -15,7 +15,7 @@ public class VersionCaveatVerifier implements CaveatVerifier {
 
     private final int minimumVersion;
 
-    VersionCaveatVerifier(TokenPolicy policy) {
+    public VersionCaveatVerifier(TokenPolicy policy) {
         this.minimumVersion = policy.getVersionPolicy().getMinimumVersion();
     }
 

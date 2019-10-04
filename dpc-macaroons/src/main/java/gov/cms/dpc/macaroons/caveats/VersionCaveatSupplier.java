@@ -1,6 +1,6 @@
-package gov.cms.dpc.api.auth.macaroons;
+package gov.cms.dpc.macaroons.caveats;
 
-import gov.cms.dpc.api.config.TokenPolicy;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -14,7 +14,7 @@ public class VersionCaveatSupplier implements CaveatSupplier {
 
     private final String tokenVersion;
 
-    VersionCaveatSupplier(TokenPolicy policy) {
+    public VersionCaveatSupplier(TokenPolicy policy) {
         this.tokenVersion = Integer.toString(policy.getVersionPolicy().getCurrentVersion());
     }
 

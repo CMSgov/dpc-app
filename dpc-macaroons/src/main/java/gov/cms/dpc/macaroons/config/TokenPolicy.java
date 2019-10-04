@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.config;
+package gov.cms.dpc.macaroons.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

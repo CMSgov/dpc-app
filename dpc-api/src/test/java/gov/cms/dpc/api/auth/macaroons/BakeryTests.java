@@ -5,7 +5,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.DPCAPIConfiguration;
-import gov.cms.dpc.api.config.TokenPolicy;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
+import gov.cms.dpc.macaroons.BakeryProvider;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -29,10 +30,7 @@ class BakeryTests {
 
     @BeforeEach
     void setup() {
-        // Setup the config
-        final DPCAPIConfiguration config = new DPCAPIConfiguration();
-        config.setTokenPolicy(generateTokenPolicy());
-        bakery = new BakeryProvider(config, new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore(), "http://test.local").get();
+        bakery = new BakeryProvider(generateTokenPolicy(), new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore(), "http://test.local").get();
     }
 
 

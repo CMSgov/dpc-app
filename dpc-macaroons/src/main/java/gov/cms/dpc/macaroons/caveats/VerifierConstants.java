@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.auth.macaroons;
+package gov.cms.dpc.macaroons.caveats;
 
 public class VerifierConstants {
 
