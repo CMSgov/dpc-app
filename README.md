@@ -149,9 +149,7 @@ This request fails because the provider is not registered with the application a
 
 
 The recommended method for testing the Services is with the [Postman](https://www.getpostman.com) application.
-This allows easy visualization of responses, as well as simplifies adding the necessary HTTP Headers. 
-
-> Note: the CURL command strips off the trailing `$export` from any request URIs, which makes it impossible to correctly test the initial data export request.
+This allows easy visualization of responses, as well as simplifies adding the necessary HTTP Headers.
 
 Steps for testing the data export:
 
