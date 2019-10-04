@@ -28,11 +28,16 @@ import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
+import java.util.List;
+
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     private final DPCHibernateBundle<DPCAPIConfiguration> hibernateBundle = new DPCHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
-    private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>();
+    private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
+            "gov.cms.dpc.macaroons.store.hibernate.entities",
+            // FIXME: TokenEntity needs to come out, once we pull everything out of the Attribution service
+            "gov.cms.dpc.common.entities"));
 
     public static void main(final String[] args) throws Exception {
         new DPCAPIService().run(args);

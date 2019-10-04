@@ -46,9 +46,9 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<EndpointEntity> endpoints;
 
-    @Valid
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization", orphanRemoval = true)
-    private List<TokenEntity> tokens;
+//    @Valid
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization", orphanRemoval = true)
+//    private List<TokenEntity> tokens;
 
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "organization")
     private List<ProviderEntity> providers;
@@ -108,17 +108,17 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         this.endpoints = endpoints;
     }
 
-    public List<TokenEntity> getTokens() {
-        return tokens;
-    }
+//    public List<TokenEntity> getTokens() {
+//        return tokens;
+//    }
 
-    public void addToken(TokenEntity entity) {
-        this.tokens.add(entity);
-    }
-
-    public void removeToken(TokenEntity entity) {
-        this.tokens.remove(entity);
-    }
+//    public void addToken(TokenEntity entity) {
+//        this.tokens.add(entity);
+//    }
+//
+//    public void removeToken(TokenEntity entity) {
+//        this.tokens.remove(entity);
+//    }
 
     public List<ProviderEntity> getProviders() {
         return providers;

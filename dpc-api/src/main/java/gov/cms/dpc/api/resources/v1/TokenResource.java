@@ -107,10 +107,7 @@ public class TokenResource extends AbstractTokenResource {
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
-        final OrganizationEntity organization = new OrganizationEntity();
-        organization.setId(organizationID);
-
-        final TokenEntity token = new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON);
+        final TokenEntity token = new TokenEntity(macaroon.identifier, organizationID, TokenEntity.TokenType.MACAROON);
 
         // Set the expiration time
         token.setExpiresAt(handleExpirationTime(expiration));

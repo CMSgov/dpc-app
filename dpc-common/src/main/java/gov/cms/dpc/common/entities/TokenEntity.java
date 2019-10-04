@@ -10,10 +10,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity(name = "organization_tokens")
 public class TokenEntity implements Serializable {
@@ -28,9 +28,9 @@ public class TokenEntity implements Serializable {
     @Column(name = "id", updatable = false, nullable = false)
     private String id;
 
-    @ManyToOne
     @JsonIgnore
-    private OrganizationEntity organization;
+    @Column(name = "organization_id")
+    private UUID organizationID;
 
     @Column(name = "type")
     private TokenType tokenType;
@@ -54,9 +54,9 @@ public class TokenEntity implements Serializable {
         // Hibernate required
     }
 
-    public TokenEntity(String tokenID, OrganizationEntity organization, TokenType type) {
+    public TokenEntity(String tokenID, UUID organizationID, TokenType type) {
         this.id = tokenID;
-        this.organization = organization;
+        this.organizationID = organizationID;
         this.tokenType = type;
     }
 
@@ -68,12 +68,12 @@ public class TokenEntity implements Serializable {
         this.id = id;
     }
 
-    public OrganizationEntity getOrganization() {
-        return organization;
+    public UUID getOrganizationID() {
+        return organizationID;
     }
 
-    public void setOrganization(OrganizationEntity organization) {
-        this.organization = organization;
+    public void setOrganizationID(UUID organizationID) {
+        this.organizationID = organizationID;
     }
 
     public TokenType getTokenType() {
@@ -114,7 +114,7 @@ public class TokenEntity implements Serializable {
         if (!(o instanceof TokenEntity)) return false;
         TokenEntity that = (TokenEntity) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(organization, that.organization) &&
+                Objects.equals(organizationID, that.organizationID) &&
                 tokenType == that.tokenType &&
                 Objects.equals(label, that.label) &&
                 Objects.equals(createdAt, that.createdAt) &&
@@ -123,14 +123,14 @@ public class TokenEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, organization, tokenType, label, createdAt, expiresAt);
+        return Objects.hash(id, organizationID, tokenType, label, createdAt, expiresAt);
     }
 
     @Override
     public String toString() {
         return "TokenEntity{" +
                 "id='" + id + '\'' +
-                ", organization=" + organization +
+                ", organization=" + organizationID +
                 ", tokenType=" + tokenType +
                 ", label='" + label + '\'' +
                 ", createdAt=" + createdAt +
