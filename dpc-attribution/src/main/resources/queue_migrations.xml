@@ -42,4 +42,9 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="remove-old-queue-db" author="ronaldheft-usds">
+        <dropTable tableName="JOB_RESULT" />
+        <dropTable tableName="JOB_QUEUE" />
+    </changeSet>
+
 </databaseChangeLog>
