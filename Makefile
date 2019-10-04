@@ -29,6 +29,12 @@ travis:
 website:
 	@docker build -f dpc-web/Dockerfile . -t dpc-web
 
+.PHONY: start-app
+start-app:
+	@docker-compose up start_core_dependencies
+	@docker-compose up start_api_dependencies
+	@docker-compose up start_api
+
 .PHONY: ci-app
 ci-app:
 	@./dpc-test.sh
