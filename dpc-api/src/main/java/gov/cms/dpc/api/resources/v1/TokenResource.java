@@ -1,17 +1,17 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
-import gov.cms.dpc.api.DPCAPIConfiguration;
-import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
-import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.TokenEntity;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
@@ -19,6 +19,7 @@ import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,12 +45,14 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
+    private final IGenericClient client;
 
     @Inject
-    TokenResource(TokenDAO dao, MacaroonBakery bakery, DPCAPIConfiguration config) {
+    TokenResource(TokenDAO dao, MacaroonBakery bakery, TokenPolicy policy, IGenericClient client) {
         this.dao = dao;
         this.bakery = bakery;
-        this.policy = config.getTokenPolicy();
+        this.policy = policy;
+        this.client = client;
     }
 
     @Override
@@ -104,6 +107,18 @@ public class TokenResource extends AbstractTokenResource {
             @ApiParam(value = "Organization resource ID", required = true)
             @NotNull @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Optional label for token") @QueryParam("label") String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
+
+        // Verify that the organization actually exists
+        try {
+            this.client
+                    .read()
+                    .resource(Organization.class)
+                    .withId(organizationID.toString())
+                    .encodedJson()
+                    .execute();
+        } catch (ResourceNotFoundException e) {
+            throw new WebApplicationException("Cannot find organization", Response.Status.NOT_FOUND);
+        }
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 

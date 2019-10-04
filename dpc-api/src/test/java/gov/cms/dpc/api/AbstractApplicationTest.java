@@ -1,7 +1,9 @@
 package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.annotations.IntegrationTest;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
@@ -10,6 +12,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
+
+import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 
 /**
  * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link gov.cms.dpc.api.auth.StaticAuthFilter}
@@ -40,6 +45,9 @@ public class AbstractApplicationTest {
     @BeforeEach
     public void eachSetup() throws IOException {
         ctx = FhirContext.forDstu3();
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
+
 
         // Check health
         APITestHelpers.checkHealth(APPLICATION);

@@ -39,7 +39,7 @@ public class FHIRHelpers {
         // Random number generator for Org NPI
         // Register an organization, and a token
         // Read in the test file
-        String macaroon;
+        String macaroon = "";
         try (InputStream inputStream = FHIRHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json")) {
 
 
@@ -63,18 +63,19 @@ public class FHIRHelpers {
                     .encodedJson()
                     .execute();
 
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-
-                // Now, create a Macaroon
-                final HttpPost tokenPost = new HttpPost(String.format("%s/Token/%s", attributionURL, organization.getIdElement().getIdPart()));
-
-                try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
-                    if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
-                        throw new IllegalStateException("Should have succeeded");
-                    }
-                    macaroon = EntityUtils.toString(response.getEntity());
-                }
-            }
+            // FIXME: Token generation still needs to happen somehow.
+//            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+//
+//                // Now, create a Macaroon
+//                final HttpPost tokenPost = new HttpPost(String.format("%s/Token/%s", attributionURL, organization.getIdElement().getIdPart()));
+//
+//                try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
+//                    if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
+//                        throw new IllegalStateException("Should have succeeded");
+//                    }
+//                    macaroon = EntityUtils.toString(response.getEntity());
+//                }
+//            }
         }
         return macaroon;
     }

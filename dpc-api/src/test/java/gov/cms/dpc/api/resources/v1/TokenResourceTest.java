@@ -3,7 +3,6 @@ package gov.cms.dpc.api.resources.v1;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.AbstractApplicationTest;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.common.entities.TokenEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -41,7 +40,6 @@ class TokenResourceTest extends AbstractApplicationTest {
 
     @Test
     void testTokenGeneration() throws IOException {
-
         final String token = generateToken(ORGANIZATION_ID);
 
         // Verify that it's correct.
@@ -102,7 +100,7 @@ class TokenResourceTest extends AbstractApplicationTest {
 
         final List<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
         assertFalse(tokens.isEmpty(), "Should have tokens");
-        final TokenEntity token = tokens.get(0);
+        final TokenEntity token = tokens.get(1);
 
         assertAll(() -> assertEquals(String.format("Token for organization %s.", ORGANIZATION_ID), token.getLabel(), "Should have auto-generated label"),
                 () -> assertEquals(LocalDate.now().plus(1, ChronoUnit.YEARS), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"));
