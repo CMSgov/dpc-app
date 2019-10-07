@@ -3,8 +3,8 @@ package gov.cms.dpc.api.cli.organizations;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.setup.Bootstrap;
+import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -39,6 +39,13 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
                 .dest(ORG_FILE)
                 .type(String.class)
                 .help("FHIR Organization resource to register with system");
+
+        subparser
+                .addArgument("--no-token")
+                .dest("no-token")
+                .type(Boolean.class)
+                .action(Arguments.storeTrue())
+                .help("Skip generating access token when registering organization");
     }
 
     @Override
@@ -53,10 +60,12 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
             organization = (Bundle) parser.parseResource(fileInputStream);
         }
 
-        registerOrganization(organization, namespace.getString(ATTR_HOSTNAME));
+        final boolean noToken = Boolean.parseBoolean(namespace.getString("no-token"));
+
+        registerOrganization(organization, namespace.getString(ATTR_HOSTNAME), noToken);
     }
 
-    private void registerOrganization(Bundle organization, String attributionService) throws IOException {
+    private void registerOrganization(Bundle organization, String attributionService, boolean noToken) throws IOException {
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
         final Parameters parameters = new Parameters();
@@ -83,15 +92,16 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
             System.exit(1);
         }
 
-        // Now, create a token
+        // Now, create a token, unless --no-token has been passed
+        if (!noToken) {
+            try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-        try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                final HttpPost httpPost = new HttpPost(String.format("%s/Token/%s", attributionService, organizationID.toString()));
 
-            final HttpPost httpPost = new HttpPost(String.format("%s/Token/%s", attributionService, organizationID.toString()));
-
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                final String token = EntityUtils.toString(response.getEntity());
-                System.out.println(String.format("Organization token: %s", token));
+                try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                    final String token = EntityUtils.toString(response.getEntity());
+                    System.out.println(String.format("Organization token: %s", token));
+                }
             }
         }
     }

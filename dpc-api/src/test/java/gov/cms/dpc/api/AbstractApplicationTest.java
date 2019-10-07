@@ -13,8 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 
-import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.APITestHelpers.*;
 
 /**
  * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link gov.cms.dpc.api.auth.StaticAuthFilter}
@@ -46,8 +45,10 @@ public class AbstractApplicationTest {
     public void eachSetup() throws IOException {
         ctx = FhirContext.forDstu3();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
-
+        FHIRHelpers.registerOrganization(attrClient,
+                ctx.newJsonParser(),
+                ORGANIZATION_ID,
+                MACAROON_TASK);
 
         // Check health
         APITestHelpers.checkHealth(APPLICATION);

@@ -4,6 +4,7 @@ import gov.cms.dpc.api.AbstractApplicationTest;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
 import gov.cms.dpc.api.cli.organizations.OrganizationRegistration;
+import gov.cms.dpc.api.cli.tokens.TokenCreate;
 import gov.cms.dpc.api.cli.tokens.TokenDelete;
 import gov.cms.dpc.api.cli.tokens.TokenList;
 import io.dropwizard.cli.Cli;
@@ -39,7 +40,7 @@ class TokenTests extends AbstractApplicationTest {
     private Cli cli;
 
     TokenTests() {
-
+        // Not used
     }
 
     @BeforeEach
@@ -51,6 +52,7 @@ class TokenTests extends AbstractApplicationTest {
         // Add commands you want to test
         final Bootstrap<DPCAPIConfiguration> bootstrap = new Bootstrap<>(new DPCAPIService());
         bootstrap.addCommand(new OrganizationRegistration());
+        bootstrap.addCommand(new TokenCreate());
         bootstrap.addCommand(new TokenList());
         bootstrap.addCommand(new TokenDelete());
 
@@ -72,19 +74,30 @@ class TokenTests extends AbstractApplicationTest {
     @Test
     void testTokenDeletion() throws Exception {
         // Create the organization
-        final boolean success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json");
+        final boolean success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token");
 
         assertAll(() -> assertTrue(success, "Should have succeeded"),
-                () -> assertEquals("", stdErr.toString(), "Should not have errors"),
-                () -> assertTrue(stdOut.toString().contains("eyJ2IjoyLCJsIjoiaHR0"), "Should have token"));
+                () -> assertEquals("", stdErr.toString(), "Should not have errors"));
 
         // Pull out the organization ID
         final Matcher matcher = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}").matcher(stdOut.toString());
 
         assertTrue(matcher.find(), "Should find Organization ID");
 
-        // List the tokens
+        // Create the tokens
+
+
+
+        // Create a new token
         final String organizationID = matcher.group(0);
+        stdOut.reset();
+        stdErr.reset();
+        final boolean s2 = cli.run("create", organizationID);
+
+        assertAll(() -> assertTrue(s2, "Should have succeeded"),
+                () -> assertEquals("", stdErr.toString(), "Should not have any errors"));
+
+        // List the organization tokens
         final List<UUID> matchedTokenIDs = getTokenIDs(organizationID);
         assertEquals(1, matchedTokenIDs.size(), "Should have a single token id");
 
@@ -119,5 +132,4 @@ class TokenTests extends AbstractApplicationTest {
 
         return matchedTokenIDs;
     }
-
 }

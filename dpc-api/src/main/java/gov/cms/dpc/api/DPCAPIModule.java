@@ -12,11 +12,10 @@ import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
-import gov.cms.dpc.api.tasks.GenerateGoldenMacaroon;
+import gov.cms.dpc.api.tasks.GenerateClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
-import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -63,7 +62,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(TokenDAO.class);
 
         // Tasks
-        binder.bind(GenerateGoldenMacaroon.class);
+        binder.bind(GenerateClientTokens.class);
 
         // Healthchecks
         // TODO: Fix with DPC-538

@@ -67,7 +67,7 @@ public class FHIRHelpers {
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
                 // Now, create a Macaroon
-                final HttpPost tokenPost = new HttpPost(String.format("%s/Token/%s", apiURL, organization.getIdElement().getIdPart()));
+                final HttpPost tokenPost = new HttpPost(apiURL);
 
                 try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
                     if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
