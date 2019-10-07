@@ -45,36 +45,36 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe '#organization' do
+  describe '#requested_organization' do
     it 'is required' do
-      subject.organization = nil
+      subject.requested_organization = nil
       expect(subject).to_not be_valid
     end
   end
 
-  describe '#organization_type' do
+  describe '#requested_organization_type' do
     it 'is required' do
-      subject.organization_type = nil
+      subject.requested_organization_type = nil
       expect(subject).to_not be_valid
     end
 
     it 'must be valid' do
-      expect { subject.organization_type = 'blah-blah' }.to raise_error(ArgumentError)
+      expect { subject.requested_organization_type = 'blah-blah' }.to raise_error(ArgumentError)
     end
   end
 
-  describe '#num_providers' do
+  describe '#requested_num_providers' do
     it 'defaults to 0' do
-      expect(subject.num_providers).to be_zero
+      expect(subject.requested_num_providers).to be_zero
     end
 
     it 'must be greater than or equal to 0' do
-      subject.num_providers = -1
+      subject.requested_num_providers = -1
       expect(subject).to_not be_valid
     end
 
     it 'must be an integer' do
-      subject.num_providers = 1.23
+      subject.requested_num_providers = 1.23
       expect(subject).to_not be_valid
     end
   end

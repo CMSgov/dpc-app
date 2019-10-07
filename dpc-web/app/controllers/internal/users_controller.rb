@@ -19,11 +19,11 @@ module Internal
 
       if params[:requested_org].present?
         org = "%#{params[:requested_org].downcase}%"
-        scope = scope.where('LOWER(organization) LIKE :org', org: org)
+        scope = scope.where('LOWER(requested_organization) LIKE :org', org: org)
       end
 
       if params[:requested_org_type].present?
-        scope = scope.where(organization_type: params[:requested_org_type])
+        scope = scope.where(requested_organization_type: params[:requested_org_type])
       end
 
       if params[:created_after].present?

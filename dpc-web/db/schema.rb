@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_18_195851) do
+ActiveRecord::Schema.define(version: 2019_10_07_162013) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -96,8 +96,8 @@ ActiveRecord::Schema.define(version: 2019_09_18_195851) do
   create_table "users", force: :cascade do |t|
     t.string "first_name", null: false
     t.string "last_name", null: false
-    t.string "organization", null: false
-    t.integer "organization_type", null: false
+    t.string "requested_organization", null: false
+    t.integer "requested_organization_type", null: false
     t.string "address_1", null: false
     t.string "address_2", default: ""
     t.string "city", null: false
@@ -114,13 +114,15 @@ ActiveRecord::Schema.define(version: 2019_09_18_195851) do
     t.inet "last_sign_in_ip"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "num_providers", default: 0
+    t.integer "requested_num_providers", default: 0
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
+    t.integer "organization_id"
     t.index ["created_at"], name: "index_users_on_created_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["last_name", "first_name"], name: "index_users_on_last_name_and_first_name"
-    t.index ["organization"], name: "index_users_on_organization"
+    t.index ["organization_id"], name: "index_users_on_organization_id"
+    t.index ["requested_organization"], name: "index_users_on_requested_organization"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 

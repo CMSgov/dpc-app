@@ -7,8 +7,9 @@ class User < ApplicationRecord
   has_one :dpc_registration, inverse_of: :user
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
+  belongs_to :organization, optional: true
 
-  before_save :num_providers_to_zero_if_blank
+  before_save :requested_num_providers_to_zero_if_blank
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable,
@@ -17,9 +18,12 @@ class User < ApplicationRecord
          :validatable, :trackable, :registerable,
          :timeoutable, :recoverable
 
+  enum requested_organization_type: ORGANIZATION_TYPES
+
+  validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :last_name, :first_name, presence: true
-  validates :organization, presence: true
-  validates :num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
+  validates :requested_organization, presence: true
+  validates :requested_num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
   validates :address_1, presence: true
   validates :city, presence: true
   validates :state, inclusion: { in: Address::STATES.keys.map(&:to_s) }
@@ -46,7 +50,7 @@ class User < ApplicationRecord
 
   private
 
-  def num_providers_to_zero_if_blank
-    self.num_providers = 0 if num_providers.blank?
+  def requested_num_providers_to_zero_if_blank
+    self.requested_num_providers = 0 if requested_num_providers.blank?
   end
 end

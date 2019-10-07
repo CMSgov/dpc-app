@@ -6,8 +6,8 @@ FactoryBot.define do
     sequence(:last_name) { |n| "last_name_#{n}" }
     sequence(:first_name) { |n| "first_name_#{n}" }
 
-    organization { 'Amalgamated Lint' }
-    organization_type { 'primary_care_clinic' }
+    requested_organization { 'Amalgamated Lint' }
+    requested_organization_type { 'primary_care_clinic' }
 
     address_1 { '1234 Shut the Door Ave.' }
     city { 'Pecoima' }

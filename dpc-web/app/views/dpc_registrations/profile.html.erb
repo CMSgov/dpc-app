@@ -12,11 +12,11 @@
   <div class="ds-l-row--12 ds-l-md-col--6">
     <h3 class="ds-u-border-bottom--1">Your organization</h3>
     <div class="ds-text--lead">
-      <p><strong>Name:</strong><br><%= @dpc_registration.user.organization %></p>
-      <p><strong>Type:</strong><br><%= @dpc_registration.user.organization_type.titleize %></p>
+      <p><strong>Name:</strong><br><%= @dpc_registration.user.requested_organization %></p>
+      <p><strong>Type:</strong><br><%= @dpc_registration.user.requested_organization_type.titleize %></p>
 
-      <% unless @dpc_registration.user.organization_type == "health_it_vendor" %>
-        <p><strong>Number of providers:</strong><br><%= @dpc_registration.user.num_providers %></p>
+      <% unless @dpc_registration.user.requested_organization_type == "health_it_vendor" %>
+        <p><strong>Number of providers:</strong><br><%= @dpc_registration.user.requested_num_providers %></p>
       <% end %>
 
       <p> <strong>Address:</strong><br>

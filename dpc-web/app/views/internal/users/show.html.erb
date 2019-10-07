@@ -86,12 +86,12 @@
             <%= @user.organization %>
           </div>
 
-        <% unless @user.organization_type == "health_it_vendor" %>
+        <% unless @user.requested_organization_type == "health_it_vendor" %>
           <div class="ds-u-margin-bottom--1">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#users"></use>
             </svg>
-            <%= @user.num_providers %>
+            <%= @user.requested_num_providers %>
           </div>
         <% end %>
 
