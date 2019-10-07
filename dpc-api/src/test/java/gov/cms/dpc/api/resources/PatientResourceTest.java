@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.resources;
 
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -11,17 +10,13 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.sql.Date;
 
-import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 class PatientResourceTest extends AbstractSecureApplicationTest {
 
     PatientResourceTest() {
@@ -166,18 +161,19 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertEquals(99, patients.getTotal(), "Should have correct number of patients");
 
-        // Try to remove one
-
-        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
-        patient.setBirthDate(Date.valueOf("2000-01-01"));
-
-        final MethodOutcome outcome = client
-                .update()
-                .resource(patient)
-                .withId(patient.getId())
-                .encodedJson()
-                .execute();
-
-        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
+        // Try to update one
+        // TODO: Removed until DPC-683 is merged
+//        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
+//        patient.setBirthDate(Date.valueOf("2000-01-01"));
+//        patient.setGender(Enumerations.AdministrativeGender.MALE);
+//
+//        final MethodOutcome outcome = client
+//                .update()
+//                .resource(patient)
+//                .withId(patient.getId())
+//                .encodedJson()
+//                .execute();
+//
+//        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
     }
 }
