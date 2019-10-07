@@ -1,0 +1,25 @@
+.box {
+  background-color: $color-white;
+  border: 1px solid $color-gray-light;
+  border-radius: 3px;
+  display: flex;
+  margin: $spacer-3 0;
+}
+
+.box__content {
+  flex: 1 0 0;
+  padding: $spacer-4;
+}
+
+.box__content + .box__content {
+  border-left: 1px solid $color-gray-light;
+}
+
+.box__heading {
+  font-size: $h2-font-size;
+  margin: 0 0 $spacer-2 0;
+}
+
+.box__subhead {
+  margin: 0;
+}
