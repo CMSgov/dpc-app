@@ -7,7 +7,12 @@
 
 
   <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
-    <%= link_to "Create new organization", new_internal_organization_path %>
+    <%= link_to new_internal_organization_path, class: "utility-button" do %>
+      <svg class="ds-u-color--success" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#plus"></use>
+      </svg>
+      Create new organization
+    <% end %>
 
     <h1 class="ds-h1">Viewing <strong><%= @organizations.total_count %></strong> provider organizations</h1>
     <p class=""><%= page_entries_info @organizations %></p>
