@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.auth;
 
+import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
@@ -18,8 +19,8 @@ import java.util.UUID;
 @Priority(Priorities.AUTHENTICATION)
 public class PrincipalInjectionAuthFilter extends DPCAuthFilter {
 
-    PrincipalInjectionAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, DPCAuthManagedSessionFactory factory) {
-        super(bakery, auth, factory);
+    PrincipalInjectionAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
+        super(bakery, auth, dao);
     }
 
     @Override

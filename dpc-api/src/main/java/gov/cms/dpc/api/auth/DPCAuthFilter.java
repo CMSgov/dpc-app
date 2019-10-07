@@ -8,7 +8,6 @@ import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +34,14 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     private static final String TOKEN_URI_PARAM = "token";
     private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
 
-    private final DPCAuthManagedSessionFactory factory;
+    private final TokenDAO dao;
     private final MacaroonBakery bakery;
 
 
-    DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, DPCAuthManagedSessionFactory factory) {
+    DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
         this.authenticator = auth;
         this.bakery = bakery;
-        this.factory = factory;
+        this.dao = dao;
     }
 
     protected abstract DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo);
@@ -80,10 +79,8 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         // Lookup the organization by Macaroon id
         final UUID macaroonID = UUID.fromString(m1.identifier);
 
-        final UUID orgID;
-        try (final Session session = this.factory.getSessionFactory().openSession()) {
-            orgID = TokenDAO.findOrgByToken(session, macaroonID);
-        }
+
+        final UUID orgID = this.dao.findOrgByToken(macaroonID);
 
         // TODO: This is probably the point to handle the actual Macaroon validation
         try {

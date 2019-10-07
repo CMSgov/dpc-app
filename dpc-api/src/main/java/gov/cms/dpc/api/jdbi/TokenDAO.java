@@ -5,6 +5,7 @@ import gov.cms.dpc.common.entities.TokenEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
 import javax.inject.Inject;
@@ -16,9 +17,12 @@ import java.util.UUID;
 
 public class TokenDAO extends AbstractDAO<TokenEntity> {
 
+    private final SessionFactory factory;
+
     @Inject
     public TokenDAO(DPCAuthManagedSessionFactory factory) {
         super(factory.getSessionFactory());
+        this.factory = factory.getSessionFactory();
     }
 
     public TokenEntity persistToken(TokenEntity entity) {
@@ -60,22 +64,24 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
 
     /**
      * Method for matching a given token ID with the corresponding Organization.
-     * This is designed to be used within the authentication handlers, thus is expects an existing {@link Session} to be passed in an handled appropriately.
+     * This is designed to be used within the authentication handlers, thus it creates and manages a {@link Session} on its own
      *
-     * @param session - {@link Session} existing session to use for accessing the database
      * @param tokenID - {@link UUID} tokenID to match with organization
      * @return - {@link UUID} organization ID which was issued the token
      */
-    public static UUID findOrgByToken(Session session, UUID tokenID) {
-        final CriteriaBuilder builder = session.getCriteriaBuilder();
-        final CriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
-        final Root<TokenEntity> root = query.from(TokenEntity.class);
+    public UUID findOrgByToken(UUID tokenID) {
+        try (Session session = this.factory.openSession()) {
 
-        query.where(builder.equal(root.get(TokenEntity_.id), tokenID.toString()));
+            final CriteriaBuilder builder = session.getCriteriaBuilder();
+            final CriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
+            final Root<TokenEntity> root = query.from(TokenEntity.class);
 
-        final Query<TokenEntity> matchQuery = session.createQuery(query);
+            query.where(builder.equal(root.get(TokenEntity_.id), tokenID.toString()));
 
-        return matchQuery.getSingleResult().getOrganizationID();
+            final Query<TokenEntity> matchQuery = session.createQuery(query);
+
+            return matchQuery.getSingleResult().getOrganizationID();
+        }
     }
 
     public void deleteToken(TokenEntity entity) {

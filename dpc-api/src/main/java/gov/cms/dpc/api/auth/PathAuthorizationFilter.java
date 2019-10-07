@@ -29,8 +29,8 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
     private static final Logger logger = LoggerFactory.getLogger(PathAuthorizationFilter.class);
     private final PathAuthorizer pa;
 
-    PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, DPCAuthManagedSessionFactory factory, PathAuthorizer pa) {
-        super(bakery, auth, factory);
+    PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, PathAuthorizer pa) {
+        super(bakery, auth, dao);
         this.pa = pa;
     }
 
