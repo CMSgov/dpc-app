@@ -7,9 +7,9 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      users = UserSearch.new(params: params, scope: :non_vendor)
+      results = UserSearch.new(params: params, scope: :non_vendor)
 
-      @users = scope.order('created_at DESC').page params[:page]
+      @users = results.order('created_at DESC').page params[:page]
     end
 
     def show
