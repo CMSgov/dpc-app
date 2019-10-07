@@ -34,14 +34,20 @@ public class JobCompletionModel {
          */
         private Integer count;
 
+        /**
+         * SHA256 checksum for the file
+         */
+        private String sha256;
+
         public OutputEntry() {
             // Jackson required
         }
 
-        public OutputEntry(ResourceType type, String url, Integer count) {
+        public OutputEntry(ResourceType type, String url, Integer count, String sha256) {
             this.type = type;
             this.url = url;
             this.count = count;
+            this.sha256 = sha256;
         }
 
         public String getUrl() {
@@ -54,6 +60,10 @@ public class JobCompletionModel {
 
         public Integer getCount() {
             return count;
+        }
+
+        public String getSha256() {
+            return sha256;
         }
     }
 

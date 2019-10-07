@@ -6,6 +6,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -17,6 +18,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.bouncycastle.jcajce.provider.digest.SHA256;
+import org.bouncycastle.util.encoders.Hex;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
@@ -27,6 +30,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import java.io.FileInputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,11 +49,13 @@ public class JobResource extends AbstractJobResource {
 
     private final IJobQueue queue;
     private final String baseURL;
+    private final String fileLocation;
 
     @Inject
-    public JobResource(IJobQueue queue, @APIV1 String baseURL) {
+    public JobResource(IJobQueue queue, @APIV1 String baseURL, @ExportPath String exportPath) {
         this.queue = queue;
         this.baseURL = baseURL;
+        this.fileLocation = exportPath;
     }
 
     @Override
@@ -173,10 +179,20 @@ public class JobResource extends AbstractJobResource {
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
                         String.format("%s/Data/%s.ndjson", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getBatchID(), result.getResourceType(), result.getSequence())),
-                        result.getCount()))
+                        result.getCount(), generateChecksum(result)))
                 .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)
                 .collect(Collectors.toList());
     }
 
+    public String generateChecksum(JobQueueBatchFile file) {
+        String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(file.getBatchID(), file.getResourceType(), file.getSequence()));
+        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+            byte[] digest = new SHA256.Digest().digest(fileInputStream.readAllBytes());
+            return Hex.toHexString(digest);
+        } catch (Exception e) {
+            logger.error("Failed to generate checksum", e);
+            return "";
+        }
+    }
 }
