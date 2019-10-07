@@ -47,6 +47,6 @@ class BakeryTests {
 
     private TokenPolicy generateTokenPolicy() {
         final Config config = ConfigFactory.load();
-        return ConfigBeanFactory.create(config.getConfig("dpc.attribution.tokens"), TokenPolicy.class);
+        return ConfigBeanFactory.create(config.getConfig("dpc.api.tokens"), TokenPolicy.class);
     }
 }

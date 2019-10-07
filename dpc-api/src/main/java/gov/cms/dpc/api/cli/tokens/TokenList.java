@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
-import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.api.entities.TokenEntity;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;

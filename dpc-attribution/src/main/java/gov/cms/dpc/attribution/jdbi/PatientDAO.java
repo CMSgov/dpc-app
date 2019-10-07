@@ -60,12 +60,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         }
 
         // Delete all the attribution relationships
-        final int deletedRows = removeAttributionRelationships(patientEntity);
-
-        final List<AttributionRelationship> attributions = patientEntity.getAttributions();
-        if (deletedRows != attributions.size()) {
-            throw new IllegalStateException(String.format("Expected to delete %d rows, but only %d were deleted", attributions.size(), deletedRows));
-        }
+        removeAttributionRelationships(patientEntity);
 
         this.currentSession().delete(patientEntity);
 

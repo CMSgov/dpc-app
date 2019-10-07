@@ -3,7 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.api.entities.TokenEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;

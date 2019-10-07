@@ -1,4 +1,4 @@
-package gov.cms.dpc.common.entities;
+package gov.cms.dpc.api.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

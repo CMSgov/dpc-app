@@ -53,6 +53,6 @@ abstract class AbstractVerifierTest<V extends CaveatVerifier> {
 
     static TokenPolicy getTokenPolicy() {
         final Config config = ConfigFactory.load();
-        return ConfigBeanFactory.create(config.getConfig("dpc.attribution.tokens"), TokenPolicy.class);
+        return ConfigBeanFactory.create(config.getConfig("dpc.api.tokens"), TokenPolicy.class);
     }
 }

@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.jdbi;
 
-import gov.cms.dpc.common.entities.TokenEntity;
-import gov.cms.dpc.common.entities.TokenEntity_;
+import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.entities.TokenEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.Session;

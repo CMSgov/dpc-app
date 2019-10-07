@@ -5,14 +5,16 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
-import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.swagger.annotations.*;
@@ -64,8 +66,10 @@ public class TokenResource extends AbstractTokenResource {
     @ApiOperation(value = "Fetch organization tokens", notes = "Method to retrieve the authentication tokens associated to the given Organization. This searches by resource ID")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
     public List<TokenEntity> getOrganizationTokens(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Organization resource ID", required = true)
             @PathParam("organizationID") UUID organizationID) {
+        checkOrganizationMatches(organizationPrincipal, organizationID);
         return this.dao.fetchTokens(organizationID);
     }
 
@@ -81,7 +85,9 @@ public class TokenResource extends AbstractTokenResource {
             @ApiResponse(code = 401, message = "Token is not valid for the given Organization"),
             @ApiResponse(code = 422, message = "Token is malformed")
     })
+    // FIXME: I think this can come out?
     public Response verifyOrganizationToken(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Organization resource ID", required = true)
             @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Authentication token to verify", required = true)
@@ -104,9 +110,11 @@ public class TokenResource extends AbstractTokenResource {
             "Token supports a custom human-readable label via the `label` query param.")
     @Override
     public String createOrganizationToken(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Organization resource ID", required = true)
             @NotNull @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Optional label for token") @QueryParam("label") String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
+        checkOrganizationMatches(organizationPrincipal, organizationID);
 
         // Verify that the organization actually exists
         try {
@@ -147,9 +155,10 @@ public class TokenResource extends AbstractTokenResource {
     @ExceptionMetered
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
     public Response deleteOrganizationToken(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Organization resource ID", required = true) @NotNull @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
-
+        checkOrganizationMatches(organizationPrincipal, organizationID);
         final List<TokenEntity> matchedToken = this.dao.findTokenByOrgAndID(organizationID, tokenID);
         assert matchedToken.size() == 1 : "Should only have a single matching token";
 
@@ -208,5 +217,11 @@ public class TokenResource extends AbstractTokenResource {
             return customExpiration;
         }
         return defaultExpiration;
+    }
+
+    private static void checkOrganizationMatches(OrganizationPrincipal organizationPrincipal, UUID organizationID) {
+        if (!organizationPrincipal.getID().equals(organizationID)) {
+            throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
+        }
     }
 }
