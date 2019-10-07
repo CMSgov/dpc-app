@@ -1,19 +1,22 @@
-.filter-group {
+.field-group {
+  box-sizing: border-box;
+  border: none;
+  margin: 0;
   padding: 0;
 }
 
-.filter-group__heading {
+.field-group__heading {
   font-size: $h4-font-size;
   font-weight: $font-bold;
   padding: $spacer-4 0;
 }
 
-.filter-group__fields {
+.field-group__fields {
   border-bottom: 1px solid $color-gray-light;
   padding: $spacer-4 0;
 }
 
-.filter-group__hint {
+.field-group__hint {
   color: $color-gray;
   margin-bottom: 0;
 }

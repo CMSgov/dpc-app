@@ -1,15 +1,18 @@
 <% title "Edit Organization" %>
 
-<div class="ds-l-row">
-  <section class="ds-l-row--12 ds-l-md-col--9 ds-u-md-padding-left--2">
+<div class="ds-l-container ds-u-padding-x--0">
 
-    <%= link_to "Back to index", internal_organizations_path %>
-    <h1><%= @organization.name %></h1>
+  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
 
-    <div class="ds-u-border--1 ds-u-padding--2 ds-u-radius">
+    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Edit: <%= @organization.name %></h1>
+
+  </section>
+
+  <section class="box">
+    <div class="box__content">
       <%= form_for @organization, url: internal_organization_path(@organization), html: { method: :put } do |f| %>
-        <%= render 'internal/organizations/fields', f: f %>
+        <%= render 'internal/organizations/fields', f: f, locals: {button_label:  "Save"} %>
       <% end %>
     </div>
-  <section>
+  </section>
 </div>
