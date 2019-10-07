@@ -9,33 +9,33 @@
       <main role="main ds-text">
 
 
-        <div class="ds-l-row filter-group">
+        <fieldset class="ds-l-row field-group">
           <div class="ds-l-col--3">
-            <div class="filter-group__heading">Signup dates</div>
+            <legend class="field-group__heading">Signup dates</legend>
           </div>
 
-          <div class="ds-l-col--9 filter-group__fields">
+          <div class="ds-l-col--9 field-group__fields">
             <div class="ds-u-display--flex ds-u-align-items--center">
             <%= date_field_tag :created_after, params[:created_after], class: "ds-c-field ds-c-field--medium " %>
             <span class="ds-u-display--inline-block ds-u-padding-x--1">thru</span>
             <%= date_field_tag :created_before, params[:created_before], class: "ds-c-field ds-c-field--medium" %>
 
             </div>
-            <p class="filter-group__hint">Leave the second field blank to filter a single day</p>
+            <p class="field-group__hint">Leave the second field blank to filter a single day</p>
           </div>
-        </div>
+        </fieldset>
 
-        <div class="ds-l-row filter-group">
+        <fieldset class="ds-l-row field-group">
           <div class="ds-l-col--3">
-            <div class="filter-group__heading">Unassigned users</div>
+            <legend class="field-group__heading">Unassigned users</legend>
           </div>
-          <div class="ds-l-col--9 filter-group__fields">
+          <div class="ds-l-col--9 field-group__fields">
             <%= label_tag :requested_org, 'Requested organization', class: "ds-c-label ds-u-margin-top--0" %>
             <%= text_field_tag :requested_org, params[:requested_org], class: "ds-c-field" %>
             <%= label_tag :requested_org_type, 'Requested organization type', class: "ds-c-label" %>
             <%= select_tag(:requested_org_type, options_for_select(organization_types_for_select, params[:requested_org_type]), :class => 'ds-c-field', include_blank: 'All organization types') %>
           </div>
-        </div>
+        </fieldset>
 
       </main>
       <aside class="ds-l-row ds-c-dialog__actions" role="complementary">
