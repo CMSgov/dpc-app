@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.cli.tokens;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import gov.cms.dpc.api.cli.AbstractAttributionCommand;
+import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -12,9 +11,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Organization;
 
-public class TokenDelete extends AbstractAttributionCommand {
+public class TokenDelete extends AbstractAdminCommand {
 
     public TokenDelete() {
         super("delete", "Delete Organization Token");
@@ -40,21 +38,12 @@ public class TokenDelete extends AbstractAttributionCommand {
         final String tokenID = namespace.getString("token-id");
         System.out.println(String.format("Deleting token %s for organization %s", tokenID, orgReference));
 
-        final String attributionService = namespace.getString(ATTR_HOSTNAME);
-
-        final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
-
-        final Organization organization = client
-                .read()
-                .resource(Organization.class)
-                .withId(new IdType(orgReference))
-                .encodedJson()
-                .execute();
+        final String attributionService = namespace.getString(API_HOSTNAME);
 
         // Delete the token
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final URIBuilder builder = new URIBuilder("http://localhost:9900/tasks/delete-token");
-            builder.setParameter("organization", organization.getIdElement().getIdPart());
+            final URIBuilder builder = new URIBuilder(String.format("%s/delete-token", attributionService));
+            builder.setParameter("organization", new IdType(orgReference).getIdPart());
             builder.setParameter("token", tokenID);
             final HttpPost tokenDelete = new HttpPost(builder.build());
 

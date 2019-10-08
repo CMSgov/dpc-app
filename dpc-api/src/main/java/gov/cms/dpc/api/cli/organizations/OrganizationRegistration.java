@@ -9,6 +9,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -16,9 +17,11 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 
+import javax.ws.rs.core.UriBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -46,6 +49,13 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
                 .type(Boolean.class)
                 .action(Arguments.storeTrue())
                 .help("Skip generating access token when registering organization");
+
+        subparser
+                .addArgument("-a", "--api")
+                .dest("api-service")
+                .type(String.class)
+                .setDefault("http://localhost:9900/tasks")
+                .help("URL of API service for generating client token");
     }
 
     @Override
@@ -61,11 +71,12 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
         }
 
         final boolean noToken = Boolean.parseBoolean(namespace.getString("no-token"));
+        final String apiService = namespace.getString("api-service");
 
-        registerOrganization(organization, namespace.getString(ATTR_HOSTNAME), noToken);
+        registerOrganization(organization, namespace.getString(ATTR_HOSTNAME), noToken, apiService);
     }
 
-    private void registerOrganization(Bundle organization, String attributionService, boolean noToken) throws IOException {
+    private void registerOrganization(Bundle organization, String attributionService, boolean noToken, String apiService) throws IOException, URISyntaxException {
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
         final Parameters parameters = new Parameters();
@@ -94,9 +105,12 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
 
         // Now, create a token, unless --no-token has been passed
         if (!noToken) {
-            try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
 
-                final HttpPost httpPost = new HttpPost(String.format("%s/Token/%s", attributionService, organizationID.toString()));
+            try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                final URIBuilder builder = new URIBuilder(String.format("%s/generate-token", apiService));
+                builder.setParameter("organization", organizationID.toString());
+
+                final HttpPost httpPost = new HttpPost(builder.build());
 
                 try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                     final String token = EntityUtils.toString(response.getEntity());
