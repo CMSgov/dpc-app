@@ -13,9 +13,9 @@ RSpec.describe User, type: :model do
   describe '.to_csv' do
     it 'generates CSV of all users' do
       create(:user, id: 50000, first_name: 'Clarissa', last_name: 'Dalloway', email: 'cd@example.com',
-                    organization: 'Amalgamated Lint', organization_type: 'primary_care_clinic',
+                    requested_organization: 'Amalgamated Lint', requested_organization_type: 'primary_care_clinic',
                     address_1: '1234 Shut the Door Ave.', address_2: 'Ste 1000', city: 'Pecoima',
-                    state: 'AZ', zip: '12345', agree_to_terms: true, num_providers: 5,
+                    state: 'AZ', zip: '12345', agree_to_terms: true, requested_num_providers: 5,
                     created_at: '2019-10-15 18:29:35 UTC', updated_at: '2019-10-15 18:29:35 UTC')
 
       fixture_csv_content = File.read('spec/fixtures/users.csv')

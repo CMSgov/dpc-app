@@ -32,9 +32,11 @@ class User < ApplicationRecord
     in: [true], message: 'you must agree to the terms of service to create an account'
   }
 
+  delegate :name, :organization_type, to: :organization, prefix: true
+
   def self.to_csv
-    attrs = %w[id first_name last_name email organization organization_type address_1 address_2
-               city state zip agree_to_terms num_providers created_at updated_at]
+    attrs = %w[id first_name last_name email requested_organization requested_organization_type
+               address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at]
 
     CSV.generate(headers: true) do |csv|
       csv << attrs

@@ -3,6 +3,24 @@
 
     <fieldset class="ds-l-row field-group">
       <div class="ds-l-col--3">
+        <legend class="field-group__heading">Organization</legend>
+      </div>
+
+      <div class="ds-l-col--9 field-group__fields">
+        <% unless @user.organization %>
+          <p>
+            This user originally requested the <%= @user.requested_organization_type.titleize %> organization, <%= @user.requested_organization %>, with <%= @user.requested_num_providers %> providers.
+          </p>
+        <% end %>
+        <div class="field">
+          <%= f.label :organization, class: "ds-c-label ds-u-margin-top--0" %>
+          <%= f.select :organization_id, Organization.all.map{|o| [o.name, o.id]}, { include_blank: true }, class: "ds-c-field", value: @user.organization_id %>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="ds-l-row field-group">
+      <div class="ds-l-col--3">
         <legend class="field-group__heading">Personal Info</legend>
       </div>
 

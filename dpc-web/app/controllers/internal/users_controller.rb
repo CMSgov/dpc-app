@@ -66,7 +66,7 @@ module Internal
     private
 
     def user_params
-      params.fetch(:user).permit(:first_name, :last_name, :email)
+      params.fetch(:user).permit(:first_name, :last_name, :email, :organization_id)
     end
   end
 end

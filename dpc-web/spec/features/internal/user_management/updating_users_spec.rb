@@ -11,11 +11,13 @@ RSpec.feature 'updating users' do
 
   scenario 'successfully updating a user\'s attributes ' do
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
+    org = create(:organization)
 
     visit edit_internal_user_path(crabby)
 
     expect(page.body).to have_content('Crab Olsen')
 
+    select org.name, from: 'user_organization_id'
     fill_in 'user_first_name', with: 'Crabby'
     fill_in 'user_last_name', with: 'Graham'
     fill_in 'user_email', with: 'newemail@example.com'
@@ -26,6 +28,7 @@ RSpec.feature 'updating users' do
     expect(page).not_to have_css('[data-test="user-form-submit"]')
     expect(page.body).to have_content('Crabby Graham')
     expect(page.body).to have_content('newemail@example.com')
+    expect(page.body).to have_content(org.name)
   end
 
   scenario 'trying to update a user with invalid attributes ' do
