@@ -26,18 +26,6 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
     }
 
     public TokenEntity persistToken(TokenEntity entity) {
-        // FIXME: We need a way to ensure the organization exists, maybe placing this earlier in the call stack?
-        // Check to ensure that the organization exists
-//        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-//        final CriteriaQuery<Boolean> query = builder.createQuery(Boolean.class);
-//        final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
-//
-//        query.select(builder.literal(true))
-//                .where(builder.equal(root.get(OrganizationEntity_.id), entity.getOrganizationID()));
-//        final Query<Boolean> orgExists = this.currentSession().createQuery(query);
-//        // If the org is not present, an exception will be thrown, which we can catch in the caller
-//        orgExists.getSingleResult();
-
         return persist(entity);
     }
 
