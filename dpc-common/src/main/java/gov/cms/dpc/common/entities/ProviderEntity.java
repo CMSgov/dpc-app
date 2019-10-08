@@ -2,8 +2,6 @@ package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -18,11 +16,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "providers")
-@NamedQueries(value = {
-        @NamedQuery(name = "getProvider", query = "select 1 from providers a where a.providerNPI = :provID"),
-        @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id"),
-        @NamedQuery(name = "getAllProviders", query = "from providers p")
-})
 public class ProviderEntity implements Serializable {
 
     public static final long serialVersionUID = 42L;
@@ -51,6 +44,10 @@ public class ProviderEntity implements Serializable {
                     @JoinColumn(name = "patient_id", referencedColumnName = "id")
             })
     private List<PatientEntity> attributedPatients;
+
+    @OneToMany
+    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+    private List<RosterEntity> attributionRosters;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime createdAt;
@@ -100,6 +97,14 @@ public class ProviderEntity implements Serializable {
 
     public void setAttributedPatients(List<PatientEntity> attributedPatients) {
         this.attributedPatients = attributedPatients;
+    }
+
+    public List<RosterEntity> getAttributionRosters() {
+        return attributionRosters;
+    }
+
+    public void setAttributionRosters(List<RosterEntity> attributionRosters) {
+        this.attributionRosters = attributionRosters;
     }
 
     public OrganizationEntity getOrganization() {
