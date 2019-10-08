@@ -1,0 +1,6 @@
+extraction:
+  java:
+    index:
+      java_version: "11"
+      maven:
+        settings_file: src/main/resources/lgtm.settings.xml
