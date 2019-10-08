@@ -30,9 +30,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import java.io.File;
 import java.io.FileInputStream;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -179,20 +182,32 @@ public class JobResource extends AbstractJobResource {
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
                         String.format("%s/Data/%s.ndjson", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getBatchID(), result.getResourceType(), result.getSequence())),
-                        result.getCount(), generateChecksum(result)))
+                        result.getCount(), buildExtension(result)))
                 .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)
                 .collect(Collectors.toList());
     }
 
-    public String generateChecksum(JobQueueBatchFile file) {
-        String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(file.getBatchID(), file.getResourceType(), file.getSequence()));
-        try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
+    public Map<String, Object> buildExtension(JobQueueBatchFile batchFile) {
+        String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(batchFile.getBatchID(), batchFile.getResourceType(), batchFile.getSequence()));
+        File file = new File(filePath);
+        Map<String, Object> extension = new HashMap<>();
+        extension.put("sha256", generateChecksum(file));
+        extension.put("length", generateFileLength(file));
+        return extension;
+    }
+
+    private String generateChecksum(File file) {
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
             byte[] digest = new SHA256.Digest().digest(fileInputStream.readAllBytes());
             return Hex.toHexString(digest);
         } catch (Exception e) {
             logger.error("Failed to generate checksum", e);
-            return "";
+            return null;
         }
+    }
+
+    private Long generateFileLength(File file) {
+        return file != null ? file.length() : null;
     }
 }

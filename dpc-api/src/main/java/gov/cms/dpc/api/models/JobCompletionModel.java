@@ -35,19 +35,19 @@ public class JobCompletionModel {
         private Integer count;
 
         /**
-         * SHA256 checksum for the file
+         * Extension object to hold additional information.
          */
-        private String sha256;
+        private Map<String, ?> extension;
 
         public OutputEntry() {
             // Jackson required
         }
 
-        public OutputEntry(ResourceType type, String url, Integer count, String sha256) {
+        public OutputEntry(ResourceType type, String url, Integer count, Map<String, ?> extension) {
             this.type = type;
             this.url = url;
             this.count = count;
-            this.sha256 = sha256;
+            this.extension = extension;
         }
 
         public String getUrl() {
@@ -62,8 +62,8 @@ public class JobCompletionModel {
             return count;
         }
 
-        public String getSha256() {
-            return sha256;
+        public Map<String, ?> getExtension() {
+            return extension;
         }
     }
 

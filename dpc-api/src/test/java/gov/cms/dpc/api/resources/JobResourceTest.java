@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -215,12 +216,14 @@ public class JobResourceTest {
     }
 
     /**
-     * Test generating SHA-256 checksum for a file.
+     * Test building extension for a file.
      */
     @Test
-    public void testGenerateChecksum() {
+    public void testBuildExtension() {
         final var resource = new JobResource(null, "", "src/test/resources");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), ResourceType.Patient, 0, 11);
-        assertEquals("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b", resource.generateChecksum(file));
+        Map extension = resource.buildExtension(file);
+        assertAll(() -> assertEquals("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b", extension.get("sha256")),
+                () -> assertEquals(7202L, extension.get("length")));
     }
 }
