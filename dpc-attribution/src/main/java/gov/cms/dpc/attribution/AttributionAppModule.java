@@ -6,7 +6,6 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderNameStyle;
@@ -17,10 +16,8 @@ import java.time.Duration;
 @SuppressWarnings("rawtypes")
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
-    private final DPCHibernateBundle<DPCAttributionConfiguration> hibernate;
-
-    public AttributionAppModule(DPCHibernateBundle<DPCAttributionConfiguration> hibernate) {
-        this.hibernate = hibernate;
+    public AttributionAppModule() {
+        // Not used
     }
 
     @Override

@@ -61,7 +61,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
-                        new AttributionAppModule(hibernateBundle),
+                        new AttributionAppModule(),
                         new FHIRModule<>())
                 .build();
 
