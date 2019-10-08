@@ -9,7 +9,6 @@ import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
-import gov.cms.dpc.macaroons.BakeryModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -63,8 +62,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(hibernateBundle),
-                        new FHIRModule<>(),
-                        new BakeryModule())
+                        new FHIRModule<>())
                 .build();
 
         // The Hibernate bundle must be initialized before Guice.

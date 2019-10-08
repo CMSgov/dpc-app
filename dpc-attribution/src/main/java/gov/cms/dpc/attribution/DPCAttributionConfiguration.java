@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
-import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.db.DataSourceFactory;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -39,11 +38,6 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @NotNull
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
-
-    @Valid
-    @NotNull
-    @JsonProperty("tokens")
-    private TokenPolicy tokenPolicy = new TokenPolicy();
 
     @Valid
     @JsonProperty("swagger")
@@ -98,13 +92,5 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
         this.swaggerBundleConfiguration = swaggerBundleConfiguration;
-    }
-
-    public TokenPolicy getTokenPolicy() {
-        return tokenPolicy;
-    }
-
-    public void setTokenPolicy(TokenPolicy tokenPolicy) {
-        this.tokenPolicy = tokenPolicy;
     }
 }
