@@ -208,6 +208,9 @@ public class MacaroonBakery {
      * @return - {@link Macaroon} deserialized from {@link String}
      */
     public Macaroon deserializeMacaroon(String serializedString) {
+        if (serializedString.isEmpty()) {
+            throw new BakeryException("Cannot deserialize empty string");
+        }
         // Determine if we're Base64 encoded or not
         byte[] decodedString;
         // For a V2 JSON macaroon, either '{' or '[' will be the starting value, so we check for the base64 encoded value

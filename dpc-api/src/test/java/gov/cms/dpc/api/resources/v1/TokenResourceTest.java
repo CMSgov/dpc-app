@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.TokenEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -39,58 +40,13 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testTokenGeneration() throws IOException {
-        final String token = generateToken(ORGANIZATION_ID);
-
-        // Verify that it's correct.
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getBaseURL() + String.format("/Token/%s/verify?token=%s", ORGANIZATION_ID, token));
-
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token should be valid");
-            }
-        }
-
-        // Verify that it's unauthorized.
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getBaseURL() + String.format("/Token/%s/verify?token=%s", BAD_ORG_ID, token));
-
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.UNAUTHORIZED_401, response.getStatusLine().getStatusCode(), "Should not be valid");
-            }
-        }
-    }
-
-    @Test
     void testUnknownOrgTokenGeneration() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getBaseURL() + "/Token/" + UUID.randomUUID().toString());
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                assertEquals(HttpStatus.NOT_FOUND_404, response.getStatusLine().getStatusCode(), "Should not have found organization");
-            }
-        }
-    }
-
-    @Test
-    void testEmptyTokenHandling() throws IOException {
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getBaseURL() + String.format("/Token/%s/verify?token=%s", ORGANIZATION_ID, ""));
-
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should not be able to verify empty token");
-            }
-        }
-    }
-
-    @Test
-    void testNonMacaroonHandling() throws IOException {
-        final String badToken = Base64.getUrlEncoder().encodeToString(new String("This is not a macaroon").getBytes(StandardCharsets.UTF_8));
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getBaseURL() + String.format("/Token/%s/verify?token=%s", ORGANIZATION_ID, badToken));
-
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
-                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatusLine().getStatusCode(), "Should not be able to verify empty token");
+                assertEquals(HttpStatus.UNAUTHORIZED_401, response.getStatusLine().getStatusCode(), "Should not have found organization");
             }
         }
     }
@@ -100,7 +56,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
 
         final List<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
         assertFalse(tokens.isEmpty(), "Should have tokens");
-        final TokenEntity token = tokens.get(1);
+        final TokenEntity token = tokens.get(0);
 
         assertAll(() -> assertEquals(String.format("Token for organization %s.", ORGANIZATION_ID), token.getLabel(), "Should have auto-generated label"),
                 () -> assertEquals(LocalDate.now().plus(1, ChronoUnit.YEARS), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"));
@@ -114,6 +70,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         // Create a new token with a custom label
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token/%s?label=%s", ORGANIZATION_ID, URLEncoder.encode(customLabel, StandardCharsets.UTF_8)));
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
             }
@@ -135,6 +92,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).plusYears(5);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token/%s?expiration=%s", ORGANIZATION_ID, expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should fail with exceeding expiration time");
             }
@@ -143,6 +101,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         expires = OffsetDateTime.now(ZoneOffset.UTC).minusDays(10);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token/%s?expiration=%s", ORGANIZATION_ID, expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should fail with past expiration time");
             }
@@ -151,6 +110,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token/%s?expiration=%s", ORGANIZATION_ID, expiresFinal.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have been created.");
             }
@@ -160,17 +120,11 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         assertEquals(1, tokens.stream().filter(token -> token.getExpiresAt().toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
     }
 
-//    Pair<Organization, String> createOrganization() throws IOException {
-////        final Organization organization = APITestHelpers..createOrganization(ctx, getBaseURL());
-//        final String orgID = organization.getIdElement().getIdPart();
-//        final String macaroon = generateToken(orgID);
-//        return Pair.of(organization, macaroon);
-//    }
-
     String generateToken(String orgID) throws IOException {
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token/%s", orgID));
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
 
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
@@ -185,6 +139,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     List<TokenEntity> fetchTokens(String orgID) throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet httpGet = new HttpGet(getBaseURL() + String.format("/Token/%s", orgID));
+            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenEntity>>() {

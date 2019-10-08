@@ -6,20 +6,17 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
-import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
-import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.swagger.annotations.*;
-import org.eclipse.jetty.http.HttpStatus;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
@@ -33,7 +30,6 @@ import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -71,33 +67,6 @@ public class TokenResource extends AbstractTokenResource {
             @PathParam("organizationID") UUID organizationID) {
         checkOrganizationMatches(organizationPrincipal, organizationID);
         return this.dao.fetchTokens(organizationID);
-    }
-
-    @Override
-    @GET
-    @Timed
-    @ExceptionMetered
-    @Path("/{organizationID}/verify")
-    @ApiOperation(value = "Verify authentication token", notes = "Verify an authentication token with a given Organization. " +
-            "This allows for checking if a given token is correctly to the organization if the token is valid.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "Token cannot be empty"),
-            @ApiResponse(code = 401, message = "Token is not valid for the given Organization"),
-            @ApiResponse(code = 422, message = "Token is malformed")
-    })
-    // FIXME: I think this can come out?
-    public Response verifyOrganizationToken(
-            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-            @ApiParam(value = "Organization resource ID", required = true)
-            @PathParam("organizationID") UUID organizationID,
-            @ApiParam(value = "Authentication token to verify", required = true)
-            @NotEmpty @QueryParam("token") String token) {
-        final boolean valid = validateMacaroon(organizationID, parseMacaroonToken(token));
-        if (valid) {
-            return Response.ok().build();
-        }
-
-        return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
     @POST
@@ -173,26 +142,6 @@ public class TokenResource extends AbstractTokenResource {
                 new MacaroonCaveat("", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString()))
         );
         return this.bakery.createMacaroon(caveats);
-    }
-
-    private Macaroon parseMacaroonToken(String token) {
-        try {
-            return this.bakery.deserializeMacaroon(token);
-        } catch (BakeryException e) {
-            logger.error("Cannot deserialize Macaroon", e);
-            throw new WebApplicationException("Cannot deserialize Macaroon", HttpStatus.UNPROCESSABLE_ENTITY_422);
-        }
-    }
-
-    private boolean validateMacaroon(UUID organizationID, Macaroon macaroon) {
-        try {
-            final String caveatString = String.format("organization_id = %s", organizationID.toString());
-            this.bakery.verifyMacaroon(Collections.singletonList(macaroon), caveatString);
-        } catch (BakeryException e) {
-            logger.error("Macaroon verification failed.", e);
-            return false;
-        }
-        return true;
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

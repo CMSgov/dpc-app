@@ -74,7 +74,13 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
         logger.trace("Making request to validate token.");
 
-        final Macaroon m1 = bakery.deserializeMacaroon(macaroon);
+        final Macaroon m1;
+        try {
+            m1 = bakery.deserializeMacaroon(macaroon);
+        } catch (BakeryException e) {
+            logger.error("Cannot deserialize Macaroon", e);
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
 
         // Lookup the organization by Macaroon id
         final UUID macaroonID = UUID.fromString(m1.identifier);

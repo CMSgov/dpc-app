@@ -49,15 +49,4 @@ public abstract class AbstractTokenResource {
     @DELETE
     @Path("/{organizationID}/{tokenID}")
     public abstract Response deleteOrganizationToken(OrganizationPrincipal organizationPrincipal, @NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID);
-
-    /**
-     * Verify that the provided token is valid
-     *
-     * @param organizationID - {@link UUID} organization ID
-     * @param token          - {@link String} representation of authorization token (optionally base64 encoded)
-     * @return - {@link Response} with status {@link Response.Status#OK} if token is valid. {@link Response.Status#UNAUTHORIZED} if token is not valid
-     */
-    @GET
-    @Path("/{organizationID}/verify")
-    public abstract Response verifyOrganizationToken(OrganizationPrincipal principal, @PathParam("organizationID") UUID organizationID, @NotEmpty @QueryParam("token") String token);
 }
