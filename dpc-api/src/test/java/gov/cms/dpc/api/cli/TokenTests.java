@@ -72,7 +72,7 @@ class TokenTests extends AbstractApplicationTest {
     }
 
     @Test
-    void testTokenDeletion() throws Exception {
+    void testTokenLifecycle() throws Exception {
         // Create the organization
         final boolean success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token");
 
@@ -85,7 +85,6 @@ class TokenTests extends AbstractApplicationTest {
         assertTrue(matcher.find(), "Should find Organization ID");
 
         // Create the tokens
-
 
 
         // Create a new token

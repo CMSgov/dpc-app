@@ -11,6 +11,8 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -39,7 +42,7 @@ public class TokenList extends AbstractAttributionCommand {
     }
 
     @Override
-    public void run(Bootstrap<?> bootstrap, Namespace namespace) throws IOException {
+    public void run(Bootstrap<?> bootstrap, Namespace namespace) throws IOException, URISyntaxException {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
         System.out.println(String.format("Listing tokens for organization: %s.", orgReference));
@@ -57,12 +60,14 @@ public class TokenList extends AbstractAttributionCommand {
         listTokens(client, organization);
     }
 
-    private void listTokens(IGenericClient client, Organization organization) throws IOException {
+    private void listTokens(IGenericClient client, Organization organization) throws IOException, URISyntaxException {
         // List all the tokens, switching
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpGet tokenGet = new HttpGet(String.format("%s/Token/%s", client.getServerBase(), organization.getIdElement().getIdPart()));
+            final URIBuilder builder = new URIBuilder("http://localhost:9900/tasks/list-tokens");
+            builder.addParameter("organization", organization.getIdElement().getIdPart());
+            final HttpPost tokenPost = new HttpPost(builder.build());
 
-            try (CloseableHttpResponse response = httpClient.execute(tokenGet)) {
+            try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
                 if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
                     System.err.println("Error fetching organization: " + response.getStatusLine().getReasonPhrase());
                     System.exit(1);

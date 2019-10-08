@@ -44,7 +44,7 @@ public class APITestHelpers {
     public static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     public static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
-    static final String MACAROON_TASK = "http://localhost:9900/tasks/generate-macaroon";
+    static final String MACAROON_TASK = "http://localhost:9900/tasks/generate-token";
     public static String BASE_URL = "https://dpc.cms.gov/api";
 
     private APITestHelpers() {

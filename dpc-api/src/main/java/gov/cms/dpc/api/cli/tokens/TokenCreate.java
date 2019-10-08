@@ -54,7 +54,7 @@ public class TokenCreate extends AbstractAttributionCommand {
         final IdType orgID = new IdType(namespace.getString("org-reference"));
         final String attributionService = namespace.getString(ATTR_HOSTNAME);
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final URIBuilder builder = new URIBuilder("http://localhost:9900/tasks/generate-macaroon");
+            final URIBuilder builder = new URIBuilder("http://localhost:9900/tasks/generate-token");
 //            final URIBuilder builder = new URIBuilder(String.format("%s/Token/%s", attributionService, orgID.getIdPart()));
 
             builder.addParameter("organization", orgID.getIdPart());

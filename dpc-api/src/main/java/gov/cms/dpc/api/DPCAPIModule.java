@@ -12,7 +12,9 @@ import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
+import gov.cms.dpc.api.tasks.DeleteToken;
 import gov.cms.dpc.api.tasks.GenerateClientTokens;
+import gov.cms.dpc.api.tasks.ListClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
@@ -63,6 +65,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
         // Tasks
         binder.bind(GenerateClientTokens.class);
+        binder.bind(ListClientTokens.class);
+        binder.bind(DeleteToken.class);
 
         // Healthchecks
         // TODO: Fix with DPC-538

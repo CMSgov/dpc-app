@@ -6,7 +6,8 @@ import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
@@ -52,7 +53,10 @@ public class TokenDelete extends AbstractAttributionCommand {
 
         // Delete the token
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpDelete tokenDelete = new HttpDelete(String.format("%s/Token/%s/%s", client.getServerBase(), organization.getIdElement().getIdPart(), tokenID));
+            final URIBuilder builder = new URIBuilder("http://localhost:9900/tasks/delete-token");
+            builder.setParameter("organization", organization.getIdElement().getIdPart());
+            builder.setParameter("token", tokenID);
+            final HttpPost tokenDelete = new HttpPost(builder.build());
 
             try (CloseableHttpResponse response = httpClient.execute(tokenDelete)) {
                 if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
