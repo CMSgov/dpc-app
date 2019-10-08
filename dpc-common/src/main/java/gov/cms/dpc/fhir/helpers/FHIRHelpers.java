@@ -64,7 +64,6 @@ public class FHIRHelpers {
                     .encodedJson()
                     .execute();
 
-            // FIXME: Token generation still needs to happen somehow.
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 final URIBuilder uriBuilder = new URIBuilder(String.format("%s/generate-token", adminURL));
                 uriBuilder.setParameter("organization", organizationID);
