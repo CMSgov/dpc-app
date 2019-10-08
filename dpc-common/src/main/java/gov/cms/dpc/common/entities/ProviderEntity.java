@@ -2,8 +2,6 @@ package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -18,11 +16,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "providers")
-@NamedQueries(value = {
-        @NamedQuery(name = "getProvider", query = "select 1 from providers a where a.providerNPI = :provID"),
-        @NamedQuery(name = "findByProvider", query = "from providers a where a.providerNPI = :id"),
-        @NamedQuery(name = "getAllProviders", query = "from providers p")
-})
 public class ProviderEntity implements Serializable {
 
     public static final long serialVersionUID = 42L;
