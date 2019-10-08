@@ -1,0 +1,26 @@
+{
+  "name": "dpc-app",
+  "version": "0.0.4",
+  "description": "Data @ The Point of Care -",
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.12"
+  },
+  "dependencies": {
+    "newman": "^4.5.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "newman run src/test/EndToEndRequestTest.postman_collection.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CMSgov/dpc-app.git"
+  },
+  "author": "DPC Team @ CMS",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/CMSgov/dpc-app/issues"
+  },
+  "homepage": "https://github.com/CMSgov/dpc-app#readme"
+}
