@@ -13,8 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 
-import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.APITestHelpers.*;
 
 /**
  * Abstract test that enables the default token authentication backend.
@@ -38,6 +37,10 @@ public class AbstractSecureApplicationTest {
         return String.format("http://localhost:%d/v1/", APPLICATION.getLocalPort());
     }
 
+    protected String getAdminURL() {
+        return String.format("http://localhost:%d/tasks/", APPLICATION.getAdminPort());
+    }
+
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
@@ -46,7 +49,7 @@ public class AbstractSecureApplicationTest {
         // First, create a Golden macaroon for admin uses
         final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, String.format("http://localhost:%d/v1/", APPLICATION.getLocalPort()));
+        ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, TASK_URL);
     }
 
     @BeforeEach

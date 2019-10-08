@@ -26,7 +26,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     void ensurePractitionersExist() throws IOException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getAdminURL(), ORGANIZATION_TOKEN);
         APITestHelpers.setupPractitionerTest(client, parser);
 
         // Find everything attributed
@@ -76,7 +76,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         assertThrows(AuthenticationException.class, clientQuery::execute, "Should not have practitioner");
 
         // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getBaseURL());
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
 
         // Update the Macaroons interceptor to use the new Organization token
         ((APITestHelpers.MacaroonsInterceptor) client.getInterceptorService().getAllRegisteredInterceptors().get(0)).setMacaroon(m2);

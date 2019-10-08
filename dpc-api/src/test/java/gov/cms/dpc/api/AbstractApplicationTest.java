@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import static gov.cms.dpc.api.APITestHelpers.*;
 
@@ -42,13 +43,13 @@ public class AbstractApplicationTest {
     }
 
     @BeforeEach
-    public void eachSetup() throws IOException {
+    public void eachSetup() throws IOException, URISyntaxException {
         ctx = FhirContext.forDstu3();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         FHIRHelpers.registerOrganization(attrClient,
                 ctx.newJsonParser(),
                 ORGANIZATION_ID,
-                MACAROON_TASK);
+                TASK_URL);
 
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
