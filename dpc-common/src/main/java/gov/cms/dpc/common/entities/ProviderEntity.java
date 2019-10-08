@@ -52,6 +52,10 @@ public class ProviderEntity implements Serializable {
             })
     private List<PatientEntity> attributedPatients;
 
+    @OneToMany
+    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+    private List<RosterEntity> attributionRosters;
+
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime createdAt;
 
@@ -100,6 +104,14 @@ public class ProviderEntity implements Serializable {
 
     public void setAttributedPatients(List<PatientEntity> attributedPatients) {
         this.attributedPatients = attributedPatients;
+    }
+
+    public List<RosterEntity> getAttributionRosters() {
+        return attributionRosters;
+    }
+
+    public void setAttributionRosters(List<RosterEntity> attributionRosters) {
+        this.attributionRosters = attributionRosters;
     }
 
     public OrganizationEntity getOrganization() {
