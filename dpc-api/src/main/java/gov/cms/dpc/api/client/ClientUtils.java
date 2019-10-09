@@ -170,7 +170,9 @@ public class ClientUtils {
             fileGet.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
             try (CloseableHttpResponse fileResponse = client.execute(fileGet)) {
 
-                fileResponse.getEntity().writeTo(new FileOutputStream(tempFile));
+                try (FileOutputStream outStream = new FileOutputStream(tempFile)) {
+                    fileResponse.getEntity().writeTo(outStream);
+                }
 
                 return tempFile;
             }
