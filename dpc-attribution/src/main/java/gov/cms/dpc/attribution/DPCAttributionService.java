@@ -23,13 +23,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.List;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAttributionService.class);
 
-    private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>(List.of("gov.cms.dpc.macaroons.store.hibernate.entities"));
+    private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
     public static void main(final String[] args) throws Exception {
         new DPCAttributionService().run(args);
