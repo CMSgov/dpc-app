@@ -39,6 +39,7 @@ public abstract class AbstractTokenResource {
      *
      * @param organizationID - {@link UUID} organization ID
      * @param label          - {@link Optional} {@link String} to use as token label
+     * @param expiration     - {@link Optional} {@link OffsetDateTime} to use for token expiration
      * @return - {@link String} base64 (URL) encoded token
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

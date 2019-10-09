@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.client;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -52,6 +51,7 @@ public class ClientUtils {
      *
      * @param context       - FHIR context to use
      * @param serverBaseURL - the base URL for the FHIR endpoint
+     * @param accessToken   - {@link String} access token to use
      * @return {@link IGenericClient} for FHIR requests
      * @see #createExportOperation(IGenericClient, String)
      */
@@ -96,8 +96,10 @@ public class ClientUtils {
     /**
      * Helper method for creating a roster {@link Bundle} and corresponding FHIR Post
      *
-     * @param client   - {@link IGenericClient} client to use for request
-     * @param resource - {@link InputStream} representing test associations file
+     * @param client            - {@link IGenericClient} client to use for request
+     * @param resource          - {@link InputStream} representing test associations file
+     * @param organizationID    - {@link UUID} of Organization to submit under
+     * @param patientReferences - {@link Map} of patient's associated to a given provider
      * @throws IOException - throws if unable to read the file
      */
     public static void createRosterSubmission(IGenericClient client, InputStream resource, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
@@ -125,6 +127,7 @@ public class ClientUtils {
      *
      * @param jobLocation   - {@link String} URL where client can get job status
      * @param statusMessage - {@link String} status message to print on each iteration
+     * @param token         - {@link String} access token to use
      * @return - {@link JobCompletionModel} Completed job response
      * @throws IOException          - throws if the HTTP request fails
      * @throws InterruptedException - throws if the thread is interrupted
@@ -158,6 +161,7 @@ public class ClientUtils {
      * Uses the {@link File#createTempFile(String, String)} method to create the file handle
      *
      * @param fileID - {@link String} full URL of the file to download
+     * @param token  - {@link String} access token to use
      * @return - {@link File} file handle where the data is stored
      * @throws IOException - throws if the HTTP request or file writing fails
      */
@@ -179,6 +183,16 @@ public class ClientUtils {
         }
     }
 
+    /**
+     * Helper method for polling the Job Status endpoint until completion.
+     * When complete, returns the {@link JobCompletionModel}
+     *
+     * @param exportOperation - {@link IOperationUntypedWithInput} to execute
+     * @param token           - {@link String} access token
+     * @return - {@link JobCompletionModel}
+     * @throws IOException          - throws if something bad happens
+     * @throws InterruptedException - throws if someone cuts in line
+     */
     public static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, String token) throws IOException, InterruptedException {
         System.out.println("Retrying export request");
         String exportURL = "";

@@ -467,7 +467,7 @@
                         </goals>
                         <configuration>
                             <!--Exclude generated sources, such as Jooq-->
-                            <excludePackageNames>gov.cms.dpc.attribution.dao</excludePackageNames>
+                            <excludePackageNames>gov.cms.dpc.attribution.dao;gov.cms.dpc.attribution.dao.*</excludePackageNames>
                         </configuration>
                     </execution>
                 </executions>

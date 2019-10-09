@@ -231,7 +231,7 @@ public class MacaroonBakery {
      *
      * @param macaroons  - {@link List} of {@link Macaroon} to discharge
      * @param discharger - {@link MacaroonDischarger} which handles processing the caveats
-     * @return
+     * @return - {@link List} of discharged {@link Macaroon}s
      */
     public List<Macaroon> dischargeAll(List<Macaroon> macaroons, MacaroonDischarger discharger) {
         final List<Macaroon> macaroons1 = dischargeAllImpl(macaroons, discharger);

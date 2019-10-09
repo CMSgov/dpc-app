@@ -188,7 +188,7 @@ public final class VarInt {
 
     /**
      * @param in - {@link DataInput} to read from
-     *           * @return - {@link Integer}
+     * @return - {@link Integer}
      * @throws IllegalArgumentException if variable-length value does not terminate
      *                                  after 5 bytes have been read
      * @throws IOException              if {@link DataInput} throws {@link IOException}

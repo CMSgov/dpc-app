@@ -261,6 +261,8 @@ public class JobQueueBatch implements Serializable {
 
     /**
      * Transition this job to running status. This job should be in the QUEUED state.
+     *
+     * @param aggregatorID - the current aggregator working the job
      */
     public void setRunningStatus(UUID aggregatorID) {
         if (this.status != JobStatus.QUEUED) {
@@ -276,6 +278,9 @@ public class JobQueueBatch implements Serializable {
     /**
      * Fetch the next patient in the batch and increment the patient index.
      * Returns null if at the end of the list.
+     *
+     * @param aggregatorID - the current aggregator working the job
+     * @return - Next patient to process, if one exists
      */
     public Optional<String> fetchNextPatient(UUID aggregatorID) {
         if (this.status != JobStatus.RUNNING) {
@@ -294,6 +299,8 @@ public class JobQueueBatch implements Serializable {
 
     /**
      * Pauses the current batch and allows another aggregator to pickup where left off
+     *
+     * @param aggregatorID - the current aggregator working the job
      */
     public void setPausedStatus(UUID aggregatorID) {
         if (this.status != JobStatus.RUNNING) {
@@ -308,6 +315,8 @@ public class JobQueueBatch implements Serializable {
 
     /**
      * Sets the completed status and verifies can be completed.
+     *
+     * @param aggregatorID - the current aggregator working the job
      */
     public void setCompletedStatus(UUID aggregatorID) {
         if (this.status != JobStatus.RUNNING) {
@@ -327,6 +336,8 @@ public class JobQueueBatch implements Serializable {
 
     /**
      * Marks the job batch as failed.
+     *
+     * @param aggregatorID - the current aggregator working the job
      */
     public void setFailedStatus(UUID aggregatorID) {
         if (this.status != JobStatus.RUNNING) {
@@ -353,12 +364,19 @@ public class JobQueueBatch implements Serializable {
         this.setUpdateTime();
     }
 
+    /**
+     * Set the job priority.
+     *
+     * @param priority - job priority
+     */
     public void setPriority(Integer priority) {
         this.priority = priority;
     }
 
     /**
      * Verifies that the aggregator is still assigned to the batch, if not throw exception
+     *
+     * @param aggregatorID - the current aggregator working the job
      */
     protected void verifyAggregatorID(UUID aggregatorID) throws JobQueueFailure {
         if (this.aggregatorID != null && !this.aggregatorID.equals(aggregatorID)) {
