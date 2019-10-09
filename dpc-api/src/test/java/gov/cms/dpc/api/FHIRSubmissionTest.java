@@ -59,7 +59,7 @@ class FHIRSubmissionTest {
 
     private ResourceExtension groupResource = ResourceExtension.builder()
             .addResource(new GroupResource(queue, client, TEST_BASE_URL))
-            .addResource(new JobResource(queue, TEST_BASE_URL))
+            .addResource(new JobResource(queue, TEST_BASE_URL, ""))
             .setTestContainerFactory(testContainer)
             .addProvider(staticFilter)
             .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
