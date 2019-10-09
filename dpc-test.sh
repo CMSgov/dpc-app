@@ -73,6 +73,7 @@ if [ -n "$DEMO_COMMAND" ]; then
   docker-compose up start_core_dependencies
   docker-compose up start_api_dependencies
   docker-compose up start_api
+  java -jar dpc-attribution/target/dpc-attribution.jar seed
   java -jar dpc-api/target/dpc-api.jar demo
   docker-compose down
 fi
