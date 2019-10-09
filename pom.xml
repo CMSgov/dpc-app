@@ -32,15 +32,15 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>1.3.13</dropwizard.version>
+        <dropwizard.version>1.3.15</dropwizard.version>
         <junit.jupiter.version>5.5.1</junit.jupiter.version>
-        <slf4j.version>1.7.26</slf4j.version>
+        <slf4j.version>1.7.28</slf4j.version>
         <!--Custom group IDs for pulling dependencies from JitPack-->
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
         <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
         <hapi.fhir.groupID>${jitpack.groupID}.hapi-fhir</hapi.fhir.groupID>
         <hapi.fhir.version>72317801c7ef73c62b1ab236a4a1666d94c47a3a</hapi.fhir.version>
-        <pgsql.version>42.2.5</pgsql.version>
+        <pgsql.version>42.2.8</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
@@ -117,7 +117,7 @@
             <dependency>
                 <groupId>com.hubspot.dropwizard</groupId>
                 <artifactId>dropwizard-guicier</artifactId>
-                <version>1.3.5.1</version>
+                <version>1.3.5.2</version>
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
@@ -133,7 +133,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.4.2.Final</version>
+                <version>5.4.6.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -202,7 +202,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -375,7 +375,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -411,6 +411,21 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.4</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.7.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -443,7 +458,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.1.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>

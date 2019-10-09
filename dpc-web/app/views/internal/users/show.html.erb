@@ -1,110 +1,125 @@
 
 <% title @user.name %>
 
-<section class="ds-u-margin--2">
-  <div class="ds-l-row ds-u-justify-content--end">
-    <%= link_to "Edit details", edit_internal_user_url(@user), class: "ds-c-button  ds-c-button--big ds-c-button--primary" %>
+<div class="ds-l-container ds-u-padding-x--0">
+  <div>
+    <%= link_to internal_users_path, class: "utility-button" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#arrow-left"></use>
+      </svg>
+      Go back
+    <% end %>
+
   </div>
-</section>
+  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
 
-<section class="ds-l-container ds-u-border--1 ds-u-radius">
-  <div class="ds-l-row">
-    <h2 class="ds-u-padding-x--2">Tags</h2>
-  </div>
+    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0"><%= @user.name %></h1>
+    <div>
+      <%= link_to "Edit user", edit_internal_user_url(@user), class: "ds-c-button ds-c-button--primary" %>
+    </div>
+  </section>
 
-  <div class="ds-l-row--12" data-test="user-tags">
-    <% if @user.taggings.count == 0 %>
-      <p>No tags</p>
-    <% else %>
-      <% @user.taggings.each do |tagging| %>
-        <span class="ds-c-badge ds-u-fill--primary-alt">
-          <%= tagging.tag_name %>
+  <section class="box">
+    <div class="box__content">
+      <h2 class="box__heading">Tags</h2>
+      <div class="ds-u-margin-bottom--3" data-test="user-tags">
+        <% if @user.taggings.count == 0 %>
+          <p>No tags</p>
+        <% else %>
+          <% @user.taggings.each do |tagging| %>
+            <span class="ds-c-badge ds-u-fill--primary-alt">
+              <%= tagging.tag_name %>
 
-          <%= link_to(internal_tagging_url(tagging), method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
-            <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#times"></use>
-            </svg>
+              <%= link_to(internal_tagging_url(tagging), method: :delete, data: {test: "delete-tag-#{tagging.id}"}) do %>
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <use xlink:href="/assets/solid.svg#times"></use>
+                </svg>
+              <% end %>
+            </span>
           <% end %>
-        </span>
-      <% end %>
-    <% end %>
-  </div>
+        <% end %>
+      </div>
 
-  <div class="ds-l-row--12">
-    <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
-      <%= f.label :tag_id, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
-      <%= f.collection_select :tag_id, available_tags(@user), :id, :name, { include_blank: true }, class: "ds-c-field" %>
-      <%= f.hidden_field :taggable_id, value: @user.id %>
-      <%= f.hidden_field :taggable_type, value: 'User' %>
-      <%= f.submit "Add tag", data: { test: "add-tag-submit" } %>
-    <% end %>
-  </div>
-</section>
-
-<section class="ds-l-container ds-u-border--1 ds-u-radius">
-  <div class="ds-l-row">
-    <h2 class="ds-u-padding-x--2">Signup info</h2>
-  </div>
-
-  <div class="ds-l-row">
-    <div class="ds-l-row--12 ds-l-md-col--6">
-      <h3 class="ds-u-color--muted">Personal info</h3>
-      <p>
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#user-alt"></use>
-        </svg>
-        <%= @user.name %>
-      </p>
-      <p>
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#envelope"></use>
-        </svg>
-        <%= @user.email %>
-      </p>
+      <div>
+        <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
+          <%= f.label :tag_id, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
+          <%= f.collection_select :tag_id, available_tags(@user), :id, :name, { include_blank: true }, class: "ds-c-field" %>
+          <%= f.hidden_field :taggable_id, value: @user.id %>
+          <%= f.hidden_field :taggable_type, value: 'User' %>
+          <%= f.submit "Add tag", class: "ds-c-button ds-u-margin-top--1", data: { test: "add-tag-submit" } %>
+        <% end %>
+      </div>
     </div>
 
-    <div class="ds-l-row--12 ds-l-md-col--6">
-      <h3 class="ds-u-color--muted">Requested organization</h3>
+    <div class="box__content">
+      <h2 class="box__heading">Assigned organization</h2>
+      <p class="ds-u-color--muted">You have not assigned an organization to this person yet.</p>
+    </div>
+  </section>
 
-      <p>
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#clinic-medical"></use>
-        </svg>
-        <%= @user.organization %>
-      </p>
+  <section class="box">
+    <div class="box__content">
+      <h2 class="box__heading">Signup info</h2>
 
-      <% unless @user.organization_type == "health_it_vendor" %>
-        <p>
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <use xlink:href="/assets/solid.svg#users"></use>
+      <div class="ds-l-row">
+        <div class="ds-l-col">
+          <h3 class="box__subhead">Personal info</h3>
+          <div class="ds-u-margin-bottom--1">
+            <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#user-alt"></use>
+            </svg>
+            <%= @user.name %>
+          </div>
+          <div class="ds-u-margin-bottom--1">
+            <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#envelope"></use>
+            </svg>
+            <%= @user.email %>
+          </div>
+        </div>
+        <div class="ds-l-col">
+          <h3 class="box__subhead">Requested organization</h3>
+          <div class="ds-u-margin-bottom--1">
+            <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+            </svg>
+            <%= @user.organization %>
+          </div>
+
+        <% unless @user.organization_type == "health_it_vendor" %>
+          <div class="ds-u-margin-bottom--1">
+            <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#users"></use>
+            </svg>
+            <%= @user.num_providers %>
+          </div>
+        <% end %>
+
+        <div class="ds-u-margin-bottom--1">
+          <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <use xlink:href="/assets/solid.svg#shapes"></use>
           </svg>
-          <%= @user.num_providers %>
-        </p>
-      <% end %>
+          <%= @user.organization_type.titleize %>
+        </div>
 
-      <p>
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#shapes"></use>
-        </svg>
-        <%= @user.organization_type.titleize %>
-      </p>
+        <div>
+          <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+          </svg>
 
-      <p>
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
-        </svg>
+          <%= @user.address_1 %>
+        </div>
 
-        <%= @user.address_1 %>
-      </p>
-
-      <% if @user.address_2.length > 1 %>
-        <p class="ds-u-padding-x--3">
-          <%= @user.address_2 %>
-        <p>
-      <% end %>
-      <p class="ds-u-padding-x--3">
-        <%= @user.city %>, <%= @user.state %> <%= @user.zip %>
-      </p>
+        <% if @user.address_2.length > 1 %>
+          <div class="ds-u-padding-x--3">
+            <%= @user.address_2 %>
+          <div>
+        <% end %>
+        <div class="ds-u-padding-x--3">
+          <%= @user.city %>, <%= @user.state %> <%= @user.zip %>
+        </div>
+        </div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+</div>

@@ -15,6 +15,8 @@ jdk:
 cache:
   directories:
     - $HOME/.m2
+    - .node_modules
+    - dpc-web/.node_modules
 
 # Skip build in Maven install, which we run ourselves
 install: true
