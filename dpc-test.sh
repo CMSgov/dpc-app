@@ -69,6 +69,14 @@ if [ -n "$REPORT_COVERAGE" ]; then
     ./cc-test-reporter upload-coverage
 fi
 
+if [ -n "$DEMO_COMMAND" ]; then
+  docker-compose up start_core_dependencies
+  docker-compose up start_api_dependencies
+  docker-compose up start_api
+  java -jar dpc-api/target/dpc-api.jar demo
+  docker-compose down
+fi
+
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
 echo "│             All Tests Complete           │"
