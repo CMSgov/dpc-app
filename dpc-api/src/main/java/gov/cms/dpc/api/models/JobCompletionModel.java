@@ -34,14 +34,20 @@ public class JobCompletionModel {
          */
         private Integer count;
 
+        /**
+         * Extension object to hold additional information.
+         */
+        private OutputEntryExtension extension;
+
         public OutputEntry() {
             // Jackson required
         }
 
-        public OutputEntry(ResourceType type, String url, Integer count) {
+        public OutputEntry(ResourceType type, String url, Integer count, OutputEntryExtension extension) {
             this.type = type;
             this.url = url;
             this.count = count;
+            this.extension = extension;
         }
 
         public String getUrl() {
@@ -54,6 +60,38 @@ public class JobCompletionModel {
 
         public Integer getCount() {
             return count;
+        }
+
+        public OutputEntryExtension getExtension() {
+            return extension;
+        }
+    }
+
+    /**
+     * An extension field for additional information in an {@link OutputEntry}.
+     */
+    public static class OutputEntryExtension {
+        /**
+         * A checksum for the file.
+         */
+        private String checksum;
+
+        /**
+         * File byte length.
+         */
+        private Long length;
+
+        public OutputEntryExtension(String checksum, Long length) {
+            this.checksum = checksum;
+            this.length = length;
+        }
+
+        public String getChecksum() {
+            return checksum;
+        }
+
+        public Long getLength() {
+            return length;
         }
     }
 
