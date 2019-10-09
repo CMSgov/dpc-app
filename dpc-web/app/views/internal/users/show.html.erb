@@ -54,11 +54,39 @@
     <div class="box__content">
       <h2 class="box__heading">Assigned organization</h2>
       <% if @user.organization %>
+      <div class="ds-u-margin-bottom--1">
+        <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+        </svg>
         <%= @user.organization_name %>
+      </div>
+
+      <div class="ds-u-margin-bottom--1">
+        <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#shapes"></use>
+        </svg>
         <%= @user.organization_organization_type.titleize %>
+      </div>
+
+      <div>
+        <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+        </svg>
+        <%= @user.organization.address.street %>
+      </div>
+
+      <% if @user.organization.address.street_2.length > 1 %>
+        <div class="ds-u-padding-x--3">
+          <%= @user.organization.address.street_2 %>
+        <div>
+      <% end %>
+      <div class="ds-u-padding-x--3">
+        <%= @user.organization.address.city %>, <%= @user.organization.address.state %> <%= @user.organization.address.zip %>
+      </div>
+      
       <% else %>
         <p class="ds-u-color--muted">You have not assigned an organization to this person yet.</p>
-        <%= link_to "Assign an organization", edit_internal_user_url %>
+        <%= link_to "Assign an organization", edit_internal_user_url, class: "ds-c-button" %>
       <% end %>
     </div>
   </section>
@@ -89,7 +117,7 @@
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#clinic-medical"></use>
             </svg>
-            <%= @user.organization %>
+            <%= @user.requested_organization %>
           </div>
 
         <% unless @user.requested_organization_type == "health_it_vendor" %>
@@ -112,7 +140,6 @@
           <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
           </svg>
-
           <%= @user.address_1 %>
         </div>
 
