@@ -72,22 +72,22 @@ public class JobCompletionModel {
      */
     public static class OutputEntryExtension {
         /**
-         * SHA-256 checksum for the file.
+         * A checksum for the file.
          */
-        private String sha256;
+        private String checksum;
 
         /**
          * File byte length.
          */
         private Long length;
 
-        public OutputEntryExtension(String sha256, Long length) {
-            this.sha256 = sha256;
+        public OutputEntryExtension(String checksum, Long length) {
+            this.checksum = checksum;
             this.length = length;
         }
 
-        public String getSha256() {
-            return sha256;
+        public String getChecksum() {
+            return checksum;
         }
 
         public Long getLength() {

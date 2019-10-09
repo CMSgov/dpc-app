@@ -191,22 +191,22 @@ public class JobResource extends AbstractJobResource {
     public JobCompletionModel.OutputEntryExtension buildExtension(JobQueueBatchFile batchFile) {
         String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(batchFile.getBatchID(), batchFile.getResourceType(), batchFile.getSequence()));
         File file = new File(filePath);
-        var sha256 = generateChecksum(file);
-        var length = generateFileLength(file);
-        return new JobCompletionModel.OutputEntryExtension(sha256, length);
+        String checksum = generateChecksum(file);
+        Long length = generateFileLength(file);
+        return new JobCompletionModel.OutputEntryExtension(checksum, length);
     }
 
     private String generateChecksum(File file) {
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             byte[] digest = new SHA256.Digest().digest(fileInputStream.readAllBytes());
-            return Hex.toHexString(digest);
+            return String.format("%s:%s", "sha256", Hex.toHexString(digest));
         } catch (Exception e) {
             logger.error("Failed to generate checksum", e);
-            return null;
+            return "";
         }
     }
 
     private Long generateFileLength(File file) {
-        return file != null ? file.length() : null;
+        return file != null ? file.length() : 0;
     }
 }
