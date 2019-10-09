@@ -33,8 +33,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <dropwizard.version>1.3.15</dropwizard.version>
-        <junit.jupiter.version>5.5.1</junit.jupiter.version>
-        <slf4j.version>1.7.26</slf4j.version>
+        <junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <slf4j.version>1.7.28</slf4j.version>
         <!--Custom group IDs for pulling dependencies from JitPack-->
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
         <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
@@ -117,7 +117,7 @@
             <dependency>
                 <groupId>com.hubspot.dropwizard</groupId>
                 <artifactId>dropwizard-guicier</artifactId>
-                <version>1.3.5.1</version>
+                <version>1.3.5.2</version>
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
