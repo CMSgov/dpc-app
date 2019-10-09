@@ -84,11 +84,8 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
         // Lookup the organization by Macaroon id
         final UUID macaroonID = UUID.fromString(m1.identifier);
-
-
         final UUID orgID = this.dao.findOrgByToken(macaroonID);
 
-        // TODO: This is probably the point to handle the actual Macaroon validation
         try {
             this.bakery.verifyMacaroon(Collections.singletonList(m1), String.format("organization_id = %s", orgID));
         } catch (BakeryException e) {

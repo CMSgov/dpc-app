@@ -114,8 +114,13 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @APIV1
-    @PublicURL
     public String provideV1URL(@ServiceBaseURL String baseURL) {
+        return baseURL + "/v1";
+    }
+
+    @Provides
+    @PublicURL
+    public String providePublicURL(@ServiceBaseURL String baseURL) {
         return baseURL + "/v1";
     }
 
