@@ -51,6 +51,9 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     private boolean authenticationDisabled;
 
+    @NotEmpty
+    private String publicURL;
+
     @Valid
     @NotNull
     @JsonProperty("tokens")
@@ -117,6 +120,14 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     public void setAuthenticationDisabled(boolean authenticationDisabled) {
         this.authenticationDisabled = authenticationDisabled;
+    }
+
+    public String getPublicURL() {
+        return publicURL;
+    }
+
+    public void setPublicURL(String publicURL) {
+        this.publicURL = publicURL;
     }
 
     @Override

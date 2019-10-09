@@ -31,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
@@ -108,20 +106,20 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @ServiceBaseURL
-    public String provideBaseURL(@Context HttpServletRequest request) {
-        return String.format("%s://%s:%d%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
+    public String provideBaseURL() {
+        return getConfiguration().getPublicURL();
     }
 
     @Provides
     @APIV1
-    public String provideV1URL(@ServiceBaseURL String baseURL) {
-        return baseURL + "/v1";
+    public String provideV1URL() {
+        return getConfiguration().getPublicURL() + "/v1";
     }
 
     @Provides
     @PublicURL
     public String providePublicURL(@ServiceBaseURL String baseURL) {
-        return baseURL + "/v1";
+        return baseURL;
     }
 
     @Provides
