@@ -122,7 +122,7 @@ public class AggregationEngine implements Runnable {
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
 
             // Stop processing when no patients or early shutdown
-            Boolean queueRunning = true;
+            boolean queueRunning = true;
             while ( nextPatientID.isPresent() ) {
                 this.processJobBatchPartial(job, nextPatientID.get());
 

@@ -283,7 +283,7 @@ public class JobQueueBatch implements Serializable {
         }
         this.verifyAggregatorID(aggregatorID);
         this.setUpdateTime();
-        Integer index = this.getPatientIndex().orElse(-1) + 1;
+        int index = this.getPatientIndex().orElse(-1) + 1;
         if (index < this.patients.size()) {
             // Patient index should be set to the last successful fetched result
             this.patientIndex = index;
