@@ -133,4 +133,26 @@ RSpec.describe User, type: :model do
       expect(subject).to_not be_valid
     end
   end
+
+  describe 'scopes' do
+    describe '.assigned' do
+      it 'includes only users with an organization' do
+        org = create(:organization)
+        assigned_user = create(:user, organization: org)
+        _unassigned_user = create(:user, organization: nil)
+
+        expect(User.assigned).to match_array([assigned_user])
+      end
+    end
+
+    describe '.unassigned' do
+      it 'includes only users without an organization' do
+        org = create(:organization)
+        _assigned_user = create(:user, organization: org)
+        unassigned_user = create(:user, organization: nil)
+
+        expect(User.unassigned).to match_array([unassigned_user])
+      end
+    end
+  end
 end

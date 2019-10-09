@@ -10,6 +10,7 @@
     <h1 class="ds-h1">Viewing <strong><%= @users.total_count %></strong> provider users</h1>
     <p class=""><%= page_entries_info @users %></p>
     <%= form_tag internal_users_path, method: "get", class: "ds-u-display--flex" do %>
+      <%= hidden_field_tag :org_status, params[:org_status] %>
       <%= text_field_tag :keyword, params[:keyword], placeholder: "first name, last name, or email", class: "ds-c-field ds-u-margin--0" %>
       <%= submit_tag "Search", data: { test: 'users-keyword-search-submit' }, class: "ds-c-button ds-c-button--primary ds-u-margin-left--1" %>
     <% end %>

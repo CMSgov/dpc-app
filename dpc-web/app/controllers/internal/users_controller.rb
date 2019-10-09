@@ -9,6 +9,12 @@ module Internal
     def index
       scope = User.all
 
+      if params[:org_status] == 'unassigned'
+        scope = scope.unassigned
+      elsif params[:org_status] == 'assigned'
+        scope = scope.assigned
+      end
+
       if params[:keyword].present?
         keyword = "%#{params[:keyword].downcase}%"
         scope = scope.where(

@@ -34,6 +34,9 @@ class User < ApplicationRecord
 
   delegate :name, :organization_type, to: :organization, prefix: true
 
+  scope :assigned, -> { where.not(organization: nil) }
+  scope :unassigned, -> { where(organization: nil) }
+
   def self.to_csv
     attrs = %w[id first_name last_name email requested_organization requested_organization_type
                address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at]

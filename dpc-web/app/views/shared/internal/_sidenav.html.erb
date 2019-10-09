@@ -21,21 +21,21 @@
         </button>
         <ul id="provider-users" class="ds-c-vertical-nav__subnav" aria-hidden="false">
           <li class="ds-c-vertical-nav__item">
-            <%= link_to "All users", internal_users_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:users, current)}" %>
+            <%= link_to "All users", internal_users_path, class: "ds-c-vertical-nav__label #{current_sidenav_class?(:users,  params[:org_status] || current)}" %>
           </li>
           <li class="ds-c-vertical-nav__item">
-            <a href="#" class="ds-c-vertical-nav__label">
+            <%= link_to internal_users_path(org_status: "unassigned"), class: "ds-c-vertical-nav__label #{current_sidenav_class?(:unassigned, params[:org_status] || current)}" do %>
               <span>
                 Unassigned users
               </span>
-            </a>
+            <% end %>
           </li>
           <li class="ds-c-vertical-nav__item">
-            <a href="#" class="ds-c-vertical-nav__label">
+            <%= link_to internal_users_path(org_status: "assigned"), class: "ds-c-vertical-nav__label #{current_sidenav_class?(:assigned,  params[:org_status] || current)}" do %>
               <span>
                 Assigned users
               </span>
-            </a>
+            <% end %>
           </li>
         </ul>
       </li>
