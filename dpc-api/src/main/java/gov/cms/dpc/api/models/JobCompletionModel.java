@@ -37,13 +37,13 @@ public class JobCompletionModel {
         /**
          * Extension object to hold additional information.
          */
-        private Map<String, ?> extension;
+        private OutputEntryExtension extension;
 
         public OutputEntry() {
             // Jackson required
         }
 
-        public OutputEntry(ResourceType type, String url, Integer count, Map<String, ?> extension) {
+        public OutputEntry(ResourceType type, String url, Integer count, OutputEntryExtension extension) {
             this.type = type;
             this.url = url;
             this.count = count;
@@ -62,8 +62,36 @@ public class JobCompletionModel {
             return count;
         }
 
-        public Map<String, ?> getExtension() {
+        public OutputEntryExtension getExtension() {
             return extension;
+        }
+    }
+
+    /**
+     * An extension field for additional information in an {@link OutputEntry}.
+     */
+    public static class OutputEntryExtension {
+        /**
+         * SHA-256 checksum for the file.
+         */
+        private String sha256;
+
+        /**
+         * File byte length.
+         */
+        private Long length;
+
+        public OutputEntryExtension(String sha256, Long length) {
+            this.sha256 = sha256;
+            this.length = length;
+        }
+
+        public String getSha256() {
+            return sha256;
+        }
+
+        public Long getLength() {
+            return length;
         }
     }
 

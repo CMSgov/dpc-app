@@ -188,13 +188,12 @@ public class JobResource extends AbstractJobResource {
                 .collect(Collectors.toList());
     }
 
-    public Map<String, Object> buildExtension(JobQueueBatchFile batchFile) {
+    public JobCompletionModel.OutputEntryExtension buildExtension(JobQueueBatchFile batchFile) {
         String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(batchFile.getBatchID(), batchFile.getResourceType(), batchFile.getSequence()));
         File file = new File(filePath);
-        Map<String, Object> extension = new HashMap<>();
-        extension.put("sha256", generateChecksum(file));
-        extension.put("length", generateFileLength(file));
-        return extension;
+        var sha256 = generateChecksum(file);
+        var length = generateFileLength(file);
+        return new JobCompletionModel.OutputEntryExtension(sha256, length);
     }
 
     private String generateChecksum(File file) {
