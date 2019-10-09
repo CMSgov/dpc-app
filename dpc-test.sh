@@ -50,8 +50,8 @@ mvn test -Pintegration-tests -pl dpc-api -am
 docker-compose up start_api
 
 # Run the Postman tests
-npm install newman
-node_modules/.bin/newman run src/test/EndToEndRequestTest.postman_collection.json
+npm install
+npm run test
 
 # Wait for Jacoco to finish writing the output files
 docker-compose down -t 60
