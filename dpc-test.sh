@@ -70,10 +70,17 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 if [ -n "$DEMO_COMMAND" ]; then
+  # Test the seed command and clean up
   docker-compose up start_core_dependencies
   docker-compose up start_api_dependencies
   docker-compose up start_api
   java -jar dpc-attribution/target/dpc-attribution.jar seed
+  docker-compose down
+
+  # Test the demo command and clean up
+  docker-compose up start_core_dependencies
+  docker-compose up start_api_dependencies
+  docker-compose up start_api
   java -jar dpc-api/target/dpc-api.jar demo
   docker-compose down
 fi
