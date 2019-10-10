@@ -36,6 +36,12 @@ class User < ApplicationRecord
 
   scope :assigned, -> { where.not(organization: nil) }
   scope :unassigned, -> { where(organization: nil) }
+  scope :non_vendor, -> do
+    left_joins(:organization).where('(organizations.id IS NOT NULL AND organizations.organization_type <> :vendor) OR (organizations.id IS NULL AND users.requested_organization_type <> :vendor)', vendor: ORGANIZATION_TYPES['health_it_vendor'])
+  end
+  scope :vendor, -> do
+    left_joins(:organization).where('(organizations.id IS NOT NULL AND organizations.organization_type = :vendor) OR (organizations.id IS NULL AND users.requested_organization_type = :vendor)', vendor: ORGANIZATION_TYPES['health_it_vendor'])
+  end
 
   def self.to_csv
     attrs = %w[id first_name last_name email requested_organization requested_organization_type

@@ -154,5 +154,33 @@ RSpec.describe User, type: :model do
         expect(User.unassigned).to match_array([unassigned_user])
       end
     end
+
+    describe '.non_vendor' do
+      it 'includes users with non-vendor org or requested org' do
+        org = create(:organization, organization_type: 'primary_care_clinic')
+        vendor = create(:organization, organization_type: 'health_it_vendor')
+
+        user = create(:user, organization: org)
+        unassigned_user = create(:user, organization: nil, requested_organization_type: 'urgent_care')
+        _vendor_user = create(:user, organization: vendor)
+        _unassigned_vendor_user = create(:user, organization: nil, requested_organization_type: 'health_it_vendor')
+
+        expect(User.non_vendor).to match_array([user, unassigned_user])
+      end
+    end
+
+    describe '.vendor' do
+      it 'includes users with vendor org or requested org' do
+        org = create(:organization, organization_type: 'primary_care_clinic')
+        vendor = create(:organization, organization_type: 'health_it_vendor')
+
+        _user = create(:user, organization: org)
+        _unassigned_user = create(:user, organization: nil, requested_organization_type: 'urgent_care')
+        vendor_user = create(:user, organization: vendor)
+        unassigned_vendor_user = create(:user, organization: nil, requested_organization_type: 'health_it_vendor')
+
+        expect(User.vendor).to match_array([vendor_user, unassigned_vendor_user])
+      end
+    end
   end
 end

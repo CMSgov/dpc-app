@@ -7,38 +7,7 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      scope = User.all
-
-      if params[:org_status] == 'unassigned'
-        scope = scope.unassigned
-      elsif params[:org_status] == 'assigned'
-        scope = scope.assigned
-      end
-
-      if params[:keyword].present?
-        keyword = "%#{params[:keyword].downcase}%"
-        scope = scope.where(
-          'LOWER(first_name) LIKE :keyword OR LOWER(last_name) LIKE :keyword OR LOWER(email) LIKE :keyword',
-          keyword: keyword
-        )
-      end
-
-      if params[:requested_org].present?
-        org = "%#{params[:requested_org].downcase}%"
-        scope = scope.where('LOWER(requested_organization) LIKE :org', org: org)
-      end
-
-      if params[:requested_org_type].present?
-        scope = scope.where(requested_organization_type: params[:requested_org_type])
-      end
-
-      if params[:created_after].present?
-        scope = scope.where('created_at > :created_after', created_after: params[:created_after])
-      end
-
-      if params[:created_before].present?
-        scope = scope.where('created_at < :created_before', created_before: params[:created_before])
-      end
+      users = UserSearch.new(params: params, scope: :non_vendor)
 
       @users = scope.order('created_at DESC').page params[:page]
     end
