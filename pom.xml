@@ -14,6 +14,7 @@
         <module>dpc-bluebutton</module>
         <module>dpc-macaroons</module>
         <module>dpc-smoketest</module>
+        <module>dpc-testing</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>
@@ -177,6 +178,12 @@
             </dependency>
             <!--Test dependencies-->
             <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
@@ -219,8 +226,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
