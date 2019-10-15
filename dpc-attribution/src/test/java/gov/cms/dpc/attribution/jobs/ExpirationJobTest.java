@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
@@ -14,6 +15,7 @@ import org.hl7.fhir.dstu3.model.Group;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.knowm.sundial.SundialJobScheduler;
 
 import javax.ws.rs.client.Client;
@@ -31,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * We currently don't have a way of verifying that the job runs when expected, since we can't really override Dropwizard's time source.
  * In the future, we might consider using something like ByteBuddy to intercept all system time calls and see if the job still gets run.
  */
+@ExtendWith(BufferedLoggerHandler.class)
 class ExpirationJobTest {
 
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));

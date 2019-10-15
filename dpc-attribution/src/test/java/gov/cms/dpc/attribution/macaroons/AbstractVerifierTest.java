@@ -6,12 +6,15 @@ import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatVerifier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(BufferedLoggerHandler.class)
 abstract class AbstractVerifierTest<V extends CaveatVerifier> {
 
     private final V verifier;

@@ -1,12 +1,14 @@
 package gov.cms.dpc.aggregation;
 
 import com.codahale.metrics.health.HealthCheckRegistry;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.SortedSet;
 
@@ -15,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // Duplicating this tag so that we don't have to pull in more test resources or refactor into a shared package.
 @Tag("Integration")
+@ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
 
     private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAggregationService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "7777"));

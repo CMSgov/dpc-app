@@ -7,10 +7,12 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.BaseResource;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.ApiOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 // Ensure that all resources have the appropriate handlers and annotations
+@ExtendWith(BufferedLoggerHandler.class)
 class APIResourceAnnotationTest {
 
     private static Set<Method> methods;

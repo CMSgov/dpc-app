@@ -1,11 +1,14 @@
 package gov.cms.dpc.attribution;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(BufferedLoggerHandler.class)
 public abstract class AbstractAttributionTest {
     private static final String KEY_PREFIX = "dpc.attribution";
     protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config(KEY_PREFIX, "", ""));
