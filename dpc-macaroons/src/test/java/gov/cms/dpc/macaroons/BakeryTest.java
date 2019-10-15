@@ -5,12 +5,13 @@ import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.helpers.BakeryKeyFactory;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.whispersystems.curve25519.Curve25519KeyPair;
 
 import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,8 +20,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class
-BakeryTest {
+@ExtendWith(BufferedLoggerHandler.class)
+class BakeryTest {
 
     private static final MemoryThirdPartyKeyStore thirdParty = new MemoryThirdPartyKeyStore();
     private static final Curve25519KeyPair bakeryKey = BakeryKeyFactory.generateKeyPair();
