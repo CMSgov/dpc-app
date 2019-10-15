@@ -14,6 +14,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-testing</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
+            <scope>testing</scope>
+        </dependency>
+        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
@@ -28,11 +34,6 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
         </dependency>
 
         <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
