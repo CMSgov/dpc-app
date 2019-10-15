@@ -1,7 +1,7 @@
 package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.api.annotations.IntegrationTest;
+import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;

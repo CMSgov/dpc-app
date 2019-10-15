@@ -31,7 +31,6 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
 
     @Inject
     public FHIRValidatorProvider(FhirContext ctx, FHIRValidationConfiguration config, ValidationSupportChain supportChain) {
-        logger.warn("Initializing provider");
         this.ctx = ctx;
         this.validationConfiguration = config;
         this.supportChain = supportChain;
