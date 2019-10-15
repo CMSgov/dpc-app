@@ -1,4 +1,4 @@
-package gov.cms.dpc.common.logging;
+package gov.cms.dpc.testing;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
@@ -9,7 +9,6 @@ import java.io.IOException;
 public class RingBufferLogger extends ConsoleAppender<ILoggingEvent> {
 
     private final CircularFifoQueue<ILoggingEvent> ringBuffer;
-    private String dumpWith;
 
     public RingBufferLogger() {
         this.ringBuffer = new CircularFifoQueue<>(100);
@@ -21,9 +20,6 @@ public class RingBufferLogger extends ConsoleAppender<ILoggingEvent> {
         if (!offer) {
             addError("Unable to add message to queue");
         }
-        if (event.getLevel().levelStr.equals(this.dumpWith.toUpperCase())) {
-            dumpLogMessages();
-        }
     }
 
     public synchronized void dumpLogMessages() {
@@ -33,7 +29,7 @@ public class RingBufferLogger extends ConsoleAppender<ILoggingEvent> {
                     try {
                         super.writeOut(event);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException("Unable to write log output.", e);
                     }
                 });
         // Empty the buffer
@@ -44,13 +40,5 @@ public class RingBufferLogger extends ConsoleAppender<ILoggingEvent> {
     public void start() {
         this.ringBuffer.clear();
         super.start();
-    }
-
-    public String getDumpWith() {
-        return dumpWith;
-    }
-
-    public void setDumpWith(String dumpWith) {
-        this.dumpWith = dumpWith;
     }
 }
