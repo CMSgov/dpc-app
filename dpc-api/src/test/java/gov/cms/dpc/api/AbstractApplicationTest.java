@@ -2,12 +2,14 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.api.annotations.IntegrationTest;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 
@@ -15,6 +17,7 @@ import java.io.IOException;
  * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link gov.cms.dpc.api.auth.StaticAuthFilter}
  */
 @IntegrationTest
+@ExtendWith(BufferedLoggerHandler.class)
 public class AbstractApplicationTest {
 
     // Application prefix, which we need in order to correctly override config values.

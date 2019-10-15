@@ -1,9 +1,11 @@
 package gov.cms.dpc.attribution;
 
 import com.google.common.collect.ImmutableSet;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.swagger.annotations.ApiOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(BufferedLoggerHandler.class)
 class AttributionResourceAnnotationTest {
     private static Set<Method> methods;
 

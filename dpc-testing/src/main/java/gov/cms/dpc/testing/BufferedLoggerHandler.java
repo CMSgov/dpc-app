@@ -40,6 +40,7 @@ public class BufferedLoggerHandler implements TestWatcher, BeforeAllCallback {
         logger.start();
 
         final ch.qos.logback.classic.Logger root = context.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.detachAppender("console");
         root.addAppender(logger);
         root.setLevel(Level.TRACE);
     }

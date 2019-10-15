@@ -12,6 +12,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -41,6 +42,7 @@ import static org.mockito.Mockito.*;
  * Verifies the a user can successfully submit a data export job
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
+@ExtendWith(BufferedLoggerHandler.class)
 @SuppressWarnings("rawtypes")
 class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";

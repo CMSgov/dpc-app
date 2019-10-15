@@ -4,12 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.annotations.IntegrationTest;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 
@@ -20,6 +22,7 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
  * Abstract test that enables the default token authentication backend.
  */
 @IntegrationTest
+@ExtendWith(BufferedLoggerHandler.class)
 public class AbstractSecureApplicationTest {
     protected static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
     // Application prefix, which we need in order to correctly override config values.
