@@ -92,7 +92,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.63</version>
+            <version>1.64</version>
         </dependency>
         <!--        Validations use the R4 validator, even for STU3 resources-->
         <dependency>
