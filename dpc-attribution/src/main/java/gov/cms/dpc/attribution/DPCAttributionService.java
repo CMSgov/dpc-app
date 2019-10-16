@@ -32,7 +32,14 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>(List.of("gov.cms.dpc.macaroons.store.hibernate.entities"));
 
+    private static Boolean swaggerEnabled = false;
+
     public static void main(final String[] args) throws Exception {
+        // Only enable Swagger when running as a server
+        if ( args != null && "server".equals(args[0]) ) {
+            swaggerEnabled = true;
+        }
+
         new DPCAttributionService().run(args);
     }
 
@@ -90,11 +97,14 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         };
 
         bootstrap.addBundle(sundialBundle);
-        bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
-            @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
-                return configuration.getSwaggerBundleConfiguration();
-            }
-        });
+
+        if (swaggerEnabled) {
+            bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
+                @Override
+                protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
+                    return configuration.getSwaggerBundleConfiguration();
+                }
+            });
+        }
     }
 }
