@@ -6,14 +6,14 @@ import io.dropwizard.cli.Command;
 import net.sourceforge.argparse4j.inf.Subparser;
 
 /**
- * Parent class for CLI {@link Command} which make use of the attribution service
+ * Parent class for CLI {@link Command} which make use of the admin tasks in the API service
  */
-public abstract class AbstractAttributionCommand extends Command {
+public abstract class AbstractAdminCommand extends Command {
 
-    protected static final String ATTR_HOSTNAME = "hostname";
+    public static final String API_HOSTNAME = "hostname";
     protected final FhirContext ctx;
 
-    protected AbstractAttributionCommand(String name, String description) {
+    protected AbstractAdminCommand(String name, String description) {
         super(name, description);
         this.ctx = FhirContext.forDstu3();
         this.ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -25,8 +25,8 @@ public abstract class AbstractAttributionCommand extends Command {
 
         subparser
                 .addArgument("--host")
-                .dest(ATTR_HOSTNAME)
-                .setDefault("http://localhost:3500/v1")
+                .dest(API_HOSTNAME)
+                .setDefault("http://localhost:9900/tasks")
                 .help("Address of the Attribution Service, which handles organization registration");
     }
 

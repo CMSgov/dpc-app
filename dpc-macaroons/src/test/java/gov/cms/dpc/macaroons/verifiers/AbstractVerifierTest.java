@@ -1,17 +1,17 @@
-package gov.cms.dpc.attribution.macaroons;
+package gov.cms.dpc.macaroons.verifiers;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigBeanFactory;
-import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.attribution.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatVerifier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.caveats.VerifierConstants;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import org.junit.jupiter.api.Test;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 abstract class AbstractVerifierTest<V extends CaveatVerifier> {
 
     private final V verifier;
@@ -51,7 +51,17 @@ abstract class AbstractVerifierTest<V extends CaveatVerifier> {
     abstract String provideFailureMessage();
 
     static TokenPolicy getTokenPolicy() {
-        final Config config = ConfigFactory.load();
-        return ConfigBeanFactory.create(config.getConfig("dpc.attribution.tokens"), TokenPolicy.class);
+        final TokenPolicy.ExpirationPolicy ep = new TokenPolicy.ExpirationPolicy();
+        ep.setExpirationUnit(ChronoUnit.YEARS);
+        ep.setExpirationOffset(1);
+
+        final TokenPolicy.VersionPolicy vp = new TokenPolicy.VersionPolicy();
+        vp.setCurrentVersion(1);
+        vp.setMinimumVersion(1);
+
+        final TokenPolicy tokenPolicy = new TokenPolicy();
+        tokenPolicy.setVersionPolicy(vp);
+        tokenPolicy.setExpirationPolicy(ep);
+        return tokenPolicy;
     }
 }
