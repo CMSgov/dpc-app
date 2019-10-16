@@ -297,7 +297,7 @@
                 </plugins>
             </build>
         </profile>
-        <!--        Run the Google Error Prone checker to make sure we didn't make any silly mistakes-->
+<!--        Run the Google Error Prone checker to make sure we didn't make any silly mistakes-->
         <profile>
             <id>error-prone</id>
             <build>
@@ -500,6 +500,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
+                        <exclude>**/*_.class</exclude>
                         <!--Exclude auto-generated JOOQ classes-->
                         <exclude>gov/cms/dpc/attribution/dao/**/*</exclude>
                         <!-- Exclude the cli commands, which we don't have tests for-->
