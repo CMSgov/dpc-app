@@ -8,13 +8,11 @@
 
       <div class="ds-l-col--9 field-group__fields">
         <% unless @user.organization %>
-          <p>
-            This user originally requested the <%= @user.requested_organization_type.titleize %> organization, <%= @user.requested_organization %>, with <%= @user.requested_num_providers %> providers.
-          </p>
         <% end %>
         <div class="field">
-          <%= f.label :organization, class: "ds-c-label ds-u-margin-top--0" %>
-          <%= f.select :organization_id, Organization.all.map{|o| [o.name, o.id]}, { include_blank: true }, class: "ds-c-field", value: @user.organization_id %>
+          <%= f.label :organization_id, class: "ds-c-label ds-u-margin-top--0" %>
+          <span class="ds-c-field__hint" id="requested_org_hint">This user originally requested <strong><%= @user.requested_organization %></strong> (<%= @user.requested_organization_type.titleize %> with <%= @user.requested_num_providers %> providers).</span>
+          <%= f.select :organization_id, Organization.all.map{|o| [o.name, o.id]}, { include_blank: true }, class: "ds-c-field", value: @user.organization_id, 'aria-describedby': 'requested_org_hint' %>
         </div>
       </div>
     </fieldset>
