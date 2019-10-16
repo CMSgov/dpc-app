@@ -14,7 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.aggregation.DPCAggregationService</mainClass>
-        <resilience4j.version>0.14.1</resilience4j.version>
+        <resilience4j.version>1.1.0</resilience4j.version>
     </properties>
 
     <dependencies>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>
-            <version>2.2.10</version>
+            <version>2.2.13</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
