@@ -54,25 +54,47 @@
           </div>
         </div>
         <div class="module-container__secondary">
-          <div class="module-container__indicator module-container__indicator--warn">Requested organization</div>
+          <% if user.organization %>
+          <div class="module-container__indicator module-container__indicator--success">Assigned organization</div>
           <div class="module-container__content-wrap">
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#clinic-medical"></use>
               </svg>
-              <%= user.requested_organization %> </div>
+              <%= user.organization_name %> </div>
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#shapes"></use>
               </svg>
-              <%= user.requested_organization_type.titleize %> </div>
+              <%= user.organization_organization_type.titleize %></div>
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
               </svg>
-              <%= city_state(user) %>
+              <%= user.organization.address.city %>, <%= user.organization.address.state %>
             </div>
           </div>
+          <% else %>
+            <div class="module-container__indicator module-container__indicator--warn">Requested organization</div>
+            <div class="module-container__content-wrap">
+              <div>
+                <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+                </svg>
+                <%= user.requested_organization %> </div>
+              <div>
+                <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#shapes"></use>
+                </svg>
+                <%= user.requested_organization_type.titleize %> </div>
+              <div>
+                <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+                </svg>
+                <%= city_state(user) %>
+              </div>
+            </div>
+          <% end %>
         </div>
       </div>
     <% end %>
