@@ -1,5 +1,10 @@
 #!/bin/bash
-set -e
+set -Ee
+
+function _finally {
+  docker-compose down
+}
+trap _finally EXIT
 
 if [ -n "$REPORT_COVERAGE" ]; then
    echo "┌──────────────────────────────────────────┐"

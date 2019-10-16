@@ -20,6 +20,6 @@ List any additional tickets that have either been created due to work in this PR
 
 **Checklist**
 
-- [ ] Demo and Seed commands are working
+- [ ] All tests are passing via `make ci-app` (app change) and `make ci-web` (website change)
 - [ ] Swagger documentation has been updated
 - [ ] FHIR documentation has been updated
