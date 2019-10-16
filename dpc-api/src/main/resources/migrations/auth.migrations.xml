@@ -22,4 +22,68 @@
             <column name="id"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="create-organization-tokens-table" author="nickrobison-usds">
+        <createTable tableName="ORGANIZATION_TOKENS">
+            <column name="id" type="VARCHAR">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID"/>
+            <column name="type" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="label" type="VARCHAR"/>
+            <column name="created_at"
+                    type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="expires_at"
+                    type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <createIndex tableName="ORGANIZATION_TOKENS" indexName="IDX_ORGANIZATION_TOKENS">
+            <column name="organization_id"/>
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create-rootkey-table" author="nickrobison-usds">
+        <createTable tableName="ROOT_KEYS">
+            <column name="id" type="VARCHAR">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="key" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="ROOT_KEYS" indexName="root_key_expire_idx">
+            <column name="expires"/>
+        </createIndex>
+
+        <!--        Add the expiration trigger-->
+        <createProcedure>
+            <![CDATA[
+            CREATE OR REPLACE FUNCTION expire_root_keys() RETURNS trigger
+            LANGUAGE plpgsql
+            AS $$
+            BEGIN
+            DELETE FROM ROOT_KEYS WHERE expires < NOW();
+            RETURN NEW;
+            END;
+            $$;
+            ]]>
+        </createProcedure>
+
+        <createProcedure>
+            CREATE TRIGGER root_key_expiration_trigger
+            BEFORE INSERT ON ROOT_KEYS
+            EXECUTE PROCEDURE expire_root_keys();
+        </createProcedure>
+    </changeSet>
+
 </databaseChangeLog>

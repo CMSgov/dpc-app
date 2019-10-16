@@ -9,7 +9,6 @@ import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
-import gov.cms.dpc.macaroons.BakeryModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -24,15 +23,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.List;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAttributionService.class);
 
-    private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>(List.of("gov.cms.dpc.macaroons.store.hibernate.entities"));
+    private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>();
+
+    private static Boolean swaggerEnabled = false;
 
     public static void main(final String[] args) throws Exception {
+        // Only enable Swagger when running as a server
+        if ( args != null && "server".equals(args[0]) ) {
+            swaggerEnabled = true;
+        }
+
         new DPCAttributionService().run(args);
     }
 
@@ -62,9 +67,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
-                        new AttributionAppModule(hibernateBundle),
-                        new FHIRModule<>(),
-                        new BakeryModule())
+                        new AttributionAppModule(),
+                        new FHIRModule<>())
                 .build();
 
         // The Hibernate bundle must be initialized before Guice.
@@ -90,11 +94,14 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         };
 
         bootstrap.addBundle(sundialBundle);
-        bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
-            @Override
-            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
-                return configuration.getSwaggerBundleConfiguration();
-            }
-        });
+
+        if (swaggerEnabled) {
+            bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
+                @Override
+                protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
+                    return configuration.getSwaggerBundleConfiguration();
+                }
+            });
+        }
     }
 }

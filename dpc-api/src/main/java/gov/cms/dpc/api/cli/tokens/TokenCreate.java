@@ -1,15 +1,12 @@
 package gov.cms.dpc.api.cli.tokens;
 
-import gov.cms.dpc.api.cli.AbstractAttributionCommand;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -17,17 +14,13 @@ import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.dstu3.model.IdType;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-public class TokenCreate extends AbstractAttributionCommand {
+public class TokenCreate extends AbstractAdminCommand {
 
-    TokenCreate() {
+    public TokenCreate() {
         super("create", "Create organization token");
     }
 
@@ -52,9 +45,11 @@ public class TokenCreate extends AbstractAttributionCommand {
     @Override
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         final IdType orgID = new IdType(namespace.getString("org-reference"));
-        final String attributionService = namespace.getString(ATTR_HOSTNAME);
+        final String apiService = namespace.getString(API_HOSTNAME);
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final URIBuilder builder = new URIBuilder(String.format("%s/Token/%s", attributionService, orgID.getIdPart()));
+            final URIBuilder builder = new URIBuilder(String.format("%s/generate-token", apiService));
+
+            builder.addParameter("organization", orgID.getIdPart());
 
             final String label = namespace.getString("token-label");
             if (label != null) {

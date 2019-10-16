@@ -3,9 +3,9 @@ package gov.cms.dpc.fhir.helpers;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -19,6 +19,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 
 
 public class FHIRHelpers {
@@ -31,15 +32,15 @@ public class FHIRHelpers {
      * @param client         - {@link IGenericClient} client to communicate to attribution service
      * @param parser         - {@link IParser} to use for reading {@link Bundle} JSON
      * @param organizationID - {@link String} organization ID to filter for
-     * @param attributionURL - {@link String} Attribution server to create Org at
+     * @param adminURL       - {@link String} Base url for executing admin tasks
      * @return - {@link String} Access token generated for the {@link Organization}
      * @throws IOException - Throws if HTTP client fails
      */
-    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String attributionURL) throws IOException {
+    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String adminURL) throws IOException {
         // Random number generator for Org NPI
         // Register an organization, and a token
         // Read in the test file
-        String macaroon;
+        String macaroon = "";
         try (InputStream inputStream = FHIRHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json")) {
 
 
@@ -54,7 +55,7 @@ public class FHIRHelpers {
             final Parameters parameters = new Parameters();
             parameters.addParameter().setResource(orgBundle);
 
-            final Organization organization = client
+            client
                     .operation()
                     .onType(Organization.class)
                     .named("submit")
@@ -64,9 +65,10 @@ public class FHIRHelpers {
                     .execute();
 
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-
+                final URIBuilder uriBuilder = new URIBuilder(String.format("%s/generate-token", adminURL));
+                uriBuilder.setParameter("organization", organizationID);
                 // Now, create a Macaroon
-                final HttpPost tokenPost = new HttpPost(String.format("%s/Token/%s", attributionURL, organization.getIdElement().getIdPart()));
+                final HttpPost tokenPost = new HttpPost(uriBuilder.build());
 
                 try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
                     if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
@@ -74,6 +76,8 @@ public class FHIRHelpers {
                     }
                     macaroon = EntityUtils.toString(response.getEntity());
                 }
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("Cannot parse URI", e);
             }
         }
         return macaroon;

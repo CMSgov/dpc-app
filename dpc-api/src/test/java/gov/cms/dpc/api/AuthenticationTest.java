@@ -27,7 +27,7 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
     @Test
     void testBasicAuthentication() throws IOException {
         // Manually setup the required org functions
-        final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
+        final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, getAdminURL());
 
         // Now, try to read the organization, which should succeed
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon);
@@ -52,7 +52,7 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
 
     @Test
     void testMalformedTokens() throws IOException {
-        final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ATTRIBUTION_URL);
+        final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, getAdminURL());
 
         // Try for empty Macaroon
         IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), "");
@@ -74,6 +74,4 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
                 .encodedJson();
         assertThrows(AuthenticationException.class, fo2::execute, "Should throw exception with malformed token");
     }
-
-
 }

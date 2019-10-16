@@ -6,10 +6,14 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.core.Capabilities;
+import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.BaseResource;
 import gov.cms.dpc.api.resources.v1.OrganizationResource;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
@@ -24,6 +28,7 @@ import org.mockito.exceptions.base.MockitoException;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -59,16 +64,6 @@ class AuthHandlerTest {
     }
 
     @Test
-    void testCorrectToken() {
-        final Response response = RESOURCE.target("/Organization/" + APITestHelpers.ORGANIZATION_ID)
-                .request(FHIRMediaTypes.FHIR_JSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TEST_MACAROON)
-                .get();
-
-        assertEquals(HttpStatus.OK_200, response.getStatus(), "Should be authorized");
-    }
-
-    @Test
     void testMalformedHeader() {
         final Response response = RESOURCE.target("/Organization/" + BAD_ORG_ID)
                 .request(FHIRMediaTypes.FHIR_JSON)
@@ -90,7 +85,14 @@ class AuthHandlerTest {
     private static ResourceExtension buildAuthResource() {
         // Setup mocks
         final IGenericClient client = mockGenericClient();
-        final DPCAuthFactory factory = new DPCAuthFactory(client, new MacaroonsAuthenticator(client));
+        final MacaroonBakery bakery = buildBakery();
+        final TokenDAO sessionFactory = mock(TokenDAO.class);
+        Mockito.when(sessionFactory.fetchTokens(Mockito.any())).thenAnswer(answer -> {
+            return "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
+        });
+
+
+        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), sessionFactory);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
         final FhirContext ctx = FhirContext.forDstu3();
@@ -112,6 +114,12 @@ class AuthHandlerTest {
         doReturn(Capabilities.getCapabilities()).when(base).metadata();
 
         return base;
+    }
+
+    private static MacaroonBakery buildBakery() {
+        return new MacaroonBakery.MacaroonBakeryBuilder("http://test.local",
+                new MemoryRootKeyStore(new SecureRandom()),
+                new MemoryThirdPartyKeyStore()).build();
     }
 
     private static IGenericClient mockGenericClient() {

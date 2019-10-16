@@ -10,6 +10,7 @@ import io.dropwizard.hibernate.SessionFactoryFactory;
 import javax.inject.Singleton;
 
 import java.util.Collections;
+import java.util.List;
 
 import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 
@@ -27,6 +28,10 @@ public class DPCAuthHibernateBundle<T extends Configuration & IDPCAuthDatabase> 
     @Inject
     public DPCAuthHibernateBundle() {
         super(applicationEntities(Collections.singletonList(PREFIX_STRING)), new SessionFactoryFactory());
+    }
+
+    public DPCAuthHibernateBundle(List<String> additionalPrefixes) {
+        super(applicationEntities(PREFIX_STRING, additionalPrefixes), new SessionFactoryFactory());
     }
 
     @Override

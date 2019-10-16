@@ -1,6 +1,6 @@
-package gov.cms.dpc.attribution.macaroons;
+package gov.cms.dpc.macaroons.caveats;
 
-import gov.cms.dpc.attribution.config.TokenPolicy;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -17,7 +17,7 @@ public class ExpirationCaveatSupplier implements CaveatSupplier {
 
     private final TokenPolicy.ExpirationPolicy expirationPolicy;
 
-    ExpirationCaveatSupplier(TokenPolicy policy) {
+    public ExpirationCaveatSupplier(TokenPolicy policy) {
         this.expirationPolicy = policy.getExpirationPolicy();
     }
 

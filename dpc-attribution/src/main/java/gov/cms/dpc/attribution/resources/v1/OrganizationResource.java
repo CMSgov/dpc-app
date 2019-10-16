@@ -2,16 +2,12 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
-import gov.cms.dpc.macaroons.MacaroonBakery;
-import gov.cms.dpc.macaroons.MacaroonCondition;
-import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
@@ -22,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
@@ -32,36 +30,21 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
     private final OrganizationDAO dao;
-    private final MacaroonBakery bakery;
 
     @Inject
-    OrganizationResource(OrganizationDAO dao, MacaroonBakery bakery) {
+    OrganizationResource(OrganizationDAO dao) {
         this.dao = dao;
-        this.bakery = bakery;
     }
 
     @Override
     @GET
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Search and Validate Token",
-            notes = "FHIR Endpoint to find an Organization resource associated to the given authentication token." +
-                    "<p>This also validates that the token is valid." +
-                    "<p>The *_tag* parameter is used to convey the token, which is half-way between FHIR and REST.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Organization matching (valid) token was found."),
-            @ApiResponse(code = 401, message = "Organization was found, but token was invalid", response = OperationOutcome.class),
-            @ApiResponse(code = 404, message = "Organization was not found matching token", response = OperationOutcome.class),
-            @ApiResponse(code = 422, message = "Access token is malformed, or unprocessable", response = OperationOutcome.class)
-    })
+    @ApiOperation(value = "Search for an Organization",
+            notes = "FHIR Endpoint to find an Organization resource based on the given Identifier.")
     public Bundle searchOrganizations(
             @ApiParam(value = "NPI of Organization")
-            @QueryParam("identifier") String identifier,
-            @ApiParam(value = "Authorization token to validate")
-            @QueryParam("_tag") String tokenTag) {
-        if (tokenTag != null) {
-            return searchAndValidationByToken(tokenTag);
-        }
+            @QueryParam("identifier") String identifier) {
 
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
@@ -152,50 +135,6 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
         this.dao.deleteOrganization(organizationEntity);
         return Response.ok().build();
-    }
-
-    private Bundle searchAndValidationByToken(String token) {
-        final Macaroon macaroon;
-        try {
-            macaroon = parseTokenTag(this.bakery::deserializeMacaroon, token);
-        } catch (BakeryException e) {
-            logger.error("Cannot parse Token tag", e);
-            throw new WebApplicationException("Token is malformed", HttpStatus.UNPROCESSABLE_ENTITY_422);
-        }
-
-        final List<OrganizationEntity> organizationEntities = this.dao.searchByToken(macaroon.identifier);
-
-        if (organizationEntities.isEmpty()) {
-            throw new WebApplicationException("Cannot find organization with registered token", Response.Status.NOT_FOUND);
-        }
-
-        // There should only ever be a single entity per token
-        assert (organizationEntities.size() == 1);
-
-        final OrganizationEntity organizationEntity = organizationEntities.get(0);
-
-        // Validate the token
-        if (!validateMacaroon(organizationEntity.getId(), macaroon)) {
-            throw new WebApplicationException(String.format("Invalid token for organization %s", organizationEntity.getId().toString()), Response.Status.UNAUTHORIZED);
-        }
-
-        final Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(organizationEntity.toFHIR());
-        bundle.setTotal(1);
-
-        return bundle;
-    }
-
-    private boolean validateMacaroon(UUID organizationID, Macaroon macaroon) {
-        try {
-            final String caveatString = String.format("organization_id = %s", organizationID.toString());
-            this.bakery.verifyMacaroon(Collections.singletonList(macaroon), caveatString);
-        } catch (BakeryException e) {
-            logger.error("Macaroon verification failed.", e);
-            return false;
-        }
-
-        return true;
     }
 
     private List<EndpointEntity> extractEndpoints(Bundle transactionBundle) {

@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.resources;
+package gov.cms.dpc.api.resources.v1;
 
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.models.JobCompletionModel;
