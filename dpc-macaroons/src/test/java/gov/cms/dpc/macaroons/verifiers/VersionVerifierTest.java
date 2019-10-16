@@ -1,7 +1,8 @@
-package gov.cms.dpc.attribution.macaroons;
+package gov.cms.dpc.macaroons.verifiers;
 
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
+import gov.cms.dpc.macaroons.caveats.VersionCaveatVerifier;
 
 public class VersionVerifierTest extends AbstractVerifierTest<VersionCaveatVerifier> {
 

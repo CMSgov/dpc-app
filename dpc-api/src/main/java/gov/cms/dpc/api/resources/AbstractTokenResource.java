@@ -1,6 +1,7 @@
-package gov.cms.dpc.attribution.resources;
+package gov.cms.dpc.api.resources;
 
-import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.entities.TokenEntity;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -8,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +31,7 @@ public abstract class AbstractTokenResource {
      */
     @GET
     @Path("/{organizationID}")
-    public abstract List<TokenEntity> getOrganizationTokens(@NotNull @PathParam("organizationID") UUID organizationID);
+    public abstract List<TokenEntity> getOrganizationTokens(OrganizationPrincipal organizationPrincipal, @NotNull @PathParam("organizationID") UUID organizationID);
 
     /**
      * Create authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
@@ -44,20 +44,9 @@ public abstract class AbstractTokenResource {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
     @Path("/{organizationID}")
-    public abstract String createOrganizationToken(@PathParam("organizationID") @NotNull UUID organizationID, String label, Optional<OffsetDateTimeParam> expiration);
+    public abstract String createOrganizationToken(OrganizationPrincipal principal, @PathParam("organizationID") @NotNull UUID organizationID, String label, Optional<OffsetDateTimeParam> expiration);
 
     @DELETE
     @Path("/{organizationID}/{tokenID}")
-    public abstract Response deleteOrganizationToken(@NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID);
-
-    /**
-     * Verify that the provided token is valid
-     *
-     * @param organizationID - {@link UUID} organization ID
-     * @param token          - {@link String} representation of authorization token (optionally base64 encoded)
-     * @return - {@link Response} with status {@link Response.Status#OK} if token is valid. {@link Response.Status#UNAUTHORIZED} if token is not valid
-     */
-    @GET
-    @Path("/{organizationID}/verify")
-    public abstract Response verifyOrganizationToken(@PathParam("organizationID") UUID organizationID, @NotEmpty @QueryParam("token") String token);
+    public abstract Response deleteOrganizationToken(OrganizationPrincipal organizationPrincipal, @NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID);
 }

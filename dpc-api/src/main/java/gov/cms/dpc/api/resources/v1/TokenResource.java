@@ -1,24 +1,24 @@
-package gov.cms.dpc.attribution.resources.v1;
+package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
-import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.config.TokenPolicy;
-import gov.cms.dpc.attribution.jdbi.TokenDAO;
-import gov.cms.dpc.attribution.resources.AbstractTokenResource;
-import gov.cms.dpc.common.entities.OrganizationEntity;
-import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
-import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
+import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.swagger.annotations.*;
-import org.eclipse.jetty.http.HttpStatus;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,6 @@ import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,12 +43,14 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
+    private final IGenericClient client;
 
     @Inject
-    TokenResource(TokenDAO dao, MacaroonBakery bakery, DPCAttributionConfiguration config) {
+    TokenResource(TokenDAO dao, MacaroonBakery bakery, TokenPolicy policy, IGenericClient client) {
         this.dao = dao;
         this.bakery = bakery;
-        this.policy = config.getTokenPolicy();
+        this.policy = policy;
+        this.client = client;
     }
 
     @Override
@@ -61,34 +62,11 @@ public class TokenResource extends AbstractTokenResource {
     @ApiOperation(value = "Fetch organization tokens", notes = "Method to retrieve the authentication tokens associated to the given Organization. This searches by resource ID")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
     public List<TokenEntity> getOrganizationTokens(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Organization resource ID", required = true)
             @PathParam("organizationID") UUID organizationID) {
+        checkOrganizationMatches(organizationPrincipal, organizationID);
         return this.dao.fetchTokens(organizationID);
-    }
-
-    @Override
-    @GET
-    @Timed
-    @ExceptionMetered
-    @Path("/{organizationID}/verify")
-    @ApiOperation(value = "Verify authentication token", notes = "Verify an authentication token with a given Organization. " +
-            "This allows for checking if a given token is correctly to the organization if the token is valid.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "Token cannot be empty"),
-            @ApiResponse(code = 401, message = "Token is not valid for the given Organization"),
-            @ApiResponse(code = 422, message = "Token is malformed")
-    })
-    public Response verifyOrganizationToken(
-            @ApiParam(value = "Organization resource ID", required = true)
-            @PathParam("organizationID") UUID organizationID,
-            @ApiParam(value = "Authentication token to verify", required = true)
-            @NotEmpty @QueryParam("token") String token) {
-        final boolean valid = validateMacaroon(organizationID, parseMacaroonToken(token));
-        if (valid) {
-            return Response.ok().build();
-        }
-
-        return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
     @POST
@@ -101,16 +79,27 @@ public class TokenResource extends AbstractTokenResource {
             "Token supports a custom human-readable label via the `label` query param.")
     @Override
     public String createOrganizationToken(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Organization resource ID", required = true)
             @NotNull @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Optional label for token") @QueryParam("label") String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
+        checkOrganizationMatches(organizationPrincipal, organizationID);
+
+        // Verify that the organization actually exists
+        try {
+            this.client
+                    .read()
+                    .resource(Organization.class)
+                    .withId(organizationID.toString())
+                    .encodedJson()
+                    .execute();
+        } catch (ResourceNotFoundException e) {
+            throw new WebApplicationException("Cannot find organization", Response.Status.NOT_FOUND);
+        }
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
-        final OrganizationEntity organization = new OrganizationEntity();
-        organization.setId(organizationID);
-
-        final TokenEntity token = new TokenEntity(macaroon.identifier, organization, TokenEntity.TokenType.MACAROON);
+        final TokenEntity token = new TokenEntity(macaroon.identifier, organizationID, TokenEntity.TokenType.MACAROON);
 
         // Set the expiration time
         token.setExpiresAt(handleExpirationTime(expiration));
@@ -135,9 +124,10 @@ public class TokenResource extends AbstractTokenResource {
     @ExceptionMetered
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
     public Response deleteOrganizationToken(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Organization resource ID", required = true) @NotNull @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
-
+        checkOrganizationMatches(organizationPrincipal, organizationID);
         final List<TokenEntity> matchedToken = this.dao.findTokenByOrgAndID(organizationID, tokenID);
         assert matchedToken.size() == 1 : "Should only have a single matching token";
 
@@ -152,26 +142,6 @@ public class TokenResource extends AbstractTokenResource {
                 new MacaroonCaveat("", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString()))
         );
         return this.bakery.createMacaroon(caveats);
-    }
-
-    private Macaroon parseMacaroonToken(String token) {
-        try {
-            return this.bakery.deserializeMacaroon(token);
-        } catch (BakeryException e) {
-            logger.error("Cannot deserialize Macaroon", e);
-            throw new WebApplicationException("Cannot deserialize Macaroon", HttpStatus.UNPROCESSABLE_ENTITY_422);
-        }
-    }
-
-    private boolean validateMacaroon(UUID organizationID, Macaroon macaroon) {
-        try {
-            final String caveatString = String.format("organization_id = %s", organizationID.toString());
-            this.bakery.verifyMacaroon(Collections.singletonList(macaroon), caveatString);
-        } catch (BakeryException e) {
-            logger.error("Macaroon verification failed.", e);
-            return false;
-        }
-        return true;
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -196,5 +166,11 @@ public class TokenResource extends AbstractTokenResource {
             return customExpiration;
         }
         return defaultExpiration;
+    }
+
+    private static void checkOrganizationMatches(OrganizationPrincipal organizationPrincipal, UUID organizationID) {
+        if (!organizationPrincipal.getID().equals(organizationID)) {
+            throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
+        }
     }
 }

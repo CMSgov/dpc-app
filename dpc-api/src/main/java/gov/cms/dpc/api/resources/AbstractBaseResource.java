@@ -14,8 +14,15 @@ public abstract class AbstractBaseResource {
 //        Not used
     }
 
+    // Auth Operations
+
     @Path("/Key")
     public abstract AbstractKeyResource keyOperations();
+
+    @Path("/Token")
+    public abstract AbstractTokenResource tokenOperations();
+
+    // FHIR Endpoints
 
     @Path("/Data")
     public abstract AbstractDataResource dataOperations();

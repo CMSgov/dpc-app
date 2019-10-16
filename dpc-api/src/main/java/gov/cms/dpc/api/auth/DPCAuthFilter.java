@@ -1,12 +1,13 @@
 package gov.cms.dpc.api.auth;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
+import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.UUID;
 
 /**
  * {@link AuthFilter} implementation which extracts the Macaroon (base64 encoded) from the request.
@@ -31,15 +34,17 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     private static final String TOKEN_URI_PARAM = "token";
     private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
 
-    private final IGenericClient client;
+    private final TokenDAO dao;
+    private final MacaroonBakery bakery;
 
 
-    DPCAuthFilter(IGenericClient client, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
-        this.client = client;
+    DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
         this.authenticator = auth;
+        this.bakery = bakery;
+        this.dao = dao;
     }
 
-    protected abstract DPCAuthCredentials buildCredentials(String macaroon, Organization resource, UriInfo uriInfo);
+    protected abstract DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo);
 
     @Override
     public void filter(final ContainerRequestContext requestContext) throws IOException {
@@ -68,28 +73,27 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
 
         logger.trace("Making request to validate token.");
-        final Bundle returnedBundle;
+
+        final Macaroon m1;
         try {
-            returnedBundle = this
-                    .client
-                    .search()
-                    .forResource(Organization.class)
-                    .withTag("http://cms.gov/token", macaroon)
-                    .returnBundle(Bundle.class)
-                    .encodedJson()
-                    .execute();
-            // Catch and handle any 422 error codes, which means that the provided token was malformed or otherwise unprocessable.
-        } catch (UnprocessableEntityException e) {
-            logger.error("Cannot validate Token", e);
+            m1 = bakery.deserializeMacaroon(macaroon);
+        } catch (BakeryException e) {
+            logger.error("Cannot deserialize Macaroon", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
 
-        logger.trace("Found {} matching organizations", returnedBundle.getTotal());
-        if (returnedBundle.getTotal() == 0) {
+        // Lookup the organization by Macaroon id
+        final UUID macaroonID = UUID.fromString(m1.identifier);
+        final UUID orgID = this.dao.findOrgByToken(macaroonID);
+
+        try {
+            this.bakery.verifyMacaroon(Collections.singletonList(m1), String.format("organization_id = %s", orgID));
+        } catch (BakeryException e) {
+            logger.error("Macaroon verification failed", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
 
-        return buildCredentials(macaroon, (Organization) returnedBundle.getEntryFirstRep().getResource(), uriInfo);
+        return buildCredentials(macaroon, orgID, uriInfo);
     }
 
     @Nullable

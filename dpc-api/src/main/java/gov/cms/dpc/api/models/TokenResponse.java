@@ -1,6 +1,6 @@
-package gov.cms.dpc.common.models;
+package gov.cms.dpc.api.models;
 
-import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.api.entities.TokenEntity;
 
 import java.io.Serializable;
 import java.util.Objects;
