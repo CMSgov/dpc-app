@@ -18,6 +18,8 @@ public class BakeryModule extends PrivateModule {
         bind(IRootKeyStore.class).to(HibernateKeyStore.class);
         expose(IRootKeyStore.class);
         expose(SecureRandom.class);
+        bind(MacaroonBakery.class).toProvider(BakeryProvider.class);
+        expose(MacaroonBakery.class);
     }
 
     @Provides

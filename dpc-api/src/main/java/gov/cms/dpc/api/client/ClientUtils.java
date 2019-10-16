@@ -37,7 +37,6 @@ import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 
 /**
  * Shared methods for testing export jobs
- * Used by the {@link gov.cms.dpc.api.cli.DemoCommand} class.
  */
 public class ClientUtils {
     private static final Logger logger = LoggerFactory.getLogger(ClientUtils.class);

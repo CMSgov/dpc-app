@@ -17,6 +17,7 @@ import javax.ws.rs.Path;
 public class BaseResource extends AbstractBaseResource {
 
     private final AbstractKeyResource kr;
+    private final AbstractTokenResource tr;
     private final AbstractGroupResource gr;
     private final AbstractJobResource jr;
     private final AbstractDataResource dr;
@@ -28,6 +29,7 @@ public class BaseResource extends AbstractBaseResource {
 
     @Inject
     public BaseResource(KeyResource kr,
+                        TokenResource tr,
                         GroupResource gr,
                         JobResource jr,
                         DataResource dr,
@@ -37,6 +39,7 @@ public class BaseResource extends AbstractBaseResource {
                         PractitionerResource pr,
                         DefinitionResource sdr) {
         this.kr = kr;
+        this.tr = tr;
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
@@ -68,6 +71,11 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     public AbstractKeyResource keyOperations() {
         return this.kr;
+    }
+
+    @Override
+    public AbstractTokenResource tokenOperations() {
+        return this.tr;
     }
 
     @Override
