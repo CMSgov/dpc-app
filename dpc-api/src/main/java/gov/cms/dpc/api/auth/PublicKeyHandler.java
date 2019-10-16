@@ -38,7 +38,6 @@ public class PublicKeyHandler {
                 } catch (PEMException e) {
                     throw new PublicKeyException("Not a valid public key", e);
                 }
-
             }
         } catch (IOException e) {
             throw new PublicKeyException("Cannot parse Public Key input", e);

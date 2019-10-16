@@ -1,27 +1,27 @@
 package gov.cms.dpc.api.cli.tokens;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
-import gov.cms.dpc.api.cli.AbstractAttributionCommand;
-import gov.cms.dpc.common.entities.TokenEntity;
+import gov.cms.dpc.api.cli.AbstractAdminCommand;
+import gov.cms.dpc.api.entities.TokenEntity;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Organization;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class TokenList extends AbstractAttributionCommand {
+public class TokenList extends AbstractAdminCommand {
 
     private final ObjectMapper mapper;
 
@@ -39,30 +39,24 @@ public class TokenList extends AbstractAttributionCommand {
     }
 
     @Override
-    public void run(Bootstrap<?> bootstrap, Namespace namespace) throws IOException {
+    public void run(Bootstrap<?> bootstrap, Namespace namespace) throws IOException, URISyntaxException {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
         System.out.println(String.format("Listing tokens for organization: %s.", orgReference));
 
-        final String attributionService = namespace.getString(ATTR_HOSTNAME);
-        final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
+        final String attributionService = namespace.getString(API_HOSTNAME);
 
-        final Organization organization = client
-                .read()
-                .resource(Organization.class)
-                .withId(new IdType(orgReference))
-                .encodedJson()
-                .execute();
-
-        listTokens(client, organization);
+        listTokens(attributionService, orgReference);
     }
 
-    private void listTokens(IGenericClient client, Organization organization) throws IOException {
+    private void listTokens(String attributionService, String organization) throws IOException, URISyntaxException {
         // List all the tokens, switching
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final HttpGet tokenGet = new HttpGet(String.format("%s/Token/%s", client.getServerBase(), organization.getIdElement().getIdPart()));
+            final URIBuilder builder = new URIBuilder(String.format("%s/list-tokens", attributionService));
+            builder.addParameter("organization", new IdType(organization).getIdPart());
+            final HttpPost tokenPost = new HttpPost(builder.build());
 
-            try (CloseableHttpResponse response = httpClient.execute(tokenGet)) {
+            try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
                 if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
                     System.err.println("Error fetching organization: " + response.getStatusLine().getReasonPhrase());
                     System.exit(1);
