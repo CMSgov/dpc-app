@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.resources;
+package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
