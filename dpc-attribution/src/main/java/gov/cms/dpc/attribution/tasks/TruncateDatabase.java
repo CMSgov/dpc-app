@@ -2,7 +2,6 @@ package gov.cms.dpc.attribution.tasks;
 
 import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.dao.Public;
 import gov.cms.dpc.attribution.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
