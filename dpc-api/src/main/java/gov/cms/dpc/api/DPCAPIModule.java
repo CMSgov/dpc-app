@@ -9,19 +9,28 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
+import gov.cms.dpc.api.tasks.DeleteToken;
+import gov.cms.dpc.api.tasks.GenerateClientTokens;
+import gov.cms.dpc.api.tasks.ListClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
+import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.annotations.PublicURL;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
+import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
@@ -50,6 +59,12 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
         // DAO
         binder.bind(PublicKeyDAO.class);
+        binder.bind(TokenDAO.class);
+
+        // Tasks
+        binder.bind(GenerateClientTokens.class);
+        binder.bind(ListClientTokens.class);
+        binder.bind(DeleteToken.class);
 
         // Healthchecks
         // TODO: Fix with DPC-538
@@ -62,6 +77,14 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     public KeyResource provideKeyResource(PublicKeyDAO dao) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(KeyResource.class, new Class<?>[]{PublicKeyDAO.class}, new Object[]{dao});
+    }
+
+    @Provides
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, IGenericClient client) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(TokenResource.class,
+                        new Class<?>[]{TokenDAO.class, MacaroonBakery.class, TokenPolicy.class, IGenericClient.class},
+                        new Object[]{dao, bakery, this.getConfiguration().getTokenPolicy(), client});
     }
 
     @Provides
@@ -83,14 +106,38 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @ServiceBaseURL
-    public String provideBaseURL(@Context HttpServletRequest request) {
-        return String.format("%s://%s:%d%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
+    public String provideBaseURL() {
+        return getConfiguration().getPublicURL();
     }
 
     @Provides
     @APIV1
-    public String provideV1URL(@ServiceBaseURL String baseURL) {
-        return baseURL + "/v1";
+    public String provideV1URL() {
+        return getConfiguration().getPublicURL() + "/v1";
+    }
+
+    @Provides
+    @PublicURL
+    public String providePublicURL(@ServiceBaseURL String baseURL) {
+        return baseURL;
+    }
+
+    @Provides
+    @Singleton
+    IThirdPartyKeyStore thirdPartyKeyStore() {
+        return new MemoryThirdPartyKeyStore();
+    }
+
+    @Provides
+    TokenPolicy providePolicy() {
+        return getConfiguration().getTokenPolicy();
+    }
+
+    @Provides
+    // We can suppress this because the SessionFactory is managed
+    @SuppressWarnings("CloseableProvides")
+    SessionFactory provideSessionFactory(DPCAuthManagedSessionFactory factory) {
+        return factory.getSessionFactory();
     }
 
     @Provides

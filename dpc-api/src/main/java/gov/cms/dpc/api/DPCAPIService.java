@@ -16,6 +16,7 @@ import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.fhir.FHIRModule;
+import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -26,11 +27,14 @@ import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
+import java.util.List;
+
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     private final DPCHibernateBundle<DPCAPIConfiguration> hibernateBundle = new DPCHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
-    private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>();
+    private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
+            "gov.cms.dpc.macaroons.store.hibernate.entities"));
 
     public static void main(final String[] args) throws Exception {
         new DPCAPIService().run(args);
@@ -83,10 +87,10 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
                         new DPCAuthHibernateModule<>(hibernateAuthBundle),
                         new AuthModule(),
+                        new BakeryModule(),
                         new DPCAPIModule(hibernateAuthBundle),
                         new JobQueueModule<>(),
-                        new FHIRModule<>()
-                )
+                        new FHIRModule<>())
                 .build();
     }
 
