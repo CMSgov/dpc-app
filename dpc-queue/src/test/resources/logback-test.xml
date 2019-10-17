@@ -5,9 +5,6 @@
         </encoder>
     </appender>
     <root level="trace">
-        <logger name="org.hibernate.SQL" level="DEBUG" />
-        <logger name="org.hibernate.type" level="DEBUG" />
-
         <appender-ref ref="BufferedLogger"/>
     </root>
 </configuration>
