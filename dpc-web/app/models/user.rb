@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'csv'
+
 class User < ApplicationRecord
   include OrganizationTypable
   has_one :dpc_registration, inverse_of: :user
@@ -25,6 +27,18 @@ class User < ApplicationRecord
   validates :agree_to_terms, inclusion: {
     in: [true], message: 'you must agree to the terms of service to create an account'
   }
+
+  def self.to_csv
+    attrs = %w[id first_name last_name email organization organization_type address_1 address_2
+               city state zip agree_to_terms num_providers created_at updated_at]
+
+    CSV.generate(headers: true) do |csv|
+      csv << attrs
+      all.each do |user|
+        csv << user.attributes.values_at(*attrs)
+      end
+    end
+  end
 
   def name
     "#{first_name} #{last_name}"
