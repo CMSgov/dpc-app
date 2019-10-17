@@ -15,7 +15,7 @@
             </column>
             <column name="mbi" type="VARCHAR" />
             <column name="hicn" type="VARCHAR" />
-            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+            <column name="effective_date" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false" />
             </column>
             <column name="policy_code" type="VARCHAR" />
