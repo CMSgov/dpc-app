@@ -1,10 +1,28 @@
 # frozen_string_literal: true
 
+require 'rails_helper'
+require 'fakefs/spec_helpers'
+
 RSpec.describe User, type: :model do
   subject { create :user }
 
   describe 'factory' do
     it { is_expected.to be_valid }
+  end
+
+  describe '.to_csv' do
+    it 'generates CSV of all users' do
+      create(:user, first_name: 'Clarissa', last_name: 'Dalloway', email: 'cd@example.com',
+                    organization: 'Amalgamated Lint', organization_type: 'primary_care_clinic',
+                    address_1: '1234 Shut the Door Ave.', address_2: 'Ste 1000', city: 'Pecoima',
+                    state: 'AZ', zip: '12345', agree_to_terms: true, num_providers: 5,
+                    created_at: '2019-10-15 18:29:35 UTC', updated_at: '2019-10-15 18:29:35 UTC')
+
+      fixture_csv_content = File.read('spec/fixtures/users.csv')
+      FakeFS.with_fresh do
+        expect(User.to_csv).to eq(fixture_csv_content)
+      end
+    end
   end
 
   describe '#last_name' do

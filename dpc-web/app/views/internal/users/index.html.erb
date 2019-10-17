@@ -14,6 +14,8 @@
       <%= submit_tag "Search", data: { test: 'users-keyword-search-submit' }, class: "ds-c-button ds-c-button--primary ds-u-margin-left--1" %>
     <% end %>
 
+    <p><%= link_to "Download CSV of all users", download_internal_users_path(format: :csv) %> - Note: The download will consist of all users regardless of current search or filter.</p>
+
     <div class="ds-u-margin-top--5 ds-u-margin-bottom--2">
 
     <button type="button" id="filter-modal-trigger" class="list-control-button" data-modal-show="filter-modal" data-test="filter-modal-trigger">

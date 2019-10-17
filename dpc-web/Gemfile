@@ -40,6 +40,7 @@ group :test do
   gem 'selenium-webdriver'
   gem 'climate_control'
   gem 'rails-controller-testing'
+  gem 'fakefs', require: 'fakefs/safe'
 end
 
 group :development do
