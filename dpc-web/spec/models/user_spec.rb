@@ -12,7 +12,7 @@ RSpec.describe User, type: :model do
 
   describe '.to_csv' do
     it 'generates CSV of all users' do
-      create(:user, first_name: 'Clarissa', last_name: 'Dalloway', email: 'cd@example.com',
+      create(:user, id: 50000, first_name: 'Clarissa', last_name: 'Dalloway', email: 'cd@example.com',
                     organization: 'Amalgamated Lint', organization_type: 'primary_care_clinic',
                     address_1: '1234 Shut the Door Ave.', address_2: 'Ste 1000', city: 'Pecoima',
                     state: 'AZ', zip: '12345', agree_to_terms: true, num_providers: 5,
