@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'csv'
+
 module Internal
   class UsersController < ApplicationController
     before_action :authenticate_internal_user!
@@ -51,6 +53,13 @@ module Internal
       else
         flash[:alert] = "Please correct errrors: #{@user.errors.full_messages.join(', ')}"
         render :edit
+      end
+    end
+
+    def download
+      respond_to do |format|
+        filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
+        format.csv { send_data User.all.to_csv, filename: filename }
       end
     end
 
