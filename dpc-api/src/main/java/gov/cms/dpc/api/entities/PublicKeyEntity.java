@@ -8,6 +8,8 @@ import gov.cms.dpc.api.converters.PublicKeySerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -38,6 +40,10 @@ public class PublicKeyEntity implements Serializable {
     @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
     @JsonDeserialize(converter = OffsetDateTimeToStringConverter.class)
     private OffsetDateTime createdAt;
+
+    @NotEmpty
+    @Length(max = 25)
+    private String label;
 
     public PublicKeyEntity() {
         // Hibernate required
@@ -73,5 +79,13 @@ public class PublicKeyEntity implements Serializable {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

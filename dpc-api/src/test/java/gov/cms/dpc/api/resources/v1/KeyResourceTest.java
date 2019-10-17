@@ -10,6 +10,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -35,6 +38,47 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
     private KeyResourceTest() {
         this.mapper = new ObjectMapper();
+    }
+
+    @Test
+    void testInvalidKeySubmission() throws NoSuchAlgorithmException, IOException, URISyntaxException {
+        final String key = generatePublicKey();
+
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+
+            final URIBuilder builder = new URIBuilder(String.format("%s/Key", getBaseURL()));
+            builder.addParameter("label", "this is a test");
+            final HttpPost post = new HttpPost(builder.build());
+            post.setEntity(new StringEntity(key));
+            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+
+            try (CloseableHttpResponse response = client.execute(post)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
+            }
+
+            // Try the same key again
+            try (CloseableHttpResponse response = client.execute(post)) {
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys");
+            }
+
+            // Try again with same label
+            post.setEntity(new StringEntity(generatePublicKey()));
+            try (CloseableHttpResponse response = client.execute(post)) {
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key cannot have duplicate label");
+            }
+
+            // Try with too long label
+            final URIBuilder b2 = new URIBuilder(String.format("%s/Key", getBaseURL()));
+            b2.addParameter("label", "This is way too long to be used for a key id field. Never should pass");
+            final HttpPost labelViolationPost = new HttpPost(b2.build());
+            labelViolationPost.setEntity(new StringEntity(key));
+            labelViolationPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            labelViolationPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+            try (CloseableHttpResponse response = client.execute(labelViolationPost)) {
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key label cannot be too long");
+            }
+        }
     }
 
     @Test
@@ -108,6 +152,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         public String publicKey;
         @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
         public OffsetDateTime createdAt;
+        public String label;
 
         KeyView() {
             // Not used

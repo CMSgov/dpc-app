@@ -24,6 +24,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -98,7 +99,10 @@ public class KeyResource extends AbstractKeyResource {
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork
     @Override
-    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotEmpty String key) {
+    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotEmpty String key,
+                                     @ApiParam(name = "label", value = "Public Key ID (label)")
+                                     @QueryParam(value = "label") Optional<String> keyID) {
+        final String keyLabel = keyID.orElseGet(() -> this.buildDefaultKeyID(organizationPrincipal.getID()));
         final SubjectPublicKeyInfo publicKey;
         try {
             publicKey = PublicKeyHandler.parsePEMString(key);
@@ -114,7 +118,13 @@ public class KeyResource extends AbstractKeyResource {
         publicKeyEntity.setOrganization_id(organizationEntity.getId());
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setPublicKey(publicKey);
+        publicKeyEntity.setLabel(keyLabel);
 
         return this.dao.persistPublicKey(publicKeyEntity);
+    }
+
+    private String buildDefaultKeyID(UUID organizationID) {
+        final int newKeyID = this.dao.fetchPublicKeys(organizationID).size() + 1;
+        return String.format("key:%d", newKeyID);
     }
 }
