@@ -2,13 +2,11 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import gov.cms.dpc.api.annotations.IntegrationTest;
-import gov.cms.dpc.testing.IntegrationTest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.annotations.IntegrationTest;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,7 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 
-import static gov.cms.dpc.api.APITestHelpers.*;
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.APITestHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**

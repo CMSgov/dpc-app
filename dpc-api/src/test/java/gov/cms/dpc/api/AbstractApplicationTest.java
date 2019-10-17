@@ -1,14 +1,12 @@
 package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.api.annotations.IntegrationTest;
-import gov.cms.dpc.testing.IntegrationTest;
-import gov.cms.dpc.testing.BufferedLoggerHandler;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.annotations.IntegrationTest;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.http.client.methods.CloseableHttpResponse;
