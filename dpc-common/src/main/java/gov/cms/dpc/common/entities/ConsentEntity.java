@@ -12,6 +12,8 @@ import java.util.UUID;
 @Entity
 public class ConsentEntity implements Serializable {
 
+    private static final long serialVersionUID = 42L;
+
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
@@ -37,4 +39,92 @@ public class ConsentEntity implements Serializable {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getBeneficiaryID() {
+        return beneficiaryID;
+    }
+
+    public void setBeneficiaryID(String beneficiaryID) {
+        this.beneficiaryID = beneficiaryID;
+    }
+
+    public String getMbi() {
+        return mbi;
+    }
+
+    public void setMbi(String mbi) {
+        this.mbi = mbi;
+    }
+
+    public String getHicn() {
+        return hicn;
+    }
+
+    public void setHicn(String hicn) {
+        this.hicn = hicn;
+    }
+
+    public OffsetDateTime getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(OffsetDateTime effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public String getPolicyCode() {
+        return policyCode;
+    }
+
+    public void setPolicyCode(String policyCode) {
+        this.policyCode = policyCode;
+    }
+
+    public String getPurposeCode() {
+        return purposeCode;
+    }
+
+    public void setPurposeCode(String purposeCode) {
+        this.purposeCode = purposeCode;
+    }
+
+    public String getLoincCode() {
+        return loincCode;
+    }
+
+    public void setLoincCode(String loincCode) {
+        this.loincCode = loincCode;
+    }
+
+    public String getScopeCode() {
+        return scopeCode;
+    }
+
+    public void setScopeCode(String scopeCode) {
+        this.scopeCode = scopeCode;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
