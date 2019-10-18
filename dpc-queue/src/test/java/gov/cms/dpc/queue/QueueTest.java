@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -21,6 +23,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "rawtypes"})
+@ExtendWith(BufferedLoggerHandler.class)
 class QueueTest {
 
     //    private JobQueue queue;
@@ -67,8 +70,8 @@ class QueueTest {
 
             final Transaction tx = session.beginTransaction();
             try {
-	            session.createQuery("delete from job_queue_batch_file").executeUpdate();
-    	        session.createQuery("delete from job_queue_batch").executeUpdate();
+                session.createQuery("delete from job_queue_batch_file").executeUpdate();
+                session.createQuery("delete from job_queue_batch").executeUpdate();
             } finally {
                 tx.commit();
             }
@@ -102,7 +105,7 @@ class QueueTest {
                 () -> assertEquals(JobStatus.RUNNING, runningJob.orElseThrow().getStatus(), "Job should be running"));
 
         // Complete the job
-        while ( workBatch.get().fetchNextPatient(aggregatorID).isPresent() ) {
+        while (workBatch.get().fetchNextPatient(aggregatorID).isPresent()) {
             queue.completePartialBatch(workBatch.get(), aggregatorID);
         }
         workBatch.get().addJobQueueFile(ResourceType.Patient, 0, 1);
@@ -150,7 +153,7 @@ class QueueTest {
         workBatch.addJobQueueFile(ResourceType.ExplanationOfBenefit, 0, 1);
 
         // Complete job
-        while ( workBatch.fetchNextPatient(aggregatorID).isPresent() ) {
+        while (workBatch.fetchNextPatient(aggregatorID).isPresent()) {
             queue.completePartialBatch(workBatch, aggregatorID);
         }
         queue.completeBatch(workBatch, aggregatorID);

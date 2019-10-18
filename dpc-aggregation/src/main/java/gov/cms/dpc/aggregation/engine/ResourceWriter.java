@@ -81,7 +81,7 @@ class ResourceWriter {
             String outputPath = formOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence);
 
             JobQueueBatchFile file = job.addJobQueueFile(resourceType, sequence, batch.size());
-            Boolean isStartOfFile = batch.size() == file.getCount();
+            boolean isStartOfFile = batch.size() == file.getCount();
             Boolean shouldAppendToFile = !isStartOfFile;
 
             logger.debug("Start writing to {}", outputPath);

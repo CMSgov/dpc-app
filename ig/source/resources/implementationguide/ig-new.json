@@ -135,6 +135,30 @@
       },
       "exampleBoolean" : false,
       "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "OperationDefinition/dpc-patient-validate",
+        "display" : "dpc-patient-validate.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "OperationDefinition/dpc-group-add",
+        "display" : "dpc-group-add.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "OperationDefinition/dpc-group-remove",
+        "display" : "dpc-group-remove.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
     }],
     "parameter" : [{
       "code" : "generate",
