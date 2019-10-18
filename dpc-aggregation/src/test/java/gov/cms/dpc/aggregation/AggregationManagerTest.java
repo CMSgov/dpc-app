@@ -1,13 +1,16 @@
 package gov.cms.dpc.aggregation;
 
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(BufferedLoggerHandler.class)
 class AggregationManagerTest {
 
     private AggregationEngine engine;

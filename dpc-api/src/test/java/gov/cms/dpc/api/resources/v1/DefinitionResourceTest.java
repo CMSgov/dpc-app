@@ -5,6 +5,7 @@ import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
@@ -21,6 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
+@ExtendWith(BufferedLoggerHandler.class)
 class DefinitionResourceTest {
 
     private static final FhirContext ctx = FhirContext.forDstu3();

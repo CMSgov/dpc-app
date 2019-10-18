@@ -10,6 +10,7 @@ import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.BaseResource;
 import gov.cms.dpc.api.resources.v1.OrganizationResource;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
@@ -37,6 +38,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
+@ExtendWith(BufferedLoggerHandler.class)
 @SuppressWarnings({"unchecked", "rawtypes"})
 class AuthHandlerTest {
     private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";

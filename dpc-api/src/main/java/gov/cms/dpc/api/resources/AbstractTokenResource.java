@@ -3,12 +3,12 @@ package gov.cms.dpc.api.resources;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +39,7 @@ public abstract class AbstractTokenResource {
      *
      * @param organizationID - {@link UUID} organization ID
      * @param label          - {@link Optional} {@link String} to use as token label
+     * @param expiration     - {@link Optional} {@link OffsetDateTime} to use for token expiration
      * @return - {@link String} base64 (URL) encoded token
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

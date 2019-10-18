@@ -217,7 +217,7 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Begin export request", tags = {"Group", "Bulk Data"},
             notes = "FHIR export operation which initiates a bulk data export for the given Provider")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", value = "respond-async"))
+            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", value = "respond-async", dataTypeClass = String.class))
     @ApiResponses(
             @ApiResponse(code = 202, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
     )

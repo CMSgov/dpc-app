@@ -2,14 +2,17 @@ package gov.cms.dpc.bluebutton.health;
 
 import com.codahale.metrics.health.HealthCheck;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(BufferedLoggerHandler.class)
 class TestBlueButtonHealth {
 
     private static final String EXCEPTION_MESSAGE = "Timeout, not good";

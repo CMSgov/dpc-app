@@ -99,7 +99,7 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field." +
+    @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization listed in the *ManagingOrganization* field. " +
             "If a patient record already exists, a `200` status is returned, along with the existing record.")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Patient"),
