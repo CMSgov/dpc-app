@@ -54,6 +54,14 @@ services:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
 
+  consent:
+    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
+    environment:
+      - ENV=local
+      - JACOCO=${REPORT_COVERAGE}
+    volumes:
+      - ./jacocoReport/dpc-api:/jacoco-report
+
   start_core_dependencies:
     image: dadarek/wait-for-dependencies
     depends_on:

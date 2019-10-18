@@ -8,7 +8,7 @@ else
   JACOCO=""
 fi
 
-CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.attribution.DPCConsentService"
+CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.consent.DPCConsentService"
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"

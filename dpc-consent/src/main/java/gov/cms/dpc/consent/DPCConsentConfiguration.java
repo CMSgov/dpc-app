@@ -7,7 +7,6 @@ import io.dropwizard.db.DataSourceFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.time.Duration;
 
 public class DPCConsentConfiguration extends TypesafeConfiguration implements IDPCDatabase {
 

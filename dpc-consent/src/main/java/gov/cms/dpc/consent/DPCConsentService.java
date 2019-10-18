@@ -2,6 +2,8 @@ package gov.cms.dpc.consent;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -30,6 +32,10 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
     @Override
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
+        JerseyGuiceUtils.reset();
+        GuiceBundle<DPCConsentConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
+                .modules(new ConsentAppModule())
+                .build();
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.consent"));
         bootstrap.addBundle(new MigrationsBundle<DPCConsentConfiguration>() {
             @Override
