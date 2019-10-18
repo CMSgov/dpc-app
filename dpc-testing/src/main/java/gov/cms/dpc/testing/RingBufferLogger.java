@@ -15,8 +15,8 @@ public class RingBufferLogger extends ConsoleAppender<ILoggingEvent> {
     }
 
     @Override
-    protected synchronized void append(ILoggingEvent event) {
-        final boolean offer = this.ringBuffer.offer(event);
+    protected void append(ILoggingEvent eventObject) {
+        final boolean offer = this.ringBuffer.offer(eventObject);
         if (!offer) {
             addError("Unable to add message to queue");
         }
