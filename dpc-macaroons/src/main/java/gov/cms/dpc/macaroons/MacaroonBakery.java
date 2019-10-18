@@ -234,7 +234,7 @@ public class MacaroonBakery {
      *
      * @param macaroons  - {@link List} of {@link Macaroon} to discharge
      * @param discharger - {@link MacaroonDischarger} which handles processing the caveats
-     * @return
+     * @return - {@link List} of discharged {@link Macaroon}s
      */
     public List<Macaroon> dischargeAll(List<Macaroon> macaroons, MacaroonDischarger discharger) {
         final List<Macaroon> macaroons1 = dischargeAllImpl(macaroons, discharger);
@@ -470,7 +470,10 @@ public class MacaroonBakery {
         buffer.get();
         final int rootKeyLength;
         try {
-            rootKeyLength = VarInt.readUnsignedVarInt(new DataInputStream(new ByteBufferBackedInputStream(buffer)));
+            try (ByteBufferBackedInputStream is = new ByteBufferBackedInputStream(buffer);
+                 final DataInputStream ds = new DataInputStream(is)) {
+                rootKeyLength = VarInt.readUnsignedVarInt(ds);
+            }
         } catch (IOException e) {
             throw new BakeryException("Cannot read root key length", e);
         }

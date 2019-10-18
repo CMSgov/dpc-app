@@ -2,7 +2,9 @@ package gov.cms.dpc.macaroons;
 
 import com.codahale.xsalsa20poly1305.SecretBox;
 import gov.cms.dpc.macaroons.helpers.BakeryKeyFactory;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.whispersystems.curve25519.Curve25519;
 import org.whispersystems.curve25519.Curve25519KeyPair;
 
@@ -10,6 +12,7 @@ import java.security.SecureRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(BufferedLoggerHandler.class)
 class ConditionParsingTests {
 
     @Test

@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.ConfigOverride;
@@ -11,11 +12,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(BufferedLoggerHandler.class)
 public abstract class AbstractAttributionTest {
     private static final String KEY_PREFIX = "dpc.attribution";
     private static final ObjectMapper mapper = new ObjectMapper();

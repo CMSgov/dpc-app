@@ -1,13 +1,16 @@
 package gov.cms.dpc.common.entities;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(BufferedLoggerHandler.class)
 class OrganizationEntityTest {
 
     @Test

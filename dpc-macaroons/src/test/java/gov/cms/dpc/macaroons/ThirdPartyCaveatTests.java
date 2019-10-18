@@ -8,8 +8,10 @@ import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -20,6 +22,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(BufferedLoggerHandler.class)
 class ThirdPartyCaveatTests {
 
     private static MacaroonBakery as;

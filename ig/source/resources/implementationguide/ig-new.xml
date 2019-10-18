@@ -131,6 +131,30 @@
       <exampleBoolean value="false"/>
       <groupingId value="p1"/>
     </resource>
+    <resource>
+      <reference>
+        <reference value="OperationDefinition/dpc-patient-validate"/>
+        <display value="dpc-patient-validate.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="OperationDefinition/dpc-group-add"/>
+        <display value="dpc-group-add.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
+        <reference value="OperationDefinition/dpc-group-remove"/>
+        <display value="dpc-group-remove.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
     <parameter>
       <code value="generate"/>
       <value value="xml"/>

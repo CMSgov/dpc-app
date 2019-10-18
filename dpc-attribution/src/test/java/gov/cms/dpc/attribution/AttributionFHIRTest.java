@@ -11,6 +11,7 @@ import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -33,6 +35,7 @@ import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(BufferedLoggerHandler.class)
 class AttributionFHIRTest {
 
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));

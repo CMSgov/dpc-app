@@ -1,14 +1,17 @@
 package gov.cms.dpc.macaroons.store;
 
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(BufferedLoggerHandler.class)
 public abstract class AbstractStoreTest {
 
     private final IRootKeyStore store;

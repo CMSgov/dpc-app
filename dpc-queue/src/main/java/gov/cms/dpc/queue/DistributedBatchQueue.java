@@ -299,7 +299,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
     public void assertHealthy(UUID aggregatorID) {
         try (final Session session = this.factory.openSession()) {
             try {
-                @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery("select count(*) from job_queue_batch where aggregatorID = '" + aggregatorID.toString() + "' and job_status == 1 and update_time < current_timestamp - interval '3 minutes'");
+                @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery("select count(*) from job_queue_batch where aggregatorID = '" + aggregatorID.toString() + "' and job_status == 1 and update_time < current_timestamp - interval '3 minutes'"); // lgtm [java/concatenated-sql-query] These values are sanitized and not susceptible to user tainting.
                 int stuckBatches = healthCheck.getFirstResult();
                 if (stuckBatches > 0) {
                     throw new JobQueueUnhealthy(JOB_UNHEALTHY);
