@@ -5,8 +5,6 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import org.hl7.fhir.dstu3.model.BaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
@@ -18,15 +16,12 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class ProfileValidator implements ConstraintValidator<Profiled, BaseResource> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProfileValidator.class);
-
     private static final String VALIDATION_CONSTANT = "{gov.cms.dpc.fhir.validations.ProfileValidator.";
     private final FhirValidator validator;
     private String profileURI;
 
     @Inject
     public ProfileValidator(FhirValidator validator) {
-        logger.warn("Creating validator");
         this.validator = validator;
     }
 
@@ -37,7 +32,6 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
 
     @Override
     public boolean isValid(BaseResource value, ConstraintValidatorContext context) {
-        logger.warn("Validating profile");
         // Disable default error messages, as we want to generate our own
         context.disableDefaultConstraintViolation();
 

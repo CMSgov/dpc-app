@@ -2,15 +2,18 @@ package gov.cms.dpc.macaroons.verifiers;
 
 import gov.cms.dpc.macaroons.CaveatVerifier;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.macaroons.caveats.VerifierConstants;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(BufferedLoggerHandler.class)
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 abstract class AbstractVerifierTest<V extends CaveatVerifier> {
 

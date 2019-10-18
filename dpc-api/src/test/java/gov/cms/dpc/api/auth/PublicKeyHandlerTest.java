@@ -1,8 +1,10 @@
 package gov.cms.dpc.api.auth;
 
 import gov.cms.dpc.api.exceptions.PublicKeyException;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -18,6 +20,7 @@ import java.util.Base64;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@ExtendWith(BufferedLoggerHandler.class)
 class PublicKeyHandlerTest {
 
     @Test
