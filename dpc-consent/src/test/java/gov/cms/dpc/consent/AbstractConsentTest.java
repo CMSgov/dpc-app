@@ -1,6 +1,5 @@
 package gov.cms.dpc.consent;
 
-import ca.uhn.fhir.context.FhirContext;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
