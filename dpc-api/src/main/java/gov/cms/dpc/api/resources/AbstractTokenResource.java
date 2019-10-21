@@ -2,7 +2,9 @@ package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.models.JWTAuthResponse;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -53,5 +55,5 @@ public abstract class AbstractTokenResource {
 
     @POST
     @Path("/auth")
-    public abstract Response authorizeJWT(String jwtBody);
+    public abstract JWTAuthResponse authorizeJWT(@NotEmpty String scope, @NotEmpty String grantType, @NotEmpty String clientAssertionType, String jwtBody);
 }

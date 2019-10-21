@@ -9,6 +9,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.jwt.JTICache;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -21,6 +22,7 @@ import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
@@ -34,6 +36,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -49,6 +52,7 @@ public class TokenResource extends AbstractTokenResource {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
     private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
+    public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
@@ -166,31 +170,50 @@ public class TokenResource extends AbstractTokenResource {
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Override
-    public Response authorizeJWT(String jwtBody) {
-        // Validate JWT
+    public JWTAuthResponse authorizeJWT(@QueryParam(value = "scope") @NotEmpty String scope,
+                                        @QueryParam(value = "grant_type") @NotEmpty String grantType,
+                                        @QueryParam(value = "client_assertion_type") @NotEmpty String clientAssertionType, @QueryParam(value = "client_assertion") String jwtBody) {
+        // Validate query params
+        if (!grantType.equals("client_credentials")) {
+            throw new WebApplicationException("Grant Type must be 'client_credentials'", Response.Status.BAD_REQUEST);
+        }
+
+        if (!clientAssertionType.equals(CLIENT_ASSERTION_TYPE)) {
+            throw new WebApplicationException(String.format("Client Assertion Type must be '%s'", CLIENT_ASSERTION_TYPE), Response.Status.BAD_REQUEST);
+        }
+
+        // Validate JWT signature
         try {
             final Jws<Claims> claims = Jwts.parser()
                     .setSigningKeyResolver(this.resolver)
                     .requireAudience(this.authURL)
                     .parseClaimsJws(jwtBody);
 
-            // Determine if claims are valid
+            // Determine if claims are present and valid
+            // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
             // TODO: wire in the real Organization ID, for auditing purposes
             handleJWTClaims(UUID.randomUUID(), claims);
 
+            // Extract the Client Macaroon from the subject field (which is the same as the issuer)
             final String clientMacaroon = claims.getBody().getSubject();
             final Macaroon macaroon = this.bakery.deserializeMacaroon(clientMacaroon);
 
             // Add the additional claims that we need
-            // Currently, we need to set an expiration time, a set of scopes
+            // Currently, we need to set an expiration time, a set of scopes,
+            final Duration tokenLifetime = Duration.of(5, ChronoUnit.MINUTES);
             final OffsetDateTime expiryTime = OffsetDateTime.now(ZoneOffset.UTC)
-                    .plus(5, ChronoUnit.MINUTES);
+                    .plus(tokenLifetime);
 
             final Macaroon restrictedMacaroon = this.bakery.addCaveats(macaroon, new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString())));
 
             // Serialize back to a string
+            // Don't base64 encode it because Jackson does that automatically for byte arrays.
+            final byte[] accessToken = this.bakery.serializeMacaroon(restrictedMacaroon, false);
+            final JWTAuthResponse response = new JWTAuthResponse();
+            response.setExpiresIn(tokenLifetime);
+            response.setAccessToken(accessToken);
 
-            return Response.ok(this.bakery.serializeMacaroon(restrictedMacaroon, true)).build();
+            return response;
         } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException("Invalid JWT", Response.Status.UNAUTHORIZED);
