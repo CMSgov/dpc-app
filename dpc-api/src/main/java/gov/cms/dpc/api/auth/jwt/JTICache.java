@@ -1,0 +1,39 @@
+package gov.cms.dpc.api.auth.jwt;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.concurrent.TimeUnit;
+
+@Singleton
+public class JTICache {
+
+    private static final Logger logger = LoggerFactory.getLogger(JTICache.class);
+
+    private final Cache<String, Boolean> cache;
+
+    @Inject
+    JTICache() {
+        this.cache = Caffeine.newBuilder()
+                .maximumSize(10_000)
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .build();
+    }
+
+    public boolean isJTIOk(String jti) {
+        final Boolean isPresent = this.cache.getIfPresent(jti);
+
+        // If the JTI is present in the cache, that means it's being replayed. Which is no go
+        if (isPresent == null) {
+            this.cache.put(jti, true);
+            return true;
+        }
+        logger.warn("JTI {} is being replayed", jti);
+        return false;
+    }
+
+}

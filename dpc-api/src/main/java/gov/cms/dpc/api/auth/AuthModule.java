@@ -4,6 +4,7 @@ import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.auth.jwt.JTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyResolver;
 import gov.cms.dpc.macaroons.BakeryProvider;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -40,5 +41,6 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         }
         binder.bind(DPCAuthDynamicFeature.class);
         binder.bind(SigningKeyResolverAdapter.class).to(JwtKeyResolver.class);
+        binder.bind(JTICache.class);
     }
 }

@@ -14,7 +14,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
@@ -23,9 +22,11 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.*;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,12 +45,13 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
         final PrivateKey key = generateAndUploadKey(keyID);
 
         // Create a new JWT with the private key
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("test", "claim");
         final String jwt = Jwts.builder()
                 .setHeaderParam("kid", keyID)
                 .setSubject(ORGANIZATION_TOKEN)
-                .setIssuer("test issuer")
+                .setAudience("http://localhost:3002/v1/Token/auth")
+                .setIssuer(ORGANIZATION_TOKEN)
+                .setId(UUID.randomUUID().toString())
+                .setExpiration(Date.from(Instant.now().plus(3, ChronoUnit.MINUTES)))
                 .signWith(key, SignatureAlgorithm.RS384)
                 .compact();
 
@@ -57,7 +59,7 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("%s/Token/auth", getBaseURL()));
             post.setEntity(new StringEntity(jwt));
-            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
