@@ -40,6 +40,8 @@ public class AbstractSecureApplicationTest {
             ConfigOverride.config(KEY_PREFIX, "", "true"));
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
+    // Macaroon to use for doing admin things (like creating tokens and keys)
+    protected static String GOLDEN_MACAROON;
 
     protected AbstractSecureApplicationTest() {
         // Not used
@@ -59,7 +61,7 @@ public class AbstractSecureApplicationTest {
         ctx = FhirContext.forDstu3();
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses
-        final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
+        GOLDEN_MACAROON = APITestHelpers.createGoldenMacaroon();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, TASK_URL);
     }

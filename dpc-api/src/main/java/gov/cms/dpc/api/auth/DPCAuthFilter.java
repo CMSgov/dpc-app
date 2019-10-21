@@ -4,6 +4,8 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.MacaroonCaveat;
+import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
@@ -17,6 +19,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -83,8 +86,26 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         }
 
         // Lookup the organization by Macaroon id
+        // If we're provided a Golden Macaroon, the ID won't match, so we'll need to actually pull the org_id from the
         final UUID macaroonID = UUID.fromString(m1.identifier);
-        final UUID orgID = this.dao.findOrgByToken(macaroonID);
+        UUID orgID;
+        try {
+             orgID = this.dao.findOrgByToken(macaroonID);
+        } catch (Exception e) {
+            // Find the org_id caveat and extract the value
+            final List<MacaroonCaveat> caveats = this.bakery.getCaveats(m1);
+            final MacaroonCondition orgCaveat = caveats
+                    .stream()
+                    .map(MacaroonCaveat::getCondition)
+                    .filter(condition -> condition.getKey().equals("organization_id"))
+                    .findAny()
+                    .orElseThrow(() -> {
+                        logger.error("Unable to get org from macaroon id", e);
+                        return new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+                    });
+
+            orgID = UUID.fromString(orgCaveat.getValue());
+        }
 
         try {
             this.bakery.verifyMacaroon(Collections.singletonList(m1), String.format("organization_id = %s", orgID));

@@ -3,9 +3,10 @@ package gov.cms.dpc.api.auth;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.nitram509.jmacaroons.MacaroonVersion;
+import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.api.resources.v1.TokenResource;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.http.HttpHeaders;
@@ -75,6 +76,7 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
                 authResponse = this.mapper.readValue(response.getEntity().getContent(), AuthResponse.class);
                 assertNotEquals(ORGANIZATION_TOKEN, authResponse.accessToken, "New Macaroon should not be identical");
                 assertEquals(300, authResponse.expiresIn, "Should expire in 300 seconds");
+//                assertEquals(2, authResponse.accessToken.size(), "Should have two Macaroons");
             }
         }
 
@@ -95,12 +97,18 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
         final KeyPair keyPair = generateKeyPair();
         final String key = generatePublicKey(keyPair.getPublic());
 
+        // Create org specific macaroon from Golden Macaroon
+        final String macaroon = MacaroonsBuilder
+                .modify(MacaroonsBuilder.deserialize(GOLDEN_MACAROON))
+                .add_first_party_caveat(String.format("organization_id = %s", ORGANIZATION_ID))
+                .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
+
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Key", getBaseURL()));
             builder.addParameter("label", keyID);
             final HttpPost post = new HttpPost(builder.build());
             post.setEntity(new StringEntity(key));
-            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + macaroon);
             post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(post)) {

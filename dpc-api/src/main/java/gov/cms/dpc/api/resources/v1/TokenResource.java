@@ -40,10 +40,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
@@ -206,12 +203,10 @@ public class TokenResource extends AbstractTokenResource {
 
             final Macaroon restrictedMacaroon = this.bakery.addCaveats(macaroon, new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString())));
 
-            // Serialize back to a string
-            // Don't base64 encode it because Jackson does that automatically for byte arrays.
-            final byte[] accessToken = this.bakery.serializeMacaroon(restrictedMacaroon, false);
+            final List<Macaroon> discharged = this.bakery.dischargeAll(Collections.singletonList(restrictedMacaroon), this.bakery::discharge);
             final JWTAuthResponse response = new JWTAuthResponse();
             response.setExpiresIn(tokenLifetime);
-            response.setAccessToken(accessToken);
+            response.setDischargedMacaroons(discharged);
 
             return response;
         } catch (SecurityException e) {
@@ -226,7 +221,8 @@ public class TokenResource extends AbstractTokenResource {
     private Macaroon generateMacaroon(UUID organizationID) {
         // Create some caveats
         final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString()))
+                new MacaroonCaveat("", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString())),
+                new MacaroonCaveat("local", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString()))
         );
         return this.bakery.createMacaroon(caveats);
     }

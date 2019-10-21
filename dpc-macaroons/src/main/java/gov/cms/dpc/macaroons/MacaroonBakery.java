@@ -258,6 +258,13 @@ public class MacaroonBakery {
         return boundMacaroons;
     }
 
+    public Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
+        final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
+
+        // Create a discharge macaroon
+        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), caveat.getRawCaveat());
+    }
+
     /**
      * Implementation of discharge logic.
      * Recursively iterates through the provided {@link List} of {@link Macaroon} and discharges any third-party caveats
@@ -300,13 +307,6 @@ public class MacaroonBakery {
         }
 
         return discharged;
-    }
-
-    Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
-        final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
-
-        // Create a discharge macaroon
-        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), caveat.getRawCaveat());
     }
 
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {
