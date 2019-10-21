@@ -50,4 +50,8 @@ public abstract class AbstractTokenResource {
     @DELETE
     @Path("/{organizationID}/{tokenID}")
     public abstract Response deleteOrganizationToken(OrganizationPrincipal organizationPrincipal, @NotNull @PathParam("organizationID") UUID organizationID, @NotNull @PathParam("tokenID") UUID tokenID);
+
+    @POST
+    @Path("/auth")
+    public abstract Response authorizeJWT(String jwtBody);
 }

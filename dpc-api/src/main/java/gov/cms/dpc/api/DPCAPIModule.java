@@ -18,6 +18,7 @@ import gov.cms.dpc.api.tasks.ListClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
+import gov.cms.dpc.common.hibernate.DatabaseExceptionHandler;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -26,6 +27,7 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +68,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(ListClientTokens.class);
         binder.bind(DeleteToken.class);
 
+        binder.bind(DatabaseExceptionHandler.class);
+
         // Healthchecks
         // TODO: Fix with DPC-538
 //        binder.bind(AttributionHealthCheck.class);
@@ -80,11 +84,11 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, IGenericClient client) {
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, IGenericClient client, SigningKeyResolverAdapter resolver) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
-                        new Class<?>[]{TokenDAO.class, MacaroonBakery.class, TokenPolicy.class, IGenericClient.class},
-                        new Object[]{dao, bakery, this.getConfiguration().getTokenPolicy(), client});
+                        new Class<?>[]{TokenDAO.class, MacaroonBakery.class, TokenPolicy.class, IGenericClient.class, SigningKeyResolverAdapter.class},
+                        new Object[]{dao, bakery, this.getConfiguration().getTokenPolicy(), client, resolver});
     }
 
     @Provides

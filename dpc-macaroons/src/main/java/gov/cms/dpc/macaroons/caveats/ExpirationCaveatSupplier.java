@@ -13,7 +13,7 @@ import java.time.ZoneOffset;
  */
 public class ExpirationCaveatSupplier implements CaveatSupplier {
 
-    static final String EXPIRATION_KEY = "expires";
+    public static final String EXPIRATION_KEY = "expires";
 
     private final TokenPolicy.ExpirationPolicy expirationPolicy;
 

@@ -14,6 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.api.DPCAPIService</mainClass>
+        <jjwt.version>0.10.7</jjwt.version>
     </properties>
 
     <dependencies>
@@ -120,6 +121,23 @@
             <groupId>com.helger</groupId>
             <artifactId>ph-schematron</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <!--Test resources-->
         <dependency>

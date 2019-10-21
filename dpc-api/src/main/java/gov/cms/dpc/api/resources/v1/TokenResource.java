@@ -6,16 +6,20 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.jwt.JwtKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
+import gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -30,11 +34,14 @@ import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Api(value = "Token")
+import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
+
+@Api(value = "Token", tags = {"Auth"})
 public class TokenResource extends AbstractTokenResource {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
@@ -44,13 +51,15 @@ public class TokenResource extends AbstractTokenResource {
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
     private final IGenericClient client;
+    private final SigningKeyResolverAdapter resolver;
 
     @Inject
-    TokenResource(TokenDAO dao, MacaroonBakery bakery, TokenPolicy policy, IGenericClient client) {
+    TokenResource(TokenDAO dao, MacaroonBakery bakery, TokenPolicy policy, IGenericClient client, SigningKeyResolverAdapter resolver) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
         this.client = client;
+        this.resolver = resolver;
     }
 
     @Override
@@ -134,6 +143,46 @@ public class TokenResource extends AbstractTokenResource {
         this.dao.deleteToken(matchedToken.get(0));
 
         return Response.ok().build();
+    }
+
+    @POST
+    @Path("/auth")
+    @UnitOfWork
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
+    @Override
+    public Response authorizeJWT(String jwtBody) {
+        // Validate JWT
+        try {
+            final Jws<Claims> claims = Jwts.parser()
+                    .setSigningKeyResolver(this.resolver)
+                    .parseClaimsJws(jwtBody);
+
+            // Determine if claims are valid
+
+            //
+
+            final String clientMacaroon = claims.getBody().getSubject();
+            final Macaroon macaroon = this.bakery.deserializeMacaroon(clientMacaroon);
+
+            // Add the additional claims that we need
+            // Currently, we need to set an expiration time, a set of scopes
+            final OffsetDateTime expiryTime = OffsetDateTime.now(ZoneOffset.UTC)
+                    .plus(5, ChronoUnit.MINUTES);
+
+            final Macaroon restrictedMacaroon = this.bakery.addCaveats(macaroon, new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString())));
+
+            // Serialize back to a string
+
+            return Response.ok(this.bakery.serializeMacaroon(restrictedMacaroon, true)).build();
+        } catch (SecurityException e) {
+            logger.error("JWT has invalid signature", e);
+            throw new WebApplicationException("Invalid JWT", Response.Status.UNAUTHORIZED);
+        } catch (JwtException e) {
+            logger.error("Malformed JWT", e);
+            throw new WebApplicationException("Invalid JWT", Response.Status.UNAUTHORIZED);
+        }
     }
 
     private Macaroon generateMacaroon(UUID organizationID) {
