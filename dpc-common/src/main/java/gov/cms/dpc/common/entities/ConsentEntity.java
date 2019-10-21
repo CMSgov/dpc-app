@@ -25,6 +25,7 @@ public class ConsentEntity implements Serializable {
     private String hicn;
 
     @NotNull
+    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime effectiveDate;
 
     private String policyCode;
