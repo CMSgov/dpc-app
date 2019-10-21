@@ -33,9 +33,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     @Override
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
-        GuiceBundle<DPCConsentConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
-                .modules(new ConsentAppModule())
-                .build();
+
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.consent"));
         bootstrap.addBundle(new MigrationsBundle<DPCConsentConfiguration>() {
             @Override
