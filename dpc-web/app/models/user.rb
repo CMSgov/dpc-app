@@ -7,7 +7,8 @@ class User < ApplicationRecord
   has_one :dpc_registration, inverse_of: :user
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
-  belongs_to :organization, optional: true
+  has_many :organization_user_assignments
+  has_many :organizations, through: :organization_user_assignments
 
   before_save :requested_num_providers_to_zero_if_blank
 
@@ -32,15 +33,13 @@ class User < ApplicationRecord
     in: [true], message: 'you must agree to the terms of service to create an account'
   }
 
-  delegate :name, :organization_type, to: :organization, prefix: true
-
-  scope :assigned, -> { where.not(organization: nil) }
-  scope :unassigned, -> { where(organization: nil) }
-  scope :non_vendor, -> do
-    left_joins(:organization).where('(organizations.id IS NOT NULL AND organizations.organization_type <> :vendor) OR (organizations.id IS NULL AND users.requested_organization_type <> :vendor)', vendor: ORGANIZATION_TYPES['health_it_vendor'])
+  scope :assigned, -> { left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NOT NULL')}
+  scope :unassigned, -> { left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NULL') }
+  scope :assigned_non_vendor, -> do
+    joins(:organizations).where('organizations.organization_type <> :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
   end
-  scope :vendor, -> do
-    left_joins(:organization).where('(organizations.id IS NOT NULL AND organizations.organization_type = :vendor) OR (organizations.id IS NULL AND users.requested_organization_type = :vendor)', vendor: ORGANIZATION_TYPES['health_it_vendor'])
+  scope :assigned_vendor, -> do
+    joins(:organizations).where('organizations.organization_type = :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
   end
 
   def self.to_csv
@@ -57,6 +56,10 @@ class User < ApplicationRecord
 
   def name
     "#{first_name} #{last_name}"
+  end
+
+  def primary_organization
+    organizations.first
   end
 
   private

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UserSearch
-  ALLOWED_SCOPES = %i[all non_vendor].freeze
+  ALLOWED_SCOPES = %i[all assigned_non_vendor assigned_vendor].freeze
 
   attr_reader :params, :initial_scope
 

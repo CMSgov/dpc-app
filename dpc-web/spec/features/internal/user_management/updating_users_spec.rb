@@ -17,7 +17,7 @@ RSpec.feature 'updating users' do
 
     expect(page.body).to have_content('Crab Olsen')
 
-    select org.name, from: 'user_organization_id'
+    select org.name, from: 'user_organization_ids'
     fill_in 'user_first_name', with: 'Crabby'
     fill_in 'user_last_name', with: 'Graham'
     fill_in 'user_email', with: 'newemail@example.com'

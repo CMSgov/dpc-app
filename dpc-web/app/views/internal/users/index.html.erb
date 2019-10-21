@@ -54,24 +54,24 @@
           </div>
         </div>
         <div class="module-container__secondary">
-          <% if user.organization %>
+          <% if user.primary_organization %>
           <div class="module-container__indicator module-container__indicator--success">Assigned organization</div>
           <div class="module-container__content-wrap">
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#clinic-medical"></use>
               </svg>
-              <%= user.organization_name %> </div>
+              <%= user.primary_organization.name %> </div>
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#shapes"></use>
               </svg>
-              <%= user.organization_organization_type.titleize %></div>
+              <%= user.primary_organization.organization_type.titleize %></div>
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
               </svg>
-              <%= user.organization.address.city %>, <%= user.organization.address.state %>
+              <%= user.primary_organization.address_city %>, <%= user.primary_organization.address_state %>
             </div>
           </div>
           <% else %>

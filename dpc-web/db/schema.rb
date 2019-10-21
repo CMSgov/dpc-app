@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+ActiveRecord::Schema.define(version: 2019_10_17_201830) do
+=======
 ActiveRecord::Schema.define(version: 2019_10_07_162013) do
+>>>>>>> f79276e2... User belongs_to Organization
+=======
+ActiveRecord::Schema.define(version: 2019_10_07_162013) do
+>>>>>>> c4520fe7... User belongs_to Organization
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -70,6 +78,14 @@ ActiveRecord::Schema.define(version: 2019_10_07_162013) do
     t.index ["uid", "provider"], name: "index_internal_users_on_uid_and_provider", unique: true
   end
 
+  create_table "organization_user_assignments", force: :cascade do |t|
+    t.integer "organization_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "user_id"], name: "index_org_user_assignments_on_organization_id_and_user_id", unique: true
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name", null: false
     t.integer "organization_type", null: false
@@ -121,7 +137,6 @@ ActiveRecord::Schema.define(version: 2019_10_07_162013) do
     t.index ["created_at"], name: "index_users_on_created_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["last_name", "first_name"], name: "index_users_on_last_name_and_first_name"
-    t.index ["organization_id"], name: "index_users_on_organization_id"
     t.index ["requested_organization"], name: "index_users_on_requested_organization"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

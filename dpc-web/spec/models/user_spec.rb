@@ -137,9 +137,8 @@ RSpec.describe User, type: :model do
   describe 'scopes' do
     describe '.assigned' do
       it 'includes only users with an organization' do
-        org = create(:organization)
-        assigned_user = create(:user, organization: org)
-        _unassigned_user = create(:user, organization: nil)
+        assigned_user = create(:user, :assigned)
+        _unassigned_user = create(:user)
 
         expect(User.assigned).to match_array([assigned_user])
       end
@@ -147,39 +146,28 @@ RSpec.describe User, type: :model do
 
     describe '.unassigned' do
       it 'includes only users without an organization' do
-        org = create(:organization)
-        _assigned_user = create(:user, organization: org)
-        unassigned_user = create(:user, organization: nil)
+        _user = create(:user, :assigned)
+        unassigned_user = create(:user)
 
         expect(User.unassigned).to match_array([unassigned_user])
       end
     end
 
-    describe '.non_vendor' do
-      it 'includes users with non-vendor org or requested org' do
-        org = create(:organization, organization_type: 'primary_care_clinic')
-        vendor = create(:organization, organization_type: 'health_it_vendor')
+    describe '.assigned_non_vendor' do
+      it 'includes users with non-vendor org assignment' do
+        user = create(:user, :assigned)
+        _vendor_user = create(:user, :vendor)
 
-        user = create(:user, organization: org)
-        unassigned_user = create(:user, organization: nil, requested_organization_type: 'urgent_care')
-        _vendor_user = create(:user, organization: vendor)
-        _unassigned_vendor_user = create(:user, organization: nil, requested_organization_type: 'health_it_vendor')
-
-        expect(User.non_vendor).to match_array([user, unassigned_user])
+        expect(User.assigned_non_vendor).to match_array([user])
       end
     end
 
-    describe '.vendor' do
-      it 'includes users with vendor org or requested org' do
-        org = create(:organization, organization_type: 'primary_care_clinic')
-        vendor = create(:organization, organization_type: 'health_it_vendor')
+    describe '.assigned_vendor' do
+      it 'includes users with vendor org assignment' do
+        _user = create(:user, :assigned)
+        vendor_user = create(:user, :vendor)
 
-        _user = create(:user, organization: org)
-        _unassigned_user = create(:user, organization: nil, requested_organization_type: 'urgent_care')
-        vendor_user = create(:user, organization: vendor)
-        unassigned_vendor_user = create(:user, organization: nil, requested_organization_type: 'health_it_vendor')
-
-        expect(User.vendor).to match_array([vendor_user, unassigned_vendor_user])
+        expect(User.assigned_vendor).to match_array([vendor_user])
       end
     end
   end

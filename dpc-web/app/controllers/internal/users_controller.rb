@@ -7,7 +7,7 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      results = UserSearch.new(params: params, scope: :non_vendor)
+      results = UserSearch.new(params: params, scope: :all).results
 
       @users = results.order('created_at DESC').page params[:page]
     end
@@ -41,7 +41,7 @@ module Internal
     private
 
     def user_params
-      params.fetch(:user).permit(:first_name, :last_name, :email, :organization_id)
+      params.fetch(:user).permit(:first_name, :last_name, :email, :organization_ids)
     end
   end
 end

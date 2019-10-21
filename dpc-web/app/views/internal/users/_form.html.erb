@@ -7,12 +7,10 @@
       </div>
 
       <div class="ds-l-col--9 field-group__fields">
-        <% unless @user.organization %>
-        <% end %>
         <div class="field">
           <%= f.label :organization_id, class: "ds-c-label ds-u-margin-top--0" %>
           <span class="ds-c-field__hint" id="requested_org_hint">This user originally requested <strong><%= @user.requested_organization %></strong> (<%= @user.requested_organization_type.titleize %> with <%= @user.requested_num_providers %> providers).</span>
-          <%= f.select :organization_id, Organization.all.map{|o| [o.name, o.id]}, { include_blank: true }, class: "ds-c-field", value: @user.organization_id, 'aria-describedby': 'requested_org_hint' %>
+          <%= f.select :organization_ids, Organization.all.map{|o| [o.name, o.id]}, { include_blank: true }, class: "ds-c-field", value: @user.primary_organization.try(:id), 'aria-describedby': 'requested_org_hint' %>
         </div>
       </div>
     </fieldset>
