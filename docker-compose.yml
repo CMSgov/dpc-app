@@ -60,7 +60,7 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
     volumes:
-      - ./jacocoReport/dpc-api:/jacoco-report
+      - ./jacocoReport/dpc-consent:/jacoco-report
 
   start_core_dependencies:
     image: dadarek/wait-for-dependencies

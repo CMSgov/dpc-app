@@ -2,6 +2,7 @@ package gov.cms.dpc.common.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -18,10 +19,9 @@ public class ConsentEntity implements Serializable {
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @NotNull
-    private String beneficiaryID;
-
+    @NotEmpty
     private String mbi;
+    @NotEmpty
     private String hicn;
 
     @NotNull
@@ -47,14 +47,6 @@ public class ConsentEntity implements Serializable {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public String getBeneficiaryID() {
-        return beneficiaryID;
-    }
-
-    public void setBeneficiaryID(String beneficiaryID) {
-        this.beneficiaryID = beneficiaryID;
     }
 
     public String getMbi() {
