@@ -8,6 +8,9 @@ import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,9 +21,9 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testOrganizationFetch() {
+    void testOrganizationFetch() throws IOException, URISyntaxException {
 
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
 
         final Organization organization = client
                 .read()

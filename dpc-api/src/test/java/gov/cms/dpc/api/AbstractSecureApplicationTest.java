@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.security.PrivateKey;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.TASK_URL;
@@ -32,16 +33,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AbstractSecureApplicationTest {
     protected static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
+    protected static String KEY_ID = "test-key";
     // Application prefix, which we need in order to correctly override config values.
     private static final String KEY_PREFIX = "dpc.api";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    protected static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
             ConfigOverride.config(KEY_PREFIX, "", "true"));
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)
     protected static String GOLDEN_MACAROON;
+    protected static PrivateKey privateKey;
 
     protected AbstractSecureApplicationTest() {
         // Not used
@@ -64,6 +67,9 @@ public class AbstractSecureApplicationTest {
         GOLDEN_MACAROON = APITestHelpers.createGoldenMacaroon();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, TASK_URL);
+
+        // Register Public key
+        privateKey = APITestHelpers.generateAndUploadKey(KEY_ID, ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
     }
 
     @BeforeEach
