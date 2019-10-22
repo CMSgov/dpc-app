@@ -19,7 +19,6 @@ public class ConsentEntity implements Serializable {
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @NotEmpty
     private String mbi;
     @NotEmpty
     private String hicn;

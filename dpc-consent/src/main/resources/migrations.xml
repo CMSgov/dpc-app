@@ -10,11 +10,10 @@
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="beneficiary_id" type="varchar">
+            <column name="mbi" type="VARCHAR" />
+            <column name="hicn" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
-            <column name="mbi" type="VARCHAR" />
-            <column name="hicn" type="VARCHAR" />
             <column name="effective_date" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false" />
             </column>
