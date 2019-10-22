@@ -193,21 +193,34 @@ public class MacaroonBakery {
      * @return - Macaroon byte array
      */
     public byte[] serializeMacaroon(Macaroon macaroon, boolean base64Encode) {
-        final byte[] macaroonBytes = macaroon.serialize(MacaroonVersion.SerializationVersion.V2_JSON).getBytes(CAVEAT_CHARSET);
-        if (base64Encode) {
-            return encoder.encode(macaroonBytes);
-        }
-        return macaroonBytes;
+        return serializeMacaroon(Collections.singletonList(macaroon), base64Encode);
     }
 
     /**
-     * Deserialize {@link Macaroon} from provided {@link String} value.
+     * Convert the {@link List} of {@link Macaroon} to the underlying byte format.
+     * Optionally, the Macaroon can be base64 (URL-safe) encoded before returning.
+     *
+     * @param macaroons    - {@link List} of {@link Macaroon} to serialize
+     * @param base64Encode - {@code true} Macaroon bytes are base64 (URL-safe) encoded. {@code false} Macaroon bytes are returned directly
+     * @return - Macaroon byte array
+     */
+    public byte[] serializeMacaroon(List<Macaroon> macaroons, boolean base64Encode) {
+
+        final byte[] serializedBytes = macaroons.stream().map(m -> m.serialize(MacaroonVersion.SerializationVersion.V2_JSON)).collect(Collectors.joining(",", "[", "]")).getBytes(CAVEAT_CHARSET);
+        if (base64Encode) {
+            return encoder.encode(serializedBytes);
+        }
+        return serializedBytes;
+    }
+
+    /**
+     * Deserialize a {@link List} of {@link Macaroon} from provided {@link String} value.
      * This {@link String} can be either base64 (URL-safe) encoded or a direct representation (e.g. a JSON string)
      *
      * @param serializedString - {@link String} to deserialize from
-     * @return - {@link Macaroon} deserialized from {@link String}
+     * @return - {@link List} of {@link Macaroon} deserialized from {@link String}
      */
-    public Macaroon deserializeMacaroon(String serializedString) {
+    public List<Macaroon> deserializeMacaroon(String serializedString) {
         if (serializedString.isEmpty()) {
             throw new BakeryException("Cannot deserialize empty string");
         }
@@ -433,6 +446,7 @@ public class MacaroonBakery {
         byteBuffer.get(caveatKeySignature);
 
         byte[] pubKeySig = Arrays.copyOfRange(this.keyPair.getPublicKey(), 0, 4);
+        // FIXME: This needs to be a safe equals
         if (!Arrays.equals(caveatKeySignature, pubKeySig)) {
             throw new BakeryException("Public key mismatch");
         }

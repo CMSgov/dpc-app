@@ -50,7 +50,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     protected abstract DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo);
 
     @Override
-    public void filter(final ContainerRequestContext requestContext) throws IOException {
+    public void filter(final ContainerRequestContext requestContext) {
         // Try to get the Macaroon from the request
         String macaroon = getMacaroon(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
 
@@ -77,7 +77,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
         logger.trace("Making request to validate token.");
 
-        final Macaroon m1;
+        final List<Macaroon> m1;
         try {
             m1 = bakery.deserializeMacaroon(macaroon);
         } catch (BakeryException e) {
@@ -86,14 +86,15 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         }
 
         // Lookup the organization by Macaroon id
+        final Macaroon rootMacaroon = m1.get(0);
         // If we're provided a Golden Macaroon, the ID won't match, so we'll need to actually pull the org_id from the
-        final UUID macaroonID = UUID.fromString(m1.identifier);
+        final UUID macaroonID = UUID.fromString(rootMacaroon.identifier);
         UUID orgID;
         try {
              orgID = this.dao.findOrgByToken(macaroonID);
         } catch (Exception e) {
             // Find the org_id caveat and extract the value
-            final List<MacaroonCaveat> caveats = this.bakery.getCaveats(m1);
+            final List<MacaroonCaveat> caveats = this.bakery.getCaveats(rootMacaroon);
             final MacaroonCondition orgCaveat = caveats
                     .stream()
                     .map(MacaroonCaveat::getCondition)
@@ -108,7 +109,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         }
 
         try {
-            this.bakery.verifyMacaroon(Collections.singletonList(m1), String.format("organization_id = %s", orgID));
+            this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));

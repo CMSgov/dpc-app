@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.auth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
@@ -72,7 +74,7 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token request should have succeeded");
                 authResponse = this.mapper.readValue(response.getEntity().getContent(), AuthResponse.class);
                 assertNotEquals(ORGANIZATION_TOKEN, authResponse.accessToken, "New Macaroon should not be identical");
                 assertEquals(300, authResponse.expiresIn, "Should expire in 300 seconds");
@@ -91,6 +93,17 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
                 .execute();
 
         assertNotNull(orgBundle, "Should have found the organization");
+
+        // Ensure we can't directly submit Organization token to secure endpoint
+        final IGenericClient c2 = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
+
+        final IReadExecutable<Organization> request = c2
+                .read()
+                .resource(Organization.class)
+                .withId(new IdType("Organization", ORGANIZATION_ID))
+                .encodedJson();
+
+        assertThrows(AuthenticationException.class, request::execute, "Should not be able to submit org token directly to endpoint");
     }
 
     private PrivateKey generateAndUploadKey(String keyID) throws IOException, URISyntaxException, NoSuchAlgorithmException {
@@ -99,7 +112,7 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
 
         // Create org specific macaroon from Golden Macaroon
         final String macaroon = MacaroonsBuilder
-                .modify(MacaroonsBuilder.deserialize(GOLDEN_MACAROON))
+                .modify(MacaroonsBuilder.deserialize(GOLDEN_MACAROON).get(0))
                 .add_first_party_caveat(String.format("organization_id = %s", ORGANIZATION_ID))
                 .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 

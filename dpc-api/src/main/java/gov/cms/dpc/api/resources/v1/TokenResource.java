@@ -193,7 +193,7 @@ public class TokenResource extends AbstractTokenResource {
 
             // Extract the Client Macaroon from the subject field (which is the same as the issuer)
             final String clientMacaroon = claims.getBody().getSubject();
-            final Macaroon macaroon = this.bakery.deserializeMacaroon(clientMacaroon);
+            final List<Macaroon> macaroons = this.bakery.deserializeMacaroon(clientMacaroon);
 
             // Add the additional claims that we need
             // Currently, we need to set an expiration time, a set of scopes,
@@ -201,12 +201,13 @@ public class TokenResource extends AbstractTokenResource {
             final OffsetDateTime expiryTime = OffsetDateTime.now(ZoneOffset.UTC)
                     .plus(tokenLifetime);
 
-            final Macaroon restrictedMacaroon = this.bakery.addCaveats(macaroon, new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString())));
+            // Add an additional restriction to the root Macaroons
+            final Macaroon restrictedMacaroon = this.bakery.addCaveats(macaroons.get(0), new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString())));
 
             final List<Macaroon> discharged = this.bakery.dischargeAll(Collections.singletonList(restrictedMacaroon), this.bakery::discharge);
             final JWTAuthResponse response = new JWTAuthResponse();
             response.setExpiresIn(tokenLifetime);
-            response.setDischargedMacaroons(discharged);
+            response.setDischargedMacaroons(new String(this.bakery.serializeMacaroon(discharged, true), StandardCharsets.UTF_8));
 
             return response;
         } catch (SecurityException e) {

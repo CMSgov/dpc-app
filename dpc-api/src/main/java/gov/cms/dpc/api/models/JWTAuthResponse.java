@@ -2,21 +2,17 @@ package gov.cms.dpc.api.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.github.nitram509.jmacaroons.Macaroon;
-import gov.cms.dpc.api.converters.MacaroonListToJSONConverter;
 import gov.cms.dpc.common.converters.jackson.DurationToSecondsConverter;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.List;
 
 public class JWTAuthResponse implements Serializable {
 
     public static final long serialVersionUID = 42L;
 
     @JsonProperty(value = "access_token")
-    @JsonSerialize(converter = MacaroonListToJSONConverter.class)
-    private List<Macaroon> dischargedMacaroons;
+    private String dischargedMacaroons;
     @JsonProperty(value = "token_type")
     private String tokenType = "bearer";
     @JsonProperty(value = "expires_in")
@@ -28,11 +24,11 @@ public class JWTAuthResponse implements Serializable {
         // Jackson required
     }
 
-    public List<Macaroon> getDischargedMacaroons() {
+    public String getDischargedMacaroons() {
         return dischargedMacaroons;
     }
 
-    public void setDischargedMacaroons(List<Macaroon> dischargedMacaroons) {
+    public void setDischargedMacaroons(String dischargedMacaroons) {
         this.dischargedMacaroons = dischargedMacaroons;
     }
 
