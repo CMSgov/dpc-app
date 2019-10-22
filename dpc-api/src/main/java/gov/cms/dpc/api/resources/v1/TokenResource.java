@@ -60,13 +60,13 @@ public class TokenResource extends AbstractTokenResource {
     private final String authURL;
 
     @Inject
-    TokenResource(TokenDAO dao,
-                  MacaroonBakery bakery,
-                  TokenPolicy policy,
-                  IGenericClient client,
-                  SigningKeyResolverAdapter resolver,
-                  JTICache cache,
-                  @APIV1 String publicURl) {
+    public TokenResource(TokenDAO dao,
+                         MacaroonBakery bakery,
+                         TokenPolicy policy,
+                         IGenericClient client,
+                         SigningKeyResolverAdapter resolver,
+                         JTICache cache,
+                         @APIV1 String publicURl) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
@@ -167,9 +167,9 @@ public class TokenResource extends AbstractTokenResource {
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Override
-    public JWTAuthResponse authorizeJWT(@QueryParam(value = "scope") @NotEmpty String scope,
-                                        @QueryParam(value = "grant_type") @NotEmpty String grantType,
-                                        @QueryParam(value = "client_assertion_type") @NotEmpty String clientAssertionType, @QueryParam(value = "client_assertion") String jwtBody) {
+    public JWTAuthResponse authorizeJWT(@QueryParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
+                                        @QueryParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
+                                        @QueryParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType, @QueryParam(value = "client_assertion") String jwtBody) {
         // Validate query params
         if (!grantType.equals("client_credentials")) {
             throw new WebApplicationException("Grant Type must be 'client_credentials'", Response.Status.BAD_REQUEST);

@@ -1,10 +1,14 @@
 package gov.cms.dpc.fhir.validations.dropwizard;
 
 import ca.uhn.fhir.validation.FhirValidator;
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.HAPIExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import org.glassfish.jersey.server.internal.inject.ConfiguredValidator;
@@ -41,7 +45,9 @@ public class FHIRValidationModule extends AbstractModule {
         bind(ValidatorFactory.class).toProvider(ValidatorFactoryProvider.class);
         bind(ConfiguredValidator.class).to(InjectingConfiguredValidator.class).asEagerSingleton();
 
-        bind(FHIRValidationExceptionHandler.class);
+//        bind(FHIRValidationExceptionHandler.class);
+        bind(HAPIExceptionHandler.class);
+        bind(JerseyExceptionHandler.class);
 
         bind(DPCProfileSupport.class).asEagerSingleton();
         bind(FhirValidator.class).toProvider(FHIRValidatorProvider.class);

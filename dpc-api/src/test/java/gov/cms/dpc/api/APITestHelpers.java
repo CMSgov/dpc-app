@@ -10,9 +10,7 @@ import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.*;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
@@ -141,7 +139,9 @@ public class APITestHelpers {
                 .setRegisterDefaultExceptionMappers(false)
                 .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
                 .addProvider(new FHIRHandler(ctx))
-                .addProvider(FHIRExceptionHandler.class);
+                .addProvider(JerseyExceptionHandler.class)
+                .addProvider(HAPIExceptionHandler.class)
+                .addProvider(DefaultFHIRExceptionHandler.class);
 
         // Optionally enable validation
         if (validation) {
@@ -157,7 +157,6 @@ public class APITestHelpers {
                     Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config, support).get())));
 
             builder.setValidator(provideValidator(constraintFactory));
-            builder.addProvider(FHIRValidationExceptionHandler.class);
         }
 
         resources.forEach(builder::addResource);
@@ -282,12 +281,12 @@ public class APITestHelpers {
         }
     }
 
-    private static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+    public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
         final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         return kpg.generateKeyPair();
     }
 
-    private static String generatePublicKey(PublicKey key) {
+    public static String generatePublicKey(PublicKey key) {
         final String encoded = Base64.getMimeEncoder().encodeToString(key.getEncoded());
         return String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
     }

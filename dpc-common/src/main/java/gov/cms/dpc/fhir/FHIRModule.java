@@ -6,8 +6,9 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.DefaultFHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.MethodOutcomeHandler;
 import gov.cms.dpc.fhir.paramtests.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
@@ -39,8 +40,9 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(FHIRHandler.class);
         binder.bind(MethodOutcomeHandler.class);
         // Request/Response handlers
-        binder.bind(FHIRExceptionHandler.class);
+        binder.bind(JerseyExceptionHandler.class);
         binder.bind(FHIRRequestFeature.class);
+        binder.bind(DefaultFHIRExceptionHandler.class);
 
         binder.bind(FHIRParamValueFactory.class);
 

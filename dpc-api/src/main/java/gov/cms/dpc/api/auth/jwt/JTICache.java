@@ -17,7 +17,7 @@ public class JTICache {
     private final Cache<String, Boolean> cache;
 
     @Inject
-    JTICache() {
+    public JTICache() {
         this.cache = Caffeine.newBuilder()
                 .maximumSize(10_000)
                 .expireAfterWrite(5, TimeUnit.MINUTES)
