@@ -15,5 +15,5 @@ module OrganizationTypable
     'academic_facility' => 6,
     'health_it_vendor' => 7,
     'other' => 8
-  }
+  }.freeze
 end

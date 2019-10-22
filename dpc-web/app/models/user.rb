@@ -33,13 +33,22 @@ class User < ApplicationRecord
     in: [true], message: 'you must agree to the terms of service to create an account'
   }
 
-  scope :assigned, -> { left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NOT NULL')}
-  scope :unassigned, -> { left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NULL') }
-  scope :assigned_non_vendor, -> do
-    joins(:organizations).where('organizations.organization_type <> :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
+  scope :assigned, -> do
+    left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NOT NULL')
   end
+
+  scope :unassigned, -> do
+    left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NULL')
+  end
+
+  scope :assigned_non_vendor, -> do
+    joins(:organizations)
+      .where('organizations.organization_type <> :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
+  end
+
   scope :assigned_vendor, -> do
-    joins(:organizations).where('organizations.organization_type = :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
+    joins(:organizations)
+      .where('organizations.organization_type = :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
   end
 
   def self.to_csv
