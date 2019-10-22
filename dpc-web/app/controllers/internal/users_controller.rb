@@ -9,7 +9,7 @@ module Internal
     def index
       results = UserSearch.new(params: params, scope: :all).results
 
-      @users = results.order('created_at DESC').page params[:page]
+      @users = results.order('users.created_at DESC').page params[:page]
     end
 
     def show
