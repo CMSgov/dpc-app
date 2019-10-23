@@ -43,6 +43,11 @@ ci-app:
 ci-web:
 	@./dpc-web-test.sh
 
+.PHONY: smoke/dev
+smoke/dev: ${JMETER}
+	@echo "Running Smoke Tests against Development env"
+	@${JMETER} -p src/main/resources/dev.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+
 .PHONY: smoke/test
 smoke/test: ${JMETER}
 	@echo "Running Smoke Tests against Test env"
