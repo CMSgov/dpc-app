@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers;
+package gov.cms.dpc.fhir.dropwizard.handlers.classes;
 
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
@@ -27,6 +27,15 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
     }
 
     @Override
+    public Response toResponse(Throwable exception) {
+        if (isFHIRResource()) {
+            return handleFHIRException(exception);
+        } else {
+            return handleNonFHIRException(exception);
+        }
+    }
+
+    @Override
     Response handleFHIRException(Throwable exception) {
         final Response response = super.toResponse(exception);
 
@@ -36,7 +45,7 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
                 .setSeverity(OperationOutcome.IssueSeverity.FATAL)
                 .setDetails(new CodeableConcept().setText(exception.getMessage()));
 
-
+        // TODO: Need to log and correlate this exception
         return Response.fromResponse(response)
                 .status(status)
                 .type(FHIRMediaTypes.FHIR_JSON)

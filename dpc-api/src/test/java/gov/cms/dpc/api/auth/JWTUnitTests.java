@@ -97,10 +97,8 @@ class JWTUnitTests {
                 .request()
                 .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
-        // Should have no validation exceptions
-        validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+        // Should have no validation exceptions, but still fail
         assertEquals(500, response.getStatus(), "Should have failed, but for different reasons");
-        assertNull(validationErrorResponse, "Should not have validation error response");
     }
 
     @Test
@@ -118,7 +116,8 @@ class JWTUnitTests {
                 .request()
                 .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
-        assertEquals(500, response.getStatus(), "Should have failed, but for different reasons");
+        assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
+        assertTrue(response.readEntity(String.class).contains("Grant Type must be 'client_credentials'"), "Should have correct exception");
     }
 
     @Test

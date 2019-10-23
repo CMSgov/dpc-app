@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers;
+package gov.cms.dpc.fhir.dropwizard.handlers.classes;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
@@ -22,7 +22,17 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
     }
 
     @Override
+    public Response toResponse(JerseyViolationException exception) {
+        if (isFHIRResource()) {
+            return handleFHIRException(exception);
+        } else {
+            return handleNonFHIRException(exception);
+        }
+    }
+
+    @Override
     Response handleFHIRException(JerseyViolationException exception) {
+        // TODO: Need to log and correlate this exception
         // FIXME: This needs to be handled specially for FHIR exceptions
         final Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
         final Invocable invocable = exception.getInvocable();
@@ -38,6 +48,7 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
 
     @Override
     Response handleNonFHIRException(JerseyViolationException exception) {
+        // TODO: Need to log and correlate this exception
         final Set<ConstraintViolation<?>> violations = exception.getConstraintViolations();
         final Invocable invocable = exception.getInvocable();
         //noinspection Guava Replacing with Streams means a redundent copy when building the response

@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers;
+package gov.cms.dpc.fhir.dropwizard.handlers.classes;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
@@ -18,9 +18,20 @@ public class HAPIExceptionHandler extends AbstractFHIRExceptionHandler<BaseServe
     }
 
     @Override
+    public Response toResponse(BaseServerResponseException exception) {
+        if (isFHIRResource()) {
+            return handleFHIRException(exception);
+        } else {
+            return handleNonFHIRException(exception);
+        }
+    }
+
+    @Override
     Response handleFHIRException(BaseServerResponseException exception) {
         final Response response = super.toResponse(exception);
         final OperationOutcome operationOutcome = (OperationOutcome) exception.getOperationOutcome();
+
+        // TODO: Need to log and correlate this exception. I think.
 
         return Response.fromResponse(response)
                 .status(exception.getStatusCode())
