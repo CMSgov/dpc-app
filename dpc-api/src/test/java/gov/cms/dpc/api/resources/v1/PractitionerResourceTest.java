@@ -16,7 +16,6 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 
-import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PractitionerResourceTest extends AbstractSecureApplicationTest {
