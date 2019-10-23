@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.jwt.JTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyResolver;
+import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.TokenResource;
@@ -17,10 +18,14 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import javax.persistence.NoResultException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -40,6 +45,8 @@ import static org.mockito.Mockito.mock;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Token Resource Unit Tests")
+@SuppressWarnings("InnerClassMayBeStatic")
 class JWTUnitTests {
 
     private static final ResourceExtension RESOURCE = buildResources();
@@ -54,98 +61,213 @@ class JWTUnitTests {
     }
 
     @Test
-    void testQueryParams() {
-        final String payload = "this is not a payload";
-        Response response = RESOURCE.target("/Token/auth")
-                .request()
-                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
-
-        // Should have all exceptions
-        ValidationErrorResponse validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
-        assertEquals(400, response.getStatus(), "Should have failed");
-        assertEquals(3, validationErrorResponse.errors.size(), "Should have three validations");
-
-        // Add the missing scope value and try again
-        response = RESOURCE.target("/Token/auth").queryParam("scope", "this is not a scope")
-                .request()
-                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
-
-        // Should have one less exception
-        validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
-        assertEquals(400, response.getStatus(), "Should have failed");
-        assertEquals(2, validationErrorResponse.errors.size(), "Should have two validations");
-
-
-        // Add the grant type
-        response = RESOURCE.target("/Token/auth")
-                .queryParam("scope", "this is not a scope")
-                .queryParam("grant_type", "client_credentials")
-                .request()
-                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
-
-        // Should have all exceptions
-        validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
-        assertEquals(400, response.getStatus(), "Should have failed");
-        assertEquals(1, validationErrorResponse.errors.size(), "Should only have a single violation");
-        assertTrue(validationErrorResponse.errors.get(0).contains("Assertion type is required"));
-
-        // Add the assertion type and try again
-        response = RESOURCE.target("/Token/auth")
-                .queryParam("scope", "this is not a scope")
-                .queryParam("grant_type", "client_credentials")
-                .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
-                .request()
-                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
-
-        // Should have no validation exceptions, but still fail
-        assertEquals(500, response.getStatus(), "Should have failed, but for different reasons");
-    }
-
-    @Test
     void testScopeValues() {
         // TODO: Figure out scope testing
     }
 
-    @Test
-    void testGrantTypeValues() {
-        final String payload = "not a real payload";
-        Response response = RESOURCE.target("/Token/auth")
-                .queryParam("scope", "this is not a scope")
-                .queryParam("grant_type", "wrong_grant_type")
-                .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
-                .request()
-                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+    @Nested
+    @DisplayName("Query Param tests")
+    class QueryParmTests {
 
-        assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-        assertTrue(response.readEntity(String.class).contains("Grant Type must be 'client_credentials'"), "Should have correct exception");
+        @Test
+        void testQueryParams() {
+            final String payload = "this is not a payload";
+            Response response = RESOURCE.target("/Token/auth")
+                    .request()
+                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+            // Should have all exceptions
+            ValidationErrorResponse validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            assertEquals(400, response.getStatus(), "Should have failed");
+            assertEquals(3, validationErrorResponse.errors.size(), "Should have three validations");
+
+            // Add the missing scope value and try again
+            response = RESOURCE.target("/Token/auth").queryParam("scope", "this is not a scope")
+                    .request()
+                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+            // Should have one less exception
+            validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            assertEquals(400, response.getStatus(), "Should have failed");
+            assertEquals(2, validationErrorResponse.errors.size(), "Should have two validations");
+
+
+            // Add the grant type
+            response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .request()
+                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+            // Should have all exceptions
+            validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            assertEquals(400, response.getStatus(), "Should have failed");
+            assertEquals(1, validationErrorResponse.errors.size(), "Should only have a single violation");
+            assertTrue(validationErrorResponse.errors.get(0).contains("Assertion type is required"));
+
+            // Add the assertion type and try again
+            response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .request()
+                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+            // Should have no validation exceptions, but still fail
+            assertEquals(500, response.getStatus(), "Should have failed, but for different reasons");
+        }
+
+        @Test
+        void testInvalidGrantTypeValue() {
+            final String payload = "not a real payload";
+            Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "wrong_grant_type")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .request()
+                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+            assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
+            assertTrue(response.readEntity(String.class).contains("Grant Type must be 'client_credentials'"), "Should have correct exception");
+        }
+
+        @Test
+        void testEmptyGrantTypeValue() {
+            final Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .request()
+                    .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
+
+            // Setting the grant type to be blank, should throw a validation error
+            assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
+            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+        }
+
+        @Test
+        void testInvalidClientAssertionType() {
+            final String payload = "not a real payload";
+            Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", "Not a real assertion_type")
+                    .request()
+                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+            assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
+            assertTrue(response.readEntity(String.class).contains("Client Assertion Type must be 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'"), "Should have correct error message");
+        }
+
+        @Test
+        void testEmptyClientAssertionType() {
+            final Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", "")
+                    .request()
+                    .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
+
+            // Setting the assertion type to be blank, should throw a validation error
+            assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
+            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+        }
     }
+    // Query Param tests
 
-    @Test
-    void testJWTHandling() throws NoSuchAlgorithmException {
-        // Submit JWT with missing key
-        final KeyPair keyPair = APITestHelpers.generateKeyPair();
+    @Nested
+    @DisplayName("JWT Tests")
+    class JWTests {
 
-        final String jwt = Jwts.builder()
-                .setHeaderParam("kid", "correct")
-                .setAudience(String.format("%sToken/auth", "here"))
-                .setIssuer("macaroon")
-                .setSubject("macaroon")
-                .setId(UUID.randomUUID().toString())
-                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
-                .compact();
+        @Test
+        void testMissingJWTPublicKey() throws NoSuchAlgorithmException {
+            // Submit JWT with missing key
+            final KeyPair keyPair = APITestHelpers.generateKeyPair();
 
-        // Submit the JWT
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", "wrong")
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer("macaroon")
+                    .setSubject("macaroon")
+                    .setId(UUID.randomUUID().toString())
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .queryParam("client_assertion", jwt)
+                    .request()
+                    .post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED));
+
+            assertEquals(401, response.getStatus(), "Should be unauthorized");
+            assertTrue(response.readEntity(String.class).contains("Cannot find public key"), "Should have correct exception");
+        }
+
+        @Test
+        void testExpiredJWT() {
+            final KeyPair keyPair = JWTKeys.get("correct");
+
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", "correct")
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer("macaroon")
+                    .setSubject("macaroon")
+                    .setId(UUID.randomUUID().toString())
+                    .setExpiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .queryParam("client_assertion", jwt)
+                    .request()
+                    .post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED));
+
+            assertEquals(401, response.getStatus(), "Should be unauthorized");
+            assertTrue(response.readEntity(String.class).contains("Invalid JWT"), "Should have correct exception");
+        }
+
+        @Test
+        void testJWTWrongSigningKey() throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APITestHelpers.generateKeyPair();
+
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", "correct")
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer("macaroon")
+                    .setSubject("macaroon")
+                    .setId(UUID.randomUUID().toString())
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .queryParam("client_assertion", jwt)
+                    .request()
+                    .post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED));
+
+            assertEquals(401, response.getStatus(), "Should be unauthorized");
+            assertTrue(response.readEntity(String.class).contains("Invalid JWT"), "Should have correct exception");
+        }
     }
 
     private static ResourceExtension buildResources() {
         final IGenericClient client = mock(IGenericClient.class);
         final MacaroonBakery bakery = buildBakery();
         final TokenDAO tokenDAO = mock(TokenDAO.class);
-        final PublicKeyDAO publicKeyDAO = mock(PublicKeyDAO.class);
-        Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> {
-            return "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
-        });
+        final PublicKeyDAO publicKeyDAO = mockKeyDAO();
+        Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
         final JwtKeyResolver resolver = new JwtKeyResolver(publicKeyDAO);
         final JTICache jtiCache = new JTICache();
@@ -167,6 +289,22 @@ class JWTUnitTests {
                 new MemoryThirdPartyKeyStore()).build();
     }
 
+    private static PublicKeyDAO mockKeyDAO() {
+        final PublicKeyDAO mock = mock(PublicKeyDAO.class);
+
+        Mockito.when(mock.findKeyByLabel(Mockito.anyString())).then(answer -> {
+            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((String) answer.getArgument(0));
+            if (keyPair == null) {
+                throw new NoResultException();
+            }
+            final PublicKeyEntity entity = new PublicKeyEntity();
+            entity.setPublicKey(SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
+            return entity;
+        });
+        return mock;
+    }
+
+    @SuppressWarnings("WeakerAccess")
     public static class ValidationErrorResponse {
 
         public List<String> errors;

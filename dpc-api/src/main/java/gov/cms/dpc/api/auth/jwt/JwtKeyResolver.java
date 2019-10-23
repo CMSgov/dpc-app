@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -37,8 +38,12 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
             throw new WebApplicationException("JWT must have KID field", Response.Status.UNAUTHORIZED);
         }
 
-        // FIXME: This can throw, so catch it
-        final PublicKeyEntity keyByLabel = this.dao.findKeyByLabel(keyId);
+        final PublicKeyEntity keyByLabel;
+        try {
+             keyByLabel = this.dao.findKeyByLabel(keyId);
+        } catch (NoResultException e) {
+            throw new WebApplicationException(String.format("Cannot find public key with label: %s", keyId), Response.Status.UNAUTHORIZED);
+        }
 
         // TODO: Should be moved into a helper class
         X509EncodedKeySpec spec;
