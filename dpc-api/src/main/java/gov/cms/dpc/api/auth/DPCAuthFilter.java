@@ -87,11 +87,24 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
         // Lookup the organization by Macaroon id
         final Macaroon rootMacaroon = m1.get(0);
+        final UUID orgID = extractMacaroonID(rootMacaroon);
+
+        try {
+            this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
+        } catch (BakeryException e) {
+            logger.error("Macaroon verification failed", e);
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
+
+        return buildCredentials(macaroon, orgID, uriInfo);
+    }
+
+    private UUID extractMacaroonID(Macaroon rootMacaroon) {
         // If we're provided a Golden Macaroon, the ID won't match, so we'll need to actually pull the org_id from the
         final UUID macaroonID = UUID.fromString(rootMacaroon.identifier);
         UUID orgID;
         try {
-             orgID = this.dao.findOrgByToken(macaroonID);
+            orgID = this.dao.findOrgByToken(macaroonID);
         } catch (Exception e) {
             // Find the org_id caveat and extract the value
             final List<MacaroonCaveat> caveats = this.bakery.getCaveats(rootMacaroon);
@@ -108,14 +121,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
             orgID = UUID.fromString(orgCaveat.getValue());
         }
 
-        try {
-            this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
-        } catch (BakeryException e) {
-            logger.error("Macaroon verification failed", e);
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
-        }
-
-        return buildCredentials(macaroon, orgID, uriInfo);
+        return orgID;
     }
 
     @Nullable

@@ -19,7 +19,6 @@ import gov.cms.dpc.api.tasks.ListClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
-import gov.cms.dpc.common.hibernate.DatabaseExceptionHandler;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -68,8 +67,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(GenerateClientTokens.class);
         binder.bind(ListClientTokens.class);
         binder.bind(DeleteToken.class);
-
-        binder.bind(DatabaseExceptionHandler.class);
 
         // Healthchecks
         // TODO: Fix with DPC-538

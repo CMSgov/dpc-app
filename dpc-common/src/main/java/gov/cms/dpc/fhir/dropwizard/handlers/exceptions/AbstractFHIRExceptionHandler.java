@@ -1,8 +1,7 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.classes;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
@@ -22,16 +21,6 @@ public abstract class AbstractFHIRExceptionHandler<E extends Throwable> extends 
     abstract Response handleFHIRException(E exception);
 
     abstract Response handleNonFHIRException(E exception);
-
-//    @Override
-//    public Response toResponse(E exception) {
-//        final Response response = super.toResponse(exception);
-//        if (isFHIRResource()) {
-//            return handleFHIRException(exception);
-//        }
-//
-//        return handleNonFHIRException(exception);
-//    }
 
     protected boolean isFHIRResource() {
         return (this.info.getResourceClass() != null && this.info.getResourceClass().getAnnotation(FHIR.class) != null) ||

@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.classes;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;

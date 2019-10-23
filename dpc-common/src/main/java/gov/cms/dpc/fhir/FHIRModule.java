@@ -6,11 +6,11 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
-import gov.cms.dpc.fhir.dropwizard.handlers.classes.DefaultFHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.classes.HAPIExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.classes.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.MethodOutcomeHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.paramtests.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.Configuration;
@@ -45,8 +45,8 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
 
         // Custom exception mappers
         binder.bind(JerseyExceptionHandler.class);
-        binder.bind(DefaultFHIRExceptionHandler.class);
         binder.bind(HAPIExceptionHandler.class);
+        binder.bind(DefaultFHIRExceptionHandler.class);
 
         // Validator
         final FHIRValidationConfiguration validationConfig = getConfiguration().getFHIRConfiguration().getValidation();

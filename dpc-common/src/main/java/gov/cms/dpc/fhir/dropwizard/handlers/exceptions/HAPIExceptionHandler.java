@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.classes;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
