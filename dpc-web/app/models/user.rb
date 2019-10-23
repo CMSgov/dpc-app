@@ -51,6 +51,14 @@ class User < ApplicationRecord
       .where('organizations.organization_type = :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
   end
 
+  scope :by_keyword, ->(keyword) do
+    where(
+      'LOWER(users.first_name) LIKE :keyword OR LOWER(users.last_name) LIKE :keyword OR
+      LOWER(users.email) LIKE :keyword',
+      keyword: "%#{keyword.downcase}%"
+    )
+  end
+
   def self.to_csv
     attrs = %w[id first_name last_name email requested_organization requested_organization_type
                address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at]

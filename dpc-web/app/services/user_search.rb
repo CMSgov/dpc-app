@@ -61,11 +61,7 @@ class UserSearch
 
   def apply_keyword_search(scope)
     if params[:keyword].present?
-      keyword = "%#{params[:keyword].downcase}%"
-      scope = scope.where(
-        'LOWER(users.first_name) LIKE :keyword OR LOWER(users.last_name) LIKE :keyword OR LOWER(users.email) LIKE :keyword',
-        keyword: keyword
-      )
+      scope = scope.by_keyword(params[:keyword])
     end
 
     scope

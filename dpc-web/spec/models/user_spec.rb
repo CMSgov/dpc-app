@@ -170,5 +170,28 @@ RSpec.describe User, type: :model do
         expect(User.assigned_vendor).to match_array([vendor_user])
       end
     end
+
+    describe '.by_keyword' do
+      it 'returns users fuzzy-matching keyword by first_name' do
+        user = create(:user, first_name: 'Clover')
+        _user = create(:user, first_name: 'Summer')
+
+        expect(User.by_keyword('over')).to match_array([user])
+      end
+
+      it 'returns users fuzzy-matching keyword by last_name' do
+        user = create(:user, last_name: 'Smithfield')
+        _user = create(:user, last_name: 'Lee')
+
+        expect(User.by_keyword('Smith')).to match_array([user])
+      end
+
+      it 'returns users fuzzy-matching keyword by email' do
+        user = create(:user, email: 'clover@doctors.com')
+        _user = create(:user, last_name: 'summer@example.com')
+
+        expect(User.by_keyword('doctors')).to match_array([user])
+      end
+    end
   end
 end
