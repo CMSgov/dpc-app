@@ -17,10 +17,16 @@
     min: 0, class: "ds-c-field ds-c-field--small" %>
 </div>
 
-<div class="field">
-  <%= f.label :api_environments, "Environments", class: "ds-c-label" %>
-  <%= f.collection_check_boxes :api_environments, Organization::API_ENVIRONMENTS, :first, :second %>
-</div>
+<fieldset class="ds-c-fieldset">
+  <legend class="ds-c-label">Environments</legend>
+  <span class="ds-c-field__hint">Select all that apply. Unselecting all will remove all env access for organization.</span>
+  <%= f.collection_check_boxes(:api_environments, Organization::API_ENVIRONMENTS, :first, :second) do |b| %>
+    <span>
+      <%= b.check_box(class: 'ds-c-choice') %>
+      <%= b.label %>
+    </span>
+  <% end %>
+</fieldset>
 
 <div>
   <%= f.fields_for :address do |ff| %>

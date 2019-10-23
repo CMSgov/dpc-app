@@ -4,7 +4,7 @@ class Organization < ApplicationRecord
   include OrganizationTypable
 
   API_ENVIRONMENTS = {
-    0 => 'sandbox'
+    0 => 'Sandbox'
   }.freeze
 
   has_one :address, as: :addressable
