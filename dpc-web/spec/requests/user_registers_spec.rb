@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe 'User Registers for Access', type: :request do
-  let(:user) { attributes_for :user, organization_type: 'speciality_clinic' }
+  let(:user) { attributes_for :user, requested_organization_type: 'speciality_clinic' }
 
   it 'creates a new user account' do
     expect { post '/users', params: { user: user } }.to change(User, :count)

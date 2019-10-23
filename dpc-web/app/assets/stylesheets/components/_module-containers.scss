@@ -81,3 +81,9 @@
   color: $color-warn-alt;
   font-weight: $font-bold;
 }
+
+.module-container__indicator--success {
+  background-color: $color-success-alt-lightest;
+  color: $color-success;
+  font-weight: $font-bold;
+}

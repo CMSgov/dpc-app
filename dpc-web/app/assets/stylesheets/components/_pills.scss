@@ -44,7 +44,7 @@
 }
 
 .site-pills__item--orange {
-  background-color: rgba($color-warn-lightest, .9);
+  background-color: $color-warn-alt-light;
   color: $color-warn-alt;
 }
 
@@ -54,6 +54,6 @@
 }
 
 .site-pills__item--green {
-  background-color: rgba($color-success-lightest, .9);
+  background-color: $color-success-alt-lightest;
   color: $color-success;
 }
