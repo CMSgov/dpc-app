@@ -69,7 +69,7 @@ module Internal
     def organization_params
       params.fetch(:organization).permit(
         :name, :organization_type, :num_providers,
-        address_attributes: %i[id street street_2 city state zip]
+        api_environments: [], address_attributes: %i[id street street_2 city state zip]
       )
     end
   end

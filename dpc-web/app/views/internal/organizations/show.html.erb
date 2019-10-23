@@ -19,6 +19,17 @@
     </div>
   </section>
 
+  <section>
+    <div class="ds-u-color--success">
+      <% @organization.api_environments.each do |api_env| %>
+        <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#database"></use>
+        </svg>
+        <%= Organization::API_ENVIRONMENTS[api_env].titleize %>
+      <% end %>
+    </div>
+  </section>
+
   <section class="box">
     <div class="box__content">
       <h2 class="box__heading">Organization info</h2>

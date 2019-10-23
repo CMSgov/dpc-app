@@ -15,6 +15,7 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'organization_name', with: 'Good Health'
     select 'Primary Care Clinic', from: 'organization_organization_type'
     fill_in 'organization_num_providers', with: '2200'
+    check 'organization_api_environments_0'
     fill_in 'organization_address_attributes_street', with: '1 North Main'
     fill_in 'organization_address_attributes_street_2', with: 'Ste 2000'
     fill_in 'organization_address_attributes_city', with: 'Greenville'
@@ -28,11 +29,13 @@ RSpec.feature 'creating and updating organizations' do
     expect(page.body).to have_content('2200')
     expect(page.body).to have_content('Primary Care Clinic')
     expect(page.body).to have_content('1 North Main')
+    expect(page.body).to have_content('Sandbox')
 
     find('[data-test="edit-link"]').click
 
     fill_in 'organization_name', with: 'Health Revisited'
     select 'Multispecialty Clinic', from: 'organization_organization_type'
+    uncheck 'organization_api_environments_0'
     fill_in 'organization_address_attributes_street', with: '50 River St'
     find('[data-test="form-submit"]').click
 
@@ -40,6 +43,7 @@ RSpec.feature 'creating and updating organizations' do
     expect(page.body).to have_content('Health Revisited')
     expect(page.body).to have_content('Multispecialty Clinic')
     expect(page.body).to have_content('50 River St')
+    expect(page.body).not_to have_content('Sandbox')
   end
 
   scenario 'trying to update a organization with invalid attributes ' do
