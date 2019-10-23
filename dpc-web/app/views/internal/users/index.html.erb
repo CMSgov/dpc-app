@@ -10,6 +10,7 @@
     <h1 class="ds-h1">Viewing <strong><%= @users.total_count %></strong> provider users</h1>
     <p class=""><%= page_entries_info @users %></p>
     <%= form_tag internal_users_path, method: "get", class: "ds-u-display--flex" do %>
+      <%= hidden_field_tag :org_status, params[:org_status] %>
       <%= text_field_tag :keyword, params[:keyword], placeholder: "first name, last name, or email", class: "ds-c-field ds-u-margin--0" %>
       <%= submit_tag "Search", data: { test: 'users-keyword-search-submit' }, class: "ds-c-button ds-c-button--primary ds-u-margin-left--1" %>
     <% end %>
@@ -53,25 +54,47 @@
           </div>
         </div>
         <div class="module-container__secondary">
-          <div class="module-container__indicator module-container__indicator--warn">Requested organization</div>
+          <% if user.primary_organization %>
+          <div class="module-container__indicator module-container__indicator--success">Assigned organization</div>
           <div class="module-container__content-wrap">
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#clinic-medical"></use>
               </svg>
-              <%= user.organization %> </div>
+              <%= user.primary_organization.name %> </div>
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#shapes"></use>
               </svg>
-              <%= user.organization_type.titleize %> </div>
+              <%= user.primary_organization.organization_type.titleize %></div>
             <div>
               <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
               </svg>
-              <%= city_state(user) %>
+              <%= user.primary_organization.address_city %>, <%= user.primary_organization.address_state %>
             </div>
           </div>
+          <% else %>
+            <div class="module-container__indicator module-container__indicator--warn">Requested organization</div>
+            <div class="module-container__content-wrap">
+              <div>
+                <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+                </svg>
+                <%= user.requested_organization %> </div>
+              <div>
+                <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#shapes"></use>
+                </svg>
+                <%= user.requested_organization_type.titleize %> </div>
+              <div>
+                <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+                </svg>
+                <%= city_state(user) %>
+              </div>
+            </div>
+          <% end %>
         </div>
       </div>
     <% end %>
