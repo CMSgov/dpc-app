@@ -7,34 +7,9 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      scope = User.all
+      results = UserSearch.new(params: params, scope: :all).results
 
-      if params[:keyword].present?
-        keyword = "%#{params[:keyword].downcase}%"
-        scope = scope.where(
-          'LOWER(first_name) LIKE :keyword OR LOWER(last_name) LIKE :keyword OR LOWER(email) LIKE :keyword',
-          keyword: keyword
-        )
-      end
-
-      if params[:requested_org].present?
-        org = "%#{params[:requested_org].downcase}%"
-        scope = scope.where('LOWER(organization) LIKE :org', org: org)
-      end
-
-      if params[:requested_org_type].present?
-        scope = scope.where(organization_type: params[:requested_org_type])
-      end
-
-      if params[:created_after].present?
-        scope = scope.where('created_at > :created_after', created_after: params[:created_after])
-      end
-
-      if params[:created_before].present?
-        scope = scope.where('created_at < :created_before', created_before: params[:created_before])
-      end
-
-      @users = scope.order('created_at DESC').page params[:page]
+      @users = results.order('users.created_at DESC').page params[:page]
     end
 
     def show
@@ -66,7 +41,7 @@ module Internal
     private
 
     def user_params
-      params.fetch(:user).permit(:first_name, :last_name, :email)
+      params.fetch(:user).permit(:first_name, :last_name, :email, :organization_ids)
     end
   end
 end

@@ -50,9 +50,9 @@ RSpec.feature 'searching and filtering users' do
   end
 
   scenario 'filtering users by created_at and requested org with the modal' do
-    create(:user, organization: 'Primary Claw', organization_type: 'primary_care_clinic', created_at: 10.days.ago)
-    create(:user, organization: 'FeederFish Dental', organization_type: 'speciality_clinic', created_at: 5.days.ago)
-    create(:user, organization: 'As Fast As Legs Can Carry', organization_type: 'urgent_care', created_at: 2.days.ago)
+    create(:user, requested_organization: 'Primary Claw', requested_organization_type: 'primary_care_clinic', created_at: 10.days.ago)
+    create(:user, requested_organization: 'FeederFish Dental', requested_organization_type: 'speciality_clinic', created_at: 5.days.ago)
+    create(:user, requested_organization: 'As Fast As Legs Can Carry', requested_organization_type: 'urgent_care', created_at: 2.days.ago)
 
     visit internal_users_path
 

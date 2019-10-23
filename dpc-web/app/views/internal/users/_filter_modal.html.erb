@@ -43,6 +43,7 @@
 
         </div>
         <div class="ds-l-col--9 ds-u-padding-x--0">
+          <%= hidden_field_tag :org_status, params[:org_status] %>
           <%= submit_tag "Apply filters", class: "ds-c-button ds-c-button--primary", data: { test: 'users-filter-submit' } %>
         </div>
       </aside>
