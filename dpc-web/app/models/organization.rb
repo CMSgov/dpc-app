@@ -29,17 +29,17 @@ class Organization < ApplicationRecord
   end
 
   def update_api_organization
-    if api_environments_changed?
-      added_envs = api_environments - api_environments_was
-      removed_envs = api_environments_was - api_environments
+    return unless api_environments_changed?
 
-      added_envs.each do |api_env|
-        APIClient.new(api_env).create_organization(self)
-      end
+    added_envs = api_environments - api_environments_was
+    removed_envs = api_environments_was - api_environments
 
-      removed_envs.each do |api_env|
-        APIClient.new(api_env).delete_organization(self)
-      end
+    added_envs.each do |api_env|
+      APIClient.new(api_env).create_organization(self)
+    end
+
+    removed_envs.each do |api_env|
+      APIClient.new(api_env).delete_organization(self)
     end
   end
 end
