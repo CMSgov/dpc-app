@@ -35,8 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -57,13 +56,69 @@ class JWTUnitTests {
     @Test
     void testQueryParams() {
         final String payload = "this is not a payload";
-        final Response response = RESOURCE.target("/Token/auth")
+        Response response = RESOURCE.target("/Token/auth")
                 .request()
                 .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
-        final ValidationErrorResponse validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
-        assertAll(() -> assertEquals(400, response.getStatus(), "Should have failed"),
-                () -> assertEquals(3, validationErrorResponse.errors.size(), "Should have three validations"));
+        // Should have all exceptions
+        ValidationErrorResponse validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+        assertEquals(400, response.getStatus(), "Should have failed");
+        assertEquals(3, validationErrorResponse.errors.size(), "Should have three validations");
+
+        // Add the missing scope value and try again
+        response = RESOURCE.target("/Token/auth").queryParam("scope", "this is not a scope")
+                .request()
+                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+        // Should have one less exception
+        validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+        assertEquals(400, response.getStatus(), "Should have failed");
+        assertEquals(2, validationErrorResponse.errors.size(), "Should have two validations");
+
+
+        // Add the grant type
+        response = RESOURCE.target("/Token/auth")
+                .queryParam("scope", "this is not a scope")
+                .queryParam("grant_type", "client_credentials")
+                .request()
+                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+        // Should have all exceptions
+        validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+        assertEquals(400, response.getStatus(), "Should have failed");
+        assertEquals(1, validationErrorResponse.errors.size(), "Should only have a single violation");
+        assertTrue(validationErrorResponse.errors.get(0).contains("Assertion type is required"));
+
+        // Add the assertion type and try again
+        response = RESOURCE.target("/Token/auth")
+                .queryParam("scope", "this is not a scope")
+                .queryParam("grant_type", "client_credentials")
+                .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                .request()
+                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+        // Should have no validation exceptions
+        validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+        assertEquals(500, response.getStatus(), "Should have failed, but for different reasons");
+        assertNull(validationErrorResponse, "Should not have validation error response");
+    }
+
+    @Test
+    void testScopeValues() {
+        // TODO: Figure out scope testing
+    }
+
+    @Test
+    void testGrantTypeValues() {
+        final String payload = "not a real payload";
+        Response response = RESOURCE.target("/Token/auth")
+                .queryParam("scope", "this is not a scope")
+                .queryParam("grant_type", "wrong_grant_type")
+                .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                .request()
+                .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+        assertEquals(500, response.getStatus(), "Should have failed, but for different reasons");
     }
 
     @Test
