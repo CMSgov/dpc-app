@@ -19,10 +19,27 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address
 
+  before_save :update_api_organization
+
   def api_environments=(input)
     input = [] unless input.is_a?(Array)
     input.reject!(&:blank?)
 
     self[:api_environments] = input || []
+  end
+
+  def update_api_organization
+    if api_environments_changed?
+      added_envs = api_environments - api_environments_was
+      removed_envs = api_environments_was - api_environments
+
+      added_envs.each do |api_env|
+        APIClient.new(api_env).create_organization(self)
+      end
+
+      removed_envs.each do |api_env|
+        APIClient.new(api_env).delete_organization(self)
+      end
+    end
   end
 end
