@@ -10,15 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 2019_10_17_201830) do
-=======
-ActiveRecord::Schema.define(version: 2019_10_07_162013) do
->>>>>>> f79276e2... User belongs_to Organization
-=======
-ActiveRecord::Schema.define(version: 2019_10_07_162013) do
->>>>>>> c4520fe7... User belongs_to Organization
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -133,7 +125,6 @@ ActiveRecord::Schema.define(version: 2019_10_07_162013) do
     t.integer "requested_num_providers", default: 0
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
-    t.integer "organization_id"
     t.index ["created_at"], name: "index_users_on_created_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["last_name", "first_name"], name: "index_users_on_last_name_and_first_name"
