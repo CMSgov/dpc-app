@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import org.apache.http.HttpHeaders;
@@ -35,9 +36,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class KeyResourceTest extends AbstractSecureApplicationTest {
 
     private final ObjectMapper mapper;
+    private final String fullyAuthedToken;
 
     private KeyResourceTest() {
         this.mapper = new ObjectMapper();
+        // Do the JWT flow in order to get a correct ORGANIZATION_TOKEN, this is normally handled by the HAPI client
+        try {
+            this.fullyAuthedToken = APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey).accessToken;
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -50,7 +58,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             builder.addParameter("label", "this is a test");
             final HttpPost post = new HttpPost(builder.build());
             post.setEntity(new StringEntity(key));
-            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(post)) {
@@ -73,7 +81,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             b2.addParameter("label", "This is way too long to be used for a key id field. Never should pass");
             final HttpPost labelViolationPost = new HttpPost(b2.build());
             labelViolationPost.setEntity(new StringEntity(key));
-            labelViolationPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            labelViolationPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             labelViolationPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
             try (CloseableHttpResponse response = client.execute(labelViolationPost)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key label cannot be too long");
@@ -89,7 +97,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("%s/Key", getBaseURL()));
             post.setEntity(new StringEntity(key));
-            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(post)) {
@@ -98,7 +106,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             }
             assertNotNull(entity, "Should have retrieved entity");
             final HttpGet get = new HttpGet(String.format("%s/Key/%s", getBaseURL(), entity.id));
-            get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(get)) {
@@ -110,18 +118,18 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             }
 
             final HttpGet keyGet = new HttpGet(String.format("%s/Key", getBaseURL()));
-            keyGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            keyGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             keyGet.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(keyGet)) {
                 final List<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<KeyView>>() {
                 });
-                assertEquals(1, fetched.size(), "Should have a single key");
+                assertEquals(3, fetched.size(), "Should have multiple keys");
             }
 
             // Delete it
             final HttpDelete keyDeletion = new HttpDelete(String.format("%s/Key/%s", getBaseURL(), entity.id));
-            keyDeletion.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + ORGANIZATION_TOKEN);
+            keyDeletion.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             keyDeletion.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(keyDeletion)) {
@@ -132,7 +140,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             try (CloseableHttpResponse response = client.execute(keyGet)) {
                 final List<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<KeyView>>() {
                 });
-                assertEquals(0, fetched.size(), "Should not have any keys");
+                assertEquals(2, fetched.size(), "Should have one less key");
             }
         }
     }

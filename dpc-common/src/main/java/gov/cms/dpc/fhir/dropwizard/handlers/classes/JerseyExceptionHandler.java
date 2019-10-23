@@ -6,6 +6,8 @@ import io.dropwizard.jersey.validation.ConstraintMessage;
 import io.dropwizard.jersey.validation.JerseyViolationException;
 import io.dropwizard.jersey.validation.ValidationErrorMessage;
 import org.glassfish.jersey.server.model.Invocable;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
@@ -41,8 +43,19 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
                 .transform(violation -> ConstraintMessage.getMessage(violation, invocable)).toList();
 
         final int status = ConstraintMessage.determineStatus(violations, invocable);
+        final OperationOutcome outcome = new OperationOutcome();
+
+        errors.forEach(error -> {
+            final OperationOutcome.OperationOutcomeIssueComponent component = new OperationOutcome.OperationOutcomeIssueComponent();
+            component.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+            component.setCode(OperationOutcome.IssueType.INVALID);
+            component.setDetails(new CodeableConcept().setText(error));
+            outcome.addIssue(component);
+        });
+
+        // Create an Operation Outcome and add all the exceptions
         return Response.status(status)
-                .entity(new ValidationErrorMessage(errors))
+                .entity(outcome)
                 .build();
     }
 

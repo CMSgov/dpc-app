@@ -3,7 +3,6 @@ package gov.cms.dpc.api;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import static gov.cms.dpc.api.APITestHelpers.ATTRIBUTION_URL;
+import static gov.cms.dpc.api.APITestHelpers.MacaroonsInterceptor;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,11 +51,11 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testMalformedTokens() throws IOException, URISyntaxException {
-        final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, getAdminURL());
-
+    void testMalformedTokens() {
+        // Manually build the FHIR client, so we can use custom Macaroon values
+        final IGenericClient client = ctx.newRestfulGenericClient(getBaseURL());
         // Try for empty Macaroon
-        IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), "", KEY_ID, privateKey);
+        client.registerInterceptor(new MacaroonsInterceptor(""));
 
         final IReadExecutable<Organization> fetchOrg = client
                 .read()
@@ -66,7 +65,8 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
 
         assertThrows(AuthenticationException.class, fetchOrg::execute, "Should throw exception with empty Token");
 
-        final IGenericClient c2 = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), Base64.getUrlEncoder().encodeToString("not a valid {token}".getBytes(StandardCharsets.UTF_8)), KEY_ID, privateKey);
+        final IGenericClient c2 = ctx.newRestfulGenericClient(getBaseURL());
+        c2.registerInterceptor(new MacaroonsInterceptor(Base64.getUrlEncoder().encodeToString("not a valid {token}".getBytes(StandardCharsets.UTF_8))));
 
         final IReadExecutable<Organization> fo2 = c2
                 .read()

@@ -31,6 +31,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
     }
 
     @Override
+    @SuppressWarnings("rawtypes") // We need to suppress this because the Raw type is part of the signature we inherit
     public Key resolveSigningKey(JwsHeader header, Claims claims) {
         final String keyId = header.getKeyId();
         if (keyId == null) {
