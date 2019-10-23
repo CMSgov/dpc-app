@@ -32,10 +32,18 @@
   }
 }
 
+.usa-accordion .ds-c-vertical-nav__subnav .ds-c-vertical-nav__label {
+  padding-left: $spacer-3;
+}
+
 .usa-accordion .ds-c-vertical-nav__subnav .ds-c-vertical-nav__item {
   border-top: none;
 }
 
 .usa-accordion .ds-c-vertical-nav__subnav .ds-c-vertical-nav__label--current {
     border-color: transparent;
+}
+
+.usa-accordion .ds-c-vertical-nav__subnav .ds-c-vertical-nav__subnav .ds-c-vertical-nav__label {
+  padding-left: $spacer-4;
 }
