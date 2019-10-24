@@ -11,7 +11,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * {@link Security} annotation which indicates that a given operation is only accessible to admin tokens (e.g. Golden Macaroons)
  *
- * Note:
  */
 @Documented
 @Retention(RUNTIME)

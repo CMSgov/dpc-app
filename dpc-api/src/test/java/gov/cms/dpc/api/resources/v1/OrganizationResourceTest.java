@@ -31,15 +31,15 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
 
         final String newOrgID = UUID.randomUUID().toString();
-        final Organization organization = OrganizationHelpers.createOrganization(ctx, client, newOrgID);
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, client, newOrgID, true);
         assertNotNull(organization);
 
         // Try again, should fail because it's a duplicate
         // Error handling is really bad right now, but it should get improved in DPC-540
-        assertThrows(InternalErrorException.class, () -> OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon), newOrgID));
+        assertThrows(InternalErrorException.class, () -> OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon), newOrgID, true));
 
         // Now, try to create one again, but using an actual org token
-        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN)), UUID.randomUUID().toString());
+        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN), UUID.randomUUID().toString(), true));
     }
 
     @Test

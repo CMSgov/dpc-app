@@ -12,13 +12,16 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.UUID;
 
 import static gov.cms.dpc.api.auth.AuthHelpers.BEARER_PREFIX;
 
+/**
+ * Implementation of {@link AuthFilter} to use when an {@link gov.cms.dpc.api.auth.annotations.AdminOperation} annotated method (or class) is called.
+ * This method does not inherit from {@link DPCAuthFilter} and is designed to ensure that Organization access tokens cannot be passed to admin operations.
+ * Only Golden Macaroons should be allowed through
+ */
 @Priority(Priorities.AUTHENTICATION)
 public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
 
@@ -31,7 +34,6 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        final UriInfo uriInfo = requestContext.getUriInfo();
         final String macaroon = AuthHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
         // Validate Macaroon
