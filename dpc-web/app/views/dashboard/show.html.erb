@@ -1,11 +1,11 @@
-<% title "Welcome, #{@dpc_registration.user.first_name}!" %>
+<% title "Welcome, #{@user.first_name}!" %>
 
 <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Welcome, <%= @dpc_registration.user.first_name %>!</h1>
 
 <section class="box">
   <div class="box__content">
     <div>
-      <% if @dpc_registration.access_level == "no_access" %>
+      <% if @user.unassigned? %>
       <span class="ds-c-badge ds-c-badge--warn ds-u-font-size--base">Access requested</span>
       <% end %>
     </div>
