@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.UUID;
 
+import static gov.cms.dpc.api.auth.AuthHelpers.BEARER_PREFIX;
+
 /**
  * {@link AuthFilter} implementation which extracts the Macaroon (base64 encoded) from the request.
  * Once extracted, it passes it down along the authn/authz chain.
@@ -30,9 +32,8 @@ import java.util.UUID;
  */
 abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
 
-    private static final String BEARER_PREFIX = "Bearer";
-    private static final String TOKEN_URI_PARAM = "token";
     private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
+
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
@@ -48,18 +49,8 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
     @Override
     public void filter(final ContainerRequestContext requestContext) throws IOException {
-        // Try to get the Macaroon from the request
-        String macaroon = getMacaroon(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
-
         final UriInfo uriInfo = requestContext.getUriInfo();
-
-        if (macaroon == null) {
-            macaroon = uriInfo.getQueryParameters().getFirst(TOKEN_URI_PARAM);
-        }
-
-        if (macaroon == null) {
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
-        }
+        final String macaroon = AuthHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
         // If we have a path authorizer, do that, otherwise, continue
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
@@ -94,24 +85,5 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         }
 
         return buildCredentials(macaroon, orgID, uriInfo);
-    }
-
-    @Nullable
-    private String getMacaroon(String header) {
-        if (header == null) {
-            return null;
-        }
-
-        final int space = header.indexOf(' ');
-        if (space <= 0) {
-            return null;
-        }
-
-        final String method = header.substring(0, space);
-        if (!BEARER_PREFIX.equalsIgnoreCase(method)) {
-            return null;
-        }
-
-        return header.substring(space + 1);
     }
 }

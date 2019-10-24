@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation which specifies that the annotated resource is part of a FHIR {@link org.hl7.fhir.dstu3.model.Parameters} object.
- * By default, it automatically call {@link Parameters#getParameterFirstRep()} and returns the resource
+ * By default, it automatically call {@link Parameters#getParameterFirstRep()} and return the resource
  * <p>
  * Users can specify which parameter to use by setting the {@link FHIRParameter#name()} value.
  */
