@@ -4,6 +4,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 
 import javax.inject.Inject;
@@ -29,5 +30,10 @@ public class DPCAuthFactory implements AuthFactory {
     @Override
     public DPCAuthFilter createStandardAuthorizer() {
         return new PrincipalInjectionAuthFilter(bakery, authenticator, dao);
+    }
+
+    @Override
+    public AuthFilter<DPCAuthCredentials, OrganizationPrincipal> createAdminAuthorizer() {
+        return new AdminAuthFilter(bakery, authenticator);
     }
 }

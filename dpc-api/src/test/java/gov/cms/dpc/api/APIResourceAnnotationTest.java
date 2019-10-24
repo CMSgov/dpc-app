@@ -3,6 +3,7 @@ package gov.cms.dpc.api;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.collect.ImmutableSet;
+import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.resources.TestResource;
@@ -78,7 +79,7 @@ class APIResourceAnnotationTest {
 
     @Test
     void allResourcesHaveSecurityAnnotations() {
-        methods.forEach(method -> assertMethodHasValidAuthAnnotations(method));
+        methods.forEach(APIResourceAnnotationTest::assertMethodHasValidAuthAnnotations);
     }
 
     /**
@@ -103,7 +104,7 @@ class APIResourceAnnotationTest {
         }
 
         // each method should have validParameter or Public or PathAuthorizer annotations
-        assertTrue((validParameters || method.isAnnotationPresent(PathAuthorizer.class) || method.isAnnotationPresent(Public.class)),
+        assertTrue((validParameters || method.isAnnotationPresent(PathAuthorizer.class) || method.isAnnotationPresent(Public.class) || method.isAnnotationPresent(AdminOperation.class)),
                 String.format("Method: %s in Class: %s must either have a parameter with an Auth or a PathAuthorizer or Public annotation on the method.", method.getName(), method.getDeclaringClass())
         );
     }

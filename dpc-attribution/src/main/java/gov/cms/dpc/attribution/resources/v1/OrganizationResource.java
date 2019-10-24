@@ -78,7 +78,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 201, message = "Organization was successfully registered")
     })
     public Response submitOrganization(Parameters parameters) {
-
+        // TODO: This method signature should be migrated to using the FHIRParams annotation
         final Parameters.ParametersParameterComponent firstRep = parameters.getParameterFirstRep();
 
         if (!firstRep.hasResource()) {
