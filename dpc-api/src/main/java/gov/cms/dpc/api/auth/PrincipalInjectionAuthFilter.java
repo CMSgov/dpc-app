@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.auth;
 
 import gov.cms.dpc.api.jdbi.TokenDAO;
-import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.IdType;
