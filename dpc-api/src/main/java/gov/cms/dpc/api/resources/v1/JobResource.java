@@ -14,10 +14,7 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.bouncycastle.util.encoders.Hex;
 import org.eclipse.jetty.http.HttpStatus;
@@ -45,7 +42,7 @@ import java.util.stream.Collectors;
 /**
  * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
  */
-@Api(tags = {"Bulk Data", "Job"})
+@Api(tags = {"Bulk Data", "Job"}, authorizations = @Authorization(value = "apiKey"))
 public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
@@ -188,7 +185,7 @@ public class JobResource extends AbstractJobResource {
                 .collect(Collectors.toList());
     }
 
-    public JobCompletionModel.OutputEntryExtension buildExtension(JobQueueBatchFile batchFile) {
+    JobCompletionModel.OutputEntryExtension buildExtension(JobQueueBatchFile batchFile) {
         String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(batchFile.getBatchID(), batchFile.getResourceType(), batchFile.getSequence()));
         File file = new File(filePath);
         String checksum = generateChecksum(file);

@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Api(value = "Token")
+@Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
 public class TokenResource extends AbstractTokenResource {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
