@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.auth;
 
+import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
 import io.dropwizard.auth.Auth;
@@ -37,7 +38,7 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
 
         // If we're public don't do anything
-        if (isPublic(resourceInfo, am)) {
+        if (isMethodClassAnnotated(Public.class, resourceInfo, am)) {
             return;
         }
 
@@ -45,6 +46,13 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
         if (authAnnotated(am)) {
             logger.trace("Registering Auth param on method {}", am.toString());
             context.register(this.factory.createStandardAuthorizer());
+            return;
+        }
+
+        // Check for Admin annotated params
+        if (isMethodClassAnnotated(AdminOperation.class, resourceInfo, am)) {
+            logger.trace("Registering Admin authorizer on method {}", am);
+            context.register(this.factory.createAdminAuthorizer());
             return;
         }
 
@@ -58,12 +66,6 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
             context.register(this.factory.createPathAuthorizer(pa));
         }
     }
-
-    private boolean isPublic(ResourceInfo resourceInfo, AnnotatedMethod am) {
-        return am.isAnnotationPresent(Public.class)
-                || (resourceInfo.getResourceClass().getAnnotation(Public.class) != null);
-    }
-
     private boolean authAnnotated(AnnotatedMethod am) {
         final Annotation[][] parameterAnnotations = am.getParameterAnnotations();
 
@@ -75,5 +77,10 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
             }
         }
         return false;
+    }
+
+    private boolean isMethodClassAnnotated(Class<? extends Annotation> annotation, ResourceInfo resourceInfo, AnnotatedMethod am) {
+        return am.isAnnotationPresent(annotation)
+                || (resourceInfo.getResourceClass().getAnnotation(annotation) != null);
     }
 }

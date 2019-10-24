@@ -45,37 +45,4 @@ public class AttributionTestHelpers {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(serverURL);
     }
-
-    public static Organization createOrganization(FhirContext ctx, String serverURL) {
-        final IGenericClient client = createFHIRClient(ctx, serverURL);
-
-        // Check to see if the organization already exists, otherwise, create it
-        final Bundle searchBundle = client
-                .search()
-                .forResource(Organization.class)
-                .where(Organization.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), "test-org-npi"))
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
-
-        if (searchBundle.getTotal() > 0) {
-            return (Organization) searchBundle.getEntryFirstRep().getResource();
-        }
-
-        // Read in the test file
-        final InputStream inputStream = AttributionTestHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json");
-        final Bundle resource = (Bundle) ctx.newJsonParser().parseResource(inputStream);
-
-        final Parameters parameters = new Parameters();
-        parameters.addParameter().setResource(resource);
-
-        return client
-                .operation()
-                .onType(Organization.class)
-                .named("submit")
-                .withParameters(parameters)
-                .returnResourceType(Organization.class)
-                .encodedJson()
-                .execute();
-    }
 }
