@@ -1,0 +1,29 @@
+<% title "New Client Token" %>
+
+<div class="ds-l-container ds-u-padding-x--0">
+
+  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
+
+    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Create a new client token</h1>
+
+  </section>
+
+  <section class="box">
+    <div class="box__content">
+      <%= form_tag client_tokens_path, method: :post do %>
+        <div class="field">
+          <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
+          <%= select_tag :api_environment, params[:api_environment], @organization.api_environments %>
+        </div>
+
+        <div class="field">
+          <%= label_tag :description, "Label", class: "ds-c-label" %>
+          <%= text_field_tag :description, params[:description], class: "ds-c-field" %>
+        </div>
+
+        <%= submit_tag "Create", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+      <% end %>
+    </div>
+  </section>
+</div>
+
