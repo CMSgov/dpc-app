@@ -1,20 +1,14 @@
 <% title "Welcome, #{@user.first_name}!" %>
 
-<h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Welcome, <%= @dpc_registration.user.first_name %>!</h1>
-
-<section class="box">
-  <div class="box__content">
-    <div>
-      <% if @user.unassigned? %>
-      <span class="ds-c-badge ds-c-badge--warn ds-u-font-size--base">Access requested</span>
-      <% end %>
-    </div>
-
-    <h2>Please stay tuned</h2>
-    <p class="ds-text--lead">CMS will respond when it is ready for you to join the pilot. Unfortunately, this could take a bit of time. In the meantime, CMS recommends taking the following actions: </p>
+<div class="ds-l-container">
+  <div class="ds-l-row--12">
+    <% if @user.unassigned? %>
+      <%= render 'unassigned_content' %>
+    <% else %>
+      <%= render 'assigned_content' %>
+    <% end %>
   </div>
-</section>
-
+</div>
 
 <div class="ds-l-row dashboard-grid">
   <div class="ds-l-col--12 ds-l-sm-col--6 dashboard-grid__item">
