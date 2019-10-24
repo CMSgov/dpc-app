@@ -99,6 +99,10 @@ public class TokenResource extends AbstractTokenResource {
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
+        // Ensure that each generated Macaroon has an associated Organization ID
+        // This way we check to make sure we never generate a Golden Macaroon
+        ensureOrganizationPresent(macaroon);
+
         final TokenEntity token = new TokenEntity(macaroon.identifier, organizationID, TokenEntity.TokenType.MACAROON);
 
         // Set the expiration time
@@ -166,6 +170,20 @@ public class TokenResource extends AbstractTokenResource {
             return customExpiration;
         }
         return defaultExpiration;
+    }
+
+    private void ensureOrganizationPresent(Macaroon macaroon) {
+        final boolean idMissing = this.bakery
+                .getCaveats(macaroon)
+                .stream()
+                .map(MacaroonCaveat::getCondition)
+                .noneMatch(cond -> cond.getKey().equals("organization_id"));
+
+        if (idMissing) {
+            logger.error("GOLDEN MACAROON WAS GENERATED IN TOKEN RESOURCE!");
+            // TODO: Remove the Macaroon from the root key store (DPC-729)
+            throw new IllegalStateException("Token generation failed");
+        }
     }
 
     private static void checkOrganizationMatches(OrganizationPrincipal organizationPrincipal, UUID organizationID) {
