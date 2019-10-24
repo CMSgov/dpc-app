@@ -20,7 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import java.util.UUID;
 
-@Api(value = "Endpoint")
+@Api(value = "Endpoint", authorizations = @Authorization(value = "apiKey"))
 public class EndpointResource extends AbstractEndpointResource {
 
     private final IGenericClient client;
