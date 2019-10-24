@@ -1,12 +1,11 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.testing.OrganizationHelpers;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -30,11 +29,17 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon);
 
-        final Organization organization = OrganizationHelpers.createOrganization(ctx, client, UUID.randomUUID().toString());
+
+        final String newOrgID = UUID.randomUUID().toString();
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, client, newOrgID);
         assertNotNull(organization);
 
+        // Try again, should fail because it's a duplicate
+        // Error handling is really bad right now, but it should get improved in DPC-540
+        assertThrows(InternalErrorException.class, () -> OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon), newOrgID));
+
         // Now, try to create one again, but using an actual org token
-        final Organization o2 = OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN));
+        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN)), UUID.randomUUID().toString());
     }
 
     @Test

@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -36,8 +37,9 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @Override
     @ApiOperation(hidden = true, value = "Create organization by submitting Bundle")
+    @AdminOperation
+    @Override
     public Organization submitOrganization(@FHIRParameter(name = "resource") Bundle organizationBundle) {
 
         final Parameters parameters = new Parameters();
