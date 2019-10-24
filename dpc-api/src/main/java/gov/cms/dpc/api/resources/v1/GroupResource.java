@@ -33,7 +33,7 @@ import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
-@Api(value = "Group")
+@Api(value = "Group", authorizations = @Authorization(value = "apiKey"))
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);

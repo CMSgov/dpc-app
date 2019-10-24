@@ -8,10 +8,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.entities.PatientEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -26,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
+@Api(value = "Patient")
 public class PatientResource extends AbstractPatientResource {
 
     private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
