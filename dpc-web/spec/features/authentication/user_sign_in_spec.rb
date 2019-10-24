@@ -4,7 +4,6 @@ require 'rails_helper'
 
 RSpec.feature 'user signs in' do
   let!(:user) { create :user, password: '123456', password_confirmation: '123456' }
-  let!(:dpc_registration) { create :dpc_registration, user: user }
 
   scenario 'when successful' do
     visit new_user_session_path
