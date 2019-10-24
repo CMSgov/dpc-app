@@ -2,8 +2,10 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -11,6 +13,7 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
@@ -189,4 +192,50 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 //
 //        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
     }
+
+    @Test
+    void PatientEverything() throws IOException, URISyntaxException, NoSuchAlgorithmException {
+        final IParser parser = ctx.newJsonParser();
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getAdminURL());
+        final String keyLabel = "patient-everything-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+
+        final Bundle patients = client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .execute();
+
+        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 17).getResource();
+
+        // possibly not the right construction of the request, but also not allowed yet by capabilities
+        // See api.client.ClientUtils for examples of client usage
+        final IOperationUntypedWithInput<Patient> everythingRequest = client
+                .operation()
+                .onType(Patient.class)
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Patient.class)
+                .encodedJson();
+
+        assertThrows(MethodNotAllowedException.class, everythingRequest::execute, "$everything not yet allowed");
+    }
+//
+//    @Test
+//    void testJobPolling() throws ExecutionException, InterruptedException {
+//        UUID orgID = UUID.fromString(APITestHelpers.ORGANIZATION_ID);
+//        UUID jobID = queue.createJob(UUID.fromString(APITestHelpers.ORGANIZATION_ID), "providerID", List.of("1"), List.of(ResourceType.Patient));
+//        JobStatus status = PatientResource.pollUntilFinalStatus(jobID, orgID, queue);
+//    }
+//
+//    @Test
+//    void testCheckEverythingJob() {
+//        UUID orgID = UUID.fromString(APITestHelpers.ORGANIZATION_ID);
+//        UUID jobID = queue.createJob(UUID.fromString(APITestHelpers.ORGANIZATION_ID), "providerID", List.of("1"), List.of(ResourceType.Patient));
+//        JobStatus status = PatientResource.checkEverythingJob(jobID, orgID, queue);
+//        System.out.println("\n\nJobStatus from checkEverythingJob is " + status);
+//    }
 }

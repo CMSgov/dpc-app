@@ -37,6 +37,10 @@ public abstract class AbstractPatientResource {
     @Path("/{patientID}")
     public abstract Patient getPatient(UUID patientID);
 
+    @GET
+    @Path("/{patientID}/$everything")
+    public abstract Response everything(OrganizationPrincipal organization, String patientID);
+
     @DELETE
     @Path("/{patientID}")
     public abstract Response deletePatient(UUID patientID);

@@ -1,16 +1,20 @@
 package gov.cms.dpc.api;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.validation.FhirValidator;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
+import gov.cms.dpc.api.resources.v1.PatientResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -33,6 +37,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
@@ -56,6 +61,7 @@ class FHIRSubmissionTest {
     private static IReadExecutable mockExecutable = mock(IReadExecutable.class);
     private static ProvenanceResourceFactoryProvider factory = mock(ProvenanceResourceFactoryProvider.class);
 
+    private static final FhirContext ctx = FhirContext.forDstu3();
     private static final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
 
@@ -65,6 +71,7 @@ class FHIRSubmissionTest {
     private ResourceExtension groupResource = ResourceExtension.builder()
             .addResource(new GroupResource(queue, client, TEST_BASE_URL))
             .addResource(new JobResource(queue, TEST_BASE_URL))
+            .addResource(new PatientResource(queue, client, null, ""))
             .setTestContainerFactory(testContainer)
             .addProvider(staticFilter)
             .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
@@ -97,7 +104,7 @@ class FHIRSubmissionTest {
         // Finish the job and check again
         assertEquals(1, queue.queueSize(), "Should have at least one job in queue");
         final var job = queue.claimBatch(AGGREGATOR_ID).orElseThrow(() -> new IllegalStateException("Should have a job"));
-        while ( job.fetchNextPatient(AGGREGATOR_ID).isPresent() ) {
+        while (job.fetchNextPatient(AGGREGATOR_ID).isPresent()) {
             queue.completePartialBatch(job, AGGREGATOR_ID);
         }
         queue.completeBatch(job, AGGREGATOR_ID);
@@ -212,6 +219,20 @@ class FHIRSubmissionTest {
         assertAll(() -> assertEquals(resources.size(), JobQueueBatch.validResourceTypes.size()));
     }
 
+    @Test
+    void testPatientEverythingRequest() {
+        final WebTarget target = groupResource.target("/Patient/1/$everything");
+        final Response response = target.request().accept(FHIR_JSON)
+                .get();
+
+        var job = queue.claimBatch(AGGREGATOR_ID);
+        assertTrue(job.isPresent());
+
+        assertAll(
+                () -> assertEquals(408, response.getStatus(), "Should have a timeout response status"),
+                () -> assertEquals(null, response.getHeaderString("Content-Location"), "Should not have content location")
+        );
+    }
 
     @SuppressWarnings("unchecked")
     private static void mockClient() {
@@ -224,6 +245,7 @@ class FHIRSubmissionTest {
 
         Mockito.when(client.read()).thenReturn(mockRead);
         Mockito.when(mockRead.resource(Group.class)).thenReturn(mockTypedRead);
+        Mockito.when(mockRead.resource(Patient.class)).thenReturn(mockTypedRead);
         Mockito.when(mockTypedRead.withId(Mockito.any(IdType.class))).thenReturn(mockExecutable);
         Mockito.when(mockExecutable.encodedJson()).thenReturn(mockExecutable);
         Mockito.when(mockExecutable.execute()).thenAnswer(answer -> {
