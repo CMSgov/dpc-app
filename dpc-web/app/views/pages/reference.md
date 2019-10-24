@@ -792,7 +792,7 @@ GET /api/v1/Group?characteristic=attributed-to&characteristic-code={provider NPI
 **cURL command**
 
 ~~~ sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Group?characteristic=attributed-to&characteristic-code=11349583 \
+curl -v https://sandbox.dpc.cms.gov/api/v1/Group?characteristic=attributed-to&characteristic-code={provider NPI} \
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json
 ~~~
@@ -870,7 +870,7 @@ The dollar sign (‘$’) before the word “export” in the URL indicates that
 **cURL command**
 
 ~~~ sh
-curl -v https://sandbox.DPC.cms.gov/api/v1/Group/64d0cd85-7767-425a-a3b8-dcc9bdfd5402/\$export \
+curl -v https://sandbox.DPC.cms.gov/api/v1/Group/{attribution Group.id}/\$export \
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Prefer: respond-async'
@@ -884,7 +884,7 @@ In the example header below, the number `42` in the URL represents the ID of the
 
 **Headers**
 
-- Content-Location: https://sandbox.dpc.cms.gov/api/v1/jobs/42
+- Content-Location: https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job}
 
 
 **4. Check the status of the export job**
@@ -894,7 +894,7 @@ In the example header below, the number `42` in the URL represents the ID of the
 **Request**
 
 ~~~ sh
-GET https://sandbox.dpc.cms.gov/api/v1/jobs/42
+GET https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job}
 ~~~
 
 Using the `Content-Location` header value from the data export response, you can check the status of the export job.
@@ -907,7 +907,7 @@ The status will change from `202 Accepted` to `200 OK` when the export job is co
 **cURL Command**
 
 ~~~ sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/42 \
+curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job} \
 -H 'Authorization: Bearer {token}'
 ~~~
 
