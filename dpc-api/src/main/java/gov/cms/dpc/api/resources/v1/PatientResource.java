@@ -12,24 +12,42 @@ import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
+import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.ValidationHelpers;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.JobStatus;
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
+import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
@@ -37,18 +55,24 @@ import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 @Api(value = "Patient", authorizations = @Authorization(value = "apiKey"))
 @Path("/v1/Patient")
 public class PatientResource extends AbstractPatientResource {
+    private static final Logger logger = LoggerFactory.getLogger(PatientResource.class);
 
     // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
+    private static final int JOB_POLLING_TIMEOUT = 3 * 5;
 
+    private final IJobQueue queue;
     private final IGenericClient client;
     private final FhirValidator validator;
+    private final String exportPath;
 
     @Inject
-    PatientResource(IGenericClient client, FhirValidator validator) {
+    public PatientResource(IJobQueue queue, IGenericClient client, FhirValidator validator, @ExportPath String exportPath) {
+        this.queue = queue;
         this.client = client;
         this.validator = validator;
+        this.exportPath = exportPath;
     }
 
     @GET
@@ -125,7 +149,6 @@ public class PatientResource extends AbstractPatientResource {
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }
 
-
     @GET
     @FHIR
     @Path("/{patientID}")
@@ -197,7 +220,7 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Validate Patient resource", notes = "Validates the given resource against the " + PatientProfile.PROFILE_URI + " profile." +
-            "<p>This method always returns a 200 status, even in respond to a non-conformant resource.")
+            "<p>This method always returns a 200 status, even in response to a non-conforming resource.")
     @Override
     public IBaseOperationOutcome validatePatient(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, Parameters parameters) {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
@@ -214,6 +237,200 @@ public class PatientResource extends AbstractPatientResource {
                     throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
                 }
             }
+        }
+    }
+
+    @GET
+    @FHIR
+    @Path("/{patientID}/$everything")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Fetch entire Patient record", notes = "Fetch entire record for Patient with given ID synchronously. " +
+            "All resources available for the Patient are included in the result bundle.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find Patient record with given ID"),
+            @ApiResponse(code = 408, message = "", response = OperationOutcome.class),
+            @ApiResponse(code = 500, message = "A system error occurred", response = OperationOutcome.class)
+    })
+    @Override
+    public Response everything(@Auth OrganizationPrincipal organization, @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") String patientID) {
+        // TODO find providerID given organization and patientID (?) or receive in macaroon?
+        final String providerUUID = UUID.randomUUID().toString();           // uh oh! doesn't matter what providerID is used !?!
+        final UUID orgUUID = organization.getID();                          // or organization.getOrganization.getID()? FHIRExtractor.getOrganizationID()?
+
+        // TODO worth it to validate that patientID is valid before queueing job?
+
+        UUID jobUUID;
+        PollingStatus status;
+
+        try {
+            jobUUID = this.queue.createJob(orgUUID, providerUUID, Collections.singletonList(patientID), List.of(ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage));
+            status = pollUntilFinalStatus(jobUUID, orgUUID, this.queue);
+        } catch (JobQueueFailure e) {
+            throw new WebApplicationException("Failed to queue job", HttpStatus.INTERNAL_SERVER_ERROR_500);
+        }
+
+        List<JobQueueBatch> batches = queue.getJobBatches(jobUUID);
+        if (batches.isEmpty()) {
+            // why would there be no batches if the job was queued properly?
+            throw new WebApplicationException("No job results available", HttpStatus.INTERNAL_SERVER_ERROR_500);
+        }
+
+        Response.ResponseBuilder builder;
+        switch (status) {
+            case SUCCEEDED:
+                List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).collect(Collectors.toList());
+                if (files.size() == 1 && files.get(0).getResourceType() == ResourceType.OperationOutcome) {
+                    OperationOutcome outcome = assembleOperationOutcome(batches);
+                    builder = Response.status(HttpStatus.NOT_FOUND_404).entity(outcome);
+                } else {
+                    Bundle bundle = assembleEverythingBundle(batches);
+                    builder = Response.ok(bundle);
+                }
+                break;
+            case TIMED_OUT:
+                builder = Response.status(HttpStatus.REQUEST_TIMEOUT_408);
+                break;
+            case FAILED:
+                // is there an operation outcome to get here?
+            default:
+                builder = Response.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
+                break;
+        }
+        return builder.build();
+    }
+
+    enum PollingStatus {
+        FAILED,
+        SUCCEEDED,
+        TIMED_OUT,
+        UNKNOWN_FAILURE
+    }
+
+    PollingStatus pollUntilFinalStatus(UUID jobUUID, UUID orgUUID, IJobQueue queue) {
+        CompletableFuture<PollingStatus> finalStatusFuture = new CompletableFuture<>();
+
+        final ScheduledExecutorService poller = Executors.newSingleThreadScheduledExecutor();
+
+        final ScheduledFuture<?> task = poller.scheduleAtFixedRate(() -> {
+            JobStatus status = checkEverythingJobStatus(jobUUID, orgUUID, queue);
+            if (status == JobStatus.COMPLETED) {
+                finalStatusFuture.complete(PollingStatus.SUCCEEDED);
+            }
+            if (status == JobStatus.FAILED) {
+                finalStatusFuture.complete(PollingStatus.FAILED);
+            }
+        }, 0, 250, TimeUnit.MILLISECONDS);
+
+        // this timeout value should probably be adjusted according to the number of types being requested
+        finalStatusFuture.completeOnTimeout(PollingStatus.TIMED_OUT, JOB_POLLING_TIMEOUT, TimeUnit.SECONDS);
+
+        PollingStatus status;
+        try {
+            status = finalStatusFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            status = PollingStatus.UNKNOWN_FAILURE;
+        }
+
+        task.cancel(true);
+        poller.shutdown();
+        return status;
+    }
+
+    JobStatus checkEverythingJobStatus(UUID jobUUID, UUID orgUUID, IJobQueue queue) {
+        final List<JobQueueBatch> batches = queue.getJobBatches(jobUUID);
+
+        if (batches.isEmpty()) {
+            return JobStatus.FAILED;
+        }
+
+        Set<JobStatus> jobStatusSet = batches
+                .stream()
+                .filter(b -> b.getOrgID().equals(orgUUID))
+                .filter(JobQueueBatch::isValid)
+                .map(JobQueueBatch::getStatus).collect(Collectors.toSet());
+
+        logger.debug("JobStatusSet: {}", jobStatusSet);
+
+        // This condition was copied from JobStatus. It implies that no matter how many batches
+        // you start with, you wind up with only 1 one job status when all batches are completed? Correct?
+        if (jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED)) {
+            // success
+            return JobStatus.COMPLETED;
+        } else if (jobStatusSet.contains(JobStatus.FAILED)) {
+            return JobStatus.FAILED;
+        } else {
+            // it might actually be queued or running, but we don't care about that distinction here
+            return JobStatus.RUNNING;
+        }
+    }
+
+    OperationOutcome assembleOperationOutcome(List<JobQueueBatch> batches) {
+        // There is only ever 1 OperationOutcome file
+        final JobQueueBatchFile batchFile = batches.stream()
+                .map(JobQueueBatch::getJobQueueBatchFiles)
+                .flatMap(List::stream)
+                .filter(bf -> bf.getResourceType() == ResourceType.OperationOutcome)
+                .findFirst().get();
+
+        OperationOutcome outcome = new OperationOutcome();
+        java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
+        try (BufferedReader br = Files.newBufferedReader(path)) {
+            br.lines()
+                    .map(line -> client.getFhirContext().newJsonParser().parseResource(OperationOutcome.class, line))
+                    .map(OperationOutcome::getIssue)
+                    .flatMap(List::stream)
+                    .forEach(outcome::addIssue);
+        } catch (IOException e) {
+            throw new WebApplicationException(String.format("Unable to read OperationOutcome because %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR_500);
+        }
+
+        return outcome;
+    }
+
+    Bundle assembleEverythingBundle(List<JobQueueBatch> batches) {
+        final Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+
+        batches.stream()
+                .map(JobQueueBatch::getJobQueueBatchFiles)
+                .flatMap(List::stream)
+                .forEach(batchFile -> {
+                    java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
+                    // is there a better way to get the class type given the ResourceType?
+                    switch (batchFile.getResourceType()) {
+                        case Patient:
+                            System.out.println("\n\npatient count " + batchFile.getCount() + "\n\n");
+                            addResourceEntries(Patient.class, path, bundle);
+                            break;
+                        case ExplanationOfBenefit:
+                            System.out.println("\n\npatient count " + batchFile.getCount() + "\n\n");
+                            addResourceEntries(ExplanationOfBenefit.class, path, bundle);
+                            break;
+                        case Coverage:
+                            System.out.println("\n\npatient count " + batchFile.getCount() + "\n\n");
+                            addResourceEntries(Coverage.class, path, bundle);
+                            break;
+                        default:
+                            logger.info("Ignoring unexpected resource type {} ", batchFile.getResourceType());
+                            break;
+                    }
+                });
+
+        // set a bundle id here? anything else?
+        bundle.setTotal(bundle.getEntry().size());
+        return bundle;
+    }
+
+    private void addResourceEntries(Class<? extends Resource> clazz, java.nio.file.Path path, Bundle bundle) {
+        try (BufferedReader br = Files.newBufferedReader(path)) {
+            br.lines().forEach(line -> {
+                Resource r = client.getFhirContext().newJsonParser().parseResource(clazz, line);
+                bundle.addEntry().setResource(r);
+            });
+        } catch (IOException e) {
+            throw new WebApplicationException(String.format("Unable to read resource because %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
     }
 }
