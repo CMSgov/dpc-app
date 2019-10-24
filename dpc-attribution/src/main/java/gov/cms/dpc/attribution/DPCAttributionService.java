@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -57,7 +58,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     @Override
-    public void run(DPCAttributionConfiguration configuration, Environment environment) throws DatabaseException, SQLException {
+    public void run(DPCAttributionConfiguration configuration, Environment environment) {
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
@@ -96,10 +97,13 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(sundialBundle);
 
         if (swaggerEnabled) {
-            bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
+            final PropertiesProvider propertiesProvider = new PropertiesProvider();
+            bootstrap.addBundle(new SwaggerBundle<>() {
                 @Override
                 protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
-                    return configuration.getSwaggerBundleConfiguration();
+                    final SwaggerBundleConfiguration config = configuration.getSwaggerBundleConfiguration();
+                    config.setVersion(propertiesProvider.getBuildVersion());
+                    return config;
                 }
             });
         }
