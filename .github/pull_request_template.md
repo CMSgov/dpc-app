@@ -23,3 +23,6 @@ List any additional tickets that have either been created due to work in this PR
 - [ ] All tests are passing via `make ci-app` (app change) and `make ci-web` (website change)
 - [ ] Swagger documentation has been updated
 - [ ] FHIR documentation has been updated
+- [ ] Any required dpc-ops changes have a PR submitted and mentioned in this ticket
+- [ ] Any manual migration steps are documented, scripts written (where applicable), and tested
+- [ ] Before merging, any required dpc-ops changes have been approved and merged into master of the dpc-ops repo
