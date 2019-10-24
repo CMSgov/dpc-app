@@ -26,6 +26,12 @@ Rails.application.routes.draw do
     root 'internal/users#index', as: :authenticated_internal_root
   end
 
+  match '/dashboard', to: 'dashboard#show', via: :get
+
+  resources :organizations, only: [:show] do
+    resources :client_tokens, only: [:new, :create, :destroy]
+  end
+
   root to: 'public#home'
 
   match '/home', to: 'public#home', via: :get
