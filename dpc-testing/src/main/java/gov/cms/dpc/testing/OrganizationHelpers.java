@@ -13,6 +13,10 @@ import java.io.InputStream;
  */
 public class OrganizationHelpers {
 
+    private OrganizationHelpers() {
+        // Not used
+    }
+
     /**
      * Create an organization by calling the $submit operation on the {@link Organization} endpoint
      *

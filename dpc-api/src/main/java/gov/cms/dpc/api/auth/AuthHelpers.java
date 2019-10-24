@@ -10,8 +10,12 @@ import javax.ws.rs.core.UriInfo;
 
 class AuthHelpers {
 
+    private AuthHelpers() {
+        // Not used
+    }
+
     static final String BEARER_PREFIX = "Bearer";
-    private static final String TOKEN_URI_PARAM = "token";
+    static final String TOKEN_URI_PARAM = "token";
 
     static String extractMacaroonFromRequest(ContainerRequestContext requestContext, Response unauthorizedResponse) {
         // Try to get the Macaroon from the request
