@@ -31,5 +31,13 @@
             <artifactId>junit-jupiter-api</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-structures-dstu3</artifactId>
+        </dependency>
     </dependencies>
 </project>
