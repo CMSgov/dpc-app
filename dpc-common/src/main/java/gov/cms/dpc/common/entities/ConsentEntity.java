@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -23,9 +24,11 @@ public class ConsentEntity implements Serializable {
     @NotEmpty
     private String hicn;
 
+    private String bfdPatientId;
+
     @NotNull
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime effectiveDate;
+    @Column(columnDefinition = "DATE")
+    private Date effectiveDate;
 
     private String policyCode;
     private String purposeCode;
@@ -39,6 +42,8 @@ public class ConsentEntity implements Serializable {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
+
+    public ConsentEntity() {}
 
     public UUID getId() {
         return id;
@@ -64,11 +69,19 @@ public class ConsentEntity implements Serializable {
         this.hicn = hicn;
     }
 
-    public OffsetDateTime getEffectiveDate() {
+    public String getBfdPatientId() {
+        return bfdPatientId;
+    }
+
+    public void setBfdPatientId(String bfdPatientId) {
+        this.bfdPatientId = bfdPatientId;
+    }
+
+    public Date getEffectiveDate() {
         return effectiveDate;
     }
 
-    public void setEffectiveDate(OffsetDateTime effectiveDate) {
+    public void setEffectiveDate(Date effectiveDate) {
         this.effectiveDate = effectiveDate;
     }
 
