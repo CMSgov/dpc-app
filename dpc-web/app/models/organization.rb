@@ -4,7 +4,7 @@ class Organization < ApplicationRecord
   include OrganizationTypable
 
   has_one :address, as: :addressable
-  has_many :organization_user_assignments
+  has_many :organization_user_assignments, dependent: :destroy
   has_many :users, through: :organization_user_assignments
   has_many :fhir_endpoints
   has_many :registered_organizations
