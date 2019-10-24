@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
 @FHIR
-@Api(value = "Practitioner", authorizations = @Authorization(value = "apiKey"))
+@Api(value = "Practitioner")
 public class PractitionerResource extends AbstractPractitionerResource {
 
     private final ProviderDAO dao;

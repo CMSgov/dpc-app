@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 
-@Api(value = "Organization", authorizations = @Authorization(value = "apiKey"))
+@Api(value = "Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
