@@ -72,9 +72,15 @@ curl -H 'Authorization: Bearer {token}' {command to execute}
 ## Environment
 The examples below include cURL commands, but may be followed using any tool that can make HTTP GET requests with headers, such as [Postman](https://getpostman.com).
 
+> Note: DPC sandbox environments do not have any test data loaded.
+> Users will need to provide their own FHIR resources in order to use the Sandbox. Details on finding sample data is given in a later [section](#sample-data).
+>
+
 ### Examples
 
 Examples are shown as requests to the DPC sandbox environment.
+Any resource Identifiers that are show are merely examples and cannot be used as actual requests to the DPC sandbox.
+
 Be sure to include the CMS generated Access token in the requests, as documented in the [Authorization](#authentication-and-authorization) section.
 
 ## DPC Metadata
@@ -245,6 +251,22 @@ curl https://sandbox.dpc.cms.gov/api/v1/metadata
 In order to export data from the DPC application, a healthcare provider must have attributed [Patient](https://hl7.org/fhir/STU3/patient.html) resources.
 This attribution assertion attests to CMS that the provider has a treatment related purpose for accessing patient information.
 More details on the attribution logic and rules are given [earlier](#attribution) in this reference.
+
+### Sample data
+
+As previously mentioned, the DPC sandbox environments do not have any pre-loaded test data.
+Users will need to provide their own FHIR resources in order to successfully make export requests to the BlueButton backend.
+
+The DPC team has created a collection of sample Patient and Practitioner resources which can be used to get started with the sandbox.
+The files are available in our public [GitHub](https://github.com/CMSgov/dpc-app/tree/master/src/main/resources) repository.
+More details are given in the included [README](https://github.com/CMSgov/dpc-app/blob/master/src/main/resources/README.md) file.
+
+The sample data was generated using the excellent [Synthea](https://synthea.mitre.org) project, with some modifications that are documented in the repository. 
+
+Users can provide any sample FHIR resources (that fulfill the required FHIR profiles) to DPC, but will need to ensure that, for the sandbox environments, any `Patient` resources have an *Medicare Beneficiary Identifier* (MBI) that matches a record in the BlueButton backend.
+
+The BlueButton team maintains a list of beneficiaries (along with their MBIs) that can be used for matching existing synthetic data (such as from an organization's training EMR) with valid sandbox MBIs.
+More details and the corresponding data files can be found [here](https://bluebutton.cms.gov/developers/#sample-beneficiaries).
 
 ### Create a Provider
 
