@@ -43,17 +43,27 @@ ci-app:
 ci-web:
 	@./dpc-web-test.sh
 
+.PHONY: smoke/local
+smoke/local: ${JMETER}
+	@echo "Running Smoke Tests against Local env"
+	@${JMETER} -p src/main/resources/local.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	grep "0.00%" out.jtl > /dev/null; if [ $? -eq 0 ]; then echo "Smoke Tests Passed"; exit 0; else echo "Smoke Tests Failed"; exit 1; fi
+
+
 .PHONY: smoke/dev
 smoke/dev: ${JMETER}
 	@echo "Running Smoke Tests against Development env"
 	@${JMETER} -p src/main/resources/dev.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	grep "0.00%" out.jtl > /dev/null; if [ $? -eq 0 ]; then echo "Smoke Tests Passed"; exit 0; else echo "Smoke Tests Failed"; exit 1; fi
 
 .PHONY: smoke/test
 smoke/test: ${JMETER}
 	@echo "Running Smoke Tests against Test env"
 	@${JMETER} -p src/main/resources/test.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	grep "0.00%" out.jtl > /dev/null; if [ $? -eq 0 ]; then echo "Smoke Tests Passed"; exit 0; else echo "Smoke Tests Failed"; exit 1; fi
 
 .PHONY: smoke/prod-sbx
 smoke/prod-sbx: ${JMETER}
 	@echo "Running Smoke Tests against Sandbox env"
 	@${JMETER} -p src/main/resources/prod-sbx.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	grep "0.00%" out.jtl > /dev/null; if [ $? -eq 0 ]; then echo "Smoke Tests Passed"; exit 0; else echo "Smoke Tests Failed"; exit 1; fi

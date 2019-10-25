@@ -5,11 +5,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import org.apache.http.util.EntityUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,14 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         ctx.getRestfulClientFactory().setConnectTimeout(1800);
 
-        final IGenericClient attributionClient = ctx.newRestfulGenericClient(attributionURL);
+        final String goldenMacaroon;
+        try {
+            goldenMacaroon = FHIRHelpers.createGoldenMacaroon(adminURL);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed creating Macaroon", e);
+        }
+
+        final IGenericClient adminClient = FHIRHelpers.buildAuthenticatedClient(ctx, hostParam, goldenMacaroon);
 
         final SampleResult smokeTestResult = new SampleResult();
         smokeTestResult.sampleStart();
@@ -71,7 +80,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         String token;
         orgRegistrationResult.sampleStart();
         try {
-            token = FHIRHelpers.registerOrganization(attributionClient, ctx.newJsonParser(), organizationID, adminURL);
+            token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
             logger.info("Token: {}", token);
             orgRegistrationResult.setSuccessful(true);
         } catch (Exception e) {
