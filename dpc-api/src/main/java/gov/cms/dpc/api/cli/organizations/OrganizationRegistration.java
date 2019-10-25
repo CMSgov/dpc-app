@@ -41,6 +41,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
                 .addArgument("-f", "--file")
                 .dest(ORG_FILE)
                 .type(String.class)
+                .required(true)
                 .help("FHIR Organization resource to register with system");
 
         subparser

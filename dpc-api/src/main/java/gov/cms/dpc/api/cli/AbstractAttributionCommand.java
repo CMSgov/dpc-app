@@ -26,6 +26,7 @@ public abstract class AbstractAttributionCommand extends Command {
         subparser
                 .addArgument("--host")
                 .dest(ATTR_HOSTNAME)
+                .required(true)
                 .setDefault("http://localhost:3500/v1")
                 .help("Address of the Attribution Service, which handles organization registration");
     }

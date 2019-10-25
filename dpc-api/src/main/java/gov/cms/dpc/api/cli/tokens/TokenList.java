@@ -34,6 +34,7 @@ public class TokenList extends AbstractAdminCommand {
     public void addAdditionalOptions(Subparser subparser) {
         subparser
                 .addArgument("id")
+                .required(true)
                 .dest("org-reference")
                 .help("ID of Organization to list tokens");
     }

@@ -17,6 +17,7 @@ public class OrganizationDelete extends AbstractAttributionCommand {
     public void addAdditionalOptions(Subparser subparser) {
         subparser
                 .addArgument("id")
+                .required(true)
                 .dest("org-reference")
                 .help("ID of Organization to delete");
     }

@@ -12,6 +12,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
+import java.util.UUID;
+
 public class TokenDelete extends AbstractAdminCommand {
 
     public TokenDelete() {
@@ -24,9 +26,11 @@ public class TokenDelete extends AbstractAdminCommand {
         subparser
                 .addArgument("--org", "-o")
                 .dest("org-reference")
+                .required(true)
                 .help("Organization entity");
         subparser
                 .addArgument("id")
+                .required(true)
                 .dest("token-id")
                 .help("ID of Token to delete");
     }
