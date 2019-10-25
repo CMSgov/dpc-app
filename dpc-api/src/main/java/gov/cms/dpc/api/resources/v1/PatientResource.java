@@ -390,8 +390,7 @@ public class PatientResource extends AbstractPatientResource {
     }
 
     Bundle assembleEverythingBundle(List<JobQueueBatch> batches) {
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
+        final Bundle bundle = new Bundle().setType(Bundle.BundleType.SEARCHSET);
 
         batches.stream()
                 .map(JobQueueBatch::getJobQueueBatchFiles)
@@ -401,15 +400,12 @@ public class PatientResource extends AbstractPatientResource {
                     // is there a better way to get the class type given the ResourceType?
                     switch (batchFile.getResourceType()) {
                         case Patient:
-                            System.out.println("\n\npatient count " + batchFile.getCount() + "\n\n");
                             addResourceEntries(Patient.class, path, bundle);
                             break;
                         case ExplanationOfBenefit:
-                            System.out.println("\n\npatient count " + batchFile.getCount() + "\n\n");
                             addResourceEntries(ExplanationOfBenefit.class, path, bundle);
                             break;
                         case Coverage:
-                            System.out.println("\n\npatient count " + batchFile.getCount() + "\n\n");
                             addResourceEntries(Coverage.class, path, bundle);
                             break;
                         default:
@@ -419,8 +415,7 @@ public class PatientResource extends AbstractPatientResource {
                 });
 
         // set a bundle id here? anything else?
-        bundle.setTotal(bundle.getEntry().size());
-        return bundle;
+        return bundle.setTotal(bundle.getEntry().size());
     }
 
     private void addResourceEntries(Class<? extends Resource> clazz, java.nio.file.Path path, Bundle bundle) {
