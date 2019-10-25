@@ -17,13 +17,10 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-import liquibase.exception.DatabaseException;
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.SQLException;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
@@ -102,7 +99,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 @Override
                 protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
                     final SwaggerBundleConfiguration config = configuration.getSwaggerBundleConfiguration();
-                    config.setVersion(propertiesProvider.getBuildVersion());
+                    config.setVersion(propertiesProvider.getApplicationVersion());
                     return config;
                 }
             });
