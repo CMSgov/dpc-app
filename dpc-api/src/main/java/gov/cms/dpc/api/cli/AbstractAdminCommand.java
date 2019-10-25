@@ -10,7 +10,7 @@ import net.sourceforge.argparse4j.inf.Subparser;
  */
 public abstract class AbstractAdminCommand extends Command {
 
-    public static final String API_HOSTNAME = "hostname";
+    protected static final String API_HOSTNAME = "hostname";
     protected final FhirContext ctx;
 
     protected AbstractAdminCommand(String name, String description) {
@@ -27,7 +27,7 @@ public abstract class AbstractAdminCommand extends Command {
                 .addArgument("--host")
                 .dest(API_HOSTNAME)
                 .setDefault("http://localhost:9900/tasks")
-                .help("Address of the Attribution Service, which handles organization registration");
+                .help("Address of the API Service, which handles organization registration (Must include /tasks endpoint)");
     }
 
     public abstract void addAdditionalOptions(Subparser subparser);

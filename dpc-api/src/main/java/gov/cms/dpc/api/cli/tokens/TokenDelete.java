@@ -38,11 +38,12 @@ public class TokenDelete extends AbstractAdminCommand {
         final String tokenID = namespace.getString("token-id");
         System.out.println(String.format("Deleting token %s for organization %s", tokenID, orgReference));
 
-        final String attributionService = namespace.getString(API_HOSTNAME);
+        final String apiService = namespace.getString(API_HOSTNAME);
+        System.out.println(String.format("Connecting to API service at: %s", apiService));
 
         // Delete the token
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final URIBuilder builder = new URIBuilder(String.format("%s/delete-token", attributionService));
+            final URIBuilder builder = new URIBuilder(String.format("%s/delete-token", apiService));
             builder.setParameter("organization", new IdType(orgReference).getIdPart());
             builder.setParameter("token", tokenID);
             final HttpPost tokenDelete = new HttpPost(builder.build());

@@ -43,6 +43,7 @@ services:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
     ports:
       - "3002:3002"
+      - "9911:9900"
     environment:
       - attributionURL=http://attribution:8080/v1/
       - ENV=local

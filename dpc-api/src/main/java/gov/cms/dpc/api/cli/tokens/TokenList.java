@@ -44,9 +44,10 @@ public class TokenList extends AbstractAdminCommand {
         final String orgReference = namespace.getString("org-reference");
         System.out.println(String.format("Listing tokens for organization: %s.", orgReference));
 
-        final String attributionService = namespace.getString(API_HOSTNAME);
+        final String apiService = namespace.getString(API_HOSTNAME);
+        System.out.println(String.format("Connecting to API service at: %s", apiService));
 
-        listTokens(attributionService, orgReference);
+        listTokens(apiService, orgReference);
     }
 
     private void listTokens(String attributionService, String organization) throws IOException, URISyntaxException {

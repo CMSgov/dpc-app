@@ -11,6 +11,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
 import javax.ws.rs.core.MediaType;
@@ -46,6 +47,7 @@ public class TokenCreate extends AbstractAdminCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         final IdType orgID = new IdType(namespace.getString("org-reference"));
         final String apiService = namespace.getString(API_HOSTNAME);
+        System.out.println(String.format("Connecting to API service at: %s", apiService));
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/generate-token", apiService));
 
@@ -67,6 +69,10 @@ public class TokenCreate extends AbstractAdminCommand {
             post.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = httpClient.execute(post)) {
+                if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
+                    System.err.println("Error fetching organization: " + response.getStatusLine().getReasonPhrase());
+                    System.exit(1);
+                }
                 final String token = EntityUtils.toString(response.getEntity());
                 System.out.println(String.format("Organization token: %s", token));
             }
