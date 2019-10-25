@@ -40,7 +40,7 @@ public class FHIRHelpers {
         // Random number generator for Org NPI
         // Register an organization, and a token
         // Read in the test file
-        String macaroon = "";
+        String macaroon;
         try (InputStream inputStream = FHIRHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json")) {
 
 
@@ -72,7 +72,7 @@ public class FHIRHelpers {
 
                 try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
                     if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
-                        throw new IllegalStateException("Should have succeeded");
+                        throw new IllegalStateException(String.format("Unable to generate token: %s", response.getStatusLine().getReasonPhrase()));
                     }
                     macaroon = EntityUtils.toString(response.getEntity());
                 }
