@@ -106,7 +106,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
                 final SwaggerBundleConfiguration swaggerBundleConfiguration = dpcapiConfiguration.getSwaggerBundleConfiguration();
-                swaggerBundleConfiguration.setVersion(propertiesProvider.getBuildVersion());
+                swaggerBundleConfiguration.setVersion(propertiesProvider.getApplicationVersion());
                 return swaggerBundleConfiguration;
             }
         });
