@@ -58,7 +58,7 @@ public class FHIRHelpers {
             origOrg.setId(organizationID);
 
             final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(orgBundle);
+            parameters.addParameter().setResource(orgBundle).setName("resource");
 
             client
                     .operation()

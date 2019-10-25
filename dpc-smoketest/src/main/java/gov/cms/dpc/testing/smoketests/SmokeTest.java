@@ -5,18 +5,15 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
-import org.apache.http.util.EntityUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,10 +46,8 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         final String organizationID = UUID.randomUUID().toString();
         final String hostParam = javaSamplerContext.getParameter("host");
         final String adminURL = javaSamplerContext.getParameter("admin-url");
-        final String attributionURL = javaSamplerContext.getParameter("attribution-url");
         logger.info("Running against {}", hostParam);
         logger.info("Admin URL: {}", adminURL);
-        logger.info("Attribution URL: {}", attributionURL);
         logger.info("Running with {} threads", JMeterContextService.getNumberOfThreads());
 
         logger.info("Creating organization {}", organizationID);
@@ -81,7 +76,6 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         orgRegistrationResult.sampleStart();
         try {
             token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
-            logger.info("Token: {}", token);
             orgRegistrationResult.setSuccessful(true);
         } catch (Exception e) {
             orgRegistrationResult.setSuccessful(false);
