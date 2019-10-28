@@ -40,7 +40,7 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
                 .setSeverity(OperationOutcome.IssueSeverity.FATAL)
                 .setDetails(new CodeableConcept().setText(exception.getMessage()));
 
-        // TODO: Need to log and correlate this exception
+        // TODO: Need to log and correlate this exception (DPC-540)
         return Response.fromResponse(response)
                 .status(status)
                 .type(FHIRMediaTypes.FHIR_JSON)

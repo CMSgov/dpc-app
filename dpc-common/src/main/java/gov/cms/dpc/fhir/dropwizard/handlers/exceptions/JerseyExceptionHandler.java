@@ -16,6 +16,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.util.Set;
 
+/**
+ * Custom exception handler for {@link JerseyViolationException}.
+ * It provides human readable error messages which can help pinpoint which violates the user needs to address.
+ */
 @Provider
 public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyViolationException> {
 

@@ -14,6 +14,7 @@ import gov.cms.dpc.fhir.dropwizard.handlers.*;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
@@ -60,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class APITestHelpers {
-    public static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
+    private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     static final String TASK_URL = "http://localhost:9900/tasks/";
@@ -143,6 +144,7 @@ public class APITestHelpers {
                 .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
                 .addProvider(new FHIRHandler(ctx))
                 .addProvider(JerseyExceptionHandler.class)
+                .addProvider(PersistenceExceptionHandler.class)
                 .addProvider(HAPIExceptionHandler.class)
                 .addProvider(DefaultFHIRExceptionHandler.class);
 
@@ -340,6 +342,7 @@ public class APITestHelpers {
                 .buildValidatorFactory().getValidator();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class AuthResponse {
 
         @JsonProperty(value = "access_token")

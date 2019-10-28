@@ -15,6 +15,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
@@ -30,8 +31,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class KeyResourceTest extends AbstractSecureApplicationTest {
 
@@ -67,13 +67,15 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
             // Try the same key again
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys");
+                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
+                        () -> assertEquals("duplicate key value violates unique constraint", EntityUtils.toString(response.getEntity()), "Should have nice error message"));
             }
 
             // Try again with same label
             post.setEntity(new StringEntity(generatePublicKey()));
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key cannot have duplicate label");
+                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
+                        () -> assertEquals("duplicate key value violates unique constraint", EntityUtils.toString(response.getEntity()), "Should have nice error message"));
             }
 
             // Try with too long label
@@ -93,7 +95,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
     void testRoundTrip() throws NoSuchAlgorithmException, IOException {
         final String key = generatePublicKey();
 
-        KeyView entity = null;
+        KeyView entity;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("%s/Key", getBaseURL()));
             post.setEntity(new StringEntity(key));
@@ -154,6 +156,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         return String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
     }
 
+    @SuppressWarnings("WeakerAccess")
     static class KeyView {
 
         public UUID id;

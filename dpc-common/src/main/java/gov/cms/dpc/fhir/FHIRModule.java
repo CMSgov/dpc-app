@@ -11,6 +11,7 @@ import gov.cms.dpc.fhir.dropwizard.handlers.MethodOutcomeHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
 import gov.cms.dpc.fhir.paramtests.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.Configuration;
@@ -45,6 +46,7 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
 
         // Custom exception mappers
         binder.bind(JerseyExceptionHandler.class);
+        binder.bind(PersistenceExceptionHandler.class);
         binder.bind(HAPIExceptionHandler.class);
         binder.bind(DefaultFHIRExceptionHandler.class);
 
