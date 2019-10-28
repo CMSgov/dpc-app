@@ -39,25 +39,25 @@
         <h2>Your organization</h2>
 
         <div class="field">
-          <%= f.label :organization, "Name of your organization", class: "ds-c-label" %>
-          <%= f.text_field :organization, class: "ds-c-field" %>
+          <%= f.label :requested_organization, "Name of your organization", class: "ds-c-label" %>
+          <%= f.text_field :requested_organization, class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :organization_type, 'Type of organization', class: "ds-c-label" %>
-          <%= f.select :organization_type,
+          <%= f.label :requested_organization_type, 'Type of organization', class: "ds-c-label" %>
+          <%= f.select :requested_organization_type,
             organization_types_for_select,
             { include_blank: 'Please select' },
             class: "ds-c-field",
             :data => {:hide_follow_up => 'health_it_vendor'},
-            value: @user.organization_type
+            value: @user.requested_organization_type
           %>
           <div class="field field--follow-up" hidden>
-            <%= f.label :num_providers, class: "ds-c-label" do %>
+            <%= f.label :requested_num_providers, class: "ds-c-label" do %>
             Number of Providers at Your Organization (optional)
             <span class="ds-c-field__hint">You may use an approximate number.</span>
             <% end %>
-            <%= f.number_field :num_providers, value: '', min: 0, class: "ds-c-field ds-c-field--small" %>
+            <%= f.number_field :requested_num_providers, value: '', min: 0, class: "ds-c-field ds-c-field--small" %>
           </div>
         </div>
 

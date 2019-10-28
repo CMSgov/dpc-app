@@ -10,5 +10,7 @@ public interface AuthFactory {
 
     AuthFilter<DPCAuthCredentials, OrganizationPrincipal> createPathAuthorizer(PathAuthorizer pa);
 
+    AuthFilter<DPCAuthCredentials, OrganizationPrincipal> createAdminAuthorizer();
+
     AuthFilter<DPCAuthCredentials, OrganizationPrincipal> createStandardAuthorizer();
 }

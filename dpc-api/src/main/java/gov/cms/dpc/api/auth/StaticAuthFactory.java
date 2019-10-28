@@ -12,19 +12,26 @@ import javax.inject.Inject;
 public class StaticAuthFactory implements AuthFactory {
 
     private final Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator;
+    private final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> authFilter;
 
     @Inject
     public StaticAuthFactory(Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth) {
         this.authenticator = auth;
+        this.authFilter = new StaticAuthFilter(this.authenticator);
     }
 
     @Override
     public AuthFilter<DPCAuthCredentials, OrganizationPrincipal> createPathAuthorizer(PathAuthorizer pa) {
-        return new StaticAuthFilter(this.authenticator);
+        return this.authFilter;
     }
 
     @Override
     public AuthFilter<DPCAuthCredentials, OrganizationPrincipal> createStandardAuthorizer() {
-        return new StaticAuthFilter(this.authenticator);
+        return this.authFilter;
+    }
+
+    @Override
+    public AuthFilter<DPCAuthCredentials, OrganizationPrincipal> createAdminAuthorizer() {
+        return this.authFilter;
     }
 }

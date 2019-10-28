@@ -12,6 +12,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.OrganizationHelpers;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
@@ -61,7 +62,7 @@ class AttributionFHIRTest {
         groupedPairs = SeedProcessor.extractProviderMap(resource);
 
         // Create the Organization
-        organization = AttributionTestHelpers.createOrganization(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort()));
+        organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
     }
 
     @AfterAll

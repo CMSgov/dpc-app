@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.testing.OrganizationHelpers;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -30,7 +31,8 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBasicRegistration() {
-        final Organization organization = AttributionTestHelpers.createOrganization(ctx, getServerURL());
+
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
         assertAll(() -> assertNotNull(organization, "Should have an org back"),
                 () -> assertFalse(organization.getEndpoint().isEmpty(), "Should have endpoints"));
     }
@@ -60,7 +62,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testOrgDeletion() {
-        final Organization organization = AttributionTestHelpers.createOrganization(ctx, getServerURL());
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
         // Add a fake provider and practitioner
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 

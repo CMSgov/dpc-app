@@ -45,7 +45,7 @@ import java.util.*;
 
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
-@Api(value = "Token", tags = {"Auth"})
+@Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
 public class TokenResource extends AbstractTokenResource {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
@@ -123,6 +123,10 @@ public class TokenResource extends AbstractTokenResource {
         }
 
         final Macaroon macaroon = generateMacaroon(organizationID);
+
+        // Ensure that each generated Macaroon has an associated Organization ID
+        // This way we check to make sure we never generate a Golden Macaroon
+        ensureOrganizationPresent(macaroon);
 
         final TokenEntity token = new TokenEntity(macaroon.identifier, organizationID, TokenEntity.TokenType.MACAROON);
 
@@ -280,6 +284,20 @@ public class TokenResource extends AbstractTokenResource {
         final Date expiration = getClaimIfPresent("expiration", claims.getBody().getExpiration());
         if (OffsetDateTime.now(ZoneOffset.UTC).plus(5, ChronoUnit.MINUTES).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
             throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
+        }
+    }
+
+    private void ensureOrganizationPresent(Macaroon macaroon) {
+        final boolean idMissing = this.bakery
+                .getCaveats(macaroon)
+                .stream()
+                .map(MacaroonCaveat::getCondition)
+                .noneMatch(cond -> cond.getKey().equals("organization_id"));
+
+        if (idMissing) {
+            logger.error("GOLDEN MACAROON WAS GENERATED IN TOKEN RESOURCE!");
+            // TODO: Remove the Macaroon from the root key store (DPC-729)
+            throw new IllegalStateException("Token generation failed");
         }
     }
 

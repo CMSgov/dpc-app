@@ -21,8 +21,7 @@
         <dependency>
             <groupId>com.github.nickrobison-usds</groupId>
             <artifactId>jmacaroons</artifactId>
-<!--            FIXME: This needs to be set to a commit before pushing.-->
-            <version>macaroon-arrays-SNAPSHOT</version>
+            <version>770fea3e23b594225ca2e9aff7b4739ed28a7789</version>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>

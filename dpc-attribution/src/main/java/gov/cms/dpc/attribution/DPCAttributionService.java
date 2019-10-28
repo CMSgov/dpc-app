@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -16,13 +17,10 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-import liquibase.exception.DatabaseException;
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.SQLException;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
@@ -57,7 +55,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     @Override
-    public void run(DPCAttributionConfiguration configuration, Environment environment) throws DatabaseException, SQLException {
+    public void run(DPCAttributionConfiguration configuration, Environment environment) {
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
@@ -96,10 +94,13 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(sundialBundle);
 
         if (swaggerEnabled) {
-            bootstrap.addBundle(new SwaggerBundle<DPCAttributionConfiguration>() {
+            final PropertiesProvider propertiesProvider = new PropertiesProvider();
+            bootstrap.addBundle(new SwaggerBundle<>() {
                 @Override
                 protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAttributionConfiguration configuration) {
-                    return configuration.getSwaggerBundleConfiguration();
+                    final SwaggerBundleConfiguration config = configuration.getSwaggerBundleConfiguration();
+                    config.setVersion(propertiesProvider.getApplicationVersion());
+                    return config;
                 }
             });
         }

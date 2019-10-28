@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Key", tags = {"Auth"})
+@Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "apiKey"))
 public class KeyResource extends AbstractKeyResource {
 
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);
@@ -61,8 +61,7 @@ public class KeyResource extends AbstractKeyResource {
     @UnitOfWork
     @ApiOperation(value = "Fetch public key for Organization",
             notes = "This endpoint returns the specified public key associated with the organization." +
-                    "<p>The returned keys are serialized using PEM encoding.",
-            authorizations = @Authorization(value = "apiKey"))
+                    "<p>The returned keys are serialized using PEM encoding.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find public key for organization"))
     @Override
     public PublicKeyEntity getPublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
@@ -79,8 +78,7 @@ public class KeyResource extends AbstractKeyResource {
     @Path("/{keyID}")
     @UnitOfWork
     @ApiOperation(value = "Create public key for Organization",
-            notes = "This endpoint deletes the specified public key associated with the organization.",
-            authorizations = @Authorization(value = "apiKey"))
+            notes = "This endpoint deletes the specified public key associated with the organization.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find public key for organization"))
     @Override
     public Response deletePublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
@@ -96,8 +94,7 @@ public class KeyResource extends AbstractKeyResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Register public key for Organization",
             notes = "This endpoint registers the provided public key with the organization." +
-                    "<p>The provided key MUST be PEM encoded.",
-            authorizations = @Authorization(value = "apiKey"))
+                    "<p>The provided key MUST be PEM encoded.")
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork
     @Override

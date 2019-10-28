@@ -213,7 +213,7 @@ public class APITestHelpers {
         return authResponse;
     }
 
-    static String createGoldenMacaroon() throws IOException {
+    public static String createGoldenMacaroon() throws IOException {
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("%s/generate-token", TASK_URL));

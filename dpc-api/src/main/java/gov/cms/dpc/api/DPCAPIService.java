@@ -15,6 +15,7 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
@@ -100,10 +101,13 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
-        bootstrap.addBundle(new SwaggerBundle<DPCAPIConfiguration>() {
+        final PropertiesProvider propertiesProvider = new PropertiesProvider();
+        bootstrap.addBundle(new SwaggerBundle<>() {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
-                return dpcapiConfiguration.getSwaggerBundleConfiguration();
+                final SwaggerBundleConfiguration swaggerBundleConfiguration = dpcapiConfiguration.getSwaggerBundleConfiguration();
+                swaggerBundleConfiguration.setVersion(propertiesProvider.getApplicationVersion());
+                return swaggerBundleConfiguration;
             }
         });
         bootstrap.addBundle(new MigrationsBundle<DPCAPIConfiguration>() {
