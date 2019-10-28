@@ -3,14 +3,16 @@ package gov.cms.dpc.api.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Provider;
 import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.models.KeyPairResponse;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public class BakeryKeyPairProvider implements Provider<BakeryKeyPair> {
 
@@ -30,8 +32,9 @@ public class BakeryKeyPairProvider implements Provider<BakeryKeyPair> {
         logger.info("Loading keypair from {}", location);
 
         final File file = new File(location);
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            return this.mapper.readValue(reader, BakeryKeyPair.class);
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            final KeyPairResponse keyPairResponse = this.mapper.readValue(reader, KeyPairResponse.class);
+            return keyPairResponse.getKeyPair();
         } catch (IOException e) {
             throw new IllegalStateException(String.format("Cannot load key pair from %s", location), e);
         }

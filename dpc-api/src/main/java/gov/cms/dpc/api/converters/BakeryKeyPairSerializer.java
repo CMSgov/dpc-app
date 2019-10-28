@@ -10,11 +10,14 @@ import java.util.Base64;
 
 public class BakeryKeyPairSerializer extends StdSerializer<BakeryKeyPair> {
 
+    public static final long serialVersionUID = 42L;
+
     private final Base64.Encoder encoder;
 
     BakeryKeyPairSerializer() {
         this(null);
     }
+
     private BakeryKeyPairSerializer(Class<BakeryKeyPair> t) {
         super(t);
         this.encoder = Base64.getMimeEncoder();
