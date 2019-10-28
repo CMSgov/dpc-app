@@ -29,7 +29,14 @@
 </fieldset>
 
 <div>
+  <h2>Address</h2>
   <%= f.fields_for :address do |ff| %>
+    <%= ff.label :address_use, class: "ds-c-label" %>
+    <%= ff.select :address_use, address_uses_for_select, class: "ds-c-field" %>
+
+    <%= ff.label :address_type, class: "ds-c-label" %>
+    <%= ff.select :address_type, address_types_for_select, class: "ds-c-field" %>
+
     <%= ff.label :street, class: "ds-c-label" %>
     <%= ff.text_field :street, class: "ds-c-field" %>
 
@@ -45,6 +52,23 @@
 
     <%= ff.label :zip, class: "ds-c-label" %>
     <%= ff.text_field :zip, class: "ds-c-field" %>
+  <% end %>
+</div>
+
+<div>
+  <h2>FHIR Endpoint</h2>
+  <%= f.fields_for :fhir_endpoint do |ff| %>
+    <%= ff.label :connection_type, class: "ds-c-label" %>
+    <%= ff.select :connection_type, connection_types_for_select, class: "ds-c-field" %>
+
+    <%= ff.label :status, class: "ds-c-label" %>
+    <%= ff.select :status, statuses_for_select, class: "ds-c-field" %>
+
+    <%= ff.label :name, class: "ds-c-label" %>
+    <%= ff.text_field :name, class: "ds-c-field" %>
+
+    <%= ff.label :uri, class: "ds-c-label" %>
+    <%= ff.text_field :uri, class: "ds-c-field" %>
   <% end %>
 </div>
 

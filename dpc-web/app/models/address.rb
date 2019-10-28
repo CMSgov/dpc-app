@@ -19,6 +19,19 @@ class Address < ApplicationRecord
     GU: 'Guam', PR: 'Puerto Rico', VI: 'Virgin Islands'
   }.freeze
 
+  enum address_use: {
+    'work' => 0,
+    'home' => 1,
+    'temp' => 2,
+    'old' => 3
+  }
+
+  enum address_type: {
+    'postal' => 0,
+    'physical' => 1,
+    'both' => 2
+  }
+
   validates_presence_of :street, :city, :state, :zip
   validates :state, inclusion: { in: STATES.keys.map(&:to_s) }
   validates :zip, format: { with: /\A\d{5}(?:\-\d{4})?\z/ }

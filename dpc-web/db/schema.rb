@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_10_22_185034) do
+ActiveRecord::Schema.define(version: 2019_10_28_190113) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,6 +25,8 @@ ActiveRecord::Schema.define(version: 2019_10_22_185034) do
     t.bigint "addressable_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "address_use", default: 0, null: false
+    t.integer "address_type", default: 0, null: false
     t.index ["addressable_type", "addressable_id"], name: "index_addresses_on_addressable_type_and_addressable_id"
   end
 
@@ -50,6 +52,15 @@ ActiveRecord::Schema.define(version: 2019_10_22_185034) do
     t.datetime "updated_at", null: false
     t.index ["access_level"], name: "index_dpc_registrations_on_access_level"
     t.index ["user_id"], name: "index_dpc_registrations_on_user_id"
+  end
+
+  create_table "fhir_endpoints", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "connection_type", default: 0, null: false
+    t.string "uri", null: false
+    t.integer "organization_id", null: false
+    t.index ["organization_id"], name: "index_fhir_endpoints_on_organization_id"
   end
 
   create_table "internal_users", force: :cascade do |t|
@@ -85,6 +96,7 @@ ActiveRecord::Schema.define(version: 2019_10_22_185034) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "api_environments", default: [], array: true
+    t.string "npi"
   end
 
   create_table "taggings", force: :cascade do |t|

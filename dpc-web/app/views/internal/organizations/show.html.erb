@@ -58,6 +58,12 @@
     <div class="box__content">
       <h2 class="box__heading">Address</h2>
       <div>
+        Use: <%= @organization.address.address_use.titleize %>
+      </div>
+      <div>
+        Type: <%= @organization.address.address_type.titleize %>
+      </div>
+      <div>
         <%= @organization.address_street %>
       </div>
       <div>
@@ -76,8 +82,23 @@
   </section>
 <div>
 
-
-
+<section class="box">
+    <div class="box__content">
+      <h2 class="box__heading">FHIR Endpoint(s)</h2>
+      <div class="ds-u-margin-bottom--1">
+        Name: <%= @organization.fhir_endpoint.name %>
+      </div>
+      <div class="ds-u-margin-bottom--1">
+        URI: <%= @organization.fhir_endpoint.uri %>
+      </div>
+      <div class="ds-u-margin-bottom--1">
+        Connection Type: <%= @organization.fhir_endpoint.connection_type %>
+      </div>
+      <div class="ds-u-margin-bottom--1">
+        Status: <%= @organization.fhir_endpoint.status %>
+      </div>
+    </div>
+<div>
 
 <section class="ds-u-margin--2">
   <div class="ds-l-row ds-u-justify-content--center">
