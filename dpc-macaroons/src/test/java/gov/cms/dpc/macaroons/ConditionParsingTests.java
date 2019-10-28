@@ -1,12 +1,11 @@
 package gov.cms.dpc.macaroons;
 
 import com.codahale.xsalsa20poly1305.SecretBox;
-import gov.cms.dpc.macaroons.helpers.BakeryKeyFactory;
+import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.whispersystems.curve25519.Curve25519;
-import org.whispersystems.curve25519.Curve25519KeyPair;
 
 import java.security.SecureRandom;
 
@@ -47,8 +46,8 @@ class ConditionParsingTests {
         // Create a test key pairs for first party and third party
         final Curve25519 instance = Curve25519.getInstance(Curve25519.BEST);
 
-        final Curve25519KeyPair thirdParty = instance.generateKeyPair();
-        final Curve25519KeyPair firstParty = instance.generateKeyPair();
+        final BakeryKeyPair thirdParty = BakeryKeyPair.generate();
+        final BakeryKeyPair firstParty = BakeryKeyPair.generate();
 
         final String testMessage = "This is a test message";
         final String testKey = "this is a test key";
@@ -66,8 +65,8 @@ class ConditionParsingTests {
 
     @Test
     void testSecretEncodingCustomKeys() {
-        final Curve25519KeyPair firstParty = BakeryKeyFactory.generateKeyPair();
-        final Curve25519KeyPair thirdParty = BakeryKeyFactory.generateKeyPair();
+        final BakeryKeyPair firstParty = BakeryKeyPair.generate();
+        final BakeryKeyPair thirdParty = BakeryKeyPair.generate();
 
         final String testMessage = "This is a test message";
         final String testKey = "this is a test key";

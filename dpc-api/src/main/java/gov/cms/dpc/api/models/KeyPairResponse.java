@@ -2,8 +2,11 @@ package gov.cms.dpc.api.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import gov.cms.dpc.api.converters.BakeryKeyPairDeserializer;
+import gov.cms.dpc.api.converters.BakeryKeyPairSerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
+import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -18,6 +21,8 @@ public class KeyPairResponse {
     private String algorithm;
 
     @NotNull
+    @JsonSerialize(using = BakeryKeyPairSerializer.class)
+    @JsonDeserialize(using = BakeryKeyPairDeserializer.class)
     private BakeryKeyPair keyPair;
 
     @NotNull

@@ -1,10 +1,7 @@
-package gov.cms.dpc.api.models;
+package gov.cms.dpc.macaroons.thirdparty;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import gov.cms.dpc.api.converters.KeyBytesToMimeConverter;
-import gov.cms.dpc.api.converters.MimeToKeyBytesConverter;
+import org.whispersystems.curve25519.Curve25519;
+import org.whispersystems.curve25519.Curve25519KeyPair;
 
 import java.io.Serializable;
 
@@ -12,14 +9,8 @@ public class BakeryKeyPair implements Serializable {
 
     public static final long serialVersionUID = 42L;
 
-    @JsonProperty(value = "public_key")
-    @JsonSerialize(converter = KeyBytesToMimeConverter.class)
-    @JsonDeserialize(converter = MimeToKeyBytesConverter.class)
     private byte[] publicKey;
 
-    @JsonProperty(value = "private_key")
-    @JsonSerialize(converter = KeyBytesToMimeConverter.class)
-    @JsonDeserialize(converter = MimeToKeyBytesConverter.class)
     private byte[] privateKey;
 
     public BakeryKeyPair() {
@@ -45,5 +36,10 @@ public class BakeryKeyPair implements Serializable {
 
     public void setPrivateKey(byte[] privateKey) {
         this.privateKey = privateKey;
+    }
+
+    public static BakeryKeyPair generate() {
+        final Curve25519KeyPair keyPair = Curve25519.getInstance(Curve25519.BEST).generateKeyPair();
+        return new BakeryKeyPair(keyPair.getPublicKey(), keyPair.getPrivateKey());
     }
 }

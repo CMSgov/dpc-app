@@ -1,9 +1,11 @@
 package gov.cms.dpc.api.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
-import gov.cms.dpc.api.models.BakeryKeyPair;
+import gov.cms.dpc.api.converters.BakeryKeyPairSerializer;
+import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import gov.cms.dpc.api.models.KeyPairResponse;
 import io.dropwizard.servlets.tasks.Task;
 import org.slf4j.Logger;
