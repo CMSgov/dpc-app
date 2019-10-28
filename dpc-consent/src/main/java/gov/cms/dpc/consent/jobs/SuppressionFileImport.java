@@ -1,11 +1,18 @@
 package gov.cms.dpc.consent.jobs;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import gov.cms.dpc.common.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.context.internal.ManagedSessionContext;
 import org.knowm.sundial.Job;
+import org.knowm.sundial.SundialJobScheduler;
+import org.knowm.sundial.annotations.CronTrigger;
 import org.knowm.sundial.exceptions.JobInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,17 +31,24 @@ public class SuppressionFileImport extends Job {
 
     private static final Logger logger = LoggerFactory.getLogger(SuppressionFileImport.class);
 
+    @Inject
     private ConsentDAO consentDAO;
 
     @Inject
-    public SuppressionFileImport(ConsentDAO consentDAO) {
-        this.consentDAO = consentDAO;
+    private SessionFactory sessionFactory;
+
+    @Inject
+    public String suppressionFileDir;
+
+    public SuppressionFileImport() {
+        // Manually load the Guice injector. Since the job loads at the beginning of the startup process, Guice is not automatically injected.
+        final Injector attribute = (Injector) SundialJobScheduler.getServletContext().getAttribute("com.google.inject.Injector");
+        attribute.injectMembers(this);
     }
 
     @Override
     public void doRun() throws JobInterruptException {
-        String dir = System.getenv("SUPPRESSION_FILE_DIR");
-        try (Stream<Path> paths = Files.walk(Paths.get(dir))) {
+        try (Stream<Path> paths = Files.walk(Paths.get(suppressionFileDir))) {
             paths.filter(Files::isRegularFile).forEach(p -> {
                 if (Files.isReadable(p) && is1800File(p)) {
                     importFile(p);
@@ -63,6 +77,10 @@ public class SuppressionFileImport extends Job {
             return;
         }
 
+        Session session = sessionFactory.openSession();
+
+        ManagedSessionContext.bind(session);
+        Transaction transaction = session.beginTransaction();
         LineIterator lineIter = IOUtils.lineIterator(reader);
         while (lineIter.hasNext()) {
             Optional<ConsentEntity> consent = entityFromLine(lineIter.nextLine());
@@ -71,6 +89,9 @@ public class SuppressionFileImport extends Job {
                 consentDAO.persistConsent(consent.get());
             }
         }
+        transaction.commit();
+        session.close();
+        ManagedSessionContext.unbind(sessionFactory);
     }
 
     protected Optional<ConsentEntity> entityFromLine(String line) {
