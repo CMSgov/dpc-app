@@ -11,7 +11,8 @@ import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity(name = "consent")
+@Entity
+@Table(name = "consent")
 public class ConsentEntity implements Serializable {
 
     private static final long serialVersionUID = 42L;

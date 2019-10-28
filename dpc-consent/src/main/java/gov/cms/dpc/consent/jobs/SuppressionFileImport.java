@@ -3,6 +3,7 @@ package gov.cms.dpc.consent.jobs;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import gov.cms.dpc.common.entities.ConsentEntity;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -12,7 +13,6 @@ import org.hibernate.Transaction;
 import org.hibernate.context.internal.ManagedSessionContext;
 import org.knowm.sundial.Job;
 import org.knowm.sundial.SundialJobScheduler;
-import org.knowm.sundial.annotations.CronTrigger;
 import org.knowm.sundial.exceptions.JobInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +21,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -32,25 +29,26 @@ public class SuppressionFileImport extends Job {
     private static final Logger logger = LoggerFactory.getLogger(SuppressionFileImport.class);
 
     @Inject
-    private ConsentDAO consentDAO;
-
-    @Inject
     private SessionFactory sessionFactory;
+
+    private ConsentDAO consentDAO;
 
     @Inject
     public String suppressionFileDir;
 
+    @Inject
     public SuppressionFileImport() {
         // Manually load the Guice injector. Since the job loads at the beginning of the startup process, Guice is not automatically injected.
-        final Injector attribute = (Injector) SundialJobScheduler.getServletContext().getAttribute("com.google.inject.Injector");
-        attribute.injectMembers(this);
+        final Injector injector = (Injector) SundialJobScheduler.getServletContext().getAttribute("com.google.inject.Injector");
+        injector.injectMembers(this);
+        this.consentDAO = new ConsentDAO(new DPCManagedSessionFactory(sessionFactory));
     }
 
     @Override
     public void doRun() throws JobInterruptException {
         try (Stream<Path> paths = Files.walk(Paths.get(suppressionFileDir))) {
             paths.filter(Files::isRegularFile).forEach(p -> {
-                if (Files.isReadable(p) && is1800File(p)) {
+                if (Files.isReadable(p) && SuppressionFileUtils.is1800File(p)) {
                     importFile(p);
                 }
                 try {
@@ -62,10 +60,6 @@ public class SuppressionFileImport extends Job {
         } catch (IOException e) {
             logger.error("Cannot read files in suppression directory", e);
         }
-    }
-
-    protected boolean is1800File(Path path) {
-        return path.getFileName().toString().matches("(P|T)#EFT\\.ON\\.ACO\\.NGD1800\\.DPRF\\.D\\d{6}\\.T\\d{7}");
     }
 
     protected void importFile(Path path) {
@@ -83,7 +77,7 @@ public class SuppressionFileImport extends Job {
         Transaction transaction = session.beginTransaction();
         LineIterator lineIter = IOUtils.lineIterator(reader);
         while (lineIter.hasNext()) {
-            Optional<ConsentEntity> consent = entityFromLine(lineIter.nextLine());
+            Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine());
             if (consent.isPresent()) {
                 // TODO: Get BFD ID and MBI
                 consentDAO.persistConsent(consent.get());
@@ -92,47 +86,5 @@ public class SuppressionFileImport extends Job {
         transaction.commit();
         session.close();
         ManagedSessionContext.unbind(sessionFactory);
-    }
-
-    protected Optional<ConsentEntity> entityFromLine(String line) {
-        final int hicnStart = 0, hicnEnd = 11,
-                effectiveDateStart = 354, effectiveDateEnd = 362,
-                sourceCodeStart = 362, sourceCodeEnd = 367,
-                prefIndicatorStart = 368, prefIndicatorEnd = 369;
-
-        if (line.startsWith("HDR_BENEDATASHR") || line.startsWith("TRL_BENEDATASHR")) {
-            // Header or trailer; no record to be read
-            return Optional.empty();
-        }
-
-        String sourceCode = line.substring(sourceCodeStart, sourceCodeEnd);
-        if (!sourceCode.trim().matches("1-?800")) {
-            // If the source is not 1-800-MEDICARE, ignore this record
-            return Optional.empty();
-        }
-
-        ConsentEntity consent = new ConsentEntity();
-
-        String effectiveDateStr = line.substring(effectiveDateStart, effectiveDateEnd);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        try {
-            Date effectiveDate = formatter.parse(effectiveDateStr);
-            consent.setEffectiveDate(effectiveDate);
-        } catch (ParseException e) {
-            logger.warn("Cannot parse date from suppression record", e);
-            return Optional.empty();
-        }
-
-        String hicn = line.substring(hicnStart, hicnEnd).trim();
-        consent.setHicn(hicn);
-
-        String prefIndicator = line.substring(prefIndicatorStart, prefIndicatorEnd);
-        consent.setPolicyCode("Y".equals(prefIndicator) ? "OPTIN" : "N".equals(prefIndicator) ? "OPTOUT" : null);
-
-        consent.setPurposeCode("TREAT");
-        consent.setLoincCode("64292-6");
-        consent.setScopeCode("patient-privacy");
-
-        return Optional.ofNullable(consent);
     }
 }

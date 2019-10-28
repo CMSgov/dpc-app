@@ -28,7 +28,8 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
     public List<ConsentEntity> getConsentsByHICN(String hicn) {
         EntityManager entityManager = currentSession().getEntityManagerFactory().createEntityManager();
         return entityManager
-                .createQuery("select c from Consent c where c.hicn = :hicn", ConsentEntity.class)
+                .createQuery("select c from ConsentEntity c where c.hicn = :hicn", ConsentEntity.class)
+                .setParameter("hicn", hicn)
                 .getResultList();
     }
 }

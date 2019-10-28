@@ -3,7 +3,6 @@ package gov.cms.dpc.consent;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import org.hibernate.SessionFactory;
@@ -21,7 +20,7 @@ public class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfigurat
     }
 
     @Provides
-    SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
+    public SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
         return factory.getSessionFactory();
     }
 }
