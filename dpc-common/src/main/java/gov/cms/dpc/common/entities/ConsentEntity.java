@@ -11,12 +11,13 @@ import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "consent")
 public class ConsentEntity implements Serializable {
 
     private static final long serialVersionUID = 42L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
@@ -24,15 +25,20 @@ public class ConsentEntity implements Serializable {
     @NotEmpty
     private String hicn;
 
+    @Column(name = "bfd_patient_id")
     private String bfdPatientId;
 
     @NotNull
-    @Column(columnDefinition = "DATE")
+    @Column(name = "effective_date", columnDefinition = "DATE")
     private Date effectiveDate;
 
+    @Column(name = "policy_code")
     private String policyCode;
+    @Column(name = "purpose_code")
     private String purposeCode;
+    @Column(name = "loinc_code")
     private String loincCode;
+    @Column(name = "scope_code")
     private String scopeCode;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")

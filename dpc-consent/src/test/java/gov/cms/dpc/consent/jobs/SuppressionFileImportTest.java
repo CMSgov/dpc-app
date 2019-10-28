@@ -1,51 +1,106 @@
 package gov.cms.dpc.consent.jobs;
 
+import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.common.entities.ConsentEntity;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.consent.DPCConsentConfiguration;
+import gov.cms.dpc.consent.DPCConsentService;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
+import gov.cms.dpc.testing.JobTestUtils;
+import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.DropwizardTestSupport;
+import io.dropwizard.testing.junit.DAOTestRule;
+import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.knowm.sundial.SundialJobScheduler;
 
+import javax.ws.rs.client.Client;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Date;
-import java.util.Optional;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SuppressionFileImportTest {
 
-    SuppressionFileImport sfi = new SuppressionFileImport(Mockito.mock(ConsentDAO.class));
+    private static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
+    private static final FhirContext ctx = FhirContext.forDstu3();
+    private Client client;
+    private ConsentDAO consentDAO;
 
-    @Test
-    public void testIs1800File() {
-       assertTrue(sfi.is1800File(Paths.get("./src/test/resources/T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009")));
+    @Rule
+    public DAOTestRule database = DAOTestRule.newBuilder().addEntityClass(ConsentEntity.class).build();
+
+    @BeforeEach
+    void setUp() throws Exception {
+        consentDAO = new ConsentDAO(new DPCManagedSessionFactory(database.getSessionFactory()));
+
+        SuppressionFileImportTest.resetScheduler();
+
+        APPLICATION.before();
+        APPLICATION.getApplication().run("db", "migrate");
+
+        this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
+
+        final String PATH_1800_ORIG = "./src/test/resources/synthetic-1800-files/original";
+        final String PATH_1800_COPY = "./src/test/resources/synthetic-1800-files/copy";
+
+        //Guice.createInjector(Modules.override(new ConsentAppModule()).with(new ConsentTestModule()));
+
+        try (Stream<Path> paths = Files.walk(Paths.get(PATH_1800_ORIG))) {
+            paths.filter(Files::isRegularFile).forEach(p -> {
+                Path dest = Paths.get(PATH_1800_COPY, "/", p.getFileName().toString());
+                try {
+                    Files.copy(p, dest, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    fail(String.format("Cannot copy synthetic 1-800 file %s: %s", p.toString(), e.toString()));
+                }
+            });
+        } catch (IOException e) {
+            fail(String.format("Cannot read synthetic 1-800 files: %s", e.toString()));
+        }
+    }
+
+    @AfterEach
+    void shutdown() {
+        APPLICATION.after();
     }
 
     @Test
-    public void testEntityFromLine() {
-        Optional<ConsentEntity> result = sfi.entityFromLine("1000087481 1847800005John                          Mitchell                      Doe                                     198203218702 E Fake St.                                        Apt. 63L                                               Region                                                 Las Vegas                               NV423139954M20190618201907011-800TY201907011-800TNT9992WeCare Medical                                                        ");
-        assertTrue(result.isPresent());
-        ConsentEntity consent = result.get();
-        assertEquals("1000087481", consent.getHicn());
-        assertEquals("OPTIN", consent.getPolicyCode());
-        assertEquals(Date.valueOf("2019-07-01"), consent.getEffectiveDate());
+    void test() throws InterruptedException {
+        JobTestUtils.startJob(APPLICATION, this.client, "SuppressionFileImport");
+        JobTestUtils.stopJob(APPLICATION, this.client, "SuppressionFileImport");
+
+        // Wait for a couple of seconds to let the job complete
+        Thread.sleep(2000);
+
+        List<ConsentEntity> consents = database.inTransaction(() -> {
+            return consentDAO.getConsentsByHICN("1000000175");
+        });
+
+        assertNotNull(consents);
     }
 
-    @Test
-    public void testEntityFromLine_InvalidSource() {
-        Optional<ConsentEntity> result = sfi.entityFromLine("1000050218 1120500001Janice                        Marie                         J                                       19700227288 Waterpool Dr.                                      AddressLine2                                           City                                                   FakeCity                                NY110390889U2019030120190719aaaaaTN               T9992                                                                      ");
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testEntityFromLine_Header() {
-        Optional<ConsentEntity> result = sfi.entityFromLine("HDR_BENEDATASHR20191011");
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testEntityFromLine_Trailer() {
-        Optional<ConsentEntity> result = sfi.entityFromLine("TRL_BENEDATASHR20191011        10");
-        assertTrue(result.isEmpty());
+    /**
+     * This is a hack to get the tests to pass when running in a larger test suite.
+     * The {@link SundialJobScheduler} does not allow a scheduler to be restarted once it has been shut down.
+     * So the fix is to simply reach into the class, set the scheduler field to be null and try again.
+     *
+     * @throws IllegalAccessException - Thrown if the field can't be modified
+     * @throws NoSuchFieldException   - Thrown if the field is misspelled
+     */
+    private static void resetScheduler() throws IllegalAccessException, NoSuchFieldException {
+        final Field scheduler = SundialJobScheduler.class.getDeclaredField("scheduler");
+        scheduler.setAccessible(true);
+        final Object oldValue = scheduler.get(SundialJobScheduler.class);
+        scheduler.set(oldValue, null);
     }
 }

@@ -5,6 +5,7 @@ import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListene
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -12,6 +13,8 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import liquibase.exception.DatabaseException;
+import org.knowm.dropwizard.sundial.SundialBundle;
+import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +40,9 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         JerseyGuiceUtils.reset();
 
         GuiceBundle<DPCConsentConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
-                .modules(new ConsentAppModule())
-                .build();
+                .modules(new ConsentAppModule(),
+                        new DPCHibernateModule<>(hibernateBundle)
+                ).build();
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
@@ -48,6 +52,12 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
                 logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
                 return configuration.getDatabase();
+            }
+        });
+        bootstrap.addBundle(new SundialBundle<>() {
+            @Override
+            public SundialConfiguration getSundialConfiguration(DPCConsentConfiguration dpcConsentConfiguration) {
+                return dpcConsentConfiguration.getSundial();
             }
         });
     }
