@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.print.attribute.standard.Media;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -36,7 +37,7 @@ public class KeyResource extends AbstractKeyResource {
     private final PublicKeyDAO dao;
 
     @Inject
-    KeyResource(PublicKeyDAO dao) {
+    public KeyResource(PublicKeyDAO dao) {
         this.dao = dao;
     }
 
@@ -92,6 +93,7 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Register public key for Organization",
             notes = "This endpoint registers the provided public key with the organization." +
                     "<p>The provided key MUST be PEM encoded.",
@@ -100,7 +102,7 @@ public class KeyResource extends AbstractKeyResource {
     @UnitOfWork
     @Override
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotEmpty String key,
-                                     @ApiParam(name = "label", value = "Public Key ID (label)")
+                                     @ApiParam(name = "label", value = "Public Key ID (label)", defaultValue = "key:{count of public keys + 1) ")
                                      @QueryParam(value = "label") Optional<String> keyID) {
         final String keyLabel = keyID.orElseGet(() -> this.buildDefaultKeyID(organizationPrincipal.getID()));
         final SubjectPublicKeyInfo publicKey;
