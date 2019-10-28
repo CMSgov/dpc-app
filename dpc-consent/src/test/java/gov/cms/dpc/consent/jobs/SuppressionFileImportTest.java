@@ -1,7 +1,9 @@
 package gov.cms.dpc.consent.jobs;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.*;
 import gov.cms.dpc.common.entities.ConsentEntity;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
@@ -11,6 +13,9 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit.DAOTestRule;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.context.internal.ManagedSessionContext;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +37,6 @@ import static org.junit.Assert.*;
 public class SuppressionFileImportTest {
 
     private static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
-    private static final FhirContext ctx = FhirContext.forDstu3();
     private Client client;
     private ConsentDAO consentDAO;
 
@@ -53,7 +57,22 @@ public class SuppressionFileImportTest {
         final String PATH_1800_ORIG = "./src/test/resources/synthetic-1800-files/original";
         final String PATH_1800_COPY = "./src/test/resources/synthetic-1800-files/copy";
 
-        //Guice.createInjector(Modules.override(new ConsentAppModule()).with(new ConsentTestModule()));
+        SundialJobScheduler.getServletContext().setAttribute("com.google.inject.Injector",
+                Guice.createInjector(new AbstractModule(){
+                    @Provides
+                    protected String provideSuppressionFileDir() {
+                        return PATH_1800_COPY;
+                    }
+                    @Provides
+                    protected SessionFactory provideSessionFactory() {
+                        return database.getSessionFactory();
+                    }
+                    @Provides
+                    protected DPCManagedSessionFactory provideManagedSessionFactory() {
+                        return new DPCManagedSessionFactory(database.getSessionFactory());
+                    }
+                }
+        ));
 
         try (Stream<Path> paths = Files.walk(Paths.get(PATH_1800_ORIG))) {
             paths.filter(Files::isRegularFile).forEach(p -> {
@@ -82,11 +101,18 @@ public class SuppressionFileImportTest {
         // Wait for a couple of seconds to let the job complete
         Thread.sleep(2000);
 
+        SessionFactory sessionFactory = database.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        ManagedSessionContext.bind(session);
+
         List<ConsentEntity> consents = database.inTransaction(() -> {
             return consentDAO.getConsentsByHICN("1000000175");
         });
 
-        assertNotNull(consents);
+        assertEquals(1, consents.size());
+
+        ManagedSessionContext.unbind(sessionFactory);
+        session.close();
     }
 
     /**
