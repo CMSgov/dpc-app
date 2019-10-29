@@ -1,12 +1,10 @@
 package gov.cms.dpc.api.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
-import gov.cms.dpc.api.converters.BakeryKeyPairSerializer;
-import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import gov.cms.dpc.api.models.KeyPairResponse;
+import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.servlets.tasks.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,15 +36,15 @@ public class GenerateKeyPair extends Task {
 
     @Override
     public void execute(ImmutableMultimap<String, String> parameters, PrintWriter printWriter) throws Exception {
-        logger.warn("Generating new Bakery Keypair!!!");
         final OffsetDateTime createdOn = OffsetDateTime.now(ZoneOffset.UTC);
 
         final ImmutableCollection<String> userCollection = parameters.get("user");
         if (userCollection.isEmpty()) {
             throw new WebApplicationException("Must have ID of user generating keypair", Response.Status.BAD_REQUEST);
         }
-
         final String userID = userCollection.asList().get(0);
+
+        logger.warn("User: {} is generating new Bakery Keypair!!!", userID);
 
         final KeyPairResponse keyPairResponse = new KeyPairResponse();
         keyPairResponse.setCreatedOn(createdOn);
