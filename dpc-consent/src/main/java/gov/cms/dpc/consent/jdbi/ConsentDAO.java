@@ -30,8 +30,6 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
     public List<ConsentEntity> list() {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
-        final Root<ConsentEntity> root = query.from(ConsentEntity.class);
-
         return list(query);
     }
 }

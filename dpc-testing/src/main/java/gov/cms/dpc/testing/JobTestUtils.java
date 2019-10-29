@@ -8,6 +8,8 @@ import javax.ws.rs.core.Response;
 
 public class JobTestUtils {
 
+    private JobTestUtils() {}
+
     public static int startJob(DropwizardTestSupport<?> application, Client client, String jobName) {
         Response response = client.target(
                 String.format(
