@@ -50,8 +50,6 @@ public class ConsentEntity implements Serializable {
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
-    public ConsentEntity() {}
-
     public UUID getId() {
         return id;
     }

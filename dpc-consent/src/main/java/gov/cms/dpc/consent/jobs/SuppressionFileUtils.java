@@ -14,6 +14,8 @@ public class SuppressionFileUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(SuppressionFileUtils.class);
 
+    private SuppressionFileUtils() {}
+
     protected static boolean is1800File(Path path) {
         return path.getFileName().toString().matches("(P|T)#EFT\\.ON\\.ACO\\.NGD1800\\.DPRF\\.D\\d{6}\\.T\\d{7}");
     }
