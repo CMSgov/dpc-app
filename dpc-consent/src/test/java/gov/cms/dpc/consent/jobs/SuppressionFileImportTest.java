@@ -66,10 +66,6 @@ public class SuppressionFileImportTest {
                     protected SessionFactory provideSessionFactory() {
                         return database.getSessionFactory();
                     }
-                    @Provides
-                    protected DPCManagedSessionFactory provideManagedSessionFactory() {
-                        return new DPCManagedSessionFactory(database.getSessionFactory());
-                    }
                 }
         ));
 
