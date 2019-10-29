@@ -10,7 +10,7 @@ class Organization < ApplicationRecord
   has_one :address, as: :addressable
   has_many :organization_user_assignments
   has_many :users, through: :organization_user_assignments
-  has_one :fhir_endpoint
+  has_one :profile_endpoint
 
   enum organization_type: ORGANIZATION_TYPES
 
@@ -18,7 +18,7 @@ class Organization < ApplicationRecord
   validates :name, uniqueness: true, presence: true
 
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
-  accepts_nested_attributes_for :address, :fhir_endpoint
+  accepts_nested_attributes_for :address, :profile_endpoint, reject_if: :all_blank
 
   before_save :update_api_organization
 

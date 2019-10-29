@@ -56,13 +56,13 @@
 </div>
 
 <div>
-  <h2>FHIR Endpoint</h2>
-  <%= f.fields_for :fhir_endpoint do |ff| %>
+  <h2>Profile Endpoint</h2>
+  <%= f.fields_for :profile_endpoint do |ff| %>
     <%= ff.label :connection_type, class: "ds-c-label" %>
-    <%= ff.select :connection_type, connection_types_for_select, class: "ds-c-field" %>
+    <%= ff.select :connection_type, connection_types_for_select, include_blank: true, class: "ds-c-field" %>
 
     <%= ff.label :status, class: "ds-c-label" %>
-    <%= ff.select :status, statuses_for_select, class: "ds-c-field" %>
+    <%= ff.select :status, statuses_for_select, include_blank: true, class: "ds-c-field" %>
 
     <%= ff.label :name, class: "ds-c-label" %>
     <%= ff.text_field :name, class: "ds-c-field" %>

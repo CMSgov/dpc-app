@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class FhirEndpoint < ApplicationRecord
+class ProfileEndpoint < ApplicationRecord
   belongs_to :organization
 
   enum connection_type: {
@@ -27,4 +27,14 @@ class FhirEndpoint < ApplicationRecord
     'off' => 4,
     'entered-in-error' => 5
   }
+
+  validates :name, :uri, :status, :connection_type, presence: true
+  validate :uri_is_valid_format
+
+  def uri_is_valid_format
+    parsed_uri = URI.parse(self[:uri])
+    errors.add :uri, 'must be valid URI' if parsed_uri.host.nil?
+  rescue URI::InvalidURIError
+    errors.add :uri, 'must be valid URI'
+  end
 end

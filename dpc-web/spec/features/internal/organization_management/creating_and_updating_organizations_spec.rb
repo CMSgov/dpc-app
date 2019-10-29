@@ -15,12 +15,17 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'organization_name', with: 'Good Health'
     select 'Primary Care Clinic', from: 'organization_organization_type'
     fill_in 'organization_num_providers', with: '2200'
-    check 'organization_api_environments_0'
     fill_in 'organization_address_attributes_street', with: '1 North Main'
     fill_in 'organization_address_attributes_street_2', with: 'Ste 2000'
     fill_in 'organization_address_attributes_city', with: 'Greenville'
     select 'South Carolina', from: 'organization_address_attributes_state'
     fill_in 'organization_address_attributes_zip', with: '29601'
+    fill_in 'organization_fhir_endpoint_attributes_name', with: 'Provider Profile'
+    fill_in 'organization_fhir_endpoint_attributes_uri', with: 'https://fhirendpoint.example.com'
+    select 'Hl7 Fhir Msg', from: 'organization_fhir_endpoint_attributes_connection_type'
+    select 'Off', from: 'organization_fhir_endpoint_attributes_status'
+
+    check 'organization_api_environments_0'
 
     find('[data-test="form-submit"]').click
 
@@ -30,6 +35,10 @@ RSpec.feature 'creating and updating organizations' do
     expect(page.body).to have_content('Primary Care Clinic')
     expect(page.body).to have_content('1 North Main')
     expect(page.body).to have_content('Sandbox')
+    expect(page.body).to have_content('Provider Profile')
+    expect(page.body).to have_content('https://fhirendpoint.example.com')
+    expect(page.body).to have_content('Hl7 Fhir Msg')
+    expect(page.body).to have_content('Off')
 
     find('[data-test="edit-link"]').click
 

@@ -14,11 +14,11 @@ module OrganizationsHelper
   end
 
   def connection_types_for_select
-    enum_for_select(FhirEndpoint.connection_types)
+    enum_for_select(ProfileEndpoint.connection_types)
   end
 
   def statuses_for_select
-    enum_for_select(FhirEndpoint.statuses)
+    enum_for_select(ProfileEndpoint.statuses)
   end
 
   def enum_for_select(collection)
