@@ -7,7 +7,7 @@ import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Public;
-import gov.cms.dpc.api.auth.jwt.JTICache;
+import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.JWTAuthResponse;
@@ -52,13 +52,14 @@ public class TokenResource extends AbstractTokenResource {
     private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
     public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final String INVALID_JWT_MSG = "Invalid JWT";
+    private static final String ORGANIZATION_CAVEAT_KEY = "organization_id";
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
     private final IGenericClient client;
     private final SigningKeyResolverAdapter resolver;
-    private final JTICache cache;
+    private final IJTICache cache;
     private final String authURL;
 
     @Inject
@@ -67,7 +68,7 @@ public class TokenResource extends AbstractTokenResource {
                          TokenPolicy policy,
                          IGenericClient client,
                          SigningKeyResolverAdapter resolver,
-                         JTICache cache,
+                         IJTICache cache,
                          @APIV1 String publicURl) {
         this.dao = dao;
         this.bakery = bakery;
@@ -236,8 +237,8 @@ public class TokenResource extends AbstractTokenResource {
     private Macaroon generateMacaroon(UUID organizationID) {
         // Create some caveats
         final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString())),
-                new MacaroonCaveat("local", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString()))
+                new MacaroonCaveat("", new MacaroonCondition(ORGANIZATION_CAVEAT_KEY, MacaroonCondition.Operator.EQ, organizationID.toString())),
+                new MacaroonCaveat("local", new MacaroonCondition(ORGANIZATION_CAVEAT_KEY, MacaroonCondition.Operator.EQ, organizationID.toString()))
         );
         return this.bakery.createMacaroon(caveats);
     }
@@ -292,7 +293,7 @@ public class TokenResource extends AbstractTokenResource {
                 .getCaveats(macaroon)
                 .stream()
                 .map(MacaroonCaveat::getCondition)
-                .noneMatch(cond -> cond.getKey().equals("organization_id"));
+                .noneMatch(cond -> cond.getKey().equals(ORGANIZATION_CAVEAT_KEY));
 
         if (idMissing) {
             logger.error("GOLDEN MACAROON WAS GENERATED IN TOKEN RESOURCE!");

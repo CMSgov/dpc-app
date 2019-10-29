@@ -1,9 +1,12 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.jwt;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.auth.jwt.JTICache;
+import gov.cms.dpc.api.auth.DPCAuthDynamicFeature;
+import gov.cms.dpc.api.auth.DPCAuthFactory;
+import gov.cms.dpc.api.auth.MacaroonsAuthenticator;
+import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyResolver;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
@@ -19,6 +22,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -260,6 +264,45 @@ class JWTUnitTests {
             assertEquals(401, response.getStatus(), "Should be unauthorized");
             assertTrue(response.readEntity(String.class).contains("Invalid JWT"), "Should have correct exception");
         }
+
+        @Test
+        void testJTIReplay() {
+            final KeyPair keyPair = JWTKeys.get("correct");
+
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", "correct")
+                    .setAudience(String.format("%sToken/auth", "localhost:3002/v1/"))
+                    .setIssuer("macaroon")
+                    .setSubject("macaroon")
+                    .setId(UUID.randomUUID().toString())
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .queryParam("client_assertion", jwt)
+                    .request()
+                    .post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED));
+
+            // Since we're not using valid Macaroons for testing, we should get a 500 error, which means we made it past the JWT stage
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus(), "Should have invalid Macaroon");
+
+            // Try to submit again
+            Response r2 = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .queryParam("client_assertion", jwt)
+                    .request()
+                    .post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED));
+
+            assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, r2.getStatus(), "Should be unauthorized"),
+                    () -> assertTrue(r2.readEntity(String.class).contains("Invalid JWT"), "Should have invalid JWT"));
+        }
     }
 
     private static ResourceExtension buildResources() {
@@ -270,7 +313,7 @@ class JWTUnitTests {
         Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
         final JwtKeyResolver resolver = new JwtKeyResolver(publicKeyDAO);
-        final JTICache jtiCache = new JTICache();
+        final CaffeineJTICache jtiCache = new CaffeineJTICache();
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
 

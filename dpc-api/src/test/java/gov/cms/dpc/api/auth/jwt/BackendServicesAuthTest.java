@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.jwt;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +24,7 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testRoundTrip() throws NoSuchAlgorithmException, IOException, URISyntaxException {
+    void testRoundTrip() throws IOException, URISyntaxException {
         // Verify we can pull the Organization resource
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
 

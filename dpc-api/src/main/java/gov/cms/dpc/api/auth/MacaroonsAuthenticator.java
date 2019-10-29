@@ -24,12 +24,12 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
     private final IGenericClient client;
 
     @Inject
-    MacaroonsAuthenticator(IGenericClient client) {
+    public MacaroonsAuthenticator(IGenericClient client) {
         this.client = client;
     }
 
     @Override
-    public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) throws AuthenticationException {
+    public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) {
         logger.debug("Performing token authentication");
 
         // If we don't have a path authorizer, just return the principal

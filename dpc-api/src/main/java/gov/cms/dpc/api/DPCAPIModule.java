@@ -8,7 +8,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
-import gov.cms.dpc.api.auth.jwt.JTICache;
+import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.TestResource;
@@ -82,7 +82,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, IGenericClient client, SigningKeyResolverAdapter resolver, JTICache cache, @APIV1 String publicURL) {
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, IGenericClient client, SigningKeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
                         new Class<?>[]{TokenDAO.class,
@@ -90,7 +90,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 TokenPolicy.class,
                                 IGenericClient.class,
                                 SigningKeyResolverAdapter.class,
-                                JTICache.class,
+                                IJTICache.class,
                                 String.class},
                         new Object[]{dao,
                                 bakery,

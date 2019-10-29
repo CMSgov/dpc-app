@@ -10,20 +10,21 @@ import javax.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
-public class JTICache {
+public class CaffeineJTICache implements IJTICache {
 
-    private static final Logger logger = LoggerFactory.getLogger(JTICache.class);
+    private static final Logger logger = LoggerFactory.getLogger(CaffeineJTICache.class);
 
     private final Cache<String, Boolean> cache;
 
     @Inject
-    public JTICache() {
+    public CaffeineJTICache() {
         this.cache = Caffeine.newBuilder()
                 .maximumSize(10_000)
                 .expireAfterWrite(5, TimeUnit.MINUTES)
                 .build();
     }
 
+    @Override
     public boolean isJTIOk(String jti) {
         final Boolean isPresent = this.cache.getIfPresent(jti);
 
