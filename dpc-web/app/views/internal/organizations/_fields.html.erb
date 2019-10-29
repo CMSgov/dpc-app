@@ -1,78 +1,114 @@
-<div class="field">
-  <%= f.label :name, class: "ds-c-label" %>
-  <%= f.text_field :name, class: "ds-c-field" %>
-</div>
+<fieldset class="ds-l-row field-group">
+  <div class="ds-l-col--12 ds-l-md-col--3">
+    <legend class="field-group__heading">Details</legend>
+  </div>
 
-<div class="field">
-  <%= f.label :organization_type, class: "ds-c-label" %>
-  <%= f.select :organization_type, organization_types_for_select, {}, class: "ds-c-field" %>
-</div>
+  <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
 
-<div class="field">
-  <%= f.label :num_providers, class: "ds-c-label" do %>
-  Number of Providers
-  <span class="ds-c-field__hint">You may use an approximate number.<br/>If organization is a vendor, leave blank.</span>
-  <% end %>
-  <%= f.number_field :num_providers,
-    min: 0, class: "ds-c-field ds-c-field--small" %>
-</div>
+    <div class="field">
+      <%= f.label :name, class: "ds-c-label ds-u-margin-top--0" %>
+      <%= f.text_field :name, class: "ds-c-field" %>
+    </div>
 
-<fieldset class="ds-c-fieldset">
-  <legend class="ds-c-label">Environments</legend>
-  <span class="ds-c-field__hint">Select all that apply. Unselecting all will remove all env access for organization.</span>
-  <%= f.collection_check_boxes(:api_environments, Organization::API_ENVIRONMENTS, :first, :second) do |b| %>
-    <span>
-      <%= b.check_box(class: 'ds-c-choice') %>
-      <%= b.label %>
-    </span>
-  <% end %>
+    <div class="field">
+      <%= f.label :organization_type, class: "ds-c-label" %>
+      <%= f.select :organization_type, organization_types_for_select, { include_blank: 'Please select an organization type' }, class: "ds-c-field" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :num_providers, class: "ds-c-label" do %>
+      Number of Providers
+      <span class="ds-c-field__hint">You may use an approximate number.<br/>If organization is a vendor, leave blank.</span>
+      <% end %>
+      <%= f.number_field :num_providers,
+        min: 0, value: '', class: "ds-c-field ds-c-field--small" %>
+    </div>
+  </div>
 </fieldset>
 
-<div>
-  <h2>Address</h2>
-  <%= f.fields_for :address do |ff| %>
-    <%= ff.label :address_use, class: "ds-c-label" %>
-    <%= ff.select :address_use, address_uses_for_select, class: "ds-c-field" %>
+<fieldset class="ds-l-row field-group">
+  <div class="ds-l-col--12 ds-l-md-col--3">
+    <legend class="field-group__heading">Location</legend>
+  </div>
 
-    <%= ff.label :address_type, class: "ds-c-label" %>
-    <%= ff.select :address_type, address_types_for_select, class: "ds-c-field" %>
+  <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
+    <%= f.fields_for :address do |ff| %>
+      <%= ff.label :address_use, class: "ds-c-label ds-u-margin-top--0" %>
+      <%= ff.select :address_use, address_uses_for_select, { include_blank: 'Please select address use' },  class: "ds-c-field" %>
 
-    <%= ff.label :street, class: "ds-c-label" %>
-    <%= ff.text_field :street, class: "ds-c-field" %>
+      <%= ff.label :address_type, class: "ds-c-label" %>
+      <%= ff.select :address_type, address_types_for_select, { include_blank: 'Please select address type' }, class: "ds-c-field" %>
+
+      <%= ff.label :street, class: "ds-c-label" %>
+      <%= ff.text_field :street, class: "ds-c-field" %>
 
 
-    <%= ff.label :street_2, class: "ds-c-label" %>
-    <%= ff.text_field :street_2, class: "ds-c-field" %>
+      <%= ff.label :street_2, class: "ds-c-label" %>
+      <%= ff.text_field :street_2, class: "ds-c-field" %>
 
-    <%= ff.label :city, class: "ds-c-label" %>
-    <%= ff.text_field :city, class: "ds-c-field" %>
+      <%= ff.label :city, class: "ds-c-label" %>
+      <%= ff.text_field :city, class: "ds-c-field" %>
 
-    <%= ff.label :state, class: "ds-c-label" %>
-    <%= ff.select :state, states_for_select, { include_blank: 'Please select' }, class: "ds-c-field" %>
+      <%= ff.label :state, class: "ds-c-label" %>
+      <%= ff.select :state, states_for_select, { include_blank: 'Please select' }, class: "ds-c-field" %>
 
-    <%= ff.label :zip, class: "ds-c-label" %>
-    <%= ff.text_field :zip, class: "ds-c-field" %>
-  <% end %>
-</div>
+      <%= ff.label :zip, class: "ds-c-label" %>
+      <%= ff.text_field :zip, class: "ds-c-field ds-c-field--medium" %>
+    <% end %>
+  </div>
 
-<div>
-  <h2>Profile Endpoint</h2>
-  <%= f.fields_for :profile_endpoint do |ff| %>
-    <%= ff.label :connection_type, class: "ds-c-label" %>
-    <%= ff.select :connection_type, connection_types_for_select, include_blank: true, class: "ds-c-field" %>
+</fieldset>
 
-    <%= ff.label :status, class: "ds-c-label" %>
-    <%= ff.select :status, statuses_for_select, include_blank: true, class: "ds-c-field" %>
+<fieldset class="ds-l-row field-group">
+  <div class="ds-l-col--12 ds-l-md-col--3">
+    <legend class="field-group__heading">Environments</legend>
 
-    <%= ff.label :name, class: "ds-c-label" %>
-    <%= ff.text_field :name, class: "ds-c-field" %>
+  </div>
 
-    <%= ff.label :uri, class: "ds-c-label" %>
-    <%= ff.text_field :uri, class: "ds-c-field" %>
-  <% end %>
-</div>
+  <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
+    <span class="ds-c-field__hint">Select all that apply. Unselecting all will remove all env access for organization.</span>
+    <%= f.collection_check_boxes(:api_environments, Organization::API_ENVIRONMENTS, :first, :second) do |b| %>
+      <span>
+        <%= b.check_box(class: 'ds-c-choice') %>
+        <%= b.label %>
+      </span>
+    <% end %>
+  </div>
+</fieldset>
 
-<div class="actions ds-u-margin-top--3">
-  <%= f.submit locals[:button_label], class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
-  <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
+
+<fieldset class="ds-l-row field-group">
+  <div class="ds-l-col--12 ds-l-md-col--3">
+    <legend class="field-group__heading">Profile endpoint</legend>
+
+  </div>
+
+  <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
+    <span class="ds-c-field__hint">You are not required to enter profile endponts unless the organization is graduating from Sandbox.</span>
+
+    <%= f.fields_for :profile_endpoint do |ff| %>
+      <%= ff.label :connection_type, class: "ds-c-label" %>
+      <%= ff.select :connection_type, connection_types_for_select, {include_blank: true}, class: "ds-c-field" %>
+
+      <%= ff.label :status, class: "ds-c-label" %>
+      <%= ff.select :status, statuses_for_select, {include_blank: true}, class: "ds-c-field" %>
+
+      <%= ff.label :name, class: "ds-c-label" %>
+      <%= ff.text_field :name, class: "ds-c-field" %>
+
+      <%= ff.label :uri, "URI", class: "ds-c-label" %>
+      <%= ff.text_field :uri, class: "ds-c-field" %>
+    <% end %>
+  </div>
+</fieldset>
+
+<div class="ds-l-row actions ds-u-margin-top--3 field-group">
+  <div class="ds-l-col--12 ds-l-md-col--3">
+
+  </div>
+
+  <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
+    <%= f.submit locals[:button_label], class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+    <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
+  </div>
 </div>
