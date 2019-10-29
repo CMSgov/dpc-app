@@ -22,7 +22,6 @@ import org.knowm.sundial.SundialJobScheduler;
 
 import javax.ws.rs.client.Client;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,7 +45,7 @@ public class SuppressionFileImportTest {
     void setUp() throws Exception {
         consentDAO = new ConsentDAO(new DPCManagedSessionFactory(database.getSessionFactory()));
 
-        SuppressionFileImportTest.resetScheduler();
+        JobTestUtils.resetScheduler();
 
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate");
@@ -113,20 +112,5 @@ public class SuppressionFileImportTest {
 
         ManagedSessionContext.unbind(sessionFactory);
         session.close();
-    }
-
-    /**
-     * This is a hack to get the tests to pass when running in a larger test suite.
-     * The {@link SundialJobScheduler} does not allow a scheduler to be restarted once it has been shut down.
-     * So the fix is to simply reach into the class, set the scheduler field to be null and try again.
-     *
-     * @throws IllegalAccessException - Thrown if the field can't be modified
-     * @throws NoSuchFieldException   - Thrown if the field is misspelled
-     */
-    private static void resetScheduler() throws IllegalAccessException, NoSuchFieldException {
-        final Field scheduler = SundialJobScheduler.class.getDeclaredField("scheduler");
-        scheduler.setAccessible(true);
-        final Object oldValue = scheduler.get(SundialJobScheduler.class);
-        scheduler.set(oldValue, null);
     }
 }

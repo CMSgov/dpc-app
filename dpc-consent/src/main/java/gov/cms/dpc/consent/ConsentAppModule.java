@@ -20,6 +20,8 @@ public class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfigurat
     }
 
     @Provides
+    // We can suppress this because the SessionFactory is managed
+    @SuppressWarnings("CloseableProvides")
     public SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
         return factory.getSessionFactory();
     }
