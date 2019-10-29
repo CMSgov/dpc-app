@@ -5,7 +5,9 @@ import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,11 +27,11 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
         return Optional.ofNullable(get(consentID));
     }
 
-    public List<ConsentEntity> getConsentsByHICN(String hicn) {
-        EntityManager entityManager = currentSession().getEntityManagerFactory().createEntityManager();
-        return entityManager
-                .createQuery("select c from ConsentEntity c where c.hicn = :hicn", ConsentEntity.class)
-                .setParameter("hicn", hicn)
-                .getResultList();
+    public List<ConsentEntity> list() {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
+        final Root<ConsentEntity> root = query.from(ConsentEntity.class);
+
+        return list(query);
     }
 }
