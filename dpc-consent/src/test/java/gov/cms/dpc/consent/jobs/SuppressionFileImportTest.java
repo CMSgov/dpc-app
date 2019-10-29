@@ -1,9 +1,7 @@
 package gov.cms.dpc.consent.jobs;
 
-import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.*;
 import gov.cms.dpc.common.entities.ConsentEntity;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
@@ -29,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -106,10 +105,15 @@ public class SuppressionFileImportTest {
         ManagedSessionContext.bind(session);
 
         List<ConsentEntity> consents = database.inTransaction(() -> {
-            return consentDAO.getConsentsByHICN("1000000175");
+            return consentDAO.list();
         });
 
-        assertEquals(1, consents.size());
+        assertEquals(39, consents.size());
+
+        ConsentEntity ce = consents.stream().filter(c -> "1000009420".equals(c.getHicn())).findFirst().get();
+        assertEquals(Date.valueOf("2019-10-29"), ce.getEffectiveDate());
+        assertEquals("OPTIN", ce.getPolicyCode());
+
 
         ManagedSessionContext.unbind(sessionFactory);
         session.close();
