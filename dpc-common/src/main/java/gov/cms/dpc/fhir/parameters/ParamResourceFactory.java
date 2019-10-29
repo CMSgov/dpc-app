@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.paramtests;
+package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
