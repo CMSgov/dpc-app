@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.JobTestUtils;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
@@ -68,9 +69,11 @@ class ExpirationJobTest {
         final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");
         final Group group = submitAttributionBundle(client, updateBundle);
 
-        this.startJob(this.client, "ExpireAttributions");
+        int statusCode = JobTestUtils.startJob(APPLICATION, this.client, "ExpireAttributions");
+        assertEquals(HttpStatus.OK_200, statusCode, "Job should have started correctly");
 
-        this.stopJob(this.client, "ExpireAttributions");
+        statusCode = JobTestUtils.stopJob(APPLICATION, this.client, "ExpireAttributions");
+        assertEquals(HttpStatus.OK_200, statusCode, "Job should have stopped");
 
         // Wait for a couple of seconds to let the job complete
         Thread.sleep(2000);
@@ -85,30 +88,6 @@ class ExpirationJobTest {
                 .execute();
 
         assertEquals(1, expiredGroup.getMember().size(), "Should only have a single Member");
-    }
-
-    void startJob(Client client, String jobName) {
-        Response response = client.target(
-                String.format(
-                        "http://localhost:%d/%s/tasks/startjob?JOB_NAME=%s",
-                        APPLICATION.getAdminPort(), APPLICATION.getEnvironment().getAdminContext().getContextPath(), jobName
-                ))
-                .request()
-                .post(Entity.text(""));
-
-        assertEquals(HttpStatus.OK_200, response.getStatus(), "Job should have started correctly");
-    }
-
-    void stopJob(Client client, String jobName) {
-        Response response = client.target(
-                String.format(
-                        "http://localhost:%d/%s/tasks/stopjob?JOB_NAME=%s",
-                        APPLICATION.getAdminPort(), APPLICATION.getEnvironment().getAdminContext().getContextPath(), jobName
-                ))
-                .request()
-                .post(Entity.text(""));
-
-        assertEquals(HttpStatus.OK_200, response.getStatus(), "Job should have stopped");
     }
 
     /**
