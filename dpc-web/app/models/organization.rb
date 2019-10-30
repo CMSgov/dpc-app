@@ -17,17 +17,18 @@ class Organization < ApplicationRecord
   validates :organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :name, uniqueness: true, presence: true
 
+  delegate :connection_type, :status, :name, :uri, to: :profile_endpoint, prefix: true
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, :profile_endpoint, reject_if: :all_blank
 
   before_save :update_api_organization
 
   def address_type
-    address.address_type
+    address&.address_type
   end
 
   def address_use
-    address.address_use
+    address&.address_use
   end
 
   def api_environments=(input)

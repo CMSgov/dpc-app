@@ -22,7 +22,7 @@ class APIClient
   def create_organization(org)
     add_auth_header(golden_macaroon)
 
-    api_org = FHIR::Organziation.create(
+    api_org = FHIR::Organization.create(
       name: org.name,
       npi: org.npi,
       address: {
@@ -48,14 +48,14 @@ class APIClient
   end
 
   def profile_endpoint(org)
-    if api_env != 'sandbox' && org.profile_endpoint.nil?
+    if api_env == 'sandbox' && org.profile_endpoint.nil?
       STUBBED_PROFILE_ENDPOINT
     else
       {
-        status: org.profile_endpoint.status,
-        connection_type: org.profile_endpoint.connection_type,
-        name: org.profile_endpoint.name,
-        address: org.profile_endpoint.uri
+        status: org.profile_endpoint_status,
+        connection_type: org.profile_endpoint_connection_type,
+        name: org.profile_endpoint_name,
+        address: org.profile_endpoint_uri
       }
     end
   end
