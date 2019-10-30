@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<OperationDefinition xmlns="http://hl7.org/fhir">
+  <id value="dpc-operation-practitioner-submit"/>
+  <text>
+    <status value="generated"/><div xmlns="http://www.w3.org/1999/xhtml"><h2>Submit Practitioners</h2><p>OPERATION: Submit Practitioners</p><p>The official URL for this operation definition is: </p><pre>https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-submit</pre><div><p>Submit a Bundle of Practitioner resources which will be registered with the DPC application in a single Batch.</p>
+<p>This operation is designed to support initial on-boarding of Organizations.</p>
+</div><p>URL: [base]/Practitioner/$submit</p><p>Parameters</p><table class="grid"><tr><td><b>Use</b></td><td><b>Name</b></td><td><b>Cardinality</b></td><td><b>Type</b></td><td><b>Binding</b></td><td><b>Documentation</b></td></tr><tr><td>IN</td><td>resource</td><td>1..1</td><td><a href="http://hl7.org/fhir/STU3/bundle.html">Bundle</a></td><td/><td><div><p>Bundle resource to submit to DPC application. This should be the body of the POST request</p>
+</div></td></tr><tr><td>OUT</td><td>return</td><td>1..1</td><td><a href="http://hl7.org/fhir/STU3/bundle.html">Bundle</a></td><td/><td><div><p>Bundle resource of newly created Practitioner resources.</p>
+</div></td></tr></table></div>
+  </text>
+  <url value="https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-submit"/>
+  <version value="0.0.1"/>
+  <name value="Submit Practitioners"/>
+  <status value="draft"/>
+  <kind value="operation"/>
+  <date value="2019-10-16T16:12:10-04:00"/>
+  <publisher value="The DPC Team"/>
+  <description value="Submit a Bundle of Practitioner resources which will be registered with the DPC application in a single Batch.&#xA;&#xA;This operation is designed to support initial on-boarding of Organizations."/>
+  <code value="submit"/>
+  <resource value="Practitioner"/>
+  <system value="false"/>
+  <type value="true"/>
+  <instance value="false"/>
+  <parameter>
+    <name value="resource"/>
+    <use value="in"/>
+    <min value="1"/>
+    <max value="1"/>
+    <documentation value="Bundle resource to submit to DPC application. This should be the body of the POST request"/>
+    <type value="Bundle"/>
+  </parameter>
+  <parameter>
+    <name value="return"/>
+    <use value="out"/>
+    <min value="1"/>
+    <max value="1"/>
+    <documentation value="Bundle resource of newly created Practitioner resources."/>
+    <type value="Bundle"/>
+  </parameter>
+</OperationDefinition>
