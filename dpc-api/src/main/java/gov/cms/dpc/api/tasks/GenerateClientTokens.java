@@ -1,10 +1,12 @@
 package gov.cms.dpc.api.tasks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.servlets.tasks.Task;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Optional;
@@ -30,16 +33,18 @@ public class GenerateClientTokens extends Task {
 
     private final MacaroonBakery bakery;
     private final TokenResource resource;
+    private final ObjectMapper mapper;
 
     @Inject
     GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
         super("generate-token");
         this.bakery = bakery;
         this.resource = resource;
+        this.mapper = new ObjectMapper();
     }
 
     @Override
-    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) throws Exception {
+    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) {
 
         final ImmutableCollection<String> organizationCollection = parameters.get("organization");
         if (organizationCollection.isEmpty()) {
@@ -50,15 +55,14 @@ public class GenerateClientTokens extends Task {
             final String organization = organizationCollection.asList().get(0);
             final Organization orgResource = new Organization();
             orgResource.setId(organization);
-            final String organizationToken = this.resource
+            final TokenEntity tokenResponse = this.resource
                     .createOrganizationToken(
                             new OrganizationPrincipal(orgResource),
                             UUID.fromString(organization),
                             null,
                             Optional.empty());
 
-            output.write(organizationToken);
-
+            output.write(tokenResponse.getToken());
         }
 
     }

@@ -47,7 +47,6 @@ public class DeleteToken extends Task {
         this.resource
                 .deleteOrganizationToken(
                         new OrganizationPrincipal(organization),
-                        UUID.fromString(organizationID),
                         UUID.fromString(tokenID));
     }
 }
