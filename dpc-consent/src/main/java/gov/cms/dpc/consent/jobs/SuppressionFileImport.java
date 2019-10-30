@@ -3,7 +3,7 @@ package gov.cms.dpc.consent.jobs;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
-import gov.cms.dpc.consent.entities.ConsentEntity;
+import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import org.apache.commons.io.IOUtils;

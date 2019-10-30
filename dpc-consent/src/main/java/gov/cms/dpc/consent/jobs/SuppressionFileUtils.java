@@ -1,11 +1,12 @@
 package gov.cms.dpc.consent.jobs;
 
-import gov.cms.dpc.consent.entities.ConsentEntity;
+import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;

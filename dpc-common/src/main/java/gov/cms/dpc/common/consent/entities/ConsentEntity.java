@@ -1,4 +1,4 @@
-package gov.cms.dpc.consent.entities;
+package gov.cms.dpc.common.consent.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,28 +16,33 @@ public class ConsentEntity implements Serializable {
 
     private static final long serialVersionUID = 8702499693412507926L;
 
+    public ConsentEntity() { }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
+    @Column(name = "mbi")
     private String mbi;
+
     @NotEmpty
+    @Column(name = "hicn")
     private String hicn;
 
-    @Column(name = "bfd_patient_id")
-    private String bfdPatientId;
-
     @NotNull
-    @Column(name = "effective_date", columnDefinition = "DATE")
+    @Column(name = "effective_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private LocalDate effectiveDate;
 
     @Column(name = "policy_code")
     private String policyCode;
+
     @Column(name = "purpose_code")
     private String purposeCode;
+
     @Column(name = "loinc_code")
     private String loincCode;
+
     @Column(name = "scope_code")
     private String scopeCode;
 
@@ -73,29 +78,17 @@ public class ConsentEntity implements Serializable {
         this.hicn = hicn;
     }
 
-    public String getBfdPatientId() {
-        return bfdPatientId;
-    }
-
-    public void setBfdPatientId(String bfdPatientId) {
-        this.bfdPatientId = bfdPatientId;
-    }
-
     public LocalDate getEffectiveDate() {
         return effectiveDate;
     }
 
-    public void setEffectiveDate(LocalDate effectiveDate) {
-        this.effectiveDate = effectiveDate;
-    }
+    public void setEffectiveDate(LocalDate effectiveDate) { this.effectiveDate = effectiveDate; }
 
     public String getPolicyCode() {
         return policyCode;
     }
 
-    public void setPolicyCode(String policyCode) {
-        this.policyCode = policyCode;
-    }
+    public void setPolicyCode(String policyCode) { this.policyCode = policyCode; }
 
     public String getPurposeCode() {
         return purposeCode;
