@@ -75,10 +75,10 @@ module Internal
 
     def resolve_layout
       case action_name
-      when "index"
-        "table_index"
+      when 'index'
+        'table_index'
       else
-        "application"
+        'application'
       end
     end
   end
