@@ -1,13 +1,16 @@
-FROM adoptopenjdk/openjdk11:latest AS java_builder
+# Disabling IG building until issues are resolved:
+# https://chat.fhir.org/#narrow/stream/179240-Announcements/topic/Technical.20Corrections
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y build-essential ruby-full fontconfig ttf-dejavu
-RUN gem install jekyll
-
-# Build the IG assets
-WORKDIR /dpc-app
-COPY / /dpc-app
-RUN make ig/publish
+#FROM adoptopenjdk/openjdk11:latest AS java_builder
+#
+## Install build dependencies
+#RUN apt-get update && apt-get install -y build-essential ruby-full fontconfig ttf-dejavu
+#RUN gem install jekyll
+#
+## Build the IG assets
+#WORKDIR /dpc-app
+#COPY / /dpc-app
+#RUN make ig/publish
 
 
 FROM ruby:2.6.2-alpine AS ruby_builder
@@ -29,7 +32,7 @@ RUN gem install bundler --no-document && bundle install && npm install
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-web /dpc-web
-COPY --from=java_builder /dpc-app/dpc-web/public/ig /dpc-web/public/ig
+#COPY --from=java_builder /dpc-app/dpc-web/public/ig /dpc-web/public/ig
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Clean up from the build

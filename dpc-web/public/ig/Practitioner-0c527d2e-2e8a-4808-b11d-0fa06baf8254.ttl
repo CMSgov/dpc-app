@@ -1,0 +1,55 @@
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# - resource -------------------------------------------------------------------
+
+<https://dpc.cms.gov/api/v1/Practitioner/0c527d2e-2e8a-4808-b11d-0fa06baf8254> a fhir:Practitioner;
+  fhir:nodeRole fhir:treeRoot;
+  fhir:Resource.id [ fhir:value "0c527d2e-2e8a-4808-b11d-0fa06baf8254"];
+  fhir:Resource.meta [
+     fhir:Meta.versionId [ fhir:value "MTU1NDgxMjczNjQ1MDE4MjAwMA" ];
+     fhir:Meta.lastUpdated [ fhir:value "2019-04-09T12:25:36.450182+00:00"^^xsd:dateTime ]
+  ];
+  fhir:DomainResource.text [
+     fhir:Narrative.status [ fhir:value "generated" ];
+     fhir:Narrative.div "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 0c527d2e-2e8a-4808-b11d-0fa06baf8254</p><p><b>meta</b>: </p><p><b>identifier</b>: 3116145044854423862</p><p><b>name</b>: Leonard Klocko </p><p><b>address</b>: 275 SANDWICH STREET PLYMOUTH MA 02360 US </p><p><b>gender</b>: male</p></div>"
+  ];
+  fhir:Practitioner.identifier [
+     fhir:index 0;
+     fhir:Identifier.system [ fhir:value "http://hl7.org/fhir/sid/us-npi" ];
+     fhir:Identifier.value [ fhir:value "3116145044854423862" ]
+  ];
+  fhir:Practitioner.name [
+     fhir:index 0;
+     fhir:HumanName.family [ fhir:value "Klocko" ];
+     fhir:HumanName.given [
+       fhir:value "Leonard";
+       fhir:index 0
+     ];
+     fhir:HumanName.prefix [
+       fhir:value "Dr.";
+       fhir:index 0
+     ]
+  ];
+  fhir:Practitioner.address [
+     fhir:index 0;
+     fhir:Address.line [
+       fhir:value "275 SANDWICH STREET";
+       fhir:index 0
+     ];
+     fhir:Address.city [ fhir:value "PLYMOUTH" ];
+     fhir:Address.state [ fhir:value "MA" ];
+     fhir:Address.postalCode [ fhir:value "02360" ];
+     fhir:Address.country [ fhir:value "US" ]
+  ];
+  fhir:Practitioner.gender [ fhir:value "male"] .
+
+# - ontology header ------------------------------------------------------------
+
+<https://dpc.cms.gov/api/v1/Practitioner/0c527d2e-2e8a-4808-b11d-0fa06baf8254.ttl> a owl:Ontology;
+  owl:imports fhir:fhir.ttl .
+
+# -------------------------------------------------------------------------------------
+
