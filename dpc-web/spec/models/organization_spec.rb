@@ -5,12 +5,12 @@ require 'rails_helper'
 RSpec.describe Organization, type: :model do
   describe 'api_environments=' do
     it 'rejects non-arrays and sets attribute to []' do
-      org = create(:organization, api_environments: 'not_array')
+      org = build(:organization, api_environments: 'not_array')
       expect(org.api_environments).to eq([])
     end
 
     it 'rejects blank items in array' do
-      org = create(:organization, api_environments: ['', nil, 1])
+      org = build(:organization, api_environments: ['', nil, 1])
       expect(org.api_environments).to eq([1])
     end
   end
@@ -69,7 +69,7 @@ RSpec.describe Organization, type: :model do
         allow(api_client_0).to receive(:delete_organization).with(org)
         allow(api_client_1).to receive(:create_organization).with(org)
 
-        # Finish cration
+        # Finish creation
         org.save
 
         # Make the big change

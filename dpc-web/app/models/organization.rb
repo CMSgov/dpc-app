@@ -22,6 +22,14 @@ class Organization < ApplicationRecord
 
   before_save :update_api_organization
 
+  def address_type
+    address.address_type
+  end
+
+  def address_use
+    address.address_use
+  end
+
   def api_environments=(input)
     input = [] unless input.is_a?(Array)
     input.reject!(&:blank?)
