@@ -615,6 +615,61 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group
 }
 ~~~
 
+**Attribution Response**
+
+~~~ json
+{
+  "resourceType": "Group",
+  "type": "person",
+  "actual": true,
+  "characteristic": [
+    {
+      "code": {
+        "coding": [
+          {
+            "code": "attributed-to"
+          }
+        ]
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "code": "110001029483"
+          }
+        ]
+      }
+    }
+  ],
+  "member": [
+    {
+      "entity": {
+        "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
+      },
+      "period": {
+        "start": "2019-10-30T14:00:30+00:00",
+        "end": "2020-01-28T14:00:53+00:00"
+      },
+      "inactive": false
+    },
+    {
+      "entity": {
+        "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
+      },
+      "period": {
+        "start": "2019-10-30T14:00:30+00:00",
+        "end": "2020-01-28T14:00:53+00:00"
+      },
+      "inactive": false
+    }
+  ]
+}
+~~~
+
+The `Group` response returned by DPC includes additional `period` and `inactive` elements for each member, which indicate the time period for which the patient is active on the provider's roster, or, if the relationship has expired, the time period for which the patient *was* active on the roster.
+When an attribution relationship between a patient and provider has expired, either due to exceeding the 90 day threshold or being manually removed. The `inactive` flag will be set to `true` for the given patient.
+Patient's which are listed on a provider's roster but have their `inactive` flag set to `true` will not be included in Bulk Data exports.
+
 The `Group.id` value of the returned resource can be used by the client to initiate an [export job](#exporting-data).
 
 ### Update an Attribution Group
@@ -628,7 +683,7 @@ Roster additions are handled through a custom `$add` operation on the *Group* en
 This takes the members listed into given resource and adds them to the existing attribution list. 
 
 ~~~sh
-PUT /api/v1/Group/{Group.id}/$add
+POST /api/v1/Group/{Group.id}/$add
 ~~~
 
 **cURL command**
@@ -637,7 +692,7 @@ PUT /api/v1/Group/{Group.id}/$add
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
--X PUT \
+-X POST \
 -d @group_addition.json
 ~~~
 
@@ -648,7 +703,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
         "resourceType": "Group",
         "type": "person",
         "actual": true,
-        "characteristic": {
+        "characteristic": [{
           "code": {
             "coding": [
               {
@@ -664,7 +719,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
               }
             ]
           }
-        },
+        }],
         "member": [
           {
             "entity": {
@@ -682,7 +737,7 @@ Roster removals are handled through a custom `remove` operation on the *Group* e
 This takes the members listed into given resource and removes them from the existing attribution list.
 
 ~~~sh
-PUT /api/v1/Group/{Group.id}/$remove
+POST /api/v1/Group/{Group.id}/$remove
 ~~~
 
 **cURL command**
@@ -691,7 +746,7 @@ PUT /api/v1/Group/{Group.id}/$remove
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
--X PUT \
+-X POST \
 -d @group_removal.json
 ~~~
 
@@ -702,7 +757,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
         "resourceType": "Group",
         "type": "person",
         "actual": true,
-        "characteristic": {
+        "characteristic": [{
           "code": {
             "coding": [
               {
@@ -718,7 +773,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
               }
             ]
           }
-        },
+        }],
         "member": [
           {
               "entity": {
@@ -757,7 +812,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
         "resourceType": "Group",
         "type": "person",
         "actual": true,
-        "characteristic": {
+        "characteristic": [{
           "code": {
             "coding": [
               {
@@ -773,7 +828,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
               }
             ]
           }
-        },
+        }],
         "member": [
           {
             "entity": {
@@ -807,8 +862,11 @@ See the [Authentication and Authorization](#authentication-and-authorization) se
 Lookup the attribution [Group](https://hl7.org/fhir/STU3/group.html) resource associated to a specific provider using their [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number.
 Creating attribution groups is covered in an earlier [section](#attributing-patients-to-providers).
 
+> Note: DPC supports the standard FHIR search protocol, detailed [here](https://www.hl7.org/fhir/search.html).
+>Searching for rosters associated to a given provider makes use of [composite search parameters](https://www.hl7.org/fhir/search.html#combining). 
+
 ~~~ sh
-GET /api/v1/Group?characteristic=attributed-to&characteristic-code={provider NPI}
+GET /api/v1/Group?characteristic-value=|attributed-to$|{provider NPI}
 ~~~
 
 **cURL command**
