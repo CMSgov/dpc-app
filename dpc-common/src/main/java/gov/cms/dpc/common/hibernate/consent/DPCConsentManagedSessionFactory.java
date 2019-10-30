@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.hibernate.consent;
 
+import com.google.inject.Inject;
 import io.dropwizard.lifecycle.Managed;
 import org.hibernate.SessionFactory;
 
@@ -11,6 +12,7 @@ public class DPCConsentManagedSessionFactory implements Managed {
 
     private final SessionFactory sessionFactory;
 
+    @Inject
     public DPCConsentManagedSessionFactory(SessionFactory factory) {
         this.sessionFactory = factory;
     }
