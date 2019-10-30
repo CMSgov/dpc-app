@@ -36,8 +36,4 @@ module ApplicationHelper
   def tabs_set(tabs_set)
     content_for(:tabs_set) { tabs_set }
   end
-
-  def internal_page?
-    request.path[0..9] == '/internal/'
-  end
 end

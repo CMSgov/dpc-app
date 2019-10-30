@@ -5,6 +5,7 @@ require 'csv'
 module Internal
   class UsersController < ApplicationController
     before_action :authenticate_internal_user!
+    layout :resolve_layout
 
     def index
       results = UserSearch.new(params: params, scope: :all).results
@@ -42,6 +43,15 @@ module Internal
 
     def user_params
       params.fetch(:user).permit(:first_name, :last_name, :email, :organization_ids)
+    end
+
+    def resolve_layout
+      case action_name
+      when "index"
+        "table_index"
+      else
+        "application"
+      end
     end
   end
 end
