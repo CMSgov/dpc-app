@@ -648,7 +648,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
         "resourceType": "Group",
         "type": "person",
         "actual": true,
-        "characteristic": {
+        "characteristic": [{
           "code": {
             "coding": [
               {
@@ -664,7 +664,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
               }
             ]
           }
-        },
+        }],
         "member": [
           {
             "entity": {
@@ -702,7 +702,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
         "resourceType": "Group",
         "type": "person",
         "actual": true,
-        "characteristic": {
+        "characteristic": [{
           "code": {
             "coding": [
               {
@@ -718,7 +718,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
               }
             ]
           }
-        },
+        }],
         "member": [
           {
               "entity": {
@@ -757,7 +757,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
         "resourceType": "Group",
         "type": "person",
         "actual": true,
-        "characteristic": {
+        "characteristic": [{
           "code": {
             "coding": [
               {
@@ -773,7 +773,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
               }
             ]
           }
-        },
+        }],
         "member": [
           {
             "entity": {
@@ -807,8 +807,11 @@ See the [Authentication and Authorization](#authentication-and-authorization) se
 Lookup the attribution [Group](https://hl7.org/fhir/STU3/group.html) resource associated to a specific provider using their [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number.
 Creating attribution groups is covered in an earlier [section](#attributing-patients-to-providers).
 
+> Note: DPC supports the standard FHIR search protocol, detailed [here](https://www.hl7.org/fhir/search.html).
+>Searching for rosters associated to a given provider makes use of [composite search parameters](https://www.hl7.org/fhir/search.html#combining). 
+
 ~~~ sh
-GET /api/v1/Group?characteristic=attributed-to&characteristic-code={provider NPI}
+GET /api/v1/Group?characteristic-value=|attributed-to$|{provider NPI}
 ~~~
 
 **cURL command**
