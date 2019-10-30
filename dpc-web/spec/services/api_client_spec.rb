@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe APIClient do
   describe '#create_organization' do
     context 'without a profile endpoint persisted' do
-      it 'sends stubbed profile endpoint for orgs in sandbox' do
+      it 'sends stubbed profile endpoint with payload and creates registered org' do
         fhir_client = FHIR::Client.new(File.join(Rails.root, 'spec/fixtures/api_metadata.json'))
         allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('112233')
         allow(FHIR::Client).to receive(:new).and_return(fhir_client)
@@ -46,7 +46,7 @@ RSpec.describe APIClient do
     end
 
     context 'with a profile endpoint persisted' do
-      it 'sends full org data to API' do
+      it 'sends full org data to API and saves RegisteredOrganization' do
         fhir_client = FHIR::Client.new(File.join(Rails.root, 'spec/fixtures/api_metadata.json'))
         allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('112233')
         allow(FHIR::Client).to receive(:new).and_return(fhir_client)

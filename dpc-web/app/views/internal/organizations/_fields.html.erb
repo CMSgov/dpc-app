@@ -67,12 +67,18 @@
 
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
     <span class="ds-c-field__hint">Select all that apply. Unselecting all will remove all env access for organization.</span>
-    <%= f.collection_check_boxes(:api_environments, Organization::API_ENVIRONMENTS, :first, :second) do |b| %>
-      <span>
-        <%= b.check_box(class: 'ds-c-choice') %>
-        <%= b.label %>
-      </span>
-    <% end %>
+
+    <input name="organization[api_environments][]" value="" hidden>
+
+    <span>
+      <input id="organization_api_environments_sandbox" name="organization[api_environments][]" type="checkbox" value="sandbox" class="ds-c-choice" <%= "checked" if @organization.sandbox_enabled? %> >
+      <label for="organization_api_environments_sandbox">Sandbox</label>
+    </span>
+
+    <span>
+      <input id="organization_api_environments_production" name="organization[api_environments][]" type="checkbox" class="ds-c-choice" disabled>
+      <label for="organization_api_environments_production">Production</label>
+    </span>
   </div>
 </fieldset>
 

@@ -8,8 +8,9 @@ RSpec.feature 'creating and updating organizations' do
   before(:each) do
     api_client = instance_double(APIClient)
     allow(APIClient).to receive(:new).and_return(api_client)
-    allow(api_client).to receive(:create_organization)
-    allow(api_client).to receive(:delete_organization)
+    allow(api_client).to receive(:create_organization).
+      and_return({ 'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d' })
+    allow(api_client).to receive(:delete_organization).and_return(true)
 
     sign_in internal_user, scope: :internal_user
   end
@@ -30,11 +31,12 @@ RSpec.feature 'creating and updating organizations' do
     select 'Hl7 Fhir Msg', from: 'organization_profile_endpoint_attributes_connection_type'
     select 'Off', from: 'organization_profile_endpoint_attributes_status'
 
-    check 'organization_api_environments_0'
+    check 'organization_api_environments_sandbox'
 
     find('[data-test="form-submit"]').click
 
     expect(page).not_to have_css('[data-test="form-submit"]')
+
     expect(page.body).to have_content('Good Health')
     expect(page.body).to have_content('2200')
     expect(page.body).to have_content('Primary Care Clinic')
@@ -49,7 +51,7 @@ RSpec.feature 'creating and updating organizations' do
 
     fill_in 'organization_name', with: 'Health Revisited'
     select 'Multispecialty Clinic', from: 'organization_organization_type'
-    uncheck 'organization_api_environments_0'
+    uncheck 'organization_api_environments_sandbox'
     fill_in 'organization_address_attributes_street', with: '50 River St'
     find('[data-test="form-submit"]').click
 

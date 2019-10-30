@@ -22,7 +22,7 @@ class APIClient
   def create_organization(org)
     add_auth_header(golden_macaroon)
 
-    api_org = FHIR::Organization.create(
+    FHIR::Organization.create(
       name: org.name,
       npi: org.npi,
       address: {
@@ -36,12 +36,15 @@ class APIClient
       },
       endpoint: profile_endpoint(org)
     )
-    # org.update(api_org_id: api_org.id)
   end
 
   def delete_organization(org); end
 
   private
+
+  def add_auth_header(macaroon)
+    fhir_client.additional_headers = { Authorization: "Bearer: Token #{macaroon}" }
+  end
 
   def golden_macaroon
     @golden_macaroon ||= ENV.fetch("GOLDEN_MACAROON_#{api_env.upcase}")
@@ -58,9 +61,5 @@ class APIClient
         address: org.profile_endpoint_uri
       }
     end
-  end
-
-  def add_auth_header(macaroon)
-    fhir_client.additional_headers = { Authorization: "Bearer: Token #{macaroon}" }
   end
 end

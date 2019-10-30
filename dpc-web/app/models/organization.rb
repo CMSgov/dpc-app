@@ -3,14 +3,11 @@
 class Organization < ApplicationRecord
   include OrganizationTypable
 
-  API_ENVIRONMENTS = {
-    0 => 'Sandbox'
-  }.freeze
-
   has_one :address, as: :addressable
   has_many :organization_user_assignments
   has_many :users, through: :organization_user_assignments
   has_one :profile_endpoint
+  has_many :registered_organizations
 
   enum organization_type: ORGANIZATION_TYPES
 
@@ -21,8 +18,6 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, :profile_endpoint, reject_if: :all_blank
 
-  before_save :update_api_organization
-
   def address_type
     address&.address_type
   end
@@ -31,25 +26,18 @@ class Organization < ApplicationRecord
     address&.address_use
   end
 
+  def api_environments
+    registered_organizations.pluck(:api_env)
+  end
+
   def api_environments=(input)
     input = [] unless input.is_a?(Array)
     input.reject!(&:blank?)
 
-    self[:api_environments] = input || []
+    OrganizationRegistrar.new(organization: self, api_environments: input).register_all
   end
 
-  def update_api_organization
-    return unless api_environments_changed?
-
-    added_envs = api_environments - api_environments_was
-    removed_envs = api_environments_was - api_environments
-
-    added_envs.each do |api_env|
-      APIClient.new(api_env).create_organization(self)
-    end
-
-    removed_envs.each do |api_env|
-      APIClient.new(api_env).delete_organization(self)
-    end
+  def sandbox_enabled?
+    api_environments.include?('sandbox')
   end
 end
