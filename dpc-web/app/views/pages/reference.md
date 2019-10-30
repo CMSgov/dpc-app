@@ -628,7 +628,7 @@ Roster additions are handled through a custom `$add` operation on the *Group* en
 This takes the members listed into given resource and adds them to the existing attribution list. 
 
 ~~~sh
-PUT /api/v1/Group/{Group.id}/$add
+POST /api/v1/Group/{Group.id}/$add
 ~~~
 
 **cURL command**
@@ -637,7 +637,7 @@ PUT /api/v1/Group/{Group.id}/$add
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
--X PUT \
+-X POST \
 -d @group_addition.json
 ~~~
 
@@ -682,7 +682,7 @@ Roster removals are handled through a custom `remove` operation on the *Group* e
 This takes the members listed into given resource and removes them from the existing attribution list.
 
 ~~~sh
-PUT /api/v1/Group/{Group.id}/$remove
+POST /api/v1/Group/{Group.id}/$remove
 ~~~
 
 **cURL command**
@@ -691,7 +691,7 @@ PUT /api/v1/Group/{Group.id}/$remove
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
 -H 'Authorization: Bearer {token}' \
 -H 'Accept: application/fhir+json' \
--X PUT \
+-X POST \
 -d @group_removal.json
 ~~~
 
