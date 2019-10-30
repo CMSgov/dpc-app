@@ -1,14 +1,11 @@
 package gov.cms.dpc.api.resources.v1;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
-import gov.cms.dpc.api.models.TokenResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -19,7 +16,6 @@ import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +40,12 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final IGenericClient client;
 
     @Inject
-    TokenResource(TokenDAO dao, MacaroonBakery bakery, TokenPolicy policy, IGenericClient client) {
+    TokenResource(TokenDAO dao, MacaroonBakery bakery, TokenPolicy policy) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
-        this.client = client;
     }
 
     @Override
@@ -75,7 +69,7 @@ public class TokenResource extends AbstractTokenResource {
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Token", response = OperationOutcome.class))
     @Override
     public TokenEntity getOrganizationToken(@ApiParam(hidden = true) @Auth OrganizationPrincipal principal,
-                                            @ApiParam(value = "Token ID", required = true) @NotNull @QueryParam("tokenID") UUID tokenID) {
+                                            @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
         final List<TokenEntity> tokens = this.dao.findTokenByOrgAndID(principal.getID(), tokenID);
         if (tokens.isEmpty()) {
             throw new WebApplicationException("Cannot find token with matching ID", Response.Status.NOT_FOUND);
@@ -86,7 +80,6 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     @POST
-    @Path("/{organizationID}")
     @UnitOfWork
     @Timed
     @ExceptionMetered
@@ -96,22 +89,9 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     public TokenEntity createOrganizationToken(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-            @ApiParam(value = "Organization resource ID", required = true)
-            @NotNull @PathParam("organizationID") UUID organizationID,
             @ApiParam(value = "Optional label for token") @QueryParam("label") String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
-        checkOrganizationMatches(organizationPrincipal, organizationID);
 
-        // Verify that the organization actually exists
-        try {
-            this.client
-                    .read()
-                    .resource(Organization.class)
-                    .withId(organizationID.toString())
-                    .encodedJson()
-                    .execute();
-        } catch (ResourceNotFoundException e) {
-            throw new WebApplicationException("Cannot find organization", Response.Status.NOT_FOUND);
-        }
+        final UUID organizationID = organizationPrincipal.getID();
 
         final Macaroon macaroon = generateMacaroon(organizationID);
 
@@ -199,12 +179,6 @@ public class TokenResource extends AbstractTokenResource {
             logger.error("GOLDEN MACAROON WAS GENERATED IN TOKEN RESOURCE!");
             // TODO: Remove the Macaroon from the root key store (DPC-729)
             throw new IllegalStateException("Token generation failed");
-        }
-    }
-
-    private static void checkOrganizationMatches(OrganizationPrincipal organizationPrincipal, UUID organizationID) {
-        if (!organizationPrincipal.getID().equals(organizationID)) {
-            throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
         }
     }
 }

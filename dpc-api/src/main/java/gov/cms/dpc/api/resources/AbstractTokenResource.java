@@ -35,15 +35,13 @@ public abstract class AbstractTokenResource {
      * Create authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
      * This token is designed to be long-lived and delegatable.
      *
-     * @param organizationID - {@link UUID} organization ID
      * @param label          - {@link Optional} {@link String} to use as token label
      * @param expiration     - {@link Optional} {@link OffsetDateTime} to use for token expiration
      * @return - {@link String} base64 (URL) encoded token
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    @Path("/{organizationID}")
-    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, @PathParam("organizationID") @NotNull UUID organizationID, String label, Optional<OffsetDateTimeParam> expiration);
+    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, String label, Optional<OffsetDateTimeParam> expiration);
 
     @GET
     @Path("/{tokenID}")

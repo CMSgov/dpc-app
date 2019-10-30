@@ -31,6 +31,7 @@ public class TokenEntity implements Serializable {
     private String id;
 
     @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @Column(name = "organization_id")
     private UUID organizationID;
 

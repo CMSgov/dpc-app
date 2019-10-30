@@ -58,7 +58,6 @@ public class GenerateClientTokens extends Task {
             final TokenEntity tokenResponse = this.resource
                     .createOrganizationToken(
                             new OrganizationPrincipal(orgResource),
-                            UUID.fromString(organization),
                             null,
                             Optional.empty());
 

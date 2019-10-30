@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import javax.persistence.NoResultException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
@@ -75,7 +76,13 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
         // Lookup the organization by Macaroon id
         final UUID macaroonID = UUID.fromString(m1.identifier);
-        final UUID orgID = this.dao.findOrgByToken(macaroonID);
+        final UUID orgID;
+        try {
+            orgID = this.dao.findOrgByToken(macaroonID);
+        } catch (NoResultException e) {
+            logger.error("Cannot find token with ID {}.", macaroonID, e);
+            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        }
 
         try {
             this.bakery.verifyMacaroon(Collections.singletonList(m1), String.format("organization_id = %s", orgID));
