@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Provider;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.models.KeyPairResponse;
+import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +35,16 @@ public class BakeryKeyPairProvider implements Provider<BakeryKeyPair> {
         final File file = new File(location);
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             final KeyPairResponse keyPairResponse = this.mapper.readValue(reader, KeyPairResponse.class);
+            validateEnvironment(keyPairResponse);
             return keyPairResponse.getKeyPair();
         } catch (IOException e) {
             throw new IllegalStateException(String.format("Cannot load key pair from %s", location), e);
+        }
+    }
+
+    private void validateEnvironment(KeyPairResponse response) {
+        if (!EnvironmentParser.getEnvironment("API", false).equals(response.getEnvironment())) {
+            throw new IllegalStateException("Cannot load keypair for different environment");
         }
     }
 }

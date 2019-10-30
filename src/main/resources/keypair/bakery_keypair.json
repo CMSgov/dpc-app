@@ -1,5 +1,6 @@
 {
   "algorithm": "X25519",
+  "environment": "local",
   "keyPair": {
     "public_key": "FluVlInJ1Cr0oxikxK095SJCEP6ngzCwgz6r6cCyF1k=",
     "private_key": "ODzuQTKYEFqwoM//sKUnRs9n6XLnnfJfBLS7QvOozXk="

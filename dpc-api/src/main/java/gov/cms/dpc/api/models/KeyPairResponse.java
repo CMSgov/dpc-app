@@ -20,6 +20,9 @@ public class KeyPairResponse {
     @NotEmpty
     private String algorithm;
 
+    @NotEmpty
+    private String environment;
+
     @NotNull
     @JsonSerialize(using = BakeryKeyPairSerializer.class)
     @JsonDeserialize(using = BakeryKeyPairDeserializer.class)
@@ -67,5 +70,13 @@ public class KeyPairResponse {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

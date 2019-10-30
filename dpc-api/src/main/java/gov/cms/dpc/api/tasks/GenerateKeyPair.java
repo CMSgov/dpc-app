@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.models.KeyPairResponse;
+import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.servlets.tasks.Task;
 import org.slf4j.Logger;
@@ -36,6 +38,8 @@ public class GenerateKeyPair extends Task {
 
     @Override
     public void execute(ImmutableMultimap<String, String> parameters, PrintWriter printWriter) throws Exception {
+        final String environment = EnvironmentParser.getEnvironment("API", false);
+
         final OffsetDateTime createdOn = OffsetDateTime.now(ZoneOffset.UTC);
 
         final ImmutableCollection<String> userCollection = parameters.get("user");
@@ -53,6 +57,7 @@ public class GenerateKeyPair extends Task {
         keyPairResponse.setAlgorithm("X25519");
         final Curve25519KeyPair keyPair = instance.generateKeyPair();
         keyPairResponse.setKeyPair(new BakeryKeyPair(keyPair.getPublicKey(), keyPair.getPrivateKey()));
+        keyPairResponse.setEnvironment(environment);
 
         this.mapper.writeValue(printWriter, keyPairResponse);
     }
