@@ -1,21 +1,14 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationOptions;
-import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
-import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
-import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
 import io.swagger.annotations.*;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -29,12 +22,10 @@ import java.util.stream.Collectors;
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private final IGenericClient client;
-    private final FhirValidator validator;
 
     @Inject
-    public OrganizationResource(IGenericClient client, FhirValidator fhirValidator) {
+    public OrganizationResource(IGenericClient client) {
         this.client = client;
-        this.validator = fhirValidator;
     }
 
 
@@ -84,8 +75,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
     }
 
     private void validateOrganizationBundle(Bundle organizationBundle) {
-        // Get the organization and validate it
-        final Resource organization = organizationBundle
+        // Ensure we have an organization
+        organizationBundle
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
@@ -95,7 +86,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .orElseThrow(() -> new WebApplicationException("Bundle must include Organization", Response.Status.BAD_REQUEST));
 
 
-        // Get any provided endpoints and validate them
+        // Make sure we have some endpoints
         final List<Resource> endpoints = organizationBundle
                 .getEntry()
                 .stream()

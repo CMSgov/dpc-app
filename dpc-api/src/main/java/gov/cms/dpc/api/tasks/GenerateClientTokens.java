@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.tasks;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.google.common.collect.ImmutableCollection;
@@ -16,11 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Admin task for creating a Golden macaroon which has superuser permissions in the application.
@@ -33,14 +30,12 @@ public class GenerateClientTokens extends Task {
 
     private final MacaroonBakery bakery;
     private final TokenResource resource;
-    private final ObjectMapper mapper;
 
     @Inject
     GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
         super("generate-token");
         this.bakery = bakery;
         this.resource = resource;
-        this.mapper = new ObjectMapper();
     }
 
     @Override
@@ -63,6 +58,5 @@ public class GenerateClientTokens extends Task {
 
             output.write(tokenResponse.getToken());
         }
-
     }
 }

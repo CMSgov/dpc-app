@@ -11,6 +11,10 @@ import java.util.List;
  */
 public class DataFactories {
 
+    private DataFactories() {
+        // Not used
+    }
+
     public static Address generateFakeAddress() {
         final Address address = new Address();
         address.addLine("1800 Pennsylvania Ave NW");
