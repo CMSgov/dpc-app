@@ -1,0 +1,90 @@
+{
+  "resourceType": "Patient",
+  "id": "728b270d-d7de-4143-82fe-d3ccd92cebe4",
+  "meta": {
+    "versionId": "MTU1NDgxMjczNTM5MjYwMDAwMA",
+    "lastUpdated": "2019-04-09T12:25:35.392600+00:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 728b270d-d7de-4143-82fe-d3ccd92cebe4</p><p><b>meta</b>: </p><p><b>identifier</b>: 20000000001809</p><p><b>name</b>: Jonathan Prosacco (OFFICIAL)</p><p><b>telecom</b>: ph: 555-719-3748(HOME)</p><p><b>gender</b>: male</p><p><b>birthDate</b>: Jun 8, 1943</p><p><b>address</b>: 1038 Ratke Throughway Apt 10 Medfield Massachusetts 02052 US </p><p><b>maritalStatus</b>: M <span style=\"background: LightGoldenRodYellow\">(Details : {http://hl7.org/fhir/v3/MaritalStatus code 'M' = 'Married', given as 'Married'})</span></p><p><b>multipleBirth</b>: false</p><h3>Communications</h3><table class=\"grid\"><tr><td>-</td><td><b>Language</b></td></tr><tr><td>*</td><td>English <span style=\"background: LightGoldenRodYellow\">(Details : {urn:ietf:bcp:47 code 'en-US' = 'English (Region=United States)', given as 'English (Region=United States)'})</span></td></tr></table></div>"
+  },
+  "identifier": [
+    {
+      "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
+      "value": "20000000001809"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Prosacco",
+      "given": [
+        "Jonathan"
+      ],
+      "prefix": [
+        "Mr."
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "555-719-3748",
+      "use": "home"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1943-06-08",
+  "address": [
+    {
+      "extension": [
+        {
+          "extension": [
+            {
+              "url": "latitude",
+              "valueDecimal": 42.187011
+            },
+            {
+              "url": "longitude",
+              "valueDecimal": -71.30040
+            }
+          ],
+          "url": "http://hl7.org/fhir/StructureDefinition/geolocation"
+        }
+      ],
+      "line": [
+        "1038 Ratke Throughway Apt 10"
+      ],
+      "city": "Medfield",
+      "state": "Massachusetts",
+      "postalCode": "02052",
+      "country": "US"
+    }
+  ],
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/v3/MaritalStatus",
+        "code": "M",
+        "display": "Married"
+      }
+    ],
+    "text": "M"
+  },
+  "multipleBirthBoolean": false,
+  "communication": [
+    {
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "en-US",
+            "display": "English (Region=United States)"
+          }
+        ],
+        "text": "English"
+      }
+    }
+  ]
+}

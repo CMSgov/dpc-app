@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<OperationDefinition xmlns="http://hl7.org/fhir">
+  <id value="dpc-operation-group-add"/>
+  <text>
+    <status value="generated"/><div xmlns="http://www.w3.org/1999/xhtml"><h2>Add Member to Attribution Roster</h2><p>OPERATION: Add Member to Attribution Roster</p><p>The official URL for this operation definition is: </p><pre>https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-add</pre><div><p>Add the members in the provided in the Group resource to the existing membership list.</p>
+</div><p>URL: [base]/Group/[id]/$add</p><p>Parameters</p><table class="grid"><tr><td><b>Use</b></td><td><b>Name</b></td><td><b>Cardinality</b></td><td><b>Type</b></td><td><b>Binding</b></td><td><b>Documentation</b></td></tr><tr><td>IN</td><td>resource</td><td>1..1</td><td><a href="http://hl7.org/fhir/STU3/group.html">Group</a></td><td/><td><div><p>Group of members to add to existing resource</p>
+</div></td></tr><tr><td>OUT</td><td>return</td><td>1..1</td><td><a href="http://hl7.org/fhir/STU3/group.html">Group</a></td><td/><td><div><p>Updated group resource.</p>
+</div></td></tr></table></div>
+  </text>
+  <url value="https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-add"/>
+  <version value="0.0.1"/>
+  <name value="Add Member to Attribution Roster"/>
+  <status value="draft"/>
+  <kind value="operation"/>
+  <date value="2019-10-16T16:12:10-04:00"/>
+  <publisher value="The DPC Team"/>
+  <description value="Add the members in the provided in the Group resource to the existing membership list."/>
+  <code value="add"/>
+  <resource value="Group"/>
+  <system value="false"/>
+  <type value="false"/>
+  <instance value="true"/>
+  <parameter>
+    <name value="resource"/>
+    <use value="in"/>
+    <min value="1"/>
+    <max value="1"/>
+    <documentation value="Group of members to add to existing resource"/>
+    <type value="Group"/>
+  </parameter>
+  <parameter>
+    <name value="return"/>
+    <use value="out"/>
+    <min value="1"/>
+    <max value="1"/>
+    <documentation value="Updated group resource."/>
+    <type value="Group"/>
+  </parameter>
+</OperationDefinition>

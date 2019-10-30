@@ -1,0 +1,239 @@
+@prefix fhir: <http://hl7.org/fhir/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# - resource -------------------------------------------------------------------
+
+<https://dpc.cms.gov/api/v1/CapabilityStatement/dpc-capabilities> a fhir:CapabilityStatement;
+  fhir:nodeRole fhir:treeRoot;
+  fhir:Resource.id [ fhir:value "dpc-capabilities"];
+  fhir:DomainResource.text [
+     fhir:Narrative.status [ fhir:value "generated" ];
+     fhir:Narrative.div "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2/><div><p>This Capability Statement defines the available resource, endpoints and operations supported by the Data @ the Point of Care Application.</p>\n</div><table><tr><td>Mode</td><td>SERVER</td></tr><tr><td>Description</td><td/></tr><tr><td>Transaction</td><td></td></tr><tr><td>System History</td><td></td></tr><tr><td>System Search</td><td></td></tr></table><table><tr><th><b>Resource Type</b></th><th><b>Profile</b></th><th><b title=\"GET a resource (read interaction)\">Read</b></th><th><b title=\"GET all set of resources of the type (search interaction)\">Search</b></th><th><b title=\"PUT a new resource version (update interaction)\">Update</b></th><th><b title=\"POST a new resource (create interaction)\">Create</b></th><th><b title=\"DELETE a resource (delete interaction)\">Delete</b></th></tr><tr><td>Endpoint</td><td><a href=\"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint\">https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint</a></td><td>y</td><td>y</td><td></td><td></td><td></td></tr><tr><td>Group</td><td><a href=\"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attribution-roster\">https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attribution-roster</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Organization</td><td><a href=\"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization\">https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization</a></td><td>y</td><td></td><td></td><td></td><td></td></tr><tr><td>Patient</td><td><a href=\"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient\">https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>Practitioner</td><td><a href=\"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner\">https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner</a></td><td>y</td><td>y</td><td>y</td><td>y</td><td>y</td></tr><tr><td>StructureDefinition</td><td>y</td><td>y</td><td></td><td></td><td></td></tr></table></div>"
+  ];
+  fhir:CapabilityStatement.url [ fhir:value "https://dpc.cms.gov/api/v1/CapabilityStatement/dpc-capabilities"];
+  fhir:CapabilityStatement.version [ fhir:value "0.3.0-SNAPSHOT"];
+  fhir:CapabilityStatement.status [ fhir:value "draft"];
+  fhir:CapabilityStatement.date [ fhir:value "2019-01-01T00:00:00-05:00"^^xsd:dateTime];
+  fhir:CapabilityStatement.publisher [ fhir:value "Centers for Medicare and Medicaid Services"];
+  fhir:CapabilityStatement.description [ fhir:value "This Capability Statement defines the available resource, endpoints and operations supported by the Data @ the Point of Care Application."];
+  fhir:CapabilityStatement.kind [ fhir:value "capability"];
+  fhir:CapabilityStatement.instantiates [
+     fhir:value "http://build.fhir.org/ig/HL7/bulk-data/CapabilityStatement-bulk-data";
+     fhir:index 0
+  ];
+  fhir:CapabilityStatement.software [
+     fhir:CapabilityStatement.software.name [ fhir:value "Data @ Point of Care API" ];
+     fhir:CapabilityStatement.software.version [ fhir:value "0.3.0-SNAPSHOT" ];
+     fhir:CapabilityStatement.software.releaseDate [ fhir:value "2019-01-01T00:00:00-05:00"^^xsd:dateTime ]
+  ];
+  fhir:CapabilityStatement.fhirVersion [ fhir:value "3.0.1"];
+  fhir:CapabilityStatement.acceptUnknown [ fhir:value "extensions"];
+  fhir:CapabilityStatement.format [
+     fhir:value "application/json";
+     fhir:index 0
+  ], [
+     fhir:value "application/fhir+json";
+     fhir:index 1
+  ];
+  fhir:CapabilityStatement.rest [
+     fhir:index 0;
+     fhir:CapabilityStatement.rest.mode [ fhir:value "server" ];
+     fhir:CapabilityStatement.rest.resource [
+       fhir:index 0;
+       fhir:CapabilityStatement.rest.resource.type [ fhir:value "Endpoint" ];
+       fhir:CapabilityStatement.rest.resource.profile [
+         fhir:link <https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.interaction [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "read" ]
+       ], [
+         fhir:index 1;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "search-type" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.versioning [ fhir:value "no-version" ]
+     ], [
+       fhir:index 1;
+       fhir:CapabilityStatement.rest.resource.type [ fhir:value "Group" ];
+       fhir:CapabilityStatement.rest.resource.profile [
+         fhir:link <https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attribution-roster>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attribution-roster" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.interaction [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "read" ]
+       ], [
+         fhir:index 1;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "create" ]
+       ], [
+         fhir:index 2;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "update" ]
+       ], [
+         fhir:index 3;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "delete" ]
+       ], [
+         fhir:index 4;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "search-type" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.versioning [ fhir:value "no-version" ];
+       fhir:CapabilityStatement.rest.resource.searchParam [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.searchParam.name [ fhir:value "characteristic-value" ];
+         fhir:CapabilityStatement.rest.resource.searchParam.type [ fhir:value "token" ];
+         fhir:CapabilityStatement.rest.resource.searchParam.documentation [ fhir:value "Search for Attribution rosters which are attributed to the given provider NPI" ]
+       ], [
+         fhir:index 1;
+         fhir:CapabilityStatement.rest.resource.searchParam.name [ fhir:value "member" ];
+         fhir:CapabilityStatement.rest.resource.searchParam.type [ fhir:value "reference" ];
+         fhir:CapabilityStatement.rest.resource.searchParam.documentation [ fhir:value "Search for Attribution groups in which the given Patient resource is a member." ]
+       ]
+     ], [
+       fhir:index 2;
+       fhir:CapabilityStatement.rest.resource.type [ fhir:value "Organization" ];
+       fhir:CapabilityStatement.rest.resource.profile [
+         fhir:link <https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.interaction [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "read" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.versioning [ fhir:value "no-version" ]
+     ], [
+       fhir:index 3;
+       fhir:CapabilityStatement.rest.resource.type [ fhir:value "Patient" ];
+       fhir:CapabilityStatement.rest.resource.profile [
+         fhir:link <https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.interaction [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "read" ]
+       ], [
+         fhir:index 1;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "create" ]
+       ], [
+         fhir:index 2;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "update" ]
+       ], [
+         fhir:index 3;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "delete" ]
+       ], [
+         fhir:index 4;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "search-type" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.versioning [ fhir:value "no-version" ];
+       fhir:CapabilityStatement.rest.resource.searchParam [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.searchParam.name [ fhir:value "identifier" ];
+         fhir:CapabilityStatement.rest.resource.searchParam.type [ fhir:value "token" ];
+         fhir:CapabilityStatement.rest.resource.searchParam.documentation [ fhir:value "Find patient resources which match the given Identifier. For DPC, this will always return a single resource, as MBIs are unique." ]
+       ]
+     ], [
+       fhir:index 4;
+       fhir:CapabilityStatement.rest.resource.type [ fhir:value "Practitioner" ];
+       fhir:CapabilityStatement.rest.resource.profile [
+         fhir:link <https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.interaction [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "read" ]
+       ], [
+         fhir:index 1;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "create" ]
+       ], [
+         fhir:index 2;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "update" ]
+       ], [
+         fhir:index 3;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "delete" ]
+       ], [
+         fhir:index 4;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "search-type" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.versioning [ fhir:value "no-version" ];
+       fhir:CapabilityStatement.rest.resource.searchParam [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.searchParam.name [ fhir:value "identifier" ];
+         fhir:CapabilityStatement.rest.resource.searchParam.type [ fhir:value "token" ];
+         fhir:CapabilityStatement.rest.resource.searchParam.documentation [ fhir:value "Find practitioner resources which match the given Identifier. For DPC, this will always return a single resource, as NPIs are unique." ]
+       ]
+     ], [
+       fhir:index 5;
+       fhir:CapabilityStatement.rest.resource.type [ fhir:value "StructureDefinition" ];
+       fhir:CapabilityStatement.rest.resource.interaction [
+         fhir:index 0;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "read" ]
+       ], [
+         fhir:index 1;
+         fhir:CapabilityStatement.rest.resource.interaction.code [ fhir:value "search-type" ]
+       ];
+       fhir:CapabilityStatement.rest.resource.versioning [ fhir:value "no-version" ]
+     ];
+     fhir:CapabilityStatement.rest.interaction [
+       fhir:index 0;
+       fhir:CapabilityStatement.rest.interaction.code [ fhir:value "batch" ]
+     ];
+     fhir:CapabilityStatement.rest.operation [
+       fhir:index 0;
+       fhir:CapabilityStatement.rest.operation.name [ fhir:value "export" ];
+       fhir:CapabilityStatement.rest.operation.definition [
+         fhir:link <http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export>;
+         fhir:Reference.reference [ fhir:value "http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export" ]
+       ]
+     ], [
+       fhir:index 1;
+       fhir:CapabilityStatement.rest.operation.name [ fhir:value "validate" ];
+       fhir:CapabilityStatement.rest.operation.definition [
+         fhir:link <https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-validate>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-validate" ]
+       ]
+     ], [
+       fhir:index 2;
+       fhir:CapabilityStatement.rest.operation.name [ fhir:value "submit" ];
+       fhir:CapabilityStatement.rest.operation.definition [
+         fhir:link <https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-submit>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-submit" ]
+       ]
+     ], [
+       fhir:index 3;
+       fhir:CapabilityStatement.rest.operation.name [ fhir:value "validate" ];
+       fhir:CapabilityStatement.rest.operation.definition [
+         fhir:link <https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-validate>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-validate" ]
+       ]
+     ], [
+       fhir:index 4;
+       fhir:CapabilityStatement.rest.operation.name [ fhir:value "submit" ];
+       fhir:CapabilityStatement.rest.operation.definition [
+         fhir:link <https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-submit>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-submit" ]
+       ]
+     ], [
+       fhir:index 5;
+       fhir:CapabilityStatement.rest.operation.name [ fhir:value "add" ];
+       fhir:CapabilityStatement.rest.operation.definition [
+         fhir:link <https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-add>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-add" ]
+       ]
+     ], [
+       fhir:index 6;
+       fhir:CapabilityStatement.rest.operation.name [ fhir:value "remove" ];
+       fhir:CapabilityStatement.rest.operation.definition [
+         fhir:link <https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-remove>;
+         fhir:Reference.reference [ fhir:value "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-remove" ]
+       ]
+     ]
+  ] .
+
+# - ontology header ------------------------------------------------------------
+
+<https://dpc.cms.gov/api/v1/CapabilityStatement/dpc-capabilities.ttl> a owl:Ontology;
+  owl:imports fhir:fhir.ttl .
+
+# -------------------------------------------------------------------------------------
+
