@@ -1,7 +1,7 @@
 package gov.cms.dpc.consent.jobs;
 
 import com.google.inject.*;
-import gov.cms.dpc.common.entities.ConsentEntity;
+import gov.cms.dpc.consent.entities.ConsentEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
@@ -26,8 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
@@ -37,6 +38,7 @@ public class SuppressionFileImportTest {
     private static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private Client client;
     private ConsentDAO consentDAO;
+    final String PATH_1800_COPY = "./src/test/resources/synthetic-1800-files/copy";
 
     @Rule
     public DAOTestRule database = DAOTestRule.newBuilder().addEntityClass(ConsentEntity.class).build();
@@ -52,9 +54,6 @@ public class SuppressionFileImportTest {
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
 
-        final String PATH_1800_ORIG = "./src/test/resources/synthetic-1800-files/original";
-        final String PATH_1800_COPY = "./src/test/resources/synthetic-1800-files/copy";
-
         SundialJobScheduler.getServletContext().setAttribute("com.google.inject.Injector",
                 Guice.createInjector(new AbstractModule(){
                     @Provides
@@ -67,19 +66,6 @@ public class SuppressionFileImportTest {
                     }
                 }
         ));
-
-        try (Stream<Path> paths = Files.walk(Paths.get(PATH_1800_ORIG))) {
-            paths.filter(Files::isRegularFile).forEach(p -> {
-                Path dest = Paths.get(PATH_1800_COPY, "/", p.getFileName().toString());
-                try {
-                    Files.copy(p, dest, StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    fail(String.format("Cannot copy synthetic 1-800 file %s: %s", p.toString(), e.toString()));
-                }
-            });
-        } catch (IOException e) {
-            fail(String.format("Cannot read synthetic 1-800 files: %s", e.toString()));
-        }
     }
 
     @AfterEach
@@ -89,6 +75,8 @@ public class SuppressionFileImportTest {
 
     @Test
     void test() throws InterruptedException {
+        copyFiles("./src/test/resources/synthetic-1800-files/valid");
+
         JobTestUtils.startJob(APPLICATION, this.client, "SuppressionFileImport");
         JobTestUtils.stopJob(APPLICATION, this.client, "SuppressionFileImport");
 
@@ -106,11 +94,60 @@ public class SuppressionFileImportTest {
         assertEquals(39, consents.size());
 
         ConsentEntity ce = consents.stream().filter(c -> "1000009420".equals(c.getHicn())).findFirst().get();
-        assertEquals(Date.valueOf("2019-10-29"), ce.getEffectiveDate());
+        assertEquals(LocalDate.parse("2019-10-29"), ce.getEffectiveDate());
         assertEquals("OPTIN", ce.getPolicyCode());
 
 
         ManagedSessionContext.unbind(sessionFactory);
         session.close();
+    }
+
+    @Test
+    void test_invalidFiles() throws InterruptedException {
+        copyFiles("./src/test/resources/synthetic-1800-files/invalid");
+
+        JobTestUtils.startJob(APPLICATION, this.client, "SuppressionFileImport");
+        JobTestUtils.stopJob(APPLICATION, this.client, "SuppressionFileImport");
+
+        // Wait for a couple of seconds to let the job complete
+        Thread.sleep(2000);
+
+        SessionFactory sessionFactory = database.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        ManagedSessionContext.bind(session);
+
+        List<ConsentEntity> consents = database.inTransaction(() -> {
+            return consentDAO.list();
+        });
+
+        List<String> hicns = consents.stream().map(c -> c.getHicn()).collect(Collectors.toList());
+
+        // From file with invalid name
+        assertFalse(hicns.contains("1000001119"));
+
+        // Before invalid record
+        assertTrue(hicns.contains("1000001112"));
+        // Invalid record
+        assertFalse(hicns.contains("1000001113"));
+        // After invalid record
+        assertTrue(hicns.contains("1000001114"));
+
+        ManagedSessionContext.unbind(sessionFactory);
+        session.close();
+    }
+
+    void copyFiles(String path) {
+        try (Stream<Path> paths = Files.walk(Paths.get(path))) {
+            paths.filter(Files::isRegularFile).forEach(p -> {
+                Path dest = Paths.get(PATH_1800_COPY, "/", p.getFileName().toString());
+                try {
+                    Files.copy(p, dest, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    fail(String.format("Cannot copy synthetic 1-800 file %s: %s", p.toString(), e.toString()));
+                }
+            });
+        } catch (IOException e) {
+            fail(String.format("Cannot read synthetic 1-800 files: %s", e.toString()));
+        }
     }
 }

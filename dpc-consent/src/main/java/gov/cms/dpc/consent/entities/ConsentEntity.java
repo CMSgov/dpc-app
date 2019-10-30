@@ -1,4 +1,4 @@
-package gov.cms.dpc.common.entities;
+package gov.cms.dpc.consent.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -7,15 +7,15 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 @Entity
 @Table(name = "consent")
 public class ConsentEntity implements Serializable {
 
-    private static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 8702499693412507926L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,7 +31,7 @@ public class ConsentEntity implements Serializable {
 
     @NotNull
     @Column(name = "effective_date", columnDefinition = "DATE")
-    private Date effectiveDate;
+    private LocalDate effectiveDate;
 
     @Column(name = "policy_code")
     private String policyCode;
@@ -82,11 +82,11 @@ public class ConsentEntity implements Serializable {
         this.bfdPatientId = bfdPatientId;
     }
 
-    public Date getEffectiveDate() {
+    public LocalDate getEffectiveDate() {
         return effectiveDate;
     }
 
-    public void setEffectiveDate(Date effectiveDate) {
+    public void setEffectiveDate(LocalDate effectiveDate) {
         this.effectiveDate = effectiveDate;
     }
 

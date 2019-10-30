@@ -1,15 +1,16 @@
 package gov.cms.dpc.consent.jobs;
 
-import gov.cms.dpc.common.entities.ConsentEntity;
-import org.hibernate.SessionFactory;
+import gov.cms.dpc.consent.entities.ConsentEntity;
+import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.nio.file.Paths;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SuppressionFileUtilsTest {
 
@@ -25,13 +26,14 @@ public class SuppressionFileUtilsTest {
         ConsentEntity consent = result.get();
         assertEquals("1000087481", consent.getHicn());
         assertEquals("OPTIN", consent.getPolicyCode());
-        assertEquals(Date.valueOf("2019-07-01"), consent.getEffectiveDate());
+        assertEquals(LocalDate.parse("2019-07-01"), consent.getEffectiveDate());
     }
 
     @Test
     public void testEntityFromLine_InvalidSource() {
-        Optional<ConsentEntity> result = SuppressionFileUtils.entityFromLine("1000050218 1120500001Janice                        Marie                         J                                       19700227288 Waterpool Dr.                                      AddressLine2                                           City                                                   FakeCity                                NY110390889U2019030120190719aaaaaTN               T9992                                                                      ");
-        assertTrue(result.isEmpty());
+        assertThrows(InvalidSuppressionRecordException.class, () -> {
+            SuppressionFileUtils.entityFromLine("1000050218 1120500001Janice                        Marie                         J                                       19700227288 Waterpool Dr.                                      AddressLine2                                           City                                                   FakeCity                                NY110390889U2019030120190719aaaaaTN               T9992                                                                      ");
+        });
     }
 
     @Test

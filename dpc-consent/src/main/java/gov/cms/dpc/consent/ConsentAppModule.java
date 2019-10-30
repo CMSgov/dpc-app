@@ -15,11 +15,6 @@ public class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfigurat
     }
 
     @Provides
-    public String provideSuppressionFileDir(DPCConsentConfiguration config) {
-        return config.getSuppressionFileDir();
-    }
-
-    @Provides
     // We can suppress this because the SessionFactory is managed
     @SuppressWarnings("CloseableProvides")
     public SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {

@@ -2,11 +2,13 @@ package gov.cms.dpc.consent.jobs;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import gov.cms.dpc.common.entities.ConsentEntity;
+import gov.cms.dpc.consent.entities.ConsentEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -46,6 +48,11 @@ public class SuppressionFileImport extends Job {
 
     @Override
     public void doRun() throws JobInterruptException {
+        if (StringUtils.isBlank(suppressionFileDir)) {
+            logger.error("No suppression file directory set for import.");
+            return;
+        }
+
         try (Stream<Path> paths = Files.walk(Paths.get(suppressionFileDir))) {
             paths.filter(Files::isRegularFile).forEach(p -> {
                 if (Files.isReadable(p) && SuppressionFileUtils.is1800File(p)) {
@@ -76,12 +83,19 @@ public class SuppressionFileImport extends Job {
         ManagedSessionContext.bind(session);
         Transaction transaction = session.beginTransaction();
         LineIterator lineIter = IOUtils.lineIterator(reader);
+        int lineNum = 0;
         while (lineIter.hasNext()) {
-            Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine());
-            if (consent.isPresent()) {
-                // TODO: Get BFD ID and MBI
-                consentDAO.persistConsent(consent.get());
+            try {
+                Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine());
+                if (consent.isPresent()) {
+                    // TODO: Get BFD ID and MBI
+                    consentDAO.persistConsent(consent.get());
+                }
+            } catch (InvalidSuppressionRecordException e) {
+                logger.warn(String.format("Invalid suppression record: %s, line %s", path.getFileName(), lineNum));
+                continue;
             }
+            lineNum++;
         }
         transaction.commit();
         session.close();
