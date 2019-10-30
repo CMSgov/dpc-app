@@ -19,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collections;
 
+import static gov.cms.dpc.testing.DataFactories.generateFakeAddress;
+import static gov.cms.dpc.testing.DataFactories.generateFakeOrganization;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
@@ -87,31 +89,5 @@ class OrganizationValidationTest {
 
         final ValidationResult r3 = fhirValidator.validateWithResult(organization);
         assertTrue(r3.isSuccessful(), "Should have passed");
-    }
-
-    private Organization generateFakeOrganization() {
-        final Organization organization = new Organization();
-        final Meta meta = new Meta();
-        meta.addProfile(OrganizationProfile.PROFILE_URI);
-        organization.setMeta(meta);
-        organization.addEndpoint(new Reference("Endpoint/test-endpoint"));
-
-        organization.setId("test-organization");
-        organization.setName("Test Organization");
-
-        return organization;
-    }
-
-    private Address generateFakeAddress() {
-        final Address address = new Address();
-        address.addLine("1800 Pennsylvania Ave NW");
-        address.setCity("Washington");
-        address.setState("DC");
-        address.setPostalCode("20006");
-        address.setCountry("US");
-        address.setUse(Address.AddressUse.HOME);
-        address.setType(Address.AddressType.PHYSICAL);
-
-        return address;
     }
 }

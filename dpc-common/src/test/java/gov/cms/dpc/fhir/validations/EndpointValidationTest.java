@@ -16,10 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
+import static gov.cms.dpc.testing.DataFactories.createFakeEndpoint;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
-public class EndpointValidationTest {
+    class EndpointValidationTest {
 
     private static FhirValidator fhirValidator;
     private static DPCProfileSupport dpcModule;
@@ -87,24 +88,6 @@ public class EndpointValidationTest {
         endpoint.setAddress("http://test.local");
         final ValidationResult r2 = fhirValidator.validateWithResult(endpoint);
         assertTrue(r2.isSuccessful());
-    }
-
-    Endpoint createFakeEndpoint() {
-        final Endpoint endpoint = new Endpoint();
-        final Meta meta = new Meta();
-        meta.addProfile(EndpointProfile.PROFILE_URI);
-        endpoint.setMeta(meta);
-
-        // Payload type concept
-        final CodeableConcept payloadType = new CodeableConcept();
-        payloadType.addCoding().setCode("nothing").setSystem("http://nothing.com");
-
-        endpoint.setPayloadType(List.of(payloadType));
-
-        endpoint.setId("test-endpoint");
-        endpoint.setConnectionType(new Coding(EndpointConnectionType.HL7FHIRREST.getSystem(), EndpointConnectionType.HL7FHIRREST.toCode(), EndpointConnectionType.HL7FHIRREST.getDisplay()));
-        endpoint.setStatus(Endpoint.EndpointStatus.ACTIVE);
-        return endpoint;
     }
 
 }
