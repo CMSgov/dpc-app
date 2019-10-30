@@ -2,7 +2,9 @@ package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
+import gov.cms.dpc.fhir.validations.profiles.AddressProfile;
 import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -48,14 +50,14 @@ import static org.junit.jupiter.api.Assertions.*;
         endpoint.setName("Test Name");
         endpoint.setAddress("http://test.local");
 
-        final ValidationResult result = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult result = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
         // Add a managing org
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
 
-        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertTrue(r2.isSuccessful());
     }
 
@@ -65,7 +67,7 @@ import static org.junit.jupiter.api.Assertions.*;
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
         endpoint.setAddress("http://test.local");
 
-        final ValidationResult result = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult result = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
@@ -81,12 +83,12 @@ import static org.junit.jupiter.api.Assertions.*;
         endpoint.setName("Test Name");
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
 
-        final ValidationResult result = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult result = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
         endpoint.setAddress("http://test.local");
-        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertTrue(r2.isSuccessful());
     }
 
