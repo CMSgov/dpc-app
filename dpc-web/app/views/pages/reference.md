@@ -615,6 +615,61 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group
 }
 ~~~
 
+**Attribution Response**
+
+~~~ json
+{
+  "resourceType": "Group",
+  "type": "person",
+  "actual": true,
+  "characteristic": [
+    {
+      "code": {
+        "coding": [
+          {
+            "code": "attributed-to"
+          }
+        ]
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "code": "110001029483"
+          }
+        ]
+      }
+    }
+  ],
+  "member": [
+    {
+      "entity": {
+        "reference": "Patient/4d72ad76-fbc6-4525-be91-7f358f0fea9d"
+      },
+      "period": {
+        "start": "2019-10-30T14:00:30+00:00",
+        "end": "2020-01-28T14:00:53+00:00"
+      },
+      "inactive": false
+    },
+    {
+      "entity": {
+        "reference": "Patient/74af8018-f3a1-469c-9bfa-1dfd8a646874"
+      },
+      "period": {
+        "start": "2019-10-30T14:00:30+00:00",
+        "end": "2020-01-28T14:00:53+00:00"
+      },
+      "inactive": false
+    }
+  ]
+}
+~~~
+
+The `Group` response returned by DPC includes additional `period` and `inactive` elements for each member, which indicate the time period for which the patient is active on the provider's roster, or, if the relationship has expired, the time period for which the patient *was* active on the roster.
+When an attribution relationship between a patient and provider has expired, either due to exceeding the 90 day threshold or being manually removed. The `inactive` flag will be set to `true` for the given patient.
+Patient's which are listed on a provider's roster but have their `inactive` flag set to `true` will not be included in Bulk Data exports.
+
 The `Group.id` value of the returned resource can be used by the client to initiate an [export job](#exporting-data).
 
 ### Update an Attribution Group
