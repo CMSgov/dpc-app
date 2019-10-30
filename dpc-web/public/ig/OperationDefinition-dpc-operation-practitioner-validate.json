@@ -1,0 +1,47 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "dpc-operation-practitioner-validate",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>Validate Practitioner</h2><p>OPERATION: Validate Practitioner</p><p>The official URL for this operation definition is: </p><pre>https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-validate</pre><div><p>Validate a Practitioner resource against the DPC Roster Practitioner Profile.</p>\n</div><p>URL: [base]/Practitioner/$validate</p><p>Parameters</p><table class=\"grid\"><tr><td><b>Use</b></td><td><b>Name</b></td><td><b>Cardinality</b></td><td><b>Type</b></td><td><b>Binding</b></td><td><b>Documentation</b></td></tr><tr><td>IN</td><td>resource</td><td>1..1</td><td><a href=\"http://hl7.org/fhir/STU3/practitioner.html\">Practitioner</a></td><td/><td><div><p>Practitioner resource to validate against profile</p>\n</div></td></tr><tr><td>OUT</td><td>return</td><td>1..1</td><td><a href=\"http://hl7.org/fhir/STU3/operationoutcome.html\">OperationOutcome</a></td><td/><td><div><p>Result of validation operation.</p>\n</div></td></tr></table></div>"
+  },
+  "url": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-validate",
+  "version": "0.0.1",
+  "name": "Validate Practitioner",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-10-16T16:12:10-04:00",
+  "publisher": "The DPC Team",
+  "description": "Validate a Practitioner resource against the DPC Roster Practitioner Profile.",
+  "code": "validate",
+  "base": {
+    "reference": "http://hl7.org/fhir/OperationDefinition/Resource-validate"
+  },
+  "resource": [
+    "Practitioner"
+  ],
+  "system": false,
+  "type": true,
+  "instance": false,
+  "parameter": [
+    {
+      "name": "resource",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "Practitioner resource to validate against profile",
+      "type": "Practitioner",
+      "profile": {
+        "reference": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
+      }
+    },
+    {
+      "name": "return",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "Result of validation operation.",
+      "type": "OperationOutcome"
+    }
+  ]
+}
