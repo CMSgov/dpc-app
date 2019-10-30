@@ -17,12 +17,13 @@ public class SuppressionFileUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(SuppressionFileUtils.class);
 
+    static final Pattern FILENAME_PATTERN = Pattern.compile("(P|T)#EFT\\.ON\\.ACO\\.NGD1800\\.DPRF\\.D\\d{6}\\.T\\d{7}");
     static final Pattern HICN_PATTERN = Pattern.compile("\\d{9}[A-Za-z0-9]{0,2}");
 
     private SuppressionFileUtils() {}
 
     protected static boolean is1800File(Path path) {
-        return path.getFileName().toString().matches("(P|T)#EFT\\.ON\\.ACO\\.NGD1800\\.DPRF\\.D\\d{6}\\.T\\d{7}");
+        return FILENAME_PATTERN.matcher(path.getFileName().toString()).matches();
     }
 
     protected static Optional<ConsentEntity> entityFromLine(String line) throws InvalidSuppressionRecordException {

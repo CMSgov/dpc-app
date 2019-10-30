@@ -31,7 +31,7 @@ public class SuppressionFileImport extends Job {
     private static final Logger logger = LoggerFactory.getLogger(SuppressionFileImport.class);
 
     @Inject
-    private SessionFactory sessionFactory;
+    private DPCConsentManagedSessionFactory managedSessionFactory;
 
     private ConsentDAO consentDAO;
 
@@ -43,7 +43,7 @@ public class SuppressionFileImport extends Job {
         // Manually load the Guice injector. Since the job loads at the beginning of the startup process, Guice is not automatically injected.
         final Injector injector = (Injector) SundialJobScheduler.getServletContext().getAttribute("com.google.inject.Injector");
         injector.injectMembers(this);
-        this.consentDAO = new ConsentDAO(new DPCConsentManagedSessionFactory(sessionFactory));
+        this.consentDAO = new ConsentDAO(managedSessionFactory);
     }
 
     @Override
@@ -78,6 +78,7 @@ public class SuppressionFileImport extends Job {
             return;
         }
 
+        SessionFactory sessionFactory = managedSessionFactory.getSessionFactory();
         Session session = sessionFactory.openSession();
 
         ManagedSessionContext.bind(session);
