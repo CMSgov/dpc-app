@@ -2,8 +2,8 @@ package gov.cms.dpc.consent.jobs;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.consent.entities.ConsentEntity;
-import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import org.apache.commons.io.IOUtils;
@@ -43,7 +43,7 @@ public class SuppressionFileImport extends Job {
         // Manually load the Guice injector. Since the job loads at the beginning of the startup process, Guice is not automatically injected.
         final Injector injector = (Injector) SundialJobScheduler.getServletContext().getAttribute("com.google.inject.Injector");
         injector.injectMembers(this);
-        this.consentDAO = new ConsentDAO(new DPCManagedSessionFactory(sessionFactory));
+        this.consentDAO = new ConsentDAO(new DPCConsentManagedSessionFactory(sessionFactory));
     }
 
     @Override

@@ -1,8 +1,8 @@
 package gov.cms.dpc.consent.jobs;
 
 import com.google.inject.*;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.consent.entities.ConsentEntity;
-import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
@@ -45,7 +45,7 @@ public class SuppressionFileImportTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        consentDAO = new ConsentDAO(new DPCManagedSessionFactory(database.getSessionFactory()));
+        consentDAO = new ConsentDAO(new DPCConsentManagedSessionFactory(database.getSessionFactory()));
 
         JobTestUtils.resetScheduler();
 

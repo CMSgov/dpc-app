@@ -1,7 +1,7 @@
 package gov.cms.dpc.consent.jdbi;
 
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.consent.entities.ConsentEntity;
-import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
@@ -14,7 +14,7 @@ import java.util.UUID;
 public class ConsentDAO extends AbstractDAO<ConsentEntity> {
 
     @Inject
-    public ConsentDAO(DPCManagedSessionFactory factory) {
+    public ConsentDAO(DPCConsentManagedSessionFactory factory) {
         super(factory.getSessionFactory());
     }
 

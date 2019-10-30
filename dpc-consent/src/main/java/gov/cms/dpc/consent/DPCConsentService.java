@@ -4,8 +4,9 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -24,7 +25,7 @@ import java.sql.SQLException;
 public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCConsentService.class);
-    private final DPCHibernateBundle<DPCConsentConfiguration> hibernateBundle = new DPCHibernateBundle<>();
+    private final DPCConsentHibernateBundle<DPCConsentConfiguration> hibernateBundle = new DPCConsentHibernateBundle<>();
 
     public static void main(final String[] args) throws Exception {
         new DPCConsentService().run(args);
@@ -41,7 +42,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
         GuiceBundle<DPCConsentConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
                 .modules(new ConsentAppModule(),
-                        new DPCHibernateModule<>(hibernateBundle)
+                        new DPCConsentHibernateModule<>(hibernateBundle)
                 ).build();
 
         bootstrap.addBundle(hibernateBundle);
