@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<OperationDefinition xmlns="http://hl7.org/fhir">
+  <id value="dpc-operation-patient-validate"/>
+  <text>
+    <status value="generated"/><div xmlns="http://www.w3.org/1999/xhtml"><h2>Validate Patient</h2><p>OPERATION: Validate Patient</p><p>The official URL for this operation definition is: </p><pre>https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-validate</pre><div><p>Validate a Patient resource against the DPC Roster Patient Profile.</p>
+</div><p>URL: [base]/Patient/$validate</p><p>Parameters</p><table class="grid"><tr><td><b>Use</b></td><td><b>Name</b></td><td><b>Cardinality</b></td><td><b>Type</b></td><td><b>Binding</b></td><td><b>Documentation</b></td></tr><tr><td>IN</td><td>resource</td><td>1..1</td><td><a href="http://hl7.org/fhir/STU3/patient.html">Patient</a></td><td/><td><div><p>Patient resource to validate against profile</p>
+</div></td></tr><tr><td>OUT</td><td>return</td><td>1..1</td><td><a href="http://hl7.org/fhir/STU3/operationoutcome.html">OperationOutcome</a></td><td/><td><div><p>Result of validation operation.</p>
+</div></td></tr></table></div>
+  </text>
+  <url value="https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-validate"/>
+  <version value="0.0.1"/>
+  <name value="Validate Patient"/>
+  <status value="draft"/>
+  <kind value="operation"/>
+  <date value="2019-10-16T16:12:10-04:00"/>
+  <publisher value="The DPC Team"/>
+  <description value="Validate a Patient resource against the DPC Roster Patient Profile."/>
+  <code value="validate"/>
+  <base>
+    <reference value="http://hl7.org/fhir/OperationDefinition/Resource-validate"/>
+  </base>
+  <resource value="Patient"/>
+  <system value="false"/>
+  <type value="true"/>
+  <instance value="false"/>
+  <parameter>
+    <name value="resource"/>
+    <use value="in"/>
+    <min value="1"/>
+    <max value="1"/>
+    <documentation value="Patient resource to validate against profile"/>
+    <type value="Patient"/>
+    <profile>
+      <reference value="https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"/>
+    </profile>
+  </parameter>
+  <parameter>
+    <name value="return"/>
+    <use value="out"/>
+    <min value="1"/>
+    <max value="1"/>
+    <documentation value="Result of validation operation."/>
+    <type value="OperationOutcome"/>
+  </parameter>
+</OperationDefinition>
