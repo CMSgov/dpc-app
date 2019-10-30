@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <id value="dpc-profile-address"/>
+  <text>
+    <status value="generated"/><div xmlns="http://www.w3.org/1999/xhtml"><table border="0" cellpadding="0" cellspacing="0" style="border: 0px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;"><tr style="border: 1px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;"><th style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a href="http://hl7.org/fhir/STU3/formats.html#table" title="The logical name of the element">Name</a></th><th style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a href="http://hl7.org/fhir/STU3/formats.html#table" title="Information about the use of the element">Flags</a></th><th style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a href="http://hl7.org/fhir/STU3/formats.html#table" title="Minimum and Maximum # of times the the element can appear in the instance">Card.</a></th><th style="width: 100px" class="hierarchy"><a href="http://hl7.org/fhir/STU3/formats.html#table" title="Reference to the type of the element">Type</a></th><th style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a href="http://hl7.org/fhir/STU3/formats.html#table" title="Additional information about the element">Description &amp; Constraints</a><span style="float: right"><a href="http://hl7.org/fhir/STU3/formats.html#table" title="Legend for this format"><img src="http://hl7.org/fhir/STU3/help16.png" alt="doco" style="background-color: inherit"/></a></span></th></tr><tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;"><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck1.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: white; background-color: inherit" title="Element" class="hierarchy"/> <a href="StructureDefinition-dpc-profile-address-definitions.html#Address" title="null">Address</a><a name="Address"> </a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><span style="opacity: 0.4">0</span><span style="opacity: 0.5">..</span><span style="opacity: 0.4">*</span></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;"><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck10.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="tbl_vjoin.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: #F7F7F7; background-color: inherit" title="Element" class="hierarchy"/> <a href="StructureDefinition-dpc-profile-address-definitions.html#Address.use" title="Must have address usage">use</a><a name="Address.use"> </a></td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy">1..1</td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a style="opacity: 0.4" href="http://hl7.org/fhir/STU3/datatypes.html#code">code</a></td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;"><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck10.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="tbl_vjoin.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: white; background-color: inherit" title="Element" class="hierarchy"/> <a href="StructureDefinition-dpc-profile-address-definitions.html#Address.type" title="Must have address type">type</a><a name="Address.type"> </a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy">1..1</td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a style="opacity: 0.4" href="http://hl7.org/fhir/STU3/datatypes.html#code">code</a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;"><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck10.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="tbl_vjoin.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: #F7F7F7; background-color: inherit" title="Element" class="hierarchy"/> <span style="text-decoration:line-through" title="Cannot use text formatted address">text</span><a name="Address.text"> </a></td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><span style="text-decoration:line-through"/><span style="text-decoration:line-through">0</span><span style="text-decoration:line-through">..</span><span style="text-decoration:line-through">0</span></td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;"><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck10.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="tbl_vjoin.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: white; background-color: inherit" title="Element" class="hierarchy"/> <a href="StructureDefinition-dpc-profile-address-definitions.html#Address.line" title="Must have at least one address line">line</a><a name="Address.line"> </a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy">1..*</td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a style="opacity: 0.4" href="http://hl7.org/fhir/STU3/datatypes.html#string">string</a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;"><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck10.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="tbl_vjoin.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: #F7F7F7; background-color: inherit" title="Element" class="hierarchy"/> <a href="StructureDefinition-dpc-profile-address-definitions.html#Address.city" title="Must have city">city</a><a name="Address.city"> </a></td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy">1..1</td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a style="opacity: 0.4" href="http://hl7.org/fhir/STU3/datatypes.html#string">string</a></td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;"><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck10.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="tbl_vjoin.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: white; background-color: inherit" title="Element" class="hierarchy"/> <a href="StructureDefinition-dpc-profile-address-definitions.html#Address.state" title="Must have state">state</a><a name="Address.state"> </a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy">1..1</td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a style="opacity: 0.4" href="http://hl7.org/fhir/STU3/datatypes.html#string">string</a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;"><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck10.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="tbl_vjoin.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: #F7F7F7; background-color: inherit" title="Element" class="hierarchy"/> <a href="StructureDefinition-dpc-profile-address-definitions.html#Address.postalCode" title="Must have zip code">postalCode</a><a name="Address.postalCode"> </a></td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy">1..1</td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a style="opacity: 0.4" href="http://hl7.org/fhir/STU3/datatypes.html#string">string</a></td><td style="vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr style="border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;"><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(tbl_bck00.png)" class="hierarchy"><img src="tbl_spacer.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="tbl_vjoin_end.png" alt="." style="background-color: inherit" class="hierarchy"/><img src="icon_element.gif" alt="." style="background-color: white; background-color: inherit" title="Element" class="hierarchy"/> <a href="StructureDefinition-dpc-profile-address-definitions.html#Address.country" title="Must have country">country</a><a name="Address.country"> </a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy">1..1</td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"><a style="opacity: 0.4" href="http://hl7.org/fhir/STU3/datatypes.html#string">string</a></td><td style="vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px" class="hierarchy"/></tr>
+<tr><td colspan="5" class="hierarchy"><br/><a href="http://hl7.org/fhir/STU3/formats.html#table" title="Legend for this format"><img src="http://hl7.org/fhir/STU3/help16.png" alt="doco" style="background-color: inherit"/> Documentation for this format</a></td></tr></table></div>
+  </text>
+  <url value="https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-address"/>
+  <version value="0.0.1"/>
+  <name value="DPC Address"/>
+  <status value="draft"/>
+  <date value="2019-10-16T16:12:10-04:00"/>
+  <publisher value="The DPC Team"/>
+  <fhirVersion value="3.0.1"/>
+  <mapping>
+    <identity value="v2"/>
+    <uri value="http://hl7.org/v2"/>
+    <name value="HL7 v2 Mapping"/>
+  </mapping>
+  <mapping>
+    <identity value="rim"/>
+    <uri value="http://hl7.org/v3"/>
+    <name value="RIM Mapping"/>
+  </mapping>
+  <mapping>
+    <identity value="servd"/>
+    <uri value="http://www.omg.org/spec/ServD/1.0/"/>
+    <name value="ServD"/>
+  </mapping>
+  <mapping>
+    <identity value="vcard"/>
+    <uri value="http://w3.org/vcard"/>
+    <name value="vCard Mapping"/>
+  </mapping>
+  <kind value="complex-type"/>
+  <abstract value="false"/>
+  <type value="Address"/>
+  <baseDefinition value="http://hl7.org/fhir/StructureDefinition/Address"/>
+  <derivation value="constraint"/>
+  <snapshot>
+    <element id="Address">
+      <path value="Address"/>
+      <short value="An address expressed using postal conventions (as opposed to GPS or other location definition formats)"/>
+      <definition value="An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world."/>
+      <comment value="Note: address is for postal addresses, not physical locations."/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Address"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <condition value="ele-1"/>
+      <constraint>
+        <key value="ele-1"/>
+        <severity value="error"/>
+        <human value="All FHIR elements must have a @value or children"/>
+        <expression value="hasValue() | (children().count() &gt; id.count())"/>
+        <xpath value="@value|f:*|h:div"/>
+        <source value="Element"/>
+      </constraint>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="AD"/>
+      </mapping>
+      <mapping>
+        <identity value="servd"/>
+        <map value="Address"/>
+      </mapping>
+    </element>
+    <element id="Address.id">
+      <path value="Address.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Element.id"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element id="Address.extension">
+      <path value="Address.extension"/>
+      <slicing>
+        <discriminator>
+          <type value="value"/>
+          <path value="url"/>
+        </discriminator>
+        <description value="Extensions are always sliced by (at least) url"/>
+        <rules value="open"/>
+      </slicing>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comment value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <base>
+        <path value="Element.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element id="Address.use">
+      <path value="Address.use"/>
+      <short value="home | work | temp | old - purpose of this address"/>
+      <definition value="Must have address usage"/>
+      <comment value="This is labeled as &quot;Is Modifier&quot; because applications should not mistake a temporary or old address etc.for a current/permanent one. Applications can assume that an address is current unless it explicitly says that it is temporary or old."/>
+      <requirements value="Allows an appropriate address to be chosen from a list of many."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Address.use"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="code"/>
+      </type>
+      <example>
+        <label value="General"/>
+        <valueCode value="home"/>
+      </example>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="AddressUse"/>
+        </extension>
+        <strength value="required"/>
+        <description value="The use of an address"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/address-use"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.7"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="unique(./use)"/>
+      </mapping>
+      <mapping>
+        <identity value="servd"/>
+        <map value="./AddressPurpose"/>
+      </mapping>
+    </element>
+    <element id="Address.type">
+      <path value="Address.type"/>
+      <short value="postal | physical | both"/>
+      <definition value="Must have address type"/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Address.type"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="code"/>
+      </type>
+      <example>
+        <label value="General"/>
+        <valueCode value="both"/>
+      </example>
+      <isSummary value="true"/>
+      <binding>
+        <extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+          <valueString value="AddressType"/>
+        </extension>
+        <strength value="required"/>
+        <description value="The type of an address (physical / postal)"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/address-type"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.18"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="unique(./use)"/>
+      </mapping>
+      <mapping>
+        <identity value="vcard"/>
+        <map value="address type parameter"/>
+      </mapping>
+    </element>
+    <element id="Address.text">
+      <path value="Address.text"/>
+      <short value="Text representation of the address"/>
+      <definition value="Cannot use text formatted address"/>
+      <comment value="Can provide both a text representation and parts."/>
+      <requirements value="A renderable, unencoded form."/>
+      <min value="0"/>
+      <max value="0"/>
+      <base>
+        <path value="Address.text"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+      <example>
+        <label value="General"/>
+        <valueString value="137 Nowhere Street, Erewhon 9132"/>
+      </example>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.1 + XAD.2 + XAD.3 + XAD.4 + XAD.5 + XAD.6"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="./formatted"/>
+      </mapping>
+      <mapping>
+        <identity value="vcard"/>
+        <map value="address label parameter"/>
+      </mapping>
+    </element>
+    <element id="Address.line">
+      <path value="Address.line"/>
+      <short value="Street name, number, direction &amp; P.O. Box etc."/>
+      <definition value="Must have at least one address line"/>
+      <requirements value="home | work | temp | old - purpose of this address."/>
+      <min value="1"/>
+      <max value="*"/>
+      <base>
+        <path value="Address.line"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+      <orderMeaning value="The order in which lines should appear in an address label"/>
+      <example>
+        <label value="General"/>
+        <valueString value="137 Nowhere Street"/>
+      </example>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.1 + XAD.2 (note: XAD.1 and XAD.2 have different meanings for a company address than for a person address)"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="AD.part[parttype = AL]"/>
+      </mapping>
+      <mapping>
+        <identity value="vcard"/>
+        <map value="street"/>
+      </mapping>
+      <mapping>
+        <identity value="servd"/>
+        <map value="./StreetAddress (newline delimitted)"/>
+      </mapping>
+    </element>
+    <element id="Address.city">
+      <path value="Address.city"/>
+      <short value="Name of city, town etc."/>
+      <definition value="Must have city"/>
+      <alias value="Municpality"/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Address.city"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+      <example>
+        <label value="General"/>
+        <valueString value="Erewhon"/>
+      </example>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.3"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="AD.part[parttype = CTY]"/>
+      </mapping>
+      <mapping>
+        <identity value="vcard"/>
+        <map value="locality"/>
+      </mapping>
+      <mapping>
+        <identity value="servd"/>
+        <map value="./Jurisdiction"/>
+      </mapping>
+    </element>
+    <element id="Address.district">
+      <path value="Address.district"/>
+      <short value="District name (aka county)"/>
+      <definition value="The name of the administrative area (county)."/>
+      <comment value="District is sometimes known as county, but in some regions &#39;county&#39; is used in place of city (municipality), so county name should be conveyed in city instead."/>
+      <alias value="County"/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Address.district"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+      <example>
+        <label value="General"/>
+        <valueString value="Madison"/>
+      </example>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.9"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="AD.part[parttype = CNT | CPA]"/>
+      </mapping>
+    </element>
+    <element id="Address.state">
+      <path value="Address.state"/>
+      <short value="Sub-unit of country (abbreviations ok)"/>
+      <definition value="Must have state"/>
+      <alias value="Province"/>
+      <alias value="Territory"/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Address.state"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.4"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="AD.part[parttype = STA]"/>
+      </mapping>
+      <mapping>
+        <identity value="vcard"/>
+        <map value="region"/>
+      </mapping>
+      <mapping>
+        <identity value="servd"/>
+        <map value="./Region"/>
+      </mapping>
+    </element>
+    <element id="Address.postalCode">
+      <path value="Address.postalCode"/>
+      <short value="Postal code for area"/>
+      <definition value="Must have zip code"/>
+      <alias value="Zip"/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Address.postalCode"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+      <example>
+        <label value="General"/>
+        <valueString value="9132"/>
+      </example>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.5"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="AD.part[parttype = ZIP]"/>
+      </mapping>
+      <mapping>
+        <identity value="vcard"/>
+        <map value="code"/>
+      </mapping>
+      <mapping>
+        <identity value="servd"/>
+        <map value="./PostalIdentificationCode"/>
+      </mapping>
+    </element>
+    <element id="Address.country">
+      <path value="Address.country"/>
+      <short value="Country (e.g. can be ISO 3166 2 or 3 letter code)"/>
+      <definition value="Must have country"/>
+      <comment value="ISO 3166 3 letter codes can be used in place of a full country name."/>
+      <min value="1"/>
+      <max value="1"/>
+      <base>
+        <path value="Address.country"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="string"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.6"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="AD.part[parttype = CNT]"/>
+      </mapping>
+      <mapping>
+        <identity value="vcard"/>
+        <map value="country"/>
+      </mapping>
+      <mapping>
+        <identity value="servd"/>
+        <map value="./Country"/>
+      </mapping>
+    </element>
+    <element id="Address.period">
+      <path value="Address.period"/>
+      <short value="Time period when address was/is in use"/>
+      <definition value="Time period when address was/is in use."/>
+      <requirements value="Allows addresses to be placed in historical context."/>
+      <min value="0"/>
+      <max value="1"/>
+      <base>
+        <path value="Address.period"/>
+        <min value="0"/>
+        <max value="1"/>
+      </base>
+      <type>
+        <code value="Period"/>
+      </type>
+      <example>
+        <label value="General"/>
+        <valuePeriod>
+          <start value="2010-03-23T00:00:00-04:00"/>
+          <end value="2010-07-01T00:00:00-04:00"/>
+        </valuePeriod>
+      </example>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="XAD.12 / XAD.13 + XAD.14"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="./usablePeriod[type=&quot;IVL&lt;TS&gt;&quot;]"/>
+      </mapping>
+      <mapping>
+        <identity value="servd"/>
+        <map value="./StartDate and ./EndDate"/>
+      </mapping>
+    </element>
+  </snapshot>
+  <differential>
+    <element id="Address">
+      <path value="Address"/>
+    </element>
+    <element id="Address.use">
+      <path value="Address.use"/>
+      <definition value="Must have address usage"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="Address.type">
+      <path value="Address.type"/>
+      <definition value="Must have address type"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="Address.text">
+      <path value="Address.text"/>
+      <definition value="Cannot use text formatted address"/>
+      <min value="0"/>
+      <max value="0"/>
+    </element>
+    <element id="Address.line">
+      <path value="Address.line"/>
+      <definition value="Must have at least one address line"/>
+      <min value="1"/>
+      <max value="*"/>
+    </element>
+    <element id="Address.city">
+      <path value="Address.city"/>
+      <definition value="Must have city"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="Address.state">
+      <path value="Address.state"/>
+      <definition value="Must have state"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="Address.postalCode">
+      <path value="Address.postalCode"/>
+      <definition value="Must have zip code"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+    <element id="Address.country">
+      <path value="Address.country"/>
+      <definition value="Must have country"/>
+      <min value="1"/>
+      <max value="1"/>
+    </element>
+  </differential>
+</StructureDefinition>
