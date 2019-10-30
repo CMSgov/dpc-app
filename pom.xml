@@ -400,7 +400,7 @@
                             </tags>
                         </to>
                         <from>
-                            <image>openjdk:11-jdk-slim</image>
+                            <image>docker://755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-base</image>
                         </from>
                     </configuration>
                     <executions>
