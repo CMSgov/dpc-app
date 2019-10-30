@@ -1,0 +1,247 @@
+{
+  "resourceType": "ImplementationGuide",
+  "id": "cms-dpc-ig",
+  "meta": {
+    "versionId": "8",
+    "lastUpdated": "2019-07-16T14:49:27.000-04:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h2>Data @ the Point of Care Implementation Guide</h2><p>The official URL for this implementation guide is: </p><pre>https://dpc.cms.gov/api/v1/ImplementationGuide/cms-dpc-ig</pre><div><p>Draft implementation guide for DPC Application</p>\n</div></div>"
+  },
+  "url": "https://dpc.cms.gov/api/v1/ImplementationGuide/cms-dpc-ig",
+  "name": "Data @ the Point of Care Implementation Guide",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-10-16T16:12:10-04:00",
+  "publisher": "Centers for Medicare and Medicaid Services",
+  "description": "Draft implementation guide for DPC Application",
+  "fhirVersion": "3.0.1",
+  "package": [
+    {
+      "id": "p1",
+      "name": "Profiles in this implementation guide",
+      "resource": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "Patient"
+            }
+          ],
+          "example": true,
+          "sourceReference": {
+            "reference": "Patient/dpc-sample-patient",
+            "display": "DPC-sample-patient.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "Practitioner"
+            }
+          ],
+          "example": true,
+          "sourceReference": {
+            "reference": "Practitioner/dpc-sample-practitioner",
+            "display": "DPC-sample-practitioner.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "StructureDefinition:complex-type"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/implementationguide-page",
+              "valueUri": "StructureDefinition-dpc-profile-address.html"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "StructureDefinition/dpc-profile-address",
+            "display": "DPCAddress.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "StructureDefinition:resource"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/implementationguide-page",
+              "valueUri": "StructureDefinition-dpc-profile-attribution-roster.html"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "StructureDefinition/dpc-profile-attribution-roster",
+            "display": "DPCAttributionRoster.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "StructureDefinition:resource"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/implementationguide-page",
+              "valueUri": "StructureDefinition-dpc-profile-endpoint.html"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "StructureDefinition/dpc-profile-endpoint",
+            "display": "DPCEndpoint.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "StructureDefinition:resource"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/implementationguide-page",
+              "valueUri": "StructureDefinition-dpc-profile-organization.html"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "StructureDefinition/dpc-profile-organization",
+            "display": "DPCOrganization.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "StructureDefinition:resource"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/implementationguide-page",
+              "valueUri": "StructureDefinition-dpc-profile-patient.html"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "StructureDefinition/dpc-profile-patient",
+            "display": "DPCPatient.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "StructureDefinition:resource"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/implementationguide-page",
+              "valueUri": "StructureDefinition-dpc-profile-practitioner.html"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "StructureDefinition/dpc-profile-practitioner",
+            "display": "DPCPractitioner.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "CapabilityStatement"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "CapabilityStatement/dpc-capabilities-statement",
+            "display": "DPCCapabilities.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "OperationDefinition"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "OperationDefinition/dpc-practitioner-submit",
+            "display": "dpc-practitioner-submit.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "OperationDefinition"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "OperationDefinition/dpc-practitioner-validate",
+            "display": "dpc-practitioner-validate.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "OperationDefinition"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "OperationDefinition/dpc-patient-submit",
+            "display": "dpc-patient-submit.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "OperationDefinition"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "OperationDefinition/dpc-patient-validate",
+            "display": "dpc-patient-validate.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "OperationDefinition"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "OperationDefinition/dpc-group-add",
+            "display": "dpc-group-add.json"
+          }
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/tools/StructureDefinition/resource-information",
+              "valueString": "OperationDefinition"
+            }
+          ],
+          "example": false,
+          "sourceReference": {
+            "reference": "OperationDefinition/dpc-group-remove",
+            "display": "dpc-group-remove.json"
+          }
+        }
+      ]
+    }
+  ]
+}
