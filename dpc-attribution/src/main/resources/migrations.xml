@@ -395,11 +395,19 @@
         </addColumn>
         <renameColumn tableName="ATTRIBUTIONS" oldColumnName="created_at" newColumnName="period_begin"/>
     </changeSet>
-    
+
     <changeSet id="add-roster-idx" author="nickrobison-usds">
         <createIndex tableName="ATTRIBUTIONS" indexName="">
             <column name="roster_id"/>
             <column name="patient_id"/>
         </createIndex>
+    </changeSet>
+
+    <changeSet id="remove-old-auth-tables" author="nickrobison-usds">
+        <dropTable tableName="ROOT_KEYS"/>
+        <dropTable tableName="ORGANIZATION_TOKENS"/>
+        <sql>
+            DROP FUNCTION IF EXISTS expire_root_keys();
+        </sql>
     </changeSet>
 </databaseChangeLog>
