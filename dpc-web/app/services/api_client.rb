@@ -2,64 +2,55 @@
 
 class APIClient
   URLS = {
-    'sandbox' => 'https://sandbox.dpc.cms.gov/api/v1/metadata'
-  }.freeze
+    'sandbox' => ENV.fetch('API_METADATA_URL_SANDBOX')
+  }
 
-  STUBBED_PROFILE_ENDPOINT = {
-    status: 'Test',
-    connection_type: 'hl7-fhir-rest',
-    name: 'DPC Sandbox Test Endpoint',
-    address: 'https://dpc.cms.gov'
-  }.freeze
-
-  attr_reader :api_env, :fhir_client
+  attr_reader :api_env
 
   def initialize(api_env)
     @api_env = api_env
-    @fhir_client = FHIR::Client.new(URLS[api_env])
   end
 
   def create_organization(org)
-    add_auth_header(golden_macaroon)
+    build_sandbox_org_endpoint(org)
 
-    FHIR::Organization.create(
-      name: org.name,
-      npi: org.npi,
-      address: {
-        use: org.address_use,
-        type: org.address_type,
-        line: org.address_street,
-        city: org.address_city,
-        state: org.address_state,
-        postalCode: org.address_zip,
-        country: 'US'
-      },
-      endpoint: profile_endpoint(org)
-    )
+    uri_string = URLS[api_env] + '/Organization/$submit'
+    json = OrganizationSubmitSerializer.new(org).to_json
+    response = request(uri_string, json, golden_macaroon)
+    parsed_response(response)
   end
 
   def delete_organization(org); end
 
   private
 
-  def add_auth_header(macaroon)
-    fhir_client.additional_headers = { Authorization: "Bearer: Token #{macaroon}" }
+  def auth_header(token)
+    { Authorization: "Bearer #{token}" }
   end
 
   def golden_macaroon
     @golden_macaroon ||= ENV.fetch("GOLDEN_MACAROON_#{api_env.upcase}")
   end
 
-  def profile_endpoint(org)
-    if api_env == 'sandbox' && org.profile_endpoint.nil?
-      STUBBED_PROFILE_ENDPOINT
-    else
-      {
-        status: org.profile_endpoint_status,
-        connection_type: org.profile_endpoint_connection_type,
-        name: org.profile_endpoint_name,
-        address: org.profile_endpoint_uri
-      }
-    end
+  def parsed_response(response)
+    JSON.parse response
+  end
+
+  def request(uri_string, json, token)
+    uri = URI.parse uri_string
+    headers = { 'Content-Type': 'application/json' }.merge(auth_header(token))
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Post.new(uri.request_uri, headers)
+    request.body = json
+    http.request(request)
+  end
+
+  # Build but do not save
+  # Necessary for sandbox?
+  def build_sandbox_org_endpoint(org)
+    return unless api_env == 'sandbox' && !org.profile_endpoint
+
+    org.build_profile_endpoint status: 'Test', connection_type: 'hl7-fhir-rest',
+                               name: 'DPC Sandbox Test Endpoint', address: 'https://dpc.cms.gov/test-endpoint'
   end
 end

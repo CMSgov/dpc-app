@@ -28,7 +28,6 @@ class OrganizationRegistrar
 
     removed_reg_orgs.each do |registered_org|
       if APIClient.new(registered_org.api_env).delete_organization(registered_org)
-        pp "Destroyed"
         registered_org.destroy
       end
     end
@@ -43,5 +42,6 @@ class OrganizationRegistrar
       end
     end
     organization.save
+    # TODO save profile endpoint ID?
   end
 end
