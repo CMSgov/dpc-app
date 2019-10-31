@@ -11,6 +11,7 @@ import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
+import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ class BakeryTests {
 
     @BeforeEach
     void setup() {
-        bakery = new BakeryProvider(generateTokenPolicy(), new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore(), "http://test.local").get();
+        bakery = new BakeryProvider(generateTokenPolicy(), new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore(), "http://test.local", BakeryKeyPair.generate()).get();
     }
 
 

@@ -7,6 +7,9 @@ import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyResolver;
+import gov.cms.dpc.macaroons.BakeryProvider;
+import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.auth.Authenticator;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.slf4j.Logger;
@@ -41,5 +44,6 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(DPCAuthDynamicFeature.class);
         binder.bind(SigningKeyResolverAdapter.class).to(JwtKeyResolver.class);
         binder.bind(IJTICache.class).to(CaffeineJTICache.class);
+        binder.bind(BakeryKeyPair.class).toProvider(new BakeryKeyPairProvider(this.getConfiguration()));
     }
 }
