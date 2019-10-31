@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.github.nickrobison-usds</groupId>
             <artifactId>jmacaroons</artifactId>
-            <version>770fea3e23b594225ca2e9aff7b4739ed28a7789</version>
+            <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
