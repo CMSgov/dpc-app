@@ -83,6 +83,7 @@ public class SuppressionFileImport extends Job {
 
         ManagedSessionContext.bind(session);
         Transaction transaction = session.beginTransaction();
+
         LineIterator lineIter = IOUtils.lineIterator(reader);
         int lineNum = 0;
         while (lineIter.hasNext()) {
