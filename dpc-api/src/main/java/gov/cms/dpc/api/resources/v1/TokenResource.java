@@ -52,9 +52,11 @@ import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_
 @Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
 public class TokenResource extends AbstractTokenResource {
 
+    public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+    // This will be removed as part of DPC-747
+    private static final String DEFAULT_ACCESS_SCOPE = "system/*:*";
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
     private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
-    public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final String INVALID_JWT_MSG = "Invalid JWT";
 
     private final TokenDAO dao;
@@ -181,7 +183,8 @@ public class TokenResource extends AbstractTokenResource {
     public JWTAuthResponse authorizeJWT(@QueryParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
                                         @QueryParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
                                         @QueryParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType, @QueryParam(value = "client_assertion") String jwtBody) {
-        validateJWTQueryParams(grantType, clientAssertionType);
+        // Actual scope implementation will come as part of DPC-747
+        validateJWTQueryParams(grantType, clientAssertionType, scope);
 
         // Validate JWT signature
         try {
@@ -195,7 +198,7 @@ public class TokenResource extends AbstractTokenResource {
         }
     }
 
-    private void validateJWTQueryParams(String grantType, String clientAssertionType) {
+    private void validateJWTQueryParams(String grantType, String clientAssertionType, String scope) {
         if (!grantType.equals("client_credentials")) {
             throw new WebApplicationException("Grant Type must be 'client_credentials'", Response.Status.BAD_REQUEST);
         }
@@ -203,6 +206,11 @@ public class TokenResource extends AbstractTokenResource {
         if (!clientAssertionType.equals(CLIENT_ASSERTION_TYPE)) {
             throw new WebApplicationException(String.format("Client Assertion Type must be '%s'", CLIENT_ASSERTION_TYPE), Response.Status.BAD_REQUEST);
         }
+
+        if (!scope.equals(DEFAULT_ACCESS_SCOPE)) {
+            throw new WebApplicationException(String.format("Access Scope must be '%s'", DEFAULT_ACCESS_SCOPE), Response.Status.BAD_REQUEST);
+        }
+
     }
 
     private JWTAuthResponse handleJWT(String jwtBody) {

@@ -62,11 +62,6 @@ class JWTUnitTests {
         }
     }
 
-    @Test
-    void testScopeValues() {
-        // TODO: Figure out scope testing
-    }
-
     @Nested
     @DisplayName("Query Param tests")
     class QueryParmTests {
@@ -84,7 +79,7 @@ class JWTUnitTests {
             assertEquals(3, validationErrorResponse.errors.size(), "Should have three validations");
 
             // Add the missing scope value and try again
-            response = RESOURCE.target("/Token/auth").queryParam("scope", "this is not a scope")
+            response = RESOURCE.target("/Token/auth").queryParam("scope", "system/*:*")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -96,7 +91,7 @@ class JWTUnitTests {
 
             // Add the grant type
             response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
@@ -109,7 +104,7 @@ class JWTUnitTests {
 
             // Add the assertion type and try again
             response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .request()
@@ -123,7 +118,7 @@ class JWTUnitTests {
         void testInvalidGrantTypeValue() {
             final String payload = "not a real payload";
             Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "wrong_grant_type")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .request()
@@ -136,7 +131,7 @@ class JWTUnitTests {
         @Test
         void testEmptyGrantTypeValue() {
             final Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .request()
@@ -151,7 +146,7 @@ class JWTUnitTests {
         void testInvalidClientAssertionType() {
             final String payload = "not a real payload";
             Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "Not a real assertion_type")
                     .request()
@@ -164,7 +159,7 @@ class JWTUnitTests {
         @Test
         void testEmptyClientAssertionType() {
             final Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "")
                     .request()
@@ -174,8 +169,36 @@ class JWTUnitTests {
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
             assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
         }
+
+        @Test
+        void testInvalidScopeType() {
+            final String payload = "not a real payload";
+            Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "this is not a scope")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                    .request()
+                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
+            assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
+            assertTrue(response.readEntity(String.class).contains("Access Scope must be 'system/*:*'"), "Should have correct error message");
+        }
+
+        @Test
+        void testEmptyScopeType() {
+            final Response response = RESOURCE.target("/Token/auth")
+                    .queryParam("scope", "")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                    .request()
+                    .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
+
+            // Setting the assertion type to be blank, should throw a validation error
+            assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
+            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+        }
     }
-    // Query Param tests
+
 
     @Nested
     @DisplayName("JWT Tests")
@@ -198,7 +221,7 @@ class JWTUnitTests {
 
             // Submit the JWT
             Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -225,7 +248,7 @@ class JWTUnitTests {
 
             // Submit the JWT
             Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -252,7 +275,7 @@ class JWTUnitTests {
 
             // Submit the JWT
             Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -279,7 +302,7 @@ class JWTUnitTests {
 
             // Submit the JWT
             Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -291,7 +314,7 @@ class JWTUnitTests {
 
             // Try to submit again
             Response r2 = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "this is not a scope")
+                    .queryParam("scope", "system/*:*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
