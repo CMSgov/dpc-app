@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  base:
+    image: dpc-base:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfiles/Dockerfile.base
