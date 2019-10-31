@@ -10,6 +10,7 @@ module Internal
       results = UserSearch.new(params: params, scope: :all).results
 
       @users = results.order('users.created_at DESC').page params[:page]
+      render layout: 'table_index'
     end
 
     def show
