@@ -61,4 +61,3 @@ smoke/prod-sbx: ${JMETER}
 .PHONY: docker-base
 docker-base:
 	@docker-compose -f ./docker-compose.base.yml build base
-	# TODO: push image to ECR?
