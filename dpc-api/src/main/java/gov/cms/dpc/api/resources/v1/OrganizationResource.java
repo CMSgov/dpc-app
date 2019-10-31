@@ -9,17 +9,14 @@ import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import io.swagger.annotations.*;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Api(value = "Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
@@ -41,6 +38,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @AdminOperation
     @Override
     public Organization submitOrganization(@FHIRParameter(name = "resource") Bundle organizationBundle) {
+        // Validate bundle
+        validateOrganizationBundle(organizationBundle);
 
         final Parameters parameters = new Parameters();
         parameters.addParameter().setName("resource").setResource(organizationBundle);
@@ -73,5 +72,31 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .withId(organizationID.toString())
                 .encodedJson()
                 .execute();
+    }
+
+    private void validateOrganizationBundle(Bundle organizationBundle) {
+        // Ensure we have an organization
+        organizationBundle
+                .getEntry()
+                .stream()
+                .filter(Bundle.BundleEntryComponent::hasResource)
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(resource -> resource.getResourceType().equals(ResourceType.Organization))
+                .findAny()
+                .orElseThrow(() -> new WebApplicationException("Bundle must include Organization", Response.Status.BAD_REQUEST));
+
+
+        // Make sure we have some endpoints
+        final List<Resource> endpoints = organizationBundle
+                .getEntry()
+                .stream()
+                .filter(Bundle.BundleEntryComponent::hasResource)
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(resource -> resource.getResourceType().equals(ResourceType.Endpoint))
+                .collect(Collectors.toList());
+
+        if (endpoints.isEmpty()) {
+            throw new WebApplicationException("Organization must have at least 1 endpoint", Response.Status.BAD_REQUEST);
+        }
     }
 }
