@@ -38,7 +38,7 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
 
     @Override
     public DataSourceFactory getConsentDatabase() {
-        return database;
+        return consentDatabase;
     }
 
     public SundialConfiguration getSundial() {
