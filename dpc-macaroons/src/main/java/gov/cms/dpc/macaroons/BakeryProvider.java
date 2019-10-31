@@ -1,9 +1,7 @@
 package gov.cms.dpc.macaroons;
 
 import gov.cms.dpc.macaroons.annotations.PublicURL;
-import gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier;
 import gov.cms.dpc.macaroons.caveats.ExpirationCaveatVerifier;
-import gov.cms.dpc.macaroons.caveats.VersionCaveatSupplier;
 import gov.cms.dpc.macaroons.caveats.VersionCaveatVerifier;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
@@ -39,8 +37,6 @@ public class BakeryProvider implements Provider<MacaroonBakery> {
     public MacaroonBakery get() {
         return new MacaroonBakery.MacaroonBakeryBuilder(publicURL, store, thirdPartyKeyStore)
                 .withKeyPair(keyPair)
-                .addDefaultCaveatSupplier(new VersionCaveatSupplier(tokenPolicy))
-                .addDefaultCaveatSupplier(new ExpirationCaveatSupplier(tokenPolicy))
                 .addDefaultVerifier(new VersionCaveatVerifier(tokenPolicy))
                 .addDefaultVerifier(new ExpirationCaveatVerifier(tokenPolicy))
                 .build();

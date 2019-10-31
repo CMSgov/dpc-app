@@ -13,6 +13,7 @@ import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -42,7 +43,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
+import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
 @Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
@@ -52,7 +56,6 @@ public class TokenResource extends AbstractTokenResource {
     private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
     public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final String INVALID_JWT_MSG = "Invalid JWT";
-    private static final String ORGANIZATION_CAVEAT_KEY = "organization_id";
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
@@ -123,7 +126,7 @@ public class TokenResource extends AbstractTokenResource {
             throw new WebApplicationException("Cannot find organization", Response.Status.NOT_FOUND);
         }
 
-        final Macaroon macaroon = generateMacaroon(organizationID);
+        final Macaroon macaroon = generateMacaroon(this.policy, organizationID);
 
         // Ensure that each generated Macaroon has an associated Organization ID
         // This way we check to make sure we never generate a Golden Macaroon
@@ -234,12 +237,15 @@ public class TokenResource extends AbstractTokenResource {
         return response;
     }
 
-    private Macaroon generateMacaroon(UUID organizationID) {
+    private Macaroon generateMacaroon(TokenPolicy policy, UUID organizationID) {
         // Create some caveats
-        final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("", new MacaroonCondition(ORGANIZATION_CAVEAT_KEY, MacaroonCondition.Operator.EQ, organizationID.toString())),
-                new MacaroonCaveat("local", new MacaroonCondition(ORGANIZATION_CAVEAT_KEY, MacaroonCondition.Operator.EQ, organizationID.toString()))
-        );
+        final Duration tokenLifetime = policy
+                .getExpirationPolicy().getExpirationUnit()
+                .getDuration().multipliedBy(policy.getExpirationPolicy().getExpirationOffset());
+        final List<MacaroonCaveat> caveats = generateCaveatsForToken(policy.getVersionPolicy().getCurrentVersion(), organizationID, tokenLifetime)
+                .stream()
+                .map(CaveatSupplier::get)
+                .collect(Collectors.toList());
         return this.bakery.createMacaroon(caveats);
     }
 
