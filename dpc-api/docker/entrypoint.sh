@@ -3,10 +3,6 @@
 set -e
 
 bootstrap_config() {
-  # Install the AWS CLI
-  apt-get update
-  apt-get -y install awscli
-
   # Create the config directory
   mkdir -p /config
 
