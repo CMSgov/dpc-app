@@ -2,6 +2,7 @@ package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
@@ -48,6 +49,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     @Override
     public void initialize(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+        setupJacksonMapping(bootstrap);
         // Setup Guice bundle and module injection
         final GuiceBundle<DPCAPIConfiguration> guiceBundle = setupGuiceBundle();
 
@@ -121,5 +123,13 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                 return "migrations/auth.migrations.xml";
             }
         });
+    }
+
+    private void setupJacksonMapping(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+        // By default, Jackson will ignore @Transient annotated fields. We need to disable this so we can use Hibernate entities for serialization as well.
+        // We can still ignore fields using @JsonIgnore
+        final Hibernate5Module h5M = new Hibernate5Module();
+        h5M.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
+        bootstrap.getObjectMapper().registerModule(h5M);
     }
 }
