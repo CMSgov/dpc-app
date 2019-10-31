@@ -1,0 +1,8 @@
+# See: https://github.com/docker-library/openjdk/blob/master/11/jdk/slim/Dockerfile
+FROM openjdk:11-jdk-slim
+
+# Install additional packages used acros DPC images
+RUN  apt-get update && apt-get -y install awscli
+
+# Use the openjdk:11-jdk-slim default command/entrypoint
+CMD ["jshell"]

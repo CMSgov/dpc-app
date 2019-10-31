@@ -36,7 +36,7 @@ start-app:
 	@docker-compose up start_api
 
 .PHONY: ci-app
-ci-app:
+ci-app: docker-base
 	@./dpc-test.sh
 
 .PHONY: ci-web
@@ -48,16 +48,20 @@ smoke/local: venv
 	@echo "Running Smoke Tests against Local env"
 	. venv/bin/activate; bzt src/test/local.smoke_test.yml
 
-
 .PHONY: smoke/dev
-smoke/dev: ${JMETER}
+smoke/dev: venv
 	@echo "Running Smoke Tests against Development env"
 	. venv/bin/activate; bzt src/test/dev.smoke_test.yml
 
 .PHONY: smoke/test
-smoke/test: ${JMETER}
+smoke/test: venv
 	. venv/bin/activate; bzt src/test/test.smoke_test.yml
 
 .PHONY: smoke/prod-sbx
-smoke/prod-sbx: ${JMETER}
+smoke/prod-sbx: venv
+	@echo "Running Smoke Tests against Sandbox env"
 	. venv/bin/activate; bzt src/test/prod-sbx.smoke_test.yml
+
+.PHONY: docker-base
+docker-base:
+	@docker-compose -f ./docker-compose.base.yml build base
