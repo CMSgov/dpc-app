@@ -50,8 +50,8 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         bootstrap.addBundle(new MigrationsBundle<DPCConsentConfiguration>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
-                logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
-                return configuration.getDatabase();
+                logger.debug("Connecting to database {} at {}", configuration.getConsentDatabase().getDriverClass(), configuration.getConsentDatabase().getUrl());
+                return configuration.getConsentDatabase();
             }
         });
         bootstrap.addBundle(new SundialBundle<>() {

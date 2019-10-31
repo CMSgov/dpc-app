@@ -3,8 +3,6 @@ package gov.cms.dpc.consent.jobs;
 import gov.cms.dpc.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -14,8 +12,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class SuppressionFileUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(SuppressionFileUtils.class);
 
     static final Pattern FILENAME_PATTERN = Pattern.compile("(P|T)#EFT\\.ON\\.ACO\\.NGD1800\\.DPRF\\.D\\d{6}\\.T\\d{7}");
     static final Pattern HICN_PATTERN = Pattern.compile("\\d{9}[A-Za-z0-9]{0,2}");
