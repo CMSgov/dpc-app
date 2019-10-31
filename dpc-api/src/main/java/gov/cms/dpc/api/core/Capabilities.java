@@ -62,8 +62,8 @@ public class Capabilities {
 
             final CapabilityStatement capabilityStatement = FhirContext.forDstu3().newJsonParser().parseResource(CapabilityStatement.class, resource);
             return capabilityStatement
-                    .setVersion(pp.getBuildVersion())
-                    .setSoftware(generateSoftwareComponent(releaseDate, pp.getBuildVersion()));
+                    .setVersion(pp.getApplicationVersion())
+                    .setSoftware(generateSoftwareComponent(releaseDate, pp.getApplicationVersion()));
         } catch (IOException e) {
             throw new IllegalStateException("Unable to read capability statement", e);
         }

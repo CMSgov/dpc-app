@@ -87,11 +87,11 @@
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-client</artifactId>
         </dependency>
-		<dependency>
-			<groupId>com.jakewharton.fliptables</groupId>
+        <dependency>
+            <groupId>com.jakewharton.fliptables</groupId>
             <artifactId>fliptables</artifactId>
             <version>1.0.2</version>
-		</dependency>
+        </dependency>
         <dependency>
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
@@ -233,6 +233,7 @@
                         <paths>
                             <path>${project.basedir}/target/jacoco-agent</path>
                             <path>${project.basedir}/docker</path>
+                            <path>${project.basedir}/../src/main/resources/keypair</path>
                         </paths>
                         <permissions>
                             <permission>
