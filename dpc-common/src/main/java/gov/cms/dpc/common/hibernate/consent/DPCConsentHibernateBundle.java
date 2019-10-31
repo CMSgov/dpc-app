@@ -21,7 +21,7 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 @Singleton
 public class DPCConsentHibernateBundle<T extends Configuration & IDPCConsentDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
-    public static String PREFIX_STRING = "gov.cms.dpc.consent.models";
+    public static String PREFIX_STRING = "gov.cms.dpc.consent.entities";
 
     @Inject
     public DPCConsentHibernateBundle() {

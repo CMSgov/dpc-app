@@ -86,7 +86,9 @@ public class SuppressionFileImport extends Job {
 
         LineIterator lineIter = IOUtils.lineIterator(reader);
         int lineNum = 0;
+
         while (lineIter.hasNext()) {
+            lineNum++;
             try {
                 Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine());
                 if (consent.isPresent()) {
@@ -97,7 +99,6 @@ public class SuppressionFileImport extends Job {
                 logger.warn(String.format("Invalid suppression record: %s, line %s", path.getFileName(), lineNum));
                 continue;
             }
-            lineNum++;
         }
         transaction.commit();
         session.close();
