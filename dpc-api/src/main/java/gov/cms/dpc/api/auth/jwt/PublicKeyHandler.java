@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.jwt;
 
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;

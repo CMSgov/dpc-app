@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.auth;
 
+import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;

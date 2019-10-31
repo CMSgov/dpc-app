@@ -2,7 +2,6 @@ package gov.cms.dpc.api.auth;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
-import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -13,16 +12,13 @@ import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.auth.AuthHelpers.BEARER_PREFIX;
+import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
 
 /**
  * {@link AuthFilter} implementation which extracts the Macaroon (base64 encoded) from the request.
@@ -33,7 +29,7 @@ import static gov.cms.dpc.api.auth.AuthHelpers.BEARER_PREFIX;
  * <p>
  * Or, directly via the 'token' query param (e.g. no Bearer prefix)
  */
-abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
+public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
 
@@ -42,7 +38,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     private final MacaroonBakery bakery;
 
 
-    DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
+    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
         this.authenticator = auth;
         this.bakery = bakery;
         this.dao = dao;
@@ -53,7 +49,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     @Override
     public void filter(final ContainerRequestContext requestContext) {
         final UriInfo uriInfo = requestContext.getUriInfo();
-        final String macaroon = AuthHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
         // If we have a path authorizer, do that, otherwise, continue
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);

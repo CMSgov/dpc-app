@@ -1,8 +1,9 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.macaroonauth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.api.auth.DPCAuthCredentials;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;

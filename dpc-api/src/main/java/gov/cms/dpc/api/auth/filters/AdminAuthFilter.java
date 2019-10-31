@@ -1,6 +1,10 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.filters;
 
 import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.api.auth.DPCAuthCredentials;
+import gov.cms.dpc.api.auth.DPCAuthFilter;
+import gov.cms.dpc.api.auth.MacaroonHelpers;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
@@ -12,11 +16,9 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
-import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
-import static gov.cms.dpc.api.auth.AuthHelpers.BEARER_PREFIX;
+import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
 
 /**
  * Implementation of {@link AuthFilter} to use when an {@link gov.cms.dpc.api.auth.annotations.AdminOperation} annotated method (or class) is called.
@@ -28,14 +30,14 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
     private final MacaroonBakery bakery;
 
-    AdminAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator) {
+    public AdminAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator) {
         this.authenticator = authenticator;
         this.bakery = bakery;
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
-        final String macaroon = AuthHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+    public void filter(ContainerRequestContext requestContext) {
+        final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
         // Validate Macaroon
         final List<Macaroon> m1;

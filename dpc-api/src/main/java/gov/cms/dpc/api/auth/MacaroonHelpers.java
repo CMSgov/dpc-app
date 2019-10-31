@@ -8,16 +8,16 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-class AuthHelpers {
+public class MacaroonHelpers {
 
-    private AuthHelpers() {
+    private MacaroonHelpers() {
         // Not used
     }
 
-    static final String BEARER_PREFIX = "Bearer";
+    public static final String BEARER_PREFIX = "Bearer";
     static final String TOKEN_URI_PARAM = "token";
 
-    static String extractMacaroonFromRequest(ContainerRequestContext requestContext, Response unauthorizedResponse) {
+    public static String extractMacaroonFromRequest(ContainerRequestContext requestContext, Response unauthorizedResponse) {
         // Try to get the Macaroon from the request
         String macaroon = getMacaroon(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
 

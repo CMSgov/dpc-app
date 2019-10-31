@@ -3,6 +3,8 @@ package gov.cms.dpc.api.auth;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.auth.staticauth.StaticAuthFactory;
+import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.resources.v1.KeyResource;

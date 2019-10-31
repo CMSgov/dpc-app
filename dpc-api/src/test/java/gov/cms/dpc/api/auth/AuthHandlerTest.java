@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.BaseResource;
@@ -87,9 +88,7 @@ class AuthHandlerTest {
         final IGenericClient client = mockGenericClient();
         final MacaroonBakery bakery = buildBakery();
         final TokenDAO sessionFactory = mock(TokenDAO.class);
-        Mockito.when(sessionFactory.fetchTokens(Mockito.any())).thenAnswer(answer -> {
-            return "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
-        });
+        Mockito.when(sessionFactory.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
 
         final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), sessionFactory);
