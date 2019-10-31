@@ -59,6 +59,9 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @JsonProperty("tokens")
     private TokenPolicy tokenPolicy = new TokenPolicy();
 
+    @NotEmpty
+    private String keyPairLocation;
+
     public TokenPolicy getTokenPolicy() {
         return tokenPolicy;
     }
@@ -112,6 +115,14 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     public void setExportPath(String exportPath) {
         this.exportPath = exportPath;
+    }
+
+    public String getKeyPairLocation() {
+        return keyPairLocation;
+    }
+
+    public void setKeyPairLocation(String keyPairLocation) {
+        this.keyPairLocation = keyPairLocation;
     }
 
     public boolean isAuthenticationDisabled() {
