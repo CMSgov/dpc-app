@@ -18,8 +18,8 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
         super(factory.getSessionFactory());
     }
 
-    public ConsentEntity persistConsent(ConsentEntity consent) {
-        return this.persist(consent);
+    public ConsentEntity persistConsent(ConsentEntity consentEntity) {
+        return this.persist(consentEntity);
     }
 
     public Optional<ConsentEntity> getConsent(UUID consentID) {

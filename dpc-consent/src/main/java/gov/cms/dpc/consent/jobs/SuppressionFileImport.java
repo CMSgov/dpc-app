@@ -87,21 +87,27 @@ public class SuppressionFileImport extends Job {
         LineIterator lineIter = IOUtils.lineIterator(reader);
         int lineNum = 0;
 
-        while (lineIter.hasNext()) {
-            lineNum++;
-            try {
-                Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine());
-                if (consent.isPresent()) {
-                    // TODO: Get BFD ID and MBI
-                    consentDAO.persistConsent(consent.get());
+        try {
+            while (lineIter.hasNext()) {
+                lineNum++;
+                try {
+                    Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine());
+                    if (consent.isPresent()) {
+                        // TODO: Get BFD ID and MBI
+                        consentDAO.persistConsent(consent.get());
+                    }
+                } catch (InvalidSuppressionRecordException e) {
+                    logger.warn("Invalid suppression record: {}, line {}", path.getFileName(), lineNum);
+                    continue;
                 }
-            } catch (InvalidSuppressionRecordException e) {
-                logger.warn(String.format("Invalid suppression record: %s, line %s", path.getFileName(), lineNum));
-                continue;
             }
+            transaction.commit();
+        } catch (Exception e) {
+            logger.error("Cannot commit suppression file import transaction", e);
+            transaction.rollback();
+        } finally {
+            session.close();
+            ManagedSessionContext.unbind(sessionFactory);
         }
-        transaction.commit();
-        session.close();
-        ManagedSessionContext.unbind(sessionFactory);
     }
 }
