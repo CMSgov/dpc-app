@@ -1,8 +1,12 @@
 package gov.cms.dpc.api.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 public class TokenResponse implements Serializable {
@@ -11,16 +15,15 @@ public class TokenResponse implements Serializable {
 
     private String id;
     private TokenEntity.TokenType type;
-    private String expires;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String token;
+    @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
+    private OffsetDateTime created;
+    @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
+    private OffsetDateTime expires;
 
     TokenResponse() {
         // Jackson required
-    }
-
-    public TokenResponse(String id, TokenEntity.TokenType type, String expires) {
-        this.id = id;
-        this.type = type;
-        this.expires = expires;
     }
 
     public String getId() {
@@ -39,11 +42,27 @@ public class TokenResponse implements Serializable {
         this.type = type;
     }
 
-    public String getExpires() {
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public OffsetDateTime getCreated() {
+        return created;
+    }
+
+    public void setCreated(OffsetDateTime created) {
+        this.created = created;
+    }
+
+    public OffsetDateTime getExpires() {
         return expires;
     }
 
-    public void setExpires(String expires) {
+    public void setExpires(OffsetDateTime expires) {
         this.expires = expires;
     }
 

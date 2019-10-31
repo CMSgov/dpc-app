@@ -36,7 +36,7 @@ start-app:
 	@docker-compose up start_api
 
 .PHONY: ci-app
-ci-app:
+ci-app: docker-base
 	@./dpc-test.sh
 
 .PHONY: ci-web
@@ -57,3 +57,7 @@ smoke/test: ${JMETER}
 smoke/prod-sbx: ${JMETER}
 	@echo "Running Smoke Tests against Sandbox env"
 	@${JMETER} -p src/main/resources/prod-sbx.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+
+.PHONY: docker-base
+docker-base:
+	@docker-compose -f ./docker-compose.base.yml build base

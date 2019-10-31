@@ -43,8 +43,7 @@ public class ListClientTokens extends Task {
         orgResource.setId(organizationID);
 
         final List<TokenEntity> organizationTokens = this.resource.getOrganizationTokens(
-                new OrganizationPrincipal(orgResource),
-                UUID.fromString(organizationID));
+                new OrganizationPrincipal(orgResource));
 
         this.mapper.writeValue(output, organizationTokens);
     }
