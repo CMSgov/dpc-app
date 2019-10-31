@@ -400,7 +400,7 @@
                             </tags>
                         </to>
                         <from>
-                            <image>docker://755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-base</image>
+                            <image>docker://dpc-base:latest</image>
                         </from>
                     </configuration>
                     <executions>
