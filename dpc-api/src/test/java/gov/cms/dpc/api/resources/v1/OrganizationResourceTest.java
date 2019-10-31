@@ -5,16 +5,14 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.testing.DataFactories;
+import gov.cms.dpc.testing.factories.OrganizationFactory;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -89,7 +87,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         // Generate a golden macaroon
         final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon);
-        final Organization organization = DataFactories.generateFakeOrganization();
+        final Organization organization = OrganizationFactory.generateFakeOrganization();
 
         final Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organization);
@@ -114,7 +112,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         // Generate a golden macaroon
         final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
         final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon);
-        final Endpoint endpoint = DataFactories.createFakeEndpoint();
+        final Endpoint endpoint = OrganizationFactory.createFakeEndpoint();
 
         final Bundle bundle = new Bundle();
         bundle.addEntry().setResource(endpoint);
