@@ -3,7 +3,6 @@
 module Internal
   class OrganizationsController < ApplicationController
     before_action :authenticate_internal_user!
-    layout :resolve_layout
 
     def index
       scope = Organization.all
@@ -16,6 +15,7 @@ module Internal
       end
 
       @organizations = scope.page params[:page]
+      render layout: 'table_index'
     end
 
     def new
@@ -71,15 +71,6 @@ module Internal
         :name, :organization_type, :num_providers,
         address_attributes: %i[id street street_2 city state zip]
       )
-    end
-
-    def resolve_layout
-      case action_name
-      when 'index'
-        'table_index'
-      else
-        'application'
-      end
     end
   end
 end
