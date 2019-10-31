@@ -15,6 +15,7 @@ module Internal
       end
 
       @organizations = scope.page params[:page]
+      render layout: 'table_index'
     end
 
     def new
