@@ -57,11 +57,13 @@ Run `make ci-app`. This will start the dependencies, build all components, run i
 
 ### Option 2: Manually
 
-Run `make docker-base` to build the common, baseline Docker image used across DPC services.
+Run `make docker-base` to build the common, baseline Docker image (i.e., `dpc-base:latest`) used across DPC services.
 
 Then, run `mvn clean install` to build and test the application. Dependencies will need to be up and running for this option to succeed.
 
 Running `mvn clean install` will also construct the *Docker* images for the individual services. To skip the Docker build pass `-Djib.skip=True`
+
+Note that the `dpc-base` image produced by `make docker-base` is not stored in a remote repository. The `mvn clean install` process relies on the base image being available via the local Docker daemon.
 
 Running DPC
 --- 
