@@ -14,7 +14,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,6 +28,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     public Arguments getDefaultParameters() {
         final Arguments arguments = new Arguments();
         arguments.addArgument("host", "http://localhost:3002/v1");
+        arguments.addArgument("admin-url", "http://localhost:3002/tasks");
         arguments.addArgument("attribution-url", "http://localhost:3500/v1");
         arguments.addArgument("seed-file", "src/main/resources/test_associations.csv");
 
@@ -45,16 +45,25 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         // Create things
         final String organizationID = UUID.randomUUID().toString();
         final String hostParam = javaSamplerContext.getParameter("host");
+        final String adminURL = javaSamplerContext.getParameter("admin-url");
         logger.info("Running against {}", hostParam);
+        logger.info("Admin URL: {}", adminURL);
         logger.info("Running with {} threads", JMeterContextService.getNumberOfThreads());
 
-        logger.debug("Creating organization {}", organizationID);
+        logger.info("Creating organization {}", organizationID);
         // Disable validation against Attribution service
         this.ctx = FhirContext.forDstu3();
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         ctx.getRestfulClientFactory().setConnectTimeout(1800);
-        final String attributionURL = javaSamplerContext.getParameter("attribution-url");
-        final IGenericClient attributionClient = ctx.newRestfulGenericClient(attributionURL);
+
+        final String goldenMacaroon;
+        try {
+            goldenMacaroon = FHIRHelpers.createGoldenMacaroon(adminURL);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed creating Macaroon", e);
+        }
+
+        final IGenericClient adminClient = FHIRHelpers.buildAuthenticatedClient(ctx, hostParam, goldenMacaroon);
 
         final SampleResult smokeTestResult = new SampleResult();
         smokeTestResult.sampleStart();
@@ -63,13 +72,14 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         smokeTestResult.addSubResult(orgRegistrationResult);
 
 
-        String token = null;
+        String token;
         orgRegistrationResult.sampleStart();
         try {
-            token = FHIRHelpers.registerOrganization(attributionClient, ctx.newJsonParser(), organizationID, attributionURL);
+            token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
             orgRegistrationResult.setSuccessful(true);
-        } catch (IOException e) {
+        } catch (Exception e) {
             orgRegistrationResult.setSuccessful(false);
+            throw new RuntimeException("Cannot register org", e);
         } finally {
             orgRegistrationResult.sampleEnd();
         }
@@ -99,7 +109,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         logger.debug("Uploading roster");
         try {
             ClientUtils.createAndUploadRosters(javaSamplerContext.getParameter("seed-file"), exportClient, UUID.fromString(organizationID), patientReferences);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Cannot upload roster", e);
         }
 
