@@ -2,6 +2,7 @@ package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -9,17 +10,15 @@ import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.codesystems.EndpointConnectionType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.List;
-
+import static gov.cms.dpc.testing.factories.OrganizationFactory.createFakeEndpoint;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
-public class EndpointValidationTest {
+    class EndpointValidationTest {
 
     private static FhirValidator fhirValidator;
     private static DPCProfileSupport dpcModule;
@@ -47,14 +46,14 @@ public class EndpointValidationTest {
         endpoint.setName("Test Name");
         endpoint.setAddress("http://test.local");
 
-        final ValidationResult result = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult result = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
         // Add a managing org
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
 
-        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertTrue(r2.isSuccessful());
     }
 
@@ -64,7 +63,7 @@ public class EndpointValidationTest {
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
         endpoint.setAddress("http://test.local");
 
-        final ValidationResult result = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult result = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
@@ -80,31 +79,13 @@ public class EndpointValidationTest {
         endpoint.setName("Test Name");
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
 
-        final ValidationResult result = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult result = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
         endpoint.setAddress("http://test.local");
-        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint);
+        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertTrue(r2.isSuccessful());
-    }
-
-    Endpoint createFakeEndpoint() {
-        final Endpoint endpoint = new Endpoint();
-        final Meta meta = new Meta();
-        meta.addProfile(EndpointProfile.PROFILE_URI);
-        endpoint.setMeta(meta);
-
-        // Payload type concept
-        final CodeableConcept payloadType = new CodeableConcept();
-        payloadType.addCoding().setCode("nothing").setSystem("http://nothing.com");
-
-        endpoint.setPayloadType(List.of(payloadType));
-
-        endpoint.setId("test-endpoint");
-        endpoint.setConnectionType(new Coding(EndpointConnectionType.HL7FHIRREST.getSystem(), EndpointConnectionType.HL7FHIRREST.toCode(), EndpointConnectionType.HL7FHIRREST.getDisplay()));
-        endpoint.setStatus(Endpoint.EndpointStatus.ACTIVE);
-        return endpoint;
     }
 
 }

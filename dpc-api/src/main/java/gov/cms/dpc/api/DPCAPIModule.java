@@ -84,20 +84,19 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, IGenericClient client, SigningKeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, SigningKeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
                         new Class<?>[]{TokenDAO.class,
                                 MacaroonBakery.class,
                                 TokenPolicy.class,
-                                IGenericClient.class,
                                 SigningKeyResolverAdapter.class,
                                 IJTICache.class,
                                 String.class},
                         new Object[]{dao,
                                 bakery,
                                 this.getConfiguration().getTokenPolicy(),
-                                client, resolver,
+                                resolver,
                                 cache, publicURL});
     }
 

@@ -341,7 +341,7 @@ class JWTUnitTests {
         final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), tokenDAO);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
-        final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, client, resolver, jtiCache, "localhost:3002/v1");
+        final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, resolver, jtiCache, "localhost:3002/v1");
         final FhirContext ctx = FhirContext.forDstu3();
 
         return APITestHelpers.buildResourceExtension(ctx, List.of(tokenResource), List.of(dynamicFeature), false);
