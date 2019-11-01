@@ -41,6 +41,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
                 .addArgument("-f", "--file")
                 .dest(ORG_FILE)
                 .type(String.class)
+                .required(true)
                 .help("FHIR Organization resource to register with system");
 
         subparser
@@ -54,8 +55,8 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
                 .addArgument("-a", "--api")
                 .dest("api-service")
                 .type(String.class)
-                .setDefault("http://localhost:9900/tasks")
-                .help("URL of API service for generating client token");
+                .setDefault("http://localhost:9911/tasks")
+                .help("URL of API service for generating client token (must include /tasks endpoint). Only required if generating a token");
     }
 
     @Override
@@ -77,6 +78,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
     }
 
     private void registerOrganization(Bundle organization, String attributionService, boolean noToken, String apiService) throws IOException, URISyntaxException {
+        System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
         final Parameters parameters = new Parameters();
@@ -105,7 +107,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
 
         // Now, create a token, unless --no-token has been passed
         if (!noToken) {
-
+            System.out.println(String.format("Connecting to API service at: %s", apiService));
             try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 final URIBuilder builder = new URIBuilder(String.format("%s/generate-token", apiService));
                 builder.setParameter("organization", organizationID.toString());
