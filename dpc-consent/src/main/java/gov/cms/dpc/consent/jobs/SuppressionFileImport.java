@@ -110,7 +110,7 @@ public class SuppressionFileImport extends Job {
                     consentDAO.persistConsent(consent.get());
                 }
             } catch (InvalidSuppressionRecordException e) {
-                logger.warn("Invalid suppression record", filename, lineNum);
+                logger.error("Invalid suppression record", e);
                 continue;
             }
         }
