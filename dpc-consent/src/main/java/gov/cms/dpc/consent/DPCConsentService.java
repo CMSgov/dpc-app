@@ -53,6 +53,11 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                 logger.debug("Connecting to database {} at {}", configuration.getConsentDatabase().getDriverClass(), configuration.getConsentDatabase().getUrl());
                 return configuration.getConsentDatabase();
             }
+
+            @Override
+            public String getMigrationsFileName() {
+                return "consent.migrations.xml";
+            }
         });
         bootstrap.addBundle(new SundialBundle<>() {
             @Override

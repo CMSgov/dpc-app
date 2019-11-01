@@ -50,7 +50,6 @@ public class SuppressionFileImportTest {
         JobTestUtils.resetScheduler();
 
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "migrate");
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
 
