@@ -1,0 +1,8 @@
+settings:
+  env:
+    HOST: https://test.dpc.cms.gov/api/v1
+    ADMIN_URL: http://test.dpc.cms.gov:9900/tasks
+  artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
+
+included-configs:
+  - smoke_test.yml
