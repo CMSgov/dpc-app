@@ -61,7 +61,7 @@ public class SuppressionFileImport extends Job {
                 try {
                     Files.delete(p);
                 } catch (IOException e) {
-                    logger.error(String.format("Cannot delete file %s from suppression directory", p.toString()), e);
+                    logger.error("Cannot delete file {} from suppression directory", p.getFileName().toString(), e);
                 }
             });
         } catch (IOException e) {
@@ -69,15 +69,16 @@ public class SuppressionFileImport extends Job {
         }
     }
 
-    protected void importFile(Path path) {
-        BufferedReader reader;
-        try {
-            reader = Files.newBufferedReader(path);
+    private void importFile(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            importRecords(reader, path.getFileName().toString());
         } catch (IOException e) {
             logger.error("Cannot import suppression file", e);
             return;
         }
+    }
 
+    private void importRecords(BufferedReader reader, String filename) {
         SessionFactory sessionFactory = managedSessionFactory.getSessionFactory();
         Session session = sessionFactory.openSession();
 
@@ -85,7 +86,7 @@ public class SuppressionFileImport extends Job {
         Transaction transaction = session.beginTransaction();
 
         try {
-            buildAndSaveConsentRecords(reader, path.getFileName().toString());
+            buildAndSaveConsentRecords(reader, filename);
             transaction.commit();
         } catch (Exception e) {
             logger.error("Cannot commit suppression file import transaction", e);
@@ -96,7 +97,7 @@ public class SuppressionFileImport extends Job {
         }
     }
 
-    public void buildAndSaveConsentRecords(BufferedReader reader, String filename) {
+    private void buildAndSaveConsentRecords(BufferedReader reader, String filename) {
         LineIterator lineIter = IOUtils.lineIterator(reader);
         int lineNum = 0;
 
