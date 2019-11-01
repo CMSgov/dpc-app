@@ -175,7 +175,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Request API access token", notes = "Request access token for API access")
+    @ApiOperation(value = "Request API access token", notes = "Request access token for API access", authorizations = @Authorization(value = ""))
     @ApiResponses(
             value = {@ApiResponse(code = 400, message = "Token request is invalid"),
                     @ApiResponse(code = 401, message = "Client is not authorized to request access token")})

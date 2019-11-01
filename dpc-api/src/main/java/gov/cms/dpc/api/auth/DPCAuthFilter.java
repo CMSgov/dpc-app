@@ -12,7 +12,6 @@ import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.NoResultException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
@@ -74,8 +73,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         }
 
         // Lookup the organization by Macaroon id
-        final Macaroon rootMacaroon = m1.get(0);
-        final UUID orgID = extractMacaroonID(rootMacaroon);
+        final UUID orgID = extractMacaroonID(m1);
 
         try {
             this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
@@ -87,13 +85,20 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         return buildCredentials(macaroon, orgID, uriInfo);
     }
 
-    private UUID extractMacaroonID(Macaroon rootMacaroon) {
+    private UUID extractMacaroonID(List<Macaroon> macaroons) {
+        final Macaroon rootMacaroon = macaroons.get(0);
         // If we're provided a Golden Macaroon, the ID won't match, so we'll need to actually pull the org_id from the
         final UUID macaroonID = UUID.fromString(rootMacaroon.identifier);
         UUID orgID;
         try {
             orgID = this.dao.findOrgByToken(macaroonID);
         } catch (Exception e) {
+            // The macaroon ID doesn't match, we need to determine if we're looking at a Golden Macaroon, or if the client id has been deleted
+            // Check the length of the provided Macaroons, if more than 1, it's a client token which has been removed, so fail
+            // If the length is 1 it's either a golden macaroon or an undischarged Macaroon, which will fail in the next auth phase
+            if (macaroons.size() > 1) {
+                throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+            }
             // Find the org_id caveat and extract the value
             final List<MacaroonCaveat> caveats = this.bakery.getCaveats(rootMacaroon);
             final MacaroonCondition orgCaveat = caveats

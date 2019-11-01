@@ -15,6 +15,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
+import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -60,7 +61,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         // Check to see if a direct fetch works as well
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet httpGet = new HttpGet(getBaseURL() + String.format("/Token/%s", token.getId()));
-            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
+            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
@@ -141,15 +142,18 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         // Remove the token
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpDelete httpDelete = new HttpDelete(getBaseURL() + String.format("/Token/%s", token.getId()));
-            httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
+            httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpDelete)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
             }
 
 
             // Fetching token should throw an exception
+            // Reauthorizing should fail
+//                assertThrows(InternalServerErrorException.class, () -> APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey));
+
             final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token");
-            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", ORGANIZATION_TOKEN));
+            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.UNAUTHORIZED_401, response.getStatusLine().getStatusCode(), "Should be unauthorized");
