@@ -196,7 +196,7 @@ public class APITestHelpers {
         final AuthResponse authResponse;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Token/auth", baseURL));
-            builder.addParameter("scope", "Nothing");
+            builder.addParameter("scope", "system/*:*");
             builder.addParameter("grant_type", "client_credentials");
             builder.addParameter("client_assertion_type", CLIENT_ASSERTION_TYPE);
             builder.addParameter("client_assertion", jwt);
