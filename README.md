@@ -189,6 +189,18 @@ You will need to set the *ACCEPT* header to `application/fhir+json` (per the FHI
 1. Download the exported files by calling the `/Data` endpoint with URLs provided. e.g. `http://localhost:3002/v1/Data/de00da66-86cf-4be1-a2a8-0415b21a6a9b.ndjson`.
 1. Enjoy your glorious ND-JSON formatted FHIR data.
 
+
+### Smoke tests
+
+Smoke tests are provided by [Taurus](https://github.com/Blazemeter/taurus) and [JMeter](https://jmeter.apache.org).
+The tests can be run by the environment specific Makefile commands. e.g. `make smoke/local` will run the smoke tests against the locally running Docker instances.
+
+In order to run the tests, you'll need to ensure that `virtualenv` is installed.
+
+```bash
+pip3 install virtualenv
+```
+
 Building the Additional Services
 ---
 

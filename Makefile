@@ -1,20 +1,20 @@
 IG_PUBLISHER = ./.bin/org.hl7.fhir.publisher.jar
 REPORT_COVERAGE ?= false
 
-JMETER = ./.bin/jmeter/bin/jmeter
 SMOKE_THREADS ?= 10
 
 ${IG_PUBLISHER}:
 	-mkdir ./.bin
 	curl https://fhir.github.io/latest-ig-publisher/org.hl7.fhir.publisher.jar -o ${IG_PUBLISHER}
 
-./.bin/jmeter.tgz:
-	-mkdir ./.bin
-	curl http://mirrors.ibiblio.org/apache/jmeter/binaries/apache-jmeter-5.1.1.tgz -o ./.bin/jmeter.tgz
+venv: venv/bin/activate
 
-${JMETER}: ./.bin/jmeter.tgz
-	-mkdir ./.bin/jmeter
-	tar -xvf ./.bin/jmeter.tgz -C ./.bin/jmeter --strip-components 1
+venv/bin/activate: requirements.txt
+	test -d venv || virtualenv venv
+	. venv/bin/activate; pip install -Ur requirements.txt
+	touch venv/bin/activate
+
+
 
 .PHONY: ig/publish
 ig/publish: ${IG_PUBLISHER}
@@ -43,20 +43,24 @@ ci-app: docker-base
 ci-web:
 	@./dpc-web-test.sh
 
+.PHONY: smoke/local
+smoke/local: venv
+	@echo "Running Smoke Tests against Local env"
+	. venv/bin/activate; bzt src/test/local.smoke_test.yml
+
 .PHONY: smoke/dev
-smoke/dev: ${JMETER}
+smoke/dev: venv
 	@echo "Running Smoke Tests against Development env"
-	@${JMETER} -p src/main/resources/dev.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	. venv/bin/activate; bzt src/test/dev.smoke_test.yml
 
 .PHONY: smoke/test
-smoke/test: ${JMETER}
-	@echo "Running Smoke Tests against Test env"
-	@${JMETER} -p src/main/resources/test.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+smoke/test: venv
+	. venv/bin/activate; bzt src/test/test.smoke_test.yml
 
 .PHONY: smoke/prod-sbx
-smoke/prod-sbx: ${JMETER}
+smoke/prod-sbx: venv
 	@echo "Running Smoke Tests against Sandbox env"
-	@${JMETER} -p src/main/resources/prod-sbx.properties -Jthreads=${SMOKE_THREADS} -n -t src/main/resources/SmokeTest.jmx -l out.jtl
+	. venv/bin/activate; bzt src/test/prod-sbx.smoke_test.yml
 
 .PHONY: docker-base
 docker-base:

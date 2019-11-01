@@ -81,6 +81,10 @@ public class JobCompletionModel {
          */
         private Long length;
 
+        public OutputEntryExtension() {
+            // Jackson required
+        }
+
         public OutputEntryExtension(String checksum, Long length) {
             this.checksum = checksum;
             this.length = length;

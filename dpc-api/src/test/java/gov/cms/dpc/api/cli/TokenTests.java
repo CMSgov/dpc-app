@@ -74,7 +74,7 @@ class TokenTests extends AbstractApplicationTest {
     @Test
     void testTokenLifecycle() throws Exception {
         // Create the organization
-        final boolean success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token");
+        final boolean success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
 
         assertAll(() -> assertTrue(success, "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
