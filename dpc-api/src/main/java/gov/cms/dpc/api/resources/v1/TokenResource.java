@@ -171,13 +171,22 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
+    @ApiOperation(value = "Request API access token", notes = "Request access token for API access")
+    @ApiResponses(
+            value = {@ApiResponse(code = 400, message = "Token request is invalid"),
+                    @ApiResponse(code = 401, message = "Client is not authorized to request access token")})
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Public
     @Override
-    public JWTAuthResponse authorizeJWT(@QueryParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
-                                        @QueryParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
-                                        @QueryParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType, @QueryParam(value = "client_assertion") String jwtBody) {
+    public JWTAuthResponse authorizeJWT(
+            @ApiParam(name = "scope", allowableValues = "system/*:*", value = "Requested access scope", required = true)
+            @QueryParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
+            @ApiParam(name = "grant_type", value = "Authorization grant type", required = true, allowableValues = "client_credentials")
+            @QueryParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
+            @ApiParam(name = "client_assertion_type", value = "Client Assertion Type", required = true, allowableValues = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+            @QueryParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType,
+            @ApiParam(name = "client_assertion", value = "Signed JWT", required = true)
+            @QueryParam(value = "client_assertion") String jwtBody) {
         // Actual scope implementation will come as part of DPC-747
         validateJWTQueryParams(grantType, clientAssertionType, scope);
 
