@@ -1,0 +1,8 @@
+settings:
+  env:
+    HOST: http://localhost:3002/v1
+    ADMIN_URL: http://localhost:9903/tasks
+  artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
+
+included-configs:
+  - smoke_test.yml
