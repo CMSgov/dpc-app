@@ -84,23 +84,8 @@ public class SuppressionFileImport extends Job {
         ManagedSessionContext.bind(session);
         Transaction transaction = session.beginTransaction();
 
-        LineIterator lineIter = IOUtils.lineIterator(reader);
-        int lineNum = 0;
-
         try {
-            while (lineIter.hasNext()) {
-                lineNum++;
-                try {
-                    Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine());
-                    if (consent.isPresent()) {
-                        // TODO: Get BFD ID and MBI
-                        consentDAO.persistConsent(consent.get());
-                    }
-                } catch (InvalidSuppressionRecordException e) {
-                    logger.warn("Invalid suppression record: {}, line {}", path.getFileName(), lineNum);
-                    continue;
-                }
-            }
+            buildAndSaveConsentRecords(reader, path.getFileName().toString());
             transaction.commit();
         } catch (Exception e) {
             logger.error("Cannot commit suppression file import transaction", e);
@@ -108,6 +93,25 @@ public class SuppressionFileImport extends Job {
         } finally {
             session.close();
             ManagedSessionContext.unbind(sessionFactory);
+        }
+    }
+
+    public void buildAndSaveConsentRecords(BufferedReader reader, String filename) {
+        LineIterator lineIter = IOUtils.lineIterator(reader);
+        int lineNum = 0;
+
+        while (lineIter.hasNext()) {
+            lineNum++;
+            try {
+                Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine(), filename, lineNum);
+                if (consent.isPresent()) {
+                    // TODO: Get BFD ID and MBI
+                    consentDAO.persistConsent(consent.get());
+                }
+            } catch (InvalidSuppressionRecordException e) {
+                logger.warn("Invalid suppression record", filename, lineNum);
+                continue;
+            }
         }
     }
 }

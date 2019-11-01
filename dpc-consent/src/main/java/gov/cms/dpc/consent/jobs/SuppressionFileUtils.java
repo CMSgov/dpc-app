@@ -22,7 +22,7 @@ public class SuppressionFileUtils {
         return FILENAME_PATTERN.matcher(path.getFileName().toString()).matches();
     }
 
-    protected static Optional<ConsentEntity> entityFromLine(String line) throws InvalidSuppressionRecordException {
+    protected static Optional<ConsentEntity> entityFromLine(String line, String filename, int lineNum) throws InvalidSuppressionRecordException {
         final int hicnStart = 0, hicnEnd = 11,
                 effectiveDateStart = 354, effectiveDateEnd = 362,
                 sourceCodeStart = 362, sourceCodeEnd = 367,
@@ -39,7 +39,7 @@ public class SuppressionFileUtils {
             if (StringUtils.isBlank(sourceCode)) {
                 return Optional.empty();
             }
-            throw new InvalidSuppressionRecordException("Unexpected beneficiary data sharing source code");
+            throw new InvalidSuppressionRecordException("Unexpected beneficiary data sharing source code", filename, lineNum);
         }
 
         ConsentEntity consent = new ConsentEntity();
@@ -49,12 +49,12 @@ public class SuppressionFileUtils {
         try {
             consent.setEffectiveDate(effectiveDate);
         } catch (DateTimeParseException e) {
-            throw new InvalidSuppressionRecordException("Cannot parse date from suppression record", e);
+            throw new InvalidSuppressionRecordException("Cannot parse date from suppression record", filename, lineNum, e);
         }
 
         String hicn = line.substring(hicnStart, hicnEnd).trim();
         if (!HICN_PATTERN.matcher(hicn).matches()) {
-            throw new InvalidSuppressionRecordException("HICN does not match expected format");
+            throw new InvalidSuppressionRecordException("HICN does not match expected format", filename, lineNum);
         }
         consent.setHicn(hicn);
 
@@ -68,7 +68,7 @@ public class SuppressionFileUtils {
                 consent.setPolicyCode("OPTOUT");
                 break;
             default:
-                throw new InvalidSuppressionRecordException("Beneficiary data sharing preference does not match expected value of 'Y' or 'N'");
+                throw new InvalidSuppressionRecordException("Beneficiary data sharing preference does not match expected value of 'Y' or 'N'", filename, lineNum);
         }
 
         consent.setPurposeCode("TREAT");
