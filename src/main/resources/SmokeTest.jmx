@@ -43,6 +43,11 @@
                 <stringProp name="Argument.value">${__P(attribution-url,)}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="admin-url" elementType="Argument">
+                <stringProp name="Argument.name">admin-url</stringProp>
+                <stringProp name="Argument.value">${__P(admin-url,)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
             </collectionProp>
           </elementProp>
           <stringProp name="classname">gov.cms.dpc.testing.smoketests.SmokeTest</stringProp>

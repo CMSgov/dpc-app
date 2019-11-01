@@ -17,6 +17,7 @@ public class OrganizationDelete extends AbstractAttributionCommand {
     public void addAdditionalOptions(Subparser subparser) {
         subparser
                 .addArgument("id")
+                .required(true)
                 .dest("org-reference")
                 .help("ID of Organization to delete");
     }
@@ -28,6 +29,7 @@ public class OrganizationDelete extends AbstractAttributionCommand {
         System.out.println(String.format("Removing organization %s", orgReference));
 
         final String attributionService = namespace.getString(ATTR_HOSTNAME);
+        System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
 
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
