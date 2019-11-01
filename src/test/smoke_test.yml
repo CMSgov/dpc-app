@@ -1,0 +1,19 @@
+settings:
+  artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
+
+execution:
+  - iterations: 1
+    concurrency: 3
+    scenario: jmeter
+
+scenarios:
+  jmeter:
+    properties:
+      host: ${HOST}
+      admin-url: ${ADMIN_URL}
+    script: src/main/resources/SmokeTest.jmx
+
+reporting:
+  - module: passfail
+    criteria:
+      - "fail>50% for 10s, stop as failed"

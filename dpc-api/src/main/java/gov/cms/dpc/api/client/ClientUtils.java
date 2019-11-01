@@ -2,11 +2,11 @@ package gov.cms.dpc.api.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -82,7 +82,7 @@ public class ClientUtils {
      * @param rosterID     - {@link String} Roster ID to request data for
      * @return - {@link IOperationUntypedWithInput} export request, ready to execute
      */
-    public static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient exportClient, String rosterID) {
+    private static IOperationUntypedWithInput<Parameters> createExportOperation(IGenericClient exportClient, String rosterID) {
         return exportClient
                 .operation()
                 .onInstance(new IdType(rosterID))
@@ -101,7 +101,7 @@ public class ClientUtils {
      * @param patientReferences - {@link Map} of patient's associated to a given provider
      * @throws IOException - throws if unable to read the file
      */
-    public static void createRosterSubmission(IGenericClient client, InputStream resource, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
+    private static void createRosterSubmission(IGenericClient client, InputStream resource, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
 
         final Map<String, List<Pair<String, String>>> providerMap = SeedProcessor.extractProviderMap(resource);
 
@@ -131,7 +131,7 @@ public class ClientUtils {
      * @throws IOException          - throws if the HTTP request fails
      * @throws InterruptedException - throws if the thread is interrupted
      */
-    public static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, String token) throws IOException, InterruptedException {
+    private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, String token) throws IOException, InterruptedException {
         // Use the traditional HTTP Client to check the job status
         JobCompletionModel jobResponse = null;
         try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -164,7 +164,7 @@ public class ClientUtils {
      * @return - {@link File} file handle where the data is stored
      * @throws IOException - throws if the HTTP request or file writing fails
      */
-    public static File fetchExportedFiles(String fileID, String token) throws IOException {
+    private static File fetchExportedFiles(String fileID, String token) throws IOException {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
 
             final File tempFile = File.createTempFile("dpc", ".ndjson");
@@ -192,25 +192,18 @@ public class ClientUtils {
      * @throws IOException          - throws if something bad happens
      * @throws InterruptedException - throws if someone cuts in line
      */
-    public static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, String token) throws IOException, InterruptedException {
+    private static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, String token) throws IOException, InterruptedException {
         System.out.println("Retrying export request");
-        String exportURL = "";
 
-        try {
-            exportOperation.execute();
-        } catch (NonFhirResponseException e) {
-            if (e.getStatusCode() != HttpStatus.NO_CONTENT_204) {
-                e.printStackTrace();
-                System.exit(1);
-            }
+        // Return a MethodOutcome in order to get the response headers.
+        final MethodOutcome outcome = exportOperation.returnMethodOutcome().execute();
+        // Get the correct header
+        final Map<String, List<String>> headers = outcome.getResponseHeaders();
 
-            // Get the correct header
-            final Map<String, List<String>> headers = e.getResponseHeaders();
+        // Get the headers and check the status
+        final String exportURL = headers.get("content-location").get(0);
+        System.out.printf("Export job started. Progress URL: %s%n", exportURL);
 
-            // Get the headers and check the status
-            exportURL = headers.get("content-location").get(0);
-            System.out.printf("Export job started. Progress URL: %s%n", exportURL);
-        }
 
         // Poll the job until it's done
         return awaitExportResponse(exportURL, "Checking job status", token);
@@ -248,7 +241,7 @@ public class ClientUtils {
                 }));
     }
 
-    public static <T extends BaseResource> Bundle bundleSubmitter(Class<?> baseClass, Class<T> clazz, String filename, IParser parser, IGenericClient client) throws IOException {
+    private static <T extends BaseResource> Bundle bundleSubmitter(Class<?> baseClass, Class<T> clazz, String filename, IParser parser, IGenericClient client) throws IOException {
 
         try (InputStream resource = baseClass.getClassLoader().getResourceAsStream(filename)) {
             final Bundle bundle = parser.parseResource(Bundle.class, resource);
@@ -283,9 +276,7 @@ public class ClientUtils {
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
                 .map(resource -> (Patient) resource)
-                .forEach(patient -> {
-                    patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId()));
-                });
+                .forEach(patient -> patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId())));
 
         return patientReferences;
     }

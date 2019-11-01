@@ -29,3 +29,13 @@ out/
 
 node_modules/
 jacocoReport/
+bzt-out/
+
+# Python ignores
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
