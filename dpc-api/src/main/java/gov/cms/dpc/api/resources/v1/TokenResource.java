@@ -84,7 +84,7 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch client tokens", notes = "Method to retrieve the client tokens associated to the given Organization.")
-    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
+    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization"))
     public List<TokenEntity> getOrganizationTokens(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
         return this.dao.fetchTokens(organizationPrincipal.getID());
@@ -115,7 +115,10 @@ public class TokenResource extends AbstractTokenResource {
     @ExceptionMetered
     @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)." +
             "<p>" +
-            "Token supports a custom human-readable label via the `label` query param.")
+            "Token supports a custom human-readable label via the `label` query param as well as a custom expiration period via the `expiration` param." +
+            "<p>" +
+            "Note: The expiration time cannot exceed the maximum lifetime specified by the system (current 1 year)")
+    @ApiResponses(value = @ApiResponse(code = 400, message = "Cannot create token with specified parameters"))
     @Override
     public TokenEntity createOrganizationToken(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
@@ -155,6 +158,7 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
+    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find token with given id"))
     public Response deleteOrganizationToken(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
@@ -176,6 +180,7 @@ public class TokenResource extends AbstractTokenResource {
             value = {@ApiResponse(code = 400, message = "Token request is invalid"),
                     @ApiResponse(code = 401, message = "Client is not authorized to request access token")})
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
     @Public
     @Override
     public JWTAuthResponse authorizeJWT(

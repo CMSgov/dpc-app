@@ -76,9 +76,12 @@ public class KeyResource extends AbstractKeyResource {
     @ExceptionMetered
     @Path("/{keyID}")
     @UnitOfWork
-    @ApiOperation(value = "Create public key for Organization",
+    @ApiOperation(value = "Delete public key for Organization",
             notes = "This endpoint deletes the specified public key associated with the organization.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find public key for organization"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find public key for organization"),
+            @ApiResponse(code = 200, message = "Key successfully removed")
+    })
     @Override
     public Response deletePublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
         this.dao.deletePublicKey(keyID, organizationPrincipal.getID());
@@ -97,7 +100,9 @@ public class KeyResource extends AbstractKeyResource {
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork
     @Override
-    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotEmpty String key,
+    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                     @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
+                                     @NotEmpty String key,
                                      @ApiParam(name = "label", value = "Public Key ID (label)", defaultValue = "key:{count of public keys + 1) ")
                                      @QueryParam(value = "label") Optional<String> keyID) {
         final String keyLabel = keyID.orElseGet(() -> this.buildDefaultKeyID(organizationPrincipal.getID()));
