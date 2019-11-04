@@ -73,7 +73,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         }
 
         // Lookup the organization by Macaroon id
-        final UUID orgID = extractMacaroonID(m1);
+        final UUID orgID = extractOrgIDFromMacaroon(m1);
 
         try {
             this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
@@ -85,9 +85,8 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         return buildCredentials(macaroon, orgID, uriInfo);
     }
 
-    private UUID extractMacaroonID(List<Macaroon> macaroons) {
+    private UUID extractOrgIDFromMacaroon(List<Macaroon> macaroons) {
         final Macaroon rootMacaroon = macaroons.get(0);
-        // If we're provided a Golden Macaroon, the ID won't match, so we'll need to actually pull the org_id from the
         final UUID macaroonID = UUID.fromString(rootMacaroon.identifier);
         UUID orgID;
         try {

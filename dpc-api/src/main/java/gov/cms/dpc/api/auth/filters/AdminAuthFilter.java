@@ -55,6 +55,9 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
 
+        // At this point, we should have exactly one Macaroon, anything else is a failure
+        assert m1.size() == 1 : "Should only have a single Macaroon";
+
         // Ensure that we don't have any organization IDs
         // Since we ALWAYS generate organization_id caveats for tokens, its absence indicates that its a Golden Macaroon
         final boolean isGoldenMacaroon = this.bakery.getCaveats(m1.get(0))

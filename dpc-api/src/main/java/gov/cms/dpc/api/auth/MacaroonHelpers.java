@@ -80,6 +80,8 @@ public class MacaroonHelpers {
 
     private static List<CaveatSupplier> generateV2Caveats(Duration tokenLifetime, UUID organizationID) {
         final List<CaveatSupplier> caveatSuppliers = new ArrayList<>(generateDefaultCaveats(2, tokenLifetime, organizationID));
+        // The body of this local caveat is intentionally duplicated. We don't actually check it, we just need something in order to serialize correctly.
+        // In the future, we might add specific caveats that the discharger can check before discharging.
         caveatSuppliers.add(() -> new MacaroonCaveat("local", new MacaroonCondition(ORGANIZATION_CAVEAT_KEY, MacaroonCondition.Operator.EQ, organizationID.toString())));
         return caveatSuppliers;
     }
