@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -30,12 +32,14 @@ public class GenerateClientTokens extends Task {
 
     private final MacaroonBakery bakery;
     private final TokenResource resource;
+    private final Base64.Encoder encoder;
 
     @Inject
     GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
         super("generate-token");
         this.bakery = bakery;
         this.resource = resource;
+        this.encoder = Base64.getUrlEncoder();
     }
 
     @Override
@@ -45,7 +49,8 @@ public class GenerateClientTokens extends Task {
         if (organizationCollection.isEmpty()) {
             logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
             final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
-            output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V2_JSON));
+            final byte[] serialized = macaroon.serialize(MacaroonVersion.SerializationVersion.V2_JSON).getBytes(StandardCharsets.UTF_8);
+            output.write(this.encoder.encodeToString(serialized));
         } else {
             final String organization = organizationCollection.asList().get(0);
             final Organization orgResource = new Organization();
