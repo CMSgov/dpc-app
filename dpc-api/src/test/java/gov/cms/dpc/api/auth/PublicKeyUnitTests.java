@@ -81,7 +81,7 @@ class PublicKeyUnitTests {
                     .post(Entity.entity(APITestHelpers.generatePublicKey(key.getPublic()), MediaType.TEXT_PLAIN));
 
             assertAll(() -> assertEquals(200, response.getStatus(), "Should have succeeded"),
-                    () -> assertEquals("key:1", response.readEntity(KeyView.class).label, "Should have default label"));
+                    () -> assertTrue(response.readEntity(KeyView.class).label.startsWith("key:"), "Should have default label"));
         }
 
         @Test
