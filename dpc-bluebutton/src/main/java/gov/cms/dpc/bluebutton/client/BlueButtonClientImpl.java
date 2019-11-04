@@ -8,7 +8,9 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.common.utils.MetricMaker;
+import org.bouncycastle.util.encoders.Hex;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -18,6 +20,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -179,6 +187,17 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             throw ex;
         } finally {
             timerContext.stop();
+        }
+    }
+
+    protected static String hashHICN(String hicn, String pepper, int iterations) {
+        KeySpec keySpec = new PBEKeySpec(hicn.toCharArray(), Hex.decode(pepper), iterations, 256);
+        try {
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            SecretKey secretKey = skf.generateSecret(keySpec);
+            return Hex.toHexString(secretKey.getEncoded());
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new BlueButtonClientSetupException("Could not hash HICN", e);
         }
     }
 }

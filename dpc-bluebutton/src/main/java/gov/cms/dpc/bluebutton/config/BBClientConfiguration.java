@@ -26,6 +26,11 @@ public class BBClientConfiguration {
     @Max(1000)
     private int resourcesCount = 100;
 
+    @NotEmpty
+    private String bfdHashPepper;
+
+    private int bfdHashIter;
+
     @Valid
     @NotNull
     @JsonProperty("keyStore")
@@ -36,6 +41,10 @@ public class BBClientConfiguration {
     }
 
     public int getResourcesCount() { return resourcesCount; }
+
+    public String getBfdHashPepper() { return bfdHashPepper; }
+
+    public int getBfdHashIter() { return bfdHashIter; }
 
     public KeystoreConfiguration getKeystore() {
         return keystore;
