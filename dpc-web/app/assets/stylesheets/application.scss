@@ -47,3 +47,35 @@
  @import "components/process-list";
  @import "components/site-blocks";
  @import "utilities/add-ons";
+
+
+.play-button {
+  background: rgba(0,0,0, .75);
+  border-radius: 50px;
+  color: white;
+  display: inline-block;
+  font-size: $h2-font-size;
+  font-weight: $font-bold;
+  padding: $spacer-2 $spacer-3;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-white;
+    opacity: .9;
+  }
+}
+
+.play-button-alt {
+  background: rgba(0,0,0, .75);
+  border-radius: 50px;
+  color: white;
+  display: inline-block;
+  font-weight: $font-bold;
+  padding: $spacer-2 $spacer-3;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-white;
+    opacity: .9;
+  }
+}
