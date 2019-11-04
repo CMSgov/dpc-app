@@ -55,19 +55,320 @@ These restrictions are subject to change over time.
 The Data at the Point of Care pilot project is currently accessible as a private sandbox environment, which returns sample [NDJSON](http://ndjson.org/) files with synthetic beneficiary data.
 There is no beneficiary PII or PHI in the files you can access via the sandbox.
 
-The long-term goal of the project is to align with the security and authorization processes recommended by the [SMART Backend Services Guide](https://build.fhir.org/ig/HL7/bulk-data/authorization/index.html).
-In the interim, access is controlled via API tokens issued by the DPC team.
-All interactions with the server (except for requesting the Capability Statement) require that the token be present as a *Bearer* token in the `Authorization` request header.
+DPC implements the *SMART Backend Services Authentication* (BSA) as descripted by the [SMART ON FHIR team](https://build.fhir.org/ig/HL7/bulk-data/authorization/index.html).
+This specification requires the user to exchange their DPC provided `client_token` for an `access_token` which can be used to make API requests to the FHIR endpoints.
+This exchange requires the user to submit a self-signed [JSON Web Token](https://jwt.io) using a public/private key pair that they submit to DPC either via the Web UI or the API.
+
+> Note: Authentication is performed on a per-environment basis. Users will need to request a `client_token` and upload a public key for *each* environment they wish to access (e.g. sandbox, production, etc).
+
+The `access_token` is then set as a **Bearer** token in the `Authorization` header for each API request.
 
 ~~~ sh
-Authorization: Bearer {token}
+Authorization: Bearer {access_token}
 ~~~
 
 **cURL command**
 
 ~~~
-curl -H 'Authorization: Bearer {token}' {command to execute}
+curl -H 'Authorization: Bearer {access_token}' {command to execute}
 ~~~
+
+The authorization flow is as follows:
+
+1. The user first submits a public to DPC for the given environment. This can be done either via the Web UI or via the `PublicKey` endpoint in the API.
+
+> Note: Because the `PublicKey` endpoint is secured by BSA, the initial public key for each environment **must** be uploaded via the Web UI.
+>Any additional keys can then be submitted via the API endpoints, using an existing key for signing the JWT.
+
+2. The user creates a `client_token` to use for a given system.
+
+3. For each API request, the user creates an `access_token` by submitting a self-signed JWT to the `Token/auth` endpoint.
+
+4. The user sets the provided `access_token` as a `Bearer token` in the `Authorization` header, for each request to the DPC API 
+
+### Managing client_tokens
+
+Client tokens are required in order to provide the ability for a given application to access the DPC API.
+Users will still need to create an `access_token` from a given `client_token` details for which are given in a later [section](#creating-an-access_token).
+
+#### Listing client_tokens
+
+All client tokens registered by the organization for the given endpoint can be listed by making a GET request to the `Token/` endpoint.
+This will return an array of objects which list the token ID, when it was created, when it expires, and the label associated with the token. 
+
+~~~sh
+GET /api/v1/Token
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Token \
+-H 'Authorization: Bearer {access_token}' \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-X GET
+~~~
+
+**Response**
+
+~~~json
+[
+  {
+    "id": "3c308f6e-0223-42f8-80c2-cab242d68afc",
+    "tokenType": "MACAROON",
+    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+    "createdAt": "2019-11-04T11:49:55.126-05:00",
+    "expiresAt": "2020-11-04T11:49:55.095-05:00"
+  },
+  {
+    "id": "eef87627-db4b-4c08-8a27-e88a8343099d",
+    "tokenType": "MACAROON",
+    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+    "createdAt": "2019-11-04T11:50:06.101-05:00",
+    "expiresAt": "2020-11-04T11:50:06.096-05:00"
+  },
+  {
+    "id": "ea314eaa-1cf5-4d01-9ea7-1646099ca9fd",
+    "tokenType": "MACAROON",
+    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+    "createdAt": "2019-11-04T11:50:06.685-05:00",
+    "expiresAt": "2020-11-04T11:50:06.677-05:00"
+  }
+]
+~~~
+
+Specific client_tokens can be listed by making a `GET` request to the `Token/` endpoint using the unique id of the client_token.
+
+~~~sh
+GET /api/v1/Token/{client_token id}
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Token/{client_token id} \
+-H 'Authorization: Bearer {access_token}' \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-X GET
+~~~
+
+**Response**
+
+~~~json
+{
+    "id": "3c308f6e-0223-42f8-80c2-cab242d68afc",
+    "tokenType": "MACAROON",
+    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+    "createdAt": "2019-11-04T11:49:55.126-05:00",
+    "expiresAt": "2020-11-04T11:49:55.095-05:00"
+}
+~~~
+
+#### Creating a client_token
+
+Creating a `client_token` can be done by making a `POST` request to the `Token/` endpoint. 
+This endpoint accepts two, optional query params:
+* `label` sets a human readable label for the token. If omitted, DPC will auto-generate one.
+Note, token labels are not guaranteed to be unique. 
+*  `expiration` sets a custom expiration for the `client_token`.
+This is provided as an ISO formatted string and if omitted with default to the system specified expiration time.
+Note: The user cannot set an expiration time longer than the system allowed maximum.
+This will result in an error being returned to the user.
+
+The response from the API includes the `client_token` in the `token` field. 
+
+>Note: This is the _only_ time that the client token will be visible to user.
+>Ensure that the value is recorded in a safe and durable location.
+
+~~~sh
+POST /api/v1/Token
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Token?label={token label}&expiration={ISO formatted dateTime} \
+-H 'Authorization: Bearer {access_token}' \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-X POST
+~~~
+
+**Response**
+
+~~~json
+{
+    "id": "3c308f6e-0223-42f8-80c2-cab242d68afc",
+    "tokenType": "MACAROON",
+    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+    "createdAt": "2019-11-04T11:49:55.126-05:00",
+    "expiresAt": "2020-11-04T11:49:55.095-05:00",
+    "token:": "{client_token}"
+}
+~~~
+
+#### Deleting a client_token
+
+Client tokens can be removed by sending a `DELETE` request to the `Token/` endpoint, using the unique ID of the client_token, which is returned either on creation, or as the result of listing the client_tokens.
+
+~~~sh
+DELETE /api/v1/Token/{client_token id}
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Token/{client_token id} \
+-H 'Authorization: Bearer {access_token}' \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-X DELETE
+~~~
+
+**Response**
+
+~~~sh
+200 - Token was removed
+~~~
+
+### Managing public keys
+
+Creating an `access_token` from a given `client_token` requires that the user to submit a self-signed JWT with the specific request information (details are given in a later [section](#creating-an-access_token)).
+In order for DPC to validate that the token request is coming from an authorized application, it verifies that the private key used to sign the JWT matches a public key previously uploaded to the system.
+Users are required to maintain a list of acceptable public keys with the DPC system and management operations are described in this section.
+
+> Note: There is no direct correlation between the number of `client_tokens` an organization has and the number of public/private key pairs.
+> A keypair can be used to sign any number of client_tokens.   
+
+
+#### Listing public keys
+
+All public keys registered by the organization for the given endpoint can be listed by making a GET request to the `Key/` endpoint.
+This will return an array of objects which list public key ID, the human readable label, creation time and the value of the PEM encoded public key
+
+~~~sh
+GET /api/v1/Key
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v http://localhost:3002/v1/Key \
+-H 'Authorization: Bearer {access_token}' \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-X GET
+~~~
+
+**Response**
+
+~~~json
+[
+  {
+    "id": "b296f9d2-1aae-4c59-b6c7-c759b9db5226",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyI+y8vAAFcV4deNdyKC\nH16ZPU7tgwnUzvtEYOp6s0DFjzgaqWmYZd/CNlb1psi+J0ChtcL9+Cx3v+HwDqVx\nToQrEqJ8hMavtXnxm2jPoRaxmbIGjHZ6jfyMot5+CdP8Vr5o9G2WIUgzjhFwMEXh\nlYg97uZadLLVKVXYTl4HtluVX5y7p1Wh4vkyJFBiqrX7qAJXvr6PK7OUeZDeVsse\nOMm33VwgbQSGRw7yWNOw+H/RbpGQkAUtHvGYvo/qLeb+iJsF2zBtjnkTmk5I8Vlo\n4xzbqaoqZqsHp4NgCw+bq0Y6AWLE2yUYi/DOatOdIBfLxlpf/FAY3f5FbNjISUuL\nmwIDAQAB\n-----END PUBLIC KEY-----\n",
+    "createdAt": "2019-11-04T13:16:29.008-05:00",
+    "label": "test-key"
+  }
+]
+~~~
+
+Specific public keys can be listed by making a `GET` request to the `Key/` endpoint using the unique id of the public key.
+
+~~~sh
+GET /api/v1/Key/{public key id}
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
+-H 'Authorization: Bearer {access_token}' \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-X GET
+~~~
+
+**Response**
+
+~~~json
+{
+    "id": "b296f9d2-1aae-4c59-b6c7-c759b9db5226",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyI+y8vAAFcV4deNdyKC\nH16ZPU7tgwnUzvtEYOp6s0DFjzgaqWmYZd/CNlb1psi+J0ChtcL9+Cx3v+HwDqVx\nToQrEqJ8hMavtXnxm2jPoRaxmbIGjHZ6jfyMot5+CdP8Vr5o9G2WIUgzjhFwMEXh\nlYg97uZadLLVKVXYTl4HtluVX5y7p1Wh4vkyJFBiqrX7qAJXvr6PK7OUeZDeVsse\nOMm33VwgbQSGRw7yWNOw+H/RbpGQkAUtHvGYvo/qLeb+iJsF2zBtjnkTmk5I8Vlo\n4xzbqaoqZqsHp4NgCw+bq0Y6AWLE2yUYi/DOatOdIBfLxlpf/FAY3f5FbNjISUuL\nmwIDAQAB\n-----END PUBLIC KEY-----\n",
+    "createdAt": "2019-11-04T13:16:29.008-05:00",
+    "label": "test-key"
+}
+~~~
+
+#### Uploading a public key
+
+Uploading a public key can be done by making a `POST` request to the `Key/` endpoint. 
+This endpoint requires one additional query param:
+* `label` sets a human readable label for the public key. This label will be used for the `kid` value of the self-signed JWT. 
+*  `expiration` sets a custom expiration for the `client_token`.
+
+The submitted public key must meet the following requirements:
+
+* Be an `RSA` key
+* Have a key length of at least 3072 bits
+* Be unique to that environment
+
+~~~sh
+POST /api/v1/Key
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Key?label={key label} \
+-H 'Authorization: Bearer {access_token}' \
+-H 'Accept: application/json' \
+-H 'Content-Type: text/plain' \
+-X POST \
+-d "{PEM encoded public key}"
+~~~
+
+**Response**
+
+~~~json
+{
+    "id": "b296f9d2-1aae-4c59-b6c7-c759b9db5226",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyI+y8vAAFcV4deNdyKC\nH16ZPU7tgwnUzvtEYOp6s0DFjzgaqWmYZd/CNlb1psi+J0ChtcL9+Cx3v+HwDqVx\nToQrEqJ8hMavtXnxm2jPoRaxmbIGjHZ6jfyMot5+CdP8Vr5o9G2WIUgzjhFwMEXh\nlYg97uZadLLVKVXYTl4HtluVX5y7p1Wh4vkyJFBiqrX7qAJXvr6PK7OUeZDeVsse\nOMm33VwgbQSGRw7yWNOw+H/RbpGQkAUtHvGYvo/qLeb+iJsF2zBtjnkTmk5I8Vlo\n4xzbqaoqZqsHp4NgCw+bq0Y6AWLE2yUYi/DOatOdIBfLxlpf/FAY3f5FbNjISUuL\nmwIDAQAB\n-----END PUBLIC KEY-----\n",
+    "createdAt": "2019-11-04T13:16:29.008-05:00",
+    "label": "test-key"
+}
+~~~
+
+#### Deleting a public key
+
+Public keys can be removed by sending a `DELETE` request to the `Key/` endpoint, using the unique ID of the public key, which is returned either on creation, or as the result of listing the public keys.
+
+~~~sh
+DELETE /api/v1/Key/{public key ID}
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
+-H 'Authorization: Bearer {access_token}' \
+-H 'Accept: application/json' \
+-H 'Content-Type: application/json' \
+-X DELETE
+~~~
+
+**Response**
+
+~~~sh
+200 - Key was removed
+~~~
+
+### Creating an access_token
+
+
+Access tokens cannot be renewed, when they expire, the user must request a new one by making an additional request to the `Token/auth` endpoint with a newly created JWT.
 
 ## Environment
 The examples below include cURL commands, but may be followed using any tool that can make HTTP GET requests with headers, such as [Postman](https://getpostman.com).
@@ -286,7 +587,7 @@ Details on the exact data format are given in the [implementation guide](https:/
 
 ~~~sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Content-Type: application/fhir+json' \
 -X POST \
@@ -352,7 +653,7 @@ POST /api/v1/Practitioner/$submit
 
 ~~~sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Practitioner/\$submit
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Content-Type: application/fhir+json' \
 -X POST \
@@ -403,7 +704,7 @@ Details on the exact data format are given in the [implementation guide](https:/
 
 ~~~sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Content-Type: application/fhir+json' \
 -X POST \
@@ -518,7 +819,7 @@ POST /api/v1/Patient/$submit
 
 ~~~sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/\$submit
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Content-Type: application/fhir+json' \
 -X POST \
@@ -567,7 +868,7 @@ POST /api/v1/Group
 
 ~~~sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Content-Type: application/fhir+json' \
 -X POST \
@@ -690,7 +991,7 @@ POST /api/v1/Group/{Group.id}/$add
 
 ~~~sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
 -d @group_addition.json
@@ -744,7 +1045,7 @@ POST /api/v1/Group/{Group.id}/$remove
 
 ~~~sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$remove
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -X POST \
 -d @group_removal.json
@@ -799,7 +1100,7 @@ PUT /api/v1/Group/{Group.id}
 
 ~~~sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -X PUT \
 -d @updated_group.json
@@ -873,7 +1174,7 @@ GET /api/v1/Group?characteristic-value=|attributed-to$|{provider NPI}
 
 ~~~ sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group?characteristic=attributed-to&characteristic-code={provider NPI} \
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json
 ~~~
 
@@ -943,7 +1244,7 @@ The dollar sign (‘$’) before the word “export” in the URL indicates that
 
 **Headers**
 
-- Authorization: Bearer {token}
+- Authorization: Bearer {access_token}
 - Accept: `application/fhir+json`
 - Prefer: `respond-async`
 
@@ -951,7 +1252,7 @@ The dollar sign (‘$’) before the word “export” in the URL indicates that
 
 ~~~ sh
 curl -v https://sandbox.DPC.cms.gov/api/v1/Group/{attribution Group.id}/\$export \
--H 'Authorization: Bearer {token}' \
+-H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Prefer: respond-async'
 ~~~
@@ -982,13 +1283,13 @@ The status will change from `202 Accepted` to `200 OK` when the export job is co
 
 **Headers**
 
-- Authorization: Bearer {token}
+- Authorization: Bearer {access_token}
 
 **cURL Command**
 
 ~~~ sh
 curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job} \
--H 'Authorization: Bearer {token}'
+-H 'Authorization: Bearer {access_token}'
 ~~~
 
 **Responses**
@@ -1039,13 +1340,13 @@ GET https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED4595307
 
 **Headers**
 
-- Authorization: Bearer {token}
+- Authorization: Bearer {access_token}
 
 **cURL command**
 
 ~~~sh
 curl https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson \
--H 'Authorization: Bearer {token}'
+-H 'Authorization: Bearer {access_token}'
 ~~~
 
 **Response**

@@ -106,7 +106,7 @@ public class KeyResource extends AbstractKeyResource {
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
                                      @NotEmpty String key,
-                                     @ApiParam(name = "label", value = "Public Key ID (label)", defaultValue = "key:{count of public keys + 1) ")
+                                     @ApiParam(name = "label", value = "Public Key ID (label)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
                                      @QueryParam(value = "label") Optional<String> keyID) {
         final String keyLabel = keyID.orElseGet(this::buildDefaultKeyID);
         final SubjectPublicKeyInfo publicKey;
