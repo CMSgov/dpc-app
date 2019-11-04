@@ -3,6 +3,7 @@ package gov.cms.dpc.bluebutton.client;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -73,6 +74,27 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                 .read()
                 .resource(Patient.class)
                 .withId(patientID)
+                .execute());
+    }
+
+    /**
+     * Queries Blue Button server for patient data
+     *
+     * @param hicn The requested patient's HICN
+     * @return {@link Patient} A FHIR Patient resource
+     * @throws ResourceNotFoundException when no such patient with the provided HICN exists
+     */
+    @Override
+    public Bundle searchPatientFromServerByHICN(String hicn) throws ResourceNotFoundException {
+        logger.debug("Attempting to fetch patient by HICN from baseURL: {}", client.getServerBase());
+        String hicnHash = hashHICN(hicn, config.getBfdHashPepper(), config.getBfdHashIter());
+        ICriterion criterion = new TokenClientParam("identifier").exactly()
+                .systemAndCode("http://bluebutton.cms.hhs.gov/identifier#hicnHash", hicnHash);
+        return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
+                .search()
+                .forResource(Patient.class)
+                .where(criterion)
+                .returnBundle(Bundle.class)
                 .execute());
     }
 

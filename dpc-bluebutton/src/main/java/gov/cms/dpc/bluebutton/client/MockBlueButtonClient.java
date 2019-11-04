@@ -39,6 +39,11 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
+    public Bundle searchPatientFromServerByHICN(String hicn) throws ResourceNotFoundException {
+        return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, "hicn-" + hicn);
+    }
+
+    @Override
     public Bundle requestEOBFromServer(String patientID) throws ResourceNotFoundException {
         return loadBundle(SAMPLE_EOB_PATH_PREFIX, patientID);
     }

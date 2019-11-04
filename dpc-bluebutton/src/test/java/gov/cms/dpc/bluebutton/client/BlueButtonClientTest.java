@@ -42,6 +42,9 @@ class BlueButtonClientTest {
     private static final String TEST_SINGLE_EOB_PATIENT_ID = "20140000009893";
     // A patient id that should not exist in bluebutton
     private static final String TEST_NONEXISTENT_PATIENT_ID = "31337";
+    // A random example patient's HICN (Jane Doe)
+    private static final String TEST_HICN = "1000079035";
+    private static final String TEST_HICN_HASH = "96228a57f37efea543f4f370f96f1dbf01c3e3129041dba3ea4367545507c6e7";
 
     // Paths to test resources
     private static final String METADATA_PATH = "bb-test-data/meta.xml";
@@ -86,6 +89,13 @@ class BlueButtonClientTest {
             );
         }
 
+        createMockServerExpectation(
+                "/v1/fhir/Patient",
+                HttpStatus.OK_200,
+                getRawXML(SAMPLE_PATIENT_PATH_PREFIX + "hicn-" + TEST_HICN + ".xml"),
+                Collections.singletonList(Parameter.param("identifier", "http://bluebutton.cms.hhs.gov/identifier#hicnHash|" + TEST_HICN_HASH))
+        );
+
         // Create mocks for pages of the results
         for(String startIndex: List.of("10", "20", "30")) {
             createMockServerExpectation(
@@ -117,6 +127,22 @@ class BlueButtonClientTest {
         assertEquals(ret.getName().size(), 1, patientDataCorrupted);
         assertEquals(ret.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
         assertEquals(ret.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
+    }
+
+    @Test
+    void shouldGetPatientFromHICN() {
+        Bundle ret = bbc.searchPatientFromServerByHICN(TEST_HICN);
+
+        // Verify basic demo patient information
+        assertNotNull(ret, "The demo Patient bundle returned from BlueButtonClient should not be null");
+
+        Resource resource = ret.getEntry().get(0).getResource();
+        assertEquals(ResourceType.Patient, resource.getResourceType());
+
+        Patient patient = (Patient) resource;
+        assertEquals("Jane X", patient.getName().get(0).getGivenAsSingleString());
+        assertEquals("Doe", patient.getName().get(0).getFamily());
+        assertEquals("Female", patient.getGender().getDisplay());
     }
 
     @Test

@@ -5,11 +5,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.Resource;
 
 
 public interface BlueButtonClient {
 
     Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException;
+
+    Bundle searchPatientFromServerByHICN(String hicn) throws ResourceNotFoundException;
 
     Bundle requestEOBFromServer(String patientID) throws ResourceNotFoundException;
 
