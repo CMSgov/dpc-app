@@ -47,6 +47,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.sql.Date;
 import java.time.Instant;
@@ -242,8 +243,10 @@ public class APITestHelpers {
         final String key = generatePublicKey(keyPair.getPublic());
 
         // Create org specific macaroon from Golden Macaroon
+        // Base64 decode the Macaroon
+        final String decoded = new String(Base64.getUrlDecoder().decode(goldenMacaroon), StandardCharsets.UTF_8);
         final String macaroon = MacaroonsBuilder
-                .modify(MacaroonsBuilder.deserialize(goldenMacaroon).get(0))
+                .modify(MacaroonsBuilder.deserialize(decoded).get(0))
                 .add_first_party_caveat(String.format("organization_id = %s", organizationID))
                 .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
