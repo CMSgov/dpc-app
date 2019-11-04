@@ -46,7 +46,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
             return PublicKeyHandler.publicKeyFromEntity(keyByLabel);
         } catch (PublicKeyException e) {
             logger.error("Cannot convert public key", e);
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+            throw new WebApplicationException("Internal server error", Response.Status.INTERNAL_SERVER_ERROR);
         }
 
     }
