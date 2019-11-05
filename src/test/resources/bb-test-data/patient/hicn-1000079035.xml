@@ -28,6 +28,14 @@
                   <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"/>
                   <value value="96228a57f37efea543f4f370f96f1dbf01c3e3129041dba3ea4367545507c6e7"/>
                </identifier>
+               <identifier>
+                   <system value="http://hl7.org/fhir/sid/us-medicare"/>
+                   <value value="1000079035"/>
+               </identifier>
+               <identifier>
+                   <system value="http://hl7.org/fhir/sid/us-mbi"/>
+                   <value value="3456789"/>
+               </identifier>
                <name>
                   <use value="usual"/>
                   <family value="Doe"/>

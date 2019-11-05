@@ -143,6 +143,10 @@ class BlueButtonClientTest {
         assertEquals("Jane X", patient.getName().get(0).getGivenAsSingleString());
         assertEquals("Doe", patient.getName().get(0).getFamily());
         assertEquals("Female", patient.getGender().getDisplay());
+
+        List<Identifier> ids = patient.getIdentifier();
+        assertTrue(ids.stream().anyMatch(i -> "http://hl7.org/fhir/sid/us-medicare".equals(i.getSystem()) && "1000079035".equals(i.getValue())));
+        assertTrue(ids.stream().anyMatch(i -> "http://hl7.org/fhir/sid/us-mbi".equals(i.getSystem()) && "3456789".equals(i.getValue())));
     }
 
     @Test
