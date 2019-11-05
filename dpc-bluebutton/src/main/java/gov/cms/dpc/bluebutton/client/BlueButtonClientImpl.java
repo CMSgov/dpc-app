@@ -88,12 +88,13 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     public Bundle searchPatientFromServerByHICN(String hicn) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch patient by HICN from baseURL: {}", client.getServerBase());
         String hicnHash = hashHICN(hicn, config.getBfdHashPepper(), config.getBfdHashIter());
-        ICriterion criterion = new TokenClientParam("identifier").exactly()
+        ICriterion hicnHashEquals = new TokenClientParam("identifier").exactly()
                 .systemAndCode("http://bluebutton.cms.hhs.gov/identifier#hicnHash", hicnHash);
         return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
                 .search()
                 .forResource(Patient.class)
-                .where(criterion)
+                .where(hicnHashEquals)
+                .withAdditionalHeader("IncludeIdentifiers", "true")
                 .returnBundle(Bundle.class)
                 .execute());
     }
