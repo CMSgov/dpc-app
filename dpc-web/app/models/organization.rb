@@ -13,10 +13,13 @@ class Organization < ApplicationRecord
 
   validates :organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :name, uniqueness: true, presence: true
+  validate :api_environments_allowed
 
-  delegate :connection_type, :status, :name, :uri, to: :profile_endpoint, prefix: true
+  delegate :connection_type, :status, :name, :uri, to: :profile_endpoint, allow_nil: true, prefix: true
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, :profile_endpoint, reject_if: :all_blank
+
+  after_save :update_registered_organizations
 
   def address_type
     address&.address_type
@@ -26,18 +29,38 @@ class Organization < ApplicationRecord
     address&.address_use
   end
 
-  def api_environments
+  def api_environments=(input)
+    input = [] unless input.is_a?(Array)
+
+    self[:api_environments] = input.inject([]) do |memo, el|
+      memo  <<  el.to_i unless el.blank?
+      memo
+    end
+  end
+
+  def registered_api_envs
     registered_organizations.pluck(:api_env)
   end
 
-  def api_environments=(input)
-    input = [] unless input.is_a?(Array)
-    input.reject!(&:blank?)
+  def update_registered_organizations
+    OrganizationRegistrar.delay.run(organization: self, api_environments: api_environment_strings)
+  end
 
-    OrganizationRegistrar.new(organization: self, api_environments: input).register_all
+  def api_environment_strings
+    RegisteredOrganization.api_envs.select do |key, val|
+      api_environments.include? val
+    end.keys
   end
 
   def sandbox_enabled?
-    api_environments.include?('sandbox')
+    api_environments.include?(0)
+  end
+
+  def api_environments_allowed
+    return if api_environments.empty?
+
+    unless api_environments.all?{ |api_env| RegisteredOrganization.api_envs.values.include? api_env }
+      errors.add(:api_environments, "must be in #{RegisteredOrganization.api_envs}")
+    end
   end
 end

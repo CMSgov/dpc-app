@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Address < ApplicationRecord
+  belongs_to :addressable, polymorphic: true
+
   STATES = {
     AK: 'Alaska', AL: 'Alabama', AR: 'Arkansas', AZ: 'Arizona',
     CA: 'California', CO: 'Colorado', CT: 'Connecticut',
@@ -32,7 +34,7 @@ class Address < ApplicationRecord
     'both' => 2
   }
 
-  validates_presence_of :street, :city, :state, :zip
+  validates_presence_of :street, :city, :state, :zip, :addressable
   validates :state, inclusion: { in: STATES.keys.map(&:to_s) }
   validates :zip, format: { with: /\A\d{5}(?:\-\d{4})?\z/ }
 end

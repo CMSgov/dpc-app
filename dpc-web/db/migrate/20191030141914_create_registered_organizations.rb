@@ -9,7 +9,5 @@ class CreateRegisteredOrganizations < ActiveRecord::Migration[5.2]
     end
 
     add_index :registered_organizations, :organization_id
-
-    remove_column :organizations, :api_environments
   end
 end

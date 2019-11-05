@@ -28,7 +28,7 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
             country: 'US',
             line: [
               object.address_street,
-              object.address_street
+              object.address_street_2
             ],
             postalCode: object.address_zip,
             state: object.address_state

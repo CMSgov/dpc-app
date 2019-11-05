@@ -3,10 +3,14 @@
 class OrganizationRegistrar
   attr_reader :organization, :api_environments, :existing_envs
 
+  def self.run(organization:, api_environments:)
+    new(organization: organization, api_environments: api_environments).register_all
+  end
+
   def initialize(organization:, api_environments:)
     @organization = organization
     @api_environments = api_environments
-    @existing_envs = organization.api_environments
+    @existing_envs = organization.registered_api_envs
   end
 
   def register_all
@@ -37,11 +41,26 @@ class OrganizationRegistrar
     added_envs = api_environments - existing_envs
 
     added_envs.each do |api_env|
-      if (api_org = APIClient.new(api_env).create_organization(organization))
-        organization.registered_organizations.build api_id: api_org['id'], api_env: api_env
+      create_sandbox_endpoint(api_env)
+
+      api_client = APIClient.new(api_env).create_organization(organization)
+      if api_client.response_successful?
+        api_org = api_client.response_body
+        organization.registered_organizations.create(
+          api_id: api_org['id'],
+          api_env: api_env,
+          api_endpoint_ref: api_org['endpoint'][0]['reference']
+        )
       end
     end
-    organization.save
-    # TODO save profile endpoint ID?
+  end
+
+  def create_sandbox_endpoint(api_env)
+    return unless api_env == 'sandbox' && !organization.profile_endpoint
+
+    organization.create_profile_endpoint(
+      status: 'test', connection_type: 'hl7-fhir-rest',
+      name: 'DPC Sandbox Test Endpoint', uri: 'https://dpc.cms.gov/test-endpoint'
+    )
   end
 end

@@ -21,7 +21,12 @@
       <span class="ds-c-field__hint">You may use an approximate number.<br/>If organization is a vendor, leave blank.</span>
       <% end %>
       <%= f.number_field :num_providers,
-        min: 0, value: '', class: "ds-c-field ds-c-field--small" %>
+        min: 0, class: "ds-c-field ds-c-field--small" %>
+    </div>
+
+    <div class="field">
+      <%= f.label :npi, "NPI", class: "ds-c-label" %>
+      <%= f.text_field :npi, class: "ds-c-field" %>
     </div>
   </div>
 </fieldset>
@@ -71,7 +76,7 @@
     <input name="organization[api_environments][]" value="" hidden>
 
     <span>
-      <input id="organization_api_environments_sandbox" name="organization[api_environments][]" type="checkbox" value="sandbox" class="ds-c-choice" <%= "checked" if @organization.sandbox_enabled? %> >
+      <input id="organization_api_environments_sandbox" name="organization[api_environments][]" type="checkbox" value="0" class="ds-c-choice" <%= "checked" if @organization.sandbox_enabled? %> >
       <label for="organization_api_environments_sandbox">Sandbox</label>
     </span>
 
