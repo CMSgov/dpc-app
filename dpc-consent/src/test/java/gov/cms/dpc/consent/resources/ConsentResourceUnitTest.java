@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
  * Tests ConsentResource using a mocked DAO, making it possible to run these tests with a database running.
  * The intent for these tests is to be able to test corner and edge cases in a
  */
+@Disabled
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class ConsentResourceUnitTest {
 
@@ -78,7 +79,6 @@ public class ConsentResourceUnitTest {
         }
     }
 
-    @Disabled
     @Test
     final void getResource_withValidId_returnsConsentResource() {
         try (Response response = resource.target("/Consent/" + TEST_ID)
