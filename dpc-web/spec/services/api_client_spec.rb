@@ -7,10 +7,11 @@ RSpec.describe APIClient do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
         org = create(:organization)
-        org.fhir_endpoint = build(:fhir_endpoint,
+        create(:fhir_endpoint,
           name: 'Cool SBX',
           uri: 'https://cool.com',
-          status: 'active'
+          status: 'active',
+          organization: org
         )
 
         allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
@@ -79,10 +80,11 @@ RSpec.describe APIClient do
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
         org = create(:organization)
-        org.fhir_endpoint = build(:fhir_endpoint,
+        create(:fhir_endpoint,
           name: 'Cool SBX',
           uri: 'https://cool.com',
-          status: 'active'
+          status: 'active',
+          organization: org
         )
 
         allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')

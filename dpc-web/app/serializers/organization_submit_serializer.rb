@@ -10,8 +10,8 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
           type: 'collection',
           entry: [
             organization_resource,
-            endpoint_resource
-          ]
+            endpoint_resources
+          ].flatten
         }
       }
     ]
@@ -58,17 +58,21 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
     }
   end
 
-  def endpoint_resource
+  def endpoint_resources
+    object.fhir_endpoints.map { |fhir_endpoint| endpoint_resource(fhir_endpoint) }
+  end
+
+  def endpoint_resource(fhir_endpoint)
     {
       resource: {
         resourceType: 'Endpoint',
-        status: object.fhir_endpoint_status,
+        status: fhir_endpoint.status,
         connectionType: {
           system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
           code: 'hl7-fhir-rest'
         },
-        name: object.fhir_endpoint_name,
-        address: object.fhir_endpoint_uri
+        name: fhir_endpoint.name,
+        address: fhir_endpoint.uri
       }
     }
   end

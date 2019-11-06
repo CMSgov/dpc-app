@@ -91,19 +91,17 @@
 
 <section class="box">
     <div class="box__content">
-      <h2 class="box__heading">Fhir Endpoint</h2>
-      <% if @organization.fhir_endpoint %>
+      <h2 class="box__heading">FHIR Endpoint</h2>
+      <% @organization.fhir_endpoints.each do |fhir_endpoint| %>
         <div class="ds-u-margin-bottom--1">
-          Name: <%= @organization.fhir_endpoint.name %>
+          Name: <%= fhir_endpoint.name %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          URI: <%= @organization.fhir_endpoint.uri %>
+          URI: <%= fhir_endpoint.uri %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          Status: <%= @organization.fhir_endpoint.status.titleize %>
+          Status: <%= fhir_endpoint.status.titleize %>
         </div>
-      <% else %>
-      <p>None provided.</p>
       <% end %>
     </div>
 <div>

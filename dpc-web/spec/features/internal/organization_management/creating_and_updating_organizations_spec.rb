@@ -25,10 +25,10 @@ RSpec.feature 'creating and updating organizations' do
     select 'South Carolina', from: 'organization_address_attributes_state'
     fill_in 'organization_address_attributes_zip', with: '29601'
 
-    fill_in 'organization_fhir_endpoint_attributes_name', with: 'Provider Endpoint'
-    fill_in 'organization_fhir_endpoint_attributes_uri', with: 'https://FhirEndpoint.example.com'
+    fill_in 'organization_fhir_endpoints_attributes_0_name', with: 'Provider Endpoint'
+    fill_in 'organization_fhir_endpoints_attributes_0_uri', with: 'https://FhirEndpoint.example.com'
     fill_in 'organization_npi', with: '555ttt444'
-    select 'Test', from: 'organization_fhir_endpoint_attributes_status'
+    select 'Test', from: 'organization_fhir_endpoints_attributes_0_status'
 
     check 'organization_api_environments_sandbox'
 
@@ -51,12 +51,14 @@ RSpec.feature 'creating and updating organizations' do
     select 'Multispecialty Clinic', from: 'organization_organization_type'
     uncheck 'organization_api_environments_sandbox'
     fill_in 'organization_address_attributes_street', with: '50 River St'
+    select 'Off', from: 'organization_fhir_endpoints_attributes_0_status'
     find('[data-test="form-submit"]').click
 
     expect(page).not_to have_css('[data-test="form-submit"]')
     expect(page.body).to have_content('Health Revisited')
     expect(page.body).to have_content('Multispecialty Clinic')
     expect(page.body).to have_content('50 River St')
+    expect(page.body).to have_content('Off')
     expect(page.body).not_to have_content('Sandbox')
   end
 

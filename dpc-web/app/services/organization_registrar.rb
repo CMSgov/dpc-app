@@ -56,9 +56,9 @@ class OrganizationRegistrar
   end
 
   def create_sandbox_endpoint(api_env)
-    return unless api_env == 'sandbox' && !organization.fhir_endpoint
+    return unless api_env == 'sandbox' && organization.fhir_endpoints.empty?
 
-    organization.create_fhir_endpoint(
+    organization.fhir_endpoints.create(
       status: 'test', name: 'DPC Sandbox Test Endpoint',
       uri: 'https://dpc.cms.gov/test-endpoint'
     )
