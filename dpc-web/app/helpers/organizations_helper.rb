@@ -13,10 +13,6 @@ module OrganizationsHelper
     enum_for_select(Address.address_types)
   end
 
-  def connection_types_for_select
-    enum_for_select(FhirEndpoint.connection_types)
-  end
-
   def statuses_for_select
     enum_for_select(FhirEndpoint.statuses)
   end

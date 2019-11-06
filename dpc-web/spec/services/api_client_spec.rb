@@ -10,7 +10,6 @@ RSpec.describe APIClient do
         org.fhir_endpoint = build(:fhir_endpoint,
           name: 'Cool SBX',
           uri: 'https://cool.com',
-          connection_type: 'hl7-fhir-rest',
           status: 'active'
         )
 
@@ -83,7 +82,6 @@ RSpec.describe APIClient do
         org.fhir_endpoint = build(:fhir_endpoint,
           name: 'Cool SBX',
           uri: 'https://cool.com',
-          connection_type: 'hl7-fhir-rest',
           status: 'active'
         )
 

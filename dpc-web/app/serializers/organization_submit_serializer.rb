@@ -65,7 +65,7 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
         status: object.fhir_endpoint_status,
         connectionType: {
           system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
-          code: object.fhir_endpoint_connection_type
+          code: 'hl7-fhir-rest'
         },
         name: object.fhir_endpoint_name,
         address: object.fhir_endpoint_uri

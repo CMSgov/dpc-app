@@ -72,7 +72,7 @@ module Internal
       params.fetch(:organization).permit(
         :name, :organization_type, :num_providers, :npi,
         api_environments: [], address_attributes: %i[id street street_2 city state zip address_use address_type],
-        fhir_endpoint_attributes: %i[id name status connection_type uri]
+        fhir_endpoint_attributes: %i[id name status uri]
       )
     end
   end

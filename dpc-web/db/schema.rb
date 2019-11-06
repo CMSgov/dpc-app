@@ -54,6 +54,14 @@ ActiveRecord::Schema.define(version: 2019_11_01_134050) do
     t.index ["user_id"], name: "index_dpc_registrations_on_user_id"
   end
 
+  create_table "fhir_endpoints", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "status", null: false
+    t.string "uri", null: false
+    t.integer "organization_id", null: false
+    t.index ["organization_id"], name: "index_fhir_endpoints_on_organization_id"
+  end
+
   create_table "internal_users", force: :cascade do |t|
     t.string "email", default: ""
     t.string "encrypted_password", default: "", null: false
@@ -88,15 +96,6 @@ ActiveRecord::Schema.define(version: 2019_11_01_134050) do
     t.datetime "updated_at", null: false
     t.integer "api_environments", default: [], array: true
     t.string "npi"
-  end
-
-  create_table "fhir_endpoints", force: :cascade do |t|
-    t.string "name", null: false
-    t.integer "status", null: false
-    t.integer "connection_type", null: false
-    t.string "uri", null: false
-    t.integer "organization_id", null: false
-    t.index ["organization_id"], name: "index_fhir_endpoints_on_organization_id"
   end
 
   create_table "registered_organizations", force: :cascade do |t|

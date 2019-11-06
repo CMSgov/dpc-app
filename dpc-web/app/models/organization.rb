@@ -15,7 +15,7 @@ class Organization < ApplicationRecord
   validates :name, uniqueness: true, presence: true
   validate :api_environments_allowed
 
-  delegate :connection_type, :status, :name, :uri, to: :fhir_endpoint, allow_nil: true, prefix: true
+  delegate :status, :name, :uri, to: :fhir_endpoint, allow_nil: true, prefix: true
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, :fhir_endpoint, reject_if: :all_blank
 

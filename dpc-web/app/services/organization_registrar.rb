@@ -59,8 +59,8 @@ class OrganizationRegistrar
     return unless api_env == 'sandbox' && !organization.fhir_endpoint
 
     organization.create_fhir_endpoint(
-      status: 'test', connection_type: 'hl7-fhir-rest',
-      name: 'DPC Sandbox Test Endpoint', uri: 'https://dpc.cms.gov/test-endpoint'
+      status: 'test', name: 'DPC Sandbox Test Endpoint',
+      uri: 'https://dpc.cms.gov/test-endpoint'
     )
   end
 end

@@ -28,7 +28,6 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'organization_fhir_endpoint_attributes_name', with: 'Provider Endpoint'
     fill_in 'organization_fhir_endpoint_attributes_uri', with: 'https://FhirEndpoint.example.com'
     fill_in 'organization_npi', with: '555ttt444'
-    select 'Hl7 Fhir Msg', from: 'organization_fhir_endpoint_attributes_connection_type'
     select 'Test', from: 'organization_fhir_endpoint_attributes_status'
 
     check 'organization_api_environments_sandbox'
@@ -44,7 +43,6 @@ RSpec.feature 'creating and updating organizations' do
     expect(page.body).to have_content('Sandbox')
     expect(page.body).to have_content('Provider Endpoint')
     expect(page.body).to have_content('https://FhirEndpoint.example.com')
-    expect(page.body).to have_content('Hl7 Fhir Msg')
     expect(page.body).to have_content('Test')
 
     find('[data-test="edit-link"]').click
@@ -114,7 +112,7 @@ RSpec.feature 'creating and updating organizations' do
               resource: {
                 resourceType: 'Endpoint',
                 status: 'test',
-                connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-msg'},
+                connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
                 name: 'Provider Endpoint', address: 'https://FhirEndpoint.example.com'
               }
             }]
