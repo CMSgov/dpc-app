@@ -36,23 +36,6 @@ class ConsentResourceTest extends AbstractConsentTest {
     }
 
     @Test
-    final void saysHello_usingHttpClient() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(String.format("%s", getServerURL())))
-                .build();
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse response = null;
-        try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-        assertEquals(HttpStatus.OK_200, response.statusCode(), "should find /");
-        assertEquals("Hello World", response.body());
-    }
-
-    @Test
     final void getConsentResource_fails_withNonExtantId() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 

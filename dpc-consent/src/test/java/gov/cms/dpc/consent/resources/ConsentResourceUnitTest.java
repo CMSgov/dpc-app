@@ -69,17 +69,6 @@ public class ConsentResourceUnitTest {
     }
 
     @Test
-    final void saysHello_usingResource() {
-        try (Response response = resource.target("/")
-                .request()
-                .accept(MediaType.TEXT_PLAIN)
-                .get()) {
-            assertEquals(HttpStatus.OK_200, response.getStatus(), "should handle request");
-            assertEquals("Hello World", response.readEntity(String.class));
-        }
-    }
-
-    @Test
     final void getResource_withValidId_returnsConsentResource() {
         try (Response response = resource.target("/Consent/" + TEST_ID)
                 .request()

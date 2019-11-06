@@ -44,12 +44,6 @@ public class ConsentResource {
     }
 
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getHello() {
-        return "Hello World";
-    }
-
-    @GET
     @Path("/Consent")
     @FHIR
     @UnitOfWork
