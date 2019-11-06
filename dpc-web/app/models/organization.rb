@@ -47,7 +47,7 @@ class Organization < ApplicationRecord
   end
 
   def api_environment_strings
-    RegisteredOrganization.api_envs.select do |key, val|
+    RegisteredOrganization.api_envs.select do |_key, val|
       api_environments.include? val
     end.keys
   end
@@ -59,7 +59,7 @@ class Organization < ApplicationRecord
   def api_environments_allowed
     return if api_environments.empty?
 
-    unless api_environments.all? { |api_env| RegisteredOrganization.api_envs.values.include? api_env }
+    unless api_environments.all? { |api_env| RegisteredOrganization.api_envs.value? api_env }
       errors.add(:api_environments, "must be in #{RegisteredOrganization.api_envs}")
     end
   end
