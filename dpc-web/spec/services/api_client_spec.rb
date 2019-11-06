@@ -7,7 +7,7 @@ RSpec.describe APIClient do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
         org = create(:organization)
-        org.profile_endpoint = build(:profile_endpoint,
+        org.fhir_endpoint = build(:fhir_endpoint,
           name: 'Cool SBX',
           uri: 'https://cool.com',
           connection_type: 'hl7-fhir-rest',
@@ -80,7 +80,7 @@ RSpec.describe APIClient do
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
         org = create(:organization)
-        org.profile_endpoint = build(:profile_endpoint,
+        org.fhir_endpoint = build(:fhir_endpoint,
           name: 'Cool SBX',
           uri: 'https://cool.com',
           connection_type: 'hl7-fhir-rest',

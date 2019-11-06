@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProfileEndpoint < ApplicationRecord
+class FhirEndpoint < ApplicationRecord
   belongs_to :organization
 
   enum connection_type: {

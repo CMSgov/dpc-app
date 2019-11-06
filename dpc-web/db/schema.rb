@@ -90,13 +90,13 @@ ActiveRecord::Schema.define(version: 2019_11_01_134050) do
     t.string "npi"
   end
 
-  create_table "profile_endpoints", force: :cascade do |t|
+  create_table "fhir_endpoints", force: :cascade do |t|
     t.string "name", null: false
     t.integer "status", null: false
     t.integer "connection_type", null: false
     t.string "uri", null: false
     t.integer "organization_id", null: false
-    t.index ["organization_id"], name: "index_profile_endpoints_on_organization_id"
+    t.index ["organization_id"], name: "index_fhir_endpoints_on_organization_id"
   end
 
   create_table "registered_organizations", force: :cascade do |t|

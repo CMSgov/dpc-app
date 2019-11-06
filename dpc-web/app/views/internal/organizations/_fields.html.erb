@@ -90,14 +90,14 @@
 
 <fieldset class="ds-l-row field-group">
   <div class="ds-l-col--12 ds-l-md-col--3">
-    <legend class="field-group__heading">Profile endpoint</legend>
+    <legend class="field-group__heading">Fhir Endpoint</legend>
 
   </div>
 
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
     <span class="ds-c-field__hint">You are not required to enter profile endponts unless the organization is graduating from Sandbox.</span>
 
-    <%= f.fields_for :profile_endpoint do |ff| %>
+    <%= f.fields_for :fhir_endpoint do |ff| %>
       <%= ff.label :connection_type, class: "ds-c-label" %>
       <%= ff.select :connection_type, connection_types_for_select, {include_blank: true}, class: "ds-c-field" %>
 

@@ -12,7 +12,7 @@ FactoryBot.define do
 
     trait :with_endpoint do
       after(:create) do |org|
-        create(:profile_endpoint, organization: org)
+        create(:fhir_endpoint, organization: org)
       end
     end
   end

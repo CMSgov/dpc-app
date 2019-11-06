@@ -25,19 +25,19 @@ RSpec.describe OrganizationRegistrar do
         }
       )
 
-      initial_profile_endpoint_count = ProfileEndpoint.count
+      initial_fhir_endpoint_count = FhirEndpoint.count
 
       expect do
         OrganizationRegistrar.new(organization: org, api_environments: %w[production]).
           register_all
       end.to change(RegisteredOrganization, :count).by(0)
 
-      expect(ProfileEndpoint.count).to eq(initial_profile_endpoint_count)
+      expect(FhirEndpoint.count).to eq(initial_fhir_endpoint_count)
       expect(deletion_api_client).to have_received(:delete_organization).with(sandbox_reg_org)
       expect(prod_creation_api_client).to have_received(:create_organization).with(org)
     end
 
-    it 'creates a test profile_endpoint for a sandbox org without one' do
+    it 'creates a test fhir_endpoint for a sandbox org without one' do
       org = create(:organization)
       api_client = instance_double(APIClient)
 
@@ -54,9 +54,9 @@ RSpec.describe OrganizationRegistrar do
       expect do
         OrganizationRegistrar.new(organization: org, api_environments: %w[sandbox]).
           register_all
-      end.to change(ProfileEndpoint, :count).by(1)
+      end.to change(FhirEndpoint, :count).by(1)
 
-      expect(ProfileEndpoint.last.organization).to eq(org)
+      expect(FhirEndpoint.last.organization).to eq(org)
     end
   end
 end
