@@ -19,6 +19,17 @@
     </div>
   </section>
 
+  <section>
+    <div class="ds-u-color--success">
+      <% @organization.api_environment_strings.each do |api_env| %>
+        <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <use xlink:href="/assets/solid.svg#database"></use>
+        </svg>
+        <%= api_env.titleize %>
+      <% end %>
+    </div>
+  </section>
+
   <section class="box">
     <div class="box__content">
       <h2 class="box__heading">Organization info</h2>
@@ -42,10 +53,21 @@
         <%= @organization.num_providers %> providers
       </div>
 
+      <div class="ds-u-margin-bottom--1">
+        <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
+        <%= @organization.npi %>
+      </div>
+
     </div>
 
     <div class="box__content">
       <h2 class="box__heading">Address</h2>
+      <div>
+        Use: <%= @organization.address_use.titleize %>
+      </div>
+      <div>
+        Type: <%= @organization.address_type.titleize %>
+      </div>
       <div>
         <%= @organization.address_street %>
       </div>
@@ -65,8 +87,22 @@
   </section>
 <div>
 
-
-
+<section class="box">
+    <div class="box__content">
+      <h2 class="box__heading">FHIR Endpoint</h2>
+      <% @organization.fhir_endpoints.each do |fhir_endpoint| %>
+        <div class="ds-u-margin-bottom--1">
+          Name: <%= fhir_endpoint.name %>
+        </div>
+        <div class="ds-u-margin-bottom--1">
+          URI: <%= fhir_endpoint.uri %>
+        </div>
+        <div class="ds-u-margin-bottom--1">
+          Status: <%= fhir_endpoint.status.titleize %>
+        </div>
+      <% end %>
+    </div>
+<div>
 
 <section class="ds-u-margin--2">
   <div class="ds-l-row ds-u-justify-content--center">
