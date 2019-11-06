@@ -46,6 +46,7 @@ ci-web:
 .PHONY: smoke/local
 smoke/local: venv
 	@echo "Running Smoke Tests against Local env"
+	@read -p "`echo '\n=====\nThe Smoke Tests require an authenticated environment!\nVerify your local API environment has \"authenticationDisabled = false\" or these tests will fail.\n=====\n\nPress ENTER to run the tests...'`"
 	. venv/bin/activate; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/dev
