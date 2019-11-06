@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
+import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Tests ConsentResource using a mocked DAO, making it possible to run these tests with a database running.
- * The intent for these tests is to be able to test corner and edge cases in a
+ * The intent for these tests is to be able to test corner and edge cases in an easily controlled way.
  */
 @Disabled
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -60,7 +61,7 @@ public class ConsentResourceUnitTest {
     @BeforeAll
     static void initMock() {
         // Broke when introducing findBy
-        ConsentEntity goodRecord = ConsentResource.defaultConsentEntity(Optional.of(TEST_ID), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
+        ConsentEntity goodRecord = ConsentEntity.defaultConsentEntity(Optional.of(TEST_ID), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
         List<ConsentEntity> goodRecordList = List.of(goodRecord);
         when(mockedDAO.getConsent(null)).thenThrow(new IllegalArgumentException("empty"));
         when(mockedDAO.getConsent(TEST_ID)).thenReturn(Optional.of(goodRecord));
@@ -103,36 +104,5 @@ public class ConsentResourceUnitTest {
 
             assertEquals(HttpStatus.NOT_FOUND_404, response.getStatus(), "invalid paths should not be found");
         }
-    }
-
-    @Test
-    final void convert_correctlyConverts_fromDefaultEntity() {
-        ConsentEntity ce = ConsentResource.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
-        final Consent result = ConsentResource.convert(ce);
-        assertNotNull(result);
-        assertEquals(Consent.ConsentState.ACTIVE, result.getStatus());
-        assertEquals(ConsentResource.LOINC_CATEGORY, result.getCategoryFirstRep().getCodingFirstRep().getCode());
-        assertEquals("Patient/" + TEST_MBI, result.getPatient().getReference());
-        assertEquals(ConsentResource.OPT_IN, result.getPolicyRule());
-        assertTrue(result.getPolicy().isEmpty());
-        assertDoesNotThrow(() -> FhirContext.forDstu3().newJsonParser().encodeResourceToString(result));
-    }
-
-    @Test
-    final void convert_correctlyConverts_fromOptOutfEntity() {
-        ConsentEntity ce = ConsentResource.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
-        ce.setPolicyCode(ConsentResource.OPT_OUT);
-        final Consent result = ConsentResource.convert(ce);
-
-        assertEquals(ConsentResource.OPT_OUT, result.getPolicyRule());
-        assertDoesNotThrow(() -> {FhirContext.forDstu3().newJsonParser().encodeResourceToString(result);});
-    }
-
-    @Test
-    final void convert_correctlyThrows_whenEntityHasInvalidData() {
-        ConsentEntity ce = ConsentResource.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
-        ce.setPolicyCode("BANANA");
-
-        assertThrows(IllegalArgumentException.class,() -> ConsentResource.convert(ce), "should throw an error with invalid data");
     }
 }

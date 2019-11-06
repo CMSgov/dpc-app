@@ -5,13 +5,16 @@ import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Consent;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
@@ -30,11 +33,6 @@ import java.util.UUID;
 
 @Path("/")
 public class ConsentResource {
-    static final String LOINC_CATEGORY = "64292-6";
-    static final String OPT_IN = "OPTIN";
-    static final String OPT_OUT = "OPTOUT";
-    static final String TREATMENT = "TREAT";
-    static final String SCOPE_CODE = "patient-privacy";
 
     private final ConsentDAO dao;
 
@@ -65,19 +63,19 @@ public class ConsentResource {
         if (id.isPresent()) {
 
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(id.get());
-            entities = consentEntity.map(List::of).orElseGet(() -> List.of(defaultConsentEntity(id, Optional.empty(), Optional.empty())));
+            entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
 
         } else if (identifier.isPresent()) {
             // not sure we should support this
             final Optional<ConsentEntity> consentEntity = this.dao.getConsent(identifier.get());
-            entities = consentEntity.map(List::of).orElseGet(() -> List.of(defaultConsentEntity(id, Optional.empty(), Optional.empty())));
+            entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
 
         } else if (patientId.isPresent()) {
             final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientId.get());
             entities = getEntitiesByPatient(patientIdentifier);
         }
 
-        return bundleFor(entities);
+        return bundleOf(entities);
     }
 
     @GET
@@ -94,7 +92,7 @@ public class ConsentResource {
             throw new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404);
         }
 
-        return convert(consentEntity.get());
+        return ConsentEntityConverter.convert(consentEntity.get());
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
@@ -119,12 +117,12 @@ public class ConsentResource {
         entities = this.dao.findBy(field, patientIdentifier.getValue());
 
         if (entities.isEmpty()) {
-            entities = List.of(defaultConsentEntity(Optional.empty(), hicn, mbi));
+            entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), hicn, mbi));
         }
         return entities;
     }
 
-    private Bundle bundleFor(List<ConsentEntity> consentEntities) {
+    private Bundle bundleOf(List<ConsentEntity> consentEntities) {
 
         if (consentEntities.isEmpty()) {
             throw new WebApplicationException("Cannot find patient with given ID", javax.ws.rs.core.Response.Status.NOT_FOUND);
@@ -133,86 +131,10 @@ public class ConsentResource {
         Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.COLLECTION);
         consentEntities.forEach(e -> {
-            bundle.addEntry().setResource(convert(e));
+            bundle.addEntry().setResource(ConsentEntityConverter.convert(e));
         });
         bundle.setTotal(bundle.getEntry().size());
 
         return bundle;
-    }
-
-    static String patientIdentifier(DPCIdentifierSystem type, String value) {
-        return String.format("%s|%s ", type.getSystem(), value);
-    }
-
-    static Narrative narrativeText(String inOrOut, String hicn, String mbi) {
-        StringBuilder sb = new StringBuilder("Words about the ");
-        sb.append(inOrOut);
-        sb.append(" status of the patient with identifiers ");
-        sb.append(hicn == null || hicn.isEmpty() ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn));
-        sb.append(mbi == null || mbi.isEmpty() ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi));
-
-        Narrative text = new Narrative();
-        text.setDiv(new XhtmlNode(NodeType.Text).setValue(sb.toString()));
-        text.setStatus(Narrative.NarrativeStatus.GENERATED);
-        return text;
-    }
-
-    static String policyCode(String value) {
-        if (OPT_OUT.equals(value) || OPT_IN.equals(value)) {
-            return value;
-        }
-        throw new IllegalArgumentException(String.format("invalid policyCode %s", value));
-    }
-
-    static List<CodeableConcept> category(String loincCode) {
-        // there must be a way to look up the code systems used in these CodeableConcept values. what is it?
-        CodeableConcept category = new CodeableConcept();
-        category.addCoding().setSystem("http://loinc.org").setCode(loincCode);
-        return List.of(category);
-    }
-
-    static Consent convert(ConsentEntity consentEntity) {
-        Consent c = new Consent();
-
-        c.setId(consentEntity.getId().toString());
-
-        // there is no consent status in entity, so we are defaulting to active. Correct?
-        c.setStatus(Consent.ConsentState.ACTIVE);
-        c.setDateTime(Date.from(consentEntity.getEffectiveDate().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant()));
-        c.setText(narrativeText(consentEntity.getPolicyCode(), consentEntity.getHicn(), consentEntity.getMbi()));
-
-        // hicn or mbi? both?
-        c.setPatient(new Reference(new IdType("Patient", consentEntity.getMbi())));
-
-        // PolicyRule is a CodeableConcept in r4 but is a string in r3
-        c.setPolicyRule(policyCode(consentEntity.getPolicyCode()));
-
-        // scope is an r4 entity. in our data this is currently always "patient-privacy"
-        // hence, I don't think it's worth extending r3 to include it atm
-
-        c.setCategory(category(consentEntity.getLoincCode()));
-
-        return c;
-    }
-
-    static ConsentEntity defaultConsentEntity(Optional<UUID> id, Optional<String> hicn, Optional<String> mbi) {
-        ConsentEntity ce = new ConsentEntity();
-
-        ce.setId(UUID.randomUUID());
-        id.ifPresent(ce::setId);
-
-        ce.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
-        ce.setEffectiveDate(LocalDate.now(ZoneId.of("UTC")));
-        ce.setUpdatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
-
-        hicn.ifPresent(ce::setHicn);
-        mbi.ifPresent(ce::setMbi);
-
-        ce.setLoincCode(LOINC_CATEGORY);
-        ce.setPolicyCode(OPT_IN);
-        ce.setPurposeCode(TREATMENT);
-        ce.setScopeCode(SCOPE_CODE);
-
-        return ce;
     }
 }

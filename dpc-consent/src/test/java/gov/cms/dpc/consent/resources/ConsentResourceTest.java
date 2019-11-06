@@ -6,28 +6,23 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.AbstractConsentTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests ConsentResource using a live database. These tests will fail if the database is not running or
  * seed data is not loaded.
  */
 class ConsentResourceTest extends AbstractConsentTest {
-
 
     private static final String TEST_CONSENT_UUID = "3a51c388-a9b0-42e2-afe4-688a2b6cef95";
     private static final String TEST_CONSENT_REF = String.format("Consent/%s", TEST_CONSENT_UUID);
@@ -59,7 +54,7 @@ class ConsentResourceTest extends AbstractConsentTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(ConsentResource.OPT_IN, sut.getPolicyRule());
+        assertEquals(ConsentEntity.OPT_IN, sut.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, sut.getId());
     }
 
@@ -92,7 +87,7 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
 
-        assertEquals(ConsentResource.OPT_IN, found.getPolicyRule());
+        assertEquals(ConsentEntity.OPT_IN, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
     }
 
@@ -111,7 +106,7 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
 
-        assertEquals(ConsentResource.OPT_IN, found.getPolicyRule());
+        assertEquals(ConsentEntity.OPT_IN, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
     }
 
@@ -132,7 +127,7 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
 
-        assertEquals(ConsentResource.OPT_IN, found.getPolicyRule());
+        assertEquals(ConsentEntity.OPT_IN, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
     }
 }
