@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -45,7 +46,8 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                 .modules(
                         new ConsentAppModule(),
                         new DPCConsentHibernateModule<>(hibernateBundle),
-                        new FHIRModule<>()
+                        new FHIRModule<>(),
+                        new BlueButtonClientModule<>()
                 ).build();
 
         bootstrap.addBundle(hibernateBundle);
