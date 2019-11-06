@@ -1,0 +1,51 @@
+{
+  "resourceType":"CapabilityStatement",
+  "id":"dpc-capabilities",
+  "version":"0.4.0-SNAPSHOT",
+  "status":"draft",
+  "date":"2019",
+  "publisher":"Centers for Medicare and Medicaid Services",
+  "description":"This Capability Statement defines the available resource, endpoints and operations supported by the Data @ the Point of Care Application.",
+  "kind":"capability",
+  "instantiates":["http://build.fhir.org/ig/HL7/bulk-data/CapabilityStatement-bulk-data"],
+  "software":{"name":"Data @ Point of Care API","version":"0.4.0-SNAPSHOT","releaseDate":"2019"},
+  "fhirVersion":"3.0.1",
+  "acceptUnknown":"extensions",
+  "format":["application/json","application/fhir+json"],
+  "rest":[
+    {
+      "mode":"server",
+      "resource":[
+        {
+          "type":"Endpoint",
+          "profile":{"reference":"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-endpoint"},
+          "interaction":[{"code":"read"},{"code":"search-type"}],
+          "versioning":"no-version"
+        },{
+          "type":"Group",
+          "profile":{"reference":"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attribution-roster"},
+          "interaction":[
+            {"code":"read"},{"code":"create"},{"code":"update"},{"code":"delete"},{"code":"search-type"}
+          ],
+          "versioning":"no-version",
+          "searchParam":[
+            {"name":"characteristic-value","type":"token","documentation":"Search for Attribution rosters which are attributed to the given provider NPI"},
+            {"name":"member","type":"reference","documentation":"Search for Attribution groups in which the given Patient resource is a member."}
+          ]
+        },{
+          "type":"Organization",
+          "profile":{"reference":"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization"},
+          "interaction":[
+            {"code":"read"}
+          ],
+          "versioning":"no-version"
+        },{
+          "type":"Patient",
+          "profile":{"reference":"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"},
+          "interaction":[
+            {"code":"read"},{"code":"create"},{"code":"update"},{"code":"delete"},{"code":"search-type"}
+          ],
+          "versioning":"no-version",
+          "searchParam":[{"name":"identifier","type":"token","documentation":"Find patient resources which match the given Identifier. For DPC, this will always return a single resource, as MBIs are unique."}]
+        },{
+          "type":"Practitioner","profile":{"reference":"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"},"interaction":[{"code":"read"},{"code":"create"},{"code":"update"},{"code":"delete"},{"code":"search-type"}],"versioning":"no-version","searchParam":[{"name":"identifier","type":"token","documentation":"Find practitioner resources which match the given Identifier. For DPC, this will always return a single resource, as NPIs are unique."}]},{"type":"StructureDefinition","interaction":[{"code":"read"},{"code":"search-type"}],"versioning":"no-version"}],"interaction":[{"code":"batch"}],"operation":[{"name":"export","definition":{"reference":"http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export"}},{"name":"validate","definition":{"reference":"https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-validate"}},{"name":"submit","definition":{"reference":"https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-submit"}},{"name":"validate","definition":{"reference":"https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-validate"}},{"name":"submit","definition":{"reference":"https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-patient-submit"}},{"name":"add","definition":{"reference":"https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-add"}},{"name":"remove","definition":{"reference":"https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-group-remove"}}]}]}
