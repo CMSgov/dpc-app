@@ -21,6 +21,7 @@ module Internal
     def new
       @organization = Organization.new
       @organization.build_address
+      @organization.fhir_endpoints.build
     end
 
     def create
@@ -40,6 +41,7 @@ module Internal
 
     def edit
       @organization = Organization.find params[:id]
+      @organization.fhir_endpoints.build if @organization.fhir_endpoints.empty?
     end
 
     def update
@@ -68,8 +70,9 @@ module Internal
 
     def organization_params
       params.fetch(:organization).permit(
-        :name, :organization_type, :num_providers,
-        address_attributes: %i[id street street_2 city state zip]
+        :name, :organization_type, :num_providers, :npi,
+        api_environments: [], address_attributes: %i[id street street_2 city state zip address_use address_type],
+        fhir_endpoints_attributes: %i[id name status uri]
       )
     end
   end
