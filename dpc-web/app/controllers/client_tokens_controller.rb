@@ -10,7 +10,11 @@ class ClientTokensController < ApplicationController
   def create
     redirect_if_invalid
     # Kick off token creation request to API
-    @client_token = APIClient.new(params[:api_environment]).create_client_token
+    @organization = current_user.organizations.find(params[:organization_id])
+    @client_token = ClientTokenManager.new(
+      api_env: params[:api_environment,
+      organization: @organization]
+      ).create_client_token(label: params[:label])
 
     if @client_token
       render :show
@@ -31,10 +35,6 @@ class ClientTokensController < ApplicationController
   private
 
   def redirect_if_invalid
-    return render :new if params[:api_environment].blank? or params[:description].blank?
-  end
-
-  def client_token_params
-    params.permit(:description, :api_environment)
+    return render :new if params[:api_environment].blank? or params[:label].blank?
   end
 end
