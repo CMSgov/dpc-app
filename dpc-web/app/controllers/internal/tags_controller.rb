@@ -6,6 +6,7 @@ module Internal
 
     def index
       @tags = Tag.all
+      render layout: 'table_index'
     end
 
     def create
