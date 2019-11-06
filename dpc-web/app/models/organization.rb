@@ -32,9 +32,8 @@ class Organization < ApplicationRecord
   def api_environments=(input)
     input = [] unless input.is_a?(Array)
 
-    self[:api_environments] = input.inject([]) do |memo, el|
-      memo << el.to_i unless el.blank?
-      memo
+    self[:api_environments] = input.each_with_object([]) do |api_env, array|
+      array << api_env.to_i unless api_env.blank?
     end
   end
 
@@ -57,10 +56,8 @@ class Organization < ApplicationRecord
   end
 
   def api_environments_allowed
-    return if api_environments.empty?
+    return if api_environments.all? { |api_env| RegisteredOrganization.api_envs.value? api_env }
 
-    unless api_environments.all? { |api_env| RegisteredOrganization.api_envs.value? api_env }
-      errors.add(:api_environments, "must be in #{RegisteredOrganization.api_envs}")
-    end
+    errors.add(:api_environments, "must be in #{RegisteredOrganization.api_envs}")
   end
 end

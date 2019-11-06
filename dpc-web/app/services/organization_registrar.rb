@@ -44,15 +44,18 @@ class OrganizationRegistrar
       create_sandbox_endpoint(api_env)
 
       api_client = APIClient.new(api_env).create_organization(organization)
-      if api_client.response_successful?
-        api_org = api_client.response_body
-        organization.registered_organizations.create(
-          api_id: api_org['id'],
-          api_env: api_env,
-          api_endpoint_ref: api_org['endpoint'][0]['reference']
-        )
-      end
+      api_org = api_client.response_body
+
+      create_registered_org(api_env, api_org) if api_client.response_successful?
     end
+  end
+
+  def create_registered_org(api_env, api_org)
+    organization.registered_organizations.create(
+      api_id: api_org['id'],
+      api_env: api_env,
+      api_endpoint_ref: api_org['endpoint'][0]['reference']
+    )
   end
 
   def create_sandbox_endpoint(api_env)
