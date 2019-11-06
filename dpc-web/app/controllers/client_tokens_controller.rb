@@ -5,23 +5,27 @@ class ClientTokensController < ApplicationController
 
   def new
     @organization = current_user.organizations.find(params[:organization_id])
+  rescue ActiveRecord::RecordNotFound
+    flash[:error] = 'Unauthorized'
+    redirect_to dashboard_path
   end
 
   def create
-    redirect_if_invalid
-    # Kick off token creation request to API
-    @organization = current_user.organizations.find(params[:organization_id])
-    @client_token = ClientTokenManager.new(
-      api_env: params[:api_environment,
-      organization: @organization]
-      ).create_client_token(label: params[:label])
+    return render_error('Must have both a label and an API environment.') if missing_invalid_params
 
-    if @client_token
+    @organization = current_user.organizations.find(params[:organization_id])
+    manager = ClientTokenManager.new(api_env: params[:api_environment], organization: @organization)
+
+    if manager.create_client_token(label: params[:label])
+      @client_token = manager.client_token
       render :show
     else
-      flash[:error] = 'Client token could not be created.'
-      render :new
+      render_error 'Client token could not be created.'
     end
+
+  rescue ActiveRecord::RecordNotFound
+    flash[:error] = 'Unauthorized'
+    redirect_to dashboard_path
   end
 
   # Need to get client token api env
@@ -34,7 +38,12 @@ class ClientTokensController < ApplicationController
 
   private
 
-  def redirect_if_invalid
-    return render :new if params[:api_environment].blank? or params[:label].blank?
+  def render_error(msg)
+    flash[:error] = msg
+    render :new
+  end
+
+  def missing_invalid_params
+    params[:api_environment].blank? || params[:label].blank?
   end
 end

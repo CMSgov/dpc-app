@@ -10,15 +10,15 @@
 
   <section class="box">
     <div class="box__content">
-      <%= form_tag client_tokens_path, method: :post do %>
+      <%= form_tag organization_client_tokens_path(organization_id: params[:organization_id]), method: :post do %>
         <div class="field">
           <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
-          <%= select_tag :api_environment, params[:api_environment], @organization.api_environments %>
+          <%= select_tag :api_environment, params[:api_environment], @organization.api_environment_strings %>
         </div>
 
         <div class="field">
-          <%= label_tag :description, "Label", class: "ds-c-label" %>
-          <%= text_field_tag :description, params[:description], class: "ds-c-field" %>
+          <%= label_tag :label, "Label", class: "ds-c-label" %>
+          <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
         </div>
 
         <%= submit_tag "Create", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>

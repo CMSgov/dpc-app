@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.feature 'managing client tokens' do
   context 'unassigned user' do
-    let!(:user) { create :user, :unassigned }
+    let!(:user) { create :user }
 
     before(:each) do
       sign_in user, scope: :user
