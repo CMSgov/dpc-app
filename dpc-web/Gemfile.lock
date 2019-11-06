@@ -157,6 +157,10 @@ GEM
     loofah (2.3.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
+    macaroons (1.0.0)
+      multi_json (~> 1.10)
+      rbnacl (~> 5.0)
+      rbnacl-libsodium (~> 1.0)
     mail (2.7.1)
       mini_mime (>= 0.1.1)
     marcel (0.3.3)
@@ -241,6 +245,10 @@ GEM
     rb-fsevent (0.10.3)
     rb-inotify (0.10.0)
       ffi (~> 1.0)
+    rbnacl (5.0.0)
+      ffi
+    rbnacl-libsodium (1.0.16)
+      rbnacl (>= 3.0.1)
     regexp_parser (1.6.0)
     responders (3.0.0)
       actionpack (>= 5.0)
@@ -362,6 +370,7 @@ DEPENDENCIES
   kramdown (~> 2.1)
   letter_opener
   listen (>= 3.0.5, < 3.3)
+  macaroons
   octokit
   omniauth-github
   omniauth-rails_csrf_protection (~> 0.1)
