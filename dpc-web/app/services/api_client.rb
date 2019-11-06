@@ -20,13 +20,12 @@ class APIClient
     uri_string = base_urls[api_env] + "/Token/#{registered_org.api_id}"
 
     json = params.to_json
-    response = request(uri_string, json, delegated_macaroon)
-
-    @response_status = response.code.to_i
-    @response_body = parsed_response(response)
+    post_request(uri_string, json, delegated_macaroon)
 
     self
   end
+
+  def get_client_tokens; end
 
   def response_successful?
     @response_status == 200
