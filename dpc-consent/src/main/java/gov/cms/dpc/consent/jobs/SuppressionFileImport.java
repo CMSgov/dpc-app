@@ -2,6 +2,8 @@ package gov.cms.dpc.consent.jobs;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.bluebutton.client.BlueButtonClientManager;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
@@ -13,22 +15,29 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.context.internal.ManagedSessionContext;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.knowm.sundial.Job;
 import org.knowm.sundial.SundialJobScheduler;
 import org.knowm.sundial.exceptions.JobInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.Id;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class SuppressionFileImport extends Job {
 
     private static final Logger logger = LoggerFactory.getLogger(SuppressionFileImport.class);
+    static final Pattern FILENAME_PATTERN = Pattern.compile("(P|T)#EFT\\.ON\\.ACO\\.NGD1800\\.DPRF\\.D\\d{6}\\.T\\d{7}");
 
     @Inject
     private DPCConsentManagedSessionFactory managedSessionFactory;
@@ -37,6 +46,9 @@ public class SuppressionFileImport extends Job {
 
     @Inject
     public String suppressionFileDir;
+
+    @Inject
+    public BlueButtonClient bfdClient;
 
     @Inject
     public SuppressionFileImport() {
@@ -55,7 +67,7 @@ public class SuppressionFileImport extends Job {
 
         try (Stream<Path> paths = Files.walk(Paths.get(suppressionFileDir))) {
             paths.filter(Files::isRegularFile).forEach(p -> {
-                if (Files.isReadable(p) && SuppressionFileUtils.is1800File(p)) {
+                if (Files.isReadable(p) && is1800File(p)) {
                     importFile(p);
                 }
                 try {
@@ -69,16 +81,20 @@ public class SuppressionFileImport extends Job {
         }
     }
 
+    protected static boolean is1800File(Path path) {
+        return FILENAME_PATTERN.matcher(path.getFileName().toString()).matches();
+    }
+
     private void importFile(Path path) {
-        try (BufferedReader reader = Files.newBufferedReader(path)) {
-            importRecords(reader, path.getFileName().toString());
+        try (SuppressionFileReader reader = new SuppressionFileReader(path, bfdClient)) {
+            importRecords(reader);
         } catch (IOException e) {
             logger.error("Cannot import suppression file", e);
             return;
         }
     }
 
-    private void importRecords(BufferedReader reader, String filename) {
+    private void importRecords(SuppressionFileReader reader) {
         SessionFactory sessionFactory = managedSessionFactory.getSessionFactory();
         Session session = sessionFactory.openSession();
 
@@ -86,7 +102,7 @@ public class SuppressionFileImport extends Job {
         Transaction transaction = session.beginTransaction();
 
         try {
-            buildAndSaveConsentRecords(reader, filename);
+            buildAndSaveConsentRecords(reader);
             transaction.commit();
         } catch (Exception e) {
             logger.error("Cannot commit suppression file import transaction", e);
@@ -97,16 +113,11 @@ public class SuppressionFileImport extends Job {
         }
     }
 
-    private void buildAndSaveConsentRecords(BufferedReader reader, String filename) {
-        LineIterator lineIter = IOUtils.lineIterator(reader);
-        int lineNum = 0;
-
-        while (lineIter.hasNext()) {
-            lineNum++;
+    private void buildAndSaveConsentRecords(SuppressionFileReader reader) throws IOException {
+        while (reader.ready()) {
             try {
-                Optional<ConsentEntity> consent = SuppressionFileUtils.entityFromLine(lineIter.nextLine(), filename, lineNum);
+                Optional<ConsentEntity> consent = reader.entityFromLine();
                 if (consent.isPresent()) {
-                    // TODO: Get BFD ID and MBI
                     consentDAO.persistConsent(consent.get());
                 }
             } catch (InvalidSuppressionRecordException e) {

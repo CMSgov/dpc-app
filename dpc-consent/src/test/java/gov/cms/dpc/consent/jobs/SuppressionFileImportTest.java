@@ -1,6 +1,9 @@
 package gov.cms.dpc.consent.jobs;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.*;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
@@ -14,11 +17,15 @@ import io.dropwizard.testing.junit.DAOTestRule;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.context.internal.ManagedSessionContext;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.knowm.sundial.SundialJobScheduler;
+import org.mockito.Mockito;
 
 import javax.ws.rs.client.Client;
 import java.io.IOException;
@@ -63,6 +70,10 @@ public class SuppressionFileImportTest {
                     protected SessionFactory provideSessionFactory() {
                         return database.getSessionFactory();
                     }
+                    @Provides
+                    protected BlueButtonClient provideBlueButtonClient() {
+                       return SuppressionFileReaderTest.mockBfdClient();
+                    }
                 }
         ));
     }
@@ -70,6 +81,11 @@ public class SuppressionFileImportTest {
     @AfterEach
     void shutdown() {
         APPLICATION.after();
+    }
+
+    @Test
+    public void testIs1800File() {
+        assertTrue(SuppressionFileImport.is1800File(Paths.get("./src/test/resources/T#EFT.ON.ACO.NGD1800.DPRF.D181120.T1000009")));
     }
 
     @Test
