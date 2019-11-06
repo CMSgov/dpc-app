@@ -16,6 +16,18 @@ class APIClient
 
   def delete_organization(org); end
 
+  def create_client_token(registered_org, params: {})
+    uri_string = base_urls[api_env] + "/Token/#{registered_org.api_id}"
+
+    json = params.to_json
+    response = request(uri_string, json, delegated_macaroon)
+
+    @response_status = response.code.to_i
+    @response_body = parsed_response(response)
+
+    self
+  end
+
   def response_successful?
     @response_status == 200
   end
@@ -30,6 +42,9 @@ class APIClient
 
   def auth_header(token)
     { 'Authorization': "Bearer #{token}" }
+  end
+
+  def delegated_macaroon
   end
 
   def golden_macaroon
