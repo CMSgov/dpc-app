@@ -10,11 +10,7 @@ class APIClient
   def create_organization(org)
     uri_string = base_urls[api_env] + '/Organization/$submit'
     json = OrganizationSubmitSerializer.new(org).to_json
-    response = request(uri_string, json, golden_macaroon)
-
-    @response_status = response.code.to_i
-    @response_body = parsed_response(response)
-
+    post_request(uri_string, json, golden_macaroon)
     self
   end
 
@@ -44,19 +40,16 @@ class APIClient
     JSON.parse response.body
   end
 
-  def request(uri_string, json, token)
+  def post_request(uri_string, json, token)
     uri = URI.parse uri_string
     headers = { 'Content-Type': 'application/json' }.merge(auth_header(token))
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Post.new(uri.request_uri, headers)
     request.body = json
 
-    Rails.logger.info 'Making request to FHIR API:'
-    Rails.logger.info request
     response = http.request(request)
-    Rails.logger.info 'Got response:'
-    Rails.logger.info response
 
-    response
+    @response_status = response.code.to_i
+    @response_body = parsed_response(response)
   end
 end
