@@ -8,6 +8,6 @@ FactoryBot.define do
     state { "SC" }
     zip { "29001" }
 
-    addressable { organization }
+    addressable { build(:organization) }
   end
 end
