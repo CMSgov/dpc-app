@@ -6,7 +6,7 @@ RSpec.describe APIClient do
   describe '#create_organization' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
-        org = create(:organization)
+        org = create(:organization, npi: 'cool-npi-1')
         create(:fhir_endpoint,
           name: 'Cool SBX',
           uri: 'https://cool.com',
@@ -37,7 +37,7 @@ RSpec.describe APIClient do
                       postalCode: org.address_zip,
                       state: org.address_state
                     }],
-                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: nil}],
+                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: 'cool-npi-1'}],
                     name: org.name,
                     resourceType: 'Organization',
                     type: [{
@@ -79,7 +79,7 @@ RSpec.describe APIClient do
 
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
-        org = create(:organization)
+        org = create(:organization, npi: 'cool-npi-1')
         create(:fhir_endpoint,
           name: 'Cool SBX',
           uri: 'https://cool.com',
@@ -110,7 +110,7 @@ RSpec.describe APIClient do
                       postalCode: org.address_zip,
                       state: org.address_state
                     }],
-                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: nil}],
+                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: 'cool-npi-1'}],
                     name: org.name,
                     resourceType: 'Organization',
                     type: [{

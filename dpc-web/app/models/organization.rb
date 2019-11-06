@@ -14,6 +14,7 @@ class Organization < ApplicationRecord
   validates :organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :name, uniqueness: true, presence: true
   validate :api_environments_allowed
+  validates :npi, presence: true, unless: -> { api_environments.empty? }
 
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, :fhir_endpoints, reject_if: :all_blank
@@ -32,7 +33,7 @@ class Organization < ApplicationRecord
     input = [] unless input.is_a?(Array)
 
     self[:api_environments] = input.inject([]) do |memo, el|
-      memo  <<  el.to_i unless el.blank?
+      memo << el.to_i unless el.blank?
       memo
     end
   end
@@ -58,7 +59,7 @@ class Organization < ApplicationRecord
   def api_environments_allowed
     return if api_environments.empty?
 
-    unless api_environments.all?{ |api_env| RegisteredOrganization.api_envs.values.include? api_env }
+    unless api_environments.all? { |api_env| RegisteredOrganization.api_envs.values.include? api_env }
       errors.add(:api_environments, "must be in #{RegisteredOrganization.api_envs}")
     end
   end

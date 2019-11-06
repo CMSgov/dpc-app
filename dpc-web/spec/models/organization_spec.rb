@@ -44,6 +44,32 @@ RSpec.describe Organization, type: :model do
         end
       end
     end
+
+    describe 'npi presence' do
+      context 'when npi is present' do
+        it 'is valid without api_environments' do
+          org = build(:organization, npi: '111222', api_environments: [])
+          expect(org).to be_valid
+        end
+
+        it 'is valid with api_environments' do
+          org = build(:organization, npi: '111222', api_environments: [0])
+          expect(org).to be_valid
+        end
+      end
+
+      context 'when npi is not present' do
+        it 'is valid without api_environments' do
+          org = build(:organization, npi: nil, api_environments: [])
+          expect(org).to be_valid
+        end
+
+        it 'is invalid with api_environments' do
+          org = build(:organization, npi: nil, api_environments: [0])
+          expect(org).not_to be_valid
+        end
+      end
+    end
   end
 
   describe '#api_environments=' do

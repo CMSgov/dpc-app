@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrganizationSubmitSerializer < ActiveModel::Serializer
   attribute(:resourceType) { 'Parameters' }
 
@@ -20,20 +22,7 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
   def organization_resource
     {
       resource: {
-        address: [
-          {
-            use: object.address_use,
-            type: object.address_type,
-            city: object.address_city,
-            country: 'US',
-            line: [
-              object.address_street,
-              object.address_street_2
-            ],
-            postalCode: object.address_zip,
-            state: object.address_state
-          }
-        ],
+        address: [address],
         identifier: [
           {
             system: 'http://hl7.org/fhir/sid/us-npi',
@@ -55,6 +44,21 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
           }
         ]
       }
+    }
+  end
+
+  def address
+    {
+      use: object.address_use,
+      type: object.address_type,
+      city: object.address_city,
+      country: 'US',
+      line: [
+        object.address_street,
+        object.address_street_2
+      ],
+      postalCode: object.address_zip,
+      state: object.address_state
     }
   end
 
