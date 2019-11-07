@@ -191,4 +191,51 @@ RSpec.describe APIClient do
       end
     end
   end
+
+  describe '#get_client_tokens' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:get, "http://dpc.example.com/Token/#{registered_org.api_id}").with(
+          headers: { 'Content-Type' => 'application/json' }
+        ).to_return(
+          status: 200,
+          body: "[{\"id\":\"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66\",\"label\":\"Sandbox Token 1\",\"createdAt\":\"2019-11-07T17:15:22.781Z\",\"expiresdAt\":\"2019-11-07T17:15:22.781Z\"}]"
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.get_client_tokens(registered_org.api_id)
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          [{
+            "id"=>"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66",
+            "label"=>"Sandbox Token 1",
+            "createdAt"=>"2019-11-07T17:15:22.781Z",
+            "expiresdAt"=>"2019-11-07T17:15:22.781Z"
+          }]
+        )
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:get, "http://dpc.example.com/Token/#{registered_org.api_id}").with(
+          headers: { 'Content-Type' => 'application/json' }
+        ).to_return(
+          status: 500,
+          body: '{}'
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.get_client_tokens(registered_org.api_id)
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {}
+        )
+      end
+    end
+  end
 end
