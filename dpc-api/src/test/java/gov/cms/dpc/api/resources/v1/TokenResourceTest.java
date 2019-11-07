@@ -149,9 +149,6 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
 
 
             // Fetching token should throw an exception
-            // Reauthorizing should fail
-//                assertThrows(InternalServerErrorException.class, () -> APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey));
-
             final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token");
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
 

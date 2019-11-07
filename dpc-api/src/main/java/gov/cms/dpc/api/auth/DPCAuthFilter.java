@@ -51,7 +51,6 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final UriInfo uriInfo = requestContext.getUriInfo();
         final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
-        // If we have a path authorizer, do that, otherwise, continue
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
 
         final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
