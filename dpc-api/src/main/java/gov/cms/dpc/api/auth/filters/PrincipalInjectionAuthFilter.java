@@ -1,5 +1,8 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.filters;
 
+import gov.cms.dpc.api.auth.DPCAuthCredentials;
+import gov.cms.dpc.api.auth.DPCAuthFilter;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
@@ -18,7 +21,7 @@ import java.util.UUID;
 @Priority(Priorities.AUTHENTICATION)
 public class PrincipalInjectionAuthFilter extends DPCAuthFilter {
 
-    PrincipalInjectionAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
+    public PrincipalInjectionAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
         super(bakery, auth, dao);
     }
 

@@ -1,5 +1,8 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.staticauth;
 
+import gov.cms.dpc.api.auth.DPCAuthCredentials;
+import gov.cms.dpc.api.auth.DPCAuthFilter;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -9,7 +12,6 @@ import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
-import java.io.IOException;
 
 /**
  * WARNING: DO NOT USE IN PRODUCTION
@@ -30,7 +32,7 @@ public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, Organizatio
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         // We accept everything and pass it along to the authenticator
 
         final String headerString = requestContext.getHeaderString(ORG_HEADER);
