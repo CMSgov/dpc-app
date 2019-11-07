@@ -1,5 +1,6 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.macaroonauth;
 
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import io.dropwizard.auth.Authorizer;
 
 import javax.inject.Inject;

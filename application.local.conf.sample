@@ -8,10 +8,11 @@ dpc {
       }]
       adminConnectors = [{
         type = http
-        port = 9911
+        port = 9903
       }]
     }
     authenticationDisabled=true
+    keyPairLocation = "src/main/resources/keypair/bakery_keypair.json"
   }
 
   attribution {
@@ -23,7 +24,7 @@ dpc {
       }]
       adminConnectors = [{
         type = http
-        port = 9912
+        port = 9902
       }]
     }
   }
@@ -39,7 +40,7 @@ dpc {
         }]
         adminConnectors = [{
           type = http
-          port = 9913
+          port = 9901
         }]
       }
     }
