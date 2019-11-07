@@ -1,1 +1,41 @@
-@client_token
+<% title "Client Token" %>
+
+<div class="ds-l-container ds-u-padding-x--0">
+  <div>
+    <%= link_to dashboard_path, class: "utility-button", data: { test: 'dashboard-link' } do %>
+      <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#arrow-left"></use>
+      </svg>
+      Back to Dashboard
+    <% end %>
+
+  </div>
+
+  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
+
+    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Your new client token</h1>
+
+  </section>
+
+  <section class="box">
+    <div class="box__content">
+      <p>This is your client token. Copy it now; it is not viewable again!</p>
+
+      <div class="ds-u-margin-bottom--1">
+        <label class="ds-u-margin-right--1 ds-u-color--muted">Label:</label>
+        <%= @client_token['label'] %>
+      </div>
+
+      <div class="ds-u-margin-bottom--1">
+        <label class="ds-u-margin-right--1 ds-u-color--muted">Token:</label>
+        <p class='token-text'><%= @client_token['token'] %></p>
+      </div>
+
+      <div class="ds-u-margin-bottom--1">
+        <label class="ds-u-margin-right--1 ds-u-color--muted">Created at:</label>
+        <%= @client_token['createdAt'] %>
+      </div>
+    </div>
+  </section>
+</div>
+
