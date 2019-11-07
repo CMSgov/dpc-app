@@ -9,4 +9,8 @@ class RegisteredOrganization < ApplicationRecord
   }
 
   validates :api_id, :api_env, :organization, presence: true
+
+  def client_tokens
+    ClientTokenManager.new(api_env: api_env, organization: organization).client_tokens
+  end
 end

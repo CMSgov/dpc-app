@@ -13,7 +13,7 @@
       <%= form_tag organization_client_tokens_path(organization_id: params[:organization_id]), method: :post do %>
         <div class="field">
           <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
-          <%= select_tag :api_environment, params[:api_environment], @organization.api_environment_strings %>
+          <%= select_tag :api_environment, options_for_select(@organization.api_environment_strings, params[:api_environment]), include_blank: true %>
         </div>
 
         <div class="field">
