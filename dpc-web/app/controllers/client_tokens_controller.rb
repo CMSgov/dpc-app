@@ -2,38 +2,24 @@
 
 class ClientTokensController < ApplicationController
   before_action :authenticate_user!
+  rescue_from ActiveRecord::RecordNotFound, :with => :unauthorized
 
   def new
     @organization = current_user.organizations.find(params[:organization_id])
-  rescue ActiveRecord::RecordNotFound
-    flash[:error] = 'Unauthorized'
-    redirect_to dashboard_path
   end
 
   def create
+    @organization = current_user.organizations.find(params[:organization_id])
     return render_error('Must have both a label and an API environment.') if missing_invalid_params
 
-    @organization = current_user.organizations.find(params[:organization_id])
     manager = ClientTokenManager.new(api_env: params[:api_environment], organization: @organization)
-
     if manager.create_client_token(label: params[:label])
       @client_token = manager.client_token
+      # @client_token = {'token' => 'MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCBrZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDkTYjOGpmMI9vWcK', 'label' => 'Test Token 1', 'createdAt' => Time.now.iso8601}
       render :show
     else
       render_error 'Client token could not be created.'
     end
-
-  rescue ActiveRecord::RecordNotFound
-    flash[:error] = 'Unauthorized'
-    redirect_to dashboard_path
-  end
-
-  # Need to get client token api env
-  # probably need to store client tokens in this DB so we can get list and queue up actions if the API is down
-  # and we'll know envs without making a call
-  # but if the token gets deleted on the API without going through this UI, this DB will need to stay up to date
-  def destroy
-    APIClient.new(api_env).delete_client_token(params[:id])
   end
 
   private
@@ -45,5 +31,10 @@ class ClientTokensController < ApplicationController
 
   def missing_invalid_params
     params[:api_environment].blank? || params[:label].blank?
+  end
+
+  def unauthorized
+    flash[:error] = 'Unauthorized'
+    redirect_to dashboard_path
   end
 end
