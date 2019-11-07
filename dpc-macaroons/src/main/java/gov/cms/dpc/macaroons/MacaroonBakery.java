@@ -192,21 +192,34 @@ public class MacaroonBakery {
      * @return - Macaroon byte array
      */
     public byte[] serializeMacaroon(Macaroon macaroon, boolean base64Encode) {
-        final byte[] macaroonBytes = macaroon.serialize(MacaroonVersion.SerializationVersion.V2_JSON).getBytes(CAVEAT_CHARSET);
-        if (base64Encode) {
-            return encoder.encode(macaroonBytes);
-        }
-        return macaroonBytes;
+        return serializeMacaroon(Collections.singletonList(macaroon), base64Encode);
     }
 
     /**
-     * Deserialize {@link Macaroon} from provided {@link String} value.
+     * Convert the {@link List} of {@link Macaroon} to the underlying byte format.
+     * Optionally, the Macaroon can be base64 (URL-safe) encoded before returning.
+     *
+     * @param macaroons    - {@link List} of {@link Macaroon} to serialize
+     * @param base64Encode - {@code true} Macaroon bytes are base64 (URL-safe) encoded. {@code false} Macaroon bytes are returned directly
+     * @return - Macaroon byte array
+     */
+    public byte[] serializeMacaroon(List<Macaroon> macaroons, boolean base64Encode) {
+
+        final byte[] serializedBytes = macaroons.stream().map(m -> m.serialize(MacaroonVersion.SerializationVersion.V2_JSON)).collect(Collectors.joining(",", "[", "]")).getBytes(CAVEAT_CHARSET);
+        if (base64Encode) {
+            return encoder.encode(serializedBytes);
+        }
+        return serializedBytes;
+    }
+
+    /**
+     * Deserialize a {@link List} of {@link Macaroon} from provided {@link String} value.
      * This {@link String} can be either base64 (URL-safe) encoded or a direct representation (e.g. a JSON string)
      *
      * @param serializedString - {@link String} to deserialize from
-     * @return - {@link Macaroon} deserialized from {@link String}
+     * @return - {@link List} of {@link Macaroon} deserialized from {@link String}
      */
-    public Macaroon deserializeMacaroon(String serializedString) {
+    public List<Macaroon> deserializeMacaroon(String serializedString) {
         if (serializedString.isEmpty()) {
             throw new BakeryException("Cannot deserialize empty string");
         }
@@ -257,6 +270,13 @@ public class MacaroonBakery {
         return boundMacaroons;
     }
 
+    public Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
+        final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
+
+        // Create a discharge macaroon
+        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), caveat.getRawCaveat());
+    }
+
     /**
      * Implementation of discharge logic.
      * Recursively iterates through the provided {@link List} of {@link Macaroon} and discharges any third-party caveats
@@ -299,13 +319,6 @@ public class MacaroonBakery {
         }
 
         return discharged;
-    }
-
-    Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
-        final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
-
-        // Create a discharge macaroon
-        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), caveat.getRawCaveat());
     }
 
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {
@@ -432,7 +445,7 @@ public class MacaroonBakery {
         byteBuffer.get(caveatKeySignature);
 
         byte[] pubKeySig = Arrays.copyOfRange(this.keyPair.getPublicKey(), 0, 4);
-        if (!Arrays.equals(caveatKeySignature, pubKeySig)) {
+        if (!safeEquals(caveatKeySignature, pubKeySig)) {
             throw new BakeryException("Public key mismatch");
         }
 
@@ -586,5 +599,25 @@ public class MacaroonBakery {
             }
             return BakeryKeyPair.generate();
         }
+    }
+
+    /**
+     * Use constant time approach, to compare two byte arrays
+     * See also
+     * <a href="https://codahale.com/a-lesson-in-timing-attacks">A Lesson In Timing Attacks (or, Don’t use MessageDigest.isEquals)</a>
+     * @param a an array
+     * @param b an array
+     * @return true if both have same length and content
+     */
+    private static boolean safeEquals(byte[] a, byte[] b) {
+        if (a.length != b.length) {
+            return false;
+        }
+
+        int result = 0;
+        for (int i = 0; i < a.length; i++) {
+            result |= a[i] ^ b[i];
+        }
+        return result == 0;
     }
 }

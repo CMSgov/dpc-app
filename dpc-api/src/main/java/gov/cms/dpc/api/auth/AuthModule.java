@@ -4,10 +4,17 @@ import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.api.DPCAPIConfiguration;
-import gov.cms.dpc.macaroons.BakeryProvider;
-import gov.cms.dpc.macaroons.MacaroonBakery;
+import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
+import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
+import gov.cms.dpc.api.auth.jwt.IJTICache;
+import gov.cms.dpc.api.auth.jwt.JwtKeyResolver;
+import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
+import gov.cms.dpc.api.auth.staticauth.StaticAuthFactory;
+import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
+import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.auth.Authenticator;
+import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +45,8 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
             binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
         }
         binder.bind(DPCAuthDynamicFeature.class);
+        binder.bind(SigningKeyResolverAdapter.class).to(JwtKeyResolver.class);
+        binder.bind(IJTICache.class).to(CaffeineJTICache.class);
         binder.bind(BakeryKeyPair.class).toProvider(new BakeryKeyPairProvider(this.getConfiguration()));
     }
 }

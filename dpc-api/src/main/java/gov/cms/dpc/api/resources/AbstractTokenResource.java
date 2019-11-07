@@ -2,7 +2,9 @@ package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.models.JWTAuthResponse;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
@@ -46,6 +48,10 @@ public abstract class AbstractTokenResource {
     @GET
     @Path("/{tokenID}")
     public abstract TokenEntity getOrganizationToken(OrganizationPrincipal principal, @PathParam("tokenID") @NotNull UUID tokenID);
+
+    @POST
+    @Path("/auth")
+    public abstract JWTAuthResponse authorizeJWT(@NotEmpty(message = "Scope is required") String scope, @NotEmpty(message = "Grant type is required") String grantType, @NotEmpty(message = "Assertion type is required") String clientAssertionType, String jwtBody);
 
     @DELETE
     @Path("/{tokenID}")

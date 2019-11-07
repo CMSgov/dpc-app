@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Path("/Key")
@@ -28,5 +29,5 @@ public abstract class AbstractKeyResource {
     public abstract Response deletePublicKey(OrganizationPrincipal organizationPrincipal, @NotNull UUID keyID);
 
     @POST
-    public abstract PublicKeyEntity submitKey(OrganizationPrincipal organizationPrincipal, @NotEmpty String key);
+    public abstract PublicKeyEntity submitKey(OrganizationPrincipal organizationPrincipal, @NotEmpty String key, Optional<String> keyLabel);
 }
