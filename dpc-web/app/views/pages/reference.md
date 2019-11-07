@@ -55,7 +55,7 @@ These restrictions are subject to change over time.
 The Data at the Point of Care pilot project is currently accessible as a private sandbox environment, which returns sample [NDJSON](http://ndjson.org/) files with synthetic beneficiary data.
 There is no beneficiary PII or PHI in the files you can access via the sandbox.
 
-DPC implements the *SMART Backend Services Authentication* (BSA) as descripted by the [SMART ON FHIR team](https://build.fhir.org/ig/HL7/bulk-data/authorization/index.html).
+DPC implements the *SMART Backend Services Authentication* (BSA) as described by the [SMART ON FHIR team](https://build.fhir.org/ig/HL7/bulk-data/authorization/index.html).
 This specification requires the user to exchange their DPC provided `client_token` for an `access_token` which can be used to make API requests to the FHIR endpoints.
 This exchange requires the user to submit a self-signed [JSON Web Token](https://jwt.io) using a public/private key pair that they submit to DPC either via the Web UI or the API.
 
@@ -75,25 +75,26 @@ curl -H 'Authorization: Bearer {access_token}' {command to execute}
 
 The authorization flow is as follows:
 
-1. The user first submits a public to DPC for the given environment. This can be done either via the Web UI or via the `PublicKey` endpoint in the API.
+1. The user first submits a public key to DPC for the given environment.
+This can be done either through the Web UI or via the `PublicKey` endpoint in the API.
 
 > Note: Because the `PublicKey` endpoint is secured by BSA, the initial public key for each environment **must** be uploaded via the Web UI.
 >Any additional keys can then be submitted via the API endpoints, using an existing key for signing the JWT.
 
-2. The user creates a `client_token` to use for a given system.
+2. The user creates a `client_token` to use for a given application.
 
 3. For each API request, the user creates an `access_token` by submitting a self-signed JWT to the `Token/auth` endpoint.
 
-4. The user sets the provided `access_token` as a `Bearer token` in the `Authorization` header, for each request to the DPC API 
+4. The user sets the provided `access_token` as a `Bearer` token in the `Authorization` header, for each request to the DPC API 
 
 ### Managing client_tokens
 
 Client tokens are required in order to provide the ability for a given application to access the DPC API.
-Users will still need to create an `access_token` from a given `client_token` details for which are given in a later [section](#creating-an-access_token).
+Details on how to create an `access_token` from a given `client_token` are given in a later [section](#creating-an-accesstoken).
 
 #### Listing client_tokens
 
-All client tokens registered by the organization for the given endpoint can be listed by making a GET request to the `Token/` endpoint.
+All client tokens registered by the organization for a given environment can be listed by making a GET request to the `Token/` endpoint.
 This will return an array of objects which list the token ID, when it was created, when it expires, and the label associated with the token. 
 
 ~~~sh
@@ -170,11 +171,14 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token/{client_token id} \
 
 Creating a `client_token` can be done by making a `POST` request to the `Token/` endpoint. 
 This endpoint accepts two, optional query params:
+
 * `label` sets a human readable label for the token. If omitted, DPC will auto-generate one.
 Note, token labels are not guaranteed to be unique. 
+
 *  `expiration` sets a custom expiration for the `client_token`.
-This is provided as an ISO formatted string and if omitted with default to the system specified expiration time.
-Note: The user cannot set an expiration time longer than the system allowed maximum.
+This is provided as an ISO formatted string and if omitted will default to the system specified expiration time.
+
+> Note: The user cannot set an expiration time longer than the system allowed maximum.
 This will result in an error being returned to the user.
 
 The response from the API includes the `client_token` in the `token` field. 
@@ -235,7 +239,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token/{client_token id} \
 
 ### Managing public keys
 
-Creating an `access_token` from a given `client_token` requires that the user to submit a self-signed JWT with the specific request information (details are given in a later [section](#creating-an-access_token)).
+Creating an `access_token` from a given `client_token` requires that the user to submit a self-signed JWT with the specific request information (details are given in a later [section](#creating-an-accesstoken)).
 In order for DPC to validate that the token request is coming from an authorized application, it verifies that the private key used to sign the JWT matches a public key previously uploaded to the system.
 Users are required to maintain a list of acceptable public keys with the DPC system and management operations are described in this section.
 
@@ -246,7 +250,7 @@ Users are required to maintain a list of acceptable public keys with the DPC sys
 #### Listing public keys
 
 All public keys registered by the organization for the given endpoint can be listed by making a GET request to the `Key/` endpoint.
-This will return an array of objects which list public key ID, the human readable label, creation time and the value of the PEM encoded public key
+This will return an array of objects which list the public key ID, the human readable label, creation time and the PEM encoded value of the public key
 
 ~~~sh
 GET /api/v1/Key
@@ -306,14 +310,14 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
 
 Uploading a public key can be done by making a `POST` request to the `Key/` endpoint. 
 This endpoint requires one additional query param:
-* `label` sets a human readable label for the public key. This label will be used for the `kid` value of the self-signed JWT. 
-*  `expiration` sets a custom expiration for the `client_token`.
+
+* `label` sets a human readable label for the public key. This label will be used as the `kid` value of the self-signed JWT. 
 
 The submitted public key must meet the following requirements:
 
-* Be an `RSA` key
+* Be an `RSA` key (ECC keys will be supported in a future release)
 * Have a key length of at least 3072 bits
-* Be unique to that environment
+* Be unique to each environment
 
 ~~~sh
 POST /api/v1/Key
@@ -361,14 +365,72 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
 
 **Response**
 
-~~~sh
+~~~javascript
 200 - Key was removed
 ~~~
 
 ### Creating an access_token
 
+Creating an *access_token* for API access requires the user to submit a self-signed JWT to the `Token/auth` endpoint.
+This token must be signed with a public key previously registered and contain the following header and claim values:
 
-Access tokens cannot be renewed, when they expire, the user must request a new one by making an additional request to the `Token/auth` endpoint with a newly created JWT.
+
+**Authentication JWT Header Values**
+
+`alg`	_required_	- The JWA algorithm (e.g., `RS384`, `EC384`) used for signing the authentication JWT. (DPC only supports RS384)
+
+`kid`   _required_	- The identifier of the key-pair used to sign this JWT. This should make the `label` field of the previously registered public key
+
+`typ`	_required_	- Fixed value: JWT.
+
+**Authentication JWT Claims**
+
+`iss`	_required_	Issuer of the JWT -- the `client_token` provided by DPC
+
+`sub`	_required_	Issuer of the JWT -- the `client_token` provided by DPC (note that this is the same as the value for the `iss` claim)
+
+`aud`	_required_	The DPC "token URL" (the same URL to which this authentication JWT will be posted. e.g. https://sandbox.dpc.cms.gov/api/v1/Token/auth)
+
+`exp`	_required_	Expiration time integer for this authentication JWT, expressed in seconds since the "Epoch" (1970-01-01T00:00:00Z UTC). This time SHALL be no more than five minutes in the future.
+
+`jti`	_required_	A nonce string value that uniquely identifies this authentication JWT. 
+
+The resulting JWT is then submitted to the `Token/auth` endpoint as the `client_assertion` query param of an `application/x-www-form-urlencoded` POST request, along with the following, additional, query params:
+
+**Parameters**
+
+`scope`	                _required_	The scope of access requested. (Currently, the only supported scope is `system/*.*`)
+
+`grant_type`            _required_	Fixed value: `client_credentials`
+
+`client_assertion_type`	_required_	Fixed value: `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`
+
+`client_assertion`  	_required_	Signed authentication JWT value (see above)
+
+The endpoint response is a JSON object which contains the access_token, the lifetime of the token (in seconds) and the authorized system scopes.
+
+~~~sh
+POST /api/v1/Token/auth
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Token/auth?grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_asssertions={self-signed JWT} \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-X POST
+~~~
+
+**Response**
+
+~~~json
+{
+  "access_token": "{access_token value}",
+  "token_type": "bearer",
+  "expires_in": 300,
+  "scope": "system/*.*"
+}
+~~~ 
 
 ## Environment
 The examples below include cURL commands, but may be followed using any tool that can make HTTP GET requests with headers, such as [Postman](https://getpostman.com).
