@@ -280,4 +280,92 @@ RSpec.describe APIClient do
       end
     end
   end
+
+  describe '#create_public_key' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, "http://dpc.example.com/Key/#{registered_org.api_id}").with(
+          body: { label: 'Sandbox Key 1', key: file_fixture("stubbed_cert.pem").read }.to_json
+        ).to_return(
+          status: 200,
+          body: "{\"label\":\"Sandbox Key 1\",\"createdAt\":\"2019-11-07T19:38:44.205Z\",\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}"
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', key: file_fixture("stubbed_cert.pem").read })
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          { 'label'=>'Sandbox Key 1', 'createdAt'=>'2019-11-07T19:38:44.205Z', 'id'=>'3fa85f64-5717-4562-b3fc-2c963f66afa6' }
+        )
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, "http://dpc.example.com/Key/#{registered_org.api_id}").with(
+          body: { label: 'Sandbox Key 1', key: file_fixture("stubbed_cert.pem").read }.to_json
+        ).to_return(
+          status: 500,
+          body: '{}'
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', key: file_fixture("stubbed_cert.pem").read })
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {}
+        )
+      end
+    end
+  end
+
+  describe '#get_public_keys' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:get, "http://dpc.example.com/Key/#{registered_org.api_id}").with(
+          headers: { 'Content-Type' => 'application/json' }
+        ).to_return(
+          status: 200,
+          body: "[{\"id\":\"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66\",\"label\":\"Sandbox Key 1\",\"createdAt\":\"2019-11-07T17:15:22.781Z\"}]"
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.get_public_keys(registered_org.api_id)
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          [{
+            "id"=>"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66",
+            "label"=>"Sandbox Key 1",
+            "createdAt"=>"2019-11-07T17:15:22.781Z"
+          }]
+        )
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:get, "http://dpc.example.com/Key/#{registered_org.api_id}").with(
+          headers: { 'Content-Type' => 'application/json' }
+        ).to_return(
+          status: 500,
+          body: '{}'
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.get_public_keys(registered_org.api_id)
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {}
+        )
+      end
+    end
+  end
 end

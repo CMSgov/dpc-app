@@ -39,10 +39,35 @@
     </section>
     <section class="box">
       <div class="box__content">
-        <div class="box__header">
-          <h2 class="box__heading">Public Keys</h2>
-          <div class="box__header__actions">
+        <%= link_to new_organization_public_key_path(organization_id: organization.id), class: "utility-button", data: { test: "new-public-key" } do %>
+          <svg class="ds-u-color--success" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <use xlink:href="/assets/solid.svg#plus"></use>
+          </svg>
+          New key
+        <% end %>
 
+        <h2 class="box__heading">Public Keys</h2>
+
+        <div class="ds-l-row--12">
+          <div class="ds-l-col--12">
+            <% organization.registered_organizations.each do |reg_org| %>
+              <% reg_org.public_keys.each do |key| %>
+                <div class="module-container">
+                  <div class="module-container__primary">
+                    <h3 class="module-container__heading"><%= key['id'] %></h3>
+                    <div class="ds-u-margin-bottom--1">
+                      <label class="ds-u-margin-right--1 ds-u-color--muted">Label:</label>
+                      <%= key['label'] %>
+                    </div>
+
+                    <div class="ds-u-margin-bottom--1">
+                      <label class="ds-u-margin-right--1 ds-u-color--muted">Created at:</label>
+                      <%= key['createdAt'] %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
           </div>
         </div>
         <p>You have not added any public keys.</p>

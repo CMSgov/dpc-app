@@ -30,6 +30,20 @@ class APIClient
     get_request(uri_string, delegated_macaroon(reg_org_id))
   end
 
+  def create_public_key(reg_org_id, params: {})
+    uri_string = base_urls[api_env] + "/Key/#{reg_org_id}"
+
+    json = params.to_json
+    post_request(uri_string, json, delegated_macaroon(reg_org_id))
+
+    self
+  end
+
+  def get_public_keys(reg_org_id)
+    uri_string = base_urls[api_env] + "/Key/#{reg_org_id}"
+    get_request(uri_string, delegated_macaroon(reg_org_id))
+  end
+
   def response_successful?
     @response_status == 200
   end
