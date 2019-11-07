@@ -16,6 +16,8 @@ else
   JACOCO=""
 fi
 
+aws sts get-caller-identity
+
 if [ -n "$BOOTSTRAP" ]; then
   echo "Bootstrapping image from S3"
   bootstrap_config
