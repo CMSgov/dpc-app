@@ -16,7 +16,24 @@
 
         <div class="ds-l-row--12">
           <div class="ds-l-col--12">
-            No tokens yet.
+            <% organization.registered_organizations.each do |reg_org| %>
+              <% reg_org.client_tokens.each do |token| %>
+                <div class="module-container">
+                  <div class="module-container__primary">
+                    <h3 class="module-container__heading"><%= token['label'] %></h3>
+                    <div class="ds-u-margin-bottom--1">
+                      <label class="ds-u-margin-right--1 ds-u-color--muted">Created at:</label>
+                      <%= token['createdAt'] %>
+                    </div>
+
+                    <div class="ds-u-margin-bottom--1">
+                      <label class="ds-u-margin-right--1 ds-u-color--muted">Expires at:</label>
+                      <%= token['expiresAt'] %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
           </div>
         </div>
       </div>
