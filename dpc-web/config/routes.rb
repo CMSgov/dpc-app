@@ -29,7 +29,7 @@ Rails.application.routes.draw do
   match '/dashboard', to: 'dashboard#show', via: :get
 
   resources :organizations, only: [:show] do
-    resources :client_tokens, only: [:new, :create, :destroy]
+    resources :client_tokens, only: [:new, :create]
   end
 
   root to: 'public#home'
