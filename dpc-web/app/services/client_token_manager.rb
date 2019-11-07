@@ -25,8 +25,6 @@ class ClientTokenManager
 
   # If no registered_org, attempt creation and then proceed
   def registered_org
-    @registered_org = organization.registered_organizations.find_by(api_env: api_env) ||
-                      OrganizationRegistrar.new(organization: organization, api_environments: [api_env])
-                                           .register_organization(api_env)
+    @registered_org ||= organization.registered_organizations.find_by(api_env: api_env)
   end
 end

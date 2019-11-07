@@ -3,22 +3,21 @@
 require 'rails_helper'
 
 RSpec.describe APIClient do
+  let!(:org) { create(:organization, npi: 'cool-npi-1') }
+  let!(:registered_org) { create(:registered_organization, organization: org) }
+  let!(:fhir_endpoint) { create(:fhir_endpoint, name: 'Cool SBX', uri: 'https://cool.com',
+                                                status: 'active', organization: org) }
+
+  before(:each) do
+    allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
+    allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCBrZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDkTYjOGpmMI9vWcK')
+  end
+
   describe '#create_organization' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
-        org = create(:organization, npi: 'cool-npi-1')
-        create(:fhir_endpoint,
-          name: 'Cool SBX',
-          uri: 'https://cool.com',
-          status: 'active',
-          organization: org
-        )
-
-        allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
-        allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('112233')
-
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer 112233' },
+          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCBrZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDkTYjOGpmMI9vWcK' },
           body: {
             resourceType: 'Parameters',
             parameter: [{
@@ -50,9 +49,9 @@ RSpec.describe APIClient do
                 }, {
                   resource: {
                     resourceType: 'Endpoint',
-                    status: 'active',
+                    status: fhir_endpoint.status,
                     connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
-                    name: 'Cool SBX', address: 'https://cool.com'
+                    name: fhir_endpoint.name, address: fhir_endpoint.uri
                   }
                 }]
               }
@@ -79,19 +78,8 @@ RSpec.describe APIClient do
 
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
-        org = create(:organization, npi: 'cool-npi-1')
-        create(:fhir_endpoint,
-          name: 'Cool SBX',
-          uri: 'https://cool.com',
-          status: 'active',
-          organization: org
-        )
-
-        allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
-        allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('112233')
-
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer 112233' },
+          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCBrZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDkTYjOGpmMI9vWcK' },
           body: {
             resourceType: 'Parameters',
             parameter: [{
@@ -123,9 +111,9 @@ RSpec.describe APIClient do
                 }, {
                   resource: {
                     resourceType: 'Endpoint',
-                    status: 'active',
+                    status: fhir_endpoint.status,
                     connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
-                    name: 'Cool SBX', address: 'https://cool.com'
+                    name: fhir_endpoint.name, address: fhir_endpoint.uri
                   }
                 }]
               }
@@ -151,6 +139,54 @@ RSpec.describe APIClient do
               }
             }]
           }
+        )
+      end
+    end
+  end
+
+  describe '#create_client_token' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, "http://dpc.example.com/Token/#{registered_org.api_id}").with(
+          headers: { 'Content-Type' => 'application/json' },
+          body: {
+            label: 'Sandbox Token 1'
+          }.to_json
+        ).to_return(
+          status: 200,
+          body: "{\"token\":\"1234567890\",\"label\":\"Sandbox Token 1\",\"createdAt\":\"2019-11-07T17:15:22.781Z\"}"
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.create_client_token(registered_org.api_id, params: { label: 'Sandbox Token 1' })
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          { 'token' => '1234567890', 'label' => 'Sandbox Token 1', 'createdAt' => '2019-11-07T17:15:22.781Z' }
+        )
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, "http://dpc.example.com/Token/#{registered_org.api_id}").with(
+          headers: { 'Content-Type' => 'application/json' },
+          body: {
+            label: 'Sandbox Token 1'
+          }.to_json
+        ).to_return(
+          status: 500,
+          body: '{}'
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.create_client_token(registered_org.api_id, params: { label: 'Sandbox Token 1' })
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {}
         )
       end
     end
