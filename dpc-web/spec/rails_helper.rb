@@ -14,6 +14,7 @@ require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
 require 'support/chromedriver'
+require 'webmock/rspec'
 
 # Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
 
@@ -53,4 +54,12 @@ RSpec.configure do |config|
 
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
+
+  config.around(:each, :perform_enqueued) do |example|
+    Delayed::Worker.delay_jobs = false
+
+    example.run
+
+    Delayed::Worker.delay_jobs = true
+  end
 end
