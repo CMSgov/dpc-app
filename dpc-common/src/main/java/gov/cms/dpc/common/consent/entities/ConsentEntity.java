@@ -23,7 +23,9 @@ public class ConsentEntity implements Serializable {
 
     private static final long serialVersionUID = 8702499693412507926L;
 
-    public ConsentEntity() { }
+    public ConsentEntity() {
+        // Hibernate required
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

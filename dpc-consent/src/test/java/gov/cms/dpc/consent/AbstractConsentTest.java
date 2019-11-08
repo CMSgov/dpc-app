@@ -28,7 +28,7 @@ public abstract class AbstractConsentTest {
 
     // supporting a v1 path might require inserting something like attribution.resources.AbstractAttributionResource
     protected String getServerURL() {
-        return String.format("http://localhost:%s", APPLICATION.getLocalPort());
+        return String.format("http://localhost:%s/v1", APPLICATION.getLocalPort());
     }
 
     public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {

@@ -24,11 +24,16 @@ public class ConsentEntityConverter {
     }
 
     private static Narrative narrativeText(String inOrOut, String hicn, String mbi) {
-        StringBuilder sb = new StringBuilder("Words about the ");
+        boolean noHicn = hicn == null || hicn.isEmpty();
+        boolean noMbi = mbi == null || mbi.isEmpty();
+
+        StringBuilder sb = new StringBuilder("Consent status of ");
         sb.append(inOrOut);
-        sb.append(" status of the patient with identifiers ");
-        sb.append(hicn == null || hicn.isEmpty() ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn));
-        sb.append(mbi == null || mbi.isEmpty() ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi));
+        sb.append(" for the patient with identifiers [");
+        sb.append(noHicn ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn));
+        sb.append(true == noHicn == noMbi ? "" : "], [");
+        sb.append(noMbi ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi));
+        sb.append("]");
 
         Narrative text = new Narrative();
         text.setDiv(new XhtmlNode(NodeType.Text).setValue(sb.toString()));
@@ -67,7 +72,7 @@ public class ConsentEntityConverter {
         c.setPolicyRule(policyCode(consentEntity.getPolicyCode()));
 
         // scope is an r4 entity. in our data this is currently always "patient-privacy"
-        // hence, I don't think it's worth extending r3 to include it atm
+        // for the moment, we're not extending r3 to include it
 
         c.setCategory(category(consentEntity.getLoincCode()));
 

@@ -1,5 +1,9 @@
 package gov.cms.dpc.consent.resources;
 
+import com.codahale.metrics.annotation.ExceptionMetered;
+import com.codahale.metrics.annotation.Metered;
+import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -31,7 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Path("/")
+@Path("v1/Consent")
 public class ConsentResource {
 
     private final ConsentDAO dao;
@@ -42,20 +46,17 @@ public class ConsentResource {
     }
 
     @GET
-    @Path("/Consent")
     @FHIR
+    @Timed
+    @ExceptionMetered
     @UnitOfWork
     @ApiOperation(value = "Search for Consent Entries", notes = "Search for Consent records. " +
             "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.")
     @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
     public Bundle search(
-            @ApiParam(value = "Consent resource _id") @QueryParam("_id") Optional<UUID> id,
-            @ApiParam(value = "Consent resource identifier") @QueryParam("identifier") Optional<UUID> identifier,
-            @ApiParam(value = "Patient Identifier") @QueryParam("patient") Optional<String> patientId ) {
-
-        if (id.isEmpty() && identifier.isEmpty() && patientId.isEmpty()) {
-            throw new WebApplicationException("Must have some form of Consent Resource ID or Patient Resource ID", Response.Status.BAD_REQUEST);
-        }
+            @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
+            @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
+            @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId ) {
 
         List<ConsentEntity> entities = null;
 
@@ -71,43 +72,50 @@ public class ConsentResource {
             entities = consentEntity.map(List::of).orElseGet(() -> List.of(ConsentEntity.defaultConsentEntity(id, Optional.empty(), Optional.empty())));
 
         } else if (patientId.isPresent()) {
+
             final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientId.get());
             entities = getEntitiesByPatient(patientIdentifier);
+
+        } else {
+
+            throw new WebApplicationException("Must have some form of Consent Resource ID or Patient ID", Response.Status.BAD_REQUEST);
         }
 
         return bundleOf(entities);
     }
 
     @GET
-    @Path("/Consent/{consentId}")
+    @Path("/{consentId}")
     @FHIR
+    @Timed
+    @ExceptionMetered
     @UnitOfWork
     @ApiOperation(value = "Locate a Consent entry by id")
     @ApiResponses(@ApiResponse(code = 400, message = "invalid id value. Must have a consent resource id"))
     public Consent getConsent(@ApiParam(value = "Consent resource ID", required = true) @PathParam("consentId") UUID consentId) {
 
-        final Optional<ConsentEntity> consentEntity = this.dao.getConsent(consentId);
+        final ConsentEntity consentEntity = this.dao.getConsent(consentId).orElseThrow(() ->
+            new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
+        );
 
-        if (consentEntity.isEmpty()) {
-            throw new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404);
-        }
-
-        return ConsentEntityConverter.convert(consentEntity.get());
+        return ConsentEntityConverter.convert(consentEntity);
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
         List<ConsentEntity> entities;
-        Optional<String> hicn = Optional.empty();
-        Optional<String> mbi  = Optional.empty();
+        Optional<String> hicnValue = Optional.empty();
+        Optional<String> mbiValue  = Optional.empty();
         String field;
 
+        // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
+        // we need to determine which database field that system's value is stored in
         switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
             case MBI:
-                mbi = Optional.of(patientIdentifier.getValue());
+                mbiValue = Optional.of(patientIdentifier.getValue());
                 field = "mbi";
                 break;
             case HICN:
-                hicn = Optional.of(patientIdentifier.getValue());
+                hicnValue = Optional.of(patientIdentifier.getValue());
                 field = "hicn";
                 break;
             default:
@@ -117,7 +125,7 @@ public class ConsentResource {
         entities = this.dao.findBy(field, patientIdentifier.getValue());
 
         if (entities.isEmpty()) {
-            entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), hicn, mbi));
+            entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), hicnValue, mbiValue));
         }
         return entities;
     }
@@ -125,14 +133,12 @@ public class ConsentResource {
     private Bundle bundleOf(List<ConsentEntity> consentEntities) {
 
         if (consentEntities.isEmpty()) {
-            throw new WebApplicationException("Cannot find patient with given ID", javax.ws.rs.core.Response.Status.NOT_FOUND);
+            throw new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
         }
 
         Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.COLLECTION);
-        consentEntities.forEach(e -> {
-            bundle.addEntry().setResource(ConsentEntityConverter.convert(e));
-        });
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+        consentEntities.forEach(e -> bundle.addEntry().setResource(ConsentEntityConverter.convert(e)));
         bundle.setTotal(bundle.getEntry().size());
 
         return bundle;
