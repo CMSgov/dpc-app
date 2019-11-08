@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -42,7 +43,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         this.mapper = new ObjectMapper();
         // Do the JWT flow in order to get a correct ORGANIZATION_TOKEN, this is normally handled by the HAPI client
         try {
-            this.fullyAuthedToken = APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey).accessToken;
+            this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey).accessToken;
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }

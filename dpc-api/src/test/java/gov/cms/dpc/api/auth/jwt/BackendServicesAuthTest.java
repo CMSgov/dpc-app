@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
     @Test
     void testRoundTrip() throws IOException, URISyntaxException {
         // Verify we can pull the Organization resource
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
 
         final Organization orgBundle = client
                 .read()

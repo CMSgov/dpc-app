@@ -8,6 +8,7 @@ import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void ensurePatientsExist() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
         APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = client
@@ -68,10 +69,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
         // Submit a new public key to use for JWT flow
         final String keyID = "new-key";
-        final PrivateKey privateKey = APITestHelpers.generateAndUploadKey(keyID, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        final PrivateKey privateKey = APIAuthHelpers.generateAndUploadKey(keyID, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
 
         // Update the authenticated client to use the new organization
-        client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, keyID, privateKey);
+        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, keyID, privateKey);
 
         final Bundle otherPatients = client
                 .search()
@@ -108,7 +109,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getAdminURL());
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, KEY_ID, privateKey);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, KEY_ID, privateKey);
 
         final Bundle patients = client
                 .search()
@@ -156,7 +157,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getAdminURL());
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, KEY_ID, privateKey);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, KEY_ID, privateKey);
 
         final Bundle patients = client
                 .search()

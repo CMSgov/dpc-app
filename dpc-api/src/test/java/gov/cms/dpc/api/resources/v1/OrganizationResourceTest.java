@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.OrganizationFactory;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -31,8 +32,8 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testOrganizationRegistration() throws IOException, URISyntaxException {
         // Generate a golden macaroon
-        final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon, KEY_ID, privateKey);
+        final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon, KEY_ID, privateKey);
 
 
         final String newOrgID = UUID.randomUUID().toString();
@@ -41,16 +42,16 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
         // Try again, should fail because it's a duplicate
         // Error handling is really bad right now, but it should get improved in DPC-540
-        assertThrows(InvalidRequestException.class, () -> OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon, KEY_ID, privateKey), newOrgID, true));
+        assertThrows(InvalidRequestException.class, () -> OrganizationHelpers.createOrganization(ctx, APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon, KEY_ID, privateKey), newOrgID, true));
 
         // Now, try to create one again, but using an actual org token
-        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey), UUID.randomUUID().toString(), true));
+        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey), UUID.randomUUID().toString(), true));
     }
 
     @Test
     void testOrganizationFetch() throws IOException, URISyntaxException {
 
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
 
         final Organization organization = client
                 .read()
@@ -86,8 +87,8 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testMissingEndpoint() throws IOException, URISyntaxException {
         // Generate a golden macaroon
-        final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon, KEY_ID, privateKey);
+        final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon, KEY_ID, privateKey);
         final Organization organization = OrganizationFactory.generateFakeOrganization();
 
         final Bundle bundle = new Bundle();
@@ -111,8 +112,8 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testMissingOrganization() throws IOException, URISyntaxException {
         // Generate a golden macaroon
-        final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon, KEY_ID, privateKey);
+        final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), goldenMacaroon, KEY_ID, privateKey);
         final Endpoint endpoint = OrganizationFactory.createFakeEndpoint();
 
         final Bundle bundle = new Bundle();
