@@ -43,6 +43,10 @@ ci-app: docker-base
 ci-web:
 	@./dpc-web-test.sh
 
+.PHONY: smoke
+smoke:
+	@mvn clean install -DskipTests -Djib.skip=True
+
 .PHONY: smoke/local
 smoke/local: venv
 	@echo "Running Smoke Tests against Local env"
