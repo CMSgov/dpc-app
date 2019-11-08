@@ -1,7 +1,7 @@
 <div class="ds-l-row--12">
   <% @user.organizations.each do |organization| %>
 
-    <h1><%= organization.name %></h1>
+    <h2 class="dashboard-section-heading"><%= organization.name %></h2>
 
     <section class="box">
       <div class="box__content">
@@ -14,7 +14,7 @@
 
         <h2 class="box__heading ds-h2">Client tokens</h2>
 
-        <div class="ds-l-row--12">
+          <div class="ds-l-row">
           <div class="ds-l-col--12">
             <% organization.registered_organizations.each do |reg_org| %>
               <% reg_org.client_tokens.each do |token| %>
@@ -35,7 +35,6 @@
               <% end %>
             <% end %>
           </div>
-        </div>
       </div>
     </section>
 
