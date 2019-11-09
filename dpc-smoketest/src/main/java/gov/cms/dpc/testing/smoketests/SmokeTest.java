@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
-
 public class SmokeTest extends AbstractJavaSamplerClient {
 
     private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
@@ -67,7 +65,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
         final String goldenMacaroon;
         try {
-            goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
+            goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
         } catch (Exception e) {
             throw new RuntimeException("Failed creating Macaroon", e);
         }
@@ -83,7 +81,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         String token;
         orgRegistrationResult.sampleStart();
         try {
-            token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, TASK_URL);
+            token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
             orgRegistrationResult.setSuccessful(true);
         } catch (Exception e) {
             orgRegistrationResult.setSuccessful(false);

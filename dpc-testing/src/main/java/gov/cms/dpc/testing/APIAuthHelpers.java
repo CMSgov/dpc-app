@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class APIAuthHelpers {
-    public static final String TASK_URL = "http://localhost:9903/tasks/";
+    public static final String TASK_URL = "http://localhost:9900/tasks/";
     private static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -104,9 +104,13 @@ public class APIAuthHelpers {
     }
 
     public static String createGoldenMacaroon() throws IOException {
+        return createGoldenMacaroon(TASK_URL);
+    }
+
+    public static String createGoldenMacaroon(String taskURL) throws IOException {
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost post = new HttpPost(String.format("%s/generate-token", TASK_URL));
+            final HttpPost post = new HttpPost(String.format("%s/generate-token", taskURL));
 
             try (CloseableHttpResponse execute = client.execute(post)) {
                 assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Generated macaroon");
