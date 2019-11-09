@@ -20,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
@@ -28,6 +29,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
     private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
     private static final String KEY_ID = "smoke-test-key";
+    private static final Random RANDOM = new Random();
 
     private FhirContext ctx;
 
@@ -91,9 +93,11 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
 
         // Create a new public key
+        // FIXME: This is a hack until DPC-784 is merged, this avoids duplicate key labels during smoke testing
+        final String customKeyID = String.format("%s:%d", KEY_ID, RANDOM.nextInt());
         final PrivateKey privateKey;
         try {
-            privateKey = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
+            privateKey = APIAuthHelpers.generateAndUploadKey(customKeyID, organizationID, goldenMacaroon, hostParam);
         } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
             throw new RuntimeException("Failed uploading public key", e);
         }
@@ -101,7 +105,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
         try {
-            exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, String.format("%s/", hostParam), token, KEY_ID, privateKey);
+            exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, String.format("%s/", hostParam), token, customKeyID, privateKey);
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException("Cannot create export client", e);
         }
