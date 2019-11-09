@@ -133,7 +133,17 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
 
         // Run the job
-        ClientUtils.handleExportJob(exportClient, providerNPIs, token);
+        // We need the fully authed access_token, which we'll need to manually pull from the Macaroons Interceptor
+        // Gross, but the other options are even worse
+        final List<Object> interceptors = exportClient.getInterceptorService().getAllRegisteredInterceptors();
+
+        final APIAuthHelpers.MacaroonsInterceptor mInterceptor = interceptors
+                .stream()
+                .filter(interceptor -> interceptor instanceof APIAuthHelpers.MacaroonsInterceptor)
+                .map(APIAuthHelpers.MacaroonsInterceptor.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Cannot get interceptor"));
+        ClientUtils.handleExportJob(exportClient, providerNPIs, mInterceptor.getMacaroon());
         smokeTestResult.setSuccessful(true);
 
         logger.info("Test completed");
