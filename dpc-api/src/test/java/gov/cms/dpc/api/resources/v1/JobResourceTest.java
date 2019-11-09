@@ -1,8 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
 import gov.cms.dpc.api.APITestHelpers;
-import gov.cms.dpc.api.models.JobCompletionModel;
-import gov.cms.dpc.api.resources.v1.JobResource;
+import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 

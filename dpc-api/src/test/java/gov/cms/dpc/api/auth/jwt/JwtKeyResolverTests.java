@@ -1,8 +1,8 @@
 package gov.cms.dpc.api.auth.jwt;
 
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.jsonwebtoken.Claims;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -29,10 +30,12 @@ class JwtKeyResolverTests {
 
     private static JwtKeyResolver resolver;
     private static KeyPair keyPair;
+    private static MacaroonBakery bakery;
 
     @BeforeAll
     static void setup() throws IOException, NoSuchAlgorithmException {
         keyPair = APIAuthHelpers.generateKeyPair();
+        bakery = mock(MacaroonBakery.class);
         PublicKeyDAO dao = mock(PublicKeyDAO.class);
         // Bad entity with malformed key
         final PublicKeyEntity badEntity = mock(PublicKeyEntity.class);
@@ -46,10 +49,12 @@ class JwtKeyResolverTests {
         Mockito.when(goodInfo.getEncoded()).thenReturn(keyPair.getPublic().getEncoded());
         Mockito.when(goodEntity.getPublicKey()).thenReturn(goodInfo);
 
-        Mockito.when(dao.findKeyByLabel("malformed-key")).thenReturn(badEntity);
-        Mockito.when(dao.findKeyByLabel("correct-key")).thenReturn(goodEntity);
-        Mockito.when(dao.findKeyByLabel("not a real key")).thenThrow(NoResultException.class);
-        resolver = new JwtKeyResolver(dao);
+        final UUID organizationID = UUID.randomUUID();
+
+        Mockito.when(dao.findKeyByLabel(organizationID, "malformed-key")).thenReturn(badEntity);
+        Mockito.when(dao.findKeyByLabel(organizationID, "correct-key")).thenReturn(goodEntity);
+        Mockito.when(dao.findKeyByLabel(organizationID, "not a real key")).thenThrow(NoResultException.class);
+        resolver = new JwtKeyResolver(bakery, dao);
     }
 
     @Test

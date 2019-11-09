@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.client;
+package gov.cms.dpc.testing.smoketests;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -10,10 +10,11 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import gov.cms.dpc.api.models.JobCompletionModel;
+import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.FHIRHeaders;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -31,9 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
-import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 
 /**
  * Shared methods for testing export jobs
@@ -60,7 +58,7 @@ public class ClientUtils {
         final var addPreferInterceptor = new IClientInterceptor() {
             @Override
             public void interceptRequest(IHttpRequest iHttpRequest) {
-                iHttpRequest.addHeader(PREFER_HEADER, PREFER_RESPOND_ASYNC);
+                iHttpRequest.addHeader(FHIRHeaders.PREFER_HEADER, FHIRHeaders.PREFER_RESPOND_ASYNC);
                 if (accessToken != null) {
                     iHttpRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", accessToken));
                 }
@@ -156,7 +154,7 @@ public class ClientUtils {
     }
 
     /**
-     * Helper method to download a file from the {@link gov.cms.dpc.api.resources.v1.DataResource}
+     * Helper method to download a file from the DataResource
      * Uses the {@link File#createTempFile(String, String)} method to create the file handle
      *
      * @param fileID - {@link String} full URL of the file to download

@@ -3,7 +3,7 @@ settings:
 
 execution:
   - iterations: 1
-    concurrency: 3
+    concurrency: 1
     scenario: jmeter
 
 scenarios:

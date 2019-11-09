@@ -334,7 +334,7 @@ class JWTUnitTests {
         final PublicKeyDAO publicKeyDAO = mockKeyDAO();
         Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
-        final JwtKeyResolver resolver = new JwtKeyResolver(publicKeyDAO);
+        final JwtKeyResolver resolver = new JwtKeyResolver(bakery, publicKeyDAO);
         final CaffeineJTICache jtiCache = new CaffeineJTICache();
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
@@ -357,7 +357,7 @@ class JWTUnitTests {
     private static PublicKeyDAO mockKeyDAO() {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
-        Mockito.when(mock.findKeyByLabel(Mockito.anyString())).then(answer -> {
+        Mockito.when(mock.findKeyByLabel(Mockito.any(), Mockito.anyString())).then(answer -> {
             @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((String) answer.getArgument(0));
             if (keyPair == null) {
                 throw new NoResultException();

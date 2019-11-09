@@ -36,18 +36,38 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class APIAuthHelpers {
-    public static final String TASK_URL = "http://localhost:9900/tasks/";
+    public static final String TASK_URL = "http://localhost:9903/tasks/";
     private static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, String keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
-
 
         final AuthResponse authResponse = jwtAuthFlow(baseURL, macaroon, keyID, privateKey);
         // Request an access token from the JWT endpoint
         final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
         client.registerInterceptor(new MacaroonsInterceptor(authResponse.accessToken));
 
+        // Add a header the hard way
+        final var addPreferInterceptor = new IClientInterceptor() {
+            @Override
+            public void interceptRequest(IHttpRequest iHttpRequest) {
+                // Manually set these values, rather than pulling a dependency on dpc-common, where the constants are defined
+                iHttpRequest.addHeader("Prefer", "respond-async");
+            }
+
+            @Override
+            public void interceptResponse(IHttpResponse iHttpResponse) {
+                // Not used
+            }
+        };
+        client.registerInterceptor(addPreferInterceptor);
+
+        return client;
+    }
+
+    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon) {
+        final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
+        client.registerInterceptor(new MacaroonsInterceptor(macaroon));
         return client;
     }
 
