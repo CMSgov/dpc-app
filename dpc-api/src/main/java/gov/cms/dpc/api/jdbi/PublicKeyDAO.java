@@ -41,15 +41,12 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
                 .forEach(key -> currentSession().delete(key));
     }
 
-    public PublicKeyEntity findKeyByLabel(UUID organizationID, String keyLabel) {
+    public PublicKeyEntity findKeyByLabel(String keyLabel) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
         final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.and(
-                builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID),
-                builder.equal(root.get(PublicKeyEntity_.label), keyLabel)));
-
+        query.where(builder.equal(root.get(PublicKeyEntity_.label), keyLabel));
         return currentSession().createQuery(query).getSingleResult();
     }
 
