@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
+
 public class SmokeTest extends AbstractJavaSamplerClient {
 
     private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
@@ -80,7 +82,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         String token;
         orgRegistrationResult.sampleStart();
         try {
-            token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
+            token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, TASK_URL);
             orgRegistrationResult.setSuccessful(true);
         } catch (Exception e) {
             orgRegistrationResult.setSuccessful(false);
