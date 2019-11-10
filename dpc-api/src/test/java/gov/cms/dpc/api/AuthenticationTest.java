@@ -30,7 +30,7 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
         final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, getAdminURL());
 
         // Now, try to read the organization, which should succeed
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, KEY_ID, privateKey);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Organization organization = client
                 .read()
