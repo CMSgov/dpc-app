@@ -40,6 +40,10 @@ public class APIAuthHelpers {
     private static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    private APIAuthHelpers() {
+        // Not used
+    }
+
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, String keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
 
         final AuthResponse authResponse = jwtAuthFlow(baseURL, macaroon, keyID, privateKey);

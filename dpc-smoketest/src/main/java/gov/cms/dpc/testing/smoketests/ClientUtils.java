@@ -3,10 +3,7 @@ package gov.cms.dpc.testing.smoketests;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -14,7 +11,6 @@ import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.FHIRHeaders;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -44,33 +40,21 @@ public class ClientUtils {
     }
 
     /**
-     * Helper method to create a FHIR client has the headers setup for export operations.
+     * Helper method for initiating and Export job and monitoring its success.
      *
-     * @param context       - FHIR context to use
-     * @param serverBaseURL - the base URL for the FHIR endpoint
-     * @param accessToken   - {@link String} access token to use
-     * @return {@link IGenericClient} for FHIR requests
-     * @see #createExportOperation(IGenericClient, String)
+     * @param exportClient - {@link IGenericClient} to use for export request. Ensure this contains the necessary authentication and HttpHeaders
+     * @param providerNPIs - {@link List} of {@link String} of provider NPIs to use for exporting
+     * @param token        - {@link String} access_token to use when downloading the actual files.
      */
-    public static IGenericClient createExportClient(FhirContext context, String serverBaseURL, String accessToken) {
-        final IGenericClient exportClient = context.newRestfulGenericClient(serverBaseURL);
-        // Add a header the hard way
-        final var addPreferInterceptor = new IClientInterceptor() {
-            @Override
-            public void interceptRequest(IHttpRequest iHttpRequest) {
-                iHttpRequest.addHeader(FHIRHeaders.PREFER_HEADER, FHIRHeaders.PREFER_RESPOND_ASYNC);
-                if (accessToken != null) {
-                    iHttpRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", accessToken));
-                }
-            }
-
-            @Override
-            public void interceptResponse(IHttpResponse iHttpResponse) {
-                // Not used
-            }
-        };
-        exportClient.registerInterceptor(addPreferInterceptor);
-        return exportClient;
+    static void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String token) {
+        providerNPIs
+                .stream()
+                .map(npi -> exportRequestDispatcher(exportClient, npi))
+                .map(search -> (Group) search.getEntryFirstRep().getResource())
+                .map(group -> jobCompletionLambda(exportClient, token, group))
+                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
+                    jobResponseHandler(token, entry);
+                }));
     }
 
     /**
@@ -207,36 +191,35 @@ public class ClientUtils {
         return awaitExportResponse(exportURL, "Checking job status", token);
     }
 
-    public static void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String token) {
-        providerNPIs
-                .stream()
-                .map(npi -> exportClient
-                        .search()
-                        .forResource(Group.class)
-                        .where(Group.CHARACTERISTIC_VALUE
-                                .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
-                                .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), npi)))
-                        .returnBundle(Bundle.class)
-                        .encodedJson()
-                        .execute())
-                .map(search -> (Group) search.getEntryFirstRep().getResource())
-                .map(group -> {
-                    final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
-                    try {
-                        return monitorExportRequest(exportOperation, token);
-                    } catch (IOException | InterruptedException e) {
-                        throw new RuntimeException("Error monitoring export", e);
-                    }
-                })
-                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
-                    System.out.println(entry.getUrl());
-                    try {
-                        final File file = fetchExportedFiles(entry.getUrl(), token);
-                        System.out.println(String.format("Downloaded file to: %s", file.getPath()));
-                    } catch (IOException e) {
-                        throw new RuntimeException("Cannot output file", e);
-                    }
-                }));
+    private static Bundle exportRequestDispatcher(IGenericClient exportClient, String npi) {
+        return exportClient
+                .search()
+                .forResource(Group.class)
+                .where(Group.CHARACTERISTIC_VALUE
+                        .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
+                        .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), npi)))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+    }
+
+    private static void jobResponseHandler(String token, JobCompletionModel.OutputEntry entry) {
+        System.out.println(entry.getUrl());
+        try {
+            final File file = fetchExportedFiles(entry.getUrl(), token);
+            System.out.println(String.format("Downloaded file to: %s", file.getPath()));
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot output file", e);
+        }
+    }
+
+    private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, String token, Group group) {
+        final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
+        try {
+            return monitorExportRequest(exportOperation, token);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Error monitoring export", e);
+        }
     }
 
     private static <T extends BaseResource> Bundle bundleSubmitter(Class<?> baseClass, Class<T> clazz, String filename, IParser parser, IGenericClient client) throws IOException {
@@ -258,7 +241,7 @@ public class ClientUtils {
         }
     }
 
-    public static Map<String, Reference> submitPatients(Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+    static Map<String, Reference> submitPatients(Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
         final Bundle patientBundle;
 
         try {
@@ -279,7 +262,7 @@ public class ClientUtils {
         return patientReferences;
     }
 
-    public static List<String> submitPractitioners(Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+    static List<String> submitPractitioners(Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
         final Bundle providerBundle;
 
         try {
@@ -299,7 +282,7 @@ public class ClientUtils {
                 .collect(Collectors.toList());
     }
 
-    public static void createAndUploadRosters(String seedsFile, IGenericClient client, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
+    static void createAndUploadRosters(String seedsFile, IGenericClient client, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
         // Read the provider bundle from the given file
         try (InputStream resource = new FileInputStream(new File(seedsFile))) {
             // Now, submit the bundle
