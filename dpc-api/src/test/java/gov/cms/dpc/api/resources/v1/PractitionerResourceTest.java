@@ -82,11 +82,11 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         // Create a new org and make sure it has no providers
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
         // Submit a new public key to use for JWT flow
-        final String keyID = "new-key";
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APITestHelpers.generateAndUploadKey(keyID, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        final String keyLabel = "new-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APITestHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
 
         // Update the authenticated client to use the new organization
-        client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, uuidPrivateKeyPair.getLeft(), PRIVATE_KEY);
+        client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         final Bundle otherPractitioners = client
                 .search()

@@ -107,11 +107,13 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientRemoval() throws IOException, URISyntaxException {
+    void testPatientRemoval() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getAdminURL());
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final String keyLabel = "patient-deletion-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APITestHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         final Bundle patients = client
                 .search()
@@ -155,11 +157,13 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientUpdating() throws IOException, URISyntaxException {
+    void testPatientUpdating() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getAdminURL());
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final String keyLabel = "patient-update-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APITestHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         final Bundle patients = client
                 .search()
