@@ -8,6 +8,7 @@ import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
@@ -52,8 +53,8 @@ public class KeyResource extends AbstractKeyResource {
                     "<p>The returned keys are serialized using PEM encoding.",
             authorizations = @Authorization(value = "apiKey"))
     @Override
-    public List<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
-        return this.dao.fetchPublicKeys(organizationPrincipal.getID());
+    public CollectionResponse<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
+        return new CollectionResponse<>(this.dao.fetchPublicKeys(organizationPrincipal.getID()));
     }
 
     @GET
