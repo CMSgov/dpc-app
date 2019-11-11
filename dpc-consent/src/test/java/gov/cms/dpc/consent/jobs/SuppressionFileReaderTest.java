@@ -2,19 +2,15 @@ package gov.cms.dpc.consent.jobs;
 
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.consent.entities.ConsentEntity;
-import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -92,12 +88,12 @@ public class SuppressionFileReaderTest {
         Patient p = new Patient();
 
         Identifier beneId = new Identifier();
-        beneId.setSystem("https://bluebutton.cms.gov/resources/variables/bene_id");
+        beneId.setSystem(DPCIdentifierSystem.CCW.getSystem());
         beneId.setValue("20140000008325");
         p.addIdentifier(beneId);
 
         Identifier mbi = new Identifier();
-        mbi.setSystem("http://hl7.org/fhir/sid/us-mbi");
+        mbi.setSystem(DPCIdentifierSystem.MBI.getSystem());
         mbi.setValue("3456789");
         p.addIdentifier(mbi);
 

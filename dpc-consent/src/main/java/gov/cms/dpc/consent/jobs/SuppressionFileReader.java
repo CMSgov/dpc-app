@@ -3,6 +3,7 @@ package gov.cms.dpc.consent.jobs;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -89,13 +90,13 @@ public class SuppressionFileReader extends BufferedReader {
 
         Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
         List<Identifier> identifiers = patient.getIdentifier();
-        Optional<Identifier> beneId = identifiers.stream().filter(i -> "https://bluebutton.cms.gov/resources/variables/bene_id".equals(i.getSystem())).findFirst();
+        Optional<Identifier> beneId = identifiers.stream().filter(i -> DPCIdentifierSystem.CCW.getSystem().equals(i.getSystem())).findFirst();
         if (beneId.isEmpty()) {
             throw new InvalidSuppressionRecordException("No beneficiary ID found in BFD Patient record", filename, lineNum);
         }
         consent.setBfdPatientId(beneId.get().getValue());
 
-        Optional<Identifier> mbi = identifiers.stream().filter(i -> "http://hl7.org/fhir/sid/us-mbi".equals(i.getSystem())).findFirst();
+        Optional<Identifier> mbi = identifiers.stream().filter(i -> DPCIdentifierSystem.MBI.getSystem().equals(i.getSystem())).findFirst();
         if (mbi.isEmpty()) {
             throw new InvalidSuppressionRecordException("No MBI found in BFD Patient record", filename, lineNum);
         }

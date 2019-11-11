@@ -10,6 +10,7 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
@@ -93,7 +94,7 @@ class BlueButtonClientTest {
                 "/v1/fhir/Patient",
                 HttpStatus.OK_200,
                 getRawXML(SAMPLE_PATIENT_PATH_PREFIX + "hicn-" + TEST_HICN + ".xml"),
-                Collections.singletonList(Parameter.param("identifier", "http://bluebutton.cms.hhs.gov/identifier#hicnHash|" + TEST_HICN_HASH))
+                Collections.singletonList(Parameter.param("identifier", "https://bluebutton.cms.gov/resources/identifier/hicn-hash|" + TEST_HICN_HASH))
         );
 
         // Create mocks for pages of the results
@@ -145,8 +146,8 @@ class BlueButtonClientTest {
         assertEquals("Female", patient.getGender().getDisplay());
 
         List<Identifier> ids = patient.getIdentifier();
-        assertTrue(ids.stream().anyMatch(i -> "http://hl7.org/fhir/sid/us-medicare".equals(i.getSystem()) && "1000079035".equals(i.getValue())));
-        assertTrue(ids.stream().anyMatch(i -> "http://hl7.org/fhir/sid/us-mbi".equals(i.getSystem()) && "3456789".equals(i.getValue())));
+        assertTrue(ids.stream().anyMatch(i -> DPCIdentifierSystem.HICN.getSystem().equals(i.getSystem()) && "1000079035".equals(i.getValue())));
+        assertTrue(ids.stream().anyMatch(i -> DPCIdentifierSystem.MBI.getSystem().equals(i.getSystem()) && "3456789".equals(i.getValue())));
     }
 
     @Test

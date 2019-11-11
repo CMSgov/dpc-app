@@ -11,6 +11,7 @@ import com.codahale.metrics.Timer;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.common.utils.MetricMaker;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.bouncycastle.util.encoders.Hex;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
@@ -89,7 +90,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         logger.debug("Attempting to fetch patient by HICN from baseURL: {}", client.getServerBase());
         String hicnHash = hashHICN(hicn, config.getBfdHashPepper(), config.getBfdHashIter());
         ICriterion hicnHashEquals = new TokenClientParam("identifier").exactly()
-                .systemAndCode("http://bluebutton.cms.hhs.gov/identifier#hicnHash", hicnHash);
+                .systemAndCode(DPCIdentifierSystem.HICN_HASH.getSystem(), hicnHash);
         return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
                 .search()
                 .forResource(Patient.class)
