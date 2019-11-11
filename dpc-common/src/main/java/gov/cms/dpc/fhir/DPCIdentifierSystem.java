@@ -9,9 +9,11 @@ public enum DPCIdentifierSystem {
     // Need to see if we actually have a PECOS ID URI.
     PECOS("http://bluebutton.cms.hhs.gov/identifier#pecos"),
     NPPES("http://hl7.org/fhir/sid/us-npi"),
-    MBI("https://bluebutton.cms.gov/resources/variables/bene_id"),
+    CCW("https://bluebutton.cms.gov/resources/variables/bene_id"),
+    HICN("http://hl7.org/fhir/sid/us-medicare"),
+    HICN_HASH("https://bluebutton.cms.gov/resources/identifier/hicn-hash"),
+    MBI("http://hl7.org/fhir/sid/us-mbi"),
     DPC("https://dpc.cms.gov/organization_id#"),
-    HICN("http://bluebutton.cms.hhs.gov/identifier#hicnHash"),
     UNKNOWN ("");
 
     private final String system;
