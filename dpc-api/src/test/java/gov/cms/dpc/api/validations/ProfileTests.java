@@ -28,7 +28,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
 
     @Test
     void testPatientProfile() throws IOException, URISyntaxException {
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         // Create a new patient record
 
         final Patient invalidPatient = new Patient();
@@ -90,7 +90,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
 
     @Test
     void testProviderProfile() throws IOException, URISyntaxException {
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Practitioner invalidPractitioner = new Practitioner();
         invalidPractitioner.addName().addGiven("Test").setFamily("Practitioner");
@@ -147,7 +147,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
     @Disabled
         // Disabled until DPC-614 and DPC-616 are merged.
     void testAttributionProfile() throws IOException, URISyntaxException {
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
+        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Group invalidGroup = new Group();
         invalidGroup.addMember().setEntity(new Reference("Patient/strange-patient"));
