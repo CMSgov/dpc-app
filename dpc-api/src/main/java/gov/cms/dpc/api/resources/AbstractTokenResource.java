@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -31,7 +32,7 @@ public abstract class AbstractTokenResource {
      * @return - {@link List} {@link String} base64 (URL) encoded token
      */
     @GET
-    public abstract List<TokenEntity> getOrganizationTokens(OrganizationPrincipal organizationPrincipal);
+    public abstract CollectionResponse<TokenEntity> getOrganizationTokens(OrganizationPrincipal organizationPrincipal);
 
     /**
      * Create authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.

@@ -3,8 +3,6 @@ package gov.cms.dpc.api.auth;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.macaroons.MacaroonBakery;
-import gov.cms.dpc.macaroons.MacaroonCaveat;
-import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
@@ -15,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -98,18 +97,11 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
                 throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
             }
             // Find the org_id caveat and extract the value
-            final List<MacaroonCaveat> caveats = this.bakery.getCaveats(rootMacaroon);
-            final MacaroonCondition orgCaveat = caveats
-                    .stream()
-                    .map(MacaroonCaveat::getCondition)
-                    .filter(condition -> condition.getKey().equals("organization_id"))
-                    .findAny()
+            orgID = MacaroonHelpers.extractOrgIDFromCaveats(this.bakery, Collections.singletonList(rootMacaroon))
                     .orElseThrow(() -> {
-                        logger.error("Unable to get org from macaroon id", e);
-                        return new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+                        logger.error("Cannot find organization_id on Macaroon");
+                        throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
                     });
-
-            orgID = UUID.fromString(orgCaveat.getValue());
         }
 
         return orgID;
