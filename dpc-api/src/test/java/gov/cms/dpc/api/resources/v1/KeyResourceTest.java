@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,13 +22,14 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.net.URI;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +44,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         this.mapper = new ObjectMapper();
         // Do the JWT flow in order to get a correct ORGANIZATION_TOKEN, this is normally handled by the HAPI client
         try {
-            this.fullyAuthedToken = APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey).accessToken;
+            this.fullyAuthedToken = APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -124,9 +126,9 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             keyGet.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(keyGet)) {
-                final List<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<KeyView>>() {
+                final CollectionResponse<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<KeyView>>() {
                 });
-                assertEquals(3, fetched.size(), "Should have multiple keys");
+                assertEquals(3, fetched.getCount(), "Should have multiple keys");
             }
 
             // Delete it
@@ -140,9 +142,9 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
             // Check to see everything is gone.
             try (CloseableHttpResponse response = client.execute(keyGet)) {
-                final List<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<KeyView>>() {
+                final CollectionResponse<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<KeyView>>() {
                 });
-                assertEquals(2, fetched.size(), "Should have one less key");
+                assertEquals(2, fetched.getEntities().size(), "Should have one less key");
             }
         }
     }
@@ -157,7 +159,8 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
     }
 
     @SuppressWarnings("WeakerAccess")
-    static class KeyView {
+    static class KeyView implements Serializable {
+        public static final long serialVersionUID = 42L;
 
         public UUID id;
         public String publicKey;

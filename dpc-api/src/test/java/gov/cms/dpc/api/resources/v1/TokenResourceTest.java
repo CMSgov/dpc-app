@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.models.CollectionResponse;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -15,7 +16,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -40,7 +40,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
 
         // Do the JWT flow in order to get a correct ORGANIZATION_TOKEN, this is normally handled by the HAPI client
         try {
-            this.fullyAuthedToken = APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey).accessToken;
+            this.fullyAuthedToken = APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -49,9 +49,11 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testTokenList() throws IOException {
 
-        final List<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
-        assertFalse(tokens.isEmpty(), "Should have tokens");
-        final TokenEntity token = tokens.get(0);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
+        assertAll(() -> assertFalse(tokens.getEntities().isEmpty(), "Should have tokens"),
+                () -> assertEquals(3, tokens.getCount(), "Should have 3 tokens"),
+                () -> assertEquals(LocalDate.now(ZoneOffset.UTC), tokens.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate(), "Should have created date"));
+        final TokenEntity token = ((List<TokenEntity>) tokens.getEntities()).get(0);
 
         assertAll(() -> assertEquals(String.format("Token for organization %s.", ORGANIZATION_ID), token.getLabel(), "Should have auto-generated label"),
                 () -> assertEquals(LocalDate.now().plus(1, ChronoUnit.YEARS), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"),
@@ -89,8 +91,9 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         }
 
         // List the tokens
-        final List<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
         assertEquals(1, tokens
+                .getEntities()
                 .stream()
                 .filter(token -> token.getLabel().equals(customLabel))
                 .count(), "Should have token with custom label");
@@ -128,16 +131,16 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             }
         }
 
-        final List<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
-        assertEquals(1, tokens.stream().filter(token -> token.getExpiresAt().toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
+        assertEquals(1, tokens.getEntities().stream().filter(token -> token.getExpiresAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
     }
 
     @Test
     void testTokenDeletion() throws IOException {
         // Get all the tokens
-        final List<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
-        assertFalse(tokens.isEmpty(), "Should have tokens");
-        final TokenEntity token = tokens.get(0);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
+        assertFalse(tokens.getEntities().isEmpty(), "Should have tokens");
+        final TokenEntity token = ((List<TokenEntity>) tokens.getEntities()).get(0);
 
         // Remove the token
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -158,13 +161,13 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
-    List<TokenEntity> fetchTokens(String orgID) throws IOException {
+    CollectionResponse<TokenEntity> fetchTokens(String orgID) throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token");
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenEntity>>() {
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
                 });
             }
         }

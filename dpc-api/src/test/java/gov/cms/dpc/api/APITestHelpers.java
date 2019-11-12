@@ -9,6 +9,7 @@ import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.*;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
@@ -23,6 +24,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -171,7 +173,7 @@ public class APITestHelpers {
         return builder.build();
     }
 
-    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, String keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
 
 
         final AuthResponse authResponse = jwtAuthFlow(baseURL, macaroon, keyID, privateKey);
@@ -182,7 +184,7 @@ public class APITestHelpers {
         return client;
     }
 
-    public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, String keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
+    public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
         final String jwt = Jwts.builder()
                 .setHeaderParam("kid", keyID)
                 .setAudience(String.format("%sToken/auth", baseURL))
@@ -229,16 +231,16 @@ public class APITestHelpers {
     /**
      * Generate a new {@link KeyPair} and submit the {@link PublicKey} to the API service, along with the given label
      *
-     * @param keyID          - {@link String} identifier (kid) of the public key
+     * @param keyLabel          - {@link String} identifier (kid) of the public key
      * @param organizationID - {@link String} organization ID to register key with
      * @param goldenMacaroon - {@link String} admin Macaroon that can upload keys
      * @param baseURL        - {@link String} baseURl to submit Key to
-     * @return - {@link PrivateKey} which matches uploaded {@link PublicKey}
+     * @return - {@link Pair}  of {@link UUID} (public key ID) and {@link PrivateKey} which matches the uploaded {@link PublicKey}
      * @throws IOException              - throws if something bad happens
      * @throws URISyntaxException       - throws if the URI is no good
      * @throws NoSuchAlgorithmException - throws if security breaks
      */
-    public static PrivateKey generateAndUploadKey(String keyID, String organizationID, String goldenMacaroon, String baseURL) throws IOException, URISyntaxException, NoSuchAlgorithmException {
+    public static Pair<UUID, PrivateKey> generateAndUploadKey(String keyLabel, String organizationID, String goldenMacaroon, String baseURL) throws IOException, URISyntaxException, NoSuchAlgorithmException {
         final KeyPair keyPair = generateKeyPair();
         final String key = generatePublicKey(keyPair.getPublic());
 
@@ -250,20 +252,22 @@ public class APITestHelpers {
                 .add_first_party_caveat(String.format("organization_id = %s", organizationID))
                 .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
+        final PublicKeyEntity keyEntity;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Key", baseURL));
-            builder.addParameter("label", keyID);
+            builder.addParameter("label", keyLabel);
             final HttpPost post = new HttpPost(builder.build());
             post.setEntity(new StringEntity(key));
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + macaroon);
             post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(post)) {
+                 keyEntity = mapper.readValue(response.getEntity().getContent(), PublicKeyEntity.class);
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
             }
         }
 
-        return keyPair.getPrivate();
+        return Pair.of(keyEntity.getId(), keyPair.getPrivate());
     }
 
     static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
