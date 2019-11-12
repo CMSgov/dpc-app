@@ -16,7 +16,7 @@ import java.time.Duration;
 @SuppressWarnings("rawtypes")
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
-    public AttributionAppModule() {
+    AttributionAppModule() {
         // Not used
     }
 
@@ -42,6 +42,10 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(TruncateDatabase.class);
 
         // Services
+
+        // Healthchecks
+        // Additional health-checks can be added here
+        // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
 
     }
 

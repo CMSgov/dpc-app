@@ -71,8 +71,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(DeleteToken.class);
 
         // Healthchecks
-        // TODO: Fix with DPC-538
-//        binder.bind(AttributionHealthCheck.class);
+        // Additional health-checks can be added here
+        // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
+        // We also get the JobQueueStatus by default, even though it always return healthy
     }
 
     // Since the KeyResource requires access to the Auth DB, we have to manually do the creation and resource injection,
