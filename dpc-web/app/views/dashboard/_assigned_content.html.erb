@@ -1,54 +1,56 @@
 <div class="ds-l-row--12">
   <% @user.organizations.each do |organization| %>
-
     <h2 class="dashboard-section-heading"><%= organization.name %></h2>
-
     <section class="box">
       <div class="box__content">
-
-        <h2 class="box__heading ds-h2">Client tokens</h2>
-
-          <%= link_to new_organization_client_token_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-client-token" } do %>
-            <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <use xlink:href="/assets/solid.svg#plus"></use>
-            </svg>
-            New token
-          <% end %>
-
-          <div class="ds-l-row">
+        <div class="box__header">
+          <h2 class="box__heading">Client tokens</h2>
+          <div class="box__header__actions">
+            <%= link_to new_organization_client_token_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-client-token" } do %>
+              <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#plus"></use>
+              </svg>
+              New token
+            <% end %>
+          </div>
+        </div>
+        <div class="ds-l-row">
           <div class="ds-l-col--12">
             <% organization.registered_organizations.each do |reg_org| %>
               <% reg_org.client_tokens.each do |token| %>
-                <div class="module-container">
-                  <div class="module-container__primary">
-                    <h3 class="module-container__heading"><%= token['label'] %></h3>
-                    <div class="ds-u-margin-bottom--1">
-                      <label class="ds-u-margin-right--1 ds-u-color--muted">Created at:</label>
-                      <%= token['createdAt'] %>
+                <ul class="credentials">
+                  <li class="credential">
+                    <div class="credential__body">
+                      <h3 class="credential__name"><%= token['label'] %></h3>
+                      <div class="credential__meta">
+                        <p>Created: <%= Date.parse(token['createdAt']).strftime("%m/%d/%Y at %I:%M%p") %></p>
+                        <p>Expires: <%= Date.parse(token['expiresAt']).strftime("%m/%d/%Y at %I:%M%p") %></p>
+                      </div>
                     </div>
+                    <div class="credential__actions">
 
-                    <div class="ds-u-margin-bottom--1">
-                      <label class="ds-u-margin-right--1 ds-u-color--muted">Expires at:</label>
-                      <%= token['expiresAt'] %>
                     </div>
-                  </div>
-                </div>
+                  </li>
+                </ul>
               <% end %>
             <% end %>
           </div>
       </div>
     </section>
-
     <section class="box">
       <div class="box__content">
-        <h2 class="box__heading">Public Keys</h2>
+        <div class="box__header">
+          <h2 class="box__heading">Public Keys</h2>
+          <div class="box__header__actions">
 
-        <div class="ds-l-row--12">
-          <div class="ds-l-col--12">
-            No keys yet.
           </div>
         </div>
+        <p>You have not added any public keys.</p>
       </div>
     </section>
   <% end %>
 </div>
+
+<p><svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <use xlink:href="/assets/solid.svg#exclamation-triangle"></use>
+</svg> You will need <strong>both</strong> client tokens and public keys to use the API</p>
