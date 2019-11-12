@@ -39,6 +39,8 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         arguments.addArgument("admin-url", "http://localhost:3002/tasks");
         arguments.addArgument("attribution-url", "http://localhost:3500/v1");
         arguments.addArgument("seed-file", "src/main/resources/test_associations.csv");
+        arguments.addArgument("provider-bundle", "src/main/resources/provider_bundle.json");
+        arguments.addArgument("patient-bundle", "src/main/resources/patient_bundle.json");
 
         return arguments;
     }
@@ -111,7 +113,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         logger.debug("Submitting practitioners");
         final SampleResult practitionerSample = new SampleResult();
         practitionerSample.sampleStart();
-        final List<String> providerNPIs = ClientUtils.submitPractitioners(this.getClass(), ctx, exportClient);
+        final List<String> providerNPIs = ClientUtils.submitPractitioners(javaSamplerContext.getParameter("provider-bundle"), this.getClass(), ctx, exportClient);
         practitionerSample.sampleEnd();
         practitionerSample.setSuccessful(true);
         smokeTestResult.addSubResult(practitionerSample);
@@ -120,7 +122,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         final SampleResult patientSample = new SampleResult();
 
         patientSample.sampleStart();
-        final Map<String, Reference> patientReferences = ClientUtils.submitPatients(this.getClass(), ctx, exportClient);
+        final Map<String, Reference> patientReferences = ClientUtils.submitPatients(javaSamplerContext.getParameter("patient-bundle"), this.getClass(), ctx, exportClient);
         patientSample.setSuccessful(true);
         patientSample.sampleEnd();
         smokeTestResult.addSubResult(patientSample);
