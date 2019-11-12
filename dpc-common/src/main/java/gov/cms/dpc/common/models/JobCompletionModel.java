@@ -2,6 +2,7 @@ package gov.cms.dpc.common.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -90,10 +91,12 @@ public class JobCompletionModel {
             this.length = length;
         }
 
+        @JsonProperty("https://dpc.cms.gov/checksum")
         public String getChecksum() {
             return checksum;
         }
 
+        @JsonProperty("https://dpc.cms.gov/file_length")
         public Long getLength() {
             return length;
         }

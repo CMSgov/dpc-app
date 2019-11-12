@@ -1379,8 +1379,8 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job} \
     "type": "ExplanationOfBenefit",
     "url": "https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson",
     "extension": {
-        "checksum": "sha256:8b74ba377554fa73de2a2da52cab9e1d160550247053e4d6aba1968624c67b10",
-        "length": 2468
+        "https://dpc.cms.gov/checksum": "sha256:8b74ba377554fa73de2a2da52cab9e1d160550247053e4d6aba1968624c67b10",
+        "https://dpc.cms.gov/file_length": 2468
     }
   }
 ],
