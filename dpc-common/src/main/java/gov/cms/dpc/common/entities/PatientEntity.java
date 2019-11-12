@@ -167,6 +167,7 @@ public class PatientEntity implements Serializable {
         this.setPatientFirstName(updated.getPatientFirstName());
         this.setPatientLastName(updated.getPatientLastName());
         this.setDob(updated.getDob());
+        this.setGender(updated.getGender());
         return this;
     }
 

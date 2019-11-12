@@ -52,17 +52,17 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertEquals(1, specificSearch.getTotal(), "Should have a single patient");
 
-        // Fetch the provider directly
+        // Fetch the patient directly
         final Patient foundPatient = (Patient) specificSearch.getEntryFirstRep().getResource();
 
-        final Patient queriedProvider = client
+        final Patient queriedPatient = client
                 .read()
                 .resource(Patient.class)
                 .withId(foundPatient.getIdElement())
                 .encodedJson()
                 .execute();
 
-        assertTrue(foundPatient.equalsDeep(queriedProvider), "Search and GET should be identical");
+        assertTrue(foundPatient.equalsDeep(queriedPatient), "Search and GET should be identical");
 
         // Create a new org and make sure it has no providers
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
