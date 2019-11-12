@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.auth;
 
 import com.github.nitram509.jmacaroons.Macaroon;
+import gov.cms.dpc.api.auth.filters.AdminAuthFilter;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -46,7 +47,7 @@ class AdminAuthFilterTests {
     }
 
     @Test
-    void ensureGoldenMacaroonPasses() throws IOException, AuthenticationException {
+    void ensureGoldenMacaroonPasses() throws AuthenticationException {
         // Create Golden Macaroon
         final Macaroon m1 = bakery.createMacaroon(Collections.emptyList());
         final String macaroonValue = new String(this.bakery.serializeMacaroon(m1, true), StandardCharsets.UTF_8);

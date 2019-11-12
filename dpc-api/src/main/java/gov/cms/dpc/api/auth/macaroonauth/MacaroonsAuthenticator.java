@@ -1,8 +1,9 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.macaroonauth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.api.auth.DPCAuthCredentials;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -24,12 +25,12 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
     private final IGenericClient client;
 
     @Inject
-    MacaroonsAuthenticator(IGenericClient client) {
+    public MacaroonsAuthenticator(IGenericClient client) {
         this.client = client;
     }
 
     @Override
-    public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) throws AuthenticationException {
+    public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) {
         logger.debug("Performing token authentication");
 
         // If we don't have a path authorizer, just return the principal

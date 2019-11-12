@@ -86,4 +86,14 @@
         </createProcedure>
     </changeSet>
 
+    <changeSet id="add-keyid-column" author="nickrobison-usds">
+        <addColumn tableName="ORGANIZATION_KEYS">
+            <column name="label" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        
+        <addUniqueConstraint tableName="ORGANIZATION_KEYS" columnNames="organization_id, label"/>
+    </changeSet>
+
 </databaseChangeLog>

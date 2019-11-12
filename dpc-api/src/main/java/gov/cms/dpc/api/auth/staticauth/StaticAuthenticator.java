@@ -1,8 +1,9 @@
-package gov.cms.dpc.api.auth;
+package gov.cms.dpc.api.auth.staticauth;
 
+import gov.cms.dpc.api.auth.DPCAuthCredentials;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.inject.Inject;
@@ -21,7 +22,7 @@ public class StaticAuthenticator implements Authenticator<DPCAuthCredentials, Or
     }
 
     @Override
-    public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) throws AuthenticationException {
+    public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) {
 
         // Return a test organization
 

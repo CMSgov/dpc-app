@@ -14,8 +14,8 @@ public class VersionCaveatSupplier implements CaveatSupplier {
 
     private final String tokenVersion;
 
-    public VersionCaveatSupplier(TokenPolicy policy) {
-        this.tokenVersion = Integer.toString(policy.getVersionPolicy().getCurrentVersion());
+    public VersionCaveatSupplier(int tokenVersion) {
+        this.tokenVersion = Integer.toString(tokenVersion);
     }
 
     @Override

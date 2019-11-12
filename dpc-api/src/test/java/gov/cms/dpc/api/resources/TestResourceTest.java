@@ -5,14 +5,6 @@ import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
-import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRValidationExceptionHandler;
-import gov.cms.dpc.fhir.validations.DPCProfileSupport;
-import gov.cms.dpc.fhir.validations.ProfileValidator;
-import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
-import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -22,15 +14,12 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

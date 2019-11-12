@@ -1,8 +1,10 @@
 package gov.cms.dpc.api.auth;
 
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.api.auth.filters.AdminAuthFilter;
+import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
+import gov.cms.dpc.api.auth.filters.PrincipalInjectionAuthFilter;
 import gov.cms.dpc.api.jdbi.TokenDAO;
-import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
