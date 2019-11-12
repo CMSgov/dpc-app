@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import static gov.cms.dpc.api.APITestHelpers.MacaroonsInterceptor;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,7 +30,7 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
         final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, getAdminURL());
 
         // Now, try to read the organization, which should succeed
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Organization organization = client
                 .read()
@@ -55,7 +55,7 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
         // Manually build the FHIR client, so we can use custom Macaroon values
         final IGenericClient client = ctx.newRestfulGenericClient(getBaseURL());
         // Try for empty Macaroon
-        client.registerInterceptor(new MacaroonsInterceptor(""));
+        client.registerInterceptor(new APIAuthHelpers.MacaroonsInterceptor(""));
 
         final IReadExecutable<Organization> fetchOrg = client
                 .read()
@@ -66,7 +66,7 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
         assertThrows(AuthenticationException.class, fetchOrg::execute, "Should throw exception with empty Token");
 
         final IGenericClient c2 = ctx.newRestfulGenericClient(getBaseURL());
-        c2.registerInterceptor(new MacaroonsInterceptor(Base64.getUrlEncoder().encodeToString("not a valid {token}".getBytes(StandardCharsets.UTF_8))));
+        c2.registerInterceptor(new APIAuthHelpers.MacaroonsInterceptor(Base64.getUrlEncoder().encodeToString("not a valid {token}".getBytes(StandardCharsets.UTF_8))));
 
         final IReadExecutable<Organization> fo2 = c2
                 .read()

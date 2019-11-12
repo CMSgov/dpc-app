@@ -1,8 +1,8 @@
 package gov.cms.dpc.api.auth.jwt;
 
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
@@ -36,7 +36,7 @@ class JwtKeyResolverTests {
 
     @BeforeAll
     static void setup() throws IOException, NoSuchAlgorithmException {
-        keyPair = APITestHelpers.generateKeyPair();
+        keyPair = APIAuthHelpers.generateKeyPair();
         PublicKeyDAO dao = mock(PublicKeyDAO.class);
         // Bad entity with malformed key
         final PublicKeyEntity badEntity = mock(PublicKeyEntity.class);
