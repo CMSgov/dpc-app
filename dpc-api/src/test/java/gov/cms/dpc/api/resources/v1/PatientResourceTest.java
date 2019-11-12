@@ -9,6 +9,7 @@ import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +33,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void ensurePatientsExist() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, KEY_ID, privateKey);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = client
@@ -69,10 +71,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
         // Submit a new public key to use for JWT flow
         final String keyID = "new-key";
-        final PrivateKey privateKey = APIAuthHelpers.generateAndUploadKey(keyID, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyID, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        PRIVATE_KEY = uuidPrivateKeyPair.getRight();
 
         // Update the authenticated client to use the new organization
-        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, keyID, privateKey);
+        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, uuidPrivateKeyPair.getLeft(), PRIVATE_KEY);
 
         final Bundle otherPatients = client
                 .search()
@@ -105,11 +108,13 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientRemoval() throws IOException, URISyntaxException {
+    void testPatientRemoval() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getAdminURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, KEY_ID, privateKey);
+        final String keyLabel = "patient-deletion-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         final Bundle patients = client
                 .search()
@@ -153,11 +158,13 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientUpdating() throws IOException, URISyntaxException {
+    void testPatientUpdating() throws IOException, URISyntaxException, NoSuchAlgorithmException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, getAdminURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, KEY_ID, privateKey);
+        final String keyLabel = "patient-update-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         final Bundle patients = client
                 .search()

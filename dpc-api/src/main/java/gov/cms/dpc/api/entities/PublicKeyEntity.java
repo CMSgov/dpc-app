@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.api.converters.PublicKeyBytesConverter;
+import gov.cms.dpc.api.converters.PublicKeyDeserializer;
 import gov.cms.dpc.api.converters.PublicKeySerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
+import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import io.swagger.annotations.ApiModelProperty;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,6 +35,7 @@ public class PublicKeyEntity implements Serializable {
     @NotNull
     @Convert(converter = PublicKeyBytesConverter.class)
     @JsonSerialize(converter = PublicKeySerializer.class)
+    @JsonDeserialize(converter = PublicKeyDeserializer.class)
     @Column(name = "public_key")
     @ApiModelProperty(value = "PEM encoded public key", dataType = "String", example = "---PUBLIC KEY---......---END PUBLIC KEY---")
     private SubjectPublicKeyInfo publicKey;
@@ -40,7 +43,7 @@ public class PublicKeyEntity implements Serializable {
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
     @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
-    @JsonDeserialize(converter = OffsetDateTimeToStringConverter.class)
+    @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
     private OffsetDateTime createdAt;
 
     @NotEmpty

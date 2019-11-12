@@ -13,12 +13,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.persistence.NoResultException;
 import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,10 @@ class JwtKeyResolverTests {
 
     private static JwtKeyResolver resolver;
     private static KeyPair keyPair;
+
+    private final static UUID badKeyID = UUID.randomUUID();
+    private final static UUID correctKeyID = UUID.randomUUID();
+    private final static UUID notRealKeyID = UUID.randomUUID();
 
     @BeforeAll
     static void setup() throws IOException, NoSuchAlgorithmException {
@@ -45,9 +50,9 @@ class JwtKeyResolverTests {
         Mockito.when(goodInfo.getEncoded()).thenReturn(keyPair.getPublic().getEncoded());
         Mockito.when(goodEntity.getPublicKey()).thenReturn(goodInfo);
 
-        Mockito.when(dao.findKeyByLabel("malformed-key")).thenReturn(badEntity);
-        Mockito.when(dao.findKeyByLabel("correct-key")).thenReturn(goodEntity);
-        Mockito.when(dao.findKeyByLabel("not a real key")).thenThrow(NoResultException.class);
+        Mockito.when(dao.fetchPublicKey(badKeyID)).thenReturn(Optional.of(badEntity));
+        Mockito.when(dao.fetchPublicKey(correctKeyID)).thenReturn(Optional.of(goodEntity));
+        Mockito.when(dao.fetchPublicKey(notRealKeyID)).thenReturn(Optional.empty());
         resolver = new JwtKeyResolver(dao);
     }
 
@@ -55,7 +60,7 @@ class JwtKeyResolverTests {
     void testSigningKeyResolver() {
         final JwsHeader headerMock = mock(JwsHeader.class);
         final Claims mockClaims = mock(Claims.class);
-        Mockito.when(headerMock.getKeyId()).thenReturn("correct-key");
+        Mockito.when(headerMock.getKeyId()).thenReturn(correctKeyID.toString());
         final Key key = resolver.resolveSigningKey(headerMock, mockClaims);
 
         assertEquals(keyPair.getPublic(), key, "Keys should match");
@@ -79,23 +84,35 @@ class JwtKeyResolverTests {
     void testMissingSigningKey() {
         final JwsHeader headerMock = mock(JwsHeader.class);
         final Claims mockClaims = mock(Claims.class);
-        Mockito.when(headerMock.getKeyId()).thenReturn("not a real key");
+        Mockito.when(headerMock.getKeyId()).thenReturn(notRealKeyID.toString());
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
-                () -> assertTrue(exception.getMessage().contains("Cannot find public key with label"), "Should have KID message"));
+                () -> assertTrue(exception.getMessage().contains("Cannot find public key with id:"), "Should have KID message"));
     }
 
     @Test
     void testFailingKeyParsing() {
         final JwsHeader headerMock = mock(JwsHeader.class);
         final Claims mockClaims = mock(Claims.class);
-        Mockito.when(headerMock.getKeyId()).thenReturn("malformed-key");
+        Mockito.when(headerMock.getKeyId()).thenReturn(badKeyID.toString());
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
 
         assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("Internal server error", exception.getMessage(), "Should have KID message"));
+    }
+
+    @Test
+    void testNonUUIDKeyID() {
+        final JwsHeader headerMock = mock(JwsHeader.class);
+        final Claims mockClaims = mock(Claims.class);
+        Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
+
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
+
+        assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
+                () -> assertEquals("Invalid Public Key ID", exception.getMessage(), "Should have non-UUID message"));
     }
 }
