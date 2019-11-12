@@ -5,14 +5,15 @@
 
     <section class="box">
       <div class="box__content">
-        <%= link_to new_organization_client_token_path(organization_id: organization.id), class: "utility-button", data: { test: "new-client-token" } do %>
-          <svg class="ds-u-color--success" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <use xlink:href="/assets/solid.svg#plus"></use>
-          </svg>
-          New token
-        <% end %>
 
         <h2 class="box__heading ds-h2">Client tokens</h2>
+
+          <%= link_to new_organization_client_token_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-client-token" } do %>
+            <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <use xlink:href="/assets/solid.svg#plus"></use>
+            </svg>
+            New token
+          <% end %>
 
           <div class="ds-l-row">
           <div class="ds-l-col--12">
