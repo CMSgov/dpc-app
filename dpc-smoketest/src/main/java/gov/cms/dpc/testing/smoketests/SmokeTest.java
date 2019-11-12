@@ -21,14 +21,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 public class SmokeTest extends AbstractJavaSamplerClient {
 
     private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
     private static final String KEY_ID = "smoke-test-key";
-    private static final Random RANDOM = new Random();
 
     private FhirContext ctx;
 
