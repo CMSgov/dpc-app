@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.api.models.CollectionResponse;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -40,7 +41,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
 
         // Do the JWT flow in order to get a correct ORGANIZATION_TOKEN, this is normally handled by the HAPI client
         try {
-            this.fullyAuthedToken = APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
+            this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }

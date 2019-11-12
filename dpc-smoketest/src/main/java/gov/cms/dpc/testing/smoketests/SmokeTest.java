@@ -3,8 +3,9 @@ package gov.cms.dpc.testing.smoketests;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import gov.cms.dpc.api.client.ClientUtils;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.APIAuthHelpers;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -14,6 +15,10 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,6 +26,7 @@ import java.util.UUID;
 public class SmokeTest extends AbstractJavaSamplerClient {
 
     private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
+    private static final String KEY_ID = "smoke-test-key";
 
     private FhirContext ctx;
 
@@ -58,19 +64,18 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
         final String goldenMacaroon;
         try {
-            goldenMacaroon = FHIRHelpers.createGoldenMacaroon(adminURL);
+            goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
         } catch (Exception e) {
             throw new RuntimeException("Failed creating Macaroon", e);
         }
-
-        final IGenericClient adminClient = FHIRHelpers.buildAuthenticatedClient(ctx, hostParam, goldenMacaroon);
+        // Create admin client for registering organization
+        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon);
 
         final SampleResult smokeTestResult = new SampleResult();
         smokeTestResult.sampleStart();
 
         final SampleResult orgRegistrationResult = new SampleResult();
         smokeTestResult.addSubResult(orgRegistrationResult);
-
 
         String token;
         orgRegistrationResult.sampleStart();
@@ -84,8 +89,21 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             orgRegistrationResult.sampleEnd();
         }
 
+        // Create a new public key
+        final Pair<UUID, PrivateKey> keyTuple;
+        try {
+            keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
+        } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
+            throw new RuntimeException("Failed uploading public key", e);
+        }
+
         // Create an authenticated and async client (the async part is ignored by other endpoints)
-        final IGenericClient exportClient = ClientUtils.createExportClient(ctx, hostParam, token);
+        final IGenericClient exportClient;
+        try {
+            exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, String.format("%s/", hostParam), token, keyTuple.getLeft(), keyTuple.getRight());
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException("Cannot create export client", e);
+        }
 
         // Upload a batch of patients and a batch of providers
         logger.debug("Submitting practitioners");
@@ -114,7 +132,17 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
 
         // Run the job
-        ClientUtils.handleExportJob(exportClient, providerNPIs, token);
+        // We need the fully authed access_token, which we'll need to manually pull from the Macaroons Interceptor
+        // Gross, but the other options are even worse
+        final List<Object> interceptors = exportClient.getInterceptorService().getAllRegisteredInterceptors();
+
+        final APIAuthHelpers.MacaroonsInterceptor mInterceptor = interceptors
+                .stream()
+                .filter(interceptor -> interceptor instanceof APIAuthHelpers.MacaroonsInterceptor)
+                .map(APIAuthHelpers.MacaroonsInterceptor.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Cannot get interceptor"));
+        ClientUtils.handleExportJob(exportClient, providerNPIs, mInterceptor.getMacaroon());
         smokeTestResult.setSuccessful(true);
 
         logger.info("Test completed");
