@@ -14,7 +14,6 @@
 
     <properties>
         <mainClass>gov.cms.dpc.consent.DPCConsentService</mainClass>
-        <jooq.version>3.12.1</jooq.version>
     </properties>
 
     <dependencies>

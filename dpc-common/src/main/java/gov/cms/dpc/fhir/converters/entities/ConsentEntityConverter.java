@@ -31,7 +31,7 @@ public class ConsentEntityConverter {
         sb.append(inOrOut);
         sb.append(" for the patient with identifiers [");
         sb.append(noHicn ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn));
-        sb.append(true == noHicn == noMbi ? "" : "], [");
+        sb.append((!noHicn && !noMbi) ? "], [" : "");
         sb.append(noMbi ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi));
         sb.append("]");
 
@@ -51,7 +51,7 @@ public class ConsentEntityConverter {
     private static List<CodeableConcept> category(String loincCode) {
         // there must be a way to look up the code systems used in these CodeableConcept values. what is it?
         CodeableConcept category = new CodeableConcept();
-        category.addCoding().setSystem("http://loinc.org").setCode(loincCode);
+        category.addCoding().setSystem("http://loinc.org").setCode(loincCode).setDisplay(ConsentEntity.CATEGORY_DISPLAY);
         return List.of(category);
     }
 
@@ -65,7 +65,7 @@ public class ConsentEntityConverter {
         c.setDateTime(Date.from(consentEntity.getEffectiveDate().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant()));
         c.setText(narrativeText(consentEntity.getPolicyCode(), consentEntity.getHicn(), consentEntity.getMbi()));
 
-        // hicn or mbi? both?
+        // Per Nick, this should be the PatientResource UUID, which we don't currently have
         c.setPatient(new Reference(new IdType("Patient", consentEntity.getMbi())));
 
         // PolicyRule is a CodeableConcept in r4 but is a string in r3

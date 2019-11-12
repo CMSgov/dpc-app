@@ -22,7 +22,8 @@ public class ConsentEntityConverterTest {
         final Consent result = ConsentEntityConverter.convert(ce);
         assertNotNull(result);
         assertEquals(Consent.ConsentState.ACTIVE, result.getStatus());
-        assertEquals(ConsentEntity.LOINC_CATEGORY, result.getCategoryFirstRep().getCodingFirstRep().getCode());
+        assertEquals(ConsentEntity.CATEGORY_LOINC_CODE, result.getCategoryFirstRep().getCodingFirstRep().getCode());
+        assertEquals(ConsentEntity.CATEGORY_DISPLAY, result.getCategoryFirstRep().getCodingFirstRep().getDisplay());
         assertEquals("Patient/" + TEST_MBI, result.getPatient().getReference());
         assertEquals(ConsentEntity.OPT_IN, result.getPolicyRule());
         assertTrue(result.getPolicy().isEmpty());

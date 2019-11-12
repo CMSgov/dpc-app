@@ -15,7 +15,8 @@ import java.util.UUID;
 
 @Entity(name = "consent")
 public class ConsentEntity implements Serializable {
-    public static final String LOINC_CATEGORY = "64292-6";
+    public static final String CATEGORY_LOINC_CODE = "64292-6";
+    public static final String CATEGORY_DISPLAY = "Release of information consent Document";
     public static final String OPT_IN = "OPTIN";
     public static final String OPT_OUT = "OPTOUT";
     public static final String TREATMENT = "TREAT";
@@ -152,7 +153,7 @@ public class ConsentEntity implements Serializable {
         hicn.ifPresent(ce::setHicn);
         mbi.ifPresent(ce::setMbi);
 
-        ce.setLoincCode(LOINC_CATEGORY);
+        ce.setLoincCode(CATEGORY_LOINC_CODE);
         ce.setPolicyCode(OPT_IN);
         ce.setPurposeCode(TREATMENT);
         ce.setScopeCode(SCOPE_CODE);
