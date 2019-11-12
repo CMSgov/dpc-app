@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.converters;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
-import gov.cms.dpc.api.auth.PublicKeyHandler;
+import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 /**

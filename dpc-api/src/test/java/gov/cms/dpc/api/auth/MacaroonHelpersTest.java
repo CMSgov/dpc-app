@@ -12,15 +12,15 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import static gov.cms.dpc.api.auth.AuthHelpers.TOKEN_URI_PARAM;
+import static gov.cms.dpc.api.auth.MacaroonHelpers.TOKEN_URI_PARAM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("InnerClassMayBeStatic")
-class AuthHelpersTest {
+class MacaroonHelpersTest {
 
-    AuthHelpersTest() {
+    MacaroonHelpersTest() {
         // Not used
     }
 
@@ -38,7 +38,7 @@ class AuthHelpersTest {
             Mockito.when(headers.getFirst(HttpHeaders.AUTHORIZATION)).thenReturn(String.format("Bearer %s", macaroonValue));
 
             final Response response = Response.ok().build();
-            assertEquals(macaroonValue, AuthHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from header");
+            assertEquals(macaroonValue, MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from header");
         }
 
         @Test
@@ -55,7 +55,7 @@ class AuthHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertEquals(macaroonValue, AuthHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from header");
+            assertEquals(macaroonValue, MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from header");
         }
 
         @Test
@@ -71,7 +71,7 @@ class AuthHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertThrows(WebApplicationException.class, () -> AuthHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
+            assertThrows(WebApplicationException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
         }
 
         @Test
@@ -88,7 +88,7 @@ class AuthHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertEquals(macaroonValue, AuthHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from header");
+            assertEquals(macaroonValue, MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from header");
         }
 
         @Test
@@ -105,7 +105,7 @@ class AuthHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertEquals(macaroonValue, AuthHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from header");
+            assertEquals(macaroonValue, MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from header");
         }
 
         @Test
@@ -122,7 +122,7 @@ class AuthHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertEquals(macaroonValue, AuthHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from query param");
+            assertEquals(macaroonValue, MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should have Macaroon from query param");
         }
 
         @Test
@@ -139,7 +139,7 @@ class AuthHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertThrows(WebApplicationException.class, () -> AuthHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
+            assertThrows(WebApplicationException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
         }
 
         @Test
@@ -156,7 +156,7 @@ class AuthHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertThrows(WebApplicationException.class, () -> AuthHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
+            assertThrows(WebApplicationException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
         }
     }
 }

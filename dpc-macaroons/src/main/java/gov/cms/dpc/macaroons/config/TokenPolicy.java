@@ -1,7 +1,5 @@
 package gov.cms.dpc.macaroons.config;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.temporal.ChronoUnit;
@@ -10,12 +8,10 @@ public class TokenPolicy {
 
     @NotNull
     @Valid
-    @JsonProperty("versionPolicy")
     private VersionPolicy versionPolicy = new VersionPolicy();
 
     @NotNull
     @Valid
-    @JsonProperty("expirationPolicy")
     private ExpirationPolicy expirationPolicy = new ExpirationPolicy();
 
     public TokenPolicy() {
