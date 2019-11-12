@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public class MacaroonBakery {
 
-    public static final Charset CAVEAT_CHARSET = StandardCharsets.UTF_8;
+    private static final Charset CAVEAT_CHARSET = StandardCharsets.UTF_8;
     private static final Base64.Encoder encoder = Base64.getUrlEncoder();
     private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
@@ -225,9 +225,9 @@ public class MacaroonBakery {
         }
         // Determine if we're Base64 encoded or not
         byte[] decodedString;
-        // For a V2 JSON macaroon, either '{' or '[' will be the starting value, so we check for the base64 encoded value
+        // For a JSON macaroon, either '{' or '[' will be the starting value, for V1 binary it's 'T', so we check for the base64 encoded value
         final char indexChar = serializedString.charAt(0);
-        if (indexChar == 'e' || indexChar == 'W') {
+        if (indexChar == 'e' || indexChar == 'W' || indexChar == 'T') {
             decodedString = decoder.decode(serializedString.getBytes(CAVEAT_CHARSET));
         } else {
             decodedString = serializedString.getBytes(CAVEAT_CHARSET);
@@ -555,7 +555,7 @@ public class MacaroonBakery {
          * @param caveatSupplier - {@link CaveatSupplier} which generates caveat
          * @return - {@link MacaroonBakeryBuilder}
          */
-        public MacaroonBakeryBuilder addDefaultCaveatSupplier(CaveatSupplier caveatSupplier) {
+        MacaroonBakeryBuilder addDefaultCaveatSupplier(CaveatSupplier caveatSupplier) {
             this.caveatSuppliers.add(caveatSupplier);
             return this;
         }
@@ -566,12 +566,12 @@ public class MacaroonBakery {
          * @param caveatVerifier - {@link CaveatVerifier} to apply to each {@link Macaroon}
          * @return - {@link MacaroonBakeryBuilder}
          */
-        public MacaroonBakeryBuilder addDefaultVerifier(CaveatVerifier caveatVerifier) {
+        MacaroonBakeryBuilder addDefaultVerifier(CaveatVerifier caveatVerifier) {
             this.caveatVerifiers.add(caveatVerifier);
             return this;
         }
 
-        public MacaroonBakeryBuilder withKeyPair(BakeryKeyPair keyPair) {
+        MacaroonBakeryBuilder withKeyPair(BakeryKeyPair keyPair) {
             this.keyPair = keyPair;
             return this;
         }
@@ -594,10 +594,7 @@ public class MacaroonBakery {
         }
 
         private BakeryKeyPair getKeyPair() {
-            if (this.keyPair != null) {
-                return this.keyPair;
-            }
-            return BakeryKeyPair.generate();
+            return Objects.requireNonNullElseGet(this.keyPair, BakeryKeyPair::generate);
         }
     }
 
