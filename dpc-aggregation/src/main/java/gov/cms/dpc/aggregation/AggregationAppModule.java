@@ -24,6 +24,12 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     public void configure(Binder binder) {
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
+
+        // Healthchecks
+        // Additional health-checks can be added here
+        // By default, Dropwizard adds a check for Hibernate and each additonal database (e.g. auth, queue, etc)
+        // We also have JobQueueHealthy which ensures the queue is operation correctly
+        // We have the BlueButton Client healthcheck as well
     }
 
     @Provides
