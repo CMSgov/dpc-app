@@ -3,6 +3,8 @@ settings:
     HOST: https://dpc.cms.gov/api/v1
     ADMIN_URL: http://dpc.cms.gov:9900/tasks
     SEED_FILE: src/main/resources/test_associations-dpr.csv
+    PROVIDER_BUNDLE: provider_bundle-dpr.json
+    PATIENT_BUNDLE: patient_bundle-dpr.json
   artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
 
 included-configs:

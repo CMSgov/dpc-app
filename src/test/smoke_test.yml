@@ -12,6 +12,8 @@ scenarios:
       host: ${HOST}
       admin-url: ${ADMIN_URL}
       seed-file: ${SEED_FILE}
+      provider-bundle: ${PROVIDER_BUNDLE}
+      patient-bundle: ${PATIENT_BUNDLE}
     script: src/main/resources/SmokeTest.jmx
 
 reporting:
