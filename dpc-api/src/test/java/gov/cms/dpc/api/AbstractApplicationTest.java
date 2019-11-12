@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.APITestHelpers.TASK_URL;
+import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
