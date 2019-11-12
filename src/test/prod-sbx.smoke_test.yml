@@ -2,6 +2,7 @@ settings:
   env:
     HOST: https://dpc.cms.gov/api/v1
     ADMIN_URL: http://dpc.cms.gov:9900/tasks
+    SEED_FILE: src/main/resources/test_associations-dpr.csv
   artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
 
 included-configs:

@@ -11,6 +11,7 @@ scenarios:
     properties:
       host: ${HOST}
       admin-url: ${ADMIN_URL}
+      seed-file: ${SEED_FILE}
     script: src/main/resources/SmokeTest.jmx
 
 reporting:
