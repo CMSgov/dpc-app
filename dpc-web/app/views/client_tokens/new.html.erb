@@ -10,18 +10,25 @@
 
   <section class="box">
     <div class="box__content">
+
+      <h2 class="box__heading">Client token for <%= @organization.name %></h2>
       <%= form_tag organization_client_tokens_path(organization_id: params[:organization_id]), method: :post do %>
-        <div class="field">
-          <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
-          <%= select_tag :api_environment, options_for_select(@organization.api_environment_strings, params[:api_environment]), include_blank: true %>
-        </div>
 
         <div class="field">
           <%= label_tag :label, "Label", class: "ds-c-label" %>
           <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
+          <span class="ds-c-field__hint">Choose a descriptive name that includes environment, such as “EMR synthetic sandbox”</span>
         </div>
 
-        <%= submit_tag "Create", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+
+        <div class="field ds-u-margin-y--5">
+          <%= label_tag :api_environment, "In what environment will this token be used?", class: "ds-c-label" %>
+          <%= select_tag :api_environment, options_for_select(@organization.api_environment_strings, params[:api_environment]), include_blank: true ,class: "ds-c-field" %>
+        </div>
+
+
+
+        <%= submit_tag "Create token", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
       <% end %>
     </div>
   </section>
