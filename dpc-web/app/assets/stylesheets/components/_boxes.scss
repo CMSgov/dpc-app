@@ -6,6 +6,10 @@
   margin: $spacer-3 0;
 }
 
+.box--dashed {
+  border-style: dashed;
+}
+
 .box__content {
   flex: 1 0 0;
   padding: $spacer-4;
