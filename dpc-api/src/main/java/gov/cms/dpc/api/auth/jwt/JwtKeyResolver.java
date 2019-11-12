@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.security.Key;
+import java.util.UUID;
 
 public class JwtKeyResolver extends SigningKeyResolverAdapter {
 
@@ -35,19 +35,20 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
             throw new WebApplicationException("JWT must have KID field", Response.Status.UNAUTHORIZED);
         }
 
-        final PublicKeyEntity keyByLabel;
+        final PublicKeyEntity keyEntity;
         try {
-            keyByLabel = this.dao.findKeyByLabel(keyId);
-        } catch (NoResultException e) {
-            throw new WebApplicationException(String.format("Cannot find public key with label: %s", keyId), Response.Status.UNAUTHORIZED);
+            keyEntity = this.dao.fetchPublicKey(UUID.fromString(keyId))
+                    .orElseThrow(() -> new WebApplicationException(String.format("Cannot find public key with id: %s", keyId), Response.Status.UNAUTHORIZED));
+        } catch (IllegalArgumentException e) {
+            logger.error("Cannot convert '{}' to UUID", keyId, e);
+            throw new WebApplicationException("Invalid Public Key ID", Response.Status.UNAUTHORIZED);
         }
 
         try {
-            return PublicKeyHandler.publicKeyFromEntity(keyByLabel);
+            return PublicKeyHandler.publicKeyFromEntity(keyEntity);
         } catch (PublicKeyException e) {
             logger.error("Cannot convert public key", e);
             throw new WebApplicationException("Internal server error", Response.Status.INTERNAL_SERVER_ERROR);
         }
-
     }
 }
