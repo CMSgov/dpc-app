@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -223,8 +224,10 @@ public class JobResourceTest {
     public void testBuildExtension() {
         final var resource = new JobResource(null, "", "src/test/resources");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), ResourceType.Patient, 0, 11);
-        JobCompletionModel.OutputEntryExtension extension = resource.buildExtension(file);
-        assertAll(() -> assertEquals("sha256:9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b", extension.getChecksum()),
-                () -> assertEquals(7202L, extension.getLength()));
+        List<JobCompletionModel.OutputEntryExtension> extension = resource.buildExtension(file);
+        assertAll(() -> assertEquals(JobCompletionModel.CHECKSUM_URL, extension.get(0).getUrl()),
+                () -> assertEquals("sha256:9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b", extension.get(0).getValueString()),
+                () -> assertEquals(JobCompletionModel.FILE_LENGTH_URL, extension.get(1).getUrl()),
+                () -> assertEquals(BigDecimal.valueOf(7202), extension.get(1).getValueDecimal()));
     }
 }
