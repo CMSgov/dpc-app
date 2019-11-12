@@ -1,57 +1,42 @@
 <% title "Welcome, #{@user.first_name}!" %>
 
 <div class="ds-l-container">
-
-  <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Welcome, <%= @user.first_name %></h1>
-
+  <div class="ds-l-row--12">
     <% if @user.unassigned? %>
       <%= render 'unassigned_content' %>
     <% else %>
       <%= render 'assigned_content' %>
     <% end %>
+  </div>
 </div>
 
-<div class="ds-l-container">
-
-  <h2 class="dashboard-section-heading">Additional info</h2>
-
-  <div class="ds-l-row ds-u-margin-top--0">
-
-    <div class="ds-l-col--12 ds-l-sm-col--6">
-      <div class="box">
-      <div class="box__content">
-      <h3>Join the Google Group.</h3>
-      <p>Hear announcements, ask questions, and give feedback throughout the pilot process.</p>
-      <p class="ds-u-margin-top--3 ds-u-margin-bottom--0"><a class="ds-c-button" href="https://groups.google.com/d/forum/dpc-api">Join the Google Group</a></p>
-      </div>
-      </div>
+<div class="ds-l-row dashboard-grid">
+  <div class="ds-l-col--12 ds-l-sm-col--6 dashboard-grid__item">
+    <div class="dashboard-grid__content">
+    <h3>Join the Google Group.</h3>
+    <p>Hear announcements, ask questions, and give feedback throughout the pilot process.</p>
+    <p class="ds-u-margin-top--3 ds-u-margin-bottom--0"><a class="ds-c-button" href="https://groups.google.com/d/forum/dpc-api">Join the Google Group</a></p>
     </div>
-    <div class="ds-l-col--12 ds-l-sm-col--6">
-      <div class="box">
-      <div class="box__content">
-      <h3>Ask your software vendors work with you</h3>
-      <p>Tell your software vendors to read the developer documentation so that they can support you in the pilot</p>
-      <p class="ds-u-margin-top--3 ds-u-margin-bottom--0"><%= link_to "API documentation", docs_path, :class => "ds-c-button" %></p>
-      </div>
-      </div>
+  </div>
+  <div class="ds-l-col--12 ds-l-sm-col--6 dashboard-grid__item">
+    <div class="dashboard-grid__content">
+    <h3>Ask your software vendors work with you</h3>
+    <p>Tell your software vendors to read the developer documentation so that they can support you in the pilot</p>
+    <p class="ds-u-margin-top--3 ds-u-margin-bottom--0"><%= link_to "API documentation", docs_path, :class => "ds-c-button" %></p>
     </div>
-    <div class="ds-l-col--12 ds-l-sm-col--6">
-      <div class="box">
-      <div class="box__content">
-      <h3>View Frequently Asked Questions </h3>
-      <p>Read answers to common questions that will be updated as the pilot program progresses.</p>
-      <p class="ds-u-margin-top--3 ds-u-margin-bottom--0"><%= link_to "Frequently asked questions", faq_path, :class => "ds-c-button" %></p>
-      </div>
-      </div>
+  </div>
+  <div class="ds-l-col--12 ds-l-sm-col--6 dashboard-grid__item">
+    <div class="dashboard-grid__content">
+    <h3>View Frequently Asked Questions </h3>
+    <p>Read answers to common questions that will be updated as the pilot program progresses.</p>
+    <p class="ds-u-margin-top--3 ds-u-margin-bottom--0"><%= link_to "Frequently asked questions", faq_path, :class => "ds-c-button" %></p>
     </div>
-    <div class="ds-l-col--12 ds-l-sm-col--6">
-      <div class="box">
-      <div class="box__content">
-      <h3>View general information about the pilot</h3>
-      <p>Learn more about the goals of the pilot, the process, and the data involved.</p>
-      <p class="ds-u-margin-top--3 ds-u-margin-bottom--0"> <%= link_to "About the pilot", home_path, :class => "ds-c-button" %></p>
-      </div>
-      </div>
+  </div>
+  <div class="ds-l-col--12 ds-l-sm-col--6 dashboard-grid__item">
+    <div class="dashboard-grid__content">
+    <h3>View general information about the pilot</h3>
+    <p>Learn more about the goals of the pilot, the process, and the data involved.</p>
+    <p class="ds-u-margin-top--3 ds-u-margin-bottom--0"> <%= link_to "About the pilot", home_path, :class => "ds-c-button" %></p>
     </div>
   </div>
 </div>
