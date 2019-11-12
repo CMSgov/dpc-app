@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -91,11 +92,9 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
 
         // Create a new public key
-        // FIXME: This is a hack until DPC-784 is merged, this avoids duplicate key labels during smoke testing
-        final String customKeyID = String.format("%s:%d", KEY_ID, RANDOM.nextInt());
-        final PrivateKey privateKey;
+        final Pair<UUID, PrivateKey> keyTuple;
         try {
-            privateKey = APIAuthHelpers.generateAndUploadKey(customKeyID, organizationID, goldenMacaroon, hostParam);
+            keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
         } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
             throw new RuntimeException("Failed uploading public key", e);
         }
@@ -103,7 +102,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
         try {
-            exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, String.format("%s/", hostParam), token, customKeyID, privateKey);
+            exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, String.format("%s/", hostParam), token, keyTuple.getLeft(), keyTuple.getRight());
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException("Cannot create export client", e);
         }
