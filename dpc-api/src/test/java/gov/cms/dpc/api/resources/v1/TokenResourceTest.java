@@ -50,7 +50,9 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     void testTokenList() throws IOException {
 
         final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
-        assertFalse(tokens.getEntities().isEmpty(), "Should have tokens");
+        assertAll(() -> assertFalse(tokens.getEntities().isEmpty(), "Should have tokens"),
+                () -> assertEquals(3, tokens.getCount(), "Should have 3 tokens"),
+                () -> assertEquals(LocalDate.now(ZoneOffset.UTC), tokens.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate(), "Should have created date"));
         final TokenEntity token = ((List<TokenEntity>) tokens.getEntities()).get(0);
 
         assertAll(() -> assertEquals(String.format("Token for organization %s.", ORGANIZATION_ID), token.getLabel(), "Should have auto-generated label"),
@@ -130,7 +132,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         }
 
         final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
-        assertEquals(1, tokens.getEntities().stream().filter(token -> token.getExpiresAt().toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
+        assertEquals(1, tokens.getEntities().stream().filter(token -> token.getExpiresAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
     }
 
     @Test
