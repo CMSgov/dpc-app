@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
@@ -25,7 +26,7 @@ import java.security.PrivateKey;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.APITestHelpers.TASK_URL;
+import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -66,12 +67,12 @@ public class AbstractSecureApplicationTest {
         ctx = FhirContext.forDstu3();
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses
-        GOLDEN_MACAROON = APITestHelpers.createGoldenMacaroon();
+        GOLDEN_MACAROON = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, TASK_URL);
 
         // Register Public key
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APITestHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
         PRIVATE_KEY = uuidPrivateKeyPair.getRight();
         PUBLIC_KEY_ID = uuidPrivateKeyPair.getLeft();
     }

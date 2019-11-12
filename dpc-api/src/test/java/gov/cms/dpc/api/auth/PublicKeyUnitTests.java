@@ -9,6 +9,7 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -51,12 +52,12 @@ class PublicKeyUnitTests {
 
         @Test
         void testMediaType() throws NoSuchAlgorithmException {
-            final KeyPair key = APITestHelpers.generateKeyPair();
+            final KeyPair key = APIAuthHelpers.generateKeyPair();
 
             final Response response = RESOURCE
                     .target("/Key")
                     .request()
-                    .post(Entity.entity(APITestHelpers.generatePublicKey(key.getPublic()), MediaType.APPLICATION_JSON));
+                    .post(Entity.entity(APIAuthHelpers.generatePublicKey(key.getPublic()), MediaType.APPLICATION_JSON));
 
             assertEquals(415, response.getStatus(), "Should not support FHIR JSON");
         }
@@ -74,11 +75,11 @@ class PublicKeyUnitTests {
 
         @Test
         void testKeyDefaultLabel() throws NoSuchAlgorithmException {
-            final KeyPair key = APITestHelpers.generateKeyPair();
+            final KeyPair key = APIAuthHelpers.generateKeyPair();
             final Response response = RESOURCE
                     .target("/Key")
                     .request()
-                    .post(Entity.entity(APITestHelpers.generatePublicKey(key.getPublic()), MediaType.TEXT_PLAIN));
+                    .post(Entity.entity(APIAuthHelpers.generatePublicKey(key.getPublic()), MediaType.TEXT_PLAIN));
 
             assertAll(() -> assertEquals(200, response.getStatus(), "Should have succeeded"),
                     () -> assertTrue(response.readEntity(KeyView.class).label.startsWith("key:"), "Should have default label"));
@@ -87,12 +88,12 @@ class PublicKeyUnitTests {
         @Test
         void testKeyCustomLabel() throws NoSuchAlgorithmException {
             final String label = "This is a label";
-            final KeyPair key = APITestHelpers.generateKeyPair();
+            final KeyPair key = APIAuthHelpers.generateKeyPair();
             final Response response = RESOURCE
                     .target("/Key")
                     .queryParam("label", label)
                     .request()
-                    .post(Entity.entity(APITestHelpers.generatePublicKey(key.getPublic()), MediaType.TEXT_PLAIN));
+                    .post(Entity.entity(APIAuthHelpers.generatePublicKey(key.getPublic()), MediaType.TEXT_PLAIN));
 
             assertAll(() -> assertEquals(200, response.getStatus(), "Should have succeeded"),
                     () -> assertEquals(label, response.readEntity(KeyView.class).label, "Should have default label"));

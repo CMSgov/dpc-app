@@ -47,7 +47,6 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
         query.where(builder.equal(root.get(PublicKeyEntity_.label), keyLabel));
-
         return currentSession().createQuery(query).getSingleResult();
     }
 

@@ -14,6 +14,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -54,7 +55,7 @@ class JWTUnitTests {
 
     private JWTUnitTests() {
         try {
-            JWTKeys.put(correctKEYID, APITestHelpers.generateKeyPair());
+            JWTKeys.put(correctKEYID, APIAuthHelpers.generateKeyPair());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -205,7 +206,7 @@ class JWTUnitTests {
         @Test
         void testMissingJWTPublicKey() throws NoSuchAlgorithmException {
             // Submit JWT with missing key
-            final KeyPair keyPair = APITestHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
 
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", UUID.randomUUID())
@@ -259,7 +260,7 @@ class JWTUnitTests {
 
         @Test
         void testJWTWrongSigningKey() throws NoSuchAlgorithmException {
-            final KeyPair keyPair = APITestHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
 
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", correctKEYID)

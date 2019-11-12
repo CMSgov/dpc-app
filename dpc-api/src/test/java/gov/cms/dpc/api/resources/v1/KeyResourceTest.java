@@ -2,11 +2,10 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
+import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.models.KeyView;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -22,16 +21,11 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.time.OffsetDateTime;
 import java.util.Base64;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,7 +38,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         this.mapper = new ObjectMapper();
         // Do the JWT flow in order to get a correct ORGANIZATION_TOKEN, this is normally handled by the HAPI client
         try {
-            this.fullyAuthedToken = APITestHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
+            this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -158,18 +152,4 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         return String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    static class KeyView implements Serializable {
-        public static final long serialVersionUID = 42L;
-
-        public UUID id;
-        public String publicKey;
-        @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
-        public OffsetDateTime createdAt;
-        public String label;
-
-        KeyView() {
-            // Not used
-        }
-    }
 }
