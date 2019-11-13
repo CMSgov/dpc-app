@@ -39,38 +39,39 @@
     </section>
     <section class="box">
       <div class="box__content">
-        <%= link_to new_organization_public_key_path(organization_id: organization.id), class: "utility-button", data: { test: "new-public-key" } do %>
-          <svg class="ds-u-color--success" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <use xlink:href="/assets/solid.svg#plus"></use>
-          </svg>
-          New key
-        <% end %>
 
-        <h2 class="box__heading">Public Keys</h2>
-
-        <div class="ds-l-row--12">
-          <div class="ds-l-col--12">
-            <% organization.registered_organizations.each do |reg_org| %>
-              <% reg_org.public_keys.each do |key| %>
-                <div class="module-container">
-                  <div class="module-container__primary">
-                    <h3 class="module-container__heading"><%= key['id'] %></h3>
-                    <div class="ds-u-margin-bottom--1">
-                      <label class="ds-u-margin-right--1 ds-u-color--muted">Label:</label>
-                      <%= key['label'] %>
-                    </div>
-
-                    <div class="ds-u-margin-bottom--1">
-                      <label class="ds-u-margin-right--1 ds-u-color--muted">Created at:</label>
-                      <%= key['createdAt'] %>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
+        <div class="box__header">
+          <h2 class="box__heading">Public Keys</h2>
+          <div class="box__header__actions">
+            <%= link_to new_organization_public_key_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-public-key" } do %>
+              <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#plus"></use>
+              </svg>
+              Add key
             <% end %>
           </div>
         </div>
-        <p>You have not added any public keys.</p>
+        <% organization.registered_organizations.each do |reg_org| %>
+          <% reg_org.public_keys.each do |key| %>
+            <ul class="credentials">
+              <li class="credential">
+                <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <use xlink:href="/assets/solid.svg#key"></use>
+                </svg>
+                <div class="credential__body">
+                  <h3 class="credential__name"><%= key['label'] %></h3>
+                  <div class="credential__meta">
+                    <p class="ds-u-color--base"><%= key['id'] %></p>
+                    <p>Created: <%= formatted_datestr(key['createdAt']) %></p>
+                  </div>
+                </div>
+                <div class="credential__actions">
+
+                </div>
+              </li>
+            </ul>
+          <% end %>
+        <% end %>
       </div>
     </section>
   <% end %>
