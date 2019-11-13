@@ -13,5 +13,8 @@ class RegisteredOrganization < ApplicationRecord
   def client_tokens
     # [{'id' => '4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66', 'label' => 'Test Token 1', 'createdAt' => Time.now.iso8601, 'expiresAt' => Time.now.iso8601}]
     ClientTokenManager.new(api_env: api_env, organization: organization).client_tokens
+  rescue
+    Rails.logger.warn 'Could not retrieve client tokens'
+    []
   end
 end
