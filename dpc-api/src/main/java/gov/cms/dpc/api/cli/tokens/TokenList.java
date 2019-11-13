@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.models.CollectionResponse;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -19,6 +20,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TokenList extends AbstractAdminCommand {
@@ -64,9 +66,9 @@ public class TokenList extends AbstractAdminCommand {
                     System.exit(1);
                 }
 
-                List<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<List<TokenEntity>>() {
+                CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
                 });
-                generateTable(tokens);
+                generateTable(new ArrayList<>(tokens.getEntities()));
             }
         }
     }

@@ -49,7 +49,7 @@ public class GenerateClientTokens extends Task {
         if (organizationCollection.isEmpty()) {
             logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
             final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
-            final byte[] serialized = macaroon.serialize(MacaroonVersion.SerializationVersion.V2_JSON).getBytes(StandardCharsets.UTF_8);
+            final byte[] serialized = macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY).getBytes(StandardCharsets.UTF_8);
             output.write(this.encoder.encodeToString(serialized));
         } else {
             final String organization = organizationCollection.asList().get(0);
