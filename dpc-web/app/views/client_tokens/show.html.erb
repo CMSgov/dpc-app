@@ -33,7 +33,7 @@
 
       <div class="ds-u-margin-bottom--1">
         <label class="ds-u-margin-right--1 ds-u-color--muted">Created at:</label>
-        <%= @client_token['createdAt'] %>
+        <%= formatted_datestr(@client_token['createdAt']) %>
       </div>
     </div>
   </section>

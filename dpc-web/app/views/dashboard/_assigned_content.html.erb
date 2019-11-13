@@ -23,8 +23,8 @@
                     <div class="credential__body">
                       <h3 class="credential__name"><%= token['label'] %></h3>
                       <div class="credential__meta">
-                        <p>Created: <%= Date.parse(token['createdAt']).strftime("%m/%d/%Y at %I:%M%p") %></p>
-                        <p>Expires: <%= Date.parse(token['expiresAt']).strftime("%m/%d/%Y at %I:%M%p") %></p>
+                        <p>Created: <%= formatted_datestr(token['createdAt']) %></p>
+                        <p>Expires: <%= formatted_datestr(token['expiresAt']) %></p>
                       </div>
                     </div>
                     <div class="credential__actions">

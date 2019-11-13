@@ -38,12 +38,12 @@ RSpec.feature 'managing client tokens' do
 
       expect(page).to have_content('Sandbox Token 1')
       expect(page).to have_content('1234567890')
-      expect(page).to have_content('2019-11-07T17:15:22.781Z')
+      expect(page).to have_content('11/07/2019 at 5:15PM UTC')
 
       find('[data-test="dashboard-link"]').click
 
       expect(page).to have_content('Sandbox Token 1')
-      expect(page).to have_content('2019-11-07T17:15:22.781Z')
+      expect(page).to have_content('11/07/2019 at 5:15PM UTC')
       expect(page).not_to have_content('1234567890')
     end
   end
