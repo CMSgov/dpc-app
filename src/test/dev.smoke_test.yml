@@ -2,6 +2,9 @@ settings:
   env:
     HOST: https://dpc-dev-815423886.us-east-1.elb.amazonaws.com/api/v1
     ADMIN_URL: http://dpc-dev-815423886.us-east-1.elb.amazonaws.com:9900/tasks
+    SEED_FILE: src/main/resources/test_associations-dpr.csv
+    PROVIDER_BUNDLE: provider_bundle.json
+    PATIENT_BUNDLE: patient_bundle-dpr.json
 
 included-configs:
   - smoke_test.yml
