@@ -42,7 +42,7 @@ class Organization < ApplicationRecord
   end
 
   def update_registered_organizations
-    OrganizationRegistrar.delay.run(organization: self, api_environments: api_environment_strings)
+    OrganizationRegistrar.run(organization: self, api_environments: api_environment_strings)
   end
 
   def api_environment_strings

@@ -17,7 +17,7 @@ class APIClient
   def delete_organization(org); end
 
   def create_client_token(reg_org_id, params: {})
-    uri_string = base_urls[api_env] + "/Token/#{reg_org_id}"
+    uri_string = base_urls[api_env] + "/Token"
 
     json = params.to_json
     post_request(uri_string, json, delegated_macaroon(reg_org_id))
@@ -26,7 +26,7 @@ class APIClient
   end
 
   def get_client_tokens(reg_org_id)
-    uri_string = base_urls[api_env] + "/Token/#{reg_org_id}"
+    uri_string = base_urls[api_env] + "/Token"
     get_request(uri_string, delegated_macaroon(reg_org_id))
   end
 

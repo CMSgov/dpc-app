@@ -147,7 +147,7 @@ RSpec.describe APIClient do
   describe '#create_client_token' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
-        stub_request(:post, "http://dpc.example.com/Token/#{registered_org.api_id}").with(
+        stub_request(:post, "http://dpc.example.com/Token").with(
           headers: { 'Content-Type' => 'application/json' },
           body: {
             label: 'Sandbox Token 1'
@@ -170,7 +170,7 @@ RSpec.describe APIClient do
 
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
-        stub_request(:post, "http://dpc.example.com/Token/#{registered_org.api_id}").with(
+        stub_request(:post, "http://dpc.example.com/Token").with(
           headers: { 'Content-Type' => 'application/json' },
           body: {
             label: 'Sandbox Token 1'
@@ -195,7 +195,7 @@ RSpec.describe APIClient do
   describe '#get_client_tokens' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
-        stub_request(:get, "http://dpc.example.com/Token/#{registered_org.api_id}").with(
+        stub_request(:get, "http://dpc.example.com/Token").with(
           headers: { 'Content-Type' => 'application/json' }
         ).to_return(
           status: 200,
@@ -220,7 +220,7 @@ RSpec.describe APIClient do
 
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
-        stub_request(:get, "http://dpc.example.com/Token/#{registered_org.api_id}").with(
+        stub_request(:get, "http://dpc.example.com/Token").with(
           headers: { 'Content-Type' => 'application/json' }
         ).to_return(
           status: 500,
