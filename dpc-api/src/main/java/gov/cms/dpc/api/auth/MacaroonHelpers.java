@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.auth;
 
+import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.macaroons.CaveatSupplier;
+import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier;
@@ -15,6 +17,7 @@ import javax.ws.rs.core.UriInfo;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class MacaroonHelpers {
@@ -72,6 +75,18 @@ public class MacaroonHelpers {
                 throw new IllegalArgumentException(String.format("Cannot created token with version: %s", tokenVersion));
             }
         }
+    }
+
+    public static Optional<UUID> extractOrgIDFromCaveats(MacaroonBakery bakery, List<Macaroon> macaroons) {
+        final Macaroon rootMacaroon = macaroons.get(0);
+            // Find the org_id caveat and extract the value
+            return bakery
+                    .getCaveats(rootMacaroon)
+                    .stream()
+                    .map(MacaroonCaveat::getCondition)
+                    .filter(condition -> condition.getKey().equals(ORGANIZATION_CAVEAT_KEY))
+                    .map(condition -> UUID.fromString(condition.getValue()))
+                    .findAny();
     }
 
     private static List<CaveatSupplier> generateV1Caveats(Duration tokenLifetime, UUID organizationID) {
