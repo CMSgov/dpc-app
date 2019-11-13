@@ -29,6 +29,8 @@
 }
 
 .site-pills__item--small {
+  align-items: center;
+  display: inline-flex;
   font-size: 12px;
   margin: $spacer-1 / 4;
   padding: .5em 1em;
@@ -56,4 +58,19 @@
 .site-pills__item--green {
   background-color: $color-success-alt-lightest;
   color: $color-success;
+}
+
+.site-pills__item--gray {
+  background-color: $color-gray-lightest;
+  color: $color-gray;
+
+  .site-pills__item__button {
+    color: rgba($color-gray, .5);
+  }
+}
+
+.site-pills__item__button {
+  color: rgba($color-primary-alt-darkest, .5);
+  display: inline-block;
+  margin: 5px 0 0 $spacer-1;
 }
