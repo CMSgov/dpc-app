@@ -228,6 +228,6 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(JobCompletionModel.CHECKSUM_URL, extension.get(0).getUrl()),
                 () -> assertEquals("sha256:9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b", extension.get(0).getValueString()),
                 () -> assertEquals(JobCompletionModel.FILE_LENGTH_URL, extension.get(1).getUrl()),
-                () -> assertEquals(BigDecimal.valueOf(7202), extension.get(1).getValueDecimal()));
+                () -> assertEquals(7202L, extension.get(1).getValueDecimal()));
     }
 }

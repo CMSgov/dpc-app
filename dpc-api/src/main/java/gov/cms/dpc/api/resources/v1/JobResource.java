@@ -185,7 +185,7 @@ public class JobResource extends AbstractJobResource {
         String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(batchFile.getBatchID(), batchFile.getResourceType(), batchFile.getSequence()));
         File file = new File(filePath);
         String checksum = generateChecksum(file);
-        BigDecimal fileLength = BigDecimal.valueOf(generateFileLength(file));
+        long fileLength = generateFileLength(file);
         return List.of(new JobCompletionModel.OutputEntryExtension(JobCompletionModel.CHECKSUM_URL, checksum),
                 new JobCompletionModel.OutputEntryExtension(JobCompletionModel.FILE_LENGTH_URL, fileLength));
     }

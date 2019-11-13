@@ -79,14 +79,14 @@ public class JobCompletionModel {
     public static class OutputEntryExtension {
         private String url;
         private String valueString;
-        private BigDecimal valueDecimal;
+        private long valueDecimal;
 
         public OutputEntryExtension(String url, String valueString) {
             this.url = url;
             this.valueString = valueString;
         }
 
-        public OutputEntryExtension(String url, BigDecimal valueDecimal) {
+        public OutputEntryExtension(String url, long valueDecimal) {
             this.url = url;
             this.valueDecimal = valueDecimal;
         }
@@ -99,7 +99,7 @@ public class JobCompletionModel {
             return valueString;
         }
 
-        public BigDecimal getValueDecimal() {
+        public long getValueDecimal() {
             return valueDecimal;
         }
     }
