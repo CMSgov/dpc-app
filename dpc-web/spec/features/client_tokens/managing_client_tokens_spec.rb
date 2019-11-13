@@ -50,7 +50,7 @@ RSpec.feature 'managing client tokens' do
 
   def stub_token_creation_request
     allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
-    allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCBrZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDkTYjOGpmMI9vWcK')
+    allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('TURBeU0yeHZZMkYwYVc5dUlHaDBkSEE2THk5c2IyTmhiR2h2YzNRNk16QXdNZ293TURNMGFXUmxiblJwWm1sbGNpQmlOamczTURoak5TMDBOakV6TFRSbVlXVXRZVGhpWlMweU0ySXhNV1JoTVRFNVl6QUtNREF5Wm5OcFoyNWhkSFZ5WlNBcElYUUFpcmpYbE9NR3VaQkUyM25Ra2xYZjdmNlQ0RG5tc2RoeFk4cE9QQW8')
     stub_request(:post, 'http://dpc.example.com/Token/923a4f7b-eade-494a-8ca4-7a685edacfad').with(
       body: { label: 'Sandbox Token 1' }.to_json
     ).to_return(
