@@ -241,12 +241,12 @@ public class ClientUtils {
         }
     }
 
-    static Map<String, Reference> submitPatients(Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+    static Map<String, Reference> submitPatients(String patientBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
         final Bundle patientBundle;
 
         try {
             System.out.println("Submitting patients");
-            patientBundle = bundleSubmitter(baseClass, Patient.class, "patient_bundle.json", ctx.newJsonParser(), exportClient);
+            patientBundle = bundleSubmitter(baseClass, Patient.class, patientBundleFilename, ctx.newJsonParser(), exportClient);
         } catch (Exception e) {
             throw new RuntimeException("Cannot submit patients.", e);
         }
@@ -262,12 +262,12 @@ public class ClientUtils {
         return patientReferences;
     }
 
-    static List<String> submitPractitioners(Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+    static List<String> submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
         final Bundle providerBundle;
 
         try {
             System.out.println("Submitting practitioners");
-            providerBundle = bundleSubmitter(baseClass, Practitioner.class, "provider_bundle.json", ctx.newJsonParser(), exportClient);
+            providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
         } catch (Exception e) {
             throw new RuntimeException("Cannot submit providers.", e);
         }
