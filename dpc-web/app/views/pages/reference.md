@@ -114,29 +114,33 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token \
 **Response**
 
 ~~~json
-[
-  {
-    "id": "3c308f6e-0223-42f8-80c2-cab242d68afc",
-    "tokenType": "MACAROON",
-    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
-    "createdAt": "2019-11-04T11:49:55.126-05:00",
-    "expiresAt": "2020-11-04T11:49:55.095-05:00"
-  },
-  {
-    "id": "eef87627-db4b-4c08-8a27-e88a8343099d",
-    "tokenType": "MACAROON",
-    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
-    "createdAt": "2019-11-04T11:50:06.101-05:00",
-    "expiresAt": "2020-11-04T11:50:06.096-05:00"
-  },
-  {
-    "id": "ea314eaa-1cf5-4d01-9ea7-1646099ca9fd",
-    "tokenType": "MACAROON",
-    "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
-    "createdAt": "2019-11-04T11:50:06.685-05:00",
-    "expiresAt": "2020-11-04T11:50:06.677-05:00"
-  }
-]
+{
+  "created_at": "2019-11-04T11:49:55.126-05:00",
+  "count": 3,
+  "entities": [
+    {
+      "id": "3c308f6e-0223-42f8-80c2-cab242d68afc",
+      "tokenType": "MACAROON",
+      "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+      "createdAt": "2019-11-04T11:49:55.126-05:00",
+      "expiresAt": "2020-11-04T11:49:55.095-05:00"
+    },
+    {
+      "id": "eef87627-db4b-4c08-8a27-e88a8343099d",
+      "tokenType": "MACAROON",
+      "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+      "createdAt": "2019-11-04T11:50:06.101-05:00",
+      "expiresAt": "2020-11-04T11:50:06.096-05:00"
+    },
+    {
+      "id": "ea314eaa-1cf5-4d01-9ea7-1646099ca9fd",
+      "tokenType": "MACAROON",
+      "label": "Token for organization 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0.",
+      "createdAt": "2019-11-04T11:50:06.685-05:00",
+      "expiresAt": "2020-11-04T11:50:06.677-05:00"
+    }
+  ]
+}
 ~~~
 
 Specific client_tokens can be listed by making a `GET` request to the `Token/` endpoint using the unique id of the client_token.
@@ -269,14 +273,18 @@ curl -v http://localhost:3002/v1/Key \
 **Response**
 
 ~~~json
-[
-  {
-    "id": "b296f9d2-1aae-4c59-b6c7-c759b9db5226",
-    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyI+y8vAAFcV4deNdyKC\nH16ZPU7tgwnUzvtEYOp6s0DFjzgaqWmYZd/CNlb1psi+J0ChtcL9+Cx3v+HwDqVx\nToQrEqJ8hMavtXnxm2jPoRaxmbIGjHZ6jfyMot5+CdP8Vr5o9G2WIUgzjhFwMEXh\nlYg97uZadLLVKVXYTl4HtluVX5y7p1Wh4vkyJFBiqrX7qAJXvr6PK7OUeZDeVsse\nOMm33VwgbQSGRw7yWNOw+H/RbpGQkAUtHvGYvo/qLeb+iJsF2zBtjnkTmk5I8Vlo\n4xzbqaoqZqsHp4NgCw+bq0Y6AWLE2yUYi/DOatOdIBfLxlpf/FAY3f5FbNjISUuL\nmwIDAQAB\n-----END PUBLIC KEY-----\n",
-    "createdAt": "2019-11-04T13:16:29.008-05:00",
-    "label": "test-key"
-  }
-]
+{
+  "created_at": "2019-11-04T13:16:29.008-05:00",
+  "count": 1,
+  "entities": [
+    {
+      "id": "b296f9d2-1aae-4c59-b6c7-c759b9db5226",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmyI+y8vAAFcV4deNdyKC\nH16ZPU7tgwnUzvtEYOp6s0DFjzgaqWmYZd/CNlb1psi+J0ChtcL9+Cx3v+HwDqVx\nToQrEqJ8hMavtXnxm2jPoRaxmbIGjHZ6jfyMot5+CdP8Vr5o9G2WIUgzjhFwMEXh\nlYg97uZadLLVKVXYTl4HtluVX5y7p1Wh4vkyJFBiqrX7qAJXvr6PK7OUeZDeVsse\nOMm33VwgbQSGRw7yWNOw+H/RbpGQkAUtHvGYvo/qLeb+iJsF2zBtjnkTmk5I8Vlo\n4xzbqaoqZqsHp4NgCw+bq0Y6AWLE2yUYi/DOatOdIBfLxlpf/FAY3f5FbNjISUuL\nmwIDAQAB\n-----END PUBLIC KEY-----\n",
+      "createdAt": "2019-11-04T13:16:29.008-05:00",
+      "label": "test-key"
+    }
+  ]
+}
 ~~~
 
 Specific public keys can be listed by making a `GET` request to the `Key/` endpoint using the unique id of the public key.
@@ -311,7 +319,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
 Uploading a public key can be done by making a `POST` request to the `Key/` endpoint. 
 This endpoint requires one additional query param:
 
-* `label` sets a human readable label for the public key. This label will be used as the `kid` value of the self-signed JWT. 
+* `label` sets a human readable label for the public key (this must be less than 26 characters long). 
 
 The submitted public key must meet the following requirements:
 
@@ -344,6 +352,8 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Key?label={key label} \
     "label": "test-key"
 }
 ~~~
+
+The `id` field of the response will be used as the `kid` JWT header value, as described in a later [section](#creating-an-accesstoken)
 
 #### Deleting a public key
 
@@ -379,7 +389,7 @@ This token must be signed with a public key previously registered and contain th
 
 `alg`	_required_	- The JWA algorithm (e.g., `RS384`, `EC384`) used for signing the authentication JWT. (DPC only supports RS384)
 
-`kid`   _required_	- The identifier of the key-pair used to sign this JWT. This should make the `label` field of the previously registered public key
+`kid`   _required_	- The identifier of the key-pair used to sign this JWT. This must be the ID of a previously registered public key
 
 `typ`	_required_	- Fixed value: JWT.
 
