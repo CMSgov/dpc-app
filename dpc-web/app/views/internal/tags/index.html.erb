@@ -1,4 +1,4 @@
-<% title "Manage Tags" %>
+<% title "Tags" %>
 
 
 <div class="ds-l-row">
@@ -8,53 +8,58 @@
 
   <div class="ds-l-row--12 ds-l-md-col--9 ds-u-padding-bottom--2">
 
-    <div class="ds-l-row">
-      <h2 class="ds-u-padding-x--2">Existing Tags</h2>
-      <p>
-        Gray tags indicate currently unused tags.
-        Blue tags are being used, and the number with the tag indicates the number of records with that tag.
-      </p>
-    </div>
+    <h1 class="ds-h1">Tags</h1>
 
-    <div class="ds-l-row">
-      <ul class="ds-c-list ds-c-list--bare">
-        <% @tags.each do |tag| %>
-          <li>
-            <% if tag.taggings.count == 0 %>
+    <div class="box">
 
-              <span class="ds-c-badge">
-                <%= tag.name %>
-                <%= link_to(internal_tag_url(tag), method: :delete, data: {test: "delete-tag-#{tag.id}"}) do %>
-                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <use xlink:href="/assets/solid.svg#times"></use>
-                  </svg>
-                <% end %>
-              </span>
+      <div class="box__content">
 
-            <% else %>
+        <div class="ds-l-row">
 
-              <span class="ds-c-badge ds-u-fill--primary-alt">
-                <%= tag.name %> - <%= tag.taggings.count %>
-
-                <%= link_to(internal_tag_url(tag), method: :delete, data: { confirm: confirm_text(tag), test: "delete-tag-#{tag.id}" }) do %>
-                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <use xlink:href="/assets/solid.svg#times"></use>
-                  </svg>
-                <% end %>
-              </span>
-
+          <div class="ds-l-col--12 ds-l-md-col--6 ds-u-margin-bottom--5 ds-u-md-margin-bottom--0">
+            <h2 class="box__heading">Create a new tag</h2>
+            <%= form_for Tag.new, url: internal_tags_path, html: { method: :post } do |f| %>
+              <%= f.label :name, "Tag name", class: "ds-c-label ds-u-margin-top--0" %>
+              <%= f.text_field :name, class: "ds-c-field" %>
+              <%= f.submit "Create tag", class: "ds-u-margin-top--2 ds-c-button ds-c-button--primary", data: { test: "add-tag-submit" } %>
             <% end %>
-          </li>
-        <% end %>
-      </ul>
-    </div>
+          </div>
 
-    <div class="ds-l-row ds-u-margin-y--3 ds-u-border--1 ds-u-radius">
-      <%= form_for Tag.new, url: internal_tags_path, html: { method: :post } do |f| %>
-        <%= f.label :name, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
-        <%= f.text_field :name, class: "ds-c-field" %>
-        <%= f.submit "Create", data: { test: "add-tag-submit" } %>
-      <% end %>
+          <div class="ds-l-col--12 ds-l-md-col--6">
+            <h2 class="box__heading">Existing Tags</h2>
+            <ul class="ds-c-list ds-c-list--bare">
+              <% @tags.order('LOWER(name)').each do |tag| %>
+                <li class="ds-u-display--inline-block">
+                  <% if tag.taggings.count == 0 %>
+
+                    <span class="site-pills__item site-pills__item--small site-pills__item--gray">
+                      <span><%= tag.name %> <span class="ds-u-font-weight--normal">(0)</span></span>
+                      <%= link_to(internal_tag_url(tag), class: "site-pills__item__button", method: :delete, data: {test: "delete-tag-#{tag.id}"}) do %>
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <use xlink:href="/assets/solid.svg#times"></use>
+                        </svg>
+                      <% end %>
+                    </span>
+
+                  <% else %>
+
+                    <span class="site-pills__item site-pills__item--small">
+                      <span><%= tag.name %> <span class="ds-u-font-weight--normal">(<%= tag.taggings.count %>)</span></span>
+
+                      <%= link_to(internal_tag_url(tag), class: "site-pills__item__button", method: :delete, data: { confirm: confirm_text(tag), test: "delete-tag-#{tag.id}" }) do %>
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <use xlink:href="/assets/solid.svg#times"></use>
+                        </svg>
+                      <% end %>
+                    </span>
+
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
