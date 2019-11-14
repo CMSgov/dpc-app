@@ -1,6 +1,6 @@
 settings:
   env:
-    HOST: http://internal-dpc-dev-frontend-internal-1469809887.us-east-1.elb.amazonaws.com/api/v1
+    HOST: https://dpc-dev-815423886.us-east-1.elb.amazonaws.com/api/v1
     ADMIN_URL: **REMOVED**
     SEED_FILE: src/main/resources/test_associations.csv
     PROVIDER_BUNDLE: provider_bundle.json
