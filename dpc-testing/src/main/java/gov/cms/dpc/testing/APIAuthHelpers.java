@@ -19,15 +19,19 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.cert.X509Certificate;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -47,10 +51,14 @@ public class APIAuthHelpers {
     }
 
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
+        return buildAuthenticatedClient(ctx, baseURL, macaroon, keyID, privateKey, false);
+    }
+
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck) throws IOException, URISyntaxException {
 
         final AuthResponse authResponse = jwtAuthFlow(baseURL, macaroon, keyID, privateKey);
         // Request an access token from the JWT endpoint
-        final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
+        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck);
         client.registerInterceptor(new MacaroonsInterceptor(authResponse.accessToken));
 
         // Add a header the hard way
@@ -71,8 +79,8 @@ public class APIAuthHelpers {
         return client;
     }
 
-    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon) {
-        final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
+    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon, boolean disableSSLCheck) {
+        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck);
         client.registerInterceptor(new MacaroonsInterceptor(macaroon));
         return client;
     }
@@ -152,10 +160,8 @@ public class APIAuthHelpers {
         final String key = generatePublicKey(keyPair.getPublic());
 
         // Create org specific macaroon from Golden Macaroon
-        // Base64 decode the Macaroon
-        final String decoded = new String(Base64.getUrlDecoder().decode(goldenMacaroon), StandardCharsets.UTF_8);
         final String macaroon = MacaroonsBuilder
-                .modify(MacaroonsBuilder.deserialize(decoded).get(0))
+                .modify(MacaroonsBuilder.deserialize(goldenMacaroon).get(0))
                 .add_first_party_caveat(String.format("organization_id = %s", organizationID))
                 .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
@@ -175,6 +181,51 @@ public class APIAuthHelpers {
         }
 
         return Pair.of(keyEntity.id, keyPair.getPrivate());
+    }
+
+    private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck) {
+        final HttpClientBuilder clientBuilder = HttpClients.custom();
+        if (disableSSLCheck) {
+            try {
+                clientBuilder.setSSLContext(createTrustingSSLContext());
+                clientBuilder.setSSLHostnameVerifier((s, sslSession) -> true);
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new RuntimeException("Cannot create custom SSL context", e);
+            }
+        }
+
+        ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
+
+        return ctx.newRestfulGenericClient(baseURL);
+    }
+
+    private static SSLContext createTrustingSSLContext() throws KeyManagementException, NoSuchAlgorithmException {
+        final SSLContext tls = SSLContext.getInstance("TLS");
+        tls.init(null, getTrustingManager(), new SecureRandom());
+        return tls;
+    }
+
+    private static TrustManager[] getTrustingManager() {
+        return new TrustManager[]{new X509TrustManager() {
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                System.err.println("Accepting certs");
+                return null;
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                System.err.println("Checking client");
+                // Do nothing
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                System.err.println("Checking server");
+                // Do nothing
+            }
+
+        }};
     }
 
 

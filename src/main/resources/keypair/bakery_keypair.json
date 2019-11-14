@@ -2,9 +2,9 @@
   "algorithm": "X25519",
   "environment": "local",
   "keyPair": {
-    "public_key": "FluVlInJ1Cr0oxikxK095SJCEP6ngzCwgz6r6cCyF1k=",
-    "private_key": "ODzuQTKYEFqwoM//sKUnRs9n6XLnnfJfBLS7QvOozXk="
+    "public_key": "bSRaz/g7ppjsAEZ99aekCw5eCLxBtQUz4xE5/QctIH4=",
+    "private_key": "aKcacJ1/I/07oAyLqv660q3eVAD5MJFFd93iSBKYnEU="
   },
-  "createdOn": "2019-10-28T19:41:42.244+00:00",
+  "createdOn": "2019-11-13T20:10:19.030+00:00",
   "createdBy": "nickrobison-usds"
 }
