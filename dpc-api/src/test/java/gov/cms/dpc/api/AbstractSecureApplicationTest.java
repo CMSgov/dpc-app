@@ -54,7 +54,7 @@ public class AbstractSecureApplicationTest {
     }
 
     protected String getBaseURL() {
-        return String.format("http://localhost:%d/v1/", APPLICATION.getLocalPort());
+        return String.format("http://localhost:%d/v1", APPLICATION.getLocalPort());
     }
 
     protected String getAdminURL() {
