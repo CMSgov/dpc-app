@@ -98,7 +98,7 @@ public class APIAuthHelpers {
 
         // Submit JWT to /auth endpoint
         final AuthResponse authResponse;
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+        try (final CloseableHttpClient client = createTrustingHttpClient()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Token/auth", baseURL));
             builder.addParameter("scope", "system/*:*");
             builder.addParameter("grant_type", "client_credentials");
@@ -166,7 +166,7 @@ public class APIAuthHelpers {
                 .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
         final KeyView keyEntity;
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+        try (final CloseableHttpClient client = createTrustingHttpClient()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Key", baseURL));
             builder.addParameter("label", keyLabel);
             final HttpPost post = new HttpPost(builder.build());
@@ -181,6 +181,17 @@ public class APIAuthHelpers {
         }
 
         return Pair.of(keyEntity.id, keyPair.getPrivate());
+    }
+
+    public static CloseableHttpClient createTrustingHttpClient() {
+        try {
+            return HttpClients.custom()
+                    .setSSLContext(createTrustingSSLContext())
+                    .setSSLHostnameVerifier((s, sslSession) -> true)
+                    .build();
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Cannot create trusting HTTP client", e);
+        }
     }
 
     private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck) {
@@ -209,19 +220,16 @@ public class APIAuthHelpers {
         return new TrustManager[]{new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
-                System.err.println("Accepting certs");
                 return null;
             }
 
             @Override
             public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                System.err.println("Checking client");
                 // Do nothing
             }
 
             @Override
             public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                System.err.println("Checking server");
                 // Do nothing
             }
 
