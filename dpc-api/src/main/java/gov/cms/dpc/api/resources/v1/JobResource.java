@@ -29,11 +29,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -183,12 +181,13 @@ public class JobResource extends AbstractJobResource {
                 .collect(Collectors.toList());
     }
 
-    JobCompletionModel.OutputEntryExtension buildExtension(JobQueueBatchFile batchFile) {
+    List<JobCompletionModel.OutputEntryExtension> buildExtension(JobQueueBatchFile batchFile) {
         String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(batchFile.getBatchID(), batchFile.getResourceType(), batchFile.getSequence()));
         File file = new File(filePath);
         String checksum = generateChecksum(file);
-        Long length = generateFileLength(file);
-        return new JobCompletionModel.OutputEntryExtension(checksum, length);
+        long fileLength = generateFileLength(file);
+        return List.of(new JobCompletionModel.OutputEntryExtension(JobCompletionModel.CHECKSUM_URL, checksum),
+                new JobCompletionModel.OutputEntryExtension(JobCompletionModel.FILE_LENGTH_URL, fileLength));
     }
 
     private String generateChecksum(File file) {
