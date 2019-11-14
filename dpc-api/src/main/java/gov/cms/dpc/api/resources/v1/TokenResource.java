@@ -70,13 +70,13 @@ public class TokenResource extends AbstractTokenResource {
                          TokenPolicy policy,
                          SigningKeyResolverAdapter resolver,
                          IJTICache cache,
-                         @APIV1 String publicURl) {
+                         @APIV1 String publicURL) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
         this.resolver = resolver;
         this.cache = cache;
-        this.authURL = String.format("%s/Token/auth", publicURl);
+        this.authURL = String.format("%s/Token/auth", publicURL);
     }
 
     @Override

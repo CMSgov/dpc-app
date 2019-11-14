@@ -81,6 +81,10 @@ public class JobCompletionModel {
         private String valueString;
         private long valueDecimal;
 
+        public OutputEntryExtension() {
+            // Jackson required
+        }
+
         public OutputEntryExtension(String url, String valueString) {
             this.url = url;
             this.valueString = valueString;
