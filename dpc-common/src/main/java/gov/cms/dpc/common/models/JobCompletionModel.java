@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,10 @@ import java.util.Map;
  * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
  */
 public class JobCompletionModel {
+
+    public static final String CHECKSUM_URL = "https://dpc.cms.gov/checksum";
+    public static final String FILE_LENGTH_URL = "https://dpc.cms.gov/file_length";
+
     /**
      * An entry in the {@link JobCompletionModel} output field.
      */
@@ -37,13 +42,13 @@ public class JobCompletionModel {
         /**
          * Extension object to hold additional information.
          */
-        private OutputEntryExtension extension;
+        private List<OutputEntryExtension> extension;
 
         public OutputEntry() {
             // Jackson required
         }
 
-        public OutputEntry(ResourceType type, String url, Integer count, OutputEntryExtension extension) {
+        public OutputEntry(ResourceType type, String url, Integer count, List<OutputEntryExtension> extension) {
             this.type = type;
             this.url = url;
             this.count = count;
@@ -62,7 +67,7 @@ public class JobCompletionModel {
             return count;
         }
 
-        public OutputEntryExtension getExtension() {
+        public List<OutputEntryExtension> getExtension() {
             return extension;
         }
     }
@@ -70,32 +75,32 @@ public class JobCompletionModel {
     /**
      * An extension field for additional information in an {@link OutputEntry}.
      */
+    @JsonInclude(Include.NON_EMPTY)
     public static class OutputEntryExtension {
-        /**
-         * A checksum for the file.
-         */
-        private String checksum;
+        private String url;
+        private String valueString;
+        private long valueDecimal;
 
-        /**
-         * File byte length.
-         */
-        private Long length;
-
-        public OutputEntryExtension() {
-            // Jackson required
+        public OutputEntryExtension(String url, String valueString) {
+            this.url = url;
+            this.valueString = valueString;
         }
 
-        public OutputEntryExtension(String checksum, Long length) {
-            this.checksum = checksum;
-            this.length = length;
+        public OutputEntryExtension(String url, long valueDecimal) {
+            this.url = url;
+            this.valueDecimal = valueDecimal;
         }
 
-        public String getChecksum() {
-            return checksum;
+        public String getUrl() {
+            return url;
         }
 
-        public Long getLength() {
-            return length;
+        public String getValueString() {
+            return valueString;
+        }
+
+        public long getValueDecimal() {
+            return valueDecimal;
         }
     }
 
