@@ -6,12 +6,12 @@
             <job-class>gov.cms.dpc.consent.jobs.SuppressionFileImport</job-class>
             <concurrency-allowed>false</concurrency-allowed>
         </job>
-        <trigger>
+        <!--trigger>
             <cron>
                 <name>SuppressionFileImport-Trigger</name>
                 <job-name>SuppressionFileImport</job-name>
                 <cron-expression>0 0 23 * * ?</cron-expression>
             </cron>
-        </trigger>
+        </trigger-->
     </schedule>
 </job-scheduling-data>
