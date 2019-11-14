@@ -73,8 +73,8 @@ RSpec.feature 'managing api credentials' do
   def stub_key_creation_request
     allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCBrZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDkTYjOGpmMI9vWcK')
-    stub_request(:post, 'http://dpc.example.com/Key').with(
-      body: { label: 'Sandbox Key 1', key: stubbed_key }.to_json
+    stub_request(:post, 'http://dpc.example.com/Key?label=Sandbox+Key+1').with(
+      body: stubbed_key
     ).to_return(
       status: 200,
       body: { label: 'Sandbox Key 1', createdAt: '2019-11-07T19:38:44.205Z', id: '3fa85f64-5717-4562-b3fc-2c963f66afa6' }.to_json

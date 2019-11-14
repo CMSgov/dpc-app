@@ -14,7 +14,7 @@ class PublicKeyManager
     return false if invalid_encoding?(public_key)
 
     api_client = APIClient.new(api_env)
-    api_client.create_public_key(registered_org.api_id, params: { label: label, key: public_key })
+    api_client.create_public_key(registered_org.api_id, params: { label: label, public_key: public_key })
 
     api_client.response_successful?
   end

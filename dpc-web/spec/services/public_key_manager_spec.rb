@@ -13,7 +13,7 @@ RSpec.describe PublicKeyManager do
           api_client = instance_double(APIClient)
           allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
           allow(api_client).to receive(:create_public_key)
-            .with(registered_org.api_id, params: { label: 'Test Key 1', key: file_fixture('stubbed_key.pem').read })
+            .with(registered_org.api_id, params: { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read })
             .and_return(api_client)
           allow(api_client).to receive(:response_successful?).and_return(true)
           allow(api_client).to receive(:response_body).and_return('id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
@@ -31,7 +31,7 @@ RSpec.describe PublicKeyManager do
           api_client = instance_double(APIClient)
           allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
           allow(api_client).to receive(:create_public_key)
-            .with(registered_org.api_id, params: { label: 'Test Key 1', key: file_fixture('stubbed_key.pem').read })
+            .with(registered_org.api_id, params: { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read })
             .and_return(api_client)
           allow(api_client).to receive(:response_successful?).and_return(false)
 
