@@ -47,9 +47,7 @@ class APIClient
   end
 
   def delegated_macaroon(reg_org_id)
-    # Temp fix - the macaroon shouldn't need to be decoded
-    decoded = Base64.decode64(golden_macaroon)
-    m = Macaroon.from_binary(decoded)
+    m = Macaroon.from_binary(golden_macaroon)
     m.add_first_party_caveat("organization_id = #{reg_org_id}")
     m.add_first_party_caveat("expires = #{2.minutes.from_now.iso8601}")
     m.add_first_party_caveat('dpc_macaroon_version = 1')
@@ -81,12 +79,10 @@ class APIClient
 
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
-
     response = http.request(request)
 
     @response_status = response.code.to_i
     @response_body = parsed_response(response)
-
   rescue Errno::ECONNREFUSED
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500

@@ -10,14 +10,14 @@ RSpec.describe APIClient do
 
   before(:each) do
     allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
-    allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('TURBeU0yeHZZMkYwYVc5dUlHaDBkSEE2THk5c2IyTmhiR2h2YzNRNk16QXdNZ293TURNMGFXUmxiblJwWm1sbGNpQmlOamczTURoak5TMDBOakV6TFRSbVlXVXRZVGhpWlMweU0ySXhNV1JoTVRFNVl6QUtNREF5Wm5OcFoyNWhkSFZ5WlNBcElYUUFpcmpYbE9NR3VaQkUyM25Ra2xYZjdmNlQ0RG5tc2RoeFk4cE9QQW8=')
+    allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo')
   end
 
   describe '#create_organization' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer TURBeU0yeHZZMkYwYVc5dUlHaDBkSEE2THk5c2IyTmhiR2h2YzNRNk16QXdNZ293TURNMGFXUmxiblJwWm1sbGNpQmlOamczTURoak5TMDBOakV6TFRSbVlXVXRZVGhpWlMweU0ySXhNV1JoTVRFNVl6QUtNREF5Wm5OcFoyNWhkSFZ5WlNBcElYUUFpcmpYbE9NR3VaQkUyM25Ra2xYZjdmNlQ0RG5tc2RoeFk4cE9QQW8=' },
+          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
           body: {
             resourceType: 'Parameters',
             parameter: [{
@@ -100,7 +100,7 @@ RSpec.describe APIClient do
 
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer TURBeU0yeHZZMkYwYVc5dUlHaDBkSEE2THk5c2IyTmhiR2h2YzNRNk16QXdNZ293TURNMGFXUmxiblJwWm1sbGNpQmlOamczTURoak5TMDBOakV6TFRSbVlXVXRZVGhpWlMweU0ySXhNV1JoTVRFNVl6QUtNREF5Wm5OcFoyNWhkSFZ5WlNBcElYUUFpcmpYbE9NR3VaQkUyM25Ra2xYZjdmNlQ0RG5tc2RoeFk4cE9QQW8=' },
+          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
           body: {
             resourceType: 'Parameters',
             parameter: [{
