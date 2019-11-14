@@ -71,7 +71,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             throw new RuntimeException("Failed creating Macaroon", e);
         }
         // Create admin client for registering organization
-        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon);
+        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
 
         final SampleResult smokeTestResult = new SampleResult();
         smokeTestResult.sampleStart();
@@ -102,7 +102,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
         try {
-            exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, String.format("%s/", hostParam), token, keyTuple.getLeft(), keyTuple.getRight());
+            exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, String.format("%s/", hostParam), token, keyTuple.getLeft(), keyTuple.getRight(), true);
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException("Cannot create export client", e);
         }
