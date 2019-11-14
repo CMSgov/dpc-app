@@ -15,7 +15,7 @@
 
         <div class="field">
           <%= label_tag :label, "Label", class: "ds-c-label" %>
-          <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
+          <%= text_field_tag :label, params[:label], class: "ds-c-field", maxlength: "25"  %>
           <p class="ds-c-field__hint">Choose a descriptive name that includes environment, such as “EMR synthetic sandbox”</p>
         </div>
 
