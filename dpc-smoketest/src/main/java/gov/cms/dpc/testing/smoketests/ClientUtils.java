@@ -11,13 +11,12 @@ import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.jmeter.gui.action.Close;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -45,16 +44,16 @@ public class ClientUtils {
      *
      * @param exportClient - {@link IGenericClient} to use for export request. Ensure this contains the necessary authentication and HttpHeaders
      * @param providerNPIs - {@link List} of {@link String} of provider NPIs to use for exporting
-     * @param token        - {@link String} access_token to use when downloading the actual files.
+     * @param httpClient       - {@link CloseableHttpClient} to use for executing non-FHIR HTTP requests
      */
-    static void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, String token) {
+    static void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, CloseableHttpClient httpClient) {
         providerNPIs
                 .stream()
                 .map(npi -> exportRequestDispatcher(exportClient, npi))
                 .map(search -> (Group) search.getEntryFirstRep().getResource())
-                .map(group -> jobCompletionLambda(exportClient, token, group))
+                .map(group -> jobCompletionLambda(exportClient, httpClient, group))
                 .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
-                    jobResponseHandler(token, entry);
+                    jobResponseHandler(httpClient, entry);
                 }));
     }
 
@@ -109,29 +108,26 @@ public class ClientUtils {
      *
      * @param jobLocation   - {@link String} URL where client can get job status
      * @param statusMessage - {@link String} status message to print on each iteration
-     * @param token         - {@link String} access token to use
+     * @param client        - {@link CloseableHttpClient} to use for non-FHIR requests
      * @return - {@link JobCompletionModel} Completed job response
      * @throws IOException          - throws if the HTTP request fails
      * @throws InterruptedException - throws if the thread is interrupted
      */
-    private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, String token) throws IOException, InterruptedException {
+    private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, CloseableHttpClient client) throws IOException, InterruptedException {
         // Use the traditional HTTP Client to check the job status
         JobCompletionModel jobResponse = null;
-        try (CloseableHttpClient client = APIAuthHelpers.createTrustingHttpClient()) {
-            final HttpGet jobGet = new HttpGet(jobLocation);
-            jobGet.setHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
-            boolean done = false;
+        final HttpGet jobGet = new HttpGet(jobLocation);
+        boolean done = false;
 
-            while (!done) {
-                Thread.sleep(1000);
-                logger.debug(statusMessage);
-                try (CloseableHttpResponse response = client.execute(jobGet)) {
-                    final int statusCode = response.getStatusLine().getStatusCode();
-                    done = statusCode == HttpStatus.OK_200 || statusCode > 300;
-                    if (done) {
-                        final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-                        jobResponse = mapper.readValue(response.getEntity().getContent(), JobCompletionModel.class);
-                    }
+        while (!done) {
+            Thread.sleep(1000);
+            logger.debug(statusMessage);
+            try (CloseableHttpResponse response = client.execute(jobGet)) {
+                final int statusCode = response.getStatusLine().getStatusCode();
+                done = statusCode == HttpStatus.OK_200 || statusCode > 300;
+                if (done) {
+                    final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+                    jobResponse = mapper.readValue(response.getEntity().getContent(), JobCompletionModel.class);
                 }
             }
         }
@@ -143,25 +139,22 @@ public class ClientUtils {
      * Uses the {@link File#createTempFile(String, String)} method to create the file handle
      *
      * @param fileID - {@link String} full URL of the file to download
-     * @param token  - {@link String} access token to use
+     * @param client - {@link CloseableHttpClient} to use for non-FHIR requests
      * @return - {@link File} file handle where the data is stored
      * @throws IOException - throws if the HTTP request or file writing fails
      */
-    private static File fetchExportedFiles(String fileID, String token) throws IOException {
-        try (CloseableHttpClient client = APIAuthHelpers.createTrustingHttpClient()) {
+    private static File fetchExportedFiles(String fileID, CloseableHttpClient client) throws IOException {
 
-            final File tempFile = File.createTempFile("dpc", ".ndjson");
+        final File tempFile = File.createTempFile("dpc", ".ndjson");
 
-            final HttpGet fileGet = new HttpGet(fileID);
-            fileGet.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-            try (CloseableHttpResponse fileResponse = client.execute(fileGet)) {
+        final HttpGet fileGet = new HttpGet(fileID);
+        try (CloseableHttpResponse fileResponse = client.execute(fileGet)) {
 
-                try (FileOutputStream outStream = new FileOutputStream(tempFile)) {
-                    fileResponse.getEntity().writeTo(outStream);
-                }
-
-                return tempFile;
+            try (FileOutputStream outStream = new FileOutputStream(tempFile)) {
+                fileResponse.getEntity().writeTo(outStream);
             }
+
+            return tempFile;
         }
     }
 
@@ -170,12 +163,12 @@ public class ClientUtils {
      * When complete, returns the {@link JobCompletionModel}
      *
      * @param exportOperation - {@link IOperationUntypedWithInput} to execute
-     * @param token           - {@link String} access token
+     * @param client          - {@link CloseableHttpClient} to use for non-FHIR requests
      * @return - {@link JobCompletionModel}
      * @throws IOException          - throws if something bad happens
      * @throws InterruptedException - throws if someone cuts in line
      */
-    private static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, String token) throws IOException, InterruptedException {
+    private static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, CloseableHttpClient client) throws IOException, InterruptedException {
         System.out.println("Retrying export request");
 
         // Return a MethodOutcome in order to get the response headers.
@@ -189,7 +182,7 @@ public class ClientUtils {
 
 
         // Poll the job until it's done
-        return awaitExportResponse(exportURL, "Checking job status", token);
+        return awaitExportResponse(exportURL, "Checking job status", client);
     }
 
     private static Bundle exportRequestDispatcher(IGenericClient exportClient, String npi) {
@@ -204,20 +197,20 @@ public class ClientUtils {
                 .execute();
     }
 
-    private static void jobResponseHandler(String token, JobCompletionModel.OutputEntry entry) {
+    private static void jobResponseHandler(CloseableHttpClient client, JobCompletionModel.OutputEntry entry) {
         System.out.println(entry.getUrl());
         try {
-            final File file = fetchExportedFiles(entry.getUrl(), token);
+            final File file = fetchExportedFiles(entry.getUrl(), client);
             System.out.println(String.format("Downloaded file to: %s", file.getPath()));
         } catch (IOException e) {
             throw new RuntimeException("Cannot output file", e);
         }
     }
 
-    private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, String token, Group group) {
+    private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, CloseableHttpClient client, Group group) {
         final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
         try {
-            return monitorExportRequest(exportOperation, token);
+            return monitorExportRequest(exportOperation, client);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Error monitoring export", e);
         }
