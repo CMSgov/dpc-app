@@ -7,13 +7,9 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 
 import java.io.IOException;
-import java.util.Base64;
 
 public class BakeryKeyPairDeserializer extends StdDeserializer<BakeryKeyPair> {
-
     public static final long serialVersionUID = 42L;
-
-    private final Base64.Decoder decoder;
 
     BakeryKeyPairDeserializer() {
         this(null);
@@ -21,7 +17,6 @@ public class BakeryKeyPairDeserializer extends StdDeserializer<BakeryKeyPair> {
 
     private BakeryKeyPairDeserializer(Class<?> vc) {
         super(vc);
-        this.decoder = Base64.getMimeDecoder();
     }
 
     @Override
@@ -36,9 +31,7 @@ public class BakeryKeyPairDeserializer extends StdDeserializer<BakeryKeyPair> {
         if (privateKeyNode == null) {
             throw new IllegalArgumentException("Keypair must have private key value");
         }
-        final byte[] publicKey = this.decoder.decode(publicKeyNode.asText());
-        final byte[] privateKey = this.decoder.decode(privateKeyNode.asText());
 
-        return new BakeryKeyPair(publicKey, privateKey);
+        return new BakeryKeyPair(publicKeyNode.binaryValue(), publicKeyNode.binaryValue());
     }
 }

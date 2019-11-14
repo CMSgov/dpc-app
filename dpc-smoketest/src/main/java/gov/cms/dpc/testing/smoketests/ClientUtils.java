@@ -11,6 +11,7 @@ import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -116,7 +117,7 @@ public class ClientUtils {
     private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, String token) throws IOException, InterruptedException {
         // Use the traditional HTTP Client to check the job status
         JobCompletionModel jobResponse = null;
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
+        try (CloseableHttpClient client = APIAuthHelpers.createTrustingHttpClient()) {
             final HttpGet jobGet = new HttpGet(jobLocation);
             jobGet.setHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
             boolean done = false;
@@ -147,7 +148,7 @@ public class ClientUtils {
      * @throws IOException - throws if the HTTP request or file writing fails
      */
     private static File fetchExportedFiles(String fileID, String token) throws IOException {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
+        try (CloseableHttpClient client = APIAuthHelpers.createTrustingHttpClient()) {
 
             final File tempFile = File.createTempFile("dpc", ".ndjson");
 
