@@ -2,11 +2,12 @@ package gov.cms.dpc.consent;
 
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.consent.resources.ConsentResource;
 
-public class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
+class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
 
     @Override
     public void configure(Binder binder) {
@@ -18,4 +19,12 @@ public class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfigurat
     public String provideSuppressionFileDir() {
         return this.getConfiguration().getSuppressionFileDir();
     }
+
+    @Provides
+    @Named("fhirReferenceURL")
+    public String provideFhirReferenceURL() { return getConfiguration().getFhirReferenceURL(); }
+
+    @Provides
+    @Named("consentOrganizationURL")
+    public String provideConsentOrganizationURL() { return getConfiguration().getConsentOrganizationURL(); }
 }

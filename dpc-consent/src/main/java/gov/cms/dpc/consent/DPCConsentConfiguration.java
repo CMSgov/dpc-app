@@ -30,6 +30,12 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
 
+    @NotEmpty
+    private String fhirReferenceURL;
+
+    @NotEmpty
+    private String consentOrganizationURL;
+
     @Override
     public DataSourceFactory getConsentDatabase() {
         return consentDatabase;
@@ -49,7 +55,23 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     }
 
     @Override
-    public void setFHIRConfiguration(DPCFHIRConfiguration config) {
-        fhirConfig = config;
+    public void setFHIRConfiguration(DPCFHIRConfiguration fhirConfig) {
+        this.fhirConfig = fhirConfig;
+    }
+
+    public String getFhirReferenceURL() {
+        return fhirReferenceURL;
+    }
+
+    public void setFhirReferenceURL(String fhirReferenceURL) {
+        this.fhirReferenceURL = fhirReferenceURL;
+    }
+
+    public String getConsentOrganizationURL() {
+        return consentOrganizationURL;
+    }
+
+    public void setConsentOrganizationURL(String consentOrganizationURL) {
+        this.consentOrganizationURL = consentOrganizationURL;
     }
 }

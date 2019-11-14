@@ -1,9 +1,8 @@
 package gov.cms.dpc.consent.resources;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
-import com.codahale.metrics.annotation.Metered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.common.annotations.APIV1;
+import com.google.inject.name.Named;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -39,10 +38,14 @@ import java.util.UUID;
 public class ConsentResource {
 
     private final ConsentDAO dao;
+    private final String fhirReferenceURL;
+    private final String consentOrganizationURL;
 
     @Inject
-    ConsentResource(ConsentDAO dao) {
+    ConsentResource(ConsentDAO dao, @Named("fhirReferenceURL")String fhirReferenceURL, @Named("consentOrganizationURL")String consentOrganizationURL) {
         this.dao = dao;
+        this.fhirReferenceURL = fhirReferenceURL;
+        this.consentOrganizationURL = consentOrganizationURL;
     }
 
     @GET
@@ -98,7 +101,7 @@ public class ConsentResource {
             new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
         );
 
-        return ConsentEntityConverter.convert(consentEntity);
+        return ConsentEntityConverter.convert(consentEntity, consentOrganizationURL, fhirReferenceURL);
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
@@ -138,7 +141,7 @@ public class ConsentResource {
 
         Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
-        consentEntities.forEach(e -> bundle.addEntry().setResource(ConsentEntityConverter.convert(e)));
+        consentEntities.forEach(e -> bundle.addEntry().setResource(ConsentEntityConverter.convert(e, consentOrganizationURL, fhirReferenceURL)));
         bundle.setTotal(bundle.getEntry().size());
 
         return bundle;
