@@ -5,14 +5,18 @@
       <div class="box__content">
         <div class="box__header">
           <h2 class="box__heading">Client tokens</h2>
-          <div class="box__header__actions">
-            <%= link_to new_organization_client_token_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-client-token" } do %>
-              <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <use xlink:href="/assets/solid.svg#plus"></use>
-              </svg>
-              New token
-            <% end %>
-          </div>
+          <% if organization.registered_organizations.count > 0 %>
+            <div class="box__header__actions">
+              <%= link_to new_organization_client_token_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-client-token" } do %>
+                <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <use xlink:href="/assets/solid.svg#plus"></use>
+                </svg>
+                New token
+              <% end %>
+            </div>
+          <% else %>
+            <p class="ds-u-color--muted">You cannot add client tokens until your organization has access to an API environment.</p>
+          <% end %>
         </div>
         <div class="ds-l-row">
           <div class="ds-l-col--12">
@@ -45,14 +49,18 @@
       <div class="box__content">
         <div class="box__header">
           <h2 class="box__heading">Public Keys</h2>
-          <div class="box__header__actions">
-            <%= link_to new_organization_public_key_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-public-key" } do %>
-              <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <use xlink:href="/assets/solid.svg#plus"></use>
-              </svg>
-              Add key
-            <% end %>
-          </div>
+          <% if organization.registered_organizations.count > 0 %>
+            <div class="box__header__actions">
+              <%= link_to new_organization_public_key_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-public-key" } do %>
+                <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <use xlink:href="/assets/solid.svg#plus"></use>
+                </svg>
+                Add key
+              <% end %>
+            </div>
+          <% else %>
+            <p class="ds-u-color--muted">You cannot add public keys until your organization has access to an API environment.</p>
+          <% end %>
         </div>
         <% organization.registered_organizations.each do |reg_org| %>
           <% reg_org.public_keys.each do |key| %>

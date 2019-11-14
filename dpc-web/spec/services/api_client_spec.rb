@@ -284,8 +284,8 @@ RSpec.describe APIClient do
   describe '#create_public_key' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
-        stub_request(:post, "http://dpc.example.com/Key/#{registered_org.api_id}").with(
-          body: { label: 'Sandbox Key 1', key: file_fixture("stubbed_cert.pem").read }.to_json
+        stub_request(:post, "http://dpc.example.com/Key").with(
+          body: { label: 'Sandbox Key 1', key: file_fixture('stubbed_key.pem').read }.to_json
         ).to_return(
           status: 200,
           body: "{\"label\":\"Sandbox Key 1\",\"createdAt\":\"2019-11-07T19:38:44.205Z\",\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}"
@@ -293,7 +293,7 @@ RSpec.describe APIClient do
 
         api_client = APIClient.new('sandbox')
 
-        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', key: file_fixture("stubbed_cert.pem").read })
+        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', key: file_fixture('stubbed_key.pem').read })
 
         expect(api_client.response_status).to eq(200)
         expect(api_client.response_body).to eq(
@@ -304,8 +304,8 @@ RSpec.describe APIClient do
 
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
-        stub_request(:post, "http://dpc.example.com/Key/#{registered_org.api_id}").with(
-          body: { label: 'Sandbox Key 1', key: file_fixture("stubbed_cert.pem").read }.to_json
+        stub_request(:post, "http://dpc.example.com/Key").with(
+          body: { label: 'Sandbox Key 1', key: file_fixture('stubbed_key.pem').read }.to_json
         ).to_return(
           status: 500,
           body: '{}'
@@ -313,7 +313,7 @@ RSpec.describe APIClient do
 
         api_client = APIClient.new('sandbox')
 
-        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', key: file_fixture("stubbed_cert.pem").read })
+        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', key: file_fixture('stubbed_key.pem').read })
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq(
@@ -326,7 +326,7 @@ RSpec.describe APIClient do
   describe '#get_public_keys' do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
-        stub_request(:get, "http://dpc.example.com/Key/#{registered_org.api_id}").with(
+        stub_request(:get, "http://dpc.example.com/Key").with(
           headers: { 'Content-Type' => 'application/json' }
         ).to_return(
           status: 200,
@@ -350,7 +350,7 @@ RSpec.describe APIClient do
 
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
-        stub_request(:get, "http://dpc.example.com/Key/#{registered_org.api_id}").with(
+        stub_request(:get, "http://dpc.example.com/Key").with(
           headers: { 'Content-Type' => 'application/json' }
         ).to_return(
           status: 500,
