@@ -12,11 +12,9 @@ import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.jmeter.gui.action.Close;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -44,7 +42,7 @@ public class ClientUtils {
      *
      * @param exportClient - {@link IGenericClient} to use for export request. Ensure this contains the necessary authentication and HttpHeaders
      * @param providerNPIs - {@link List} of {@link String} of provider NPIs to use for exporting
-     * @param httpClient       - {@link CloseableHttpClient} to use for executing non-FHIR HTTP requests
+     * @param httpClient   - {@link CloseableHttpClient} to use for executing non-FHIR HTTP requests
      */
     static void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, CloseableHttpClient httpClient) {
         providerNPIs
