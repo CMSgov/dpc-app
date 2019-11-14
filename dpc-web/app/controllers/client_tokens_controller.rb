@@ -2,7 +2,7 @@
 
 class ClientTokensController < ApplicationController
   before_action :authenticate_user!
-  rescue_from ActiveRecord::RecordNotFound, :with => :unauthorized
+  rescue_from ActiveRecord::RecordNotFound, with: :unauthorized
 
   def new
     @organization = current_user.organizations.find(params[:organization_id])
