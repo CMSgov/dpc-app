@@ -86,6 +86,11 @@ class APIClient
 
     @response_status = response.code.to_i
     @response_body = parsed_response(response)
+
+  rescue Errno::ECONNREFUSED
+    Rails.logger.warn 'Could not connect to API'
+    @response_status = 500
+    @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
   end
 
   def headers(token)

@@ -77,6 +77,27 @@ RSpec.describe APIClient do
     end
 
     context 'unsuccessful API request' do
+      it 'responds like 500 if connection error is raised' do
+        http_stub = instance_double(Net::HTTP)
+        allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.create_organization(org)
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {
+            'issue' => [{
+              'details' => {
+                'text' => 'Connection error'
+              }
+            }]
+          }
+        )
+      end
+
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
           headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer TURBeU0yeHZZMkYwYVc5dUlHaDBkSEE2THk5c2IyTmhiR2h2YzNRNk16QXdNZ293TURNMGFXUmxiblJwWm1sbGNpQmlOamczTURoak5TMDBOakV6TFRSbVlXVXRZVGhpWlMweU0ySXhNV1JoTVRFNVl6QUtNREF5Wm5OcFoyNWhkSFZ5WlNBcElYUUFpcmpYbE9NR3VaQkUyM25Ra2xYZjdmNlQ0RG5tc2RoeFk4cE9QQW8=' },
@@ -219,6 +240,27 @@ RSpec.describe APIClient do
     end
 
     context 'unsuccessful API request' do
+      it 'responds like 500 if connection error is raised' do
+        http_stub = instance_double(Net::HTTP)
+        allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.get_client_tokens(registered_org.api_id)
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {
+            'issue' => [{
+              'details' => {
+                'text' => 'Connection error'
+              }
+            }]
+          }
+        )
+      end
+
       it 'sends data to API and sets response instance variables' do
         stub_request(:get, "http://dpc.example.com/Token").with(
           headers: { 'Content-Type' => 'application/json' }
