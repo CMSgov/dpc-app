@@ -20,7 +20,11 @@ class ClientTokenManager
   def client_tokens
     api_client = APIClient.new(api_env)
     api_client.get_client_tokens(registered_org.api_id)
-    api_client.response_body['entities']
+    if api_client.response_successful?
+      api_client.response_body['entities']
+    else
+      []
+    end
   end
 
   # If no registered_org, attempt creation and then proceed

@@ -12,8 +12,5 @@ class RegisteredOrganization < ApplicationRecord
 
   def client_tokens
     ClientTokenManager.new(api_env: api_env, organization: organization).client_tokens
-  rescue
-    Rails.logger.warn 'Could not retrieve client tokens'
-    []
   end
 end

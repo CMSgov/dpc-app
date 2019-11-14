@@ -41,4 +41,41 @@ RSpec.describe ClientTokenManager do
       end
     end
   end
+
+  describe '#client_tokens' do
+    context 'successful API request' do
+      it 'responds with client_tokens array' do
+        org = create(:organization)
+        registered_org = create(:registered_organization, api_env: 0, organization: org)
+        tokens = [{ 'token' => 'exampleToken' }]
+        api_client = instance_double(APIClient)
+        allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
+        allow(api_client).to receive(:get_client_tokens)
+          .with(registered_org.api_id)
+          .and_return(api_client)
+        allow(api_client).to receive(:response_successful?).and_return(true)
+        allow(api_client).to receive(:response_body).and_return('entities' => tokens)
+
+        manager = ClientTokenManager.new(api_env: 'sandbox', organization: registered_org.organization)
+        expect(manager.client_tokens).to eq(tokens)
+      end
+    end
+
+    context 'failed API request' do
+      it 'responds with empty array' do
+        org = create(:organization)
+        registered_org = create(:registered_organization, api_env: 0, organization: org)
+        api_client = instance_double(APIClient)
+        allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
+        allow(api_client).to receive(:get_client_tokens)
+          .with(registered_org.api_id)
+          .and_return(api_client)
+        allow(api_client).to receive(:response_successful?).and_return(false)
+        allow(api_client).to receive(:response_body).and_return(error: 'Bad credentials')
+
+        manager = ClientTokenManager.new(api_env: 'sandbox', organization: registered_org.organization)
+        expect(manager.client_tokens).to eq([])
+      end
+    end
+  end
 end

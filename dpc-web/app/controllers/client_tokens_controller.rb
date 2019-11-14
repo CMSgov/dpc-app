@@ -15,7 +15,6 @@ class ClientTokensController < ApplicationController
     manager = ClientTokenManager.new(api_env: params[:api_environment], organization: @organization)
     if manager.create_client_token(label: params[:label])
       @client_token = manager.client_token
-      # @client_token = {'token' => 'MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCBrZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDkTYjOGpmMI9vWcK', 'label' => 'Test Token 1', 'createdAt' => Time.now.iso8601}
       render :show
     else
       render_error 'Client token could not be created.'

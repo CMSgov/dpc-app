@@ -47,11 +47,12 @@ class APIClient
   end
 
   def delegated_macaroon(reg_org_id)
-    # Temp fix
+    # Temp fix - the macaroon shouldn't need to be decoded
     decoded = Base64.decode64(golden_macaroon)
     m = Macaroon.from_binary(decoded)
     m.add_first_party_caveat("organization_id = #{reg_org_id}")
     m.add_first_party_caveat("expires = #{2.minutes.from_now.iso8601}")
+    m.add_first_party_caveat("dpc_macaroon_version = 1")
     m.serialize
   end
 
