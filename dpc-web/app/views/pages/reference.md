@@ -1378,10 +1378,16 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job} \
   {
     "type": "ExplanationOfBenefit",
     "url": "https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson",
-    "extension": {
-        "checksum": "sha256:8b74ba377554fa73de2a2da52cab9e1d160550247053e4d6aba1968624c67b10",
-        "length": 2468
-    }
+    "extension": [
+        {
+            "url": "https://dpc.cms.gov/checksum",
+            "valueString": "sha256:8b74ba377554fa73de2a2da52cab9e1d160550247053e4d6aba1968624c67b10"
+        },
+        {
+            "url": "https://dpc.cms.gov/file_length",
+            "valueDecimal": 2468
+        }
+    ]
   }
 ],
 "error": [
@@ -1393,7 +1399,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job} \
 }
 ~~~
 
-Claims data can be found at the URLs within the output field. The output includes file integrity information in an `extension` object. It contains `checksum`, a checksum in the format `algorithm:checksum`, and `length`, the file length in bytes.
+Claims data can be found at the URLs within the output field. The output includes file integrity information in an `extension` array. It contains `https://dpc.cms.gov/checksum`, a checksum in the format `algorithm:checksum`, and `https://dpc.cms.gov/file_length`, the file length in bytes.
 The number `42` in the data file URLs is the same job ID from the Content-Location header URL in previous step.
 If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field.
 The errors are provided in [NDJSON](http://ndjson.org/) files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
