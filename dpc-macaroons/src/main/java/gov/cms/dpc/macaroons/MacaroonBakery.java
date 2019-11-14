@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 public class MacaroonBakery {
 
-    public static final Charset CAVEAT_CHARSET = StandardCharsets.UTF_8;
+    private static final Charset CAVEAT_CHARSET = StandardCharsets.UTF_8;
     private static final Base64.Encoder encoder = Base64.getUrlEncoder();
     private static final Base64.Decoder decoder = Base64.getUrlDecoder();
 
@@ -192,29 +192,42 @@ public class MacaroonBakery {
      * @return - Macaroon byte array
      */
     public byte[] serializeMacaroon(Macaroon macaroon, boolean base64Encode) {
-        final byte[] macaroonBytes = macaroon.serialize(MacaroonVersion.SerializationVersion.V2_JSON).getBytes(CAVEAT_CHARSET);
-        if (base64Encode) {
-            return encoder.encode(macaroonBytes);
-        }
-        return macaroonBytes;
+        return serializeMacaroon(Collections.singletonList(macaroon), base64Encode);
     }
 
     /**
-     * Deserialize {@link Macaroon} from provided {@link String} value.
+     * Convert the {@link List} of {@link Macaroon} to the underlying byte format.
+     * Optionally, the Macaroon can be base64 (URL-safe) encoded before returning.
+     *
+     * @param macaroons    - {@link List} of {@link Macaroon} to serialize
+     * @param base64Encode - {@code true} Macaroon bytes are base64 (URL-safe) encoded. {@code false} Macaroon bytes are returned directly
+     * @return - Macaroon byte array
+     */
+    public byte[] serializeMacaroon(List<Macaroon> macaroons, boolean base64Encode) {
+
+        final byte[] serializedBytes = macaroons.stream().map(m -> m.serialize(MacaroonVersion.SerializationVersion.V2_JSON)).collect(Collectors.joining(",", "[", "]")).getBytes(CAVEAT_CHARSET);
+        if (base64Encode) {
+            return encoder.encode(serializedBytes);
+        }
+        return serializedBytes;
+    }
+
+    /**
+     * Deserialize a {@link List} of {@link Macaroon} from provided {@link String} value.
      * This {@link String} can be either base64 (URL-safe) encoded or a direct representation (e.g. a JSON string)
      *
      * @param serializedString - {@link String} to deserialize from
-     * @return - {@link Macaroon} deserialized from {@link String}
+     * @return - {@link List} of {@link Macaroon} deserialized from {@link String}
      */
-    public Macaroon deserializeMacaroon(String serializedString) {
+    public List<Macaroon> deserializeMacaroon(String serializedString) {
         if (serializedString.isEmpty()) {
             throw new BakeryException("Cannot deserialize empty string");
         }
         // Determine if we're Base64 encoded or not
         byte[] decodedString;
-        // For a V2 JSON macaroon, either '{' or '[' will be the starting value, so we check for the base64 encoded value
+        // For a JSON macaroon, either '{' or '[' will be the starting value, for V1 binary it's 'T', so we check for the base64 encoded value
         final char indexChar = serializedString.charAt(0);
-        if (indexChar == 'e' || indexChar == 'W') {
+        if (indexChar == 'e' || indexChar == 'W' || indexChar == 'T') {
             decodedString = decoder.decode(serializedString.getBytes(CAVEAT_CHARSET));
         } else {
             decodedString = serializedString.getBytes(CAVEAT_CHARSET);
@@ -255,6 +268,13 @@ public class MacaroonBakery {
                 .forEach(boundMacaroons::add);
 
         return boundMacaroons;
+    }
+
+    public Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
+        final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
+
+        // Create a discharge macaroon
+        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), caveat.getRawCaveat());
     }
 
     /**
@@ -299,13 +319,6 @@ public class MacaroonBakery {
         }
 
         return discharged;
-    }
-
-    Macaroon discharge(MacaroonCaveat caveat, byte[] payload) {
-        final Pair<String, MacaroonCondition> stringMacaroonCaveatPair = decodeCaveat(caveat.getRawCaveat());
-
-        // Create a discharge macaroon
-        return MacaroonsBuilder.create("", stringMacaroonCaveatPair.getLeft(), caveat.getRawCaveat());
     }
 
     private void addCaveats(MacaroonsBuilder builder, List<MacaroonCaveat> caveats) {
@@ -432,7 +445,7 @@ public class MacaroonBakery {
         byteBuffer.get(caveatKeySignature);
 
         byte[] pubKeySig = Arrays.copyOfRange(this.keyPair.getPublicKey(), 0, 4);
-        if (!Arrays.equals(caveatKeySignature, pubKeySig)) {
+        if (!safeEquals(caveatKeySignature, pubKeySig)) {
             throw new BakeryException("Public key mismatch");
         }
 
@@ -542,7 +555,7 @@ public class MacaroonBakery {
          * @param caveatSupplier - {@link CaveatSupplier} which generates caveat
          * @return - {@link MacaroonBakeryBuilder}
          */
-        public MacaroonBakeryBuilder addDefaultCaveatSupplier(CaveatSupplier caveatSupplier) {
+        MacaroonBakeryBuilder addDefaultCaveatSupplier(CaveatSupplier caveatSupplier) {
             this.caveatSuppliers.add(caveatSupplier);
             return this;
         }
@@ -553,12 +566,12 @@ public class MacaroonBakery {
          * @param caveatVerifier - {@link CaveatVerifier} to apply to each {@link Macaroon}
          * @return - {@link MacaroonBakeryBuilder}
          */
-        public MacaroonBakeryBuilder addDefaultVerifier(CaveatVerifier caveatVerifier) {
+        MacaroonBakeryBuilder addDefaultVerifier(CaveatVerifier caveatVerifier) {
             this.caveatVerifiers.add(caveatVerifier);
             return this;
         }
 
-        public MacaroonBakeryBuilder withKeyPair(BakeryKeyPair keyPair) {
+        MacaroonBakeryBuilder withKeyPair(BakeryKeyPair keyPair) {
             this.keyPair = keyPair;
             return this;
         }
@@ -581,10 +594,27 @@ public class MacaroonBakery {
         }
 
         private BakeryKeyPair getKeyPair() {
-            if (this.keyPair != null) {
-                return this.keyPair;
-            }
-            return BakeryKeyPair.generate();
+            return Objects.requireNonNullElseGet(this.keyPair, BakeryKeyPair::generate);
         }
+    }
+
+    /**
+     * Use constant time approach, to compare two byte arrays
+     * See also
+     * <a href="https://codahale.com/a-lesson-in-timing-attacks">A Lesson In Timing Attacks (or, Don’t use MessageDigest.isEquals)</a>
+     * @param a an array
+     * @param b an array
+     * @return true if both have same length and content
+     */
+    private static boolean safeEquals(byte[] a, byte[] b) {
+        if (a.length != b.length) {
+            return false;
+        }
+
+        int result = 0;
+        for (int i = 0; i < a.length; i++) {
+            result |= a[i] ^ b[i];
+        }
+        return result == 0;
     }
 }

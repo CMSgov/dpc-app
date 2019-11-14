@@ -4,9 +4,15 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.annotations.Public;
+import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
+import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
@@ -14,38 +20,63 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
+import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
+import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
 @Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
 public class TokenResource extends AbstractTokenResource {
 
+    public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+    // This will be removed as part of DPC-747
+    private static final String DEFAULT_ACCESS_SCOPE = "system/*:*";
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
     private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
+    private static final String INVALID_JWT_MSG = "Invalid JWT";
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
+    private final SigningKeyResolverAdapter resolver;
+    private final IJTICache cache;
+    private final String authURL;
 
     @Inject
-    TokenResource(TokenDAO dao, MacaroonBakery bakery, TokenPolicy policy) {
+    public TokenResource(TokenDAO dao,
+                         MacaroonBakery bakery,
+                         TokenPolicy policy,
+                         SigningKeyResolverAdapter resolver,
+                         IJTICache cache,
+                         @APIV1 String publicURl) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
+        this.resolver = resolver;
+        this.cache = cache;
+        this.authURL = String.format("%s/Token/auth", publicURl);
     }
 
     @Override
@@ -54,10 +85,10 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Fetch client tokens", notes = "Method to retrieve the client tokens associated to the given Organization.")
-    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
-    public List<TokenEntity> getOrganizationTokens(
+    @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization"))
+    public CollectionResponse<TokenEntity> getOrganizationTokens(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
-        return this.dao.fetchTokens(organizationPrincipal.getID());
+        return new CollectionResponse<>(this.dao.fetchTokens(organizationPrincipal.getID()));
     }
 
     @GET
@@ -85,7 +116,10 @@ public class TokenResource extends AbstractTokenResource {
     @ExceptionMetered
     @ApiOperation(value = "Create authentication token", notes = "Create a new authentication token for the given Organization (identified by Resource ID)." +
             "<p>" +
-            "Token supports a custom human-readable label via the `label` query param.")
+            "Token supports a custom human-readable label via the `label` query param as well as a custom expiration period via the `expiration` param." +
+            "<p>" +
+            "Note: The expiration time cannot exceed the maximum lifetime specified by the system (current 1 year)")
+    @ApiResponses(value = @ApiResponse(code = 400, message = "Cannot create token with specified parameters"))
     @Override
     public TokenEntity createOrganizationToken(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
@@ -93,7 +127,7 @@ public class TokenResource extends AbstractTokenResource {
 
         final UUID organizationID = organizationPrincipal.getID();
 
-        final Macaroon macaroon = generateMacaroon(organizationID);
+        final Macaroon macaroon = generateMacaroon(this.policy, organizationID);
 
         // Ensure that each generated Macaroon has an associated Organization ID
         // This way we check to make sure we never generate a Golden Macaroon
@@ -125,6 +159,7 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
+    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find token with given id"))
     public Response deleteOrganizationToken(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
@@ -136,11 +171,99 @@ public class TokenResource extends AbstractTokenResource {
         return Response.ok().build();
     }
 
-    private Macaroon generateMacaroon(UUID organizationID) {
+    @POST
+    @Path("/auth")
+    @UnitOfWork
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Request API access token", notes = "Request access token for API access", authorizations = @Authorization(value = ""))
+    @ApiResponses(
+            value = {@ApiResponse(code = 400, message = "Token request is invalid"),
+                    @ApiResponse(code = 401, message = "Client is not authorized to request access token")})
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Public
+    @Override
+    public JWTAuthResponse authorizeJWT(
+            @ApiParam(name = "scope", allowableValues = "system/*:*", value = "Requested access scope", required = true)
+            @QueryParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
+            @ApiParam(name = "grant_type", value = "Authorization grant type", required = true, allowableValues = "client_credentials")
+            @QueryParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
+            @ApiParam(name = "client_assertion_type", value = "Client Assertion Type", required = true, allowableValues = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+            @QueryParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType,
+            @ApiParam(name = "client_assertion", value = "Signed JWT", required = true)
+            @QueryParam(value = "client_assertion") String jwtBody) {
+        // Actual scope implementation will come as part of DPC-747
+        validateJWTQueryParams(grantType, clientAssertionType, scope);
+
+        // Validate JWT signature
+        try {
+            return handleJWT(jwtBody);
+        } catch (SecurityException e) {
+            logger.error("JWT has invalid signature", e);
+            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+        } catch (JwtException e) {
+            logger.error("Malformed JWT", e);
+            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+        }
+    }
+
+    private void validateJWTQueryParams(String grantType, String clientAssertionType, String scope) {
+        if (!grantType.equals("client_credentials")) {
+            throw new WebApplicationException("Grant Type must be 'client_credentials'", Response.Status.BAD_REQUEST);
+        }
+
+        if (!clientAssertionType.equals(CLIENT_ASSERTION_TYPE)) {
+            throw new WebApplicationException(String.format("Client Assertion Type must be '%s'", CLIENT_ASSERTION_TYPE), Response.Status.BAD_REQUEST);
+        }
+
+        if (!scope.equals(DEFAULT_ACCESS_SCOPE)) {
+            throw new WebApplicationException(String.format("Access Scope must be '%s'", DEFAULT_ACCESS_SCOPE), Response.Status.BAD_REQUEST);
+        }
+
+    }
+
+    private JWTAuthResponse handleJWT(String jwtBody) {
+        final Jws<Claims> claims = Jwts.parser()
+                .setSigningKeyResolver(this.resolver)
+                .requireAudience(this.authURL)
+                .parseClaimsJws(jwtBody);
+
+        // Determine if claims are present and valid
+        // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
+        // TODO: wire in the real Organization ID, for auditing purposes
+        handleJWTClaims(UUID.randomUUID(), claims);
+
+        // Extract the Client Macaroon from the subject field (which is the same as the issuer)
+        final String clientMacaroon = claims.getBody().getSubject();
+        final List<Macaroon> macaroons = this.bakery.deserializeMacaroon(clientMacaroon);
+
+        // Add the additional claims that we need
+        // Currently, we need to set an expiration time, a set of scopes,
+        final Duration tokenLifetime = Duration.of(5, ChronoUnit.MINUTES);
+        final OffsetDateTime expiryTime = OffsetDateTime.now(ZoneOffset.UTC)
+                .plus(tokenLifetime);
+
+        // Add an additional restriction to the root Macaroons
+        final Macaroon restrictedMacaroon = this.bakery.addCaveats(macaroons.get(0), new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString())));
+
+        final List<Macaroon> discharged = this.bakery.dischargeAll(Collections.singletonList(restrictedMacaroon), this.bakery::discharge);
+        final JWTAuthResponse response = new JWTAuthResponse();
+        response.setExpiresIn(tokenLifetime);
+        response.setDischargedMacaroons(new String(this.bakery.serializeMacaroon(discharged, true), StandardCharsets.UTF_8));
+
+        return response;
+    }
+
+    private Macaroon generateMacaroon(TokenPolicy policy, UUID organizationID) {
         // Create some caveats
-        final List<MacaroonCaveat> caveats = List.of(
-                new MacaroonCaveat("", new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, organizationID.toString()))
-        );
+        final Duration tokenLifetime = policy
+                .getExpirationPolicy().getExpirationUnit()
+                .getDuration().multipliedBy(policy.getExpirationPolicy().getExpirationOffset());
+        final List<MacaroonCaveat> caveats = generateCaveatsForToken(policy.getVersionPolicy().getCurrentVersion(), organizationID, tokenLifetime)
+                .stream()
+                .map(CaveatSupplier::get)
+                .collect(Collectors.toList());
         return this.bakery.createMacaroon(caveats);
     }
 
@@ -168,17 +291,45 @@ public class TokenResource extends AbstractTokenResource {
         return defaultExpiration;
     }
 
+    private void handleJWTClaims(UUID organizationID, Jws<Claims> claims) {
+        // Issuer and Sub must be present and identical
+        final String issuer = getClaimIfPresent("issuer", claims.getBody().getIssuer());
+        final String subject = getClaimIfPresent("subject", claims.getBody().getSubject());
+        if (!issuer.equals(subject)) {
+            throw new WebApplicationException("Issuer and Subject must be identical", Response.Status.BAD_REQUEST);
+        }
+
+        // JTI must be present and have not been used in the past 5 minutes.
+        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getBody().getId()))) {
+            logger.warn("JWT being replayed for organization {}", organizationID);
+            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+        }
+
+        // Ensure the expiration time for the token is not more than 5 minutes in the future
+        final Date expiration = getClaimIfPresent("expiration", claims.getBody().getExpiration());
+        if (OffsetDateTime.now(ZoneOffset.UTC).plus(5, ChronoUnit.MINUTES).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
+            throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
+        }
+    }
+
     private void ensureOrganizationPresent(Macaroon macaroon) {
         final boolean idMissing = this.bakery
                 .getCaveats(macaroon)
                 .stream()
                 .map(MacaroonCaveat::getCondition)
-                .noneMatch(cond -> cond.getKey().equals("organization_id"));
+                .noneMatch(cond -> cond.getKey().equals(ORGANIZATION_CAVEAT_KEY));
 
         if (idMissing) {
             logger.error("GOLDEN MACAROON WAS GENERATED IN TOKEN RESOURCE!");
             // TODO: Remove the Macaroon from the root key store (DPC-729)
             throw new IllegalStateException("Token generation failed");
         }
+    }
+
+    private static <T> T getClaimIfPresent(String claimName, @Nullable T claim) {
+        if (claim == null) {
+            throw new WebApplicationException(String.format("Claim %s must be present", claimName), Response.Status.BAD_REQUEST);
+        }
+        return claim;
     }
 }

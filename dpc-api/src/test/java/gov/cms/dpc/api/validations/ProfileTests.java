@@ -9,10 +9,13 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,8 +28,8 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientProfile() {
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
+    void testPatientProfile() throws IOException, URISyntaxException {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         // Create a new patient record
 
         final Patient invalidPatient = new Patient();
@@ -87,8 +90,8 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testProviderProfile() {
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
+    void testProviderProfile() throws IOException, URISyntaxException {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Practitioner invalidPractitioner = new Practitioner();
         invalidPractitioner.addName().addGiven("Test").setFamily("Practitioner");
@@ -144,8 +147,8 @@ class ProfileTests extends AbstractSecureApplicationTest {
     @Test
     @Disabled
         // Disabled until DPC-614 and DPC-616 are merged.
-    void testAttributionProfile() {
-        final IGenericClient client = APITestHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN);
+    void testAttributionProfile() throws IOException, URISyntaxException {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Group invalidGroup = new Group();
         invalidGroup.addMember().setEntity(new Reference("Patient/strange-patient"));

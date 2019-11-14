@@ -33,6 +33,16 @@
                 <stringProp name="Argument.value">src/main/resources/test_associations.csv</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="provider-bundle" elementType="Argument">
+                <stringProp name="Argument.name">provider-bundle</stringProp>
+                <stringProp name="Argument.value">provider_bundle.json</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="patient-bundle" elementType="Argument">
+                <stringProp name="Argument.name">patient-bundle</stringProp>
+                <stringProp name="Argument.value">patient_bundle.json</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
               <elementProp name="host" elementType="Argument">
                 <stringProp name="Argument.name">host</stringProp>
                 <stringProp name="Argument.value">${__P(host,)}</stringProp>

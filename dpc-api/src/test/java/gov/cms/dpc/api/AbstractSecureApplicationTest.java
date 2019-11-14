@@ -5,10 +5,12 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,9 +22,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.security.PrivateKey;
+import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.APITestHelpers.TASK_URL;
+import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -36,10 +40,14 @@ public class AbstractSecureApplicationTest {
     private static final String KEY_PREFIX = "dpc.api";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    protected static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
             ConfigOverride.config(KEY_PREFIX, "", "true"));
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
+    // Macaroon to use for doing admin things (like creating tokens and keys)
+    protected static String GOLDEN_MACAROON;
+    protected static PrivateKey PRIVATE_KEY;
+    protected static UUID PUBLIC_KEY_ID;
 
     protected AbstractSecureApplicationTest() {
         // Not used
@@ -59,9 +67,14 @@ public class AbstractSecureApplicationTest {
         ctx = FhirContext.forDstu3();
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses
-        final String goldenMacaroon = APITestHelpers.createGoldenMacaroon();
+        GOLDEN_MACAROON = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, TASK_URL);
+
+        // Register Public key
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
+        PRIVATE_KEY = uuidPrivateKeyPair.getRight();
+        PUBLIC_KEY_ID = uuidPrivateKeyPair.getLeft();
     }
 
     @BeforeEach

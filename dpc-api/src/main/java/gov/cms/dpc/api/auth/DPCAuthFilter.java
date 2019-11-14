@@ -2,7 +2,6 @@ package gov.cms.dpc.api.auth;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
-import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
@@ -11,16 +10,14 @@ import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.persistence.NoResultException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
-import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.auth.AuthHelpers.BEARER_PREFIX;
+import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
 
 /**
  * {@link AuthFilter} implementation which extracts the Macaroon (base64 encoded) from the request.
@@ -31,7 +28,7 @@ import static gov.cms.dpc.api.auth.AuthHelpers.BEARER_PREFIX;
  * <p>
  * Or, directly via the 'token' query param (e.g. no Bearer prefix)
  */
-abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
+public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
 
@@ -40,7 +37,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     private final MacaroonBakery bakery;
 
 
-    DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
+    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
         this.authenticator = auth;
         this.bakery = bakery;
         this.dao = dao;
@@ -49,11 +46,10 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
     protected abstract DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo);
 
     @Override
-    public void filter(final ContainerRequestContext requestContext) throws IOException {
+    public void filter(final ContainerRequestContext requestContext) {
         final UriInfo uriInfo = requestContext.getUriInfo();
-        final String macaroon = AuthHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+        final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
 
-        // If we have a path authorizer, do that, otherwise, continue
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
 
         final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
@@ -66,7 +62,7 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
         logger.trace("Making request to validate token.");
 
-        final Macaroon m1;
+        final List<Macaroon> m1;
         try {
             m1 = bakery.deserializeMacaroon(macaroon);
         } catch (BakeryException e) {
@@ -75,22 +71,39 @@ abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         }
 
         // Lookup the organization by Macaroon id
-        final UUID macaroonID = UUID.fromString(m1.identifier);
-        final UUID orgID;
-        try {
-            orgID = this.dao.findOrgByToken(macaroonID);
-        } catch (NoResultException e) {
-            logger.error("Cannot find token with ID {}.", macaroonID, e);
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
-        }
+        final UUID orgID = extractOrgIDFromMacaroon(m1);
 
         try {
-            this.bakery.verifyMacaroon(Collections.singletonList(m1), String.format("organization_id = %s", orgID));
+            this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
 
         return buildCredentials(macaroon, orgID, uriInfo);
+    }
+
+    private UUID extractOrgIDFromMacaroon(List<Macaroon> macaroons) {
+        final Macaroon rootMacaroon = macaroons.get(0);
+        final UUID macaroonID = UUID.fromString(rootMacaroon.identifier);
+        UUID orgID;
+        try {
+            orgID = this.dao.findOrgByToken(macaroonID);
+        } catch (Exception e) {
+            // The macaroon ID doesn't match, we need to determine if we're looking at a Golden Macaroon, or if the client id has been deleted
+            // Check the length of the provided Macaroons, if more than 1, it's a client token which has been removed, so fail
+            // If the length is 1 it's either a golden macaroon or an undischarged Macaroon, which will fail in the next auth phase
+            if (macaroons.size() > 1) {
+                throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+            }
+            // Find the org_id caveat and extract the value
+            orgID = MacaroonHelpers.extractOrgIDFromCaveats(this.bakery, Collections.singletonList(rootMacaroon))
+                    .orElseThrow(() -> {
+                        logger.error("Cannot find organization_id on Macaroon");
+                        throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+                    });
+        }
+
+        return orgID;
     }
 }

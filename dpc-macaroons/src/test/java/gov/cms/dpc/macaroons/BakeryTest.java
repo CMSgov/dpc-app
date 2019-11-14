@@ -84,8 +84,10 @@ class BakeryTest {
                                 MacaroonCondition.Operator.EQ, "1234"))));
 
         final byte[] macaroonBytes = bakery.serializeMacaroon(testMacaroon, base64);
-        final Macaroon mac2 = bakery.deserializeMacaroon(new String(macaroonBytes, StandardCharsets.UTF_8));
-        assertEquals(testMacaroon, mac2, "Macaroons should be equal");
+        final List<Macaroon> macaroons = bakery.deserializeMacaroon(new String(macaroonBytes, StandardCharsets.UTF_8));
+        final Macaroon mac2 = macaroons.get(0);
+        assertAll(() -> assertEquals(1, macaroons.size(), "Should only have a single macaroon"),
+                () -> assertEquals(testMacaroon, mac2, "Macaroons should be equal"));
     }
 
     @Test

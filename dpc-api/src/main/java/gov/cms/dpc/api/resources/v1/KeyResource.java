@@ -4,10 +4,11 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.auth.PublicKeyHandler;
+import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
@@ -24,6 +25,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,10 +36,12 @@ public class KeyResource extends AbstractKeyResource {
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);
 
     private final PublicKeyDAO dao;
+    private final Random random;
 
     @Inject
-    KeyResource(PublicKeyDAO dao) {
+    public KeyResource(PublicKeyDAO dao) {
         this.dao = dao;
+        this.random = new Random();
     }
 
     @GET
@@ -48,8 +53,8 @@ public class KeyResource extends AbstractKeyResource {
                     "<p>The returned keys are serialized using PEM encoding.",
             authorizations = @Authorization(value = "apiKey"))
     @Override
-    public List<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
-        return this.dao.fetchPublicKeys(organizationPrincipal.getID());
+    public CollectionResponse<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
+        return new CollectionResponse<>(this.dao.fetchPublicKeys(organizationPrincipal.getID()));
     }
 
     @GET
@@ -63,11 +68,11 @@ public class KeyResource extends AbstractKeyResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find public key for organization"))
     @Override
     public PublicKeyEntity getPublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
-        final List<PublicKeyEntity> certificates = this.dao.fetchPublicKey(keyID, organizationPrincipal.getID());
-        if (certificates.isEmpty()) {
-            throw new WebApplicationException("Cannot find certificate", Response.Status.NOT_FOUND);
+        final List<PublicKeyEntity> publicKeys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
+        if (publicKeys.isEmpty()) {
+            throw new WebApplicationException("Cannot find public key", Response.Status.NOT_FOUND);
         }
-        return certificates.get(0);
+        return publicKeys.get(0);
     }
 
     @DELETE
@@ -75,12 +80,20 @@ public class KeyResource extends AbstractKeyResource {
     @ExceptionMetered
     @Path("/{keyID}")
     @UnitOfWork
-    @ApiOperation(value = "Create public key for Organization",
+    @ApiOperation(value = "Delete public key for Organization",
             notes = "This endpoint deletes the specified public key associated with the organization.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find public key for organization"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find public key for organization"),
+            @ApiResponse(code = 200, message = "Key successfully removed")
+    })
     @Override
     public Response deletePublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
-        this.dao.deletePublicKey(keyID, organizationPrincipal.getID());
+        final List<PublicKeyEntity> keys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
+
+        if (keys.isEmpty()) {
+            throw new WebApplicationException("Cannot find certificate", Response.Status.NOT_FOUND);
+        }
+        keys.forEach(this.dao::deletePublicKey);
 
         return Response.ok().build();
     }
@@ -89,13 +102,19 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Register public key for Organization",
             notes = "This endpoint registers the provided public key with the organization." +
                     "<p>The provided key MUST be PEM encoded.")
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork
     @Override
-    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotEmpty String key) {
+    public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                     @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
+                                     @NotEmpty String key,
+                                     @ApiParam(name = "label", value = "Public Key ID (label)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
+                                     @QueryParam(value = "label") Optional<String> keyID) {
+        final String keyLabel = keyID.orElseGet(this::buildDefaultKeyID);
         final SubjectPublicKeyInfo publicKey;
         try {
             publicKey = PublicKeyHandler.parsePEMString(key);
@@ -111,7 +130,13 @@ public class KeyResource extends AbstractKeyResource {
         publicKeyEntity.setOrganization_id(organizationEntity.getId());
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setPublicKey(publicKey);
+        publicKeyEntity.setLabel(keyLabel);
 
         return this.dao.persistPublicKey(publicKeyEntity);
+    }
+
+    private String buildDefaultKeyID() {
+        final int newKeyID = this.random.nextInt();
+        return String.format("key:%d", newKeyID);
     }
 }

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -23,11 +24,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.APITestHelpers.TASK_URL;
+import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link gov.cms.dpc.api.auth.StaticAuthFilter}
+ * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link StaticAuthFilter}
  */
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
@@ -37,7 +38,7 @@ public class AbstractApplicationTest {
     private static final String KEY_PREFIX = "dpc.api";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    protected static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
             ConfigOverride.config(KEY_PREFIX, "authenticationDisabled", "true"));
     protected FhirContext ctx;
 
@@ -55,7 +56,7 @@ public class AbstractApplicationTest {
     }
 
     @BeforeEach
-    public void eachSetup() throws IOException, URISyntaxException {
+    public void eachSetup() throws IOException {
         ctx = FhirContext.forDstu3();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         FHIRHelpers.registerOrganization(attrClient,

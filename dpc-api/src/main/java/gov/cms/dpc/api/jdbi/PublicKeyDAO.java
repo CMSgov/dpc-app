@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
@@ -32,16 +33,24 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         return list(query);
     }
 
-    public List<PublicKeyEntity> fetchPublicKey(UUID keyID, UUID organizationID) {
-        return publicKeySearch(keyID, organizationID);
+    public Optional<PublicKeyEntity> fetchPublicKey(UUID keyID) {
+        return Optional.ofNullable(get(keyID));
     }
 
-    public void deletePublicKey(UUID keyID, UUID organizationID) {
-        publicKeySearch(keyID, organizationID)
-                .forEach(key -> currentSession().delete(key));
+    public void deletePublicKey(PublicKeyEntity keyEntity) {
+        currentSession().delete(keyEntity);
     }
 
-    private List<PublicKeyEntity> publicKeySearch(UUID keyID, UUID organizationID) {
+    public PublicKeyEntity findKeyByLabel(String keyLabel) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
+        final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
+
+        query.where(builder.equal(root.get(PublicKeyEntity_.label), keyLabel));
+        return currentSession().createQuery(query).getSingleResult();
+    }
+
+    public List<PublicKeyEntity> publicKeySearch(UUID keyID, UUID organizationID) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
         final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
