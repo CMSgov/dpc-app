@@ -35,7 +35,7 @@
     <% @organizations.each do |org| %>
       <div class="module-container">
         <div class="module-container__primary">
-          <h3 class="module-container__heading"><%= link_to org.name, internal_organization_path(org) %></h3>
+          <h2 class="module-container__heading"><%= link_to org.name, internal_organization_path(org) %></h2>
         </div>
       </div>
     <% end %>

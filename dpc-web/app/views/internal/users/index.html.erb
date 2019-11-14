@@ -34,7 +34,7 @@
           <%= user.id %>
         </div>
         <div class="module-container__primary">
-          <h3 class="module-container__heading"><%= link_to user.name, internal_user_path(user) %></h3>
+          <h2 class="module-container__heading"><%= link_to user.name, internal_user_path(user) %></h2>
           <div class="site-pills ds-u-margin--0 ds-u-padding-x--2">
           <% user.taggings.each do |tagging| %>
             <span class="site-pills__item site-pills__item--small">
