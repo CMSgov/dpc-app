@@ -8,25 +8,71 @@
 
       <div class="ds-l-col--9 field-group__fields">
         <div class="field">
-          <%= f.label :organization_id, class: "ds-c-label ds-u-margin-top--0" %>
-          <%= f.select :organization_ids, Organization.all.map{|o| [o.name, o.id]}, { selected: params[:user_organization_ids] || @user.organization_ids, include_blank: true }, class: "ds-c-field", value: @user.primary_organization.try(:id), 'aria-describedby': 'requested_org_hint' %>
-          <span class="ds-c-field__hint" id="requested_org_hint">
-          This user originally requested
-          <strong><%= @user.requested_organization %></strong>
-          (<%= @user.requested_organization_type.titleize %>
-          with <%= @user.requested_num_providers %> providers).
-          </span>
-          <%= link_to 'Create an organization from this info',
-              new_internal_organization_path(organization_name: @user.requested_organization,
-                                             organization_organization_type: @user.requested_organization_type,
-                                             organization_num_providers: @user.requested_num_providers,
-                                             organization_address_attributes_street: @user.address_1,
-                                             organization_address_attributes_street_2: @user.address_2,
-                                             organization_address_attributes_city: @user.city,
-                                             organization_address_attributes_state: @user.state,
-                                             organization_address_attributes_zip: @user.zip,
-                                             from_user: @user.id),
-              data: { test: 'convert-org-link' } %>
+          <%= f.label :organization_ids, "Assigned organization", class: "ds-c-label ds-u-margin-top--0" %>
+          <%= f.select :organization_ids, Organization.all.map{|o| [o.name, o.id]}, { selected: params[:user_organization_ids] || @user.organization_ids, include_blank: '-Not assigned-' }, class: "ds-c-field", value: @user.primary_organization.try(:id), 'aria-describedby': 'requested_org_hint', 'data-org-toggle': 'org-toggle' %>
+
+          <div id="requested_org_hint" class="ds-u-fill--primary-alt-lightest ds-u-padding--3 ds-u-margin-top--5 ds-u-radius ds-u-border--1">
+            <h2 class="ds-u-margin-top--0 ds-u-font-size--h4">This user originally requested</h2>
+            <div class="ds-u-margin-bottom--1">
+              <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#clinic-medical"></use>
+              </svg>
+              <%= @user.requested_organization %>
+            </div>
+
+            <% unless @user.requested_organization_type == "health_it_vendor" %>
+              <div class="ds-u-margin-bottom--1">
+                <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <use xlink:href="/assets/solid.svg#users"></use>
+                </svg>
+                <%= @user.requested_num_providers %>
+              </div>
+            <% end %>
+
+            <div class="ds-u-margin-bottom--1">
+              <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#shapes"></use>
+              </svg>
+              <%= @user.requested_organization_type.titleize %>
+            </div>
+
+            <div>
+              <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
+              </svg>
+              <%= @user.address_1 %>
+            </div>
+
+            <% if @user.address_2.length > 1 %>
+              <div class="ds-u-padding-x--3">
+                <%= @user.address_2 %>
+              <div>
+            <% end %>
+            <div class="ds-u-padding-x--3">
+              <%= @user.city %>, <%= @user.state %> <%= @user.zip %>
+            </div>
+
+            <p><%= link_to new_internal_organization_path(organization_name: @user.requested_organization,
+                                               organization_organization_type: @user.requested_organization_type,
+                                               organization_num_providers: @user.requested_num_providers,
+                                               organization_address_attributes_street: @user.address_1,
+                                               organization_address_attributes_street_2: @user.address_2,
+                                               organization_address_attributes_city: @user.city,
+                                               organization_address_attributes_state: @user.state,
+                                               organization_address_attributes_zip: @user.zip,
+                                               from_user: @user.id),
+                data: { test: 'convert-org-link' }, class: "ds-c-button ds-u-fill--white" do %>
+                  Create an organization from this info
+                  <svg class="icon ds-u-margin-left--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <use xlink:href="/assets/solid.svg#arrow-right"></use>
+                  </svg>
+
+                <% end %>
+              </p>
+          </div>
+
+
+
         </div>
       </div>
     </fieldset>
