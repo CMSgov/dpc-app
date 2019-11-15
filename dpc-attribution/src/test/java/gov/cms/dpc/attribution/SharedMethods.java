@@ -39,6 +39,7 @@ public class SharedMethods {
         patient.addIdentifier(patientIdentifier);
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
+        patient.setGender(Enumerations.AdministrativeGender.OTHER);
         patient.setManagingOrganization(new Reference("Organization/" + organizationID));
         final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
         component.setResource(patient);
