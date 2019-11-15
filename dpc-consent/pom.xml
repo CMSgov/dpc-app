@@ -34,6 +34,10 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-hibernate</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.knowm</groupId>
+            <artifactId>dropwizard-sundial</artifactId>
+        </dependency>
         <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -80,6 +84,17 @@
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-testing</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
