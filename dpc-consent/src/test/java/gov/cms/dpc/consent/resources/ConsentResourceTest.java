@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.AbstractConsentTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ class ConsentResourceTest extends AbstractConsentTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(ConsentEntity.OPT_IN, sut.getPolicyRule());
+        assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, sut.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, sut.getId());
     }
 
@@ -87,7 +88,7 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
 
-        assertEquals(ConsentEntity.OPT_IN, found.getPolicyRule());
+        assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
     }
 
@@ -106,7 +107,7 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
 
-        assertEquals(ConsentEntity.OPT_IN, found.getPolicyRule());
+        assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
     }
 
@@ -126,8 +127,9 @@ class ConsentResourceTest extends AbstractConsentTest {
                 .execute();
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
+        System.out.println(ctx.forDstu3().newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
-        assertEquals(ConsentEntity.OPT_IN, found.getPolicyRule());
+        assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
     }
 }

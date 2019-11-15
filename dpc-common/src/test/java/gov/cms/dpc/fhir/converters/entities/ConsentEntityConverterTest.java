@@ -29,7 +29,7 @@ public class ConsentEntityConverterTest {
         assertEquals(ConsentEntity.CATEGORY_DISPLAY, result.getCategoryFirstRep().getCodingFirstRep().getDisplay());
         assertEquals(TEST_FHIR_URL + "/Patient?identity=|" + TEST_MBI, result.getPatient().getReference());
         assertEquals(TEST_DPC_URL, result.getOrganization().get(0).getReference());
-        assertEquals(ConsentEntity.OPT_IN, result.getPolicyRule());
+        assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, result.getPolicyRule());
         assertTrue(result.getPolicy().isEmpty());
         assertDoesNotThrow(() -> FhirContext.forDstu3().newJsonParser().encodeResourceToString(result));
     }
@@ -40,7 +40,7 @@ public class ConsentEntityConverterTest {
         ce.setPolicyCode(ConsentEntity.OPT_OUT);
         final Consent result = ConsentEntityConverter.convert(ce, TEST_DPC_URL, TEST_FHIR_URL);
 
-        assertEquals(ConsentEntity.OPT_OUT, result.getPolicyRule());
+        assertEquals(ConsentEntityConverter.OPT_OUT_MAGIC, result.getPolicyRule());
         assertDoesNotThrow(() -> {
             FhirContext.forDstu3().newJsonParser().encodeResourceToString(result);
         });

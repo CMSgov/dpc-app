@@ -17,6 +17,12 @@ import static gov.cms.dpc.common.consent.entities.ConsentEntity.OPT_OUT;
  * A utility class for converting a ConsentEntity into a FHIR Consent Resource.
  */
 public class ConsentEntityConverter {
+    /*
+     * "magic string" uris for a PolicyRule, as defined
+     * <a href="http://hl7.org/fhir/STU3/consent.html#6.2.5">by Hl7</a>
+     */
+    public static final String OPT_IN_MAGIC = "http://hl7.org/fhir/ConsentPolicy/opt-in";
+    public static final String OPT_OUT_MAGIC = "http://hl7.org/fhir/ConsentPolicy/opt-out";
 
     private ConsentEntityConverter() {}
 
@@ -50,12 +56,18 @@ public class ConsentEntityConverter {
         return new Reference().setReference(String.format("%s/Patient?identity=|%s", fhirURL, mbi));
     }
 
-    private static String policyCode(String value) {
-        if (OPT_OUT.equals(value) || OPT_IN.equals(value)) {
-            return value;
+
+    private static String policyRule(String value) {
+        String code;
+        if (OPT_IN.equals(value)) {
+            code = OPT_IN_MAGIC;
+        } else if (OPT_OUT.equals(value)) {
+            code = OPT_OUT_MAGIC;
+        } else {
+            throw new IllegalArgumentException(String.format("invalid value %s; should be %s or %s", value, OPT_IN, OPT_OUT));
         }
 
-        throw new IllegalArgumentException(String.format("invalid policyCode %s", value));
+        return code;
     }
 
     private static List<CodeableConcept> category(String loincCode) {
@@ -70,15 +82,15 @@ public class ConsentEntityConverter {
 
         c.setId(consentEntity.getId().toString());
 
-        // there is no consent status in entity, so we are defaulting to active. Correct?
+        // there is no consent status in entity, so we are defaulting to active.
         c.setStatus(Consent.ConsentState.ACTIVE);
 
         c.setDateTime(Date.from(consentEntity.getEffectiveDate().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant()));
         c.setText(narrativeText(consentEntity.getPolicyCode(), consentEntity.getHicn(), consentEntity.getMbi()));
         c.setPatient(patient(fhirURL, consentEntity.getMbi()));
 
-        // PolicyRule is a CodeableConcept in r4 but is a string in r3
-        c.setPolicyRule(policyCode(consentEntity.getPolicyCode()));
+        // PolicyRule is a CodeableConcept in r4 but is a uri in r3
+        c.setPolicyRule(policyRule(consentEntity.getPolicyCode()));
 
         // scope is an r4 entity. in our data this is currently always "patient-privacy"
         // for the moment, we're not extending r3 to include it
