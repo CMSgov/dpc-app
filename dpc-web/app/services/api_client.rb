@@ -98,7 +98,7 @@ class APIClient
   def post_text_request(uri_string, text, query_params, token)
     uri = URI.parse uri_string
     uri.query = URI.encode_www_form(query_params)
-    text_headers = { 'Content-Type': 'text/plain' }.merge(auth_header(token))
+    text_headers = { 'Content-Type': 'text/plain', 'Accept': 'application/json' }.merge(auth_header(token))
 
     request = Net::HTTP::Post.new(uri.request_uri, text_headers)
     request.body = text
@@ -119,6 +119,6 @@ class APIClient
   end
 
   def headers(token)
-    { 'Content-Type': 'application/json' }.merge(auth_header(token))
+    { 'Content-Type': 'application/json', 'Accept': 'application/json' }.merge(auth_header(token))
   end
 end
