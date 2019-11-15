@@ -58,9 +58,14 @@ services:
 
   consent:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
+    depends_on:
+      - db
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
+    ports:
+      - "3600:3002"
+      - "9004:9900"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
 
