@@ -38,7 +38,7 @@ public class SuppressionFileImportTest {
     private static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private Client client;
     private ConsentDAO consentDAO;
-    final String PATH_1800_COPY = "./src/test/resources/synthetic-1800-files/copy";
+    final Path PATH_1800_COPY = Paths.get("./src/test/resources/synthetic-1800-files/copy");
 
     @Rule
     public DAOTestRule database = DAOTestRule.newBuilder().addEntityClass(ConsentEntity.class).build();
@@ -57,7 +57,7 @@ public class SuppressionFileImportTest {
                 Guice.createInjector(new AbstractModule(){
                     @Provides
                     protected String provideSuppressionFileDir() {
-                        return PATH_1800_COPY;
+                        return PATH_1800_COPY.toString();
                     }
                     @Provides
                     protected SessionFactory provideSessionFactory() {
@@ -68,12 +68,13 @@ public class SuppressionFileImportTest {
     }
 
     @AfterEach
-    void shutdown() {
+    void shutdown() throws IOException {
+        Files.delete(PATH_1800_COPY);
         APPLICATION.after();
     }
 
     @Test
-    void test() throws InterruptedException {
+    void test() throws InterruptedException, IOException {
         copyFiles("./src/test/resources/synthetic-1800-files/valid");
 
         JobTestUtils.startJob(APPLICATION, this.client, "SuppressionFileImport");
@@ -102,7 +103,7 @@ public class SuppressionFileImportTest {
     }
 
     @Test
-    void test_invalidFiles() throws InterruptedException {
+    void test_invalidFiles() throws InterruptedException, IOException {
         copyFiles("./src/test/resources/synthetic-1800-files/invalid");
 
         JobTestUtils.startJob(APPLICATION, this.client, "SuppressionFileImport");
@@ -135,18 +136,16 @@ public class SuppressionFileImportTest {
         session.close();
     }
 
-    void copyFiles(String path) {
-        try (Stream<Path> paths = Files.walk(Paths.get(path))) {
-            paths.filter(Files::isRegularFile).forEach(p -> {
-                Path dest = Paths.get(PATH_1800_COPY, "/", p.getFileName().toString());
-                try {
-                    Files.copy(p, dest, StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    fail(String.format("Cannot copy synthetic 1-800 file %s: %s", p.toString(), e.toString()));
-                }
-            });
-        } catch (IOException e) {
-            fail(String.format("Cannot read synthetic 1-800 files: %s", e.toString()));
-        }
+    void copyFiles(String path) throws IOException {
+        Path copyPath = Files.createDirectory(PATH_1800_COPY);
+        Stream<Path> paths = Files.walk(Paths.get(path));
+        paths.filter(Files::isRegularFile).forEach(f -> {
+            Path dest = Paths.get(PATH_1800_COPY.toString(), "/", f.getFileName().toString());
+            try {
+                Files.copy(f, dest, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                fail(String.format("Cannot copy synthetic 1-800 file %s: %s", f.toString(), e.toString()));
+            }
+        });
     }
 }
