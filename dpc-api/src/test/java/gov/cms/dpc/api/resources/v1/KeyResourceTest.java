@@ -55,7 +55,6 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             final HttpPost post = new HttpPost(builder.build());
             post.setEntity(new StringEntity(key));
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
-            post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
@@ -96,7 +95,6 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             final HttpPost post = new HttpPost(String.format("%s/Key", getBaseURL()));
             post.setEntity(new StringEntity(key));
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
-            post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token should be valid");
@@ -105,7 +103,6 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             assertNotNull(entity, "Should have retrieved entity");
             final HttpGet get = new HttpGet(String.format("%s/Key/%s", getBaseURL(), entity.id));
             get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
-            get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(get)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
@@ -117,7 +114,6 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
             final HttpGet keyGet = new HttpGet(String.format("%s/Key", getBaseURL()));
             keyGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
-            keyGet.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(keyGet)) {
                 final CollectionResponse<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<KeyView>>() {
