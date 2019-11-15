@@ -21,6 +21,7 @@ bbcerts/*
 ig/output
 ig/generated_output
 .bin/
+bz-out/
 dpc-web/public/ig
 ig/source/resources/implementationguide/*parameters.json
 
