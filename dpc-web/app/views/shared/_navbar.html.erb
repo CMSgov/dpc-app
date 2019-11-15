@@ -40,7 +40,7 @@ aria-controls="topnav-wrap" aria-label="Close menu">
                   aria-controls="nav-1" data-test="my-account-menu">My account</button>
           <ul id="nav-1" class="topnav__dropdown usa-accordion__content" hidden>
             <li class="topnav__dropdown__item">
-              <%= link_to profile_path, class: "topnav__dropdown__link",
+              <%= link_to edit_registration_path(User), class: "topnav__dropdown__link",
                   data: { test: 'dpc-registrations-profile-link' } do %>
                   Profile
                 <% end %>

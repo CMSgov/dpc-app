@@ -54,3 +54,8 @@ blockquote {
 .ds-c-choice + label a {
   margin-left: 1ch;
 }
+
+.token-text {
+  word-wrap: break-word;
+  width: 400px;
+}
