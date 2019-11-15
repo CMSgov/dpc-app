@@ -19,6 +19,8 @@ public class DPCConsentConfiguration extends TypesafeConfiguration implements ID
     @JsonProperty("consentdb")
     private DataSourceFactory consentDatabase = new DataSourceFactory();
 
+    @Valid
+    @NotNull
     @JsonProperty("sundial")
     private SundialConfiguration sundial = new SundialConfiguration();
 

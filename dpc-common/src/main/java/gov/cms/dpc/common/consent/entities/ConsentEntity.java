@@ -40,8 +40,11 @@ public class ConsentEntity implements Serializable {
     @Column(name = "hicn")
     private String hicn;
 
+    @Column(name = "bfd_patient_id")
+    private String bfdPatientId;
+
     @NotNull
-    @Column(name = "effective_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @Column(name = "effective_date", columnDefinition = "DATE")
     private LocalDate effectiveDate;
 
     @Column(name = "policy_code")
@@ -86,6 +89,14 @@ public class ConsentEntity implements Serializable {
 
     public void setHicn(String hicn) {
         this.hicn = hicn;
+    }
+
+    public String getBfdPatientId() {
+        return bfdPatientId;
+    }
+
+    public void setBfdPatientId(String bfdPatientId) {
+        this.bfdPatientId = bfdPatientId;
     }
 
     public LocalDate getEffectiveDate() {
