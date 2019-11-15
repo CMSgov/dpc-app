@@ -235,6 +235,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final OffsetDateTime created = OffsetDateTime.now(ZoneOffset.UTC);
         record.setCreatedAt(created);
         record.setUpdatedAt(created);
+        record.setGender(entity.getGender().ordinal());
         record.setId(UUID.randomUUID());
 
         return record;

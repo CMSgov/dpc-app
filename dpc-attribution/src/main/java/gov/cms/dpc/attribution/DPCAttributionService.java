@@ -82,6 +82,11 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
                 return configuration.getDatabase();
             }
+
+            @Override
+            public String getMigrationsFileName() {
+                return "migrations/attribution.migrations.xml";
+            }
         });
 
         final SundialBundle<DPCAttributionConfiguration> sundialBundle = new SundialBundle<>() {
