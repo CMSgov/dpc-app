@@ -4,10 +4,9 @@ require 'csv'
 
 class User < ApplicationRecord
   include OrganizationTypable
-  has_one :dpc_registration, inverse_of: :user
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
-  has_many :organization_user_assignments
+  has_many :organization_user_assignments, dependent: :destroy
   has_many :organizations, through: :organization_user_assignments
 
   before_save :requested_num_providers_to_zero_if_blank
@@ -77,6 +76,10 @@ class User < ApplicationRecord
 
   def primary_organization
     organizations.first
+  end
+
+  def unassigned?
+    organization_user_assignments.count.zero?
   end
 
   private
