@@ -1,6 +1,6 @@
 package gov.cms.dpc.consent.jobs;
 
-import gov.cms.dpc.consent.entities.ConsentEntity;
+import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.exceptions.InvalidSuppressionRecordException;
 import org.apache.commons.lang3.StringUtils;
 
