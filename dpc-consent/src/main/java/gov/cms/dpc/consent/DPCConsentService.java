@@ -7,6 +7,8 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.consent.cli.SeedCommand;
+import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -40,8 +42,10 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         JerseyGuiceUtils.reset();
 
         GuiceBundle<DPCConsentConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
-                .modules(new ConsentAppModule(),
-                        new DPCConsentHibernateModule<>(hibernateBundle)
+                .modules(
+                        new ConsentAppModule(),
+                        new DPCConsentHibernateModule<>(hibernateBundle),
+                        new FHIRModule<>()
                 ).build();
 
         bootstrap.addBundle(hibernateBundle);
@@ -65,6 +69,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                 return dpcConsentConfiguration.getSundial();
             }
         });
+        bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
     }
 
     @Override
