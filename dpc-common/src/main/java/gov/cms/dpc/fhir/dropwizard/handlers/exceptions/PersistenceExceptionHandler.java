@@ -42,15 +42,15 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
 
     @Override
     Response handleFHIRException(PersistenceException exception) {
-
         final Pair<Response.Status, String> statusStringPair = handleResponseGeneration(exception);
+        final long exceptionID = this.logException(exception);
 
         final OperationOutcome outcome = new OperationOutcome();
+        outcome.setId(Long.toString(exceptionID));
         outcome.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.FATAL)
                 .setDetails(new CodeableConcept().setText(statusStringPair.getRight()));
 
-        // TODO: Need to log and correlate this exception (DPC-540)
         return Response
                 .status(statusStringPair.getLeft())
                 .type(FHIRMediaTypes.FHIR_JSON)
@@ -60,8 +60,8 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
 
     @Override
     Response handleNonFHIRException(PersistenceException exception) {
+        final long exceptionID = super.logException(exception);
         final Pair<Response.Status, String> statusStringPair = handleResponseGeneration(exception);
-        // TODO: Need to log and correlate this exception (DPC-540)
         return Response
                 .status(statusStringPair.getLeft())
                 .entity(statusStringPair.getRight())
