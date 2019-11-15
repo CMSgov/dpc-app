@@ -178,6 +178,7 @@ class AttributionFHIRTest {
         patient.addIdentifier(patientIdentifier);
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
+        patient.setGender(Enumerations.AdministrativeGender.FEMALE);
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
 
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);

@@ -1,9 +1,9 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@SuppressWarnings("WeakerAccess")
 @Entity(name = "patients")
 public class PatientEntity implements Serializable {
 
@@ -42,6 +43,9 @@ public class PatientEntity implements Serializable {
     @NotNull
     @Column(name = "dob")
     private LocalDate dob;
+
+    @NotNull
+    private AdministrativeGender gender;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime createdAt;
@@ -100,6 +104,14 @@ public class PatientEntity implements Serializable {
         this.dob = dob;
     }
 
+    public AdministrativeGender getGender() {
+        return gender;
+    }
+
+    public void setGender(AdministrativeGender gender) {
+        this.gender = gender;
+    }
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
@@ -155,6 +167,7 @@ public class PatientEntity implements Serializable {
         this.setPatientFirstName(updated.getPatientFirstName());
         this.setPatientLastName(updated.getPatientLastName());
         this.setDob(updated.getDob());
+        this.setGender(updated.getGender());
         return this;
     }
 
@@ -183,6 +196,7 @@ public class PatientEntity implements Serializable {
         final HumanName name = resource.getNameFirstRep();
         patient.setPatientFirstName(name.getGivenAsSingleString());
         patient.setPatientLastName(name.getFamily());
+        patient.setGender(resource.getGender());
 
         // Set the managing organization
 

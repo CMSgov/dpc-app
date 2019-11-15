@@ -28,6 +28,7 @@ public class PatientEntityConverter {
                 .addGiven(entity.getPatientFirstName());
 
         patient.setBirthDate(PatientEntity.fromLocalDate(entity.getDob()));
+        patient.setGender(entity.getGender());
 
         patient
                 .addIdentifier()
