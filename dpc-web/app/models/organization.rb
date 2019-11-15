@@ -14,7 +14,7 @@ class Organization < ApplicationRecord
   validates :organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :name, uniqueness: true, presence: true
   validate :api_environments_allowed
-  validates :npi, presence: true, unless: -> { api_environments.empty? }
+  validates :npi, uniqueness: true, presence: true, unless: -> { api_environments.empty? }
 
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, :fhir_endpoints, reject_if: :all_blank

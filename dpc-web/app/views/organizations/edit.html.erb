@@ -1,0 +1,26 @@
+<% title "Edit Your Organization" %>
+
+<div class="ds-l-container ds-u-padding-x--0">
+
+  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
+
+    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Edit: <%= @organization.name %></h1>
+
+  </section>
+
+  <section class="box">
+    <div class="box__content">
+      <%= form_for @organization, url: organization_path(@organization), html: { method: :put } do |f| %>
+        <div class="field">
+          <%= f.label :npi, "NPI", class: "ds-c-label" %>
+          <%= f.text_field :npi, class: "ds-c-field" %>
+        </div>
+
+        <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
+          <%= f.submit 'Save', class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+          <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+</div>
