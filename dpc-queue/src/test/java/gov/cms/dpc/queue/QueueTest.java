@@ -35,7 +35,7 @@ class QueueTest {
     @TestFactory
     Stream<DynamicTest> testSource() {
 
-        BiFunction<IJobQueue, String, String> nameGenerator = (queue, operation) -> String.format("Testing operation: %s on queue: %s", operation, queue.queueType());
+        BiFunction<JobQueueCommon, String, String> nameGenerator = (queue, operation) -> String.format("Testing operation: %s on queue: %s", operation, queue.queueType());
         return queues
                 .stream()
                 .map(queueName -> {
@@ -54,7 +54,8 @@ class QueueTest {
                     final DynamicTest first = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Simple Submission"), () -> testSimpleSubmissionCompletion(queue));
                     final DynamicTest second = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Missing Job"), () -> testMissingJob(queue));
                     final DynamicTest third = DynamicTest.dynamicTest(nameGenerator.apply(queue, "EOB Submission"), () -> testPatientAndEOBSubmission(queue));
-                    return List.of(first, second, third);
+                    final DynamicTest fourth = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Invalid batch on queue"), () -> testInvalidJobBatch(queue));
+                    return List.of(first, second, third, fourth);
                 })
                 .flatMap(Collection::stream);
     }
@@ -79,7 +80,7 @@ class QueueTest {
         sessionFactory.close();
     }
 
-    void testSimpleSubmissionCompletion(IJobQueue queue) {
+    void testSimpleSubmissionCompletion(JobQueueCommon queue) {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();
 
@@ -142,7 +143,7 @@ class QueueTest {
         assertEquals(0, queue.queueSize(), "Worked all jobs in the queue, but the queue is not empty");
     }
 
-    void testPatientAndEOBSubmission(IJobQueue queue) {
+    void testPatientAndEOBSubmission(JobQueueCommon queue) {
         // Add a job with a EOB resource
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit));
@@ -168,7 +169,7 @@ class QueueTest {
         });
     }
 
-    void testMissingJob(IJobQueue queue) {
+    void testMissingJob(JobQueueCommon queue) {
         UUID batchID = UUID.randomUUID();
 
         // Check that things are empty
@@ -177,5 +178,32 @@ class QueueTest {
 
         assertTrue(queue.getBatch(batchID).isEmpty(), "Should not be able to get a missing batch");
         assertThrows(JobQueueFailure.class, () -> queue.completeBatch(null, aggregatorID), "Should error when completing a job which does not exist");
+    }
+
+    void testInvalidJobBatch(JobQueueCommon queue) {
+        final UUID orgID = UUID.randomUUID();
+        final UUID jobID = UUID.randomUUID();
+
+        final var jobBatch = new JobQueueBatch(
+                jobID,
+                orgID,
+                "test-provider-1",
+                Collections.singletonList("test-patient-1"),
+                Collections.singletonList(ResourceType.ExplanationOfBenefit)
+        );
+
+        // Set the aggregatorID to something random so it gets claimed incorrectly
+        jobBatch.setAggregatorIDForTesting(UUID.randomUUID());
+
+        // Submit the job batch
+        queue.submitJobBatches(Collections.singletonList(jobBatch));
+
+        // Claim the batch, but expect it to fail and not return
+        Optional<JobQueueBatch> claimed = queue.claimBatch(aggregatorID);
+        assertFalse(claimed.isPresent(), "Invalid batch should not be claimed");
+
+        // Verify the batch was marked as failed in the queue
+        final var failedBatch = queue.getBatch(jobBatch.getBatchID());
+        assertEquals(JobStatus.FAILED, failedBatch.get().getStatus());
     }
 }
