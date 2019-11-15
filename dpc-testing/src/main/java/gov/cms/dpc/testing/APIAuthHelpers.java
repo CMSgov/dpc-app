@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
@@ -14,22 +15,31 @@ import gov.cms.dpc.testing.models.KeyView;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.cert.X509Certificate;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.UUID;
@@ -46,14 +56,15 @@ public class APIAuthHelpers {
         // Not used
     }
 
-    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) {
+        return buildAuthenticatedClient(ctx, baseURL, macaroon, keyID, privateKey, false);
+    }
 
-        final AuthResponse authResponse = jwtAuthFlow(baseURL, macaroon, keyID, privateKey);
-        // Request an access token from the JWT endpoint
-        final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
-        client.registerInterceptor(new MacaroonsInterceptor(authResponse.accessToken));
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck) {
+        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck);
+        client.registerInterceptor(new HAPISmartInterceptor(baseURL, macaroon, keyID, privateKey));
 
-        // Add a header the hard way
+        // Add the async header the hard way
         final var addPreferInterceptor = new IClientInterceptor() {
             @Override
             public void interceptRequest(IHttpRequest iHttpRequest) {
@@ -71,8 +82,8 @@ public class APIAuthHelpers {
         return client;
     }
 
-    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon) {
-        final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
+    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon, boolean disableSSLCheck) {
+        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck);
         client.registerInterceptor(new MacaroonsInterceptor(macaroon));
         return client;
     }
@@ -80,7 +91,7 @@ public class APIAuthHelpers {
     public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
         final String jwt = Jwts.builder()
                 .setHeaderParam("kid", keyID)
-                .setAudience(String.format("%sToken/auth", baseURL))
+                .setAudience(String.format("%s/Token/auth", baseURL))
                 .setIssuer(macaroon)
                 .setSubject(macaroon)
                 .setId(UUID.randomUUID().toString())
@@ -90,7 +101,7 @@ public class APIAuthHelpers {
 
         // Submit JWT to /auth endpoint
         final AuthResponse authResponse;
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+        try (final CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Token/auth", baseURL));
             builder.addParameter("scope", "system/*:*");
             builder.addParameter("grant_type", "client_credentials");
@@ -152,22 +163,20 @@ public class APIAuthHelpers {
         final String key = generatePublicKey(keyPair.getPublic());
 
         // Create org specific macaroon from Golden Macaroon
-        // Base64 decode the Macaroon
-        final String decoded = new String(Base64.getUrlDecoder().decode(goldenMacaroon), StandardCharsets.UTF_8);
         final String macaroon = MacaroonsBuilder
-                .modify(MacaroonsBuilder.deserialize(decoded).get(0))
+                .modify(MacaroonsBuilder.deserialize(goldenMacaroon).get(0))
                 .add_first_party_caveat(String.format("organization_id = %s", organizationID))
                 .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
         final KeyView keyEntity;
-        try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final URIBuilder builder = new URIBuilder(String.format("%s/Key", baseURL));
-            builder.addParameter("label", keyLabel);
-            final HttpPost post = new HttpPost(builder.build());
-            post.setEntity(new StringEntity(key));
-            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + macaroon);
-            post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+        final URIBuilder builder = new URIBuilder(String.format("%s/Key", baseURL));
+        builder.addParameter("label", keyLabel);
+        final HttpPost post = new HttpPost(builder.build());
+        post.setEntity(new StringEntity(key));
+        post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + macaroon);
+        post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
+        try (CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             try (CloseableHttpResponse response = client.execute(post)) {
                 keyEntity = mapper.readValue(response.getEntity().getContent(), KeyView.class);
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
@@ -175,6 +184,52 @@ public class APIAuthHelpers {
         }
 
         return Pair.of(keyEntity.id, keyPair.getPrivate());
+    }
+
+    public static CustomHttpBuilder createCustomHttpClient() {
+        return new CustomHttpBuilder();
+    }
+
+    private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck) {
+        final HttpClientBuilder clientBuilder = HttpClients.custom();
+        if (disableSSLCheck) {
+            try {
+                clientBuilder.setSSLContext(createTrustingSSLContext());
+                clientBuilder.setSSLHostnameVerifier((s, sslSession) -> true);
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new RuntimeException("Cannot create custom SSL context", e);
+            }
+        }
+
+        ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
+
+        return ctx.newRestfulGenericClient(baseURL);
+    }
+
+    private static SSLContext createTrustingSSLContext() throws KeyManagementException, NoSuchAlgorithmException {
+        final SSLContext tls = SSLContext.getInstance("TLS");
+        tls.init(null, getTrustingManager(), new SecureRandom());
+        return tls;
+    }
+
+    private static TrustManager[] getTrustingManager() {
+        return new TrustManager[]{new X509TrustManager() {
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                // Do nothing
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                // Do nothing
+            }
+
+        }};
     }
 
 
@@ -215,9 +270,139 @@ public class APIAuthHelpers {
         @JsonProperty(value = "expires_in")
         public Long expiresIn;
         public String scope;
+        @JsonIgnore
+        public OffsetDateTime expiresAt;
 
         public AuthResponse() {
-            // Not used
+            // Set the expiration time, so we can track it later
+            this.expiresAt = OffsetDateTime.now(ZoneOffset.UTC);
+        }
+    }
+
+    public static class HAPISmartInterceptor implements IClientInterceptor {
+
+        private final String baseURL;
+        private final String clientToken;
+        private final UUID keyID;
+        private final PrivateKey privateKey;
+
+        private OffsetDateTime shouldRefreshToken;
+        private AuthResponse response;
+
+        HAPISmartInterceptor(String baseURL, String clientToken, UUID keyID, PrivateKey privateKey) {
+            this.baseURL = baseURL;
+            this.clientToken = clientToken;
+            this.keyID = keyID;
+            this.privateKey = privateKey;
+
+            // Do the initial JWT Auth flow
+            refreshAuthToken();
+        }
+
+        @Override
+        public void interceptRequest(IHttpRequest theRequest) {
+            if (OffsetDateTime.now(ZoneOffset.UTC).isAfter(shouldRefreshToken)) {
+                refreshAuthToken();
+            }
+
+            theRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.response.accessToken);
+        }
+
+        @Override
+        public void interceptResponse(IHttpResponse theResponse) {
+            // We don't need this
+        }
+
+        public AuthResponse getAuthResponse() {
+            return this.response;
+        }
+
+        private void refreshAuthToken() {
+            System.out.println("Refreshing access token");
+            try {
+                final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
+                // Set the refresh time to be 30 seconds before expiration
+                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC)
+                        .plus(authResponse.expiresIn, ChronoUnit.SECONDS)
+                        .minus(30, ChronoUnit.SECONDS);
+                this.response = authResponse;
+            } catch (IOException | URISyntaxException e) {
+                throw new IllegalStateException("Cannot perform auth flow", e);
+            }
+        }
+    }
+
+    public static class HttpClientAuthInterceptor implements HttpRequestInterceptor {
+
+        private final String baseURL;
+        private final String clientToken;
+        private final UUID keyID;
+        private final PrivateKey privateKey;
+
+        private OffsetDateTime shouldRefreshToken;
+        private AuthResponse response;
+
+        HttpClientAuthInterceptor(String baseURL, String clientToken, UUID keyID, PrivateKey privateKey) {
+            this.baseURL = baseURL;
+            this.clientToken = clientToken;
+            this.keyID = keyID;
+            this.privateKey = privateKey;
+
+            // Do the initial refresh
+            refreshAuthToken();
+        }
+
+        @Override
+        public void process(HttpRequest request, HttpContext context) {
+            if (OffsetDateTime.now(ZoneOffset.UTC).isAfter(this.shouldRefreshToken)) {
+                refreshAuthToken();
+            }
+            request.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.response.accessToken));
+        }
+
+        private void refreshAuthToken() {
+            System.out.println("Refreshing access token");
+            try {
+                final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
+                // Set the refresh time to be 30 seconds before expiration
+                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC)
+                        .plus(authResponse.expiresIn, ChronoUnit.SECONDS)
+                        .minus(30, ChronoUnit.SECONDS);
+                this.response = authResponse;
+            } catch (IOException | URISyntaxException e) {
+                throw new IllegalStateException("Cannot perform auth flow", e);
+            }
+        }
+    }
+
+    public static class CustomHttpBuilder {
+
+        private final org.apache.http.impl.client.HttpClientBuilder builder;
+
+        CustomHttpBuilder() {
+            this.builder = HttpClients.custom();
+        }
+
+
+        public CustomHttpBuilder trusting() {
+            try {
+                builder
+                        .setSSLContext(createTrustingSSLContext())
+                        .setSSLHostnameVerifier((s, sslSession) -> true);
+            } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                throw new IllegalStateException("Cannot create trusting http context");
+            }
+
+            return this;
+        }
+
+        public CustomHttpBuilder isAuthed(String baseURL, String clientToken, UUID keyID, PrivateKey privateKey) {
+            this.builder.addInterceptorFirst(new HttpClientAuthInterceptor(baseURL, clientToken, keyID, privateKey));
+            return this;
+        }
+
+        public CloseableHttpClient build() {
+            return this.builder.build();
         }
     }
 }

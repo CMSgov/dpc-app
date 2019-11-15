@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -71,7 +72,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             throw new RuntimeException("Failed creating Macaroon", e);
         }
         // Create admin client for registering organization
-        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon);
+        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
 
         final SampleResult smokeTestResult = new SampleResult();
         smokeTestResult.sampleStart();
@@ -101,11 +102,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
-        try {
-            exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, String.format("%s/", hostParam), token, keyTuple.getLeft(), keyTuple.getRight());
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException("Cannot create export client", e);
-        }
+        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, token, keyTuple.getLeft(), keyTuple.getRight(), true);
 
         // Upload a batch of patients and a batch of providers
         logger.debug("Submitting practitioners");
@@ -134,20 +131,18 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
 
         // Run the job
-        // We need the fully authed access_token, which we'll need to manually pull from the Macaroons Interceptor
-        // Gross, but the other options are even worse
-        final List<Object> interceptors = exportClient.getInterceptorService().getAllRegisteredInterceptors();
+        // Create a custom http client to use for monitoring the non-FHIR export request
+        try (CloseableHttpClient httpClient = APIAuthHelpers.createCustomHttpClient()
+                .trusting()
+                .isAuthed(hostParam, token, keyTuple.getKey(), keyTuple.getRight())
+                .build()) {
+            ClientUtils.handleExportJob(exportClient, providerNPIs, httpClient);
+            smokeTestResult.setSuccessful(true);
 
-        final APIAuthHelpers.MacaroonsInterceptor mInterceptor = interceptors
-                .stream()
-                .filter(interceptor -> interceptor instanceof APIAuthHelpers.MacaroonsInterceptor)
-                .map(APIAuthHelpers.MacaroonsInterceptor.class::cast)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Cannot get interceptor"));
-        ClientUtils.handleExportJob(exportClient, providerNPIs, mInterceptor.getMacaroon());
-        smokeTestResult.setSuccessful(true);
-
-        logger.info("Test completed");
-        return smokeTestResult;
+            logger.info("Test completed");
+            return smokeTestResult;
+        } catch (IOException e) {
+            throw new IllegalStateException("Somehow, could not monitor export response", e);
+        }
     }
 }

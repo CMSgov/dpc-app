@@ -20,12 +20,4 @@ RSpec.describe 'User Registers for Access', type: :request do
       expect(value).to eq(stored_user[key])
     end
   end
-
-  it 'creates an associated DPC Registration' do
-    post '/users', params: { user: user }
-    expect { follow_redirect! }.to change(DpcRegistration, :count)
-
-    dpc_user = DpcRegistration.first.user
-    expect(dpc_user.email).to eq(user[:email])
-  end
 end
