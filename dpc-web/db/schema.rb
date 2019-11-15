@@ -45,15 +45,6 @@ ActiveRecord::Schema.define(version: 2019_11_01_134050) do
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
-  create_table "dpc_registrations", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.integer "access_level", default: 0
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["access_level"], name: "index_dpc_registrations_on_access_level"
-    t.index ["user_id"], name: "index_dpc_registrations_on_user_id"
-  end
-
   create_table "fhir_endpoints", force: :cascade do |t|
     t.string "name", null: false
     t.integer "status", null: false

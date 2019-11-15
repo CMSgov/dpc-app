@@ -20,6 +20,15 @@ class OrganizationRegistrar
     register_new_organizations
   end
 
+  def register_organization(api_env)
+    create_sandbox_endpoint(api_env)
+
+    api_client = APIClient.new(api_env).create_organization(organization)
+    api_org = api_client.response_body
+
+    create_registered_org(api_env, api_org) if api_client.response_successful?
+  end
+
   private
 
   def no_change?
@@ -41,12 +50,7 @@ class OrganizationRegistrar
     added_envs = api_environments - existing_envs
 
     added_envs.each do |api_env|
-      create_sandbox_endpoint(api_env)
-
-      api_client = APIClient.new(api_env).create_organization(organization)
-      api_org = api_client.response_body
-
-      create_registered_org(api_env, api_org) if api_client.response_successful?
+      register_organization(api_env)
     end
   end
 
