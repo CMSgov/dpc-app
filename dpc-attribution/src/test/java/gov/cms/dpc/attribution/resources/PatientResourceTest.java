@@ -7,10 +7,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -31,7 +28,8 @@ class PatientResourceTest extends AbstractAttributionTest {
     void testPatientReadWrite() {
         final Patient patient = createPatientResource("1871", DEFAULT_ORG_ID);
 
-        patient.setManagingOrganization(new Reference(new IdType("Organization", DEFAULT_ORG_ID)));
+        final Reference orgReference = new Reference(new IdType("Organization", DEFAULT_ORG_ID));
+        patient.setManagingOrganization(orgReference);
 
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -44,6 +42,10 @@ class PatientResourceTest extends AbstractAttributionTest {
         assertTrue(outcome.getCreated(), "Should have been created");
 
         final Patient createdResource = (Patient) outcome.getResource();
+
+        // Ensure we have some of the necessary fields
+        assertAll(() -> assertEquals(Enumerations.AdministrativeGender.OTHER, createdResource.getGender(), "Should have matching gender"),
+                () -> assertTrue(orgReference.equalsDeep(createdResource.getManagingOrganization()), "Should have organization"));
 
         final Patient fetchedPatient = client
                 .read()
@@ -153,6 +155,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         foundPatient.getNameFirstRep().setFamily("Updated");
         final Date updatedBirthDate = Date.valueOf("2001-01-01");
         foundPatient.setBirthDate(updatedBirthDate);
+        foundPatient.setGender(Enumerations.AdministrativeGender.UNKNOWN);
 
         // Update the patient
 
