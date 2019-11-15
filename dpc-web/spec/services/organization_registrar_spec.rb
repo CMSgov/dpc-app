@@ -59,4 +59,26 @@ RSpec.describe OrganizationRegistrar do
       expect(FhirEndpoint.last.organization).to eq(org)
     end
   end
+
+  describe '#register_organization' do
+    it 'registers the organization for the given api_env' do
+      org = create(:organization)
+      api_client = instance_double(APIClient)
+
+      allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
+      allow(api_client).to receive(:create_organization).with(org).and_return(api_client)
+      allow(api_client).to receive(:response_successful?).and_return(true)
+      allow(api_client).to receive(:response_body).and_return(
+        {
+          'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
+          'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
+        }
+      )
+
+      expect do
+        OrganizationRegistrar.new(organization: org, api_environments: %w[sandbox]).
+          register_organization('sandbox')
+      end.to change(RegisteredOrganization, :count).by(1)
+    end
+  end
 end

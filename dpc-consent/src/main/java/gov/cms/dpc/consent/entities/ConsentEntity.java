@@ -1,4 +1,4 @@
-package gov.cms.dpc.common.entities;
+package gov.cms.dpc.consent.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -7,15 +7,17 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "consent")
 public class ConsentEntity implements Serializable {
 
-    private static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 8702499693412507926L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
@@ -23,13 +25,20 @@ public class ConsentEntity implements Serializable {
     @NotEmpty
     private String hicn;
 
-    @NotNull
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime effectiveDate;
+    @Column(name = "bfd_patient_id")
+    private String bfdPatientId;
 
+    @NotNull
+    @Column(name = "effective_date", columnDefinition = "DATE")
+    private LocalDate effectiveDate;
+
+    @Column(name = "policy_code")
     private String policyCode;
+    @Column(name = "purpose_code")
     private String purposeCode;
+    @Column(name = "loinc_code")
     private String loincCode;
+    @Column(name = "scope_code")
     private String scopeCode;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
@@ -64,11 +73,19 @@ public class ConsentEntity implements Serializable {
         this.hicn = hicn;
     }
 
-    public OffsetDateTime getEffectiveDate() {
+    public String getBfdPatientId() {
+        return bfdPatientId;
+    }
+
+    public void setBfdPatientId(String bfdPatientId) {
+        this.bfdPatientId = bfdPatientId;
+    }
+
+    public LocalDate getEffectiveDate() {
         return effectiveDate;
     }
 
-    public void setEffectiveDate(OffsetDateTime effectiveDate) {
+    public void setEffectiveDate(LocalDate effectiveDate) {
         this.effectiveDate = effectiveDate;
     }
 

@@ -12,7 +12,6 @@ public abstract class AbstractConsentTest {
     @BeforeAll
     public static void initDB() throws Exception {
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "migrate");
     }
 
     @AfterAll

@@ -6,6 +6,21 @@
   margin: $spacer-3 0;
 }
 
+.box--dashed {
+  border-style: dashed;
+}
+
+.box__header {
+  align-items: center;
+  border-bottom: 1px solid $color-gray-lighter;
+  display: flex;
+  justify-content: space-between;
+}
+
+.box__header__actions {
+  margin-top: -$spacer-2;
+}
+
 .box__content {
   flex: 1 0 0;
   padding: $spacer-4;
