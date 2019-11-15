@@ -36,6 +36,7 @@ public class AttributionTestHelpers {
 
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
+        patient.setGender(Enumerations.AdministrativeGender.OTHER);
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
 
         return patient;
