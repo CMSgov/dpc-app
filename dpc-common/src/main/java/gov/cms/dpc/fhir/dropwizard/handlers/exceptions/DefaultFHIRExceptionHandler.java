@@ -33,7 +33,6 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
 
     @Override
     Response handleFHIRException(Throwable exception) {
-//        final Response response = super.toResponse(exception);
         final int statusCode;
         // Duplicating some of the logic from the parent LoggingExceptionMapper, because we need to get the logged ID
         // We just pass along redirects
