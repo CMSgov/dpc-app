@@ -32,7 +32,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     public static void main(final String[] args) throws Exception {
         // Only enable Swagger when running as a server
-        if ( args != null && "server".equals(args[0]) ) {
+        if (args != null && "server".equals(args[0])) {
             swaggerEnabled = true;
         }
 

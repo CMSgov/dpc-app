@@ -80,6 +80,9 @@ The individual services can be started (along with their dependencies) by passin
 docker-compose up {db,dpc-aggregation,dpc-attribution,dpc-api}
 ``` 
 
+By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always return the same value.
+This can be overriding during startup by setting the `AUTH_DISABLED=false` environment variable. 
+
 ## Manual JAR execution
 
 Alternatively, the individual services can be manually executing the `server` command for the various services.
