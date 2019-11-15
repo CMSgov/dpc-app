@@ -1,4 +1,4 @@
-package gov.cms.dpc.consent.entities;
+package gov.cms.dpc.common.consent.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -9,20 +9,35 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity(name = "consent")
 public class ConsentEntity implements Serializable {
+    public static final String CATEGORY_LOINC_CODE = "64292-6";
+    public static final String CATEGORY_DISPLAY = "Release of information consent Document";
+    public static final String OPT_IN = "OPTIN";
+    public static final String OPT_OUT = "OPTOUT";
+    public static final String TREATMENT = "TREAT";
+    public static final String SCOPE_CODE = "patient-privacy";
 
     private static final long serialVersionUID = 8702499693412507926L;
+
+    public ConsentEntity() {
+        // Hibernate required
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
+    @Column(name = "mbi")
     private String mbi;
+
     @NotEmpty
+    @Column(name = "hicn")
     private String hicn;
 
     @Column(name = "bfd_patient_id")
@@ -34,10 +49,13 @@ public class ConsentEntity implements Serializable {
 
     @Column(name = "policy_code")
     private String policyCode;
+
     @Column(name = "purpose_code")
     private String purposeCode;
+
     @Column(name = "loinc_code")
     private String loincCode;
+
     @Column(name = "scope_code")
     private String scopeCode;
 
@@ -85,17 +103,13 @@ public class ConsentEntity implements Serializable {
         return effectiveDate;
     }
 
-    public void setEffectiveDate(LocalDate effectiveDate) {
-        this.effectiveDate = effectiveDate;
-    }
+    public void setEffectiveDate(LocalDate effectiveDate) { this.effectiveDate = effectiveDate; }
 
     public String getPolicyCode() {
         return policyCode;
     }
 
-    public void setPolicyCode(String policyCode) {
-        this.policyCode = policyCode;
-    }
+    public void setPolicyCode(String policyCode) { this.policyCode = policyCode; }
 
     public String getPurposeCode() {
         return purposeCode;
@@ -135,5 +149,26 @@ public class ConsentEntity implements Serializable {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public static ConsentEntity defaultConsentEntity(Optional<UUID> id, Optional<String> hicn, Optional<String> mbi) {
+        ConsentEntity ce = new ConsentEntity();
+
+        ce.setId(UUID.randomUUID());
+        id.ifPresent(ce::setId);
+
+        ce.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
+        ce.setEffectiveDate(LocalDate.now(ZoneId.of("UTC")));
+        ce.setUpdatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
+
+        hicn.ifPresent(ce::setHicn);
+        mbi.ifPresent(ce::setMbi);
+
+        ce.setLoincCode(CATEGORY_LOINC_CODE);
+        ce.setPolicyCode(OPT_IN);
+        ce.setPurposeCode(TREATMENT);
+        ce.setScopeCode(SCOPE_CODE);
+
+        return ce;
     }
 }
