@@ -16,6 +16,7 @@ require "action_cable/engine"
 require "sprockets/railtie"
 # require "rails/test_unit/railtie"
 require "./lib/dpc_middleware/ig_fix"
+require 'macaroons'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
