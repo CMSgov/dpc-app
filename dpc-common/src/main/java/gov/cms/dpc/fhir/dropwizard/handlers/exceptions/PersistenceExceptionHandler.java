@@ -64,7 +64,7 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
         final Pair<Response.Status, String> statusStringPair = handleResponseGeneration(exception);
         return Response
                 .status(statusStringPair.getLeft())
-                .entity(statusStringPair.getRight())
+                .entity(String.format(ERROR_MSG_FMT, exceptionID, statusStringPair.getRight()))
                 .build();
     }
 
