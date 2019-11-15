@@ -340,10 +340,6 @@ public class JobQueueBatch implements Serializable {
      * @param aggregatorID - the current aggregator working the job
      */
     public void setFailedStatus(UUID aggregatorID) {
-        if (this.status != JobStatus.RUNNING) {
-            throw new JobQueueFailure(jobID, batchID, String.format("Cannot complete. JobStatus: %s", this.status));
-        }
-        this.verifyAggregatorID(aggregatorID);
         this.status = JobStatus.FAILED;
         this.aggregatorID = null;
         completeTime = OffsetDateTime.now(ZoneOffset.UTC);
