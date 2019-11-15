@@ -15,7 +15,7 @@
     "version": "0.3.0-SNAPSHOT",
     "releaseDate": "2019"
   },
-  "fhirVersion": "3.0.1",
+  "fhirVersion": "3.0.2",
   "acceptUnknown": "extensions",
   "format": [
     "application/json",
