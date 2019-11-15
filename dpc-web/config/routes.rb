@@ -19,15 +19,18 @@ Rails.application.routes.draw do
   end
 
   authenticated :user do
-    root 'dpc_registrations#show', as: :authenticated_root
+    root 'dashboard#show', as: :authenticated_root, via: :get
   end
 
   authenticated :internal_user do
     root 'internal/users#index', as: :authenticated_internal_root
   end
 
-  get '/dpc_registrations' => "dpc_registrations#new", as: :user_root
+  match '/dashboard', to: 'dashboard#show', via: :get
 
+  resources :organizations, only: [:show] do
+    resources :client_tokens, only: [:new, :create]
+  end
 
   root to: 'public#home'
 
@@ -38,8 +41,4 @@ Rails.application.routes.draw do
   match '/faq', to: 'pages#faq', via: :get
   match '/support', to: 'pages#support', via: :get
   match '/terms-of-service', to: 'pages#terms_of_service', via: :get
-
-  match '/profile', to: 'dpc_registrations#profile', via: :get
-
-  resources :dpc_registrations, only: %i[new show]
 end

@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<job-scheduling-data>
+    <schedule>
+        <job>
+            <name>SuppressionFileImport</name>
+            <job-class>gov.cms.dpc.consent.jobs.SuppressionFileImport</job-class>
+            <concurrency-allowed>false</concurrency-allowed>
+        </job>
+        <!--trigger>
+            <cron>
+                <name>SuppressionFileImport-Trigger</name>
+                <job-name>SuppressionFileImport</job-name>
+                <cron-expression>0 0 23 * * ?</cron-expression>
+            </cron>
+        </trigger-->
+    </schedule>
+</job-scheduling-data>
