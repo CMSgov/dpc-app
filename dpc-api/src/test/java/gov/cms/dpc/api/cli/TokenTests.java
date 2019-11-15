@@ -127,7 +127,7 @@ class TokenTests extends AbstractApplicationTest {
                 .collect(Collectors.toList());
 
         assertAll(() -> assertTrue(s2, "Should have succeeded"),
-                () -> assertTrue(stdErr.toString().isEmpty(), "Should be empty"));
+                () -> assertEquals("", stdErr.toString(), "Should be empty"));
 
         return matchedTokenIDs;
     }

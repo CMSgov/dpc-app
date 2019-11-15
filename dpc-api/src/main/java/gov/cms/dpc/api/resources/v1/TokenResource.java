@@ -8,6 +8,7 @@ import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
@@ -69,13 +70,13 @@ public class TokenResource extends AbstractTokenResource {
                          TokenPolicy policy,
                          SigningKeyResolverAdapter resolver,
                          IJTICache cache,
-                         @APIV1 String publicURl) {
+                         @APIV1 String publicURL) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
         this.resolver = resolver;
         this.cache = cache;
-        this.authURL = String.format("%s/Token/auth", publicURl);
+        this.authURL = String.format("%s/Token/auth", publicURL);
     }
 
     @Override
@@ -85,9 +86,9 @@ public class TokenResource extends AbstractTokenResource {
     @ExceptionMetered
     @ApiOperation(value = "Fetch client tokens", notes = "Method to retrieve the client tokens associated to the given Organization.")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization"))
-    public List<TokenEntity> getOrganizationTokens(
+    public CollectionResponse<TokenEntity> getOrganizationTokens(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
-        return this.dao.fetchTokens(organizationPrincipal.getID());
+        return new CollectionResponse<>(this.dao.fetchTokens(organizationPrincipal.getID()));
     }
 
     @GET

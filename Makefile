@@ -45,25 +45,25 @@ ci-web:
 
 .PHONY: smoke
 smoke:
-	@mvn clean install -DskipTests -Djib.skip=True
+	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am
 
 .PHONY: smoke/local
-smoke/local: venv
+smoke/local: venv smoke
 	@echo "Running Smoke Tests against Local env"
 	@read -p "`echo '\n=====\nThe Smoke Tests require an authenticated environment!\nVerify your local API environment has \"authenticationDisabled = false\" or these tests will fail.\n=====\n\nPress ENTER to run the tests...'`"
 	. venv/bin/activate; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/dev
-smoke/dev: venv
+smoke/dev: venv smoke
 	@echo "Running Smoke Tests against Development env"
 	. venv/bin/activate; bzt src/test/dev.smoke_test.yml
 
 .PHONY: smoke/test
-smoke/test: venv
+smoke/test: venv smoke
 	. venv/bin/activate; bzt src/test/test.smoke_test.yml
 
 .PHONY: smoke/prod-sbx
-smoke/prod-sbx: venv
+smoke/prod-sbx: venv smoke
 	@echo "Running Smoke Tests against Sandbox env"
 	. venv/bin/activate; bzt src/test/prod-sbx.smoke_test.yml
 

@@ -14,6 +14,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -37,10 +38,7 @@ import java.security.SecureRandom;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -52,11 +50,12 @@ import static org.mockito.Mockito.mock;
 class JWTUnitTests {
 
     private static final ResourceExtension RESOURCE = buildResources();
-    private static final Map<String, KeyPair> JWTKeys = new HashMap<>();
+    private static final Map<UUID, KeyPair> JWTKeys = new HashMap<>();
+    private static final UUID correctKEYID = UUID.randomUUID();
 
     private JWTUnitTests() {
         try {
-            JWTKeys.put("correct", APITestHelpers.generateKeyPair());
+            JWTKeys.put(correctKEYID, APIAuthHelpers.generateKeyPair());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -207,10 +206,10 @@ class JWTUnitTests {
         @Test
         void testMissingJWTPublicKey() throws NoSuchAlgorithmException {
             // Submit JWT with missing key
-            final KeyPair keyPair = APITestHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", "wrong")
+                    .setHeaderParam("kid", UUID.randomUUID())
                     .setAudience(String.format("%sToken/auth", "here"))
                     .setIssuer("macaroon")
                     .setSubject("macaroon")
@@ -234,10 +233,10 @@ class JWTUnitTests {
 
         @Test
         void testExpiredJWT() {
-            final KeyPair keyPair = JWTKeys.get("correct");
+            final KeyPair keyPair = JWTKeys.get(correctKEYID);
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", "correct")
+                    .setHeaderParam("kid", correctKEYID)
                     .setAudience(String.format("%sToken/auth", "here"))
                     .setIssuer("macaroon")
                     .setSubject("macaroon")
@@ -261,10 +260,10 @@ class JWTUnitTests {
 
         @Test
         void testJWTWrongSigningKey() throws NoSuchAlgorithmException {
-            final KeyPair keyPair = APITestHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", "correct")
+                    .setHeaderParam("kid", correctKEYID)
                     .setAudience(String.format("%sToken/auth", "here"))
                     .setIssuer("macaroon")
                     .setSubject("macaroon")
@@ -288,10 +287,10 @@ class JWTUnitTests {
 
         @Test
         void testJTIReplay() {
-            final KeyPair keyPair = JWTKeys.get("correct");
+            final KeyPair keyPair = JWTKeys.get(correctKEYID);
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", "correct")
+                    .setHeaderParam("kid", correctKEYID)
                     .setAudience(String.format("%sToken/auth", "localhost:3002/v1/"))
                     .setIssuer("macaroon")
                     .setSubject("macaroon")
@@ -356,14 +355,14 @@ class JWTUnitTests {
     private static PublicKeyDAO mockKeyDAO() {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
-        Mockito.when(mock.findKeyByLabel(Mockito.anyString())).then(answer -> {
-            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((String) answer.getArgument(0));
+        Mockito.when(mock.fetchPublicKey(Mockito.any())).then(answer -> {
+            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(0));
             if (keyPair == null) {
-                throw new NoResultException();
+                return Optional.empty();
             }
             final PublicKeyEntity entity = new PublicKeyEntity();
             entity.setPublicKey(SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
-            return entity;
+            return Optional.of(entity);
         });
         return mock;
     }

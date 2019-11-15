@@ -12,6 +12,10 @@
     <artifactId>dpc-testing</artifactId>
     <name>Common DPC testing code</name>
 
+    <properties>
+        <jjwt.version>0.10.7</jjwt.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -38,6 +42,38 @@
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.nickrobison-usds</groupId>
+            <artifactId>jmacaroons</artifactId>
+            <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1.1</version>
         </dependency>
     </dependencies>
 </project>

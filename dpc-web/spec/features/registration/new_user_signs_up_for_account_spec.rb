@@ -41,7 +41,9 @@ RSpec.feature 'new user signs up for account' do
     scenario 'can see profile information' do
       find('[data-test="my-account-menu"]').click
       find('[data-test="dpc-registrations-profile-link"]', visible: false).click
-      expect(page).to have_content(user.email)
+
+      email_field = find('#user_email')
+      expect(email_field.value).to eq(user.email)
     end
   end
 

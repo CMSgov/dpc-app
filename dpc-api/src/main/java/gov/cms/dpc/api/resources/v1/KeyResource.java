@@ -8,6 +8,7 @@ import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
@@ -52,8 +53,8 @@ public class KeyResource extends AbstractKeyResource {
                     "<p>The returned keys are serialized using PEM encoding.",
             authorizations = @Authorization(value = "apiKey"))
     @Override
-    public List<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
-        return this.dao.fetchPublicKeys(organizationPrincipal.getID());
+    public CollectionResponse<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
+        return new CollectionResponse<>(this.dao.fetchPublicKeys(organizationPrincipal.getID()));
     }
 
     @GET
@@ -67,11 +68,11 @@ public class KeyResource extends AbstractKeyResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find public key for organization"))
     @Override
     public PublicKeyEntity getPublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
-        final List<PublicKeyEntity> certificates = this.dao.fetchPublicKey(keyID, organizationPrincipal.getID());
-        if (certificates.isEmpty()) {
-            throw new WebApplicationException("Cannot find certificate", Response.Status.NOT_FOUND);
+        final List<PublicKeyEntity> publicKeys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
+        if (publicKeys.isEmpty()) {
+            throw new WebApplicationException("Cannot find public key", Response.Status.NOT_FOUND);
         }
-        return certificates.get(0);
+        return publicKeys.get(0);
     }
 
     @DELETE
@@ -87,7 +88,12 @@ public class KeyResource extends AbstractKeyResource {
     })
     @Override
     public Response deletePublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
-        this.dao.deletePublicKey(keyID, organizationPrincipal.getID());
+        final List<PublicKeyEntity> keys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
+
+        if (keys.isEmpty()) {
+            throw new WebApplicationException("Cannot find certificate", Response.Status.NOT_FOUND);
+        }
+        keys.forEach(this.dao::deletePublicKey);
 
         return Response.ok().build();
     }

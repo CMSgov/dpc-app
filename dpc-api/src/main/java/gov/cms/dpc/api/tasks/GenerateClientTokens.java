@@ -32,14 +32,12 @@ public class GenerateClientTokens extends Task {
 
     private final MacaroonBakery bakery;
     private final TokenResource resource;
-    private final Base64.Encoder encoder;
 
     @Inject
     GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
         super("generate-token");
         this.bakery = bakery;
         this.resource = resource;
-        this.encoder = Base64.getUrlEncoder();
     }
 
     @Override
@@ -49,8 +47,7 @@ public class GenerateClientTokens extends Task {
         if (organizationCollection.isEmpty()) {
             logger.warn("CREATING UNRESTRICTED MACAROON. ENSURE THIS IS OK");
             final Macaroon macaroon = bakery.createMacaroon(Collections.emptyList());
-            final byte[] serialized = macaroon.serialize(MacaroonVersion.SerializationVersion.V2_JSON).getBytes(StandardCharsets.UTF_8);
-            output.write(this.encoder.encodeToString(serialized));
+            output.write(macaroon.serialize(MacaroonVersion.SerializationVersion.V1_BINARY));
         } else {
             final String organization = organizationCollection.asList().get(0);
             final Organization orgResource = new Organization();
