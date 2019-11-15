@@ -10,6 +10,7 @@ import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
@@ -28,8 +29,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
@@ -55,7 +55,7 @@ class AggregationEngineTest {
 
     @BeforeEach
     void setupEach() {
-        queue = new MemoryBatchQueue(10);
+        queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500);
         engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig);
@@ -72,6 +72,25 @@ class AggregationEngineTest {
     void mockBlueButtonClientTest() {
         Patient patient = bbclient.requestPatientFromServer(MockBlueButtonClient.TEST_PATIENT_IDS.get(0));
         assertNotNull(patient);
+    }
+
+    /**
+     * Verify that an exception in the claimBatch method doesn't kill polling the queue
+     */
+    @Test
+    void claimBatchException() {
+        // Throw a failure on the first poll, then be successful
+        JobQueueFailure ex = new JobQueueFailure("Any failure");
+        when(queue.claimBatch(any(UUID.class)))
+                .thenThrow(ex)
+                .thenAnswer(invocationOnMock -> {
+                    engine.stop();
+                    return Optional.empty();
+                });
+
+        engine.pollQueue();
+
+        verify(queue, Mockito.times(2)).claimBatch(any(UUID.class));
     }
 
     /**

@@ -98,7 +98,7 @@ public class AggregationEngine implements Runnable {
     /**
      * The main run-loop of the engine.
      */
-    private void pollQueue() {
+    protected void pollQueue() {
         subscribe = Observable.fromCallable(() -> this.queue.claimBatch(aggregatorID))
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .filter(Optional::isPresent)
@@ -107,7 +107,10 @@ public class AggregationEngine implements Runnable {
                     logger.debug(String.format("No job, polling again in %d milliseconds", operationsConfig.getPollingFrequency()));
                     return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
                 })
-                .subscribe(this::processJobBatch, error -> logger.error("Unable to complete job.", error));
+                .subscribe(this::processJobBatch, error -> {
+                    logger.error("Unable to complete job.", error);
+                    this.pollQueue(); // Continue polling the queue
+                });
     }
 
     /**
