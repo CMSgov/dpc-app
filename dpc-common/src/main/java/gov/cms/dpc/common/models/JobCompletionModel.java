@@ -79,7 +79,7 @@ public class JobCompletionModel {
     public static class OutputEntryExtension {
         private String url;
         private String valueString;
-        private long valueDecimal;
+        private Long valueDecimal;
 
         public OutputEntryExtension() {
             // Jackson required
@@ -90,7 +90,7 @@ public class JobCompletionModel {
             this.valueString = valueString;
         }
 
-        public OutputEntryExtension(String url, long valueDecimal) {
+        public OutputEntryExtension(String url, Long valueDecimal) {
             this.url = url;
             this.valueDecimal = valueDecimal;
         }
@@ -103,7 +103,7 @@ public class JobCompletionModel {
             return valueString;
         }
 
-        public long getValueDecimal() {
+        public Long getValueDecimal() {
             return valueDecimal;
         }
     }
