@@ -1,7 +1,7 @@
 settings:
   env:
     HOST: https://test.dpc.cms.gov/api/v1
-    ADMIN_URL: http://test.dpc.cms.gov:9900/tasks
+    ADMIN_URL: **REMOVED**
     SEED_FILE: src/main/resources/test_associations-dpr.csv
     PROVIDER_BUNDLE: provider_bundle.json
     PATIENT_BUNDLE: patient_bundle-dpr.json
