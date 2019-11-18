@@ -1,15 +1,19 @@
 package gov.cms.dpc.fhir.parameters;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParser;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 
 /**
@@ -17,13 +21,15 @@ import java.io.IOException;
  */
 public class ParamResourceFactory implements Factory<Object> {
 
+    private static final Logger logger = LoggerFactory.getLogger(ParamResourceFactory.class);
+
     private final Injector injector;
-    private final FhirContext ctx;
+    private final IParser parser;
     private final Parameter parameter;
 
-    ParamResourceFactory(Injector injector, Parameter parameter, FhirContext ctx) {
+    ParamResourceFactory(Injector injector, Parameter parameter, IParser parser) {
         this.injector = injector;
-        this.ctx = ctx;
+        this.parser = parser;
         this.parameter = parameter;
     }
 
@@ -34,10 +40,14 @@ public class ParamResourceFactory implements Factory<Object> {
         final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
         final Parameters parameters;
         try {
-            parameters = ctx.newJsonParser().parseResource(Parameters.class, request.getInputStream());
+            parameters = parser.parseResource(Parameters.class, request.getInputStream());
+        } catch (DataFormatException e) {
+            logger.error("Unable to parse Parameters resource.", e);
+            throw new WebApplicationException("Resource type must be `Parameters`", Response.Status.BAD_REQUEST);
         } catch (IOException e) {
-            throw new WebApplicationException("Cannot parse input stream", e);
+            throw new WebApplicationException("Cannot read input stream", e);
         }
+
         final Resource resource;
         final FHIRParameter annotation = parameter.getAnnotation(FHIRParameter.class);
         // Get the appropriate parameter
@@ -52,7 +62,13 @@ public class ParamResourceFactory implements Factory<Object> {
                     .findAny()
                     .orElseThrow(() -> new IllegalArgumentException("Cannot find matching parameter"));
         }
-        return parameter.getRawType().cast(resource);
+        final Class<?> rawType = parameter.getRawType();
+        try {
+            return rawType.cast(resource);
+        } catch (ClassCastException e) {
+            logger.error("Parameter type does not match payload", e);
+            throw new WebApplicationException(String.format("Provided resource must be: `%s`, not `%s`", rawType.getSimpleName(), resource.getResourceType()), Response.Status.BAD_REQUEST);
+        }
     }
 
     @Override
