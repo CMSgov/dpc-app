@@ -22,4 +22,12 @@ module OrganizationsHelper
       [key.to_s.titleize, key]
     end
   end
+
+  def npi_text(organization)
+    if organization.npi.present?
+      organization.npi
+    else
+      'No NPI added. You must add an NPI before creating client tokens or public keys.'
+    end
+  end
 end

@@ -14,7 +14,7 @@ class Organization < ApplicationRecord
   validates :organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :name, uniqueness: true, presence: true
   validate :api_environments_allowed
-  validates :npi, uniqueness: true, presence: true, unless: -> { api_environments.empty? }
+  validates :npi, uniqueness: true
 
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, :fhir_endpoints, reject_if: :all_blank
@@ -37,11 +37,21 @@ class Organization < ApplicationRecord
     end
   end
 
+  def npi=(input)
+    super(input.blank? ? nil : input)
+  end
+
+  def api_credentialable?
+    registered_organizations.count.positive? && npi.present?
+  end
+
   def registered_api_envs
     registered_organizations.pluck(:api_env)
   end
 
   def update_registered_organizations
+    return unless npi.present?
+
     OrganizationRegistrar.delay.run(organization: self, api_environments: api_environment_strings)
   end
 
