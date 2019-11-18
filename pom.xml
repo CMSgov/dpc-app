@@ -48,6 +48,7 @@
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
         <timestamp>${maven.build.timestamp}</timestamp>
         <jacoco.version>0.8.5</jacoco.version>
+        <jooq.version>3.12.1</jooq.version>
     </properties>
 
     <developers>
@@ -135,7 +136,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.4.8.Final</version>
+                <version>5.4.9.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -288,7 +289,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!--                    We have to do this because for some reason the Maven plugin isn't letting me set configuration options on a per-execution basis-->
+                    <!-- We have to do this because for some reason the Maven plugin isn't letting me set configuration options on a per-execution basis -->
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
@@ -308,7 +309,7 @@
                 </plugins>
             </build>
         </profile>
-<!--        Run the Google Error Prone checker to make sure we didn't make any silly mistakes-->
+        <!-- Run the Google Error Prone checker to make sure we didn't make any silly mistakes -->
         <profile>
             <id>error-prone</id>
             <build>
@@ -478,7 +479,9 @@
                         </goals>
                         <configuration>
                             <!--Exclude generated sources, such as Jooq-->
-                            <excludePackageNames>gov.cms.dpc.attribution.dao;gov.cms.dpc.attribution.dao.*</excludePackageNames>
+                            <excludePackageNames>gov.cms.dpc.attribution.dao;gov.cms.dpc.attribution.dao.*;
+                                gov.cms.dpc.consent.dao;gov.cms.dpc.consent.dao.*
+                            </excludePackageNames>
                         </configuration>
                     </execution>
                 </executions>

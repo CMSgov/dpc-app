@@ -51,13 +51,21 @@
 
 .utility-button {
   align-items: center;
+  background: $color-gray-lightest;
+  border: 1px solid $color-gray-light;
+  border-radius: 3px;
+  color: $color-gray-dark;
   display: inline-flex;
+  font-size: $h6-font-size;
   font-weight: $font-bold;
   margin: 0 0 $spacer-2 0;
+  padding: $spacer-1;
   text-decoration: none;
 
-  &:hover {
-    text-decoration: underline;
+  &:hover,
+  &:focus {
+    border-color: $color-gray-dark;
+    color: $color-gray-dark;
   }
 
   svg {

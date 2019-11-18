@@ -2,7 +2,7 @@ package gov.cms.dpc.consent.jobs;
 
 import com.google.inject.*;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
-import gov.cms.dpc.consent.entities.ConsentEntity;
+import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
