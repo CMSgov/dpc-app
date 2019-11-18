@@ -3,5 +3,5 @@
 class Tag < ApplicationRecord
   has_many :taggings, dependent: :destroy
 
-  validates :name, uniqueness: true, presence: true
+  validates :name, uniqueness: { case_sensitive: false }, presence: true
 end
