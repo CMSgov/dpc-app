@@ -39,7 +39,7 @@ public class ProvenanceResourceFactory implements Factory<Provenance> {
             provenance = ctx.newJsonParser().parseResource(Provenance.class, headerValue);
         } catch (Exception e) {
             logger.error("Cannot parse Provenance", e);
-            throw new WebApplicationException("Cannot parse FHIR provenance resource", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException("Cannot parse FHIR `Provenance` resource", Response.Status.BAD_REQUEST);
         }
 
         return provenance;

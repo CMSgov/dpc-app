@@ -51,16 +51,21 @@ public class ParamResourceFactory implements Factory<Object> {
         final Resource resource;
         final FHIRParameter annotation = parameter.getAnnotation(FHIRParameter.class);
         // Get the appropriate parameter
-        if (annotation.name().equals("")) {
+        final String parameterName = annotation.name();
+        if (parameterName.equals("")) {
             resource = parameters.getParameterFirstRep().getResource();
         } else {
             resource = parameters
                     .getParameter()
                     .stream()
-                    .filter(param -> param.hasName() && param.getName().equals(annotation.name()))
+                    .filter(param -> param.hasName() && param.getName().equals(parameterName))
                     .map(Parameters.ParametersParameterComponent::getResource)
                     .findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("Cannot find matching parameter"));
+                    .orElseThrow(() -> {
+                        logger.error("Cannot find parameter named `{}` in resource", parameterName);
+                        throw new WebApplicationException(String.format("Cannot find matching parameter named `%s`", parameterName), Response.Status.BAD_REQUEST);
+                    });
+
         }
         final Class<?> rawType = parameter.getRawType();
         try {
