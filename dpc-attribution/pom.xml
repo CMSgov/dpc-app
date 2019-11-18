@@ -14,7 +14,6 @@
 
     <properties>
         <mainClass>gov.cms.dpc.attribution.DPCAttributionService</mainClass>
-        <jooq.version>3.12.1</jooq.version>
     </properties>
 
     <dependencies>
