@@ -78,7 +78,7 @@ class AggregationEngineTest {
      * Verify that an exception in the claimBatch method doesn't kill polling the queue
      */
     @Test
-    void claimBatchException() {
+    void claimBatchException() throws InterruptedException {
         // Throw a failure on the first poll, then be successful
         JobQueueFailure ex = new JobQueueFailure("Any failure");
         when(queue.claimBatch(any(UUID.class)))
@@ -89,6 +89,11 @@ class AggregationEngineTest {
                 });
 
         engine.pollQueue();
+
+        // Wait for the queue to finish processing before finishing the test
+        while ( engine.isRunning() ) {
+            Thread.sleep(100);
+        }
 
         verify(queue, Mockito.times(2)).claimBatch(any(UUID.class));
     }
