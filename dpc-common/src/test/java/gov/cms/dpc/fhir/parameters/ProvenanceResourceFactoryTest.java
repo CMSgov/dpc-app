@@ -74,6 +74,6 @@ class ProvenanceResourceFactoryTest {
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
-                () -> assertEquals("Cannot parse FHIR provenance resource", exception.getMessage(), "Should show missing header"));
+                () -> assertEquals("Cannot parse FHIR `Provenance` resource", exception.getMessage(), "Should show missing header"));
     }
 }
