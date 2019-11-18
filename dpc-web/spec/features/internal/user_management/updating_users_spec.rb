@@ -119,8 +119,7 @@ RSpec.feature 'updating users' do
     find('[data-test="form-submit"]').click
 
     # Back on user edit page
-    selected_org = find(:css, 'select#user_organization_ids').text
-    expect(selected_org).to eq('Happy Health')
+    expect(page).to have_select('user_organization_ids', selected: 'Happy Health')
     find('[data-test="user-form-submit"]').click
 
     expect(page).not_to have_css('[data-test="user-form-submit"]')
