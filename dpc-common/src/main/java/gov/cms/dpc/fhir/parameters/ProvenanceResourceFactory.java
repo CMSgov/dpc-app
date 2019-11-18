@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
 import org.glassfish.hk2.api.Factory;
 import org.hl7.fhir.dstu3.model.Provenance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -14,7 +16,8 @@ import javax.ws.rs.core.Response;
  */
 public class ProvenanceResourceFactory implements Factory<Provenance> {
 
-    public static final String PROVENANCE_HEADER = "X-Provenance";
+    static final String PROVENANCE_HEADER = "X-Provenance";
+    private static final Logger logger = LoggerFactory.getLogger(ProvenanceResourceFactory.class);
 
     private final Injector injector;
     private final FhirContext ctx;
@@ -35,7 +38,8 @@ public class ProvenanceResourceFactory implements Factory<Provenance> {
         try {
             provenance = ctx.newJsonParser().parseResource(Provenance.class, headerValue);
         } catch (Exception e) {
-            throw new WebApplicationException("Cannot parse FHIR resource", e);
+            logger.error("Cannot parse Provenance", e);
+            throw new WebApplicationException("Cannot parse FHIR provenance resource", Response.Status.BAD_REQUEST);
         }
 
         return provenance;
