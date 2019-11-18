@@ -32,7 +32,7 @@ public class FHIRParamValueFactory implements ValueFactoryProvider {
         if (parameter.getDeclaredAnnotation(FHIRParameter.class) != null) {
             // If the parameter is a resource, pass it off to the resource factory
             if (IBaseResource.class.isAssignableFrom(parameter.getRawType()))
-                return new ParamResourceFactory(injector, parameter, ctx);
+                return new ParamResourceFactory(injector, parameter, ctx.newJsonParser());
         }
 
         return null;
