@@ -106,6 +106,7 @@ public class SeedProcessor {
                     patient.addName().addGiven("Tester " + rand.nextInt()).setFamily("Patient");
                     patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
                     patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID.toString())));
+                    patient.setGender(Enumerations.AdministrativeGender.UNKNOWN);
                     final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
                     component.setResource(patient);
                     component.setFullUrl("http://something.gov/" + patient.getIdentifierFirstRep().getValue());
