@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
@@ -32,17 +33,31 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
 
     @Override
     Response handleFHIRException(Throwable exception) {
-        final Response response = super.toResponse(exception);
-
-        final int status = response.getStatus();
+        final int statusCode;
+        // Duplicating some of the logic from the parent LoggingExceptionMapper, because we need to get the logged ID
+        // We just pass along redirects
+        if (exception instanceof WebApplicationException) {
+            final Response response = ((WebApplicationException) exception).getResponse();
+            Response.Status.Family family = response.getStatusInfo().getFamily();
+            if (family.equals(Response.Status.Family.REDIRECTION)) {
+                return response;
+            }
+            // If it's any other type of web application exception, use the status as the response code.
+            statusCode = ((WebApplicationException) exception).getResponse().getStatus();
+        } else {
+            // For any other types of errors, just set a 500 and move along
+            statusCode = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
+        }
+        // Log the exception and generate the OperationOutcome
+        final long exceptionID = super.logException(exception);
         final OperationOutcome outcome = new OperationOutcome();
+        outcome.setId(Long.toString(exceptionID));
         outcome.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.FATAL)
                 .setDetails(new CodeableConcept().setText(exception.getMessage()));
 
-        // TODO: Need to log and correlate this exception (DPC-540)
-        return Response.fromResponse(response)
-                .status(status)
+        return Response
+                .status(statusCode)
                 .type(FHIRMediaTypes.FHIR_JSON)
                 .entity(outcome)
                 .build();
