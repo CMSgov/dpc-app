@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -49,6 +50,7 @@ public class AggregationEngine implements Runnable {
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
+    private AtomicBoolean queueRunning = new AtomicBoolean(false);
 
     /**
      * Create an engine.
@@ -93,21 +95,32 @@ public class AggregationEngine implements Runnable {
     public void stop() {
         logger.info("Shutting down aggregation engine");
         this.subscribe.dispose();
+        queueRunning.set(false);
+    }
+
+    public Boolean isRunning() {
+        return queueRunning.get();
     }
 
     /**
      * The main run-loop of the engine.
      */
-    private void pollQueue() {
+    protected void pollQueue() {
+        queueRunning.set(true);
         subscribe = Observable.fromCallable(() -> this.queue.claimBatch(aggregatorID))
                 .doOnNext(job -> logger.trace("Polling queue for job"))
+                .doOnError(error -> logger.error("Unable to complete job.", error))
+                .onErrorResumeNext(Observable.empty()) // Keep the queue running on error
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .repeatWhen(completed -> {
                     logger.debug(String.format("No job, polling again in %d milliseconds", operationsConfig.getPollingFrequency()));
                     return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
                 })
-                .subscribe(this::processJobBatch, error -> logger.error("Unable to complete job.", error));
+                .subscribe(this::processJobBatch, error -> {
+                    logger.error("Fatal error processing the queue! Queue processing is stopping!", error);
+                    queueRunning.set(false);
+                });
     }
 
     /**

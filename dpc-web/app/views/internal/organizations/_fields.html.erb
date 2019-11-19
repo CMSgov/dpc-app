@@ -116,6 +116,7 @@
   </div>
 
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
+    <%= hidden_field_tag :from_user, params[:from_user] %>
     <%= f.submit locals[:button_label], class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
     <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
   </div>
