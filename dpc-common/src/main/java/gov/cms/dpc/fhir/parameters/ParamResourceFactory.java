@@ -35,38 +35,7 @@ public class ParamResourceFactory implements Factory<Object> {
 
     @Override
     public Object provide() {
-        // Directly call the injector to get the current Servlet Request.
-        // It would be better to have this automatically provided, but it's simple enough to do it manually, rather than wrangling Guice scopes.
-        final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
-        final Parameters parameters;
-        try {
-            parameters = parser.parseResource(Parameters.class, request.getInputStream());
-        } catch (DataFormatException e) {
-            logger.error("Unable to parse Parameters resource.", e);
-            throw new WebApplicationException("Resource type must be `Parameters`", Response.Status.BAD_REQUEST);
-        } catch (IOException e) {
-            throw new WebApplicationException("Cannot read input stream", e);
-        }
-
-        final Resource resource;
-        final FHIRParameter annotation = parameter.getAnnotation(FHIRParameter.class);
-        // Get the appropriate parameter
-        final String parameterName = annotation.name();
-        if (parameterName.equals("")) {
-            resource = parameters.getParameterFirstRep().getResource();
-        } else {
-            resource = parameters
-                    .getParameter()
-                    .stream()
-                    .filter(param -> param.hasName() && param.getName().equals(parameterName))
-                    .map(Parameters.ParametersParameterComponent::getResource)
-                    .findAny()
-                    .orElseThrow(() -> {
-                        logger.error("Cannot find parameter named `{}` in resource", parameterName);
-                        throw new WebApplicationException(String.format("Cannot find matching parameter named `%s`", parameterName), Response.Status.BAD_REQUEST);
-                    });
-
-        }
+        final Resource resource = extractFHIRResource(extractParameters());
         final Class<?> rawType = parameter.getRawType();
         try {
             return rawType.cast(resource);
@@ -79,5 +48,40 @@ public class ParamResourceFactory implements Factory<Object> {
     @Override
     public void dispose(Object instance) {
         // Not used
+    }
+
+    private Parameters extractParameters() {
+        // Directly call the injector to get the current Servlet Request.
+        // It would be better to have this automatically provided, but it's simple enough to do it manually, rather than wrangling Guice scopes.
+        final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
+        try {
+            return parser.parseResource(Parameters.class, request.getInputStream());
+        } catch (DataFormatException e) {
+            logger.error("Unable to parse Parameters resource.", e);
+            throw new WebApplicationException("Resource type must be `Parameters`", Response.Status.BAD_REQUEST);
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot read input stream", e);
+        }
+    }
+
+    private Resource extractFHIRResource(Parameters fhirParameters) {
+        final FHIRParameter annotation = parameter.getAnnotation(FHIRParameter.class);
+        // Get the appropriate parameter
+        final String parameterName = annotation.name();
+        if (parameterName.equals("")) {
+            return fhirParameters.getParameterFirstRep().getResource();
+        } else {
+            return fhirParameters
+                    .getParameter()
+                    .stream()
+                    .filter(param -> param.hasName() && param.getName().equals(parameterName))
+                    .map(Parameters.ParametersParameterComponent::getResource)
+                    .findAny()
+                    .orElseThrow(() -> {
+                        logger.error("Cannot find parameter named `{}` in resource", parameterName);
+                        throw new WebApplicationException(String.format("Cannot find matching parameter named `%s`", parameterName), Response.Status.BAD_REQUEST);
+                    });
+
+        }
     }
 }
