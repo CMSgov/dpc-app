@@ -169,6 +169,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
 
             for ( JobQueueBatch stuckJob : stuckJobList ) {
+                logger.warn(String.format("Restarting stuck batch... batchID=%s", stuckJob.getBatchID()));
                 stuckJob.restartBatch();
                 session.merge(stuckJob);
             }
