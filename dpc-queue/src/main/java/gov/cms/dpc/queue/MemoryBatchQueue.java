@@ -27,7 +27,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
     }
 
     @Override
-    protected synchronized void submitJobBatches(List<JobQueueBatch> jobBatches) {
+    public synchronized void submitJobBatches(List<JobQueueBatch> jobBatches) {
         jobBatches.forEach(batch -> {
             logger.debug("Submitting batch {}", batch.getBatchID());
             this.queue.put(batch.getBatchID(), batch);
@@ -59,7 +59,13 @@ public class MemoryBatchQueue extends JobQueueCommon {
                 .findFirst();
 
         if ( first.isPresent() ) {
-            first.get().setRunningStatus(aggregatorID);
+            try {
+                first.get().setRunningStatus(aggregatorID);
+            } catch ( Exception e ) {
+                logger.error("Failed to mark job as running. Marking the job as failed", e);
+                first.get().setFailedStatus(aggregatorID);
+                return Optional.empty();
+            }
         }
 
         return first;
