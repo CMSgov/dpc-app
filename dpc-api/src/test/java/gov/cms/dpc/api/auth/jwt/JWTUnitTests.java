@@ -10,6 +10,7 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.TokenResource;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DPCValidationErrorMessage;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.persistence.NoResultException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -73,9 +73,9 @@ class JWTUnitTests {
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
             // Should have all exceptions
-            ValidationErrorResponse validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            DPCValidationErrorMessage validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(3, validationErrorResponse.errors.size(), "Should have three validations");
+            assertEquals(3, validationErrorResponse.getErrors().size(), "Should have three validations");
 
             // Add the missing scope value and try again
             response = RESOURCE.target("/Token/auth").queryParam("scope", "system/*:*")
@@ -83,9 +83,9 @@ class JWTUnitTests {
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
             // Should have one less exception
-            validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(2, validationErrorResponse.errors.size(), "Should have two validations");
+            assertEquals(2, validationErrorResponse.getErrors().size(), "Should have two validations");
 
 
             // Add the grant type
@@ -96,10 +96,10 @@ class JWTUnitTests {
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
             // Should have all exceptions
-            validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(1, validationErrorResponse.errors.size(), "Should only have a single violation");
-            assertTrue(validationErrorResponse.errors.get(0).contains("Assertion type is required"));
+            assertEquals(1, validationErrorResponse.getErrors().size(), "Should only have a single violation");
+            assertTrue(validationErrorResponse.getErrors().get(0).contains("Assertion type is required"));
 
             // Add the assertion type and try again
             response = RESOURCE.target("/Token/auth")
@@ -138,7 +138,7 @@ class JWTUnitTests {
 
             // Setting the grant type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+            assertNotNull(response.readEntity(DPCValidationErrorMessage.class), "Should have a validation failure");
         }
 
         @Test
@@ -166,7 +166,7 @@ class JWTUnitTests {
 
             // Setting the assertion type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+            assertNotNull(response.readEntity(DPCValidationErrorMessage.class), "Should have a validation failure");
         }
 
         @Test
@@ -194,7 +194,7 @@ class JWTUnitTests {
 
             // Setting the assertion type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+            assertNotNull(response.readEntity(DPCValidationErrorMessage.class), "Should have a validation failure");
         }
     }
 
@@ -370,6 +370,7 @@ class JWTUnitTests {
     @SuppressWarnings("WeakerAccess")
     public static class ValidationErrorResponse {
 
+        public long id;
         public List<String> errors;
 
         ValidationErrorResponse() {
