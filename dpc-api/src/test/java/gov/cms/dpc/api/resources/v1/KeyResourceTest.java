@@ -64,14 +64,14 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             // Try the same key again
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
-                        () -> assertEquals("duplicate key value violates unique constraint", EntityUtils.toString(response.getEntity()), "Should have nice error message"));
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
             }
 
             // Try again with same label
             post.setEntity(new StringEntity(generatePublicKey()));
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
-                        () -> assertEquals("duplicate key value violates unique constraint", EntityUtils.toString(response.getEntity()), "Should have nice error message"));
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
             }
 
             // Try with too long label

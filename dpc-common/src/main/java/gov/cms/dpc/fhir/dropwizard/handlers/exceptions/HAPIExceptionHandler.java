@@ -28,12 +28,11 @@ public class HAPIExceptionHandler extends AbstractFHIRExceptionHandler<BaseServe
 
     @Override
     Response handleFHIRException(BaseServerResponseException exception) {
-        final Response response = super.toResponse(exception);
+        final long exceptionID = super.logException(exception);
         final OperationOutcome operationOutcome = (OperationOutcome) exception.getOperationOutcome();
+        operationOutcome.setId(Long.toString(exceptionID));
 
-        // TODO: Need to log and correlate this exception. I think.
-
-        return Response.fromResponse(response)
+        return Response
                 .status(exception.getStatusCode())
                 .type(FHIRMediaTypes.FHIR_JSON)
                 .entity(operationOutcome)
