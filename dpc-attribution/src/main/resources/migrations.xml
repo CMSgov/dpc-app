@@ -410,4 +410,16 @@
             DROP FUNCTION IF EXISTS expire_root_keys();
         </sql>
     </changeSet>
+
+    <changeSet id="add-patient-gender" author="nickrobison-usds">
+        <addColumn tableName="PATIENTS" schemaName="public">
+            <column name="gender" type="TINYINT"/>
+        </addColumn>
+
+        <!-- Add a non-null constraint to the gender field, setting existing values to AdministrativeGender.UNKNOWN-->
+        <addNotNullConstraint
+                tableName="PATIENTS"
+                columnName="gender"
+                defaultNullValue="3"/>
+    </changeSet>
 </databaseChangeLog>

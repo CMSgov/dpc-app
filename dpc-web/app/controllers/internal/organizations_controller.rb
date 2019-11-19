@@ -19,8 +19,15 @@ module Internal
     end
 
     def new
-      @organization = Organization.new
-      @organization.build_address
+      @organization = Organization.new name: params[:organization_name],
+                                       organization_type: params[:organization_organization_type],
+                                       num_providers: params[:organization_num_providers]
+
+      @organization.build_address street: params[:organization_address_attributes_street],
+                                  street_2: params[:organization_address_attributes_street_2],
+                                  city: params[:organization_address_attributes_city],
+                                  state: params[:organization_address_attributes_state],
+                                  zip: params[:organization_address_attributes_zip]
       @organization.fhir_endpoints.build
     end
 
@@ -28,7 +35,11 @@ module Internal
       @organization = Organization.new organization_params
       if @organization.save
         flash[:notice] = 'Organization created.'
-        redirect_to internal_organization_path(@organization)
+        if params[:from_user].present?
+          redirect_to edit_internal_user_path(params[:from_user], user_organization_ids: @organization.id)
+        else
+          redirect_to internal_organization_path(@organization)
+        end
       else
         flash[:alert] = "Organization could not be created: #{@organization.errors.full_messages.join(', ')}"
         render :new
