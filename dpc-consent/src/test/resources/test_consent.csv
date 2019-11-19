@@ -1,0 +1,11 @@
+id,mbi,hicn,effective_date,policy_code,purpose_code,loinc_code,scope_code
+3a51c388-a9b0-42e2-afe4-688a2b6cef95,mbi_1,hicn_1,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+4722ea71-c09e-4493-9ca3-29532948e2f0,mbi_2,hicn_2,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+4203b616-b82c-4dcb-b212-ce837c68543f,mbi_3,hicn_3,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+29d9a3a8-6fa9-4eb8-8874-c974734b2e85,mbi_4,hicn_4,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+29799ba7-9e5b-4716-b218-0232c69fd2e1,mbi_5,hicn_5,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+6baef3b8-4f48-489f-9035-00d0ec8496db,mbi_6,hicn_6,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+5bcdbf45-3464-4964-b609-4beb8a21b0ec,mbi_7,hicn_7,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+d32c318f-c783-44fa-945f-2bfe6005b4e6,mbi_8,hicn_8,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+c3e7d8d3-a6c3-445c-aa52-12abfe38e3a8,mbi_9,hicn_9,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
+3d2bf79e-e6cd-4fae-87a3-676b5162f8ff,mbi_10,hicn_10,2019-10-29,OPTIN,TREAT,64292-6,patient-privacy
