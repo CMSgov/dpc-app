@@ -4,7 +4,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.jersey.validation.ConstraintMessage;
 import io.dropwizard.jersey.validation.JerseyViolationException;
-import io.dropwizard.jersey.validation.ValidationErrorMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.server.model.Invocable;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -39,9 +38,10 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
 
     @Override
     Response handleFHIRException(JerseyViolationException exception) {
-        // TODO: Need to log and correlate this exception (DPC-540)
+        final long exceptionID = this.logException(exception);
         final Pair<ImmutableList<String>, Integer> errorStatusPair = processConstraintViolations(exception);
         final OperationOutcome outcome = new OperationOutcome();
+        outcome.setId(Long.toString(exceptionID));
 
         errorStatusPair.getLeft().forEach(error -> {
             final OperationOutcome.OperationOutcomeIssueComponent component = new OperationOutcome.OperationOutcomeIssueComponent();
@@ -51,7 +51,6 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
             outcome.addIssue(component);
         });
 
-        // Create an Operation Outcome and add all the exceptions
         return Response.status(errorStatusPair.getRight())
                 .entity(outcome)
                 .build();
@@ -59,11 +58,11 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
 
     @Override
     Response handleNonFHIRException(JerseyViolationException exception) {
-        // TODO: Need to log and correlate this exception (DPC-540)
         final Pair<ImmutableList<String>, Integer> errorStatusPair = processConstraintViolations(exception);
+        final long exceptionID = super.logException(exception);
 
         return Response.status(errorStatusPair.getRight())
-                .entity(new ValidationErrorMessage(errorStatusPair.getLeft()))
+                .entity(new DPCValidationErrorMessage(exceptionID, errorStatusPair.getLeft()))
                 .build();
     }
 
