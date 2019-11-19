@@ -29,6 +29,7 @@ public abstract class AbstractTokenResource {
      * Get authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
      * If no tokens exists, returns an empty {@link List}
      *
+     * @param organizationPrincipal - {@link OrganizationPrincipal} supplied by auth handler
      * @return - {@link List} {@link String} base64 (URL) encoded token
      */
     @GET
@@ -38,8 +39,9 @@ public abstract class AbstractTokenResource {
      * Create authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
      * This token is designed to be long-lived and delegatable.
      *
-     * @param label          - {@link Optional} {@link String} to use as token label
-     * @param expiration     - {@link Optional} {@link OffsetDateTime} to use for token expiration
+     * @param principal  - {@link OrganizationPrincipal} supplied by auth handler
+     * @param label      - {@link Optional} {@link String} to use as token label
+     * @param expiration - {@link Optional} {@link OffsetDateTime} to use for token expiration
      * @return - {@link String} base64 (URL) encoded token
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
