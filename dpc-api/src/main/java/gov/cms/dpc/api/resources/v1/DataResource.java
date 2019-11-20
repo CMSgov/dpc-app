@@ -30,7 +30,7 @@ import java.time.ZoneOffset;
 public class DataResource extends AbstractDataResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
-    private static final int CHUNK_SIZE = 1024 * 1024; // 1MB chunks, but we can modify this later, if we want
+    private static final int CHUNK_SIZE = 1024 * 1024; // Return a maximum of 1MB chunks, but we can modify this later if we need to
 
     private final FileManager manager;
 

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -120,8 +121,14 @@ class BatchAggregationEngineTest {
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
         // Look at the output files
-        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
-        assertTrue(Files.exists(Path.of(outputFilePath)));
+        completeJob.getJobQueueBatchFiles()
+                .forEach(batchFile -> {
+                    final var outputFilePath = String.format("%s/%s.ndjson", exportPath, batchFile.getFileName());
+                    final File file = new File(Path.of(outputFilePath).toString());
+                    assertAll(() -> assertNotNull(file, "Should have input file"),
+                            () -> assertArrayEquals(AggregationEngine.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"));
+                });
+
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }

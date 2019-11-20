@@ -68,4 +68,10 @@
                                  referencedTableName="JOB_QUEUE_BATCH" referencedColumnNames="batch_id"/>
     </changeSet>
 
+    <changeSet id="add-checksum-file-length" author="nickrobison-usds">
+        <addColumn tableName="JOB_QUEUE_BATCH_FILE">
+            <column name="checksum" type="BYTEA"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -14,6 +14,7 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
+import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
@@ -21,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * The top level of the Aggregation Engine. {@link ResourceFetcher} does the fetching from
  * BlueButton and {@link ResourceWriter} does the writing.
- *
+ * <p>
  * Implementation Notes:
  * - There is a single flow that does the work for a job
  * - It starts with an iteration of resource types in a job and produces a series of JobQueueBatchFile for that resource type
@@ -55,12 +58,12 @@ public class AggregationEngine implements Runnable {
     /**
      * Create an engine.
      *
-     * @param aggregatorID - The ID of the current working aggregator
-     * @param bbclient    - {@link BlueButtonClient } to use
-     * @param queue       - {@link IJobQueue} that will direct the work done
-     * @param fhirContext - {@link FhirContext} for DSTU3 resources
-     * @param metricRegistry - {@link MetricRegistry} for metrics
-     * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
+     * @param aggregatorID     - The ID of the current working aggregator
+     * @param bbclient         - {@link BlueButtonClient } to use
+     * @param queue            - {@link IJobQueue} that will direct the work done
+     * @param fhirContext      - {@link FhirContext} for DSTU3 resources
+     * @param metricRegistry   - {@link MetricRegistry} for metrics
+     * @param operationsConfig - The {@link OperationsConfig} to use for writing the output files
      */
     @Inject
     public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, IJobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
@@ -125,6 +128,7 @@ public class AggregationEngine implements Runnable {
 
     /**
      * Loops over the partials of a job batch and handles completed, error, and paused job scenarios
+     *
      * @param job - the job to process
      */
     protected void processJobBatch(JobQueueBatch job) {
@@ -136,7 +140,7 @@ public class AggregationEngine implements Runnable {
 
             // Stop processing when no patients or early shutdown
             boolean queueRunning = true;
-            while ( nextPatientID.isPresent() ) {
+            while (nextPatientID.isPresent()) {
                 this.processJobBatchPartial(job, nextPatientID.get());
 
                 // Check if the subscriber is still running before getting the next part of the batch
@@ -145,8 +149,20 @@ public class AggregationEngine implements Runnable {
             }
 
             // Finish processing the batch
-            if ( queueRunning ) {
+            if (queueRunning) {
                 logger.info("COMPLETED job {} batch {}", job.getJobID(), job.getBatchID());
+                // Calculate the checksums
+                job.getJobQueueBatchFiles()
+                        .forEach(batchFile -> {
+                            final File file = new File(String.format("%s/%s.ndjson", this.operationsConfig.getExportPath(), batchFile.getFileName()));
+                            try {
+                                final byte[] checksum = generateChecksum(file);
+                                batchFile.setChecksum(checksum);
+                            } catch (IOException e) { // If we can't generate the checksum, that's a faulting error, just continue
+                                logger.error("Unable to generate checksum for file {}", batchFile.getFileName());
+                            }
+
+                        });
                 this.queue.completeBatch(job, aggregatorID);
             } else {
                 logger.info("PAUSED job {} batch {}", job.getJobID(), job.getBatchID());
@@ -160,7 +176,8 @@ public class AggregationEngine implements Runnable {
 
     /**
      * Processes a partial of a job batch. Marks the partial as completed upon processing
-     * @param job - the job to process
+     *
+     * @param job       - the job to process
      * @param patientID - The current patient id processing
      */
     private List<JobQueueBatchFile> processJobBatchPartial(JobQueueBatch job, String patientID) {
@@ -174,7 +191,8 @@ public class AggregationEngine implements Runnable {
 
     /**
      * Fetch and write a specific resource type
-     * @param job context
+     *
+     * @param job          context
      * @param resourceType to process
      */
     private Flowable<JobQueueBatchFile> completeResource(JobQueueBatch job, String patientID, ResourceType resourceType) {
@@ -210,10 +228,10 @@ public class AggregationEngine implements Runnable {
     /**
      * This part of the flow chain buffers resources and writes them in batches to a file
      *
-     * @param writer - the writer to use
+     * @param writer        - the writer to use
      * @param resourceCount - the number of resources in the current file
      * @param sequenceCount - the sequence counter
-     * @param meter - a meter on the number of resources
+     * @param meter         - a meter on the number of resources
      * @return a transformed flow
      */
     private Publisher<JobQueueBatchFile> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger resourceCount, AtomicInteger sequenceCount, Meter meter) {
@@ -224,7 +242,7 @@ public class AggregationEngine implements Runnable {
         var resourcesPerFile = operationsConfig.getResourcesPerFileCount();
         var firstResourceBatchCount = resourcesInCurrentFileCount < resourcesPerFile ? resourcesPerFile - resourcesInCurrentFileCount : resourcesPerFile;
 
-        if ( resourcesInCurrentFileCount == resourcesPerFile ) {
+        if (resourcesInCurrentFileCount == resourcesPerFile) {
             // Start a new file since the file has been filled up
             sequenceCount.incrementAndGet();
         }
@@ -254,7 +272,7 @@ public class AggregationEngine implements Runnable {
 
     /**
      * Global error handler. Needed to catch undeliverable exceptions.
-     *
+     * <p>
      * See: https://github.com/ReactiveX/RxJava/wiki/What's-different-in-2.0#error-handling
      *
      * @param e is the exception thrown
@@ -293,5 +311,11 @@ public class AggregationEngine implements Runnable {
 
     protected void setSubscribe(Disposable subscribe) {
         this.subscribe = subscribe;
+    }
+
+    static byte[] generateChecksum(File file) throws IOException {
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            return new SHA256.Digest().digest(fileInputStream.readAllBytes());
+        }
     }
 }
