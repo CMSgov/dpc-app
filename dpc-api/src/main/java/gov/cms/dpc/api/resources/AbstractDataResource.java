@@ -15,5 +15,5 @@ public abstract class AbstractDataResource {
 
     @Path("/{fileID}/")
     @GET
-    public abstract Response export(OrganizationPrincipal organizationPrincipal, String fileID);
+    public abstract Response export(OrganizationPrincipal organizationPrincipal, String range, String fileID);
 }

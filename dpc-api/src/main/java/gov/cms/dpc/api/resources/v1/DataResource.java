@@ -8,29 +8,29 @@ import gov.cms.dpc.api.resources.AbstractDataResource;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
+/**
+ * Streaming and range logic was taken from here: https://github.com/aruld/jersey-streaming
+ */
 @Api(tags = {"Bulk Data", "Data"}, authorizations = @Authorization(value = "apiKey"))
 public class DataResource extends AbstractDataResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
+    private static final int CHUNK_SIZE = 1024 * 1024; // 1MB chunks, but we can modify this later, if we want
 
     private final FileManager manager;
 
@@ -50,8 +50,29 @@ public class DataResource extends AbstractDataResource {
             @ApiResponse(code = 200, message = "File of newline-delimited JSON FHIR objects"),
             @ApiResponse(code = 500, message = "An error occurred", response = OperationOutcome.class)
     })
-    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @PathParam("fileID") String fileID) {
+    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @HeaderParam(HttpHeaders.RANGE) String range, @PathParam("fileID") String fileID) {
+
         final File file = this.manager.getFile(fileID);
+
+        final Response response;
+        // Return a non-ranged streamed response if the requester doesn't actually send the range header
+        if (range == null) {
+            response = buildDefaultResponse(fileID, file);
+        } else { // Process the range request and return a partial stream
+            response = buildRangedRequest(fileID, file, range);
+        }
+
+        // Set the cache control headers to make sure the file isn't retained in transit
+        final CacheControl cacheControl = new CacheControl();
+        cacheControl.setNoCache(true);
+        cacheControl.setNoStore(true);
+
+        return Response.fromResponse(response)
+                .cacheControl(cacheControl)
+                .build();
+    }
+
+    private Response buildDefaultResponse(String fileID, File file) {
         final StreamingOutput fileStream = outputStream -> {
             try (FileInputStream fileInputStream = new FileInputStream(file)) {
                 // Use the IOUtils copy method, which internally buffers the files
@@ -62,16 +83,85 @@ public class DataResource extends AbstractDataResource {
             outputStream.flush();
         };
 
-        // Set the cache control headers to make sure the file isn't retained in transit
-        final CacheControl cacheControl = new CacheControl();
-        cacheControl.setNoCache(true);
-        cacheControl.setNoStore(true);
-
         return Response
-                .ok(fileStream)
-                .cacheControl(cacheControl)
+                .status(Response.Status.OK)
+                .entity(fileStream)
                 .header(HttpHeaders.ETAG, OffsetDateTime.now(ZoneOffset.UTC).toString())
                 .header(HttpHeaders.CONTENT_LENGTH, file.length())
                 .build();
+    }
+
+    private Response buildRangedRequest(String fileID, File file, String range) {
+        final Pair<Long, Long> rangePair = parseRangeHeader(range, file.length());
+        final String responseRange = String.format("bytes %d-%d/%d", rangePair.getLeft(), rangePair.getRight(), file.length());
+
+        try {
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+            randomAccessFile.seek(rangePair.getLeft());
+            final long len = rangePair.getRight() - rangePair.getLeft();
+            final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);
+
+            return Response
+                    .status(Response.Status.PARTIAL_CONTENT)
+                    .entity(fileStreamer)
+                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                    .header(HttpHeaders.CONTENT_RANGE, responseRange)
+                    .header(HttpHeaders.CONTENT_LENGTH, fileStreamer.getLength())
+                    .build();
+
+        } catch (IOException e) {
+            throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private Pair<Long, Long> parseRangeHeader(String range, long fileLength) {
+        // Split the range request
+        final String[] ranges = range.split("=")[1].split("-");
+        final long from = Long.parseLong(ranges[0]);
+
+         /*
+          Chunk media if the range upper bound is unspecified. Chrome, Opera sends "bytes=0-"
+         */
+        long to = CHUNK_SIZE + from;
+        if (to >= fileLength) {
+            to = fileLength - 1;
+        }
+        // If we're given a to range, use that directly
+        // Can they give us a value larger than the actual byte size?
+        if (ranges.length == 2) {
+            to = Long.parseLong(ranges[1]);
+        }
+
+        return Pair.of(from, to);
+    }
+
+    private static class PartialFileStreamer implements StreamingOutput {
+
+        private int length;
+        private RandomAccessFile raf;
+        final byte[] buf = new byte[4096];
+
+        PartialFileStreamer(int length, RandomAccessFile raf) {
+            this.length = length;
+            this.raf = raf;
+        }
+
+        @Override
+        public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+            try {
+                while (length != 0) {
+                    int read = raf.read(buf, 0, Math.min(buf.length, length));
+                    outputStream.write(buf, 0, read);
+                    length -= read;
+                }
+                outputStream.flush();
+            } finally {
+                raf.close();
+            }
+        }
+
+        int getLength() {
+            return length;
+        }
     }
 }
