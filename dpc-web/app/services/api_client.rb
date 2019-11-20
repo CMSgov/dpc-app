@@ -108,9 +108,13 @@ class APIClient
 
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = use_ssl?
-    response = http.request(request)
 
+    if use_ssl?
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE unless verify_ssl_cert?
+    end
+
+    response = http.request(request)
     @response_status = response.code.to_i
     @response_body = parsed_response(response)
   rescue Errno::ECONNREFUSED
@@ -125,5 +129,9 @@ class APIClient
 
   def use_ssl?
     !(Rails.env.development? || Rails.env.test?)
+  end
+
+  def verify_ssl_cert?
+    ENV.fetch('VERIFY_SSL_CERT') != 'false'
   end
 end
