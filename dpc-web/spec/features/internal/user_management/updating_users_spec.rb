@@ -136,4 +136,25 @@ RSpec.feature 'updating users' do
     expect(page).to have_content('80313')
     expect(page).to have_content('999')
   end
+
+  scenario 'sending sandbox email to user added to a sandbox org' do
+    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
+    org = create(:organization, api_environments: [0])
+
+    mailer = double(UserMailer)
+    allow(UserMailer).to receive(:with).with(user: crabby, organization: org).and_return(mailer)
+    allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
+    allow(mailer).to receive(:deliver_later)
+
+    visit edit_internal_user_path(crabby)
+
+    expect(page.body).to have_content('Crab Olsen')
+
+    select org.name, from: 'user_organization_ids'
+
+    find('[data-test="user-form-submit"]').click
+
+    expect(page).not_to have_css('[data-test="user-form-submit"]')
+    expect(mailer).to have_received(:organization_sandbox_email).once
+  end
 end

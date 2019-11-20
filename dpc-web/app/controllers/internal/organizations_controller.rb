@@ -57,19 +57,16 @@ module Internal
 
     def update
       @organization = Organization.find params[:id]
-      sandbox_added = (organization_params[:api_environments] - @organization.api_environments).include?('0')
+      notify_users = sandbox_added?
 
       if @organization.update organization_params
-        @organization.notify_users_of_sandbox_access if sandbox_added
+        @organization.notify_users_of_sandbox_access if notify_users
         flash[:notice] = 'Organization updated.'
         redirect_to internal_organization_path(@organization)
       else
         flash[:alert] = "Organization could not be updated: #{@organization.errors.full_messages.join(', ')}"
         render :edit
       end
-    end
-    def sandbox_added?
-
     end
 
     def destroy
@@ -91,6 +88,10 @@ module Internal
         api_environments: [], address_attributes: %i[id street street_2 city state zip address_use address_type],
         fhir_endpoints_attributes: %i[id name status uri]
       )
+    end
+
+    def sandbox_added?
+      (organization_params[:api_environments] - @organization.api_environments).include?('0')
     end
   end
 end

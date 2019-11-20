@@ -19,26 +19,6 @@ RSpec.describe Organization, type: :model do
           with(organization: org, api_environments: ['production'])
       end
     end
-
-    describe '#notify_users_of_sandbox_access' do
-      let(:organization) { create(:organization) }
-      let(:assignment) { create(:organization_user_assignment, organization: organization) }
-
-      before(:each) do
-        allow(assignment).to receive(:send_organization_sandbox_email)
-      end
-
-      it 'does nothing if sandbox is not enabled' do
-        organization.notify_users_of_sandbox_access
-        expect(assignment).not_to have_received(:send_organization_sandbox_email)
-      end
-
-      it 'sends org sandbox email to users if sandbox was added' do
-        organization.update(api_environments: [0])
-        organization.notify_users_of_sandbox_access
-        expect(assignment).to have_received(:send_organization_sandbox_email)
-      end
-    end
   end
 
   describe 'validations' do
@@ -126,6 +106,32 @@ RSpec.describe Organization, type: :model do
       org = build(:organization, api_environments: [])
 
       expect(org.api_environment_strings).to match_array([])
+    end
+  end
+
+  describe '#notify_users_of_sandbox_access' do
+    let!(:organization) { create(:organization, api_environments: []) }
+    let!(:assignment) { create(:organization_user_assignment, organization: organization) }
+    let!(:mailer) { double(UserMailer) }
+
+    before(:each) do
+      allow(UserMailer).to receive(:with).and_return(mailer)
+      allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
+      allow(mailer).to receive(:deliver_later)
+    end
+
+    it 'does nothing if sandbox is not enabled' do
+      organization.notify_users_of_sandbox_access
+      expect(UserMailer).not_to have_received(:with)
+    end
+
+    it 'sends org sandbox email to users if sandbox was added' do
+      organization.update(api_environments: [0])
+      organization.notify_users_of_sandbox_access
+
+      expect(UserMailer).to have_received(:with)
+        .once.with(user: assignment.user, organization: organization)
+      expect(mailer).to have_received(:organization_sandbox_email)
     end
   end
 end
