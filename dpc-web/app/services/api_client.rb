@@ -30,6 +30,24 @@ class APIClient
     get_request(uri_string, delegated_macaroon(reg_org_id))
   end
 
+  def create_public_key(reg_org_id, params: {})
+    uri_string = base_urls[api_env] + '/Key'
+
+    post_text_request(
+      uri_string,
+      params[:public_key],
+      { label: params[:label] },
+      delegated_macaroon(reg_org_id)
+    )
+
+    self
+  end
+
+  def get_public_keys(reg_org_id)
+    uri_string = base_urls[api_env] + '/Key'
+    get_request(uri_string, delegated_macaroon(reg_org_id))
+  end
+
   def response_successful?
     @response_status == 200
   end
@@ -77,6 +95,17 @@ class APIClient
     http_request(request, uri)
   end
 
+  def post_text_request(uri_string, text, query_params, token)
+    uri = URI.parse uri_string
+    uri.query = URI.encode_www_form(query_params)
+    text_headers = { 'Content-Type': 'text/plain', 'Accept': 'application/json' }.merge(auth_header(token))
+
+    request = Net::HTTP::Post.new(uri.request_uri, text_headers)
+    request.body = text
+
+    http_request(request, uri)
+  end
+
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
     response = http.request(request)
@@ -90,6 +119,6 @@ class APIClient
   end
 
   def headers(token)
-    { 'Content-Type': 'application/json' }.merge(auth_header(token))
+    { 'Content-Type': 'application/json', 'Accept': 'application/json' }.merge(auth_header(token))
   end
 end
