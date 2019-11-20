@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Dear <%= @user.first_name %> <%= @user.last_name %></h1>
+    <p>
+      Congratulations! You have now been given access to the Data at the Point of Care sandbox!
+      Once you follow the steps below, you will be able to develop and test your solution to retrieve
+      important health history for your Original Medicare patients. We are excited to see how you use
+      this data for use cases such as understanding a new patient's past history, knowing what preventive
+      items have been performed or are needed, staying updated on what happens to your patients in between
+      visits, and being informed of the medication fill information for your patients. We know you will
+      find innovative ways to use the data, and we look forward to hearing about your experiences.
+    </p>
+
+    <p><b>To connect to the sandbox, follow these steps:</b></p>
+
+    <ol>
+      <li>Log into your account at https://dpc.cms.gov</li>
+      <li>Edit your organization to add the NPI number for your organization that you plan to use for
+      testing. For the synthetic/test sandbox, you can use an individual  NPI (Type I) or an
+      organizational NPI (Type II).</li>
+      <li>Create a client token for each vendor that you want to have access to test in the sandbox on
+      your behalf. This can be internal IT teams or external vendors. As per the terms of service, a
+      token should not be shared with multiple vendors. Instead, create a token for each vendor or
+      application. You will only see this once on the screen, so copy it or download it before leaving
+      the screen. You can create as many tokens as you need, so create a new one if needed.</li>
+      <li>Upload your public keys. The dashboard will give you a UUID for each key that you upload which
+      you will need to use to authenticate with the API.</li>
+      <li>Follow the documentation and start your testing!. Information on the data to use for testing
+      can be found here. https://github.com/CMSgov/dpc-app/blob/master/src/main/resources/README.md</li>
+    </ol>
+
+    <p><b>What happens once you have successfully tested in the sandbox?</b></p>
+
+    <p>
+      Once you have successfully tested in the sandbox and are ready to start the process to move to
+      production, please follow the steps below. Please remember that this is a pilot project and the
+      process will move slowly to allow us to test and improve as we move forward.
+    </p>
+
+    <ol>
+      <li>Successfully test in the sandbox. Make sure that you have a documented process for creating
+      your first roster, updating the roster for existing patients, and adding new patients to the roster.</li>
+      <li>Locate your HITRUST validation or certification or be prepared to share the HHS ONC HIT
+      Technology certification information for the version you are using, including the CHPL ID and version.</li>
+      <li>Ensure the provider organization and vendor associations have read and understand the Terms of
+      Service that were agreed to upon registration and will be attested to with each roster addition.</li>
+      <li>Register each provider's FHIR end points in the NPPES database. The FHIR endpoint needs to have
+      a minimum of a FHIR Capabilities statement and one resource.</li>
+      <li>Send us an email to DPCInfo@cms.hhs.gov when you feel you meet all the requirements and are
+      ready to enter the queue. Please include all of the details from the steps above, including:</li>
+          <ul>
+            <li>Summary of the rostering process</li>
+            <li>Certification information (from step 2)</li>
+            <li>Confirmation of understanding the Terms of Service</li>
+            <li>The initial providers NPIs for production use</li>
+          </ul>
+      <li>As we are ready, we will reach out to verify the information submitted and to schedule a
+      demonstration of your solution. Remember, the information has to be included in the workflow of
+      the clinician at the point of care without any extra steps or logins.</li>
+    </ol>
+
+    <p>
+      Please let us know how you are doing and ask any questions you may have in our Google Group which
+      is found <a href="https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!forum/dpc-api">
+      here</a>. We look forward to hearing from you soon! Please let us know if we can help!
+    </p>
+
+    <p>Sincerely,</p>
+
+    <p>The Data at the Point of Care Team</p>
+  </body>
+</html>

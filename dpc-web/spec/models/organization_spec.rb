@@ -19,6 +19,26 @@ RSpec.describe Organization, type: :model do
           with(organization: org, api_environments: ['production'])
       end
     end
+
+    describe '#notify_users_of_sandbox_access' do
+      let(:organization) { create(:organization) }
+      let(:assignment) { create(:organization_user_assignment, organization: organization) }
+
+      before(:each) do
+        allow(assignment).to receive(:send_organization_sandbox_email)
+      end
+
+      it 'does nothing if sandbox is not enabled' do
+        organization.notify_users_of_sandbox_access
+        expect(assignment).not_to have_received(:send_organization_sandbox_email)
+      end
+
+      it 'sends org sandbox email to users if sandbox was added' do
+        organization.update(api_environments: [0])
+        organization.notify_users_of_sandbox_access
+        expect(assignment).to have_received(:send_organization_sandbox_email)
+      end
+    end
   end
 
   describe 'validations' do

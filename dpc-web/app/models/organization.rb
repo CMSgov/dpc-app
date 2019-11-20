@@ -41,6 +41,12 @@ class Organization < ApplicationRecord
     registered_organizations.pluck(:api_env)
   end
 
+  def notify_users_of_sandbox_access
+    return unless sandbox_enabled?
+
+    organization_user_assignments.each(&:send_organization_sandbox_email)
+  end
+
   def update_registered_organizations
     OrganizationRegistrar.delay.run(organization: self, api_environments: api_environment_strings)
   end
