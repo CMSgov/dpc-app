@@ -21,6 +21,6 @@ class OrganizationsController < ApplicationController
   private
 
   def organization_params
-    params.fetch(:organization).permit(:npi)
+    params.fetch(:organization).permit(:npi, :vendor)
   end
 end

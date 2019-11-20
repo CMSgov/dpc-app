@@ -16,6 +16,11 @@
           <%= f.text_field :npi, class: "ds-c-field" %>
         </div>
 
+        <div class="field">
+          <%= f.label :vendor, "Vendor", class: "ds-c-label" %>
+          <%= f.text_field :vendor, class: "ds-c-field" %>
+        </div>
+
         <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
           <%= f.submit 'Save', class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
           <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>

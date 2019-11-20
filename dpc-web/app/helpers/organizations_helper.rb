@@ -30,4 +30,12 @@ module OrganizationsHelper
       'No NPI added. You must add an NPI before creating client tokens or public keys.'
     end
   end
+
+  def vendor_text(organization)
+    if organization.vendor.present?
+      organization.vendor
+    else
+      'No vendor info added.'
+    end
+  end
 end
