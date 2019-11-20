@@ -79,6 +79,7 @@ class APIClient
 
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = use_ssl?
     response = http.request(request)
 
     @response_status = response.code.to_i
@@ -91,5 +92,9 @@ class APIClient
 
   def headers(token)
     { 'Content-Type': 'application/json' }.merge(auth_header(token))
+  end
+
+  def use_ssl?
+    !(Rails.env.development? || Rails.env.test?)
   end
 end
