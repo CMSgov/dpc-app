@@ -13,4 +13,8 @@ class RegisteredOrganization < ApplicationRecord
   def client_tokens
     ClientTokenManager.new(api_env: api_env, organization: organization).client_tokens
   end
+
+  def public_keys
+    PublicKeyManager.new(api_env: api_env, organization: organization).public_keys
+  end
 end
