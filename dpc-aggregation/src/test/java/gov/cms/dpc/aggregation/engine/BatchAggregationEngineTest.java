@@ -126,7 +126,8 @@ class BatchAggregationEngineTest {
                     final var outputFilePath = String.format("%s/%s.ndjson", exportPath, batchFile.getFileName());
                     final File file = new File(Path.of(outputFilePath).toString());
                     assertAll(() -> assertNotNull(file, "Should have input file"),
-                            () -> assertArrayEquals(AggregationEngine.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"));
+                            () -> assertArrayEquals(AggregationEngine.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"),
+                            () -> assertEquals(file.length(), batchFile.getFileLength(), "Should have matching file length"));
                 });
 
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);

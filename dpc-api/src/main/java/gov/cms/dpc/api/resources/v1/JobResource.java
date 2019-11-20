@@ -3,10 +3,10 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -29,9 +29,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -74,12 +76,12 @@ public class JobResource extends AbstractJobResource {
         final UUID orgUUID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final List<JobQueueBatch> batches = this.queue.getJobBatches(jobUUID);
 
-        if ( batches.isEmpty() ) {
+        if (batches.isEmpty()) {
             return Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build();
         }
 
         // Validate the batches
-        for ( JobQueueBatch batch : batches ) {
+        for (JobQueueBatch batch : batches) {
             logger.debug("Fetched Batch: {}", batch);
             if (!batch.getOrgID().equals(orgUUID)) {
                 return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
@@ -92,13 +94,13 @@ public class JobResource extends AbstractJobResource {
         Response.ResponseBuilder builder = Response.noContent();
         Set<JobStatus> jobStatusSet = batches.stream().map(JobQueueBatch::getStatus).collect(Collectors.toSet());
 
-        if ( jobStatusSet.contains(JobStatus.FAILED) ) {
+        if (jobStatusSet.contains(JobStatus.FAILED)) {
             // If any part of the job has failed, report a failed status
             builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
-        } else if ( jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.QUEUED) ) {
+        } else if (jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.QUEUED)) {
             // The job is still being processed
             builder = buildJobStatusInProgress(builder, batches, jobStatusSet);
-        } else if ( jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED) ) {
+        } else if (jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED)) {
             // All batches in the job have finished
             builder = buildJobStatusCompleted(builder, batches);
         } else {
@@ -111,16 +113,15 @@ public class JobResource extends AbstractJobResource {
     /**
      * Builds a job status response for an in progress job. Includes the current progress in the X-Progress header.
      *
-     * @param builder - The current response builder
-     * @param batches - The list of batches made up in a job
+     * @param builder      - The current response builder
+     * @param batches      - The list of batches made up in a job
      * @param jobStatusSet - The list of all possible statuses in the job
-     *
      * @return the response builder
      */
     private Response.ResponseBuilder buildJobStatusInProgress(Response.ResponseBuilder builder, List<JobQueueBatch> batches, Set<JobStatus> jobStatusSet) {
         String progress = "QUEUED: 0.00%";
 
-        if ( jobStatusSet.contains(JobStatus.RUNNING) ) {
+        if (jobStatusSet.contains(JobStatus.RUNNING)) {
             AtomicInteger done = new AtomicInteger();
             AtomicInteger total = new AtomicInteger();
             batches.forEach(batch -> {
@@ -135,11 +136,10 @@ public class JobResource extends AbstractJobResource {
     }
 
     /**
-     *  Builds a job status response for a completed job. Includes the list of files created from the job.
+     * Builds a job status response for a completed job. Includes the list of files created from the job.
      *
      * @param builder - The current response builder
      * @param batches - The list of batches made up in a job
-     *
      * @return the response builder
      */
     private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches) {
@@ -167,7 +167,7 @@ public class JobResource extends AbstractJobResource {
      */
     private List<JobCompletionModel.OutputEntry> formOutputList(List<JobQueueBatch> batchList, boolean forOperationalOutcomes) {
         // Assert batches are from the same job
-        assert ( batchList.stream().map(JobQueueBatch::getJobID).collect(Collectors.toSet()).size() == 1 );
+        assert (batchList.stream().map(JobQueueBatch::getJobID).collect(Collectors.toSet()).size() == 1);
 
         return batchList.stream()
                 .map(JobQueueBatch::getJobQueueBatchFiles)
@@ -184,23 +184,16 @@ public class JobResource extends AbstractJobResource {
     List<JobCompletionModel.OutputEntryExtension> buildExtension(JobQueueBatchFile batchFile) {
         String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(batchFile.getBatchID(), batchFile.getResourceType(), batchFile.getSequence()));
         File file = new File(filePath);
-        String checksum = generateChecksum(file);
-        long fileLength = generateFileLength(file);
-        return List.of(new JobCompletionModel.OutputEntryExtension(JobCompletionModel.CHECKSUM_URL, checksum),
-                new JobCompletionModel.OutputEntryExtension(JobCompletionModel.FILE_LENGTH_URL, fileLength));
-    }
-
-    private String generateChecksum(File file) {
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            byte[] digest = new SHA256.Digest().digest(fileInputStream.readAllBytes());
-            return String.format("%s:%s", "sha256", Hex.toHexString(digest));
-        } catch (Exception e) {
-            logger.error("Failed to generate checksum", e);
-            return "";
+        final byte[] byteChecksum = batchFile.getChecksum();
+        final String stringChecksum;
+        if (byteChecksum == null) {
+            stringChecksum = "";
+        } else {
+            stringChecksum = Hex.toHexString(byteChecksum);
         }
-    }
-
-    private Long generateFileLength(File file) {
-        return file != null ? file.length() : 0;
+        String formattedChecksum = String.format("%s:%s", "sha256", stringChecksum);
+        long fileLength = batchFile.getFileLength();
+        return List.of(new JobCompletionModel.OutputEntryExtension(JobCompletionModel.CHECKSUM_URL, formattedChecksum),
+                new JobCompletionModel.OutputEntryExtension(JobCompletionModel.FILE_LENGTH_URL, fileLength));
     }
 }

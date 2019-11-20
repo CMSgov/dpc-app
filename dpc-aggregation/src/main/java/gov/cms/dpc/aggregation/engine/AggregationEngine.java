@@ -161,7 +161,7 @@ public class AggregationEngine implements Runnable {
                             } catch (IOException e) { // If we can't generate the checksum, that's a faulting error, just continue
                                 logger.error("Unable to generate checksum for file {}", batchFile.getFileName());
                             }
-
+                            batchFile.setFileLength(file.length());
                         });
                 this.queue.completeBatch(job, aggregatorID);
             } else {

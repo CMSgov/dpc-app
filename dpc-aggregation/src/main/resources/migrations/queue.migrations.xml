@@ -71,6 +71,7 @@
     <changeSet id="add-checksum-file-length" author="nickrobison-usds">
         <addColumn tableName="JOB_QUEUE_BATCH_FILE">
             <column name="checksum" type="BYTEA"/>
+            <column name="file_length" type="BIGINT"/>
         </addColumn>
     </changeSet>
 
