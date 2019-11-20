@@ -80,6 +80,7 @@ RSpec.describe APIClient do
       it 'responds like 500 if connection error is raised' do
         http_stub = instance_double(Net::HTTP)
         allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
 
         api_client = APIClient.new('sandbox')
@@ -243,6 +244,7 @@ RSpec.describe APIClient do
       it 'responds like 500 if connection error is raised' do
         http_stub = instance_double(Net::HTTP)
         allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
 
         api_client = APIClient.new('sandbox')
