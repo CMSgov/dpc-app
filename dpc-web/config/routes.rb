@@ -30,6 +30,7 @@ Rails.application.routes.draw do
 
   resources :organizations, only: [:show] do
     resources :client_tokens, only: [:new, :create]
+    resources :public_keys, only: [:new, :create]
   end
 
   root to: 'public#home'
