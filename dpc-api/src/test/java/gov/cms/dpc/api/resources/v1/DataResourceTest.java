@@ -2,8 +2,14 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.auth.DPCAuthCredentials;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
+import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import io.dropwizard.auth.AuthFilter;
+import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.apache.commons.io.FileUtils;
@@ -19,6 +25,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,11 +49,11 @@ class DataResourceTest {
     @Test
     void streamingTest() throws IOException {
 
-        Mockito.when(manager.getFile(Mockito.anyString())).thenAnswer(answer -> {
+        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
             final File tempPath = FileUtils.getTempDirectory();
             final File file = File.createTempFile("test", ".ndjson", tempPath);
             FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-            return file;
+            return new FileManager.FilePointer("", file.length(), file);
         });
 
         final Response response = RESOURCE.target("/Data/test.ndjson")
@@ -69,7 +76,7 @@ class DataResourceTest {
         final String randomString = buildRandomString(length);
         FileUtils.write(file, randomString, StandardCharsets.UTF_8);
 
-        Mockito.when(manager.getFile(Mockito.anyString())).thenReturn(file);
+        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, file));
 
         // Try to request one byte
         Response response = RESOURCE.target("/Data/test.ndjson")
@@ -145,8 +152,9 @@ class DataResourceTest {
 
         final DataResource dataResource = new DataResource(manager);
         final FhirContext ctx = FhirContext.forDstu3();
+        final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 
-        return APITestHelpers.buildResourceExtension(ctx, Collections.singletonList(dataResource), Collections.emptyList(), false);
+        return APITestHelpers.buildResourceExtension(ctx, Collections.singletonList(dataResource), List.of(staticFilter, new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class)), false);
     }
 
     private static String buildRandomString(long length) throws IOException {

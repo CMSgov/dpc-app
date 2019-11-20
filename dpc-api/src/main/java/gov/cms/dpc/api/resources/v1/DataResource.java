@@ -20,8 +20,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 
 /**
  * Streaming and range logic was taken from here: https://github.com/aruld/jersey-streaming
@@ -52,14 +50,14 @@ public class DataResource extends AbstractDataResource {
     })
     public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @HeaderParam(HttpHeaders.RANGE) String range, @PathParam("fileID") String fileID) {
 
-        final File file = this.manager.getFile(fileID);
+        final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
         final Response response;
         // Return a non-ranged streamed response if the requester doesn't actually send the range header
         if (range == null) {
-            response = buildDefaultResponse(fileID, file);
+            response = buildDefaultResponse(fileID, filePointer);
         } else { // Process the range request and return a partial stream
-            response = buildRangedRequest(fileID, file, range);
+            response = buildRangedRequest(fileID, filePointer.getFile(), range);
         }
 
         // Set the cache control headers to make sure the file isn't retained in transit
@@ -72,9 +70,9 @@ public class DataResource extends AbstractDataResource {
                 .build();
     }
 
-    private Response buildDefaultResponse(String fileID, File file) {
+    private Response buildDefaultResponse(String fileID, FileManager.FilePointer filePointer) {
         final StreamingOutput fileStream = outputStream -> {
-            try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            try (FileInputStream fileInputStream = new FileInputStream(filePointer.getFile())) {
                 // Use the IOUtils copy method, which internally buffers the files
                 IOUtils.copy(fileInputStream, outputStream);
             } catch (FileNotFoundException e) {
@@ -86,8 +84,8 @@ public class DataResource extends AbstractDataResource {
         return Response
                 .status(Response.Status.OK)
                 .entity(fileStream)
-                .header(HttpHeaders.ETAG, OffsetDateTime.now(ZoneOffset.UTC).toString())
-                .header(HttpHeaders.CONTENT_LENGTH, file.length())
+                .header(HttpHeaders.ETAG, filePointer.getChecksum())
+                .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
                 .build();
     }
 
