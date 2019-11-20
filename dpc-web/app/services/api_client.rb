@@ -10,7 +10,7 @@ class APIClient
   def create_organization(org)
     uri_string = base_urls[api_env] + '/Organization/$submit'
     json = OrganizationSubmitSerializer.new(org).to_json
-    post_request(uri_string, json, golden_macaroon)
+    post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
   end
 
@@ -20,7 +20,8 @@ class APIClient
     uri_string = base_urls[api_env] + '/Token'
 
     json = params.to_json
-    post_request(uri_string, json, delegated_macaroon(reg_org_id))
+    macaroon = delegated_macaroon(reg_org_id)
+    post_request(uri_string, json, headers(macaroon))
 
     self
   end
@@ -87,9 +88,9 @@ class APIClient
     http_request(request, uri)
   end
 
-  def post_request(uri_string, json, token)
+  def post_request(uri_string, json, headers)
     uri = URI.parse uri_string
-    request = Net::HTTP::Post.new(uri.request_uri, headers(token))
+    request = Net::HTTP::Post.new(uri.request_uri, headers)
     request.body = json
 
     http_request(request, uri)
@@ -125,6 +126,10 @@ class APIClient
 
   def headers(token)
     { 'Content-Type': 'application/json', 'Accept': 'application/json' }.merge(auth_header(token))
+  end
+
+  def fhir_headers(token)
+    { 'Content-Type': 'application/fhir+json', 'Accept': 'application/fhir+json' }.merge(auth_header(token))
   end
 
   def use_ssl?
