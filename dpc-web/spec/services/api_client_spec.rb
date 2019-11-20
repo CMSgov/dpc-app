@@ -17,7 +17,7 @@ RSpec.describe APIClient do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
+          headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
           body: {
             resourceType: 'Parameters',
             parameter: [{
@@ -101,7 +101,7 @@ RSpec.describe APIClient do
 
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
+          headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
           body: {
             resourceType: 'Parameters',
             parameter: [{
