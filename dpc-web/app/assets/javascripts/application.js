@@ -11,12 +11,10 @@
 // about supported directives.
 //
 //= require svg4everybody
-//= require jquery3
-//= require popper
-//= require bootstrap-sprockets
 //= require accordions
 //= require rails-ujs
 //= require activestorage
+//= require_tree ./utils
 //= require_tree .
 
 svg4everybody();

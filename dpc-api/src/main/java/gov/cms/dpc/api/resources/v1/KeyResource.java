@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
-@Produces(MediaType.APPLICATION_JSON)
 @Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "apiKey"))
 public class KeyResource extends AbstractKeyResource {
 
@@ -48,6 +47,7 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Fetch public keys for Organization",
             notes = "This endpoint returns all the public keys currently associated with the organization." +
                     "<p>The returned keys are serialized using PEM encoding.",
@@ -62,6 +62,7 @@ public class KeyResource extends AbstractKeyResource {
     @ExceptionMetered
     @Path("/{keyID}")
     @UnitOfWork
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Fetch public key for Organization",
             notes = "This endpoint returns the specified public key associated with the organization." +
                     "<p>The returned keys are serialized using PEM encoding.")
@@ -80,6 +81,7 @@ public class KeyResource extends AbstractKeyResource {
     @ExceptionMetered
     @Path("/{keyID}")
     @UnitOfWork
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Delete public key for Organization",
             notes = "This endpoint deletes the specified public key associated with the organization.")
     @ApiResponses(value = {

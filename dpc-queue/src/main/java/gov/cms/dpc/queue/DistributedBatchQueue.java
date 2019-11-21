@@ -68,7 +68,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
     }
 
     @Override
-    protected void submitJobBatches(List<JobQueueBatch> jobBatches) {
+    public void submitJobBatches(List<JobQueueBatch> jobBatches) {
         JobQueueBatch firstBatch = jobBatches.stream().findFirst().orElseThrow(() -> new JobQueueFailure("No job batches to submit"));
 
         logger.debug("Adding jobID {} ({} batches) to the queue at {} with for organization {}.",
@@ -169,6 +169,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
 
             for ( JobQueueBatch stuckJob : stuckJobList ) {
+                logger.warn(String.format("Restarting stuck batch... batchID=%s", stuckJob.getBatchID()));
                 stuckJob.restartBatch();
                 session.merge(stuckJob);
             }
@@ -191,8 +192,15 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
         if ( batchID.isPresent() ) {
             JobQueueBatch batch = session.get(JobQueueBatch.class, UUID.fromString(batchID.get()));
-            batch.setRunningStatus(aggregatorID);
-            session.merge(batch);
+            try {
+                batch.setRunningStatus(aggregatorID);
+            } catch (Exception e) {
+                logger.error("Failed to mark job as running. Marking the job as failed", e);
+                batch.setFailedStatus(aggregatorID);
+                return Optional.empty();
+            } finally {
+                session.merge(batch);
+            }
 
             final var delay = Duration.between(batch.getStartTime().orElseThrow(), batch.getUpdateTime().orElseThrow());
             waitTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);

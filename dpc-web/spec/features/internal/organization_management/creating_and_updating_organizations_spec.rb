@@ -104,7 +104,7 @@ RSpec.feature 'creating and updating organizations' do
     allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('112233')
     stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-      headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer 112233' },
+      headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer 112233' },
       body: {
         resourceType: 'Parameters',
         parameter: [{

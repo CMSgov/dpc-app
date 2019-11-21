@@ -213,20 +213,24 @@ public class JobQueueBatchTest {
         assertEquals(2, job.patientIndex);
         assertTrue(job.getJobQueueBatchFiles().isEmpty());
 
-        Mockito.verify(job).verifyAggregatorID(aggregatorID);
+        Mockito.verify(job, Mockito.never()).verifyAggregatorID(aggregatorID);
     }
 
     @Test
     void testSetFailedStatus_InvalidRunningStatus() {
+        // We should always allow a job to fail regardless of state, or this can cause other issues
+
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.QUEUED;
 
-        try {
-            job.setFailedStatus(aggregatorID);
-            Assertions.fail();
-        } catch (JobQueueFailure e) {
-            assertTrue(e.getMessage().contains("Cannot complete. JobStatus"));
-        }
+        job.setFailedStatus(aggregatorID);
+
+        assertEquals(JobStatus.FAILED, job.getStatus());
+        assertFalse(job.getAggregatorID().isPresent());
+        assertNotNull(job.getCompleteTime());
+        assertTrue(job.getJobQueueBatchFiles().isEmpty());
+
+        Mockito.verify(job, Mockito.never()).verifyAggregatorID(aggregatorID);
     }
 
     @Test
@@ -241,6 +245,25 @@ public class JobQueueBatchTest {
         assertNull(job.patientIndex);
         assertNull(job.startTime);
         assertNull(job.completeTime);
+        assertNull(job.aggregatorID);
+        assertTrue(job.getJobQueueBatchFiles().isEmpty());
+    }
+
+    @Test
+    void testRestartBatch_Stuck() {
+        final var job = createJobQueueBatch();
+        job.setRunningStatus(aggregatorID);
+        job.patientIndex = 2;
+        job.getJobQueueBatchFiles().add(new JobQueueBatchFile());
+
+        job.restartBatch();
+
+        assertEquals(JobStatus.QUEUED, job.getStatus());
+        assertNull(job.patientIndex);
+        assertNull(job.startTime);
+        assertNull(job.completeTime);
+        assertNull(job.aggregatorID);
+        assertTrue(job.getJobQueueBatchFiles().isEmpty());
     }
 
     @Test
