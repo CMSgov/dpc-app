@@ -79,6 +79,29 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_css('[data-test="form-submit"]')
   end
 
+  scenario 'sending sandbox emails to org users when sandbox added' do
+    org = create(:organization, api_environments: [])
+    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
+    fishy = create(:user, first_name: 'Fish', last_name: 'Marlin', email: 'fish@beach.com')
+    create(:user, first_name: 'Unrelated', last_name: 'User', email: 'unrelated@beach.com')
+    org.users << crabby
+    org.users << fishy
+
+    mailer = double(UserMailer)
+    allow(UserMailer).to receive(:with).with(user: crabby, organization: org).and_return(mailer)
+    allow(UserMailer).to receive(:with).with(user: fishy, organization: org).and_return(mailer)
+    allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
+    allow(mailer).to receive(:deliver_later)
+
+    visit edit_internal_organization_path(org)
+
+    check 'organization_api_environments_sandbox'
+    find('[data-test="form-submit"]').click
+
+    expect(page).not_to have_css('[data-test="form-submit"]')
+    expect(mailer).to have_received(:organization_sandbox_email).twice
+  end
+
   def stub_creation_request
     allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('112233')

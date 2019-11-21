@@ -135,4 +135,30 @@ RSpec.describe Organization, type: :model do
       expect(org.api_credentialable?).to be false
     end
   end
+  
+  describe '#notify_users_of_sandbox_access' do
+    let!(:organization) { create(:organization, api_environments: []) }
+    let!(:assignment) { create(:organization_user_assignment, organization: organization) }
+    let!(:mailer) { double(UserMailer) }
+
+    before(:each) do
+      allow(UserMailer).to receive(:with).and_return(mailer)
+      allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
+      allow(mailer).to receive(:deliver_later)
+    end
+
+    it 'does nothing if sandbox is not enabled' do
+      organization.notify_users_of_sandbox_access
+      expect(UserMailer).not_to have_received(:with)
+    end
+
+    it 'sends org sandbox email to users if sandbox was added' do
+      organization.update(api_environments: [0])
+      organization.notify_users_of_sandbox_access
+
+      expect(UserMailer).to have_received(:with)
+        .once.with(user: assignment.user, organization: organization)
+      expect(mailer).to have_received(:organization_sandbox_email)
+    end
+  end
 end
