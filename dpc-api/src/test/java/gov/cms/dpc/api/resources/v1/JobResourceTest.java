@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,7 +36,7 @@ public class JobResourceTest {
     public void testNonExistentJob() {
         final var jobID = UUID.randomUUID();
         final var queue = new MemoryBatchQueue(100);
-        final var resource = new JobResource(queue, TEST_BASEURL, "");
+        final var resource = new JobResource(queue, TEST_BASEURL);
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
@@ -58,7 +57,7 @@ public class JobResourceTest {
         final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
 
         // Test the response
-        final var resource = new JobResource(queue, TEST_BASEURL, "");
+        final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
                 () -> assertEquals("QUEUED: 0.00%", response.getHeaderString("X-Progress")));
@@ -80,7 +79,7 @@ public class JobResourceTest {
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
 
         // Test the response
-        final var resource = new JobResource(queue, TEST_BASEURL, "");
+        final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
                 () -> assertEquals("RUNNING: 50.00%", response.getHeaderString("X-Progress")));
@@ -108,7 +107,7 @@ public class JobResourceTest {
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response
-        final var resource = new JobResource(queue, TEST_BASEURL, "");
+        final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
@@ -116,7 +115,7 @@ public class JobResourceTest {
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
-        for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
+        for (JobCompletionModel.OutputEntry entry : completion.getOutput()) {
             assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
         }
     }
@@ -142,7 +141,7 @@ public class JobResourceTest {
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response for ok
-        final var resource = new JobResource(queue, TEST_BASEURL, "");
+        final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
@@ -172,7 +171,7 @@ public class JobResourceTest {
         queue.failBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response
-        final var resource = new JobResource(queue, TEST_BASEURL, "");
+        final var resource = new JobResource(queue, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus()));
     }
@@ -201,7 +200,7 @@ public class JobResourceTest {
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Try accessing it with the wrong org (should be unauthorized)
-        final var resource = new JobResource(queue, TEST_BASEURL, "");
+        final var resource = new JobResource(queue, TEST_BASEURL);
         final Response responseWrong = resource.checkJobStatus(organizationPrincipalWrong, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, responseWrong.getStatus()));
 
@@ -213,7 +212,7 @@ public class JobResourceTest {
         final var completion = (JobCompletionModel) responseRight.getEntity();
         assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
                 () -> assertEquals(0, completion.getError().size()));
-        for (JobCompletionModel.OutputEntry entry: completion.getOutput()) {
+        for (JobCompletionModel.OutputEntry entry : completion.getOutput()) {
             assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
         }
     }
@@ -223,7 +222,7 @@ public class JobResourceTest {
      */
     @Test
     public void testBuildExtension() {
-        final var resource = new JobResource(null, "", "src/test/resources");
+        final var resource = new JobResource(null, "");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), ResourceType.Patient, 0, 11);
         file.setChecksum(Hex.decode("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b"));
         file.setFileLength(7202L);
