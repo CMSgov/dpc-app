@@ -5,7 +5,7 @@ execution:
   - iterations: 3
     concurrency: 3
     scenario: jmeter
-    ramp-up: 120s
+    ramp-up: 60s
 
 scenarios:
   jmeter:
