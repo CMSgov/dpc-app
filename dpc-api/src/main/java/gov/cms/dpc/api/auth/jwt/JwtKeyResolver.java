@@ -1,11 +1,8 @@
 package gov.cms.dpc.api.auth.jwt;
 
-import com.github.nitram509.jmacaroons.Macaroon;
-import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
-import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
@@ -16,8 +13,6 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.security.Key;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class JwtKeyResolver extends SigningKeyResolverAdapter {

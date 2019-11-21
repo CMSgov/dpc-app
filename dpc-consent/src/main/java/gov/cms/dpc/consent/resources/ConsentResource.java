@@ -18,18 +18,10 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.utilities.xhtml.NodeType;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +34,7 @@ public class ConsentResource {
     private final String consentOrganizationURL;
 
     @Inject
-    ConsentResource(ConsentDAO dao, @Named("fhirReferenceURL")String fhirReferenceURL, @Named("consentOrganizationURL")String consentOrganizationURL) {
+    ConsentResource(ConsentDAO dao, @Named("fhirReferenceURL") String fhirReferenceURL, @Named("consentOrganizationURL") String consentOrganizationURL) {
         this.dao = dao;
         this.fhirReferenceURL = fhirReferenceURL;
         this.consentOrganizationURL = consentOrganizationURL;
@@ -59,7 +51,7 @@ public class ConsentResource {
     public Bundle search(
             @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
-            @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId ) {
+            @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
         List<ConsentEntity> entities = null;
 
@@ -98,7 +90,7 @@ public class ConsentResource {
     public Consent getConsent(@ApiParam(value = "Consent resource ID", required = true) @PathParam("consentId") UUID consentId) {
 
         final ConsentEntity consentEntity = this.dao.getConsent(consentId).orElseThrow(() ->
-            new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
+                new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
         );
 
         return ConsentEntityConverter.convert(consentEntity, consentOrganizationURL, fhirReferenceURL);
@@ -107,7 +99,7 @@ public class ConsentResource {
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
         List<ConsentEntity> entities;
         Optional<String> hicnValue = Optional.empty();
-        Optional<String> mbiValue  = Optional.empty();
+        Optional<String> mbiValue = Optional.empty();
         String field;
 
         // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
