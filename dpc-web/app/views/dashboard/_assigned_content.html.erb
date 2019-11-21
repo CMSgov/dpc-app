@@ -1,21 +1,15 @@
 <div class="ds-l-row--12">
   <% @user.organizations.each do |organization| %>
 
-    <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
-      <h2 class="dashboard-section-heading"><%= organization.name %></h2>
-
-      <div>
-        <%= link_to "Edit organization", edit_organization_url(organization), class: "ds-c-button ds-c-button--primary", data: { test: "edit-link" } %>
-      </div>
+    <section class="">
+      <h2 class="dashboard-section-heading"><%= organization.name %> | NPI: <%= npi_text(organization) %> <%= link_to "Edit", edit_organization_url(organization), class: "", data: { test: "edit-link" } %></h2>
     </section>
 
-      <div>NPI: <%= npi_text(organization) %></div>
-
-    <section class="box">
-      <div class="box__content">
-        <div class="box__header">
-          <h2 class="box__heading">Client tokens</h2>
-          <% if organization.api_credentialable? %>
+    <% if organization.api_credentialable? %>
+      <section class="box">
+        <div class="box__content">
+          <div class="box__header">
+            <h2 class="box__heading">Client tokens</h2>
             <div class="box__header__actions">
               <%= link_to new_organization_client_token_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-client-token" } do %>
                 <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -24,42 +18,38 @@
                 New token
               <% end %>
             </div>
-          <% else %>
-            <p class="ds-u-color--muted">You cannot add client tokens until your organization has access to an API environment and has an NPI.</p>
-          <% end %>
-        </div>
-        <div class="ds-l-row">
-          <div class="ds-l-col--12">
-            <% organization.registered_organizations.each do |reg_org| %>
-              <% reg_org.client_tokens.each do |token| %>
-                <% if reg_org.client_tokens.count == 0 %>
-                  <p class="ds-u-color--muted">You do not have not created any client tokens. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.</p>
-                <% else %>
-                  <ul class="credentials">
-                    <li class="credential">
-                      <div class="credential__body">
-                        <h3 class="credential__name"><%= token['label'] %></h3>
-                        <div class="credential__meta">
-                          <p>Created: <%= formatted_datestr(token['createdAt']) %></p>
-                          <p>Expires: <%= formatted_datestr(token['expiresAt']) %></p>
+          </div>
+          <div class="ds-l-row">
+            <div class="ds-l-col--12">
+              <% organization.registered_organizations.each do |reg_org| %>
+                <% reg_org.client_tokens.each do |token| %>
+                  <% if reg_org.client_tokens.count == 0 %>
+                    <p class="ds-u-color--muted">You do not have not created any client tokens. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.</p>
+                  <% else %>
+                    <ul class="credentials">
+                      <li class="credential">
+                        <div class="credential__body">
+                          <h3 class="credential__name"><%= token['label'] %></h3>
+                          <div class="credential__meta">
+                            <p>Created: <%= formatted_datestr(token['createdAt']) %></p>
+                            <p>Expires: <%= formatted_datestr(token['expiresAt']) %></p>
+                          </div>
                         </div>
-                      </div>
-                      <div class="credential__actions">
+                        <div class="credential__actions">
 
-                      </div>
-                    </li>
-                  </ul>
+                        </div>
+                      </li>
+                    </ul>
+                  <% end %>
                 <% end %>
               <% end %>
-            <% end %>
-          </div>
-      </div>
-    </section>
-    <section class="box">
-      <div class="box__content">
-        <div class="box__header">
-          <h2 class="box__heading">Public Keys</h2>
-          <% if organization.api_credentialable? %>
+            </div>
+        </div>
+      </section>
+      <section class="box">
+        <div class="box__content">
+          <div class="box__header">
+            <h2 class="box__heading">Public Keys</h2>
             <div class="box__header__actions">
               <%= link_to new_organization_public_key_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-public-key" } do %>
                 <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -68,41 +58,47 @@
                 Add key
               <% end %>
             </div>
-          <% else %>
-            <p class="ds-u-color--muted">You cannot add public keys until your organization has access to an API environment and has an NPI.</p>
-          <% end %>
-        </div>
-        <% organization.registered_organizations.each do |reg_org| %>
-          <% reg_org.public_keys.each do |key| %>
-            <% if reg_org.public_keys.count == 0 %>
-            <p class="ds-u-color--muted">You do not have not added any public keys. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %></p>
-            <% else %>
-            <ul class="credentials">
-              <li class="credential">
-                <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <use xlink:href="/assets/solid.svg#key"></use>
-                </svg>
-                <div class="credential__body">
-                  <h3 class="credential__name"><%= key['label'] %></h3>
-                  <div class="credential__meta">
-                    <p class="ds-u-color--base"><%= key['id'] %></p>
-                    <p>Created: <%= formatted_datestr(key['createdAt']) %></p>
+          </div>
+          <% organization.registered_organizations.each do |reg_org| %>
+            <% reg_org.public_keys.each do |key| %>
+              <% if reg_org.public_keys.count == 0 %>
+              <p class="ds-u-color--muted">You do not have not added any public keys. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %></p>
+              <% else %>
+              <ul class="credentials">
+                <li class="credential">
+                  <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <use xlink:href="/assets/solid.svg#key"></use>
+                  </svg>
+                  <div class="credential__body">
+                    <h3 class="credential__name"><%= key['label'] %></h3>
+                    <div class="credential__meta">
+                      <p class="ds-u-color--base"><%= key['id'] %></p>
+                      <p>Created: <%= formatted_datestr(key['createdAt']) %></p>
+                    </div>
                   </div>
-                </div>
-                <div class="credential__actions">
+                  <div class="credential__actions">
 
-                </div>
-              </li>
-            </ul>
+                  </div>
+                </li>
+              </ul>
+              <% end %>
             <% end %>
           <% end %>
-        <% end %>
+        </div>
+      </section>
+
+      <p><svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <use xlink:href="/assets/solid.svg#exclamation-triangle"></use>
+      </svg> You will need <strong>both</strong> client tokens and public keys to use the API for this organization.</p>
+    <% else %>
+    <section class="box box--dashed ds-u-margin-bottom--7">
+      <div class="box__content">
+        <p class="ds-text--lead">
+        This organization is ready to begin working with the Data at the Point of Care Pilot. Before using the sandbox, you need to designate an organization NPI. <%= link_to "Designate an NPI", edit_organization_url(organization), class: "", data: { test: "edit-link" } %>
+        </p>
       </div>
     </section>
-
-    <p><svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <use xlink:href="/assets/solid.svg#exclamation-triangle"></use>
-    </svg> You will need <strong>both</strong> client tokens and public keys to use the API for this organization.</p>
+    <% end %>
 
   <% end %>
 </div>

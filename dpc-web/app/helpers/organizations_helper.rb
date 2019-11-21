@@ -27,7 +27,7 @@ module OrganizationsHelper
     if organization.npi.present?
       organization.npi
     else
-      'No NPI added. You must add an NPI before creating client tokens or public keys.'
+      'Not added'
     end
   end
 end
