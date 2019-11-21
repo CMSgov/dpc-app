@@ -90,6 +90,8 @@ module Internal
       )
     end
 
+    # Find out if the input params include 'sandbox' for api_environments, and whether the organization
+    # already has sandbox or not. '0' corresponds to 'sandbox'.
     def sandbox_added?
       (organization_params[:api_environments] - @organization.api_environments).include?('0')
     end
