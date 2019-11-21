@@ -17,12 +17,29 @@ RSpec.feature 'managing api credentials' do
     end
   end
 
+  context 'as a user assign to an org that is not credentialiable' do
+    let!(:user) { create :user, :assigned }
+
+    before(:each) do
+      org = user.organizations.first
+      org.update(npi: nil)
+
+      sign_in user, scope: :user
+    end
+
+    it 'cannot manage api credentials' do
+      visit dashboard_path
+      expect(page).not_to have_css('[data-test="new-client-token"]')
+      expect(page).not_to have_css('[data-test="new-public-key"]')
+    end
+  end
+
   context 'as an assigned user' do
     let!(:user) { create :user, :assigned }
 
     before(:each) do
       org = user.organizations.first
-      org.update(api_environments: [0])
+      org.update(api_environments: [0], npi: SecureRandom.uuid)
       create(:registered_organization, organization: org, api_env: 0, api_id: '923a4f7b-eade-494a-8ca4-7a685edacfad')
 
       sign_in user, scope: :user

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_01_134050) do
+ActiveRecord::Schema.define(version: 2019_11_20_215051) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -87,6 +87,7 @@ ActiveRecord::Schema.define(version: 2019_11_01_134050) do
     t.datetime "updated_at", null: false
     t.integer "api_environments", default: [], array: true
     t.string "npi"
+    t.string "vendor"
   end
 
   create_table "registered_organizations", force: :cascade do |t|
