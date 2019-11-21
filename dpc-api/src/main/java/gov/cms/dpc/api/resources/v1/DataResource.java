@@ -11,8 +11,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -27,7 +25,6 @@ import java.io.*;
 @Api(tags = {"Bulk Data", "Data"}, authorizations = @Authorization(value = "apiKey"))
 public class DataResource extends AbstractDataResource {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
     private static final int CHUNK_SIZE = 1024 * 1024; // Return a maximum of 1MB chunks, but we can modify this later if we need to
 
     private final FileManager manager;
@@ -114,7 +111,7 @@ public class DataResource extends AbstractDataResource {
 
     private Pair<Long, Long> parseRangeHeader(String range, long fileLength) {
         // Split the range request
-        final String[] ranges = range.split("=")[1].split("-");
+        final String[] ranges = range.split("=", -1)[1].split("-", -1);
         final long from = Long.parseLong(ranges[0]);
 
          /*

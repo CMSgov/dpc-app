@@ -31,6 +31,7 @@ public class FileManager {
         this.factory = factory.getSessionFactory();
     }
 
+    @SuppressWarnings("rawtypes")
     public FilePointer getFile(UUID organizationID, String fileID) {
         // Try
 

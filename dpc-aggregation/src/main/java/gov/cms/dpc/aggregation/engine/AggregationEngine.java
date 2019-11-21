@@ -151,18 +151,8 @@ public class AggregationEngine implements Runnable {
             // Finish processing the batch
             if (queueRunning) {
                 logger.info("COMPLETED job {} batch {}", job.getJobID(), job.getBatchID());
-                // Calculate the checksums
-                job.getJobQueueBatchFiles()
-                        .forEach(batchFile -> {
-                            final File file = new File(String.format("%s/%s.ndjson", this.operationsConfig.getExportPath(), batchFile.getFileName()));
-                            try {
-                                final byte[] checksum = generateChecksum(file);
-                                batchFile.setChecksum(checksum);
-                            } catch (IOException e) { // If we can't generate the checksum, that's a faulting error, just continue
-                                logger.error("Unable to generate checksum for file {}", batchFile.getFileName());
-                            }
-                            batchFile.setFileLength(file.length());
-                        });
+                // Calculate metadata for the file (length and checksum)
+                calculateFileMetadata(job);
                 this.queue.completeBatch(job, aggregatorID);
             } else {
                 logger.info("PAUSED job {} batch {}", job.getJobID(), job.getBatchID());
@@ -172,6 +162,20 @@ public class AggregationEngine implements Runnable {
             logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
             this.queue.failBatch(job, aggregatorID);
         }
+    }
+
+    private void calculateFileMetadata(JobQueueBatch job) {
+        job.getJobQueueBatchFiles()
+                .forEach(batchFile -> {
+                    final File file = new File(String.format("%s/%s.ndjson", this.operationsConfig.getExportPath(), batchFile.getFileName()));
+                    try {
+                        final byte[] checksum = generateChecksum(file);
+                        batchFile.setChecksum(checksum);
+                    } catch (IOException e) { // If we can't generate the checksum, that's a faulting error, just continue
+                        logger.error("Unable to generate checksum for file {}", batchFile.getFileName());
+                    }
+                    batchFile.setFileLength(file.length());
+                });
     }
 
     /**
