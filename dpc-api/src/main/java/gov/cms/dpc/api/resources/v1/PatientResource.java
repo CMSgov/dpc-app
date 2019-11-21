@@ -250,7 +250,7 @@ public class PatientResource extends AbstractPatientResource {
             "All resources available for the Patient are included in the result bundle.")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "Cannot find Patient record with given ID"),
-            @ApiResponse(code = 408, message = "", response = OperationOutcome.class),
+            @ApiResponse(code = 504, message = "", response = OperationOutcome.class),
             @ApiResponse(code = 500, message = "A system error occurred", response = OperationOutcome.class)
     })
     @Override
@@ -290,7 +290,7 @@ public class PatientResource extends AbstractPatientResource {
                 }
                 break;
             case TIMED_OUT:
-                builder = Response.status(HttpStatus.REQUEST_TIMEOUT_408);
+                builder = Response.status(HttpStatus.GATEWAY_TIMEOUT_504);
                 break;
             case FAILED:
                 // is there an operation outcome to get here?
@@ -397,24 +397,11 @@ public class PatientResource extends AbstractPatientResource {
                 .flatMap(List::stream)
                 .forEach(batchFile -> {
                     java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
-                    // is there a better way to get the class type given the ResourceType?
-                    switch (batchFile.getResourceType()) {
-                        case Patient:
-                            addResourceEntries(Patient.class, path, bundle);
-                            break;
-                        case ExplanationOfBenefit:
-                            addResourceEntries(ExplanationOfBenefit.class, path, bundle);
-                            break;
-                        case Coverage:
-                            addResourceEntries(Coverage.class, path, bundle);
-                            break;
-                        default:
-                            logger.info("Ignoring unexpected resource type {} ", batchFile.getResourceType());
-                            break;
-                    }
+                    addResourceEntries(Resource.class, path, bundle);
                 });
 
         // set a bundle id here? anything else?
+        bundle.setId(UUID.randomUUID().toString());
         return bundle.setTotal(bundle.getEntry().size());
     }
 
