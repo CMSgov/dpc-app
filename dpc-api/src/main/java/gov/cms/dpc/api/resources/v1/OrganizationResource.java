@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Api(value = "Organization")
+@Path("/v1/Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private final IGenericClient client;
