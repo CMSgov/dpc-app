@@ -52,7 +52,7 @@ public class ClientUtils {
                 .map(group -> jobCompletionLambda(exportClient, httpClient, group))
                 .peek(jobResponse -> {
                     if (jobResponse.getError().size() > 0)
-                        throw new IllegalStateException("Errors reported during export");
+                        throw new IllegalStateException("Export job completed, but with errors");
                 })
                 .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
                     jobResponseHandler(httpClient, entry);
