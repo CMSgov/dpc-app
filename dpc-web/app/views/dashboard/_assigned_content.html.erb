@@ -36,7 +36,7 @@
               <% organization.registered_organizations.each do |reg_org| %>
                 <% reg_org.client_tokens.each do |token| %>
                   <% if reg_org.client_tokens.count == 0 %>
-                    <p class="ds-u-color--muted">You do not have not created any client tokens. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.</p>
+                    <p class="ds-u-color--muted">Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.</p>
                   <% else %>
                     <ul class="credentials">
                       <li class="credential">
@@ -74,7 +74,7 @@
           <% organization.registered_organizations.each do |reg_org| %>
             <% reg_org.public_keys.each do |key| %>
               <% if reg_org.public_keys.count == 0 %>
-              <p class="ds-u-color--muted">You do not have not added any public keys. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %></p>
+              <p class="ds-u-color--muted">Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %></p>
               <% else %>
               <ul class="credentials">
                 <li class="credential">
