@@ -13,11 +13,13 @@
       <%= form_for @organization, url: organization_path(@organization), html: { method: :put } do |f| %>
         <div class="field">
           <%= f.label :npi, "NPI", class: "ds-c-label" %>
-          <%= f.text_field :npi, class: "ds-c-field" %>
+          <span class="ds-c-field__hint ds-u-measure--wide">Enter the organizational NPI that you want to use for synthetic (test data) sandbox testing. This can be any of your organizational NPIs at this point for testing, You will have a chance to modify this before moving to production access.</span>
+          <%= f.text_field :npi, class: "ds-c-field ds-c-field--medium", maxlength: "10" %>
         </div>
 
         <div class="field">
-          <%= f.label :vendor, "Vendor", class: "ds-c-label" %>
+          <%= f.label :vendor, "Vendor(s)", class: "ds-c-label" %>
+          <span class="ds-c-field__hint ds-u-measure--wide">Enter each vendor you would like to connect to the synthetic sandbox, separated by a comma</span>
           <%= f.text_field :vendor, class: "ds-c-field" %>
         </div>
 

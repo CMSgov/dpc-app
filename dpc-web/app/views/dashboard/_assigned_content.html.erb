@@ -1,15 +1,27 @@
+<p class="ds-text--lead ds-u-measure--wide ds-u-margin-top--2">Welcome to the Data at the Point of Care Pilot. You have been assigned to the organizations below to start using the APIs in a synthetic, or test, sandbox.</p>
+
 <div class="ds-l-row--12">
+
+
   <% @user.organizations.each do |organization| %>
 
-    <section class="">
-      <h2 class="dashboard-section-heading"><%= organization.name %> | NPI: <%= npi_text(organization) %> <%= link_to "Edit", edit_organization_url(organization), class: "", data: { test: "edit-link" } %></h2>
-    </section>
+    <div class="dashboard-section-header">
+      <div>
+        <h2 class="dashboard-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
+        <div>
+        <strong>NPI:</strong> <%= npi_text(organization) %> | <strong>Vendor(s):</strong> <%= vendor_text(organization) %>
+        </div>
+      </div>
+      <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
+    </div>
+
+
 
     <% if organization.api_credentialable? %>
       <section class="box">
         <div class="box__content">
           <div class="box__header">
-            <h2 class="box__heading">Client tokens</h2>
+            <h3 class="box__heading">Client tokens</h3>
             <div class="box__header__actions">
               <%= link_to new_organization_client_token_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-client-token" } do %>
                 <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -49,7 +61,7 @@
       <section class="box">
         <div class="box__content">
           <div class="box__header">
-            <h2 class="box__heading">Public Keys</h2>
+            <h3 class="box__heading">Public Keys</h3>
             <div class="box__header__actions">
               <%= link_to new_organization_public_key_path(organization_id: organization.id), class: "ds-c-button ds-c-button--primary", data: { test: "new-public-key" } do %>
                 <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -93,8 +105,11 @@
     <% else %>
     <section class="box box--dashed ds-u-margin-bottom--7">
       <div class="box__content">
-        <p class="ds-text--lead">
-        This organization is ready to begin working with the Data at the Point of Care Pilot. Before using the sandbox, you need to designate an organization NPI. <%= link_to "Designate an NPI", edit_organization_url(organization), class: "", data: { test: "edit-link" } %>
+        <div class="box__header">
+          <h3 class="box__heading"><%= organization.name %> is almost ready!</h3>
+        </div>
+        <p class="ds-text--lead ds-u-measure--wide">
+         Before this organization can add credentials for sandbox testing, you need to designate an organizational NPI and vendor by <%= link_to "editing the organization", edit_organization_url(organization), class: "", data: { test: "edit-link" } %>.
         </p>
       </div>
     </section>
