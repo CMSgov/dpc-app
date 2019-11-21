@@ -25,6 +25,7 @@ RSpec.feature 'creating and updating organizations' do
     select 'South Carolina', from: 'organization_address_attributes_state'
     fill_in 'organization_address_attributes_zip', with: '29601'
 
+    fill_in 'organization_vendor', with: 'Cool EMR Vendor'
     fill_in 'organization_fhir_endpoints_attributes_0_name', with: 'Provider Endpoint'
     fill_in 'organization_fhir_endpoints_attributes_0_uri', with: 'https://FhirEndpoint.example.com'
     fill_in 'organization_npi', with: '555ttt444'
@@ -44,6 +45,7 @@ RSpec.feature 'creating and updating organizations' do
     expect(page.body).to have_content('Provider Endpoint')
     expect(page.body).to have_content('https://FhirEndpoint.example.com')
     expect(page.body).to have_content('Test')
+    expect(page.body).to have_content('Cool EMR Vendor')
 
     find('[data-test="edit-link"]').click
 

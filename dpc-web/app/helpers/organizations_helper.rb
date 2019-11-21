@@ -30,4 +30,12 @@ module OrganizationsHelper
       'Not added'
     end
   end
+
+  def vendor_text(organization)
+    if organization.vendor.present?
+      organization.vendor
+    else
+      'No vendor info added.'
+    end
+  end
 end
