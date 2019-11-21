@@ -50,6 +50,10 @@ public class ClientUtils {
                 .map(npi -> exportRequestDispatcher(exportClient, npi))
                 .map(search -> (Group) search.getEntryFirstRep().getResource())
                 .map(group -> jobCompletionLambda(exportClient, httpClient, group))
+                .peek(jobResponse -> {
+                    if (jobResponse.getError().size() > 0)
+                        throw new IllegalStateException("Errors reported during export");
+                })
                 .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
                     jobResponseHandler(httpClient, entry);
                 }));
@@ -219,29 +223,32 @@ public class ClientUtils {
         try (InputStream resource = baseClass.getClassLoader().getResourceAsStream(filename)) {
             final Bundle bundle = parser.parseResource(Bundle.class, resource);
 
-            final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(bundle);
+            bundle
+                    .getEntry()
+                    .stream()
+                    .map(Bundle.BundleEntryComponent::getResource)
+                    .filter(entry -> entry.getClass().equals(clazz))
+                    .forEach(entry -> client
+                            .create()
+                            .resource(entry)
+                            .encodedJson()
+                            .execute());
 
+            // Fetch the new bundle, so we make sure we get the IDs that we're after
             return client
-                    .operation()
-                    .onType(clazz)
-                    .named("submit")
-                    .withParameters(parameters)
-                    .returnResourceType(Bundle.class)
+                    .search()
+                    .forResource(clazz)
+                    .returnBundle(Bundle.class)
                     .encodedJson()
                     .execute();
         }
     }
 
-    static Map<String, Reference> submitPatients(String patientBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+    static Map<String, Reference> submitPatients(String patientBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) throws IOException {
         final Bundle patientBundle;
 
-        try {
-            System.out.println("Submitting patients");
-            patientBundle = bundleSubmitter(baseClass, Patient.class, patientBundleFilename, ctx.newJsonParser(), exportClient);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot submit patients.", e);
-        }
+        System.out.println("Submitting patients");
+        patientBundle = bundleSubmitter(baseClass, Patient.class, patientBundleFilename, ctx.newJsonParser(), exportClient);
 
         final Map<String, Reference> patientReferences = new HashMap<>();
         patientBundle
@@ -254,15 +261,11 @@ public class ClientUtils {
         return patientReferences;
     }
 
-    static List<String> submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+    static List<String> submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) throws IOException {
         final Bundle providerBundle;
 
-        try {
-            System.out.println("Submitting practitioners");
-            providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot submit providers.", e);
-        }
+        System.out.println("Submitting practitioners");
+        providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
 
         // Get the provider NPIs
         return providerBundle
