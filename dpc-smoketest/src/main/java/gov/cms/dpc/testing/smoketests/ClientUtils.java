@@ -52,7 +52,7 @@ public class ClientUtils {
                 .map(group -> jobCompletionLambda(exportClient, httpClient, group))
                 .peek(jobResponse -> {
                     if (jobResponse.getError().size() > 0)
-                        throw new IllegalStateException("Errors reported during export");
+                        throw new IllegalStateException("Export job completed, but with errors");
                 })
                 .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
                     jobResponseHandler(httpClient, entry);
@@ -129,6 +129,10 @@ public class ClientUtils {
                 done = statusCode == HttpStatus.OK_200 || statusCode > 300;
                 if (done) {
                     final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+                    // If we're done, make sure we completed successfully, otherwise, throw an error
+                    if (statusCode > 300) {
+                        throw new IllegalStateException(String.format("Awaiting export results failed: %s", mapper.readValue(response.getEntity().getContent(), String.class)));
+                    }
                     jobResponse = mapper.readValue(response.getEntity().getContent(), JobCompletionModel.class);
                 }
             }
