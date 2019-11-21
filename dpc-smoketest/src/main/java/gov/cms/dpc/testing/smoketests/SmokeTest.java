@@ -75,6 +75,9 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
 
         final SampleResult smokeTestResult = new SampleResult();
+        smokeTestResult.setSampleLabel("Smoke Test");
+        // False, unless proven otherwise
+        smokeTestResult.setSuccessful(false);
         smokeTestResult.sampleStart();
 
         final SampleResult orgRegistrationResult = new SampleResult();
@@ -107,27 +110,44 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         // Upload a batch of patients and a batch of providers
         logger.debug("Submitting practitioners");
         final SampleResult practitionerSample = new SampleResult();
+        practitionerSample.setSampleLabel("Practitioner submission");
         practitionerSample.sampleStart();
-        final List<String> providerNPIs = ClientUtils.submitPractitioners(javaSamplerContext.getParameter("provider-bundle"), this.getClass(), ctx, exportClient);
-        practitionerSample.sampleEnd();
-        practitionerSample.setSuccessful(true);
+        final List<String> providerNPIs;
+        try {
+            providerNPIs = ClientUtils.submitPractitioners(javaSamplerContext.getParameter("provider-bundle"), this.getClass(), ctx, exportClient);
+            practitionerSample.setSuccessful(true);
+        } catch (Exception e) {
+            practitionerSample.setSuccessful(false);
+            throw new IllegalStateException("Cannot submit practitioners", e);
+        } finally {
+            practitionerSample.sampleEnd();
+        }
+
         smokeTestResult.addSubResult(practitionerSample);
 
         logger.debug("Submitting patients");
         final SampleResult patientSample = new SampleResult();
-
+        patientSample.setSampleLabel("Patient submission");
         patientSample.sampleStart();
-        final Map<String, Reference> patientReferences = ClientUtils.submitPatients(javaSamplerContext.getParameter("patient-bundle"), this.getClass(), ctx, exportClient);
-        patientSample.setSuccessful(true);
-        patientSample.sampleEnd();
-        smokeTestResult.addSubResult(patientSample);
+        final Map<String, Reference> patientReferences;
+        try {
+            patientReferences = ClientUtils.submitPatients(javaSamplerContext.getParameter("patient-bundle"), this.getClass(), ctx, exportClient);
+            patientSample.setSuccessful(true);
+        } catch (Exception e) {
+            patientSample.setSuccessful(false);
+            throw new IllegalStateException("Cannot submit patients", e);
+        } finally {
+            patientSample.sampleEnd();
+            smokeTestResult.addSubResult(patientSample);
+        }
+
 
         // Upload the roster bundle
         logger.debug("Uploading roster");
         try {
             ClientUtils.createAndUploadRosters(javaSamplerContext.getParameter("seed-file"), exportClient, UUID.fromString(organizationID), patientReferences);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot upload roster", e);
+            throw new IllegalStateException("Cannot upload roster", e);
         }
 
         // Run the job
