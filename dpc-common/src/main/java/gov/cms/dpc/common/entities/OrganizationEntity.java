@@ -208,6 +208,21 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         return org;
     }
 
+    /**
+     * Update {@link Organization} fields.
+     *
+     * @param updated - {@link OrganizationEntity} with new values
+     * @return - {@link OrganizationEntity} existing record with updated fields.
+     */
+    public OrganizationEntity update(OrganizationEntity updated) {
+        this.setOrganizationName(updated.getOrganizationName());
+        this.setOrganizationAddress(updated.getOrganizationAddress());
+        this.setContacts(updated.getContacts());
+        this.setPatients(updated.getPatients());
+        this.setProviders(updated.getProviders());
+        return this;
+    }
+
     @Embeddable
     public static class OrganizationID implements Serializable {
         public static final long serialVersionUID = 42L;

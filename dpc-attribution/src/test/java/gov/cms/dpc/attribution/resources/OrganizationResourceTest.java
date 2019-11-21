@@ -118,6 +118,19 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute(), "Should not have found organization");
     }
 
+    @Test
+    void testUpdateOrganization() {
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
+
+        organization.setName("An Updated Organization");
+
+        MethodOutcome outcome = client.update().resource(organization).execute();
+        Organization orgResult = (Organization) outcome.getResource();
+
+        assertTrue(organization.equalsDeep(orgResult));
+    }
+
     private Practitioner createFakePractitioner(Organization organization) {
         final Practitioner practitioner = new Practitioner();
         practitioner.addName().setFamily("Test").addGiven("Practitioner");

@@ -121,11 +121,31 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return organizationEntity.toFHIR();
     }
 
+    @PUT
+    @Path("/{organizationID}")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Update Organization record", notes = "Update specific Organization record.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Unable to find Organization to update"),
+            @ApiResponse(code = 422, message = "The provided Organization bundle is invalid")
+    })
+    @Override
+    public Response updateOrganization(@ApiParam(value = "Organization resource ID", required = true) @PathParam("organizationID") UUID organizationID, Organization organization) {
+        try {
+            OrganizationEntity orgEntity = this.dao.updateOrganization(organization);
+            return Response.status(Response.Status.OK).entity(orgEntity.toFHIR()).build();
+        } catch (Exception e) {
+            logger.error("Error: ", e);
+            throw e;
+        }
+    }
+
     @DELETE
     @Path("/{organizationID}")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Delete organization", notes = "FHIR endpoint to deleta an Organization with the given Resource ID." +
+    @ApiOperation(value = "Delete organization", notes = "FHIR endpoint to delete an Organization with the given Resource ID." +
             "<p>This also drops ALL resources associated to the given entity.")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization", response = OperationOutcome.class))
     @Override

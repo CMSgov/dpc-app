@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
@@ -12,6 +13,7 @@ import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -73,6 +75,34 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .withId(organizationID.toString())
                 .encodedJson()
                 .execute();
+    }
+
+    @PUT
+    @Path("/{organizationID}")
+    @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Update Organization record", notes = "Update specific Organization record.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Unable to find Organization to update"),
+            @ApiResponse(code = 422, message = "Provided resource is not a valid FHIR Organization")
+    })
+    @Override
+    public Organization updateOrganization(@PathParam("organizationID") UUID organizationID, @Valid Organization organization) {
+        MethodOutcome outcome = this.client
+                .update()
+                .resource(organization)
+                .withId(organizationID.toString())
+                .encodedJson()
+                .execute();
+
+        final Organization resource = (Organization) outcome.getResource();
+        if (resource == null) {
+            throw new WebApplicationException("Unable to update Organization", Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        return resource;
     }
 
     private void validateOrganizationBundle(Bundle organizationBundle) {

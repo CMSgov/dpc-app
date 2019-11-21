@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.jdbi;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hl7.fhir.dstu3.model.Organization;
 
@@ -43,8 +44,12 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         return list(query);
     }
 
-    public void updateOrganization(OrganizationEntity entity) {
-        persist(entity);
+    public OrganizationEntity updateOrganization(Organization resource) {
+        final OrganizationEntity updatedOrg = new OrganizationEntity().fromFHIR(resource);
+        OrganizationEntity organization = get(FHIRExtractors.getEntityUUID(resource.getId()));
+        organization.update(updatedOrg);
+        currentSession().merge(organization);
+        return organization;
     }
 
     public void deleteOrganization(OrganizationEntity entity) {
