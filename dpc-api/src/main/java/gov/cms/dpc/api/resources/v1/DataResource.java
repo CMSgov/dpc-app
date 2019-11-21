@@ -123,7 +123,7 @@ public class DataResource extends AbstractDataResource {
         }
         // If we're given a to range, use that directly
         // Can they give us a value larger than the actual byte size?
-        if (ranges.length == 2) {
+        if (ranges.length == 2 && !ranges[1].equals("")) {
             to = Long.parseLong(ranges[1]);
         }
 
