@@ -22,4 +22,20 @@ module OrganizationsHelper
       [key.to_s.titleize, key]
     end
   end
+
+  def npi_text(organization)
+    if organization.npi.present?
+      organization.npi
+    else
+      'Not added'
+    end
+  end
+
+  def vendor_text(organization)
+    if organization.vendor.present?
+      organization.vendor
+    else
+      'No vendor info added.'
+    end
+  end
 end
