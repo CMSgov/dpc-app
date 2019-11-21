@@ -30,10 +30,21 @@
                 New token
               <% end %>
             </div>
+<<<<<<< HEAD
           </div>
           <div class="ds-l-row">
             <div class="ds-l-col--12">
               <% organization.registered_organizations.each do |reg_org| %>
+=======
+          <% else %>
+            <p class="ds-u-color--muted">Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf.</p>
+          <% end %>
+        </div>
+        <div class="ds-l-row">
+          <div class="ds-l-col--12">
+            <% organization.registered_organizations.each do |reg_org| %>
+              <% reg_org.client_tokens.each do |token| %>
+>>>>>>> content updates
                 <% if reg_org.client_tokens.count == 0 %>
                   <p class="ds-u-color--muted">
                     Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.
@@ -72,8 +83,17 @@
                 Add key
               <% end %>
             </div>
+<<<<<<< HEAD
           </div>
           <% organization.registered_organizations.each do |reg_org| %>
+=======
+          <% else %>
+            <p class="ds-u-color--muted">Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access.</p>
+          <% end %>
+        </div>
+        <% organization.registered_organizations.each do |reg_org| %>
+          <% reg_org.public_keys.each do |key| %>
+>>>>>>> content updates
             <% if reg_org.public_keys.count == 0 %>
               <p class="ds-u-color--muted">
                 Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %>
