@@ -1,0 +1,33 @@
+<% title "Edit Your Organization" %>
+
+<div class="ds-l-container ds-u-padding-x--0">
+
+  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
+
+    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Edit: <%= @organization.name %></h1>
+
+  </section>
+
+  <section class="box">
+    <div class="box__content">
+      <%= form_for @organization, url: organization_path(@organization), html: { method: :put } do |f| %>
+        <div class="field">
+          <%= f.label :npi, "NPI", class: "ds-c-label" %>
+          <span class="ds-c-field__hint ds-u-measure--wide">Enter the organizational NPI that you want to use for synthetic (test data) sandbox testing. This can be any of your organizational NPIs at this point for testing, You will have a chance to modify this before moving to production access.</span>
+          <%= f.text_field :npi, class: "ds-c-field ds-c-field--medium", maxlength: "10" %>
+        </div>
+
+        <div class="field">
+          <%= f.label :vendor, "Vendor(s)", class: "ds-c-label" %>
+          <span class="ds-c-field__hint ds-u-measure--wide">Enter each vendor you would like to connect to the synthetic sandbox, separated by a comma</span>
+          <%= f.text_field :vendor, class: "ds-c-field" %>
+        </div>
+
+        <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
+          <%= f.submit 'Save', class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+          <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+</div>
