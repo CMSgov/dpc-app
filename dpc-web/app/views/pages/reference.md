@@ -35,6 +35,13 @@ In addition, the only available resource types are those exposed by [Blue Button
 In order to receive data from the DPC application, a healthcare provider must have a treatment related purpose for viewing a patient's claims history.
 Providers can attest to their treatment purposes by submitting a an *attribution roster* which lists the patients currently under their care.
 
+In order for a provider to establish a treatment related purpose for viewing patient data, they must fulfill one of the following conditions:
+
+1. Have an existing treatment relationship, defined as a processed claim for the given patient with the provider's [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number within the past 18 months.
+2. Have an upcoming appointment for the given patient within 10 days.
+
+If neither of these conditions are met, a treatment relationship cannot be established and the provider is is **NOT** authorized to retrieve claims data.  
+
 Given that existing standards for patient rosters do not exist, CMS is currently piloting an implementation of the [Attribution Guide](https://github.com/smart-on-fhir/smart-on-fhir.github.io/wiki/Bulk-data:-thoughts-on-attribution-lists-and-groups) currently under discussion with the [SMART-ON-FHIR](https://docs.smarthealthit.org/) team.
 The goal is to provide feedback to the group on experiences related to implementation and supporting the recommendations.
 
@@ -42,7 +49,6 @@ The goal is to provide feedback to the group on experiences related to implement
 CMS welcomes [feedback on the implementation](https://groups.google.com/d/forum/dpc-api) as well as experiences with other systems.
 
 Specific details on creating and updating treatment rosters is given in a later [section](#create-an-attribution-group).
-
 
 Providers are required to keep their treatment rosters up to date, as patient attributions automatically expire after 90 days.
 If an attribution expires, the provider may resubmit the patient to their roster and re-attest to a treatment purpose for another 90 days.
