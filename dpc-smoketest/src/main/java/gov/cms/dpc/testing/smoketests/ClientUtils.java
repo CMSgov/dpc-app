@@ -218,7 +218,7 @@ public class ClientUtils {
         try {
             return monitorExportRequest(exportOperation, client);
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error monitoring export", e);
+            throw new RuntimeException(String.format("Error monitoring export groupID: %s", group.getId()), e);
         }
     }
 
