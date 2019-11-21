@@ -34,10 +34,12 @@
           <div class="ds-l-row">
             <div class="ds-l-col--12">
               <% organization.registered_organizations.each do |reg_org| %>
-                <% reg_org.client_tokens.each do |token| %>
-                  <% if reg_org.client_tokens.count == 0 %>
-                    <p class="ds-u-color--muted">Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.</p>
-                  <% else %>
+                <% if reg_org.client_tokens.count == 0 %>
+                  <p class="ds-u-color--muted">
+                    Before you can start testing in the sandbox, you must create a unique client token for each application or vendor that will have access to the sandbox on your behalf. <%= link_to "Create a client token", new_organization_client_token_path(organization_id: organization.id) %>.
+                  </p>
+                <% else %>
+                  <% reg_org.client_tokens.each do |token| %>
                     <ul class="credentials">
                       <li class="credential">
                         <div class="credential__body">
@@ -72,27 +74,28 @@
             </div>
           </div>
           <% organization.registered_organizations.each do |reg_org| %>
-            <% reg_org.public_keys.each do |key| %>
-              <% if reg_org.public_keys.count == 0 %>
-              <p class="ds-u-color--muted">Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %></p>
-              <% else %>
-              <ul class="credentials">
-                <li class="credential">
-                  <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <use xlink:href="/assets/solid.svg#key"></use>
-                  </svg>
-                  <div class="credential__body">
-                    <h3 class="credential__name"><%= key['label'] %></h3>
-                    <div class="credential__meta">
-                      <p class="ds-u-color--base"><%= key['id'] %></p>
-                      <p>Created: <%= formatted_datestr(key['createdAt']) %></p>
+            <% if reg_org.public_keys.count == 0 %>
+              <p class="ds-u-color--muted">
+                Before you can start testing in the sandbox, add your public keys to get a UUID that you will use when you authenticate access. <%= link_to "Add a public key", new_organization_public_key_path(organization_id: organization.id) %>
+              </p>
+            <% else %>
+              <% reg_org.public_keys.each do |key| %>
+                <ul class="credentials">
+                  <li class="credential">
+                    <svg class="icon icon--lg ds-u-margin-right--3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <use xlink:href="/assets/solid.svg#key"></use>
+                    </svg>
+                    <div class="credential__body">
+                      <h3 class="credential__name"><%= key['label'] %></h3>
+                      <div class="credential__meta">
+                        <p class="ds-u-color--base"><%= key['id'] %></p>
+                        <p>Created: <%= formatted_datestr(key['createdAt']) %></p>
+                      </div>
                     </div>
-                  </div>
-                  <div class="credential__actions">
-
-                  </div>
-                </li>
-              </ul>
+                    <div class="credential__actions">
+                    </div>
+                  </li>
+                </ul>
               <% end %>
             <% end %>
           <% end %>
