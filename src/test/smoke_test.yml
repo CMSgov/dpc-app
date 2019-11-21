@@ -2,9 +2,10 @@ settings:
   artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
 
 execution:
-  - iterations: 1
-    concurrency: 3
+  - iterations: 3
+    concurrency: 10
     scenario: jmeter
+    ramp-up: 120s
 
 scenarios:
   jmeter:
