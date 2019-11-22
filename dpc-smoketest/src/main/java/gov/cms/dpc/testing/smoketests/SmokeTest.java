@@ -12,8 +12,6 @@ import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -22,15 +20,13 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Security;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -86,11 +82,6 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         smokeTestResult.setSuccessful(false);
         smokeTestResult.sampleStart();
 
-        System.out.println(organizationID);
-        System.out.println(clientToken);
-        System.out.println(privateKeyPath);
-        System.out.println(keyID);
-
         // Disable validation against Attribution service
         this.ctx = FhirContext.forDstu3();
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -106,7 +97,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             try {
                 goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
             } catch (Exception e) {
-                throw new RuntimeException("Failed creating Macaroon", e);
+                throw new IllegalStateException("Failed creating Macaroon", e);
             }
             // Create admin client for registering organization
             final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
@@ -120,7 +111,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                 orgRegistrationResult.setSuccessful(true);
             } catch (Exception e) {
                 orgRegistrationResult.setSuccessful(false);
-                throw new RuntimeException("Cannot register org", e);
+                throw new IllegalStateException("Cannot register org", e);
             } finally {
                 orgRegistrationResult.sampleEnd();
             }
@@ -129,34 +120,21 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             try {
                 keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
             } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
-                throw new RuntimeException("Failed uploading public key", e);
+                throw new IllegalStateException("Failed uploading public key", e);
             }
         } else {
             // Parse the private key and create a new ID/PrivateKey tuple
-            try {
-                final Path filePath = Paths.get(privateKeyPath);
-                if (!Files.exists(filePath)) {
-                    throw new RuntimeException("Cannot find private key");
+            try (final PEMParser pemParser = new PEMParser(new FileReader(privateKeyPath))) {
+                JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+                Object object = pemParser.readObject();
+                KeyPair kp = converter.getKeyPair((PEMKeyPair) object);
+                PrivateKey privateKey = kp.getPrivate();
+                if (privateKey == null) {
+                    throw new IllegalStateException("Key cannot be null");
                 }
-                final String pemString = Files.readString(filePath);
-                final String parsedString = pemString
-                        .replace("-----BEGIN RSA PRIVATE KEY-----\n", "")
-                        .replace("\n-----END RSA PRIVATE KEY-----\n", "");
-
-                System.out.println(String.format("Private key: %s", parsedString));
-
-                try (final PEMParser pemParser = new PEMParser(new FileReader(privateKeyPath))) {
-                    JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-                    Object object = pemParser.readObject();
-                    KeyPair kp = converter.getKeyPair((PEMKeyPair) object);
-                    PrivateKey privateKey = kp.getPrivate();
-                    if (privateKey == null) {
-                        throw new IllegalStateException("Key cannot be null");
-                    }
-                    keyTuple = Pair.of(UUID.fromString(keyID), privateKey);
-                }
+                keyTuple = Pair.of(UUID.fromString(keyID), privateKey);
             } catch (IOException e) {
-                throw new RuntimeException("Cannot read private key", e);
+                throw new IllegalArgumentException(String.format("Cannot read private key from: %s", privateKeyPath));
             }
         }
         // Create an authenticated and async client (the async part is ignored by other endpoints)
