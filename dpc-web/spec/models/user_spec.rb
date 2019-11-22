@@ -64,10 +64,6 @@ RSpec.describe User, type: :model do
   end
 
   describe '#requested_num_providers' do
-    it 'defaults to 0' do
-      expect(subject.requested_num_providers).to be_zero
-    end
-
     it 'must be greater than or equal to 0' do
       subject.requested_num_providers = -1
       expect(subject).to_not be_valid
