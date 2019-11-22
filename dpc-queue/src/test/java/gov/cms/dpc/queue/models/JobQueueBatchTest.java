@@ -245,6 +245,25 @@ public class JobQueueBatchTest {
         assertNull(job.patientIndex);
         assertNull(job.startTime);
         assertNull(job.completeTime);
+        assertNull(job.aggregatorID);
+        assertTrue(job.getJobQueueBatchFiles().isEmpty());
+    }
+
+    @Test
+    void testRestartBatch_Stuck() {
+        final var job = createJobQueueBatch();
+        job.setRunningStatus(aggregatorID);
+        job.patientIndex = 2;
+        job.getJobQueueBatchFiles().add(new JobQueueBatchFile());
+
+        job.restartBatch();
+
+        assertEquals(JobStatus.QUEUED, job.getStatus());
+        assertNull(job.patientIndex);
+        assertNull(job.startTime);
+        assertNull(job.completeTime);
+        assertNull(job.aggregatorID);
+        assertTrue(job.getJobQueueBatchFiles().isEmpty());
     }
 
     @Test

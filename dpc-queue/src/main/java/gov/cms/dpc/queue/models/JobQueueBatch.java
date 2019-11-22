@@ -360,6 +360,8 @@ public class JobQueueBatch implements Serializable {
         this.patientIndex = null;
         this.startTime = null;
         this.completeTime = null;
+        this.aggregatorID = null;
+        this.getJobQueueBatchFiles().clear();
 
         this.setUpdateTime();
     }
