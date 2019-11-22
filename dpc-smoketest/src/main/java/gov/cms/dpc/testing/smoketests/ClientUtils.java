@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -131,7 +132,7 @@ public class ClientUtils {
                     final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
                     // If we're done, make sure we completed successfully, otherwise, throw an error
                     if (statusCode > 300) {
-                        throw new IllegalStateException(String.format("Awaiting export results failed: %s", mapper.readValue(response.getEntity().getContent(), String.class)));
+                        throw new IllegalStateException(String.format("Awaiting export results failed with status %d: %s", statusCode, EntityUtils.toString(response.getEntity())));
                     }
                     jobResponse = mapper.readValue(response.getEntity().getContent(), JobCompletionModel.class);
                 }
