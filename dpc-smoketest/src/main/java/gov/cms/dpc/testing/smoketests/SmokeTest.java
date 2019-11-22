@@ -13,23 +13,21 @@ import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.crypto.encodings.PKCS1Encoding;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
@@ -64,6 +62,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     @Override
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override
@@ -92,15 +91,16 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         System.out.println(privateKeyPath);
         System.out.println(keyID);
 
+        // Disable validation against Attribution service
+        this.ctx = FhirContext.forDstu3();
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        ctx.getRestfulClientFactory().setConnectTimeout(1800);
+
         // If we're not supplied all the init parameters, create a new org
         if (organizationID.equals("") || clientToken.equals("") || privateKeyPath.equals("") || keyID.equals("")) {
             organizationID = UUID.randomUUID().toString();
 
             System.out.println(String.format("Creating organization %s", organizationID));
-            // Disable validation against Attribution service
-            this.ctx = FhirContext.forDstu3();
-            ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-            ctx.getRestfulClientFactory().setConnectTimeout(1800);
 
             final String goldenMacaroon;
             try {
@@ -141,21 +141,27 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                 final String pemString = Files.readString(filePath);
                 final String parsedString = pemString
                         .replace("-----BEGIN RSA PRIVATE KEY-----\n", "")
-                        .replace("-----END RSA PRIVATE KEY-----", "");
+                        .replace("\n-----END RSA PRIVATE KEY-----\n", "");
 
-                final byte[] decodedPEM = Base64.getMimeDecoder().decode(parsedString);
-                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedPEM);
-                KeyFactory kf = KeyFactory.getInstance("RSA");
-                PrivateKey privKey = kf.generatePrivate(keySpec);
-                keyTuple = Pair.of(UUID.fromString(keyID), privKey);
+                System.out.println(String.format("Private key: %s", parsedString));
+
+                try (final PEMParser pemParser = new PEMParser(new FileReader(privateKeyPath))) {
+                    JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+                    Object object = pemParser.readObject();
+                    KeyPair kp = converter.getKeyPair((PEMKeyPair) object);
+                    PrivateKey privateKey = kp.getPrivate();
+                    if (privateKey == null) {
+                        throw new IllegalStateException("Key cannot be null");
+                    }
+                    keyTuple = Pair.of(UUID.fromString(keyID), privateKey);
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Cannot read private key", e);
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-                throw new RuntimeException("Cannot parse private key", e);
             }
         }
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
+
         exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true);
 
         // Upload a batch of patients and a batch of providers

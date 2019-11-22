@@ -65,7 +65,7 @@
               </elementProp>
               <elementProp name="client-token" elementType="Argument">
                 <stringProp name="Argument.name">client-token</stringProp>
-                <stringProp name="Argument.value">${__P(admin-url,)}</stringProp>
+                <stringProp name="Argument.value">${__P(client-token,)}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="private-key" elementType="Argument">
