@@ -355,7 +355,7 @@ class JWTUnitTests {
     private static PublicKeyDAO mockKeyDAO() {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
-        Mockito.when(mock.fetchPublicKey(Mockito.any())).then(answer -> {
+        Mockito.when(mock.fetchPublicKey(Mockito.any(), Mockito.any())).then(answer -> {
             @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(0));
             if (keyPair == null) {
                 return Optional.empty();
@@ -365,16 +365,5 @@ class JWTUnitTests {
             return Optional.of(entity);
         });
         return mock;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public static class ValidationErrorResponse {
-
-        public long id;
-        public List<String> errors;
-
-        ValidationErrorResponse() {
-            // Jackson required
-        }
     }
 }

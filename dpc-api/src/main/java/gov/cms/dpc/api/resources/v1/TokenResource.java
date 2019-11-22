@@ -313,7 +313,7 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     private void ensureOrganizationPresent(Macaroon macaroon) {
-        final boolean idMissing = this.bakery
+        final boolean idMissing = MacaroonBakery
                 .getCaveats(macaroon)
                 .stream()
                 .map(MacaroonCaveat::getCondition)

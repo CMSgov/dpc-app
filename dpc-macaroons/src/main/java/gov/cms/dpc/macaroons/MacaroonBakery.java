@@ -95,7 +95,7 @@ public class MacaroonBakery {
      * @return - {@link List} of {@link MacaroonCaveat} which are parsed from the underlying string representation
      * @throws BakeryException if unable to parse the caveats correctly
      */
-    public List<MacaroonCaveat> getCaveats(Macaroon macaroon) {
+    public static List<MacaroonCaveat> getCaveats(Macaroon macaroon) {
         List<MacaroonCaveat> caveats = new ArrayList<>();
 
         MacaroonCaveat currentCaveat = new MacaroonCaveat();
@@ -302,7 +302,7 @@ public class MacaroonBakery {
         // addCaveats adds any required third party caveats to the need slice
         // that aren't already present .
         Consumer<Macaroon> addCaveats = (macaroon) -> {
-            this.getCaveats(macaroon)
+            MacaroonBakery.getCaveats(macaroon)
                     .stream()
                     .filter(cav -> cav.getVerificationID().length > 1 && !haveCaveat.containsKey(cav.toString()))
                     .forEach(needCaveat::add);
