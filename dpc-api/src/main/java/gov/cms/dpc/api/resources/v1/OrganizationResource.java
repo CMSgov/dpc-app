@@ -83,8 +83,11 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Update Organization record", notes = "Update specific Organization record.")
+    @ApiOperation(value = "Update organization record",
+            notes = "Update specific Organization record.",
+            authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "An organization may update only their own Organization resource"),
             @ApiResponse(code = 404, message = "Unable to find Organization to update"),
             @ApiResponse(code = 422, message = "Provided resource is not a valid FHIR Organization")
     })
