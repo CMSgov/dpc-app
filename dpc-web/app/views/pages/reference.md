@@ -1344,7 +1344,7 @@ In the example header below, the number `42` in the URL represents the ID of the
 
 **Headers**
 
-- Content-Location: https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job}
+- Content-Location: https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job}
 
 
 **4. Check the status of the export job**
@@ -1354,7 +1354,7 @@ In the example header below, the number `42` in the URL represents the ID of the
 **Request**
 
 ~~~ sh
-GET https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job}
+GET https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job}
 ~~~
 
 Using the `Content-Location` header value from the data export response, you can check the status of the export job.
@@ -1367,7 +1367,7 @@ The status will change from `202 Accepted` to `200 OK` when the export job is co
 **cURL Command**
 
 ~~~ sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job} \
+curl -v https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job} \
 -H 'Authorization: Bearer {access_token}'
 ~~~
 
