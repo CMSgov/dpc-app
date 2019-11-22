@@ -64,40 +64,52 @@ RSpec.describe User, type: :model do
   end
 
   describe '#requested_num_providers' do
-    context 'health_it_vendor' do
-      before(:each) do
-        subject.requested_organization_type = 'health_it_vendor'
-      end
-
-      it 'may be 0' do
+    context 'on update' do
+      it 'does not validate num_providers is greater than 0' do
+        subject.requested_organization_type = 'primary_care_clinic'
         subject.requested_num_providers = 0
         expect(subject).to be_valid
       end
-
-      it 'must be greater than or equal to 0' do
-        subject.requested_num_providers = -1
-        expect(subject).to_not be_valid
-      end
-
-      it 'must be an integer' do
-        subject.requested_num_providers = 1.23
-        expect(subject).to_not be_valid
-      end
     end
 
-    context 'not health_it_vendor' do
-      before(:each) do
-        subject.requested_organization_type = 'primary_care_clinic'
+    context 'on create' do
+      subject { build(:user) }
+
+      context 'health_it_vendor' do
+        before(:each) do
+          subject.requested_organization_type = 'health_it_vendor'
+        end
+
+        it 'may be 0' do
+          subject.requested_num_providers = 0
+          expect(subject).to be_valid
+        end
+
+        it 'must be greater than or equal to 0' do
+          subject.requested_num_providers = -1
+          expect(subject).to_not be_valid
+        end
+
+        it 'must be an integer' do
+          subject.requested_num_providers = 1.23
+          expect(subject).to_not be_valid
+        end
       end
 
-      it 'must be greater than 0' do
-        subject.requested_num_providers = 0
-        expect(subject).to_not be_valid
-      end
+      context 'not health_it_vendor' do
+        before(:each) do
+          subject.requested_organization_type = 'primary_care_clinic'
+        end
 
-      it 'must be an integer' do
-        subject.requested_num_providers = 1.23
-        expect(subject).to_not be_valid
+        it 'must be greater than 0' do
+          subject.requested_num_providers = 0
+          expect(subject).to_not be_valid
+        end
+
+        it 'must be an integer' do
+          subject.requested_num_providers = 1.23
+          expect(subject).to_not be_valid
+        end
       end
     end
   end
