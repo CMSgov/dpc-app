@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -123,6 +124,10 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
         Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
 
+        Identifier identifier = new Identifier();
+        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        identifier.setValue("UPDATED012345");
+        organization.setIdentifier(Arrays.asList(identifier));
         organization.setName("An Updated Organization");
 
         MethodOutcome outcome = client.update().resource(organization).execute();

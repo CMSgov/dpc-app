@@ -215,11 +215,13 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
      * @return - {@link OrganizationEntity} existing record with updated fields.
      */
     public OrganizationEntity update(OrganizationEntity updated) {
+        this.setOrganizationID(updated.getOrganizationID());
         this.setOrganizationName(updated.getOrganizationName());
         this.setOrganizationAddress(updated.getOrganizationAddress());
         this.setContacts(updated.getContacts());
         this.setPatients(updated.getPatients());
         this.setProviders(updated.getProviders());
+
         return this;
     }
 
