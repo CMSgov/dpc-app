@@ -64,7 +64,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
         final List<Macaroon> m1;
         try {
-            m1 = bakery.deserializeMacaroon(macaroon);
+            m1 = MacaroonBakery.deserializeMacaroon(macaroon);
         } catch (BakeryException e) {
             logger.error("Cannot deserialize Macaroon", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));

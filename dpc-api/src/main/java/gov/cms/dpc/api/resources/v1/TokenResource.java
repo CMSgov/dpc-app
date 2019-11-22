@@ -236,7 +236,7 @@ public class TokenResource extends AbstractTokenResource {
 
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
         final String clientMacaroon = claims.getBody().getSubject();
-        final List<Macaroon> macaroons = this.bakery.deserializeMacaroon(clientMacaroon);
+        final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
 
         // Add the additional claims that we need
         // Currently, we need to set an expiration time, a set of scopes,

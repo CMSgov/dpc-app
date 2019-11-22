@@ -219,7 +219,7 @@ public class MacaroonBakery {
      * @param serializedString - {@link String} to deserialize from
      * @return - {@link List} of {@link Macaroon} deserialized from {@link String}
      */
-    public List<Macaroon> deserializeMacaroon(String serializedString) {
+    public static List<Macaroon> deserializeMacaroon(String serializedString) {
         if (serializedString.isEmpty()) {
             throw new BakeryException("Cannot deserialize empty string");
         }
@@ -602,6 +602,7 @@ public class MacaroonBakery {
      * Use constant time approach, to compare two byte arrays
      * See also
      * <a href="https://codahale.com/a-lesson-in-timing-attacks">A Lesson In Timing Attacks (or, Don’t use MessageDigest.isEquals)</a>
+     *
      * @param a an array
      * @param b an array
      * @return true if both have same length and content

@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.auth.jwt;
 
 import com.github.nitram509.jmacaroons.Macaroon;
-import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
@@ -65,7 +64,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
         if (macaroon == null || macaroon.equals("")) {
             throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
         }
-        final List<Macaroon> macaroons = MacaroonsBuilder.deserialize(macaroon);
+        final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(macaroon);
         if (macaroons.isEmpty()) {
             throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
         }
@@ -77,7 +76,5 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
                 .map(condition -> UUID.fromString(condition.getValue()))
                 .findAny()
                 .orElseThrow(() -> new WebApplicationException("JWT client token must have organization_id", Response.Status.UNAUTHORIZED));
-
-
     }
 }

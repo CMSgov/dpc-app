@@ -77,10 +77,10 @@ public class MacaroonHelpers {
         }
     }
 
-    public static Optional<UUID> extractOrgIDFromCaveats(MacaroonBakery bakery, List<Macaroon> macaroons) {
+    static Optional<UUID> extractOrgIDFromCaveats(MacaroonBakery bakery, List<Macaroon> macaroons) {
         final Macaroon rootMacaroon = macaroons.get(0);
             // Find the org_id caveat and extract the value
-            return bakery
+            return MacaroonBakery
                     .getCaveats(rootMacaroon)
                     .stream()
                     .map(MacaroonCaveat::getCondition)
