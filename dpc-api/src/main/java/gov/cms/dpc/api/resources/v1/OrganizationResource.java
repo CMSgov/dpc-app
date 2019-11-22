@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Api(value = "Organization")
+@Api(value = "Organization", authorizations = @Authorization(value = "apiKey"))
 @Path("/v1/Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
 

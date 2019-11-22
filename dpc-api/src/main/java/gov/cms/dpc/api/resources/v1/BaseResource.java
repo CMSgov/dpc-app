@@ -70,7 +70,7 @@ public class BaseResource extends AbstractBaseResource {
     @Path("/metadata")
     @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
-    @ApiResponses(@ApiResponse(code = 200, message = "successful operation", examples = @Example(@ExampleProperty(value = ""))))
+    @ApiResponses(@ApiResponse(code = 200, message = "Successful operation", examples = @Example(@ExampleProperty(value = ""))))
     public CapabilityStatement metadata() {
         return Capabilities.getCapabilities();
     }

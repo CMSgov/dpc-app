@@ -37,10 +37,11 @@ Providers can attest to their treatment purposes by submitting a an *attribution
 
 In order for a provider to establish a treatment related purpose for viewing patient data, they must fulfill one of the following conditions:
 
-1. Have an existing treatment relationship, defined as a processed claim for the given patient with the provider's [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number within the past 18 months.
+1. Have an existing treatment relationship, defined as a visit or processed claim for the given patient with the provider's [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number within the past 18 months.
 2. Have an upcoming appointment for the given patient within 10 days.
 
-If neither of these conditions are met, a treatment relationship cannot be established and the provider is is **NOT** authorized to retrieve claims data.  
+If neither of these conditions are met, a treatment relationship cannot be established and the provider is is **NOT** authorized to retrieve claims data.
+With each roster addition or renewal, the provider is attesting that there is an active treatment relationship that creates a need for the data being requested.  
 
 Given that existing standards for patient rosters do not exist, CMS is currently piloting an implementation of the [Attribution Guide](https://github.com/smart-on-fhir/smart-on-fhir.github.io/wiki/Bulk-data:-thoughts-on-attribution-lists-and-groups) currently under discussion with the [SMART-ON-FHIR](https://docs.smarthealthit.org/) team.
 The goal is to provide feedback to the group on experiences related to implementation and supporting the recommendations.
