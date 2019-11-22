@@ -12,14 +12,27 @@ import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +53,10 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         arguments.addArgument("seed-file", "src/main/resources/test_associations.csv");
         arguments.addArgument("provider-bundle", "provider_bundle.json");
         arguments.addArgument("patient-bundle", "patient_bundle.json");
+        arguments.addArgument("organization-id", "");
+        arguments.addArgument("client-token", "");
+        arguments.addArgument("private-key", "");
+        arguments.addArgument("key-id", "");
 
         return arguments;
     }
@@ -52,27 +69,17 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     @Override
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
         // Create things
-        final String organizationID = UUID.randomUUID().toString();
         final String hostParam = javaSamplerContext.getParameter("host");
         final String adminURL = javaSamplerContext.getParameter("admin-url");
         logger.info("Running against {}", hostParam);
         logger.info("Admin URL: {}", adminURL);
         logger.info("Running with {} threads", JMeterContextService.getNumberOfThreads());
 
-        logger.info("Creating organization {}", organizationID);
-        // Disable validation against Attribution service
-        this.ctx = FhirContext.forDstu3();
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        ctx.getRestfulClientFactory().setConnectTimeout(1800);
-
-        final String goldenMacaroon;
-        try {
-            goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed creating Macaroon", e);
-        }
-        // Create admin client for registering organization
-        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
+        String organizationID = javaSamplerContext.getParameter("organization-id");
+        String clientToken = javaSamplerContext.getParameter("client-token");
+        String privateKeyPath = javaSamplerContext.getParameter("private-key");
+        final String keyID = javaSamplerContext.getParameter("key-id");
+        final Pair<UUID, PrivateKey> keyTuple;
 
         final SampleResult smokeTestResult = new SampleResult();
         smokeTestResult.setSampleLabel("Smoke Test");
@@ -80,32 +87,76 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         smokeTestResult.setSuccessful(false);
         smokeTestResult.sampleStart();
 
-        final SampleResult orgRegistrationResult = new SampleResult();
-        smokeTestResult.addSubResult(orgRegistrationResult);
+        System.out.println(organizationID);
+        System.out.println(clientToken);
+        System.out.println(privateKeyPath);
+        System.out.println(keyID);
 
-        String token;
-        orgRegistrationResult.sampleStart();
-        try {
-            token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
-            orgRegistrationResult.setSuccessful(true);
-        } catch (Exception e) {
-            orgRegistrationResult.setSuccessful(false);
-            throw new RuntimeException("Cannot register org", e);
-        } finally {
-            orgRegistrationResult.sampleEnd();
+        // If we're not supplied all the init parameters, create a new org
+        if (organizationID.equals("") || clientToken.equals("") || privateKeyPath.equals("") || keyID.equals("")) {
+            organizationID = UUID.randomUUID().toString();
+
+            System.out.println(String.format("Creating organization %s", organizationID));
+            // Disable validation against Attribution service
+            this.ctx = FhirContext.forDstu3();
+            ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+            ctx.getRestfulClientFactory().setConnectTimeout(1800);
+
+            final String goldenMacaroon;
+            try {
+                goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed creating Macaroon", e);
+            }
+            // Create admin client for registering organization
+            final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
+
+            final SampleResult orgRegistrationResult = new SampleResult();
+            smokeTestResult.addSubResult(orgRegistrationResult);
+
+            orgRegistrationResult.sampleStart();
+            try {
+                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
+                orgRegistrationResult.setSuccessful(true);
+            } catch (Exception e) {
+                orgRegistrationResult.setSuccessful(false);
+                throw new RuntimeException("Cannot register org", e);
+            } finally {
+                orgRegistrationResult.sampleEnd();
+            }
+
+            // Create a new public key
+            try {
+                keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
+            } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
+                throw new RuntimeException("Failed uploading public key", e);
+            }
+        } else {
+            // Parse the private key and create a new ID/PrivateKey tuple
+            try {
+                final Path filePath = Paths.get(privateKeyPath);
+                if (!Files.exists(filePath)) {
+                    throw new RuntimeException("Cannot find private key");
+                }
+                final String pemString = Files.readString(filePath);
+                final String parsedString = pemString
+                        .replace("-----BEGIN RSA PRIVATE KEY-----\n", "")
+                        .replace("-----END RSA PRIVATE KEY-----", "");
+
+                final byte[] decodedPEM = Base64.getMimeDecoder().decode(parsedString);
+                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedPEM);
+                KeyFactory kf = KeyFactory.getInstance("RSA");
+                PrivateKey privKey = kf.generatePrivate(keySpec);
+                keyTuple = Pair.of(UUID.fromString(keyID), privKey);
+            } catch (IOException e) {
+                throw new RuntimeException("Cannot read private key", e);
+            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                throw new RuntimeException("Cannot parse private key", e);
+            }
         }
-
-        // Create a new public key
-        final Pair<UUID, PrivateKey> keyTuple;
-        try {
-            keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
-        } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
-            throw new RuntimeException("Failed uploading public key", e);
-        }
-
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
-        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, token, keyTuple.getLeft(), keyTuple.getRight(), true);
+        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true);
 
         // Upload a batch of patients and a batch of providers
         logger.debug("Submitting practitioners");
@@ -154,7 +205,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         // Create a custom http client to use for monitoring the non-FHIR export request
         try (CloseableHttpClient httpClient = APIAuthHelpers.createCustomHttpClient()
                 .trusting()
-                .isAuthed(hostParam, token, keyTuple.getKey(), keyTuple.getRight())
+                .isAuthed(hostParam, clientToken, keyTuple.getKey(), keyTuple.getRight())
                 .build()) {
             ClientUtils.handleExportJob(exportClient, providerNPIs, httpClient);
             smokeTestResult.setSuccessful(true);
