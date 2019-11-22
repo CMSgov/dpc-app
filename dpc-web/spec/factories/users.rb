@@ -8,6 +8,7 @@ FactoryBot.define do
 
     requested_organization { 'Amalgamated Lint' }
     requested_organization_type { 'primary_care_clinic' }
+    requested_num_providers { 5 }
 
     address_1 { '1234 Shut the Door Ave.' }
     city { 'Pecoima' }
