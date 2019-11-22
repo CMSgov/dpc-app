@@ -1,7 +1,15 @@
-.dashboard-section-heading {
+.dashboard-section-header {
+  align-items: center;
   border-bottom: 1px solid $color-gray-light;
-  color: $color-gray-dark;
-  font-weight: $font-normal;
+  display: flex;
+  justify-content: space-between;
   margin: $spacer-5 0 $spacer-2;
   padding-bottom: $spacer-1;
+}
+
+.dashboard-section-heading {
+  color: $color-primary-darkest;
+  font-weight: $font-normal;
+  margin: 0;
+  padding: 0;
 }

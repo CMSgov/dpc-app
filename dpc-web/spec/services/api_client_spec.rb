@@ -17,7 +17,7 @@ RSpec.describe APIClient do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
+          headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
           body: {
             resourceType: 'Parameters',
             parameter: [{
@@ -80,6 +80,7 @@ RSpec.describe APIClient do
       it 'responds like 500 if connection error is raised' do
         http_stub = instance_double(Net::HTTP)
         allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
 
         api_client = APIClient.new('sandbox')
@@ -100,7 +101,7 @@ RSpec.describe APIClient do
 
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-          headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
+          headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
           body: {
             resourceType: 'Parameters',
             parameter: [{
@@ -243,6 +244,7 @@ RSpec.describe APIClient do
       it 'responds like 500 if connection error is raised' do
         http_stub = instance_double(Net::HTTP)
         allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        allow(http_stub).to receive(:use_ssl=).with(false).and_return(false)
         allow(http_stub).to receive(:request).and_raise(Errno::ECONNREFUSED)
 
         api_client = APIClient.new('sandbox')
@@ -279,5 +281,97 @@ RSpec.describe APIClient do
         )
       end
     end
+  end
+
+  describe '#create_public_key' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, "http://dpc.example.com/Key?label=Sandbox+Key+1").with(
+          body: stubbed_key
+        ).to_return(
+          status: 200,
+          body: "{\"label\":\"Sandbox Key 1\",\"createdAt\":\"2019-11-07T19:38:44.205Z\",\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}"
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', public_key: stubbed_key })
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          { 'label'=>'Sandbox Key 1', 'createdAt'=>'2019-11-07T19:38:44.205Z', 'id'=>'3fa85f64-5717-4562-b3fc-2c963f66afa6' }
+        )
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:post, "http://dpc.example.com/Key?label=Sandbox+Key+1").with(
+          body: stubbed_key
+        ).to_return(
+          status: 500,
+          body: '{}'
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', public_key: stubbed_key })
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {}
+        )
+      end
+    end
+  end
+
+  describe '#get_public_keys' do
+    context 'successful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:get, "http://dpc.example.com/Key").with(
+          headers: { 'Content-Type' => 'application/json' }
+        ).to_return(
+          status: 200,
+          body: "[{\"id\":\"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66\",\"label\":\"Sandbox Key 1\",\"createdAt\":\"2019-11-07T17:15:22.781Z\"}]"
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.get_public_keys(registered_org.api_id)
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          [{
+            "id"=>"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66",
+            "label"=>"Sandbox Key 1",
+            "createdAt"=>"2019-11-07T17:15:22.781Z"
+          }]
+        )
+      end
+    end
+
+    context 'unsuccessful API request' do
+      it 'sends data to API and sets response instance variables' do
+        stub_request(:get, "http://dpc.example.com/Key").with(
+          headers: { 'Content-Type' => 'application/json' }
+        ).to_return(
+          status: 500,
+          body: '{}'
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.get_public_keys(registered_org.api_id)
+
+        expect(api_client.response_status).to eq(500)
+        expect(api_client.response_body).to eq(
+          {}
+        )
+      end
+    end
+  end
+
+  def stubbed_key
+    file_fixture('stubbed_key.pem').read
   end
 end

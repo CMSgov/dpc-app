@@ -59,3 +59,12 @@ blockquote {
   word-wrap: break-word;
   width: 400px;
 }
+
+.ds-c-field--copy {
+  background-color: $color-gray-ultra-light;
+  border-width: 1px;
+  border-color: $color-gray-lighter;
+  max-width: none;
+  padding: $spacer-2;
+  resize: none;
+}
