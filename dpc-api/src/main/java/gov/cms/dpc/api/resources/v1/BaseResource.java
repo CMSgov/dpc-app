@@ -15,7 +15,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 
-@Path("/v1")
 @Api(value = "Metadata")
 public class BaseResource extends AbstractBaseResource {
 
@@ -58,7 +57,7 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     @Public
     @GET
-    @Path("/version")
+    @Path("/v1/version")
     @ApiOperation(value = "Return the application build version")
     @Consumes(value = "*/*")
     public String version() {
@@ -67,7 +66,7 @@ public class BaseResource extends AbstractBaseResource {
 
     @Override
     @GET
-    @Path("/metadata")
+    @Path("/v1/metadata")
     @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     @ApiResponses(@ApiResponse(code = 200, message = "Successful operation", examples = @Example(@ExampleProperty(value = ""))))
