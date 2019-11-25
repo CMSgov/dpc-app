@@ -48,11 +48,12 @@ import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
 @Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
+@Path("/v1/Token")
 public class TokenResource extends AbstractTokenResource {
 
     public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     // This will be removed as part of DPC-747
-    private static final String DEFAULT_ACCESS_SCOPE = "system/*:*";
+    private static final String DEFAULT_ACCESS_SCOPE = "system/*.*";
     private static final Logger logger = LoggerFactory.getLogger(TokenResource.class);
     private static final String ORG_NOT_FOUND = "Cannot find Organization: %s";
     private static final String INVALID_JWT_MSG = "Invalid JWT";
@@ -185,7 +186,7 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public JWTAuthResponse authorizeJWT(
-            @ApiParam(name = "scope", allowableValues = "system/*:*", value = "Requested access scope", required = true)
+            @ApiParam(name = "scope", allowableValues = "system/*.*", value = "Requested access scope", required = true)
             @QueryParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
             @ApiParam(name = "grant_type", value = "Authorization grant type", required = true, allowableValues = "client_credentials")
             @QueryParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
