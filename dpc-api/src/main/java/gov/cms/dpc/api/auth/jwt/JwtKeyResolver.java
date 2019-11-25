@@ -60,7 +60,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
         }
     }
 
-    private UUID getOrganizationID(String macaroon) {
+    protected UUID getOrganizationID(String macaroon) {
         if (macaroon == null || macaroon.equals("")) {
             throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
         }
