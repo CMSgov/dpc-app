@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: 'no-reply@dpc.cms.gov'
+  default from: 'dpcinfo@cms.hhs.gov'
   layout 'mailer'
 end
