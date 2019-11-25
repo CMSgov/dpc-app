@@ -21,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @Api(tags = {"Bulk Data", "Data"}, authorizations = @Authorization(value = "apiKey"))
-@Path("/v1/Data")
 public class DataResource extends AbstractDataResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataResource.class);

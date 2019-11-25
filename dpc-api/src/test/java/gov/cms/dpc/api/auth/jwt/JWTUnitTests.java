@@ -68,7 +68,7 @@ class JWTUnitTests {
         @Test
         void testQueryParams() {
             final String payload = "this is not a payload";
-            Response response = RESOURCE.target("/v1/Token/auth")
+            Response response = RESOURCE.target("/Token/auth")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -78,7 +78,7 @@ class JWTUnitTests {
             assertEquals(3, validationErrorResponse.getErrors().size(), "Should have three validations");
 
             // Add the missing scope value and try again
-            response = RESOURCE.target("/v1/Token/auth").queryParam("scope", "system/*.*")
+            response = RESOURCE.target("/Token/auth").queryParam("scope", "system/*.*")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -89,7 +89,7 @@ class JWTUnitTests {
 
 
             // Add the grant type
-            response = RESOURCE.target("/v1/Token/auth")
+            response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .request()
@@ -102,7 +102,7 @@ class JWTUnitTests {
             assertTrue(validationErrorResponse.getErrors().get(0).contains("Assertion type is required"));
 
             // Add the assertion type and try again
-            response = RESOURCE.target("/v1/Token/auth")
+            response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
@@ -116,7 +116,7 @@ class JWTUnitTests {
         @Test
         void testInvalidGrantTypeValue() {
             final String payload = "not a real payload";
-            Response response = RESOURCE.target("/v1/Token/auth")
+            Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "wrong_grant_type")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
@@ -129,7 +129,7 @@ class JWTUnitTests {
 
         @Test
         void testEmptyGrantTypeValue() {
-            final Response response = RESOURCE.target("/v1/Token/auth")
+            final Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
@@ -144,7 +144,7 @@ class JWTUnitTests {
         @Test
         void testInvalidClientAssertionType() {
             final String payload = "not a real payload";
-            Response response = RESOURCE.target("/v1/Token/auth")
+            Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "Not a real assertion_type")
@@ -157,7 +157,7 @@ class JWTUnitTests {
 
         @Test
         void testEmptyClientAssertionType() {
-            final Response response = RESOURCE.target("/v1/Token/auth")
+            final Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "")
@@ -172,7 +172,7 @@ class JWTUnitTests {
         @Test
         void testInvalidScopeType() {
             final String payload = "not a real payload";
-            Response response = RESOURCE.target("/v1/Token/auth")
+            Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "this is not a scope")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
@@ -185,7 +185,7 @@ class JWTUnitTests {
 
         @Test
         void testEmptyScopeType() {
-            final Response response = RESOURCE.target("/v1/Token/auth")
+            final Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
@@ -219,7 +219,7 @@ class JWTUnitTests {
                     .compact();
 
             // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/auth")
+            Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
@@ -246,7 +246,7 @@ class JWTUnitTests {
                     .compact();
 
             // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/auth")
+            Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
@@ -273,7 +273,7 @@ class JWTUnitTests {
                     .compact();
 
             // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/auth")
+            Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
@@ -300,7 +300,7 @@ class JWTUnitTests {
                     .compact();
 
             // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/auth")
+            Response response = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
@@ -312,7 +312,7 @@ class JWTUnitTests {
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus(), "Should have invalid Macaroon");
 
             // Try to submit again
-            Response r2 = RESOURCE.target("/v1/Token/auth")
+            Response r2 = RESOURCE.target("/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)

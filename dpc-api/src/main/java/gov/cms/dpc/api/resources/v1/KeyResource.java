@@ -30,7 +30,6 @@ import java.util.Random;
 import java.util.UUID;
 
 @Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "apiKey"))
-@Path("/v1/Key")
 public class KeyResource extends AbstractKeyResource {
 
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);

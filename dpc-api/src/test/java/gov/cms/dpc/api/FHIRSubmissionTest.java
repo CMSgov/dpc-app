@@ -76,7 +76,7 @@ class FHIRSubmissionTest {
 
     @Test
     void testDataRequest() {
-        final WebTarget target = groupResource.target("/v1/Group/1/$export");
+        final WebTarget target = groupResource.target("/Group/1/$export");
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();
@@ -84,7 +84,7 @@ class FHIRSubmissionTest {
                 () -> assertNotEquals("", response.getHeaderString("Content-Location"), "Should have content location"));
 
         // Check that the job is in progress
-        String jobURL = response.getHeaderString("Content-Location").replace("http://localhost:3002/", "");
+        String jobURL = response.getHeaderString("Content-Location").replace(TEST_BASE_URL, "");
         WebTarget jobTarget = groupResource.target(jobURL);
         Response jobResp = jobTarget.request().accept(MediaType.APPLICATION_JSON).get();
         assertEquals(HttpStatus.ACCEPTED_202, jobResp.getStatus(), "Job should be in progress");
@@ -109,7 +109,7 @@ class FHIRSubmissionTest {
     void testOneResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource
-                .target("/v1/Group/1/$export")
+                .target("/Group/1/$export")
                 .queryParam("_type", ResourceType.Patient);
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
@@ -132,7 +132,7 @@ class FHIRSubmissionTest {
     void testTwoResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource
-                .target("/v1/Group/1/$export")
+                .target("/Group/1/$export")
                 .queryParam("_type", String.format("%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit));
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
@@ -144,7 +144,7 @@ class FHIRSubmissionTest {
         var job = queue.claimBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
         var resources = job.get().getResourceTypes();
-        assertAll(() -> assertEquals(2, resources.size()),
+        assertAll(() -> assertEquals(resources.size(), 2),
                 () -> assertTrue(resources.contains(ResourceType.Patient)),
                 () -> assertTrue(resources.contains(ResourceType.ExplanationOfBenefit)));
     }
@@ -153,7 +153,7 @@ class FHIRSubmissionTest {
     void testThreeResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource
-                .target("/v1/Group/1/$export")
+                .target("/Group/1/$export")
                 .queryParam("_type", String.format("%s,%s,%s", ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage));
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
@@ -178,13 +178,13 @@ class FHIRSubmissionTest {
     void testBadResourceSubmission() {
         // A request with a bad resource type parameter...
         final WebTarget target = groupResource
-                .target("/v1/Group/1/$export")
+                .target("/Group/1/$export")
                 .queryParam("_type", "BadResource");
         final Response response = target.request().get();
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatus(), "Should have 400 status"));
 
         // Should yield a queue should have no entries
-        assertEquals(0, queue.queueSize());
+        assertEquals(queue.queueSize(), 0);
     }
 
     /**
@@ -193,7 +193,7 @@ class FHIRSubmissionTest {
     @Test
     void testNoResourceSubmission() {
         // A request with no resource type parameters...
-        final WebTarget target = groupResource.target("/v1/Group/1/$export");
+        final WebTarget target = groupResource.target("/Group/1/$export");
         final Response response = target.request()
                 .accept(FHIR_JSON).header(PREFER_HEADER, PREFER_RESPOND_ASYNC)
                 .get();

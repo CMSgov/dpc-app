@@ -21,7 +21,6 @@ import javax.ws.rs.PathParam;
 import java.util.UUID;
 
 @Api(value = "Endpoint", authorizations = @Authorization(value = "apiKey"))
-@Path("/v1/Endpoint")
 public class EndpointResource extends AbstractEndpointResource {
 
     private final IGenericClient client;

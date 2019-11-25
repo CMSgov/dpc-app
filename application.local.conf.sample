@@ -13,10 +13,6 @@ dpc {
     }
     authenticationDisabled=true
     keyPairLocation = "src/main/resources/keypair/bakery_keypair.json"
-
-    swagger {
-            schemes = ["http"]
-        }
   }
 
   attribution {

@@ -11,6 +11,7 @@ import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.api.tasks.DeleteToken;
 import gov.cms.dpc.api.tasks.GenerateClientTokens;
@@ -46,6 +47,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Override
     public void configure(Binder binder) {
+        // TODO: This will eventually go away.
+        binder.bind(TestResource.class);
         // V1 Resources
         binder.bind(BaseResource.class);
         binder.bind(DataResource.class);

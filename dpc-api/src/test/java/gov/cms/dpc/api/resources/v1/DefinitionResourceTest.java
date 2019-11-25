@@ -30,7 +30,7 @@ class DefinitionResourceTest {
 
     @Test
     void testFetchAllResources() {
-        final Response response = RESOURCES.target("/v1/StructureDefinition")
+        final Response response = RESOURCES.target("/StructureDefinition")
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .get();
 
@@ -44,7 +44,7 @@ class DefinitionResourceTest {
     @Test
     void testFetchSpecificResource() {
         // Fetch the patient resource
-        final Response response = RESOURCES.target("/v1/StructureDefinition/dpc-profile-patient")
+        final Response response = RESOURCES.target("/StructureDefinition/dpc-profile-patient")
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .get();
 
@@ -58,7 +58,7 @@ class DefinitionResourceTest {
     @Test
     void testMissingResource() {
         // Fetch the patient resource
-        final Response response = RESOURCES.target("/v1/StructureDefinition/dpc-patient-gone")
+        final Response response = RESOURCES.target("/StructureDefinition/dpc-patient-gone")
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .get();
 

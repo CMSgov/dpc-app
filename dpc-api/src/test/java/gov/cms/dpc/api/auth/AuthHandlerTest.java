@@ -57,7 +57,7 @@ class AuthHandlerTest {
 
     @Test
     void testNoToken() {
-        final Response response = RESOURCE.target("/v1/Organization/" + APITestHelpers.ORGANIZATION_ID)
+        final Response response = RESOURCE.target("/Organization/" + APITestHelpers.ORGANIZATION_ID)
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .get();
 
@@ -66,7 +66,7 @@ class AuthHandlerTest {
 
     @Test
     void testMalformedHeader() {
-        final Response response = RESOURCE.target("/v1/Organization/" + BAD_ORG_ID)
+        final Response response = RESOURCE.target("/Organization/" + BAD_ORG_ID)
                 .request(FHIRMediaTypes.FHIR_JSON)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer" + TEST_MACAROON)
                 .get();
@@ -74,14 +74,14 @@ class AuthHandlerTest {
         assertEquals(HttpStatus.UNAUTHORIZED_401, response.getStatus(), "Should not authorized for other organization");
     }
 
-//    @Test
-//    void testPublicAPI() {
-//        final Response response = RESOURCE.target("/v1/metadata")
-//                .request(FHIRMediaTypes.FHIR_JSON)
-//                .get();
-//
-//        assertEquals(HttpStatus.OK_200, response.getStatus(), "Should be authorized");
-//    }
+    @Test
+    void testPublicAPI() {
+        final Response response = RESOURCE.target("/v1/metadata")
+                .request(FHIRMediaTypes.FHIR_JSON)
+                .get();
+
+        assertEquals(HttpStatus.OK_200, response.getStatus(), "Should be authorized");
+    }
 
     private static ResourceExtension buildAuthResource() {
         // Setup mocks
