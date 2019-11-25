@@ -48,6 +48,7 @@ import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
 @Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
+@Path("/v1/Token")
 public class TokenResource extends AbstractTokenResource {
 
     public static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
