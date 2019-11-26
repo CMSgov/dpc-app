@@ -1,9 +1,6 @@
 package gov.cms.dpc.macaroons;
 
 import com.github.nitram509.jmacaroons.Macaroon;
-import com.github.nitram509.jmacaroons.MacaroonsBuilder;
-import com.github.nitram509.jmacaroons.MacaroonsConstants;
-import com.github.nitram509.jmacaroons.MacaroonsVerifier;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
@@ -13,9 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +52,7 @@ class ThirdPartyCaveatTests {
         final MacaroonCondition condition = new MacaroonCondition("user", MacaroonCondition.Operator.EQ, "bob");
 
         final Macaroon m1 = fs.addCaveats(tsMacaroon, new MacaroonCaveat("as-loc", condition.toBytes()));
-        assertEquals(1, ts.getCaveats(m1).size(), "Should have a single caveat");
+        assertEquals(1, MacaroonBakery.getCaveats(m1).size(), "Should have a single caveat");
 
         final List<Macaroon> discharged = ts.dischargeAll(Collections.singletonList(m1), (caveat, value) -> {
             assertEquals("as-loc", caveat.getLocation(), "Should have third-party caveats");
