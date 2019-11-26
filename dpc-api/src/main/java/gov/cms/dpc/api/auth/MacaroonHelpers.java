@@ -77,7 +77,7 @@ public class MacaroonHelpers {
         }
     }
 
-    static Optional<UUID> extractOrgIDFromCaveats(MacaroonBakery bakery, List<Macaroon> macaroons) {
+    static Optional<UUID> extractOrgIDFromCaveats(List<Macaroon> macaroons) {
         final Macaroon rootMacaroon = macaroons.get(0);
             // Find the org_id caveat and extract the value
             return MacaroonBakery
