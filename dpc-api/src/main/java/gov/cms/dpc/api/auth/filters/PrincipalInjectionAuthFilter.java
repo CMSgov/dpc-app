@@ -8,6 +8,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.slf4j.MDC;
 
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
@@ -27,6 +28,8 @@ public class PrincipalInjectionAuthFilter extends DPCAuthFilter {
 
     @Override
     protected DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo) {
+        MDC.clear();
+        MDC.put("organization_id", organizationID.toString());
         final Organization resource = new Organization();
         resource.setId(new IdType("Organization", organizationID.toString()));
         return new DPCAuthCredentials(macaroon, resource, null, null);
