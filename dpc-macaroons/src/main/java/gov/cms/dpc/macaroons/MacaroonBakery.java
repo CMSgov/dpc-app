@@ -95,7 +95,7 @@ public class MacaroonBakery {
      * @return - {@link List} of {@link MacaroonCaveat} which are parsed from the underlying string representation
      * @throws BakeryException if unable to parse the caveats correctly
      */
-    public List<MacaroonCaveat> getCaveats(Macaroon macaroon) {
+    public static List<MacaroonCaveat> getCaveats(Macaroon macaroon) {
         List<MacaroonCaveat> caveats = new ArrayList<>();
 
         MacaroonCaveat currentCaveat = new MacaroonCaveat();
@@ -219,7 +219,7 @@ public class MacaroonBakery {
      * @param serializedString - {@link String} to deserialize from
      * @return - {@link List} of {@link Macaroon} deserialized from {@link String}
      */
-    public List<Macaroon> deserializeMacaroon(String serializedString) {
+    public static List<Macaroon> deserializeMacaroon(String serializedString) {
         if (serializedString.isEmpty()) {
             throw new BakeryException("Cannot deserialize empty string");
         }
@@ -302,7 +302,7 @@ public class MacaroonBakery {
         // addCaveats adds any required third party caveats to the need slice
         // that aren't already present .
         Consumer<Macaroon> addCaveats = (macaroon) -> {
-            this.getCaveats(macaroon)
+            MacaroonBakery.getCaveats(macaroon)
                     .stream()
                     .filter(cav -> cav.getVerificationID().length > 1 && !haveCaveat.containsKey(cav.toString()))
                     .forEach(needCaveat::add);
@@ -602,6 +602,7 @@ public class MacaroonBakery {
      * Use constant time approach, to compare two byte arrays
      * See also
      * <a href="https://codahale.com/a-lesson-in-timing-attacks">A Lesson In Timing Attacks (or, Don’t use MessageDigest.isEquals)</a>
+     *
      * @param a an array
      * @param b an array
      * @return true if both have same length and content
