@@ -23,6 +23,7 @@ import java.io.*;
  * Streaming and range logic was taken from here: https://github.com/aruld/jersey-streaming
  */
 @Api(tags = {"Bulk Data", "Data"}, authorizations = @Authorization(value = "apiKey"))
+@Path("/v1/Data")
 public class DataResource extends AbstractDataResource {
 
     private static final int CHUNK_SIZE = 1024 * 1024; // Return a maximum of 1MB chunks, but we can modify this later if we need to

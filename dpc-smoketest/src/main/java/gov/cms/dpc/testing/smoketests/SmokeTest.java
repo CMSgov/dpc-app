@@ -3,6 +3,8 @@ package gov.cms.dpc.testing.smoketests;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import com.github.nitram509.jmacaroons.Macaroon;
+import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,14 +14,25 @@ import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +53,10 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         arguments.addArgument("seed-file", "src/main/resources/test_associations.csv");
         arguments.addArgument("provider-bundle", "provider_bundle.json");
         arguments.addArgument("patient-bundle", "patient_bundle.json");
+        arguments.addArgument("organization-id", "");
+        arguments.addArgument("client-token", "");
+        arguments.addArgument("private-key", "");
+        arguments.addArgument("key-id", "");
 
         return arguments;
     }
@@ -47,94 +64,139 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     @Override
     public void setupTest(JavaSamplerContext context) {
         super.setupTest(context);
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
         // Create things
-        final String organizationID = UUID.randomUUID().toString();
         final String hostParam = javaSamplerContext.getParameter("host");
         final String adminURL = javaSamplerContext.getParameter("admin-url");
         logger.info("Running against {}", hostParam);
         logger.info("Admin URL: {}", adminURL);
         logger.info("Running with {} threads", JMeterContextService.getNumberOfThreads());
 
-        logger.info("Creating organization {}", organizationID);
+        String organizationID = javaSamplerContext.getParameter("organization-id");
+        String clientToken = javaSamplerContext.getParameter("client-token");
+        String privateKeyPath = javaSamplerContext.getParameter("private-key");
+        final String keyID = javaSamplerContext.getParameter("key-id");
+        final Pair<UUID, PrivateKey> keyTuple;
+
+        final SampleResult smokeTestResult = new SampleResult();
+        smokeTestResult.setSampleLabel("Smoke Test");
+        // False, unless proven otherwise
+        smokeTestResult.setSuccessful(false);
+        smokeTestResult.sampleStart();
+
         // Disable validation against Attribution service
         this.ctx = FhirContext.forDstu3();
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         ctx.getRestfulClientFactory().setConnectTimeout(1800);
 
-        final String goldenMacaroon;
-        try {
-            goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed creating Macaroon", e);
+        // If we're not supplied all the init parameters, create a new org
+        if (organizationID.equals("") || clientToken.equals("") || privateKeyPath.equals("") || keyID.equals("")) {
+            organizationID = UUID.randomUUID().toString();
+
+            System.out.println(String.format("Creating organization %s", organizationID));
+
+            final String goldenMacaroon;
+            try {
+                goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed creating Macaroon", e);
+            }
+            // Create admin client for registering organization
+            final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
+
+            final SampleResult orgRegistrationResult = new SampleResult();
+            smokeTestResult.addSubResult(orgRegistrationResult);
+
+            orgRegistrationResult.sampleStart();
+            try {
+                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
+                orgRegistrationResult.setSuccessful(true);
+            } catch (Exception e) {
+                orgRegistrationResult.setSuccessful(false);
+                throw new IllegalStateException("Cannot register org", e);
+            } finally {
+                orgRegistrationResult.sampleEnd();
+            }
+
+            // Create a new public key
+            try {
+                keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
+            } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
+                throw new IllegalStateException("Failed uploading public key", e);
+            }
+        } else {
+            // Parse the private key and create a new ID/PrivateKey tuple
+            final Path path = Paths.get(privateKeyPath);
+            try (final PEMParser pemParser = new PEMParser(Files.newBufferedReader(path, StandardCharsets.UTF_8))) {
+                JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+                Object object = pemParser.readObject();
+                KeyPair kp = converter.getKeyPair((PEMKeyPair) object);
+                PrivateKey privateKey = kp.getPrivate();
+                if (privateKey == null) {
+                    throw new IllegalStateException("Key cannot be null");
+                }
+                keyTuple = Pair.of(UUID.fromString(keyID), privateKey);
+            } catch (IOException e) {
+                throw new IllegalArgumentException(String.format("Cannot read private key from: %s", privateKeyPath));
+            }
         }
-        // Create admin client for registering organization
-        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
-
-        final SampleResult smokeTestResult = new SampleResult();
-        smokeTestResult.sampleStart();
-
-        final SampleResult orgRegistrationResult = new SampleResult();
-        smokeTestResult.addSubResult(orgRegistrationResult);
-
-        String token;
-        orgRegistrationResult.sampleStart();
-        try {
-            token = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
-            orgRegistrationResult.setSuccessful(true);
-        } catch (Exception e) {
-            orgRegistrationResult.setSuccessful(false);
-            throw new RuntimeException("Cannot register org", e);
-        } finally {
-            orgRegistrationResult.sampleEnd();
-        }
-
-        // Create a new public key
-        final Pair<UUID, PrivateKey> keyTuple;
-        try {
-            keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
-        } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
-            throw new RuntimeException("Failed uploading public key", e);
-        }
-
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
-        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, token, keyTuple.getLeft(), keyTuple.getRight(), true);
+
+        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true);
 
         // Upload a batch of patients and a batch of providers
         logger.debug("Submitting practitioners");
         final SampleResult practitionerSample = new SampleResult();
+        practitionerSample.setSampleLabel("Practitioner submission");
         practitionerSample.sampleStart();
-        final List<String> providerNPIs = ClientUtils.submitPractitioners(javaSamplerContext.getParameter("provider-bundle"), this.getClass(), ctx, exportClient);
-        practitionerSample.sampleEnd();
-        practitionerSample.setSuccessful(true);
+        final List<String> providerNPIs;
+        try {
+            providerNPIs = ClientUtils.submitPractitioners(javaSamplerContext.getParameter("provider-bundle"), this.getClass(), ctx, exportClient);
+            practitionerSample.setSuccessful(true);
+        } catch (Exception e) {
+            practitionerSample.setSuccessful(false);
+            throw new IllegalStateException("Cannot submit practitioners", e);
+        } finally {
+            practitionerSample.sampleEnd();
+        }
+
         smokeTestResult.addSubResult(practitionerSample);
 
         logger.debug("Submitting patients");
         final SampleResult patientSample = new SampleResult();
-
+        patientSample.setSampleLabel("Patient submission");
         patientSample.sampleStart();
-        final Map<String, Reference> patientReferences = ClientUtils.submitPatients(javaSamplerContext.getParameter("patient-bundle"), this.getClass(), ctx, exportClient);
-        patientSample.setSuccessful(true);
-        patientSample.sampleEnd();
-        smokeTestResult.addSubResult(patientSample);
+        final Map<String, Reference> patientReferences;
+        try {
+            patientReferences = ClientUtils.submitPatients(javaSamplerContext.getParameter("patient-bundle"), this.getClass(), ctx, exportClient);
+            patientSample.setSuccessful(true);
+        } catch (Exception e) {
+            patientSample.setSuccessful(false);
+            throw new IllegalStateException("Cannot submit patients", e);
+        } finally {
+            patientSample.sampleEnd();
+            smokeTestResult.addSubResult(patientSample);
+        }
+
 
         // Upload the roster bundle
         logger.debug("Uploading roster");
         try {
             ClientUtils.createAndUploadRosters(javaSamplerContext.getParameter("seed-file"), exportClient, UUID.fromString(organizationID), patientReferences);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot upload roster", e);
+            throw new IllegalStateException("Cannot upload roster", e);
         }
 
         // Run the job
         // Create a custom http client to use for monitoring the non-FHIR export request
         try (CloseableHttpClient httpClient = APIAuthHelpers.createCustomHttpClient()
                 .trusting()
-                .isAuthed(hostParam, token, keyTuple.getKey(), keyTuple.getRight())
+                .isAuthed(hostParam, clientToken, keyTuple.getKey(), keyTuple.getRight())
                 .build()) {
             ClientUtils.handleExportJob(exportClient, providerNPIs, httpClient);
             smokeTestResult.setSuccessful(true);
