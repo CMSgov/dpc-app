@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.annotations.Public;
-import gov.cms.dpc.api.resources.TestResource;
 import gov.cms.dpc.api.resources.v1.BaseResource;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.auth.Auth;
@@ -56,7 +55,6 @@ class APIResourceAnnotationTest {
         methods = methods.stream()
                 .filter(method -> !Modifier.isAbstract(method.getModifiers()))
                 .filter(method -> !BaseResource.class.equals(method.getDeclaringClass()))
-                .filter(method -> !TestResource.class.equals(method.getDeclaringClass()))
                 .collect(Collectors.toUnmodifiableSet());
 
         assertFalse(methods.isEmpty(), "Should have annotated methods");
@@ -65,8 +63,8 @@ class APIResourceAnnotationTest {
     @Test
     void allResourcesHaveMonitoringAnnotations() {
         methods.forEach(method -> assertAll(
-            () -> assertTrue(method.isAnnotationPresent(Timed.class), String.format("Method: %s in Class: %s must have @Timed annotation", method.getName(), method.getDeclaringClass())),
-            () -> assertTrue(method.isAnnotationPresent(ExceptionMetered.class), String.format("Method: %s in Class: %s must have @ExceptionMetered annotation", method.getName(), method.getDeclaringClass()))
+                () -> assertTrue(method.isAnnotationPresent(Timed.class), String.format("Method: %s in Class: %s must have @Timed annotation", method.getName(), method.getDeclaringClass())),
+                () -> assertTrue(method.isAnnotationPresent(ExceptionMetered.class), String.format("Method: %s in Class: %s must have @ExceptionMetered annotation", method.getName(), method.getDeclaringClass()))
         ));
     }
 
@@ -93,7 +91,7 @@ class APIResourceAnnotationTest {
         final Annotation[][] paramAnnotations = method.getParameterAnnotations();
         for (Annotation[] annotations : paramAnnotations) {
             for (Annotation annotation : annotations) {
-                if(annotation.annotationType().equals(Auth.class)) {
+                if (annotation.annotationType().equals(Auth.class)) {
                     validParameters = true;
                     break;
                 }
