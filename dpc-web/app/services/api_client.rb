@@ -117,7 +117,7 @@ class APIClient
 
     response = http.request(request)
 
-    if response.kind_of?(Net::HTTPRedirection)
+    if response.is_a?(Net::HTTPRedirection)
       uri = URI.parse response.header['Location']
       response = http.get uri, request.each_header.to_h
     end
