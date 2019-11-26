@@ -34,7 +34,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>1.3.16</dropwizard.version>
+        <dropwizard.version>1.3.17</dropwizard.version>
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
         <slf4j.version>1.7.29</slf4j.version>
         <!--Custom group IDs for pulling dependencies from JitPack-->
@@ -549,7 +549,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>4.0.0</version>
                 <executions>
                     <execution>
                         <id>git-commit</id>
