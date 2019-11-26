@@ -9,6 +9,7 @@ import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -72,6 +73,10 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
         // Lookup the organization by Macaroon id
         final UUID orgID = extractOrgIDFromMacaroon(m1);
+
+        // Now that we have the organization_id, set it in the logging context
+        MDC.clear();
+        MDC.put("organization_id", orgID.toString());
 
         try {
             this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
