@@ -41,7 +41,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
@@ -332,8 +332,11 @@ class JWTUnitTests {
         final PublicKeyDAO publicKeyDAO = mockKeyDAO();
         Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
-        final JwtKeyResolver resolver = new JwtKeyResolver(publicKeyDAO);
+        final JwtKeyResolver resolver = spy(new JwtKeyResolver(publicKeyDAO));
         final CaffeineJTICache jtiCache = new CaffeineJTICache();
+
+        UUID organizationID = UUID.randomUUID();
+        doReturn(organizationID).when(resolver).getOrganizationID(Mockito.anyString());
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
 
@@ -355,8 +358,8 @@ class JWTUnitTests {
     private static PublicKeyDAO mockKeyDAO() {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
-        Mockito.when(mock.fetchPublicKey(Mockito.any())).then(answer -> {
-            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(0));
+        Mockito.when(mock.fetchPublicKey(Mockito.any(), Mockito.any())).then(answer -> {
+            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(1));
             if (keyPair == null) {
                 return Optional.empty();
             }
@@ -365,16 +368,5 @@ class JWTUnitTests {
             return Optional.of(entity);
         });
         return mock;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public static class ValidationErrorResponse {
-
-        public long id;
-        public List<String> errors;
-
-        ValidationErrorResponse() {
-            // Jackson required
-        }
     }
 }
