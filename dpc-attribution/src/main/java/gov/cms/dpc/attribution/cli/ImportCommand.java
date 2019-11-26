@@ -16,6 +16,8 @@ import java.sql.Statement;
 
 public class ImportCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
+    private static final Boolean RUN_INSERTS = false;
+
     public ImportCommand(Application<DPCAttributionConfiguration> application) {
         super(application, "import", "Import into the website");
     }
@@ -46,8 +48,7 @@ public class ImportCommand extends EnvironmentCommand<DPCAttributionConfiguratio
                 "select o.id, o.id_value, o.organization_name, e.id " +
                         "from organizations o " +
                         "left join organization_endpoints e ON e.organization_id = o.id " +
-                        "limit 1"// +
-                        //"where organization_name not in ('Template Provider Organization');"
+                        "where organization_name not in ('Template Provider Organization');"
         );
 
         while ( resultSet.next() ) {
@@ -67,13 +68,16 @@ public class ImportCommand extends EnvironmentCommand<DPCAttributionConfiguratio
                 npi
         );
         System.out.println(orgInsert);
-        PreparedStatement orgInsertStatement = webConnection.prepareStatement(orgInsert, Statement.RETURN_GENERATED_KEYS);
-        orgInsertStatement.executeUpdate();
 
         String createdOrgId = "";
-        ResultSet resultSet = orgInsertStatement.getGeneratedKeys();
-        if ( resultSet.next() ) {
-            createdOrgId = resultSet.getString(1);
+        if ( RUN_INSERTS ) {
+            PreparedStatement orgInsertStatement = webConnection.prepareStatement(orgInsert, Statement.RETURN_GENERATED_KEYS);
+            orgInsertStatement.executeUpdate();
+
+            ResultSet resultSet = orgInsertStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                createdOrgId = resultSet.getString(1);
+            }
         }
 
         String regOrgInsert = String.format(
@@ -83,23 +87,32 @@ public class ImportCommand extends EnvironmentCommand<DPCAttributionConfiguratio
                 endpointId
         );
         System.out.println(regOrgInsert);
-        PreparedStatement regOrgInsertStatement = webConnection.prepareStatement(regOrgInsert);
-        regOrgInsertStatement.executeUpdate();
+
+        if ( RUN_INSERTS ) {
+            PreparedStatement regOrgInsertStatement = webConnection.prepareStatement(regOrgInsert);
+            regOrgInsertStatement.executeUpdate();
+        }
 
         String fhirInsert = String.format(
                 "INSERT INTO fhir_endpoints(name, status, uri, organization_id) VALUES ('DPC Sandbox Test Endpoint', 0, 'https://dpc.cms.gov/test-endpoint', '%s')",
                 createdOrgId
         );
         System.out.println(fhirInsert);
-        PreparedStatement fhirInsertStatement = webConnection.prepareStatement(fhirInsert);
-        fhirInsertStatement.executeUpdate();
+
+        if ( RUN_INSERTS ) {
+            PreparedStatement fhirInsertStatement = webConnection.prepareStatement(fhirInsert);
+            fhirInsertStatement.executeUpdate();
+        }
 
         String addressInsert = String.format(
                 "INSERT INTO addresses(street, city, state, zip, addressable_type, addressable_id, created_at, updated_at, address_use, address_type) VALUES ('123 Fake St.', 'Washington', 'DC', '20000', 'Organization', %s, now(), now(), 0, 0)",
                 createdOrgId
         );
         System.out.println(addressInsert);
-        PreparedStatement addressInsertStatement = webConnection.prepareStatement(addressInsert);
-        addressInsertStatement.executeUpdate();
+
+        if ( RUN_INSERTS ) {
+            PreparedStatement addressInsertStatement = webConnection.prepareStatement(addressInsert);
+            addressInsertStatement.executeUpdate();
+        }
     }
 }
