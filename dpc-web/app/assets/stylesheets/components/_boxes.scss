@@ -10,6 +10,11 @@
   border-style: dashed;
 }
 
+.box--inverse {
+  background-color: $color-primary-alt-lightest ;
+  border-color: $color-primary-alt-light ;
+}
+
 .box__header {
   align-items: center;
   border-bottom: 1px solid $color-gray-lighter;

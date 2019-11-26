@@ -5,22 +5,26 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,9 +135,17 @@ public class ClientUtils {
                     final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
                     // If we're done, make sure we completed successfully, otherwise, throw an error
                     if (statusCode > 300) {
-                        throw new IllegalStateException(String.format("Awaiting export results failed: %s", mapper.readValue(response.getEntity().getContent(), String.class)));
+                        throw new IllegalStateException(String.format("Awaiting export results failed with status %d: %s", statusCode, EntityUtils.toString(response.getEntity())));
                     }
-                    jobResponse = mapper.readValue(response.getEntity().getContent(), JobCompletionModel.class);
+                    String responseBody = "";
+                    try {
+                        responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+                        jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
+                    } catch ( JsonParseException e ) {
+                        logger.error(String.format("Failed to parse job status response: %s", responseBody));
+                        throw e;
+                    }
+
                 }
             }
         }
@@ -218,7 +230,7 @@ public class ClientUtils {
         try {
             return monitorExportRequest(exportOperation, client);
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error monitoring export", e);
+            throw new RuntimeException(String.format("Error monitoring export groupID: %s", group.getId()), e);
         }
     }
 
