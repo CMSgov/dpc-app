@@ -8,8 +8,6 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -74,6 +72,7 @@ public class PublicKeyHandler {
 
     /**
      * Convert the given {@link PublicKeyEntity} to a {@link PublicKey}
+     *
      * @param entity - {@link PublicKeyEntity} to convert
      * @return - {@link PublicKey}
      * @throws PublicKeyException - throws if the conversion fails
