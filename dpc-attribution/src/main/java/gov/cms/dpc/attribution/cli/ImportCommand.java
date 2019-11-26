@@ -114,5 +114,7 @@ public class ImportCommand extends EnvironmentCommand<DPCAttributionConfiguratio
             PreparedStatement addressInsertStatement = webConnection.prepareStatement(addressInsert);
             addressInsertStatement.executeUpdate();
         }
+
+        System.out.println("--");
     }
 }
