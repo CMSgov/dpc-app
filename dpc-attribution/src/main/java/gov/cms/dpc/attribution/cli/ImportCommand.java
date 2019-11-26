@@ -93,5 +93,13 @@ public class ImportCommand extends EnvironmentCommand<DPCAttributionConfiguratio
         System.out.println(fhirInsert);
         PreparedStatement fhirInsertStatement = webConnection.prepareStatement(fhirInsert);
         fhirInsertStatement.executeUpdate();
+
+        String addressInsert = String.format(
+                "INSERT INTO addresses(street, city, state, zip, addressable_type, addressable_id, created_at, updated_at, address_use, address_type) VALUES ('123 Fake St.', 'Washington', 'DC', '20000', 'Organization', %s, now(), now(), 0, 0)",
+                createdOrgId
+        );
+        System.out.println(addressInsert);
+        PreparedStatement addressInsertStatement = webConnection.prepareStatement(addressInsert);
+        addressInsertStatement.executeUpdate();
     }
 }
