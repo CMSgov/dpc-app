@@ -4,6 +4,7 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.attribution.cli.ImportCommand;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
@@ -52,6 +53,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         registerBundles(bootstrap);
 
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
+        bootstrap.addCommand(new ImportCommand(bootstrap.getApplication()));
     }
 
     @Override

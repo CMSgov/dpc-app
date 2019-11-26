@@ -28,6 +28,11 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     @Valid
     @NotNull
+    @JsonProperty("database_website")
+    private DataSourceFactory database_website = new DataSourceFactory();
+
+    @Valid
+    @NotNull
     @JsonProperty("sundial")
     private SundialConfiguration sundial = new SundialConfiguration();
 
@@ -46,6 +51,10 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @Override
     public DataSourceFactory getDatabase() {
         return database;
+    }
+
+    public DataSourceFactory getDatabase_website() {
+        return database_website;
     }
 
     public SundialConfiguration getSundial() {
