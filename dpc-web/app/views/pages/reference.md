@@ -779,6 +779,11 @@ Details on the exact data format are given in the [implementation guide](https:/
 - The patient's first and last name
 - The patient's birthdate
 
+> Note: The BlueButton team is currently in the process of implementing support for MBIs in accordance with CMS policies.
+>
+>In the interim, DPC is making use of the *BlueButton Beneficiary Identifiers* as a proxy for MBI values.
+>Once MBI support is fully implemented, users will need to migrate their existing resources by remapping from the **https://bluebutton.cms.gov/resources/variables/bene_id** system to the new **http://hl7.org/fhir/sid/us-mbi** system.
+
 **cURL command**
 
 ~~~sh
@@ -805,7 +810,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
   "identifier": [
     {
       "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
-      "value": "20000000001809"
+      "value": "-20000000001809"
     }
   ],
   "name": [
