@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class APIClient
-  attr_reader :api_env, :response_body, :response_status
+  attr_reader :api_env, :response, :response_body, :response_status
 
   def initialize(api_env)
     @api_env = api_env
@@ -116,6 +116,12 @@ class APIClient
     end
 
     response = http.request(request)
+
+    if response.kind_of?(Net::HTTPRedirection)
+      uri = URI.parse response.header['Location']
+      response = http.get uri, request.each_header.to_h
+    end
+
     @response_status = response.code.to_i
     @response_body = parsed_response(response)
   rescue Errno::ECONNREFUSED
