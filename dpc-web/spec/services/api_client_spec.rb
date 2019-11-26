@@ -14,7 +14,7 @@ RSpec.describe APIClient do
   end
 
   describe '#create_organization' do
-    context 'successful API request' do
+    context '202 response' do
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
           headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
@@ -58,7 +58,7 @@ RSpec.describe APIClient do
             }]
           }.to_json
         ).to_return(
-          status: 200,
+          status: 202,
           body: "{\"id\":\"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d\",\"endpoint\":[{\"reference\":\"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}]}"
         )
 
@@ -66,7 +66,7 @@ RSpec.describe APIClient do
 
         api_client.create_organization(org)
 
-        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_status).to eq(202)
         expect(api_client.response_body).to eq(
           {
             'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
@@ -76,7 +76,76 @@ RSpec.describe APIClient do
       end
     end
 
-    context 'unsuccessful API request' do
+    context 'redirection' do
+      it 'sends data to API, follows redirect, and sets response instance variables' do
+        stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
+          headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
+          body: {
+            resourceType: 'Parameters',
+            parameter: [{
+              name: 'resource',
+              resource: {
+                resourceType: 'Bundle',
+                type: 'collection',
+                entry: [{
+                  resource: {
+                    address: [{
+                      use: org.address_use,
+                      type: org.address_type,
+                      city: org.address_city,
+                      country: 'US',
+                      line: [org.address_street, org.address_street_2],
+                      postalCode: org.address_zip,
+                      state: org.address_state
+                    }],
+                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: 'cool-npi-1'}],
+                    name: org.name,
+                    resourceType: 'Organization',
+                    type: [{
+                      coding: [{
+                        code: 'prov', display: 'Healthcare Provider', system: 'http://hl7.org/fhir/organization-type'
+                      }],
+                      text: 'Healthcare Provider'
+                    }]
+                  }
+                }, {
+                  resource: {
+                    resourceType: 'Endpoint',
+                    status: fhir_endpoint.status,
+                    connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
+                    name: fhir_endpoint.name, address: fhir_endpoint.uri
+                  }
+                }]
+              }
+            }]
+          }.to_json
+        ).to_return(
+          status: 303,
+          headers: { 'Location' => 'http://dpc.example.com/Organization/7953e48b-0b42-4ddf-8b43-07c7aa2a3dl7' }
+        )
+
+        stub_request(:get, 'http://dpc.example.com/Organization/7953e48b-0b42-4ddf-8b43-07c7aa2a3dl7').with(
+          headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' }
+        ).to_return(
+          status: 200,
+          body: "{\"id\":\"7953e48b-0b42-4ddf-8b43-07c7aa2a3dl7\",\"endpoint\":[{\"reference\":\"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}]}"
+        )
+
+        api_client = APIClient.new('sandbox')
+
+        api_client.create_organization(org)
+
+        expect(api_client.response_status).to eq(200)
+        expect(api_client.response_body).to eq(
+          {
+            'id' => '7953e48b-0b42-4ddf-8b43-07c7aa2a3dl7',
+            'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
+          }
+        )
+      end
+    end
+
+    context '500 response' do
       it 'responds like 500 if connection error is raised' do
         http_stub = instance_double(Net::HTTP)
         allow(Net::HTTP).to receive(:new).and_return(http_stub)
