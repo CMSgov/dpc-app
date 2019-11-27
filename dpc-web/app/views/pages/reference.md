@@ -635,7 +635,7 @@ More details on the attribution logic and rules are given [earlier](#attribution
 ### Sample data
 
 As previously mentioned, the DPC sandbox environments do not have any pre-loaded test data.
-Users will need to provide their own FHIR resources in order to successfully make export requests to the BlueButton backend.
+Users will need to provide their own FHIR resources in order to successfully make export requests to the Blue Button backend.
 
 The DPC team has created a collection of sample Patient and Practitioner resources which can be used to get started with the sandbox.
 The files are available in our public [GitHub](https://github.com/CMSgov/dpc-app/tree/master/src/main/resources) repository.
@@ -643,9 +643,9 @@ More details are given in the included [README](https://github.com/CMSgov/dpc-ap
 
 The sample data was generated using the excellent [Synthea](https://synthea.mitre.org) project, with some modifications that are documented in the repository. 
 
-Users can provide any sample FHIR resources (that fulfill the required FHIR profiles) to DPC, but will need to ensure that, for the sandbox environments, any `Patient` resources have an *Medicare Beneficiary Identifier* (MBI) that matches a record in the BlueButton backend.
+Users can provide any sample FHIR resources (that fulfill the required FHIR profiles) to DPC, but will need to ensure that, for the sandbox environments, any `Patient` resources have an *Medicare Beneficiary Identifier* (MBI) that matches a record in the Blue Button backend.
 
-The BlueButton team maintains a list of beneficiaries (along with their MBIs) that can be used for matching existing synthetic data (such as from an organization's training EMR) with valid sandbox MBIs.
+The Blue Button team maintains a list of beneficiaries (along with their MBIs) that can be used for matching existing synthetic data (such as from an organization's training EMR) with valid sandbox MBIs.
 More details and the corresponding data files can be found [here](https://bluebutton.cms.gov/developers/#sample-beneficiaries).
 
 ### Create a Provider
@@ -779,9 +779,9 @@ Details on the exact data format are given in the [implementation guide](https:/
 - The patient's first and last name
 - The patient's birthdate
 
-> Note: The BlueButton team is currently in the process of implementing support for MBIs in accordance with CMS policies.
+> Note: The Blue Button team is currently in the process of implementing support for MBIs in accordance with CMS policies.
 >
->In the interim, DPC is making use of the *BlueButton Beneficiary Identifiers* as a proxy for MBI values.
+>In the interim, DPC is making use of the *Blue Button Beneficiary Identifiers* as a proxy for MBI values.
 >Once MBI support is fully implemented, users will need to migrate their tooling by remapping from the **https://bluebutton.cms.gov/resources/variables/bene_id** system to the new **http://hl7.org/fhir/sid/us-mbi** system.
 > Existing resources in the DPC sandbox will be automatically updated to utilize the new system.
 
