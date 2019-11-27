@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.models.KeyPairResponse;
 import gov.cms.dpc.common.utils.EnvironmentParser;
-import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.servlets.tasks.Task;
 import org.slf4j.Logger;
