@@ -1,9 +1,7 @@
 package gov.cms.dpc.common.consent.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Source;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -63,7 +61,6 @@ public class ConsentEntity implements Serializable {
     @Column(name = "mbi")
     private String mbi;
 
-    @NotEmpty
     @Column(name = "hicn")
     private String hicn;
 
