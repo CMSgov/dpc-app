@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;

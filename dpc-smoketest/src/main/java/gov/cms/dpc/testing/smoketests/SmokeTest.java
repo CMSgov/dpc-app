@@ -3,8 +3,6 @@ package gov.cms.dpc.testing.smoketests;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import com.github.nitram509.jmacaroons.Macaroon;
-import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,7 +20,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
