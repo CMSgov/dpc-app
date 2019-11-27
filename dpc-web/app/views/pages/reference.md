@@ -782,7 +782,8 @@ Details on the exact data format are given in the [implementation guide](https:/
 > Note: The BlueButton team is currently in the process of implementing support for MBIs in accordance with CMS policies.
 >
 >In the interim, DPC is making use of the *BlueButton Beneficiary Identifiers* as a proxy for MBI values.
->Once MBI support is fully implemented, users will need to migrate their existing resources by remapping from the **https://bluebutton.cms.gov/resources/variables/bene_id** system to the new **http://hl7.org/fhir/sid/us-mbi** system.
+>Once MBI support is fully implemented, users will need to migrate their tooling by remapping from the **https://bluebutton.cms.gov/resources/variables/bene_id** system to the new **http://hl7.org/fhir/sid/us-mbi** system.
+> Existing resources in the DPC sandbox will be automatically updated to utilize the new system.
 
 **cURL command**
 
