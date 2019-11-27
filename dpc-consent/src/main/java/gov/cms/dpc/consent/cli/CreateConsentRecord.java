@@ -45,9 +45,11 @@ import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
  */
 public class CreateConsentRecord extends ConsentCommand {
 
-    private static Logger logger = LoggerFactory.getLogger(CreateConsentRecord.class);
-    private final Settings settings;
+    private static final Logger logger = LoggerFactory.getLogger(CreateConsentRecord.class);
 
+    private static final String IN_OR_OUT_ARG = "inOrOut";
+
+    private final Settings settings;
 
     CreateConsentRecord() {
         super("create", "Create a new consent record");
@@ -56,38 +58,45 @@ public class CreateConsentRecord extends ConsentCommand {
 
     @Override
     public void addAdditionalOptions(Subparser subparser) {
-        addSingleArgument(subparser, true, "mbi", "MBI of patient in this record", "-p", "--patient");
+        subparser.addArgument("-p", "--patient")
+                .required(true)
+                .dest("mbi")
+                .help("MBI of patient in this record");
 
-        addSingleArgument(subparser, true, "effective-date", "effective date of this record (e.g., 2019-11-20)", "-d", "--date");
+        subparser.addArgument("-d", "--date")
+                .required(true)
+                .dest("effective-date")
+                .help("effective date of this record (e.g., 2019-11-20)");
 
+        subparser.addArgument("--org")
+                .required(false)
+                .dest("org-uuid")
+                .help("DPC UUID of an external org that originated this record");
+
+        addInOrOutGroup(subparser);
+    }
+
+    private void addInOrOutGroup(Subparser subparser) {
         MutuallyExclusiveGroup group = subparser.addMutuallyExclusiveGroup();
         group
                 .addArgument("-i", "--in")
-                .dest("inOrOut")
+                .dest(IN_OR_OUT_ARG)
                 .action(Arguments.storeConst()).setConst(ConsentEntity.OPT_IN)
                 .help("flag indicating this is an optin record; mutually exclusive with -o");
         group
                 .addArgument("-o", "--out")
-                .dest("inOrOut")
+                .dest(IN_OR_OUT_ARG)
                 .action(Arguments.storeConst()).setConst(ConsentEntity.OPT_OUT)
                 .help("flag indicating this is an optout record; mutually exclusive with -i");
+
         group.required(true);
-
-        addSingleArgument(subparser, false, "org-uuid", "DPC UUID of an external org that originated this record", "--org");
-    }
-
-    private void addSingleArgument(Subparser subparser, boolean required, String dest, String help, String... flags) {
-        subparser.addArgument(flags)
-                .required(required)
-                .dest(dest)
-                .help(help);
     }
 
     @Override
     protected void run(Bootstrap<DPCConsentConfiguration> bootstrap, Namespace namespace, DPCConsentConfiguration dpcConsentConfiguration) throws Exception {
         final String mbi = namespace.getString("mbi");
         final LocalDate effectiveDate = LocalDate.parse(namespace.getString("effective-date"));
-        final String inOrOut = namespace.getString("inOrOut");
+        final String inOrOut = namespace.getString(IN_OR_OUT_ARG);
 
         final String orgUuid = namespace.getString("org-uuid");
         if (orgUuid != null && !orgUuid.isBlank()) {
@@ -101,26 +110,30 @@ public class CreateConsentRecord extends ConsentCommand {
                 String.format("Creating %s consent entry for patient %s, custodian is %s, effective %s",
                         inOrOut, mbi, orgUuid == null ? "DPC" : orgUuid, effectiveDate));
 
+        ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.of(mbi));
+        ce.setEffectiveDate(effectiveDate);
+        ce.setPolicyCode(inOrOut);
+
+        if (orgUuid != null && !orgUuid.isBlank()) {
+            ce.setCustodian(UUID.fromString(orgUuid));
+        }
+
+        saveEntity(bootstrap, dpcConsentConfiguration, ce);
+
+        String custodian = ce.getCustodian() == null ? ce.getSourceCode() : ce.getCustodian().toString();
+        logger.info(String.format("Created %s consent entry for patient %s, custodial entity is %s, effective %s",
+                ce.getPolicyCode(), ce.getMbi(), custodian, ce.getEffectiveDate()));
+    }
+
+    private void saveEntity(Bootstrap<DPCConsentConfiguration> bootstrap, DPCConsentConfiguration dpcConsentConfiguration, ConsentEntity entity) throws Exception {
         final PooledDataSourceFactory dataSourceFactory = dpcConsentConfiguration.getConsentDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(bootstrap.getMetricRegistry(), "consent-cli");
 
         try (final Connection connection = dataSource.getConnection();
              DSLContext context = DSL.using(connection, this.settings)) {
 
-            ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.of(mbi));
-            ce.setEffectiveDate(effectiveDate);
-            ce.setPolicyCode(inOrOut);
-
-            if (orgUuid != null && !orgUuid.isBlank()) {
-                ce.setCustodian(UUID.fromString(orgUuid));
-            }
-
-            ConsentRecord record = context.newRecord(CONSENT, ce);
+            ConsentRecord record = context.newRecord(CONSENT, entity);
             context.executeInsert(record);
-
-            logger.info(
-                    String.format("Creating %s consent entry for patient %s, custodian is %s, effective %s",
-                            inOrOut, mbi, orgUuid == null ? "DPC" : orgUuid, effectiveDate));
         }
     }
 }
