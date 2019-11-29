@@ -133,7 +133,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     public Response updateOrganization(@ApiParam(value = "Organization resource ID", required = true) @PathParam("organizationID") UUID organizationID, Organization organization) {
         try {
-            OrganizationEntity orgEntity = this.dao.updateOrganization(organization);
+            OrganizationEntity orgEntity = this.dao.updateOrganization(organizationID, organization);
             return Response.status(Response.Status.OK).entity(orgEntity.toFHIR()).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
