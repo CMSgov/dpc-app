@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c110c114-cf23-4b5a-a7c8-33ce5b4304cf",
+		"_postman_id": "665bcdc6-0a21-450f-b41a-6e61a5076cfc",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -946,7 +946,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"resourceType\": \"Organization\",\n    \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n    \"identifier\": [\n        {\n            \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n            \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n        }\n    ],\n    \"name\": \"Beth Israel Deaconess HealthCare - Chestnut Hill\",\n    \"address\": [\n        {\n            \"use\": \"work\",\n            \"type\": \"both\",\n            \"line\": [\n                \"200 Boylston Street, 4th Floor\"\n            ],\n            \"city\": \"Chestnut Hill\",\n            \"state\": \"MA\",\n            \"postalCode\": \"02467\",\n            \"country\": \"US\"\n        }\n    ]\n}"
+							"raw": "{\n    \"resourceType\": \"Organization\",\n    \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n    \"identifier\": [\n        {\n            \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n            \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n        }\n    ],\n    \"name\": \"Beth Israel Deaconess HealthCare - Chestnut Hill\",\n    \"address\": [\n        {\n            \"use\": \"work\",\n            \"type\": \"both\",\n            \"line\": [\n                \"200 Boylston Street, 4th Floor\"\n            ],\n            \"city\": \"Chestnut Hill\",\n            \"state\": \"MA\",\n            \"postalCode\": \"02467\",\n            \"country\": \"US\"\n        }\n    ],\n    \"endpoint\": [\n        {\n            \"reference\": \"Endpoint/0a60c95c-48b4-4f39-8bf4-09f7dfe2e3cc\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "http://{{hostname}}:{{api_port}}/v1/Organization/{{organization_id}}",

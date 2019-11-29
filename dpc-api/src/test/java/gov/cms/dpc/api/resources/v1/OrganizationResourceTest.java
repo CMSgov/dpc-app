@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.api.APITestHelpers;
@@ -156,14 +157,24 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         organization.setName("New Org Name");
         organization.setContact(Lists.emptyList());
 
-        final MethodOutcome outcome = client
+        MethodOutcome outcome = client
                 .update()
                 .resource(organization)
                 .execute();
 
         Organization result = (Organization) outcome.getResource();
+        assertEquals(orgID, result.getIdentifierFirstRep().getValue());
         assertEquals(organization.getName(), result.getName(), "Name should be updated");
         assertTrue(organization.getContact().isEmpty(), "Contact list should be updated");
         assertEquals(1, result.getEndpoint().size(), "Endpoint list should be unchanged");
+
+        // Try to update when authenticated as different organization
+        final String org2ID = UUID.randomUUID().toString();
+        final String org2Macaroon = FHIRHelpers.registerOrganization(attrClient, parser, org2ID, getAdminURL());
+        final Pair<UUID, PrivateKey> org2UUIDPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org2-update-key", org2ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient org2Client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), org2Macaroon, org2UUIDPrivateKeyPair.getLeft(), org2UUIDPrivateKeyPair.getRight());
+
+        IUpdateTyped update = org2Client.update().resource(organization);
+        assertThrows(AuthenticationException.class, update::execute);
     }
 }

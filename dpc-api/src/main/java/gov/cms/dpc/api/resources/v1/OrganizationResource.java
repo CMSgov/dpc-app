@@ -9,6 +9,8 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
@@ -92,7 +94,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 422, message = "Provided resource is not a valid FHIR Organization")
     })
     @Override
-    public Organization updateOrganization(@PathParam("organizationID") UUID organizationID, @Valid Organization organization) {
+    public Organization updateOrganization(@PathParam("organizationID") UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization) {
         MethodOutcome outcome = this.client
                 .update()
                 .resource(organization)
