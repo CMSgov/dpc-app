@@ -37,8 +37,8 @@ class HttpRangeHeaderParamConverterTest {
 
     @Test
     void testEmptyRequest() {
-        final RangeHeader header = converter.fromString("");
-        assertNull(header, "Should not have range request");
+        assertNull(converter.fromString(""), "Should not have range request");
+        assertNull(converter.fromString(null), "Should not have range request");
     }
 
     @Test

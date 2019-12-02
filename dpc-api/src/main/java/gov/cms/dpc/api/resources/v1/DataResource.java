@@ -52,11 +52,13 @@ public class DataResource extends AbstractDataResource {
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
         final Response response;
-        // Return a non-ranged streamed response if the requester doesn't actually send the range header
-        if (rangeHeader == null) {
+
+        // Process the range request and return a partial stream, but only if they request bytes, ignore everything else
+        if (rangeHeader != null && rangeHeader.getUnit().equals("bytes")) {
+            response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader);
+        } else {
+            // Return a non-ranged streamed response if the requester doesn't actually send the range header, or if we don't understand the range unit
             response = buildDefaultResponse(fileID, filePointer);
-        } else { // Process the range request and return a partial stream
-            response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader.toString());
         }
 
         // Set the cache control headers to make sure the file isn't retained in transit
@@ -88,16 +90,22 @@ public class DataResource extends AbstractDataResource {
                 .build();
     }
 
-    private Response buildRangedRequest(String fileID, File file, String range) {
-        final Pair<Long, Long> rangePair = parseRangeHeader(range, file.length());
-        final String responseRange = String.format("bytes %d-%d/%d", rangePair.getLeft(), rangePair.getRight(), file.length());
+    private Response buildRangedRequest(String fileID, File file, RangeHeader range) {
+        final Integer rangeEnd = range.getEnd().orElse(range.getStart() + CHUNK_SIZE);
+        final long len = rangeEnd - range.getStart();
+
+        // If we have a negative range, throw an exception
+        if (len < 0) {
+            throw new WebApplicationException("Range end cannot be before begin", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
+        }
 
         try {
             final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-            randomAccessFile.seek(rangePair.getLeft());
-            final long len = rangePair.getRight() - rangePair.getLeft();
+            randomAccessFile.seek(range.getStart());
+
             final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);
 
+            final String responseRange = String.format("bytes %d-%d/%d", range.getStart(), rangeEnd, file.length());
             return Response
                     .status(Response.Status.PARTIAL_CONTENT)
                     .entity(fileStreamer)

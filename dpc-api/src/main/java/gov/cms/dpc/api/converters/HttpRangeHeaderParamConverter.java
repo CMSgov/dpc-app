@@ -30,7 +30,7 @@ class HttpRangeHeaderParamConverter implements ParamConverter<RangeHeader> {
     @Override
     public RangeHeader fromString(String value) {
         // If the range request is completely empty, treat it as if it was never set
-        if (value.isEmpty()) {
+        if (value == null || value.isEmpty()) {
             return null;
         }
         final Matcher matcher = RANGE_REGEX.matcher(value);

@@ -147,6 +147,15 @@ class DataResourceTest {
         assertAll(() -> assertNotNull(ch1, "Should have header"),
                 () -> assertEquals(1024 * 1024, Integer.parseInt(ch4), "Should have 1 MB chunk"),
                 () -> assertEquals(randomString.substring(0, 1024 * 1024), ws4, "Should match the first 1MB of the file"));
+
+        // Request file with an invalid range
+        response = RESOURCE.target("/v1/Data/test.ndjson")
+                .request()
+                .header(org.apache.http.HttpHeaders.RANGE, "bytes=50-0")
+                .get();
+
+        assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
+        assertEquals("{\"code\":416,\"message\":\"Range end cannot be before begin\"}", response.readEntity(String.class), "Should have correct status code");
     }
 
     private static ResourceExtension buildDataResource() {
