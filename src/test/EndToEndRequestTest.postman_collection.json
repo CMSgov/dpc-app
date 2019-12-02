@@ -926,8 +926,6 @@
 									"    pm.expect(address.city).equals(\"Chestnut Hill\");",
 									"    pm.expect(address.state).equals(\"MA\");",
 									"    pm.expect(address.postalCode).equals(\"02467\");",
-									"    ",
-									"    pm.expect(respJson.endpoint.length).equals(3);",
 									"});"
 								],
 								"type": "text/javascript"
