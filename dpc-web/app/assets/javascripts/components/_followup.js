@@ -17,5 +17,11 @@ if(typeof(select_with_follow_up) != 'undefined' && select_with_follow_up != null
         sibling.removeAttribute("hidden");
       }
     }
+
+    if(select_with_follow_up[i] != select_with_follow_up[i].getAttribute("data-hide-follow-up")) {
+      var event = document.createEvent("HTMLEvents");
+      event.initEvent('change');
+      select_with_follow_up[i].dispatchEvent(event);
+    }
   }
 }

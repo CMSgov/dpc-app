@@ -5,10 +5,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
@@ -49,6 +46,18 @@ public abstract class AbstractOrganizationResource {
     @FHIR
     @Path("/{organizationID}")
     public abstract Organization getOrganization(UUID organizationID);
+
+    /**
+     * Update the {@link Organization} with the given ID
+     *
+     * @param organizationID {@link UUID} of organization
+     * @param organization {@link Organization}
+     * @return
+     */
+    @PUT
+    @FHIR
+    @Path("/{organizationID}")
+    public abstract Response updateOrganization(UUID organizationID, Organization organization);
 
     /**
      * Delete the {@link Organization} from the system.
