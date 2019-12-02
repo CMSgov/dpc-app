@@ -1,0 +1,45 @@
+package gov.cms.dpc.api.converters;
+
+import gov.cms.dpc.api.models.RangeHeader;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ParamConverter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+class HttpRangeHeaderParamConverter implements ParamConverter<RangeHeader> {
+    /**
+     * {@link Pattern} for extracting Range request (e.g. bytes=0-12345)
+     */
+    private static final Pattern RANGE_REGEX = Pattern.compile("([a-z]+)=([0-9]+)-([0-9]+)?");
+    static final String RANGE_MSG_FORMATTER = "%s is not a valid range request";
+
+    HttpRangeHeaderParamConverter() {
+        // not used
+    }
+
+    @Override
+    public RangeHeader fromString(String value) {
+        // If the range request is completely empty, treat it as if it was never set
+        if (value.isEmpty()) {
+            return null;
+        }
+        final Matcher matcher = RANGE_REGEX.matcher(value);
+        if (matcher.matches()) {
+            final RangeHeader rangeHeader = new RangeHeader();
+            rangeHeader.setUnit(matcher.group(1));
+            rangeHeader.setStart(Integer.parseInt(matcher.group(2)));
+            if (matcher.group(3) != null) {
+                rangeHeader.setEnd(Integer.parseInt(matcher.group(3)));
+            }
+            return rangeHeader;
+        }
+        throw new WebApplicationException(String.format(RANGE_MSG_FORMATTER, value), Response.Status.BAD_REQUEST);
+    }
+
+    @Override
+    public String toString(RangeHeader value) {
+        return null;
+    }
+}

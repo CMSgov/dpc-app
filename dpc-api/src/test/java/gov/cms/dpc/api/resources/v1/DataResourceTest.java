@@ -6,6 +6,7 @@ import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
+import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.auth.AuthFilter;
@@ -56,7 +57,7 @@ class DataResourceTest {
             return new FileManager.FilePointer("", file.length(), file);
         });
 
-        final Response response = RESOURCE.target("/Data/test.ndjson")
+        final Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
                 .get();
 
@@ -79,7 +80,7 @@ class DataResourceTest {
         Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, file));
 
         // Try to request one byte
-        Response response = RESOURCE.target("/Data/test.ndjson")
+        Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
                 .header(org.apache.http.HttpHeaders.RANGE, "bytes=0-1")
                 .get();
@@ -98,7 +99,7 @@ class DataResourceTest {
         // Request 500 kb, with an offset
         int start = 30;
         int end = 500 * 1024 + start;
-        response = RESOURCE.target("/Data/test.ndjson")
+        response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
                 .header(org.apache.http.HttpHeaders.RANGE, String.format("bytes=%d-%s", start, end))
                 .get();
@@ -115,7 +116,7 @@ class DataResourceTest {
         stringWriter.getBuffer().setLength(0);
 
         // Request the entire file
-        response = RESOURCE.target("/Data/test.ndjson")
+        response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
                 .header(org.apache.http.HttpHeaders.RANGE, String.format("bytes=0-%s", length))
                 .get();
@@ -132,7 +133,7 @@ class DataResourceTest {
         stringWriter.getBuffer().setLength(0);
 
         // Request the entire file, without the ending value, which returns one chunk
-        response = RESOURCE.target("/Data/test.ndjson")
+        response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
                 .header(org.apache.http.HttpHeaders.RANGE, "bytes=0-")
                 .get();
@@ -154,7 +155,10 @@ class DataResourceTest {
         final FhirContext ctx = FhirContext.forDstu3();
         final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 
-        return APITestHelpers.buildResourceExtension(ctx, Collections.singletonList(dataResource), List.of(staticFilter, new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class)), false);
+        return APITestHelpers.buildResourceExtension(ctx, Collections.singletonList(dataResource),
+                List.of(staticFilter,
+                        new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class),
+                        new HttpRangeHeaderParamConverterProvider()), false);
     }
 
     private static String buildRandomString(long length) throws IOException {

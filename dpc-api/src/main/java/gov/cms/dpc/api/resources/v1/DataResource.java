@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.core.FileManager;
+import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
@@ -46,16 +47,16 @@ public class DataResource extends AbstractDataResource {
             @ApiResponse(code = 200, message = "File of newline-delimited JSON FHIR objects"),
             @ApiResponse(code = 500, message = "An error occurred", response = OperationOutcome.class)
     })
-    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @HeaderParam(HttpHeaders.RANGE) String range, @PathParam("fileID") String fileID) {
+    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @HeaderParam(HttpHeaders.RANGE) RangeHeader rangeHeader, @PathParam("fileID") String fileID) {
 
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
         final Response response;
         // Return a non-ranged streamed response if the requester doesn't actually send the range header
-        if (range == null) {
+        if (rangeHeader == null) {
             response = buildDefaultResponse(fileID, filePointer);
         } else { // Process the range request and return a partial stream
-            response = buildRangedRequest(fileID, filePointer.getFile(), range);
+            response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader.toString());
         }
 
         // Set the cache control headers to make sure the file isn't retained in transit
