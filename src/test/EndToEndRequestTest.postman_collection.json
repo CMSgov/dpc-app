@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "25b0d817-05c2-45b2-9946-b6ed2dbf7ebb",
+		"_postman_id": "665bcdc6-0a21-450f-b41a-6e61a5076cfc",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -24,8 +24,10 @@
 									"",
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+json\", function() {",
-									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+json\"); ",
-									"});"
+									"    pm.response.to.have.header(\"Content-Type\", \"application/fhir+json\");",
+									"});",
+									"",
+									"pm.globals.set(\"organization_id\", pm.response.json().id);"
 								],
 								"type": "text/javascript"
 							}
@@ -894,6 +896,71 @@
 							]
 						},
 						"description": "The coverage data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one coverage."
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Updating",
+			"item": [
+				{
+					"name": "Update organization",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "96f38c80-8b9d-4761-b66c-a02bd1de7408",
+								"exec": [
+									"pm.test(\"Status is OK\", function () {",
+									"    pm.response.to.have.be.ok;",
+									"});",
+									"",
+									"pm.test(\"Body matches expected response\", function() {",
+									"    var respJson = pm.response.json();",
+									"    pm.expect(respJson.name).equals(\"Beth Israel Deaconess HealthCare - Chestnut Hill\");",
+									"    ",
+									"    var address = respJson.address[0];",
+									"    pm.expect(address.line[0]).equals(\"200 Boylston Street, 4th Floor\");",
+									"    pm.expect(address.city).equals(\"Chestnut Hill\");",
+									"    pm.expect(address.state).equals(\"MA\");",
+									"    pm.expect(address.postalCode).equals(\"02467\");",
+									"    ",
+									"    pm.expect(respJson.endpoint.length).equals(3);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceType\": \"Organization\",\n    \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n    \"identifier\": [\n        {\n            \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n            \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n        }\n    ],\n    \"name\": \"Beth Israel Deaconess HealthCare - Chestnut Hill\",\n    \"address\": [\n        {\n            \"use\": \"work\",\n            \"type\": \"both\",\n            \"line\": [\n                \"200 Boylston Street, 4th Floor\"\n            ],\n            \"city\": \"Chestnut Hill\",\n            \"state\": \"MA\",\n            \"postalCode\": \"02467\",\n            \"country\": \"US\"\n        }\n    ],\n    \"endpoint\": [\n        {\n            \"reference\": \"Endpoint/0a60c95c-48b4-4f39-8bf4-09f7dfe2e3cc\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Organization/{{organization_id}}",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Organization",
+								"{{organization_id}}"
+							]
+						}
 					},
 					"response": []
 				}

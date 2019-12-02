@@ -21,7 +21,8 @@
           ],
           "city": "Washington",
           "state": "DC",
-          "postalCode": "20008"
+          "postalCode": "20008",
+          "country": "US"
         }],
         "contact": [
           {
