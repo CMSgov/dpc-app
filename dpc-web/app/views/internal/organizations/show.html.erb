@@ -113,8 +113,15 @@
     <div class="box__content">
       <h2 class="box__heading">Users</h2>
       <% @organization.users.each do |user| %>
-        <div class="ds-u-margin-bottom--1">
-          <%= link_to user.name, internal_user_url(user) %>
+        <div class="module-container">
+          <div class="module-container__id">
+            <%= user.id %>
+          </div>
+          <div class="module-container__primary">
+            <h2 class="module-container__heading">
+              <%= link_to user.name, internal_user_url(user) %>
+            </h2>
+          </div>
         </div>
       <% end %>
     </div>
