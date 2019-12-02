@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "25b0d817-05c2-45b2-9946-b6ed2dbf7ebb",
+		"_postman_id": "22d19de5-127e-4788-ad7b-5738dbf0e882",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -729,7 +729,7 @@
 									"        pm.expect(Object.keys(pm.response.json().output[0].extension[1]).length).to.equal(2);",
 									"        pm.expect(pm.response.json().output[0].extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
 									"        pm.expect(pm.response.json().output[0].extension[1].valueDecimal).to.equal(1968);",
-									"        pm.environment.set(\"patient_url\", pm.response.json().output[0].url);",
+									"        pm.environment.set(\"patient\", pm.response.json().output[0]);",
 									"        pm.expect(pm.response.json().output[1].type).to.equal(\"ExplanationOfBenefit\");",
 									"        pm.expect(pm.response.json().output[1].count).to.equal(102);",
 									"        pm.expect(Object.keys(pm.response.json().output[1].extension[0]).length).to.equal(2);",
@@ -738,7 +738,7 @@
 									"        pm.expect(Object.keys(pm.response.json().output[1].extension[1]).length).to.equal(2);",
 									"        pm.expect(pm.response.json().output[1].extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
 									"        pm.expect(pm.response.json().output[1].extension[1].valueDecimal).to.equal(1269219);",
-									"        pm.environment.set(\"eob_url\", pm.response.json().output[1].url);",
+									"        pm.environment.set(\"eob\", pm.response.json().output[1]);",
 									"        pm.expect(pm.response.json().output[2].type).to.equal(\"Coverage\");",
 									"        pm.expect(pm.response.json().output[2].count).to.equal(12);",
 									"        pm.expect(Object.keys(pm.response.json().output[2].extension[0]).length).to.equal(2);",
@@ -747,7 +747,7 @@
 									"        pm.expect(Object.keys(pm.response.json().output[2].extension[1]).length).to.equal(2);",
 									"        pm.expect(pm.response.json().output[2].extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
 									"        pm.expect(pm.response.json().output[2].extension[1].valueDecimal).to.equal(8148);",
-									"        pm.environment.set(\"coverage_url\", pm.response.json().output[2].url);",
+									"        pm.environment.set(\"coverage\", pm.response.json().output[2]);",
 									"    });",
 									"} else {",
 									"    // If response code is not 200, it should be 202. Assert that, and retry.",
@@ -782,6 +782,8 @@
 							"script": {
 								"id": "3e50ce2a-4322-4723-981b-31251393b449",
 								"exec": [
+									"require('crypto-js')",
+									"",
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
 									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
@@ -796,7 +798,26 @@
 									"        var lineData = JSON.parse(line);",
 									"        pm.expect(lineData.resourceType).to.equal(\"Patient\");",
 									"    }",
-									"});"
+									"});",
+									"",
+									"// Verify sha256 checksums",
+									"pm.test(\"Checksums should match\", function() {",
+									"    var output = pm.environment.get(\"patient\")",
+									"    var responseOutput = pm.response.text();",
+									"    ",
+									"    var checksum  = CryptoJS.SHA256(responseOutput);",
+									"    pm.expect(\"sha256:\" + checksum).to.equal(output.extension[0].valueString)",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b848c339-0867-41c0-81e8-326e6da9e6d6",
+								"exec": [
+									"pm.environment.set(\"patient_url\", pm.environment.get(\"patient\").url)"
 								],
 								"type": "text/javascript"
 							}
@@ -841,6 +862,16 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "61e1278d-0e11-4a4b-97b3-6118ac20a20f",
+								"exec": [
+									"pm.environment.set(\"eob_url\", pm.environment.get(\"eob\").url)"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -878,7 +909,27 @@
 									"        var lineData = JSON.parse(line);",
 									"        pm.expect(lineData.resourceType).to.equal(\"Coverage\");",
 									"    }",
-									"});"
+									"});",
+									"",
+									"// Verify sha256 checksum",
+									"pm.test(\"Checksum should match\", function() {",
+									"    var output = pm.environment.get(\"coverage\")",
+									"    var responseOutput = pm.response.text();",
+									"    ",
+									"    var checksum  = CryptoJS.SHA256(responseOutput);",
+									"    pm.expect(\"sha256:\" + checksum).to.equal(output.extension[0].valueString)",
+									"    ",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f30dd4c7-de1c-4d75-8119-24935c3e4959",
+								"exec": [
+									"pm.environment.set(\"coverage_url\", pm.environment.get(\"coverage\").url)"
 								],
 								"type": "text/javascript"
 							}
@@ -894,6 +945,51 @@
 							]
 						},
 						"description": "The coverage data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one coverage."
+					},
+					"response": []
+				},
+				{
+					"name": "Request Partial Range",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9c3140af-4f5d-493a-85b7-ec73dec7b750",
+								"exec": [
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Range\");",
+									"});",
+									"",
+									"// Should be 10kb total",
+									"pm.test('Should have 10kb of data', function() {",
+									"    pm.expect(pm.response.text()).to.have.lengthOf(10240);",
+									"})",
+									"",
+									"pm.test('Content should be gzipped', function() {",
+									"    pm.response.to.have.header(\"Content-Encoding\", \"gzip\");",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Range",
+								"value": "bytes=0-10240",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{eob_url}}",
+							"host": [
+								"{{eob_url}}"
+							]
+						},
+						"description": "Request a subset of the EOB data to ensure range requests work correctly."
 					},
 					"response": []
 				}

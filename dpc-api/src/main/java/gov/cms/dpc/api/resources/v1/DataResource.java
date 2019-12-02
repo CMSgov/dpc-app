@@ -9,7 +9,6 @@ import gov.cms.dpc.api.resources.AbstractDataResource;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
@@ -117,27 +116,6 @@ public class DataResource extends AbstractDataResource {
         } catch (IOException e) {
             throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    private Pair<Long, Long> parseRangeHeader(String range, long fileLength) {
-        // Split the range request
-        final String[] ranges = range.split("=", -1)[1].split("-", -1);
-        final long from = Long.parseLong(ranges[0]);
-
-         /*
-          Chunk media if the range upper bound is unspecified. Chrome, Opera sends "bytes=0-"
-         */
-        long to = CHUNK_SIZE + from;
-        if (to >= fileLength) {
-            to = fileLength - 1;
-        }
-        // If we're given a to range, use that directly
-        // Can they give us a value larger than the actual byte size?
-        if (ranges.length == 2 && !ranges[1].equals("")) {
-            to = Long.parseLong(ranges[1]);
-        }
-
-        return Pair.of(from, to);
     }
 
     private static class PartialFileStreamer implements StreamingOutput {
