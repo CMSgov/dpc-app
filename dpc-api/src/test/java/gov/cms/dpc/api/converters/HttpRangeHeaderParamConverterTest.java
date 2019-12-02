@@ -23,14 +23,16 @@ class HttpRangeHeaderParamConverterTest {
 
     @Test
     void testFullParsing() {
-        final RangeHeader header = converter.fromString("bytes=0-1");
+        final String rangeValue = "bytes=0-1";
+        final RangeHeader header = converter.fromString(rangeValue);
 
         assertAll(() -> assertNotNull(header, "Should have header response"),
                 () -> assertEquals("bytes", header.getUnit(), "Should have correct unit"),
-                () -> assertTrue(header.getStart().isPresent(), "Should have start range"),
-                () -> assertEquals(0, header.getStart().get(), "Should have correct start"),
+                () -> assertEquals(0, header.getStart(), "Should have correct start"),
                 () -> assertTrue(header.getEnd().isPresent(), "Should have end range"),
                 () -> assertEquals(1, header.getEnd().get(), "Should have correct end"));
+
+        assertEquals(rangeValue, converter.toString(header), "Should convert back to string");
     }
 
     @Test
@@ -49,13 +51,15 @@ class HttpRangeHeaderParamConverterTest {
 
     @Test
     void testMissingEnd() {
-        final RangeHeader header = converter.fromString("bytes=0-");
+        final String rangeValue = "bytes=0-";
+        final RangeHeader header = converter.fromString(rangeValue);
 
         assertAll(() -> assertNotNull(header, "Should have header response"),
                 () -> assertEquals("bytes", header.getUnit(), "Should have correct unit"),
-                () -> assertTrue(header.getStart().isPresent(), "Should have start range"),
-                () -> assertEquals(0, header.getStart().get(), "Should have correct start"),
+                () -> assertEquals(0, header.getStart(), "Should have correct start"),
                 () -> assertFalse(header.getEnd().isPresent(), "Should not have end range"));
+
+        assertEquals(rangeValue, converter.toString(header), "Should convert back to string");
     }
 
     @Test

@@ -8,6 +8,14 @@ import javax.ws.rs.ext.ParamConverter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * {@link ParamConverter} for handling range request values from the {@link org.eclipse.jetty.http.HttpHeader#RANGE} header.
+ * This follows the RFC as closely as possible, see <a href="https://tools.ietf.org/html/rfc7233#section-3.1> the IETF RFC</a>
+ * One potential deviation (not entirely sure from the IETF docs) is that we simply accept an empty value and ignore it, rather than throwing an exception
+ *
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Range">MDN Range Header</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests">MDN Range Request</a>
+ */
 class HttpRangeHeaderParamConverter implements ParamConverter<RangeHeader> {
     /**
      * {@link Pattern} for extracting Range request (e.g. bytes=0-12345)
@@ -40,6 +48,6 @@ class HttpRangeHeaderParamConverter implements ParamConverter<RangeHeader> {
 
     @Override
     public String toString(RangeHeader value) {
-        return null;
+        return value.toString();
     }
 }

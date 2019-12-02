@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.models;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RangeHeader implements Serializable {
@@ -15,8 +16,8 @@ public class RangeHeader implements Serializable {
         // Jackson required
     }
 
-    public Optional<Integer> getStart() {
-        return Optional.ofNullable(start);
+    public Integer getStart() {
+        return start;
     }
 
     public void setStart(Integer start) {
@@ -37,5 +38,31 @@ public class RangeHeader implements Serializable {
 
     public void setUnit(String unit) {
         this.unit = unit;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RangeHeader that = (RangeHeader) o;
+        return unit.equals(that.unit) &&
+                start.equals(that.start) &&
+                Objects.equals(end, that.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(unit, start, end);
+    }
+
+    @Override
+    public String toString() {
+        final String endString;
+        if (this.end == null) {
+            endString = "";
+        } else {
+            endString = this.end.toString();
+        }
+        return String.format("%s=%d-%s", this.unit, this.start, endString);
     }
 }
