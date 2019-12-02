@@ -18,6 +18,7 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 /**
@@ -58,15 +59,14 @@ public class DataResource extends AbstractDataResource {
     public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                            @HeaderParam(HttpHeaders.RANGE) RangeHeader rangeHeader,
                            @HeaderParam(HttpHeaders.IF_NONE_MATCH) Optional<String> fileChecksum,
+                           @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE) Optional<String> modifiedHeader,
                            @PathParam("fileID") String fileID) {
 
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
         // If we're provided a file checksum, verify it matches, if so, return a 304
-        if (fileChecksum.isPresent()) {
-            if (fileChecksum.get().equals(filePointer.getChecksum())) {
-                return Response.status(Response.Status.NOT_MODIFIED).build();
-            }
+        if (this.manager.returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
+            return Response.status(Response.Status.NOT_MODIFIED).build();
         }
 
         final Response response;

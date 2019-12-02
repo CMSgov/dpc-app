@@ -9,6 +9,7 @@ import javax.ws.rs.HEAD;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -22,5 +23,5 @@ public abstract class AbstractDataResource {
 
     @Path("/{fileID}/")
     @GET
-    public abstract Response export(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, String fileID);
+    public abstract Response export(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, String fileID);
 }

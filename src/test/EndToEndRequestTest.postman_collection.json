@@ -748,6 +748,8 @@
 									"        pm.expect(pm.response.json().output[2].extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
 									"        pm.expect(pm.response.json().output[2].extension[1].valueDecimal).to.equal(8148);",
 									"        pm.environment.set(\"coverage\", pm.response.json().output[2]);",
+									"        ",
+									"        pm.environment.set(\"job_start\", pm.response.json().transactionTime)",
 									"    });",
 									"} else {",
 									"    // If response code is not 200, it should be 202. Assert that, and retry.",
@@ -987,6 +989,48 @@
 							"raw": "{{eob_url}}",
 							"host": [
 								"{{eob_url}}"
+							]
+						},
+						"description": "Request a subset of the EOB data to ensure range requests work correctly."
+					},
+					"response": []
+				},
+				{
+					"name": "Request Modified Since",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9c3140af-4f5d-493a-85b7-ec73dec7b750",
+								"exec": [
+									"// Response should be 304",
+									"pm.test('Response should be not-modified', function() {",
+									"    pm.response.to.have.status(304);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "If-Modified-Since",
+								"type": "text",
+								"value": "{{job_start}}"
+							}
+						],
+						"url": {
+							"raw": "{{eob_url}}",
+							"host": [
+								"{{eob_url}}"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": ""
+								}
 							]
 						},
 						"description": "Request a subset of the EOB data to ensure range requests work correctly."

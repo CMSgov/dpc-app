@@ -28,9 +28,13 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,7 +62,7 @@ class DataResourceTest {
             final File tempPath = FileUtils.getTempDirectory();
             final File file = File.createTempFile("test", ".ndjson", tempPath);
             FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-            return new FileManager.FilePointer("", file.length(), file);
+            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), file);
         });
 
         final Response response = RESOURCE.target("/v1/Data/test.ndjson")
@@ -81,7 +85,7 @@ class DataResourceTest {
         final String randomString = buildRandomString(length);
         FileUtils.write(file, randomString, StandardCharsets.UTF_8);
 
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, file));
+        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, UUID.randomUUID(), file));
 
         // Try to request one byte
         Response response = RESOURCE.target("/v1/Data/test.ndjson")
@@ -167,13 +171,16 @@ class DataResourceTest {
     @DisplayName("Test ETag responses")
     class ETagTests {
 
+        private final OffsetDateTime modifiedDate = LocalDate.of(2017, 3, 11).atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
+
         @BeforeEach
         void setupETagTests() {
+
             Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
                 final File tempPath = FileUtils.getTempDirectory();
                 final File file = File.createTempFile("test", ".ndjson", tempPath);
                 FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-                return new FileManager.FilePointer("This should match", file.length(), file);
+                return new FileManager.FilePointer("This should match", file.length(), UUID.randomUUID(), file);
             });
         }
 
@@ -214,6 +221,27 @@ class DataResourceTest {
                     .get();
 
             assertAll(() -> assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus(), "Should have downloaded"));
+        }
+
+        @Test
+        void testModifiedTimestamp() {
+
+            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+                    .request()
+                    .header(HttpHeaders.IF_MODIFIED_SINCE, "This should match")
+                    .get();
+
+            assertAll(() -> assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus(), "Should have downloaded"));
+        }
+
+        @Test
+        void testMalformedModifiedTimestamp() {
+            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+                    .request()
+                    .header(HttpHeaders.IF_MODIFIED_SINCE, "Not a real value")
+                    .get();
+
+            assertAll(() -> assertEquals(Response.Status.OK.getStatusCode(), response.getStatus(), "Should have downloaded"));
         }
     }
 
