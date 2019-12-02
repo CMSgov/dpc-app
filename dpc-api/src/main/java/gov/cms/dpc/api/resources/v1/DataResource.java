@@ -90,8 +90,9 @@ public class DataResource extends AbstractDataResource {
     }
 
     private Response buildRangedRequest(String fileID, File file, RangeHeader range) {
-        final Integer rangeEnd = range.getEnd().orElse(range.getStart() + CHUNK_SIZE);
-        final long len = rangeEnd - range.getStart();
+        final Long rangeStart = range.getStart() < 0 ? 0 : range.getStart();
+        final Long rangeEnd = range.getEnd().orElse(rangeStart + CHUNK_SIZE);
+        final long len = rangeEnd - rangeStart;
 
         // If we have a negative range, throw an exception
         if (len < 0) {
@@ -100,11 +101,11 @@ public class DataResource extends AbstractDataResource {
 
         try {
             final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-            randomAccessFile.seek(range.getStart());
+            randomAccessFile.seek(rangeStart);
 
             final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);
 
-            final String responseRange = String.format("bytes %d-%d/%d", range.getStart(), rangeEnd, file.length());
+            final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, file.length());
             return Response
                     .status(Response.Status.PARTIAL_CONTENT)
                     .entity(fileStreamer)

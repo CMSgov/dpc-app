@@ -37,9 +37,9 @@ class HttpRangeHeaderParamConverter implements ParamConverter<RangeHeader> {
         if (matcher.matches()) {
             final RangeHeader rangeHeader = new RangeHeader();
             rangeHeader.setUnit(matcher.group(1));
-            rangeHeader.setStart(Integer.parseInt(matcher.group(2)));
+            rangeHeader.setStart(Long.parseLong(matcher.group(2)));
             if (matcher.group(3) != null) {
-                rangeHeader.setEnd(Integer.parseInt(matcher.group(3)));
+                rangeHeader.setEnd(Long.parseLong(matcher.group(3)));
             }
             return rangeHeader;
         }

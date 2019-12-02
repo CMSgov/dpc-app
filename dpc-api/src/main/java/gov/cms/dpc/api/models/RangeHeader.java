@@ -9,26 +9,26 @@ public class RangeHeader implements Serializable {
     public static final long serialVersionUID = 42L;
 
     private String unit;
-    private Integer start;
-    private Integer end;
+    private Long start;
+    private Long end;
 
     public RangeHeader() {
         // Jackson required
     }
 
-    public Integer getStart() {
+    public Long getStart() {
         return start;
     }
 
-    public void setStart(Integer start) {
+    public void setStart(Long start) {
         this.start = start;
     }
 
-    public Optional<Integer> getEnd() {
+    public Optional<Long> getEnd() {
         return Optional.ofNullable(this.end);
     }
 
-    public void setEnd(Integer end) {
+    public void setEnd(Long end) {
         this.end = end;
     }
 
@@ -43,7 +43,7 @@ public class RangeHeader implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof RangeHeader)) return false;
         RangeHeader that = (RangeHeader) o;
         return unit.equals(that.unit) &&
                 start.equals(that.start) &&
