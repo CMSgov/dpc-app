@@ -45,7 +45,7 @@
             <span class="ds-c-field__hint">You may use an approximate number.<br/>If you are a vendor, leave blank.</span>
             <% end %>
             <%= f.number_field :requested_num_providers, value: "#{resource.requested_num_providers&.positive? ? resource.requested_num_providers : '' }",
-              min: 1, class: "ds-c-field ds-c-field--small" %>
+              min: 0, class: "ds-c-field ds-c-field--small" %>
           </div>
         </div>
 

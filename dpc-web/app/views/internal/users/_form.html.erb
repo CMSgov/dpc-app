@@ -9,7 +9,7 @@
       <div class="ds-l-col--9 field-group__fields">
         <div class="field">
           <%= f.label :organization_ids, "Assigned organization", class: "ds-c-label ds-u-margin-top--0" %>
-          <%= f.select :organization_ids, Organization.all.map{|o| [o.name, o.id]}, { selected: params[:user_organization_ids] || @user.organization_ids, include_blank: '-Not assigned-' }, class: "ds-c-field", value: @user.primary_organization.try(:id), 'aria-describedby': 'requested_org_hint', 'data-org-toggle': 'org-toggle' %>
+          <%= f.select :organization_ids, Organization.order('name ASC').map{|o| [o.name, o.id]}, { selected: params[:user_organization_ids] || @user.organization_ids, include_blank: '-Not assigned-' }, class: "ds-c-field", value: @user.primary_organization.try(:id), 'aria-describedby': 'requested_org_hint', 'data-org-toggle': 'org-toggle' %>
 
           <div id="requested_org_hint" class="ds-u-fill--primary-alt-lightest ds-u-padding--3 ds-u-margin-top--5 ds-u-radius ds-u-border--1">
             <h2 class="ds-u-margin-top--0 ds-u-font-size--h4">This user originally requested</h2>
