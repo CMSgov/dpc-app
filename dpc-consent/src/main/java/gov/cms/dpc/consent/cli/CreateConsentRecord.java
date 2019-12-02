@@ -14,11 +14,13 @@ import net.sourceforge.argparse4j.inf.Subparser;
 import org.jooq.DSLContext;
 import org.jooq.conf.RenderNameStyle;
 import org.jooq.conf.Settings;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,7 +91,7 @@ public class CreateConsentRecord extends ConsentCommand {
     }
 
     @Override
-    protected void run(Bootstrap<DPCConsentConfiguration> bootstrap, Namespace namespace, DPCConsentConfiguration dpcConsentConfiguration) throws Exception {
+    protected void run(Bootstrap<DPCConsentConfiguration> bootstrap, Namespace namespace, DPCConsentConfiguration dpcConsentConfiguration) throws DataAccessException, SQLException  {
         final String mbi = namespace.getString("mbi");
         final LocalDate effectiveDate = LocalDate.parse(namespace.getString("effective-date"));
         final String inOrOut = namespace.getString(IN_OR_OUT_ARG);
@@ -121,7 +123,7 @@ public class CreateConsentRecord extends ConsentCommand {
                 ce.getPolicyCode(), ce.getMbi(), custodian, ce.getEffectiveDate()));
     }
 
-    private void saveEntity(Bootstrap<DPCConsentConfiguration> bootstrap, DPCConsentConfiguration dpcConsentConfiguration, ConsentEntity entity) throws Exception {
+    private void saveEntity(Bootstrap<DPCConsentConfiguration> bootstrap, DPCConsentConfiguration dpcConsentConfiguration, ConsentEntity entity) throws DataAccessException, SQLException {
         final PooledDataSourceFactory dataSourceFactory = dpcConsentConfiguration.getConsentDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(bootstrap.getMetricRegistry(), "consent-cli");
 
