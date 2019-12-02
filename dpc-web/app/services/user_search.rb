@@ -19,7 +19,7 @@ class UserSearch
   private
 
   def query
-    scope = User.send(initial_scope)
+    scope = User.includes(organization_user_assignments: :organization).send(initial_scope)
 
     scope = apply_org_queries(scope)
     scope = apply_date_queries(scope)
