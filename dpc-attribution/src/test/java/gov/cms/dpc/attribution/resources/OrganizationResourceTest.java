@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
@@ -141,7 +142,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
         organization2.setIdentifier(Arrays.asList(identifier));
         IUpdateTyped update = client.update().resource(organization2);
-        assertThrows(Exception.class, update::execute);
+        assertThrows(InvalidRequestException.class, update::execute);
     }
 
     private Practitioner createFakePractitioner(Organization organization) {
