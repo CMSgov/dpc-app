@@ -22,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("rawtypes")
 public class FileManager {
 
     private static final Logger logger = LoggerFactory.getLogger(FileManager.class);
@@ -35,7 +36,6 @@ public class FileManager {
         this.factory = factory.getSessionFactory();
     }
 
-    @SuppressWarnings("rawtypes")
     public FilePointer getFile(UUID organizationID, String fileID) {
         // Try
 
@@ -100,6 +100,7 @@ public class FileManager {
         return false;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class FilePointer {
 
         private final String checksum;
