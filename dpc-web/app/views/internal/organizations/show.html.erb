@@ -109,6 +109,17 @@
     </div>
 </section>
 
+<section class="box">
+    <div class="box__content">
+      <h2 class="box__heading">Users</h2>
+      <% @organization.users.each do |user| %>
+        <div class="ds-u-margin-bottom--1">
+          <%= link_to user.name, internal_user_url(user) %>
+        </div>
+      <% end %>
+    </div>
+</section>
+
 <section class="ds-u-margin--2">
   <div class="ds-l-row ds-u-justify-content--center">
     <%= link_to "Delete provider organization", internal_organization_url(@organization), method: :delete, class: "ds-u-color--error ds-u-text-align--center" %>
