@@ -9,6 +9,9 @@ import javax.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+/**
+ * Implementation of Jersey's {@link ParamConverterProvider} which allows for constructing {@link RangeHeader} classes from a given header value
+ */
 @Provider
 public class HttpRangeHeaderParamConverterProvider implements ParamConverterProvider {
 

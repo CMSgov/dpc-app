@@ -6,6 +6,7 @@ import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
+import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -17,6 +18,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -33,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
+@SuppressWarnings("InnerClassMayBeStatic")
 class DataResourceTest {
 
     private static FileManager manager = Mockito.mock(FileManager.class);
@@ -62,9 +66,9 @@ class DataResourceTest {
                 .get();
 
         final InputStream output = response.readEntity(InputStream.class);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IOUtils.copy(output, baos);
-        assertAll(() -> assertEquals("This is a test", baos.toString(StandardCharsets.UTF_8), "Should have correct string"),
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        IOUtils.copy(output, bos);
+        assertAll(() -> assertEquals("This is a test", bos.toString(StandardCharsets.UTF_8), "Should have correct string"),
                 () -> assertEquals(HttpStatus.OK_200, response.getStatus(), "Should have ok status"),
                 () -> assertNotNull(response.getHeaderString(HttpHeaders.ETAG), "Should have eTag"));
     }
@@ -158,6 +162,61 @@ class DataResourceTest {
         assertEquals("{\"code\":416,\"message\":\"Range end cannot be before begin\"}", response.readEntity(String.class), "Should have correct status code");
     }
 
+
+    @Nested
+    @DisplayName("Test ETag responses")
+    class ETagTests {
+
+        @BeforeEach
+        void setupETagTests() {
+            Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
+                final File tempPath = FileUtils.getTempDirectory();
+                final File file = File.createTempFile("test", ".ndjson", tempPath);
+                FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
+                return new FileManager.FilePointer("This should match", file.length(), file);
+            });
+        }
+
+        @Test
+        void testMissingETagHeader() {
+            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+                    .request()
+                    .get();
+
+            assertAll(() -> assertEquals(Response.Status.OK.getStatusCode(), response.getStatus(), "Should have downloaded"));
+        }
+
+        @Test
+        void testMismatchingETagHeader() {
+            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+                    .request()
+                    .header(HttpHeaders.IF_NONE_MATCH, "Not a real value")
+                    .get();
+
+            assertAll(() -> assertEquals(Response.Status.OK.getStatusCode(), response.getStatus(), "Should have downloaded"));
+        }
+
+        @Test
+        void testCorrectETagHeader() {
+            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+                    .request()
+                    .header(HttpHeaders.IF_NONE_MATCH, "This should match")
+                    .get();
+
+            assertAll(() -> assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus(), "Should have downloaded"));
+        }
+
+        @Test
+        void testWeakETagHeader() {
+            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+                    .request()
+                    .header(HttpHeaders.IF_NONE_MATCH, "This should match--gzip")
+                    .get();
+
+            assertAll(() -> assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus(), "Should have downloaded"));
+        }
+    }
+
     private static ResourceExtension buildDataResource() {
 
         final DataResource dataResource = new DataResource(manager);
@@ -167,7 +226,8 @@ class DataResourceTest {
         return APITestHelpers.buildResourceExtension(ctx, Collections.singletonList(dataResource),
                 List.of(staticFilter,
                         new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class),
-                        new HttpRangeHeaderParamConverterProvider()), false);
+                        new HttpRangeHeaderParamConverterProvider(),
+                        new ChecksumConverterProvider()), false);
     }
 
     private static String buildRandomString(long length) throws IOException {

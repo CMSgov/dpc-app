@@ -18,6 +18,7 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.util.Optional;
 
 /**
  * Streaming and range logic was taken from here: https://github.com/aruld/jersey-streaming
@@ -35,6 +36,14 @@ public class DataResource extends AbstractDataResource {
         this.manager = manager;
     }
 
+    @Path("/{fileID}.ndjson")
+    @HEAD
+    @Timed
+    @ExceptionMetered
+    @Override
+    public Response exportHead(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @HeaderParam(HttpHeaders.RANGE) RangeHeader rangeHeader, @PathParam("fileID") String fileID) {
+        return null;
+    }
 
     @Override
     @Path("/{fileID}.ndjson")
@@ -46,9 +55,19 @@ public class DataResource extends AbstractDataResource {
             @ApiResponse(code = 200, message = "File of newline-delimited JSON FHIR objects"),
             @ApiResponse(code = 500, message = "An error occurred", response = OperationOutcome.class)
     })
-    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @HeaderParam(HttpHeaders.RANGE) RangeHeader rangeHeader, @PathParam("fileID") String fileID) {
+    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                           @HeaderParam(HttpHeaders.RANGE) RangeHeader rangeHeader,
+                           @HeaderParam(HttpHeaders.IF_NONE_MATCH) Optional<String> fileChecksum,
+                           @PathParam("fileID") String fileID) {
 
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
+
+        // If we're provided a file checksum, verify it matches, if so, return a 304
+        if (fileChecksum.isPresent()) {
+            if (fileChecksum.get().equals(filePointer.getChecksum())) {
+                return Response.status(Response.Status.NOT_MODIFIED).build();
+            }
+        }
 
         final Response response;
 
