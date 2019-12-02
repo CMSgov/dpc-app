@@ -19,7 +19,7 @@ public abstract class AbstractDataResource {
 
     @Path("/{fileID}/")
     @HEAD
-    public abstract Response exportHead(OrganizationPrincipal organizationPrincipal, RangeHeader range, String fileID);
+    public abstract Response exportHead(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, String fileID);
 
     @Path("/{fileID}/")
     @GET

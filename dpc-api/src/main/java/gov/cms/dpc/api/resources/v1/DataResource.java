@@ -18,8 +18,9 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
-import java.time.OffsetDateTime;
 import java.util.Optional;
+
+import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_CONTENT_LENGTH;
 
 /**
  * Streaming and range logic was taken from here: https://github.com/aruld/jersey-streaming
@@ -41,9 +42,23 @@ public class DataResource extends AbstractDataResource {
     @HEAD
     @Timed
     @ExceptionMetered
+    @ApiOperation(value = "Do head things")
     @Override
-    public Response exportHead(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @HeaderParam(HttpHeaders.RANGE) RangeHeader rangeHeader, @PathParam("fileID") String fileID) {
-        return null;
+    public Response exportHead(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                               @HeaderParam(HttpHeaders.RANGE) RangeHeader rangeHeader,
+                               @HeaderParam(HttpHeaders.IF_NONE_MATCH) Optional<String> fileChecksum,
+                               @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE) Optional<String> modifiedHeader,
+                               @PathParam("fileID") String fileID) {
+        final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
+
+        if (this.manager.returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
+            return Response.status(Response.Status.NOT_MODIFIED).build();
+        }
+
+        return Response.ok()
+                .header(HttpHeaders.ETAG, filePointer.getChecksum())
+                .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
+                .build();
     }
 
     @Override
@@ -130,7 +145,8 @@ public class DataResource extends AbstractDataResource {
                     .entity(fileStreamer)
                     .header(HttpHeaders.ACCEPT_RANGES, "bytes")
                     .header(HttpHeaders.CONTENT_RANGE, responseRange)
-                    .header(HttpHeaders.CONTENT_LENGTH, fileStreamer.getLength())
+                    // Set the X-Content-Length header, so we can manually override what Jersey does
+                    .header(X_CONTENT_LENGTH, fileStreamer.getLength())
                     .build();
 
         } catch (IOException e) {
