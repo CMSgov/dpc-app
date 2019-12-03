@@ -109,6 +109,24 @@
     </div>
 </section>
 
+<section class="box">
+    <div class="box__content">
+      <h2 class="box__heading">Users</h2>
+      <% @organization.users.each do |user| %>
+        <div class="module-container">
+          <div class="module-container__id">
+            <%= user.id %>
+          </div>
+          <div class="module-container__primary">
+            <h2 class="module-container__heading">
+              <%= link_to user.name, internal_user_url(user) %>
+            </h2>
+          </div>
+        </div>
+      <% end %>
+    </div>
+</section>
+
 <section class="ds-u-margin--2">
   <div class="ds-l-row ds-u-justify-content--center">
     <%= link_to "Delete provider organization", internal_organization_url(@organization), method: :delete, class: "ds-u-color--error ds-u-text-align--center" %>
