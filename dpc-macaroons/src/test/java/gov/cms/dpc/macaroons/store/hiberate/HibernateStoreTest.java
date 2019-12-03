@@ -4,7 +4,6 @@ import gov.cms.dpc.macaroons.store.AbstractStoreTest;
 import gov.cms.dpc.macaroons.store.hibernate.HibernateKeyStore;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 

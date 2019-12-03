@@ -1,3 +1,5 @@
+package gov.cms.dpc.macaroons.helpers;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,8 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package gov.cms.dpc.macaroons.helpers;
 
 
 import java.io.DataInput;
@@ -35,7 +35,7 @@ import java.io.IOException;
  */
 public final class VarInt {
 
-    private static final String VARIABLE_LENGTH_QUANTITY_IS_TOO_LONG = "Variable length quantity is too long";
+    static final String VARIABLE_LENGTH_QUANTITY_IS_TOO_LONG = "Variable length quantity is too long";
 
     private VarInt() {
     }
