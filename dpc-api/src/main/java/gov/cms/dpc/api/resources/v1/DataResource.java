@@ -39,6 +39,7 @@ public class DataResource extends AbstractDataResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
     private static final int CHUNK_SIZE = 1024 * 1024; // Return a maximum of 1MB chunks, but we can modify this later if we need to
+    private static final String ACCEPTED_RANGE_VALUE = "bytes";
 
     private final FileManager manager;
 
@@ -84,7 +85,7 @@ public class DataResource extends AbstractDataResource {
                 .header(HttpHeaders.ETAG, filePointer.getChecksum())
                 .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
                 .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli())
-                .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
                 .build();
     }
 
@@ -136,7 +137,7 @@ public class DataResource extends AbstractDataResource {
         final Response response;
 
         // Process the range request and return a partial stream, but only if they request bytes, ignore everything else
-        if (rangeHeader != null && rangeHeader.getUnit().equals("bytes")) {
+        if (rangeHeader != null && rangeHeader.getUnit().equals(ACCEPTED_RANGE_VALUE)) {
             response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader);
         } else {
             // Return a non-ranged streamed response if the requester doesn't actually send the range header, or if we don't understand the range unit
@@ -193,7 +194,7 @@ public class DataResource extends AbstractDataResource {
             return Response
                     .status(Response.Status.PARTIAL_CONTENT)
                     .entity(fileStreamer)
-                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                    .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
                     .header(HttpHeaders.CONTENT_RANGE, responseRange)
                     // Set the X-Content-Length header, so we can manually override what Jersey does
                     .header(X_CONTENT_LENGTH, fileStreamer.getLength())
