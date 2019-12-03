@@ -63,7 +63,7 @@ class JWTUnitTests {
 
     @Nested
     @DisplayName("Query Param tests")
-    class QueryParmTests {
+    class QueryParamTests {
 
         @Test
         void testQueryParams() {
@@ -75,7 +75,7 @@ class JWTUnitTests {
             // Should have all exceptions
             DPCValidationErrorMessage validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(3, validationErrorResponse.getErrors().size(), "Should have three validations");
+            assertEquals(4, validationErrorResponse.getErrors().size(), "Should have four validations");
 
             // Add the missing scope value and try again
             response = RESOURCE.target("/v1/Token/auth").queryParam("scope", "system/*.*")
@@ -85,7 +85,7 @@ class JWTUnitTests {
             // Should have one less exception
             validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(2, validationErrorResponse.getErrors().size(), "Should have two validations");
+            assertEquals(3, validationErrorResponse.getErrors().size(), "Should have three validations");
 
 
             // Add the grant type
@@ -95,13 +95,12 @@ class JWTUnitTests {
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
-            // Should have all exceptions
+            // Should still have an exception
             validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(1, validationErrorResponse.getErrors().size(), "Should only have a single violation");
-            assertTrue(validationErrorResponse.getErrors().get(0).contains("Assertion type is required"));
+            assertEquals(2, validationErrorResponse.getErrors().size(), "Should have two violation");
 
-            // Add the assertion type and try again
+            // Add the assertion type
             response = RESOURCE.target("/v1/Token/auth")
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
@@ -109,8 +108,23 @@ class JWTUnitTests {
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
+            // Should another for the empty client_assertion
+            validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
+            assertEquals(400, response.getStatus(), "Should have a 400 from an empty param");
+            assertEquals(1, validationErrorResponse.getErrors().size(), "Should only have a single violation");
+            assertTrue(validationErrorResponse.getErrors().get(0).contains("Assertion is required"));
+
+            // Add the token and try again
+            response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
+                    .queryParam("grant_type", "client_credentials")
+                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .queryParam("client_assertion", "badJWT")
+                    .request()
+                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+
             // Should have no validation exceptions, but still fail
-            assertEquals(500, response.getStatus(), "Should have failed, but for different reasons");
+            assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus(), "Should have failed but for a different reason");
         }
 
         @Test
@@ -120,6 +134,7 @@ class JWTUnitTests {
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "wrong_grant_type")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .queryParam( "client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -133,6 +148,7 @@ class JWTUnitTests {
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
+                    .queryParam( "client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -148,6 +164,7 @@ class JWTUnitTests {
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "Not a real assertion_type")
+                    .queryParam( "client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -161,6 +178,7 @@ class JWTUnitTests {
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "")
+                    .queryParam( "client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -176,6 +194,7 @@ class JWTUnitTests {
                     .queryParam("scope", "this is not a scope")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                    .queryParam( "client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -189,6 +208,7 @@ class JWTUnitTests {
                     .queryParam("scope", "")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                    .queryParam( "client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
 
