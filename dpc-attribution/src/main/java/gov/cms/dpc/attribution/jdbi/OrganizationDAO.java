@@ -43,8 +43,13 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         return list(query);
     }
 
-    public void updateOrganization(OrganizationEntity entity) {
-        persist(entity);
+    public OrganizationEntity updateOrganization(UUID organizationID, Organization resource) {
+        OrganizationEntity organization = fetchOrganization(organizationID)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find organization"));
+        final OrganizationEntity updatedOrg = new OrganizationEntity().fromFHIR(resource);
+        organization.update(updatedOrg);
+        currentSession().merge(organization);
+        return organization;
     }
 
     public void deleteOrganization(OrganizationEntity entity) {

@@ -11,6 +11,7 @@ import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -42,6 +43,9 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
         }
 
         final UUID organizationID = getOrganizationID(claims.getIssuer());
+        // Set the MDC values here, since it's the first time we actually know what the organization ID is
+        MDC.clear();
+        MDC.put("organization_id", organizationID.toString());
 
         final PublicKeyEntity keyEntity;
         try {

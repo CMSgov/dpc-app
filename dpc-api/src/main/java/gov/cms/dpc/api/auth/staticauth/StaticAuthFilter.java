@@ -7,6 +7,7 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.slf4j.MDC;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -37,6 +38,10 @@ public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, Organizatio
 
         final String headerString = requestContext.getHeaderString(ORG_HEADER);
         final String orgID = headerString == null ? DEFAULT_ORG_ID : headerString;
+
+        // Now that we have the organization_id, set it in the logging context
+        MDC.clear();
+        MDC.put("organization_id", orgID);
 
         final Organization org = new Organization();
         org.setId(new IdType("Organization", orgID));
