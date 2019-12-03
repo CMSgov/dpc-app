@@ -47,24 +47,30 @@ public class ChecksumConverterProvider implements ParamConverterProvider {
 
         // Now, check to see if we have an optional value, in which case we have to wrap the result of the param conversion
         if (Optional.class.equals(rawType)) {
-            final List<ClassTypePair> ctps = ReflectionHelper.getTypeArgumentAndClass(genericType);
-            final ClassTypePair ctp = (ctps.size() == 1) ? ctps.get(0) : null;
-
-            if (ctp == null || ctp.rawClass() == String.class) {
-                return new ParamConverter<>() {
-                    @Override
-                    public T fromString(String value) {
-                        return rawType.cast(Optional.ofNullable(ChecksumParamConverter.stringMatchLogic(value)));
-                    }
-
-                    @Override
-                    public String toString(T value) {
-                        return value.toString();
-                    }
-                };
-            }
+            return provideOptionalConverter(rawType, genericType);
         } else if (String.class.equals(rawType)) {
             return (ParamConverter<T>) new ChecksumParamConverter();
+        }
+
+        return null;
+    }
+
+    private <T> ParamConverter<T> provideOptionalConverter(Class<T> rawType, Type genericType) {
+        final List<ClassTypePair> ctps = ReflectionHelper.getTypeArgumentAndClass(genericType);
+        final ClassTypePair ctp = (ctps.size() == 1) ? ctps.get(0) : null;
+
+        if (ctp == null || ctp.rawClass() == String.class) {
+            return new ParamConverter<>() {
+                @Override
+                public T fromString(String value) {
+                    return rawType.cast(Optional.ofNullable(ChecksumParamConverter.stringMatchLogic(value)));
+                }
+
+                @Override
+                public String toString(T value) {
+                    return value.toString();
+                }
+            };
         }
 
         return null;

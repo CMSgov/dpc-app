@@ -158,7 +158,6 @@ public class DataResource extends AbstractDataResource {
                     // Set the X-Content-Length header, so we can manually override what Jersey does
                     .header(X_CONTENT_LENGTH, fileStreamer.getLength())
                     .build();
-
         } catch (IOException e) {
             throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -167,10 +166,8 @@ public class DataResource extends AbstractDataResource {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private boolean returnCachedValue(FileManager.FilePointer filePointer, Optional<String> checksum, Optional<String> modifiedSince) {
         // If we're provided a file checksum, verify it matches, if so, return a 304
-        if (checksum.isPresent()) {
-            if (checksum.get().equals(filePointer.getChecksum())) {
-                return true;
-            }
+        if (checksum.isPresent() && checksum.get().equals(filePointer.getChecksum())) {
+            return true;
         }
 
         if (modifiedSince.isPresent()) {
