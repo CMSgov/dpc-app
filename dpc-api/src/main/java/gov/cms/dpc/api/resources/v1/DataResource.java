@@ -142,7 +142,8 @@ public class DataResource extends AbstractDataResource {
             throw new WebApplicationException("Range end cannot be before begin", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
 
-        try (final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
+        try {
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
             randomAccessFile.seek(rangeStart);
 
             final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);

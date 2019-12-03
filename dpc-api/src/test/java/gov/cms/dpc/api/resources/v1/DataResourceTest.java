@@ -253,7 +253,8 @@ class DataResourceTest {
                 List.of(staticFilter,
                         new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class),
                         new HttpRangeHeaderParamConverterProvider(),
-                        new ChecksumConverterProvider()), false);
+                        new ChecksumConverterProvider(),
+                        new StreamingContentSizeFilter()), false);
     }
 
     private static String buildRandomString(long length) throws IOException {
