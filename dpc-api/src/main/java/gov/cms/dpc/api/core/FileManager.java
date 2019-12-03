@@ -17,9 +17,7 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("rawtypes")
@@ -40,18 +38,22 @@ public class FileManager {
         // Try
 
         final JobQueueBatchFile batchFile;
+        final OffsetDateTime creationTime;
         try (final Session session = this.factory.openSession()) {
 
             // Using a raw JPA query here, because the Criteria builder doesn't really support joining un-related entities
             final String queryString =
-                    "SELECT f FROM gov.cms.dpc.queue.models.JobQueueBatchFile f " +
+                    "SELECT b.completeTime, f FROM gov.cms.dpc.queue.models.JobQueueBatchFile f " +
                             "LEFT JOIN gov.cms.dpc.queue.models.JobQueueBatch b on b.jobID = f.jobID " +
                             "WHERE f.fileName = :fileName AND b.orgID = :org";
 
             final Query query = session.createQuery(queryString);
             query.setParameter("fileName", fileID);
             query.setParameter("org", organizationID);
-            batchFile = (JobQueueBatchFile) query.getSingleResult();
+//            batchFile = (JobQueueBatchFile) query.getSingleResult();
+            final List objects = query.getResultList();
+            creationTime = (OffsetDateTime) objects.get(0);
+            batchFile = (JobQueueBatchFile) objects.get(1);
         } catch (NoResultException e) {
             throw new WebApplicationException("Cannot find file", Response.Status.NOT_FOUND);
         }
@@ -61,57 +63,23 @@ public class FileManager {
         return new FilePointer(Hex.toHexString(batchFile.getChecksum()),
                 batchFile.getFileLength(),
                 batchFile.getJobID(),
+                creationTime,
                 new File(path.toString()));
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public boolean returnCachedValue(FilePointer filePointer, Optional<String> checksum, Optional<String> modifiedSince) {
-        // If we're provided a file checksum, verify it matches, if so, return a 304
-        if (checksum.isPresent()) {
-            if (checksum.get().equals(filePointer.getChecksum())) {
-                return true;
-            }
-        }
-
-        if (modifiedSince.isPresent()) {
-            // Try to parse out the OffsetDateTime value
-            final OffsetDateTime modifiedValue;
-            try {
-                modifiedValue = OffsetDateTime.parse(modifiedSince.get());
-            } catch (DateTimeParseException e) {
-                logger.error("Unable to parse modified timestamp", e);
-                return false;
-            }
-
-            try (final Session session = this.factory.openSession()) {
-                final String queryString = "SELECT MIN(startTime) FROM gov.cms.dpc.queue.models.JobQueueBatch " +
-                        "WHERE jobID = :jobID";
-                final Query query = session.createQuery(queryString);
-                query.setParameter("jobID", filePointer.getJobID());
-                final OffsetDateTime startTime = (OffsetDateTime) query.getSingleResult();
-
-                if (startTime.truncatedTo(ChronoUnit.MILLIS).equals(modifiedValue.truncatedTo(ChronoUnit.MILLIS))) {
-                    return true;
-                }
-
-            }
-        }
-
-        return false;
-    }
-
-    @SuppressWarnings("WeakerAccess")
     public static class FilePointer {
 
         private final String checksum;
         private final long fileSize;
         private final UUID jobID;
+        private final OffsetDateTime creationTime;
         private final File file;
 
-        public FilePointer(String checksum, long fileSize, UUID jobID, File file) {
+        public FilePointer(String checksum, long fileSize, UUID jobID, OffsetDateTime creationTime, File file) {
             this.checksum = checksum;
             this.fileSize = fileSize;
             this.jobID = jobID;
+            this.creationTime = creationTime;
             this.file = file;
         }
 
@@ -125,6 +93,10 @@ public class FileManager {
 
         public UUID getJobID() {
             return jobID;
+        }
+
+        public OffsetDateTime getCreationTime() {
+            return creationTime;
         }
 
         public File getFile() {

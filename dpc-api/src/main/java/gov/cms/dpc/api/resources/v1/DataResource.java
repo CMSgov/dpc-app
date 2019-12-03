@@ -11,6 +11,8 @@ import io.swagger.annotations.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -18,6 +20,11 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_CONTENT_LENGTH;
@@ -29,6 +36,7 @@ import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_C
 @Path("/v1/Data")
 public class DataResource extends AbstractDataResource {
 
+    private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
     private static final int CHUNK_SIZE = 1024 * 1024; // Return a maximum of 1MB chunks, but we can modify this later if we need to
 
     private final FileManager manager;
@@ -51,7 +59,7 @@ public class DataResource extends AbstractDataResource {
                                @PathParam("fileID") String fileID) {
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
-        if (this.manager.returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
+        if (returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
             return Response.status(Response.Status.NOT_MODIFIED).build();
         }
 
@@ -80,7 +88,7 @@ public class DataResource extends AbstractDataResource {
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
         // If we're provided a file checksum, verify it matches, if so, return a 304
-        if (this.manager.returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
+        if (returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
             return Response.status(Response.Status.NOT_MODIFIED).build();
         }
 
@@ -120,6 +128,7 @@ public class DataResource extends AbstractDataResource {
                 .entity(fileStream)
                 .header(HttpHeaders.ETAG, filePointer.getChecksum())
                 .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
+                .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli())
                 .build();
     }
 
@@ -151,6 +160,29 @@ public class DataResource extends AbstractDataResource {
         } catch (IOException e) {
             throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private boolean returnCachedValue(FileManager.FilePointer filePointer, Optional<String> checksum, Optional<String> modifiedSince) {
+        // If we're provided a file checksum, verify it matches, if so, return a 304
+        if (checksum.isPresent()) {
+            if (checksum.get().equals(filePointer.getChecksum())) {
+                return true;
+            }
+        }
+
+        if (modifiedSince.isPresent()) {
+            // Try to parse out the OffsetDateTime value
+            final OffsetDateTime modifiedValue;
+            try {
+                modifiedValue = Instant.ofEpochMilli(Long.parseLong(modifiedSince.get())).atOffset(ZoneOffset.UTC);
+            } catch (DateTimeParseException | NumberFormatException e) {
+                logger.error("Unable to parse modified timestamp", e);
+                return false;
+            }
+            return filePointer.getCreationTime().truncatedTo(ChronoUnit.MILLIS).equals(modifiedValue.truncatedTo(ChronoUnit.MILLIS));
+        }
+        return false;
     }
 
     private static class PartialFileStreamer implements StreamingOutput {

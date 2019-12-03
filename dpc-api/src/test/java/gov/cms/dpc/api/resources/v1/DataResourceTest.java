@@ -60,7 +60,7 @@ class DataResourceTest {
             final File tempPath = FileUtils.getTempDirectory();
             final File file = File.createTempFile("test", ".ndjson", tempPath);
             FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), file);
+            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file);
         });
 
         final Response response = RESOURCE.target("/v1/Data/test.ndjson")
@@ -83,7 +83,7 @@ class DataResourceTest {
         final String randomString = buildRandomString(length);
         FileUtils.write(file, randomString, StandardCharsets.UTF_8);
 
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, UUID.randomUUID(), file));
+        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file));
 
         // Try to request one byte
         Response response = RESOURCE.target("/v1/Data/test.ndjson")
@@ -167,7 +167,6 @@ class DataResourceTest {
 
     @Nested
     @DisplayName("Test ETag responses")
-    @Disabled
     class ETagTests {
 
         private final OffsetDateTime modifiedDate = LocalDate.of(2017, 3, 11).atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
@@ -179,7 +178,7 @@ class DataResourceTest {
                 final File tempPath = FileUtils.getTempDirectory();
                 final File file = File.createTempFile("test", ".ndjson", tempPath);
                 FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-                return new FileManager.FilePointer("This should match", file.length(), UUID.randomUUID(), file);
+                return new FileManager.FilePointer("This should match", file.length(), UUID.randomUUID(), modifiedDate, file);
             });
         }
 
@@ -227,7 +226,7 @@ class DataResourceTest {
 
             final Response response = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(HttpHeaders.IF_MODIFIED_SINCE, "This should match")
+                    .header(HttpHeaders.IF_MODIFIED_SINCE, modifiedDate.toInstant().toEpochMilli())
                     .get();
 
             assertAll(() -> assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus(), "Should have downloaded"));
@@ -254,8 +253,7 @@ class DataResourceTest {
                 List.of(staticFilter,
                         new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class),
                         new HttpRangeHeaderParamConverterProvider(),
-                        new ChecksumConverterProvider(),
-                        new StreamingContentSizeFilter()), false);
+                        new ChecksumConverterProvider()), false);
     }
 
     private static String buildRandomString(long length) throws IOException {
