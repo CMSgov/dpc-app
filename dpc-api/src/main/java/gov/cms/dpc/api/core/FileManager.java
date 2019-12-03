@@ -35,8 +35,6 @@ public class FileManager {
     }
 
     public FilePointer getFile(UUID organizationID, String fileID) {
-        // Try
-
         final JobQueueBatchFile batchFile;
         final OffsetDateTime creationTime;
         try (final Session session = this.factory.openSession()) {
@@ -50,10 +48,10 @@ public class FileManager {
             final Query query = session.createQuery(queryString);
             query.setParameter("fileName", fileID);
             query.setParameter("org", organizationID);
-//            batchFile = (JobQueueBatchFile) query.getSingleResult();
             final List objects = query.getResultList();
-            creationTime = (OffsetDateTime) objects.get(0);
-            batchFile = (JobQueueBatchFile) objects.get(1);
+            final Object[] objectArray = (Object[]) objects.get(0);
+            creationTime = (OffsetDateTime) objectArray[0];
+            batchFile = (JobQueueBatchFile) objectArray[1];
         } catch (NoResultException e) {
             throw new WebApplicationException("Cannot find file", Response.Status.NOT_FOUND);
         }

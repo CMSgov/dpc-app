@@ -182,7 +182,8 @@ public class DataResource extends AbstractDataResource {
                 logger.error("Unable to parse modified timestamp", e);
                 return false;
             }
-            return filePointer.getCreationTime().truncatedTo(ChronoUnit.MILLIS).equals(modifiedValue.truncatedTo(ChronoUnit.MILLIS));
+            // Verify that the creation timestamp is not after the value of the modified header
+            return !filePointer.getCreationTime().truncatedTo(ChronoUnit.MILLIS).isAfter(modifiedValue.truncatedTo(ChronoUnit.MILLIS));
         }
         return false;
     }

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "22d19de5-127e-4788-ad7b-5738dbf0e882",
+		"_postman_id": "74d8a0be-f6de-4e74-9f06-7f2316a2e232",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -748,8 +748,6 @@
 									"        pm.expect(pm.response.json().output[2].extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
 									"        pm.expect(pm.response.json().output[2].extension[1].valueDecimal).to.equal(8148);",
 									"        pm.environment.set(\"coverage\", pm.response.json().output[2]);",
-									"        ",
-									"        pm.environment.set(\"job_start\", pm.response.json().transactionTime)",
 									"    });",
 									"} else {",
 									"    // If response code is not 200, it should be 202. Assert that, and retry.",
@@ -849,6 +847,7 @@
 									"// Response should have FHIR Content-Type",
 									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
 									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"   pm.environment.set(\"file_timestamp\", pm.response.headers.get(\"Last-Modified\"))",
 									"});",
 									"",
 									"// There should be 86 Explanations of Benefits.",
@@ -1018,18 +1017,19 @@
 							{
 								"key": "If-Modified-Since",
 								"type": "text",
-								"value": "{{job_start}}"
+								"value": "{{file_timestamp}}"
 							}
 						],
 						"url": {
-							"raw": "{{eob_url}}",
+							"raw": "{{eob_url}}?",
 							"host": [
 								"{{eob_url}}"
 							],
 							"query": [
 								{
 									"key": "",
-									"value": ""
+									"value": "",
+									"disabled": true
 								}
 							]
 						},
