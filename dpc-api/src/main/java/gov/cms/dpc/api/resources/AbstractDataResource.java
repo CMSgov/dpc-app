@@ -18,9 +18,9 @@ public abstract class AbstractDataResource {
 
     @Path("/{fileID}/")
     @HEAD
-    public abstract Response exportHead(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, String fileID);
+    public abstract Response exportFileHead(OrganizationPrincipal organizationPrincipal, Optional<String> fileChecksum, Optional<String> modifiedHeader, String fileID);
 
     @Path("/{fileID}/")
     @GET
-    public abstract Response export(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, String fileID);
+    public abstract Response downloadExportFile(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, String fileID);
 }
