@@ -137,7 +137,7 @@ public class DataResource extends AbstractDataResource {
         final Response response;
 
         // Process the range request and return a partial stream, but only if they request bytes, ignore everything else
-        if (rangeHeader != null && rangeHeader.getUnit().equals(ACCEPTED_RANGE_VALUE)) {
+        if (rangeHeader != null) {
             response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader);
         } else {
             // Return a non-ranged streamed response if the requester doesn't actually send the range header, or if we don't understand the range unit
@@ -175,8 +175,11 @@ public class DataResource extends AbstractDataResource {
     }
 
     private Response buildRangedRequest(String fileID, File file, RangeHeader range) {
-        final Long rangeStart = range.getStart() < 0 ? 0 : range.getStart();
-        final Long rangeEnd = range.getEnd().orElse(rangeStart + CHUNK_SIZE);
+        if (!range.getUnit().equals(ACCEPTED_RANGE_VALUE)) {
+            throw new WebApplicationException("Only `bytes` are acceptable as ranges", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
+        }
+        final long rangeStart = range.getStart() < 0 ? 0 : range.getStart();
+        final long rangeEnd = range.getEnd().orElse(rangeStart + CHUNK_SIZE);
         final long len = rangeEnd - rangeStart;
 
         // If we have a negative range, throw an exception

@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -172,6 +173,23 @@ class DataResourceTest {
         assertEquals("{\"code\":416,\"message\":\"Range end cannot be before begin\"}", response.readEntity(String.class), "Should have correct status code");
     }
 
+    @Test
+    void testNonByteRange() {
+        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
+            final File tempPath = FileUtils.getTempDirectory();
+            final File file = File.createTempFile("test", ".ndjson", tempPath);
+            FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
+            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file);
+        });
+
+        final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+                .request()
+                .header(org.apache.http.HttpHeaders.RANGE, "frames=0-1")
+                .get();
+
+        assertAll(() -> assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus(),"Should have correct status code"),
+                () -> assertEquals("{\"code\":416,\"message\":\"Only `bytes` are acceptable as ranges\"}", response.readEntity(String.class), "Should have correct error message"));
+    }
 
     @Nested
     @DisplayName("Test Cache Header responses")
