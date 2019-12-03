@@ -66,6 +66,7 @@ public class DataResource extends AbstractDataResource {
         return Response.ok()
                 .header(HttpHeaders.ETAG, filePointer.getChecksum())
                 .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
+                .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli())
                 .build();
     }
 

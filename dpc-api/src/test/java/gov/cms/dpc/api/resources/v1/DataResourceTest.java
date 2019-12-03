@@ -18,13 +18,21 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -166,8 +174,8 @@ class DataResourceTest {
 
 
     @Nested
-    @DisplayName("Test ETag responses")
-    class ETagTests {
+    @DisplayName("Test Cache Header responses")
+    class CacheHeaderTests {
 
         private final OffsetDateTime modifiedDate = LocalDate.of(2017, 3, 11).atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
 
@@ -182,64 +190,79 @@ class DataResourceTest {
             });
         }
 
-        @Test
-        void testMissingETagHeader() {
-            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
-                    .request()
-                    .get();
+        @HttpParamTest
+        void testMissingETagHeader(String method) {
+            final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
+                    .request();
+
+            final Response response = createHTTPMethodCall(method, builder);
 
             assertAll(() -> assertEquals(Response.Status.OK.getStatusCode(), response.getStatus(), "Should have downloaded"));
         }
 
-        @Test
-        void testMismatchingETagHeader() {
-            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+        @HttpParamTest
+        void testMismatchingETagHeader(String method) {
+            final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(HttpHeaders.IF_NONE_MATCH, "Not a real value")
-                    .get();
+                    .header(HttpHeaders.IF_NONE_MATCH, "Not a real value");
+
+            final Response response = createHTTPMethodCall(method, builder);
 
             assertAll(() -> assertEquals(Response.Status.OK.getStatusCode(), response.getStatus(), "Should have downloaded"));
         }
 
-        @Test
-        void testCorrectETagHeader() {
-            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+        @HttpParamTest
+        void testCorrectETagHeader(String method) {
+            final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(HttpHeaders.IF_NONE_MATCH, "This should match")
-                    .get();
+                    .header(HttpHeaders.IF_NONE_MATCH, "This should match");
+
+            final Response response = createHTTPMethodCall(method, builder);
 
             assertAll(() -> assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus(), "Should have downloaded"));
         }
 
-        @Test
-        void testWeakETagHeader() {
-            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+        @HttpParamTest
+        void testWeakETagHeader(String method) {
+            final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(HttpHeaders.IF_NONE_MATCH, "This should match--gzip")
-                    .get();
+                    .header(HttpHeaders.IF_NONE_MATCH, "This should match--gzip");
+
+            final Response response = createHTTPMethodCall(method, builder);
 
             assertAll(() -> assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus(), "Should have downloaded"));
         }
 
-        @Test
-        void testModifiedTimestamp() {
+        @HttpParamTest
+        void testModifiedTimestamp(String method) {
 
-            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+            final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(HttpHeaders.IF_MODIFIED_SINCE, modifiedDate.toInstant().toEpochMilli())
-                    .get();
+                    .header(HttpHeaders.IF_MODIFIED_SINCE, modifiedDate.toInstant().toEpochMilli());
+
+            final Response response = createHTTPMethodCall(method, builder);
 
             assertAll(() -> assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus(), "Should have downloaded"));
         }
 
-        @Test
-        void testMalformedModifiedTimestamp() {
-            final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+        @HttpParamTest
+        void testMalformedModifiedTimestamp(String method) {
+            final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(HttpHeaders.IF_MODIFIED_SINCE, "Not a real value")
-                    .get();
+                    .header(HttpHeaders.IF_MODIFIED_SINCE, "Not a real value");
+
+            final Response response = createHTTPMethodCall(method, builder);
 
             assertAll(() -> assertEquals(Response.Status.OK.getStatusCode(), response.getStatus(), "Should have downloaded"));
+        }
+
+        private Response createHTTPMethodCall(String method, Invocation.Builder builder) {
+            if (method.equals("HEAD")) {
+                return builder.head();
+            } else if (method.equals("GET")) {
+                return builder.get();
+            }
+            throw new IllegalStateException(String.format("HTTP Method %s is not supported", method));
         }
     }
 
@@ -267,5 +290,11 @@ class DataResourceTest {
             writer.flush();
             return writer.toString();
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest(name = "{arguments} request")
+    @ValueSource(strings = {"HEAD", "GET"})
+    @interface HttpParamTest {
     }
 }

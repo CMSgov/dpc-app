@@ -155,6 +155,11 @@
             <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
