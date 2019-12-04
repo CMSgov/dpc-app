@@ -3,18 +3,20 @@ package gov.cms.dpc.attribution.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.jdbi.EndpointDAO;
+import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractEndpointResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
+import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.fhir.converters.entities.EndpointEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -27,10 +29,26 @@ import java.util.UUID;
 public class EndpointResource extends AbstractEndpointResource {
 
     private final EndpointDAO endpointDAO;
+    private final OrganizationDAO organizationDAO;
 
     @Inject
-    public EndpointResource(EndpointDAO endpointDAO) {
+    public EndpointResource(EndpointDAO endpointDAO, OrganizationDAO organizationDAO) {
         this.endpointDAO = endpointDAO;
+        this.organizationDAO = organizationDAO;
+    }
+
+    @FHIR
+    @POST
+    @Timed
+    @ExceptionMetered
+    @UnitOfWork
+    @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource")
+    @Override
+    public Response createEndpoint(Endpoint endpoint) {
+        UUID organizationId = FHIRExtractors.getEntityUUID(endpoint.getManagingOrganization().getReference());
+        endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationId.toString())));
+        EndpointEntity entity = endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
+        return Response.status(Response.Status.CREATED).entity(EndpointEntityConverter.convert(entity)).build();
     }
 
     @FHIR
@@ -72,5 +90,46 @@ public class EndpointResource extends AbstractEndpointResource {
                 .orElseThrow(() -> new WebApplicationException("Unable to find Endpoint", Response.Status.NOT_FOUND));
 
         return EndpointEntityConverter.convert(endpoint);
+    }
+
+    @FHIR
+    @PUT
+    @Path("/{endpointID}")
+    @Timed
+    @ExceptionMetered
+    @UnitOfWork
+    @ApiOperation(value = "Update an Endpoint", notes = "Update an Endpoint resource")
+    @ApiResponses(value = { @ApiResponse(code = 404, message = "Cannot find Endpoint") })
+    @Override
+    public Endpoint updateEndpoint(@PathParam("endpointID") UUID endpointID, Endpoint endpoint) {
+        endpoint.setId(endpointID.toString());
+        EndpointEntity entity = this.endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
+        return EndpointEntityConverter.convert(entity);
+    }
+
+    @FHIR
+    @DELETE
+    @Path("/{endpointID}")
+    @Timed
+    @ExceptionMetered
+    @UnitOfWork
+    @ApiOperation(value = "Delete an Endpoint", notes = "Delete an Endpoint resource")
+    @ApiResponses(value = {})
+    @Override
+    public Response deleteEndpoint(@PathParam("endpointID") UUID endpointID) {
+        final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
+                .orElseThrow(() -> new WebApplicationException("Unable to find Endpoint", Response.Status.NOT_FOUND));
+        OrganizationEntity organization = endpoint.getOrganization();
+        List<EndpointEntity> endpoints = organization.getEndpoints();
+        if (endpoints.size() == 1) {
+            throw new WebApplicationException("Cannot delete Organization's only endpoint");
+        }
+
+        endpoints.removeIf(e -> endpointID.equals(e.getId()));
+        organization.setEndpoints(endpoints);
+        this.organizationDAO.updateOrganization(organization.getId(), organization);
+        this.endpointDAO.deleteEndpoint(endpoint);
+
+        return Response.status(Response.Status.OK).build();
     }
 }

@@ -38,10 +38,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.*;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -206,6 +203,16 @@ public class APITestHelpers {
                 assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should be healthy");
             }
         }
+    }
+
+    public static Endpoint makeEndpoint() {
+        Endpoint endpoint = new Endpoint();
+        endpoint.setName("Test Endpoint");
+        endpoint.setAddress("http://www.example.com/endpoint");
+        endpoint.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type", "hl7-fhir-rest", ""));
+        endpoint.setManagingOrganization(new Reference(new IdType("Organization", ORGANIZATION_ID)));
+        endpoint.setStatus(Endpoint.EndpointStatus.ACTIVE);
+        return endpoint;
     }
 
     private static Validator provideValidator(InjectingConstraintValidatorFactory factory) {
