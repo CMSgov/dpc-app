@@ -5,6 +5,8 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.reactivex.Observable;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -21,19 +23,17 @@ public abstract class JobQueueCommon implements IJobQueue {
     }
 
     @Override
-    public UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes) {
+    public UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes, OffsetDateTime since, OffsetDateTime transactionTime) {
         final UUID jobID = UUID.randomUUID();
 
-        List<JobQueueBatch> jobBatches = Observable.fromIterable(patients)
-                .buffer(batchSize)
-                .map(patientBatch -> this.createJobBatch(jobID, orgID, providerID, patientBatch, resourceTypes))
-                .toList()
-                .blockingGet();
-
-        // Expect a single empty job when no patients passed
-        if ( jobBatches.isEmpty() && patients.isEmpty() ) {
-            jobBatches.add(this.createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes));
-        }
+        // Add a single empty job when no patients or since is less or equal to transactionTime
+        List<JobQueueBatch> jobBatches = patients.isEmpty() || (since != null && !transactionTime.isAfter(since)) ?
+            Collections.singletonList(createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes, since, transactionTime)) :
+            Observable.fromIterable(patients)
+                    .buffer(batchSize)
+                    .map(patientBatch -> this.createJobBatch(jobID, orgID, providerID, patientBatch, resourceTypes, since, transactionTime))
+                    .toList()
+                    .blockingGet();
 
         // Set the priority of a job batch
         // Single patients will have first priority to support patient everything
@@ -44,8 +44,14 @@ public abstract class JobQueueCommon implements IJobQueue {
         return jobBatches.stream().map(JobQueueBatch::getJobID).findFirst().orElseThrow(() -> new JobQueueFailure("Unable to create job. No batches to submit."));
     }
 
-    protected JobQueueBatch createJobBatch(UUID jobID, UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes) {
-        return new JobQueueBatch(jobID, orgID, providerID, patients, resourceTypes);
+    protected JobQueueBatch createJobBatch(UUID jobID,
+                                           UUID orgID,
+                                           String providerID,
+                                           List<String> patients,
+                                           List<ResourceType> resourceTypes,
+                                           OffsetDateTime since,
+                                           OffsetDateTime transactionTime) {
+        return new JobQueueBatch(jobID, orgID, providerID, patients, resourceTypes, since, transactionTime);
     }
 
     public int getBatchSize() {

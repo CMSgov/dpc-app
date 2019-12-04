@@ -1,19 +1,23 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.reactivex.Flowable;
+
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.GeneralSecurityException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +30,8 @@ class ResourceFetcher {
     private UUID jobID;
     private UUID batchID;
     private ResourceType resourceType;
+    private OffsetDateTime since;
+    private OffsetDateTime transactionTime;
 
     /**
      * Create a context for fetching FHIR resources
@@ -33,17 +39,23 @@ class ResourceFetcher {
      * @param jobID - the jobID for logging and reporting
      * @param batchID - the batchID for logging and reporting
      * @param resourceType - the resource type to fetch
-     *
+     * @param since - the since parameter for the job
+     * @param transactionTime - the start time of this job
+     * @param config - the operations config
      */
     ResourceFetcher(BlueButtonClient blueButtonClient,
-                           UUID jobID,
-                           UUID batchID,
-                           ResourceType resourceType,
+                    UUID jobID,
+                    UUID batchID,
+                    ResourceType resourceType,
+                    OffsetDateTime since,
+                    OffsetDateTime transactionTime,
                     OperationsConfig config) {
         this.blueButtonClient = blueButtonClient;
         this.jobID = jobID;
         this.batchID = batchID;
         this.resourceType = resourceType;
+        this.since = since;
+        this.transactionTime = transactionTime;
     }
 
     /**
@@ -57,13 +69,8 @@ class ResourceFetcher {
         return Flowable.fromCallable(() -> {
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
-            final Resource firstFetched = fetchFirst(mbi);
-            if (ResourceType.Coverage.equals(resourceType) || ResourceType.ExplanationOfBenefit.equals(resourceType)) {
-                return fetchAllBundles((Bundle)firstFetched, fetchId);
-            } else {
-                logger.debug("Done fetching {} for {}", resourceType.toString(), fetchId);
-                return List.of(firstFetched);
-            }
+            final Bundle firstFetched = fetchFirst(mbi);
+            return fetchAllBundles(firstFetched, fetchId);
         })
                 .onErrorResumeNext((Throwable error) -> handleError(mbi, error))
                 .flatMap(Flowable::fromIterable);
@@ -114,19 +121,25 @@ class ResourceFetcher {
      * Based on resourceType, fetch a resource or a bundle of resources.
      *
      * @param mbi of the resource to fetch
-     * @return either a single resource or the first bundle of resources
+     * @return the first bundle of resources
      */
-    private Resource fetchFirst(String mbi) {
+    private Bundle fetchFirst(String mbi) {
         Patient patient = fetchPatient(mbi);
+        var beneId = getBeneIdFromPatient(patient);
+        // Note: FHIR bulk spec says that since is exclusive and transactionTime is inclusive
+        // It is also says that all resources should not have lastUpdated after the transactionTime.
+        // This is true for the both the since and the non-since cases.
+        // BFD will include resources that do not have a lastUpdated if there isn't a complete range.
+        final var lastUpdated = since != null ?
+                new DateRangeParam().setUpperBoundInclusive(Date.from(transactionTime.toInstant())).setLowerBoundExclusive(Date.from(since.toInstant())) :
+                new DateRangeParam().setUpperBoundInclusive(Date.from(transactionTime.toInstant()));
         switch (resourceType) {
             case Patient:
-                return patient;
+                return blueButtonClient.requestPatientFromServer(beneId, lastUpdated);
             case ExplanationOfBenefit:
-                String beneId = getBeneIdFromPatient(patient);
-                return blueButtonClient.requestEOBFromServer(beneId);
+                return blueButtonClient.requestEOBFromServer(beneId, lastUpdated);
             case Coverage:
-                beneId = getBeneIdFromPatient(patient);
-                return blueButtonClient.requestCoverageFromServer(beneId);
+                return blueButtonClient.requestCoverageFromServer(beneId, lastUpdated);
             default:
                 throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
         }
