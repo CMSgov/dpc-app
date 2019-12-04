@@ -10,7 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 
 public abstract class AbstractConsentTest {
     private static final String KEY_PREFIX = "dpc.consent";
-    protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, "testing.conf", ConfigOverride.config(KEY_PREFIX, "", ""));
+    protected static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, null, ConfigOverride.config(KEY_PREFIX, "", ""),
+            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
 
     protected FhirContext ctx = FhirContext.forDstu3();
 
