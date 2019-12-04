@@ -7,6 +7,7 @@ import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.FHIRFormatters;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
@@ -25,9 +26,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -144,9 +143,17 @@ public class JobResource extends AbstractJobResource {
                 .map(ResourceType::toString)
                 .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
 
+        final String sinceQueryParam = firstBatch.getSince()
+                .map(since -> "&_since=" + since.format(FHIRFormatters.INSTANT_FORMATTER))
+                .orElse("");
+
         final JobCompletionModel completionModel = new JobCompletionModel(
-                batches.stream().map(JobQueueBatch::getStartTime).map(Optional::get).min(OffsetDateTime::compareTo).orElseThrow(),
-                String.format("%s/Group/%s/$export?_type=%s", baseURL, firstBatch.getProviderID(), resourceQueryParam),
+                firstBatch.getTransactionTime(),
+                String.format("%s/Group/%s/$export?_type=%s%s",
+                        baseURL,
+                        firstBatch.getProviderID(),
+                        resourceQueryParam,
+                        sinceQueryParam),
                 formOutputList(batches, false),
                 formOutputList(batches, true));
 

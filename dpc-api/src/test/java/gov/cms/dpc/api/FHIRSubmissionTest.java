@@ -8,6 +8,7 @@ import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.queue.IJobQueue;
@@ -31,6 +32,8 @@ import org.mockito.Mockito;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +54,7 @@ class FHIRSubmissionTest {
     private static final UUID AGGREGATOR_ID = UUID.randomUUID();
     private static final IJobQueue queue = spy(MemoryBatchQueue.class);
     private static IGenericClient client = mock(IGenericClient.class);
+    private static BlueButtonClient bfdClient = mock(BlueButtonClient.class);
     private static IRead mockRead = mock(IRead.class);
     private static IReadTyped mockTypedRead = mock(IReadTyped.class);
     private static IReadExecutable mockExecutable = mock(IReadExecutable.class);
@@ -63,7 +67,7 @@ class FHIRSubmissionTest {
     private static List<String> testBeneficiaries = List.of("1", "2", "3", "4");
 
     private ResourceExtension groupResource = ResourceExtension.builder()
-            .addResource(new GroupResource(queue, client, TEST_BASE_URL))
+            .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient))
             .addResource(new JobResource(queue, TEST_BASE_URL))
             .setTestContainerFactory(testContainer)
             .addProvider(staticFilter)
@@ -73,10 +77,10 @@ class FHIRSubmissionTest {
 
     @BeforeAll
     static void setup() {
-        mockClient();
         mockFactory();
-        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList());
-
+        mockClient();
+        mockBfdClient();
+        doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList(), Mockito.any(OffsetDateTime.class), Mockito.any(OffsetDateTime.class));
     }
 
     @Test
@@ -212,6 +216,14 @@ class FHIRSubmissionTest {
         assertAll(() -> assertEquals(resources.size(), JobQueueBatch.validResourceTypes.size()));
     }
 
+    /**
+     * The BFD is used to return a mock lastUpdate for the BFD service
+     */
+    private static void mockBfdClient() {
+        Bundle mockBundle = new Bundle();
+        mockBundle.getMeta().setLastUpdated(new Date());
+        Mockito.when(bfdClient.requestPatientFromServer(anyString(), isNull())).thenReturn(mockBundle);
+    }
 
     @SuppressWarnings("unchecked")
     private static void mockClient() {

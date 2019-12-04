@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.core.Response;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -54,7 +56,12 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a queued job
-        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        final var jobID = queue.createJob(orgID,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID),
+                JobQueueBatch.validResourceTypes,
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC));
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -73,7 +80,12 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a running job
-        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID, TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        final var jobID = queue.createJob(orgID,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID, TEST_PATIENT_ID),
+                JobQueueBatch.validResourceTypes,
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC));
         final var runningJob = queue.claimBatch(AGGREGATOR_ID);
         runningJob.get().fetchNextPatient(AGGREGATOR_ID);
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
@@ -95,7 +107,12 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
-        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        final var jobID = queue.createJob(orgID,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID),
+                JobQueueBatch.validResourceTypes,
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC));
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -131,7 +148,12 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job with one error
-        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        final var jobID = queue.createJob(orgID,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID),
+                JobQueueBatch.validResourceTypes,
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC));
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -164,7 +186,12 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a failed job
-        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        final var jobID = queue.createJob(orgID,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID),
+                JobQueueBatch.validResourceTypes,
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC));
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -188,7 +215,12 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
-        final var jobID = queue.createJob(orgIDCorrect, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
+        final var jobID = queue.createJob(orgIDCorrect,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID),
+                JobQueueBatch.validResourceTypes,
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC));
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
