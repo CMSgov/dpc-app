@@ -232,7 +232,14 @@ public class AggregationEngine implements Runnable {
      */
     private Flowable<JobQueueBatchFile> completeResource(JobQueueBatch job, String patientID, ResourceType resourceType) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
-        final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), job.getBatchID(), resourceType, operationsConfig);
+        final var fetcher = new ResourceFetcher(
+                bbclient,
+                job.getJobID(),
+                job.getBatchID(),
+                resourceType,
+                job.getSince().orElse(null),
+                job.getTransactionTime(),
+                operationsConfig);
         final Flowable<Resource> mixedFlow = fetcher.fetchResources(patientID);
         final var connectableMixedFlow = mixedFlow.publish().autoConnect(2);
 
