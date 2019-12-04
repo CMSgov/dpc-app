@@ -40,8 +40,7 @@ public class AbstractSecureApplicationTest {
     private static final String KEY_PREFIX = "dpc.api";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
-            ConfigOverride.config(KEY_PREFIX, "", "true"));
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, "testing.conf", ConfigOverride.config(KEY_PREFIX, "", "true"));
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)

@@ -38,7 +38,7 @@ public class AbstractApplicationTest {
     private static final String KEY_PREFIX = "dpc.api";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, "testing.conf",
             ConfigOverride.config(KEY_PREFIX, "authenticationDisabled", "true"));
     protected FhirContext ctx;
 

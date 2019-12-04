@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {
 
-    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAggregationService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
+    private static final DropwizardTestSupport<DPCAggregationConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAggregationService.class, "testing.conf", ConfigOverride.config("server.applicationConnectors[0].port", "7777"));
 
     @BeforeAll
     static void start() {
