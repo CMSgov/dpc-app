@@ -4,6 +4,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,9 +22,16 @@ public interface IJobQueue {
      * @param providerID    - The provider submitting the job
      * @param mbis          - The list of MBIs of patients to fetch data for
      * @param resourceTypes - The resource types to fetch patient data for
+     * @param since         - The since parameter to use for the requests. May be null.
+     * @param transactionTime - The transactionTime of the job
      * @return The UUID of the created job
      */
-    UUID createJob(UUID orgID, String providerID, List<String> mbis, List<ResourceType> resourceTypes);
+    UUID createJob(UUID orgID,
+                   String providerID,
+                   List<String> mbis,
+                   List<ResourceType> resourceTypes,
+                   OffsetDateTime since,
+                   OffsetDateTime transactionTime);
 
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.
