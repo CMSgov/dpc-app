@@ -23,7 +23,13 @@ class User < ApplicationRecord
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :last_name, :first_name, presence: true
   validates :requested_organization, presence: true
-  validates :requested_num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
+  validates :requested_num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0,
+                                                      allow_nil: true },
+                                      if: -> { health_it_vendor? },
+                                      on: :create
+  validates :requested_num_providers, numericality: { only_integer: true, greater_than: 0 },
+                                      unless: -> { health_it_vendor? },
+                                      on: :create
   validates :address_1, presence: true
   validates :city, presence: true
   validates :state, inclusion: { in: Address::STATES.keys.map(&:to_s) }

@@ -34,6 +34,7 @@ import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
 @Api(value = "Group", authorizations = @Authorization(value = "apiKey"))
+@Path("/v1/Group")
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);

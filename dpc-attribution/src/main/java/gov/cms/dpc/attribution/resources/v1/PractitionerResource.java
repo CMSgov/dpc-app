@@ -9,17 +9,17 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 

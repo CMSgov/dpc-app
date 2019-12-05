@@ -51,6 +51,7 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
                                 VALIDATION_CONSTANT +
                                         msg.getMessage() + "}")
                         .addConstraintViolation());
+
         return false;
     }
 }

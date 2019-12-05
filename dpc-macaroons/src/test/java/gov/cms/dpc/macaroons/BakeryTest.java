@@ -54,7 +54,7 @@ class BakeryTest {
         final Macaroon testMacaroon = bakery
                 .createMacaroon(caveatList);
 
-        assertArrayEquals(caveatList.toArray(), bakery.getCaveats(testMacaroon).toArray(), "Should have equal caveats");
+        assertArrayEquals(caveatList.toArray(), MacaroonBakery.getCaveats(testMacaroon).toArray(), "Should have equal caveats");
     }
 
     @Test
@@ -84,7 +84,7 @@ class BakeryTest {
                                 MacaroonCondition.Operator.EQ, "1234"))));
 
         final byte[] macaroonBytes = bakery.serializeMacaroon(testMacaroon, base64);
-        final List<Macaroon> macaroons = bakery.deserializeMacaroon(new String(macaroonBytes, StandardCharsets.UTF_8));
+        final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(new String(macaroonBytes, StandardCharsets.UTF_8));
         final Macaroon mac2 = macaroons.get(0);
         assertAll(() -> assertEquals(1, macaroons.size(), "Should only have a single macaroon"),
                 () -> assertEquals(testMacaroon, mac2, "Macaroons should be equal"));
@@ -144,7 +144,7 @@ class BakeryTest {
                         new MacaroonCaveat("", new MacaroonCondition("test_id",
                                 MacaroonCondition.Operator.EQ, "1234"))));
 
-        final List<MacaroonCaveat> macCaveats = bakery.getCaveats(macaroon);
+        final List<MacaroonCaveat> macCaveats = MacaroonBakery.getCaveats(macaroon);
         assertEquals(2, macCaveats.size(), "Should have two caveats");
 
         caveatBakery.verifyMacaroon(Collections.singletonList(macaroon), "test_id = 1234");

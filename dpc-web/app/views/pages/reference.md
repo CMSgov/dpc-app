@@ -35,6 +35,14 @@ In addition, the only available resource types are those exposed by [Blue Button
 In order to receive data from the DPC application, a healthcare provider must have a treatment related purpose for viewing a patient's claims history.
 Providers can attest to their treatment purposes by submitting a an *attribution roster* which lists the patients currently under their care.
 
+In order for a provider to establish a treatment related purpose for viewing patient data, they must fulfill one of the following conditions:
+
+1. Have an existing treatment relationship, defined as a visit or processed claim for the given patient with the provider's [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number within the past 18 months.
+2. Have an upcoming appointment for the given patient within 10 days.
+
+If neither of these conditions are met, a treatment relationship cannot be established and the provider is is **NOT** authorized to retrieve claims data.
+With each roster addition or renewal, the provider is attesting that there is an active treatment relationship that creates a need for the data being requested.  
+
 Given that existing standards for patient rosters do not exist, CMS is currently piloting an implementation of the [Attribution Guide](https://github.com/smart-on-fhir/smart-on-fhir.github.io/wiki/Bulk-data:-thoughts-on-attribution-lists-and-groups) currently under discussion with the [SMART-ON-FHIR](https://docs.smarthealthit.org/) team.
 The goal is to provide feedback to the group on experiences related to implementation and supporting the recommendations.
 
@@ -42,7 +50,6 @@ The goal is to provide feedback to the group on experiences related to implement
 CMS welcomes [feedback on the implementation](https://groups.google.com/d/forum/dpc-api) as well as experiences with other systems.
 
 Specific details on creating and updating treatment rosters is given in a later [section](#create-an-attribution-group).
-
 
 Providers are required to keep their treatment rosters up to date, as patient attributions automatically expire after 90 days.
 If an attribution expires, the provider may resubmit the patient to their roster and re-attest to a treatment purpose for another 90 days.
@@ -628,7 +635,7 @@ More details on the attribution logic and rules are given [earlier](#attribution
 ### Sample data
 
 As previously mentioned, the DPC sandbox environments do not have any pre-loaded test data.
-Users will need to provide their own FHIR resources in order to successfully make export requests to the BlueButton backend.
+Users will need to provide their own FHIR resources in order to successfully make export requests to the Blue Button backend.
 
 The DPC team has created a collection of sample Patient and Practitioner resources which can be used to get started with the sandbox.
 The files are available in our public [GitHub](https://github.com/CMSgov/dpc-app/tree/master/src/main/resources) repository.
@@ -636,9 +643,9 @@ More details are given in the included [README](https://github.com/CMSgov/dpc-ap
 
 The sample data was generated using the excellent [Synthea](https://synthea.mitre.org) project, with some modifications that are documented in the repository. 
 
-Users can provide any sample FHIR resources (that fulfill the required FHIR profiles) to DPC, but will need to ensure that, for the sandbox environments, any `Patient` resources have an *Medicare Beneficiary Identifier* (MBI) that matches a record in the BlueButton backend.
+Users can provide any sample FHIR resources (that fulfill the required FHIR profiles) to DPC, but will need to ensure that, for the sandbox environments, any `Patient` resources have an *Medicare Beneficiary Identifier* (MBI) that matches a record in the Blue Button backend.
 
-The BlueButton team maintains a list of beneficiaries (along with their MBIs) that can be used for matching existing synthetic data (such as from an organization's training EMR) with valid sandbox MBIs.
+The Blue Button team maintains a list of beneficiaries (along with their MBIs) that can be used for matching existing synthetic data (such as from an organization's training EMR) with valid sandbox MBIs.
 More details and the corresponding data files can be found [here](https://bluebutton.cms.gov/developers/#sample-beneficiaries).
 
 ### Create a Provider
@@ -772,6 +779,12 @@ Details on the exact data format are given in the [implementation guide](https:/
 - The patient's first and last name
 - The patient's birthdate
 
+> Note: The Blue Button team is currently in the process of implementing support for MBIs in accordance with CMS policies.
+>
+>In the interim, DPC is making use of the *Blue Button Beneficiary Identifiers* as a proxy for MBI values.
+>Once MBI support is fully implemented, users will need to migrate their tooling by remapping from the **https://bluebutton.cms.gov/resources/variables/bene_id** system to the new **http://hl7.org/fhir/sid/us-mbi** system.
+> Existing resources in the DPC sandbox will be automatically updated to utilize the new system.
+
 **cURL command**
 
 ~~~sh
@@ -798,7 +811,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient
   "identifier": [
     {
       "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
-      "value": "20000000001809"
+      "value": "-20000000001809"
     }
   ],
   "name": [
@@ -1337,7 +1350,7 @@ In the example header below, the number `42` in the URL represents the ID of the
 
 **Headers**
 
-- Content-Location: https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job}
+- Content-Location: https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job}
 
 
 **4. Check the status of the export job**
@@ -1347,7 +1360,7 @@ In the example header below, the number `42` in the URL represents the ID of the
 **Request**
 
 ~~~ sh
-GET https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job}
+GET https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job}
 ~~~
 
 Using the `Content-Location` header value from the data export response, you can check the status of the export job.
@@ -1360,7 +1373,7 @@ The status will change from `202 Accepted` to `200 OK` when the export job is co
 **cURL Command**
 
 ~~~ sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/jobs/{unique ID of export job} \
+curl -v https://sandbox.dpc.cms.gov/api/v1/Jobs/{unique ID of export job} \
 -H 'Authorization: Bearer {access_token}'
 ~~~
 

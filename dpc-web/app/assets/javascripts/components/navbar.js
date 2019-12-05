@@ -36,5 +36,7 @@ if(typeof(open_mobile_nav_button) != 'undefined' && open_mobile_nav_button != nu
     setTimeout(function(){
       overlay.classList.add(visible_class);
     }, 100);
+
+    trapFocus(mobile_nav);
   })
 };
