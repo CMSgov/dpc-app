@@ -13,7 +13,7 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
 import gov.cms.dpc.fhir.parameters.FHIRParamValueFactory;
-import gov.cms.dpc.fhir.parameters.ProvenanceResourceValueFactory;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.Configuration;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(HAPIExceptionHandler.class);
         binder.bind(DefaultFHIRExceptionHandler.class);
         binder.bind(FHIRParamValueFactory.class);
-        binder.bind(ProvenanceResourceValueFactory.class);
+        binder.bind(ProvenanceResourceFactoryProvider.class);
 
         // Validator
         final FHIRValidationConfiguration validationConfig = getConfiguration().getFHIRConfiguration().getValidation();

@@ -2,61 +2,78 @@ package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
-import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.glassfish.hk2.api.Factory;
-import org.glassfish.jersey.server.model.Parameter;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.BeforeAll;
+import org.hl7.fhir.dstu3.model.Provenance;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 class ProvenanceResourceValueFactoryTest {
 
-    private static Injector injector = Mockito.mock(Injector.class);
-    private static FhirContext ctx = Mockito.mock(FhirContext.class);
-    private static ProvenanceResourceValueFactory factory;
+    private static final FhirContext ctx = FhirContext.forDstu3();
 
     private ProvenanceResourceValueFactoryTest() {
         // Not used
     }
 
-    @BeforeAll
-    static void setup() {
-        factory = new ProvenanceResourceValueFactory(injector, ctx);
+    @Test
+    void testValidProvenance() {
+        final Provenance provenance = new Provenance();
+        provenance.addTarget(new Reference("Organization/nothing-real"));
+        final String provString = ctx.newJsonParser().encodeResourceToString(provenance);
+
+        final HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(mock.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(provString);
+
+        final Injector mockInjector = Mockito.mock(Injector.class);
+        Mockito.when(mockInjector.getInstance(HttpServletRequest.class)).thenReturn(mock);
+
+        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
+
+        final Provenance prov2 = factory.provide();
+        assertTrue(provenance.equalsDeep(prov2), "Should have matching provenance resource");
     }
 
     @Test
-    void testCorrectFactory() {
-        final Parameter parameter = Mockito.mock(Parameter.class);
-        final ProvenanceHeader mockAnnotation = Mockito.mock(ProvenanceHeader.class);
-        Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
-        Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
+    void testMissingHeader() {
+        final HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(mock.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(null);
 
-        final Factory<?> valueFactory = factory.getValueFactory(parameter);
-        assertAll(() -> assertNotNull(valueFactory, "Should have factory"),
-                () -> assertEquals(ProvenanceResourceFactory.class, valueFactory.getClass(), "Should have provenance factory"));
+        final Injector mockInjector = Mockito.mock(Injector.class);
+        Mockito.when(mockInjector.getInstance(HttpServletRequest.class)).thenReturn(mock);
+
+        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
+
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
+        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
+                () -> assertEquals(String.format("Must have %s header", ProvenanceResourceValueFactory.PROVENANCE_HEADER), exception.getMessage(), "Should show missing header"));
     }
 
     @Test
-    void testMissingAnnotation() {
-        final Parameter parameter = Mockito.mock(Parameter.class);
-        Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(null);
+    void testInvalidProvenance() {
 
-        assertNull(factory.getValueFactory(parameter), "Factory should be null");
-    }
+        final Patient patient = new Patient();
+        final String provString = ctx.newJsonParser().encodeResourceToString(patient);
 
-    @Test
-    void testIncorrectParameter() {
-        final Parameter parameter = Mockito.mock(Parameter.class);
-        final ProvenanceHeader mockAnnotation = Mockito.mock(ProvenanceHeader.class);
-        Mockito.when(parameter.getDeclaredAnnotation(ProvenanceHeader.class)).thenReturn(mockAnnotation);
-        Mockito.when(parameter.getRawType()).thenAnswer(answer -> Mockito.class);
+        final HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(mock.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(provString);
 
-        assertNull(factory.getValueFactory(parameter), "Should not have factory for non-FHIR resource");
+        final Injector mockInjector = Mockito.mock(Injector.class);
+        Mockito.when(mockInjector.getInstance(HttpServletRequest.class)).thenReturn(mock);
+
+        final ProvenanceResourceValueFactory factory = new ProvenanceResourceValueFactory(mockInjector, ctx);
+
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
+        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
+                () -> assertEquals("Cannot parse FHIR `Provenance` resource", exception.getMessage(), "Should show missing header"));
     }
 }
