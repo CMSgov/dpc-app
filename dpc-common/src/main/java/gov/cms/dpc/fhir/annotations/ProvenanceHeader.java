@@ -1,6 +1,5 @@
 package gov.cms.dpc.fhir.annotations;
 
-import javax.validation.Valid;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
