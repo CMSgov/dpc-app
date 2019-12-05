@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
       user.permit(
         :first_name, :last_name, :requested_organization, :requested_organization_type,
         :address_1, :address_2, :city, :state, :zip, :agree_to_terms,
-        :email, :password, :current_password, :num_providers
+        :email, :password, :current_password, :requested_num_providers
       )
     end
 
@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
       user.permit(
         :first_name, :last_name, :requested_organization, :requested_organization_type,
         :address_1, :address_2, :city, :state, :zip, :agree_to_terms,
-        :email, :password, :current_password, :num_providers
+        :email, :password, :current_password, :requested_num_providers
       )
     end
   end

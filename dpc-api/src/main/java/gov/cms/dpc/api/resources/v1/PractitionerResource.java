@@ -32,7 +32,8 @@ import java.util.function.Consumer;
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
-@Api(value = "Practitioner")
+@Api(value = "Practitioner", authorizations = @Authorization(value = "apiKey"))
+@Path("/v1/Practitioner")
 public class PractitionerResource extends AbstractPractitionerResource {
 
     private static final String PRACTITIONER_PROFILE = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner";

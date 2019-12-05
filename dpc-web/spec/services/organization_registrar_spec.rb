@@ -15,14 +15,12 @@ RSpec.describe OrganizationRegistrar do
       allow(deletion_api_client).to receive(:delete_organization).with(sandbox_reg_org).and_return(true)
 
       allow(APIClient).to receive(:new).with('production').and_return(prod_creation_api_client)
-      allow(prod_creation_api_client).to receive(:create_organization).with(org).
-        and_return(prod_creation_api_client)
+      allow(prod_creation_api_client).to receive(:create_organization)
+        .with(org).and_return(prod_creation_api_client)
       allow(prod_creation_api_client).to receive(:response_successful?).and_return(true)
       allow(prod_creation_api_client).to receive(:response_body).and_return(
-        {
-          'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
-          'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
-        }
+        'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
+        'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
       )
 
       initial_fhir_endpoint_count = FhirEndpoint.count

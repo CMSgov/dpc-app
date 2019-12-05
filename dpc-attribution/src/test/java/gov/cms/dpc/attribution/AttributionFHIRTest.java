@@ -39,7 +39,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 class AttributionFHIRTest {
 
-    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
+    private static final String KEY_PREFIX = "dpc.attribution";
+    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
+            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();

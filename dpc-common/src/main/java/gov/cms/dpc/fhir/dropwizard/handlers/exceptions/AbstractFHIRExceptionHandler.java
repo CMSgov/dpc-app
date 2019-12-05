@@ -11,6 +11,7 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public abstract class AbstractFHIRExceptionHandler<E extends Throwable> extends LoggingExceptionMapper<E> {
 
+    protected static final String ERROR_MSG_FMT = "There was an error processing your request. It has been logged (ID %016x): %s";
     @Context
     private ResourceInfo info;
 

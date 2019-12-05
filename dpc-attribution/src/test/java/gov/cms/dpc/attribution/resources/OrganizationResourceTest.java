@@ -2,24 +2,19 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.OrganizationHelpers;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Date;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -116,6 +111,38 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .withId(organization.getId())
                 .encodedJson()
                 .execute(), "Should not have found organization");
+    }
+
+    @Test
+    void testUpdateOrganization() {
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
+
+        Identifier identifier = new Identifier();
+        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        identifier.setValue("UPDATED012345");
+        organization.setIdentifier(Arrays.asList(identifier));
+        organization.setName("An Updated Organization");
+
+        MethodOutcome outcome = client.update().resource(organization).execute();
+        Organization orgResult = (Organization) outcome.getResource();
+
+        assertTrue(organization.equalsDeep(orgResult));
+    }
+
+    @Test
+    void testUpdateOrganizationWithDuplicateNPI() {
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "org-update-npi-duplicate1", false);
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "org-update-npi-duplicate2", false);
+
+        Identifier identifier = new Identifier();
+        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        identifier.setValue("org-update-npi-duplicate1");
+
+        organization2.setIdentifier(Arrays.asList(identifier));
+        IUpdateTyped update = client.update().resource(organization2);
+        assertThrows(InvalidRequestException.class, update::execute);
     }
 
     private Practitioner createFakePractitioner(Organization organization) {

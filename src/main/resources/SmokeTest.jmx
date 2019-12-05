@@ -30,17 +30,17 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="seed-file" elementType="Argument">
                 <stringProp name="Argument.name">seed-file</stringProp>
-                <stringProp name="Argument.value">src/main/resources/test_associations.csv</stringProp>
+                <stringProp name="Argument.value">${__P(seed-file,)}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="provider-bundle" elementType="Argument">
                 <stringProp name="Argument.name">provider-bundle</stringProp>
-                <stringProp name="Argument.value">provider_bundle.json</stringProp>
+                <stringProp name="Argument.value">${__P(provider-bundle,)}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="patient-bundle" elementType="Argument">
                 <stringProp name="Argument.name">patient-bundle</stringProp>
-                <stringProp name="Argument.value">patient_bundle.json</stringProp>
+                <stringProp name="Argument.value">${__P(patient-bundle,)}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="host" elementType="Argument">
@@ -56,6 +56,26 @@
               <elementProp name="admin-url" elementType="Argument">
                 <stringProp name="Argument.name">admin-url</stringProp>
                 <stringProp name="Argument.value">${__P(admin-url,)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="organization-id" elementType="Argument">
+                <stringProp name="Argument.name">organization-id</stringProp>
+                <stringProp name="Argument.value">${__P(organization-id,)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="client-token" elementType="Argument">
+                <stringProp name="Argument.name">client-token</stringProp>
+                <stringProp name="Argument.value">${__P(client-token,)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="private-key" elementType="Argument">
+                <stringProp name="Argument.name">private-key</stringProp>
+                <stringProp name="Argument.value">${__P(private-key,)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="key-id" elementType="Argument">
+                <stringProp name="Argument.name">key-id</stringProp>
+                <stringProp name="Argument.value">${__P(key-id,)}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>

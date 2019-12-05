@@ -10,6 +10,7 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.TokenResource;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DPCValidationErrorMessage;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.persistence.NoResultException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -41,7 +41,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
@@ -68,42 +68,42 @@ class JWTUnitTests {
         @Test
         void testQueryParams() {
             final String payload = "this is not a payload";
-            Response response = RESOURCE.target("/Token/auth")
+            Response response = RESOURCE.target("/v1/Token/auth")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
             // Should have all exceptions
-            ValidationErrorResponse validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            DPCValidationErrorMessage validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(3, validationErrorResponse.errors.size(), "Should have three validations");
+            assertEquals(3, validationErrorResponse.getErrors().size(), "Should have three validations");
 
             // Add the missing scope value and try again
-            response = RESOURCE.target("/Token/auth").queryParam("scope", "system/*:*")
+            response = RESOURCE.target("/v1/Token/auth").queryParam("scope", "system/*.*")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
             // Should have one less exception
-            validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(2, validationErrorResponse.errors.size(), "Should have two validations");
+            assertEquals(2, validationErrorResponse.getErrors().size(), "Should have two validations");
 
 
             // Add the grant type
-            response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
             // Should have all exceptions
-            validationErrorResponse = response.readEntity(ValidationErrorResponse.class);
+            validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(1, validationErrorResponse.errors.size(), "Should only have a single violation");
-            assertTrue(validationErrorResponse.errors.get(0).contains("Assertion type is required"));
+            assertEquals(1, validationErrorResponse.getErrors().size(), "Should only have a single violation");
+            assertTrue(validationErrorResponse.getErrors().get(0).contains("Assertion type is required"));
 
             // Add the assertion type and try again
-            response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .request()
@@ -116,8 +116,8 @@ class JWTUnitTests {
         @Test
         void testInvalidGrantTypeValue() {
             final String payload = "not a real payload";
-            Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            Response response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "wrong_grant_type")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .request()
@@ -129,8 +129,8 @@ class JWTUnitTests {
 
         @Test
         void testEmptyGrantTypeValue() {
-            final Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            final Response response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .request()
@@ -138,14 +138,14 @@ class JWTUnitTests {
 
             // Setting the grant type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+            assertNotNull(response.readEntity(DPCValidationErrorMessage.class), "Should have a validation failure");
         }
 
         @Test
         void testInvalidClientAssertionType() {
             final String payload = "not a real payload";
-            Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            Response response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "Not a real assertion_type")
                     .request()
@@ -157,8 +157,8 @@ class JWTUnitTests {
 
         @Test
         void testEmptyClientAssertionType() {
-            final Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            final Response response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "")
                     .request()
@@ -166,13 +166,13 @@ class JWTUnitTests {
 
             // Setting the assertion type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+            assertNotNull(response.readEntity(DPCValidationErrorMessage.class), "Should have a validation failure");
         }
 
         @Test
         void testInvalidScopeType() {
             final String payload = "not a real payload";
-            Response response = RESOURCE.target("/Token/auth")
+            Response response = RESOURCE.target("/v1/Token/auth")
                     .queryParam("scope", "this is not a scope")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
@@ -180,12 +180,12 @@ class JWTUnitTests {
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertTrue(response.readEntity(String.class).contains("Access Scope must be 'system/*:*'"), "Should have correct error message");
+            assertTrue(response.readEntity(String.class).contains("Access Scope must be 'system/*.*'"), "Should have correct error message");
         }
 
         @Test
         void testEmptyScopeType() {
-            final Response response = RESOURCE.target("/Token/auth")
+            final Response response = RESOURCE.target("/v1/Token/auth")
                     .queryParam("scope", "")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
@@ -194,7 +194,7 @@ class JWTUnitTests {
 
             // Setting the assertion type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertNotNull(response.readEntity(ValidationErrorResponse.class), "Should have a validation failure");
+            assertNotNull(response.readEntity(DPCValidationErrorMessage.class), "Should have a validation failure");
         }
     }
 
@@ -219,8 +219,8 @@ class JWTUnitTests {
                     .compact();
 
             // Submit the JWT
-            Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            Response response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -246,8 +246,8 @@ class JWTUnitTests {
                     .compact();
 
             // Submit the JWT
-            Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            Response response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -273,8 +273,8 @@ class JWTUnitTests {
                     .compact();
 
             // Submit the JWT
-            Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            Response response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -300,8 +300,8 @@ class JWTUnitTests {
                     .compact();
 
             // Submit the JWT
-            Response response = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            Response response = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -312,8 +312,8 @@ class JWTUnitTests {
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus(), "Should have invalid Macaroon");
 
             // Try to submit again
-            Response r2 = RESOURCE.target("/Token/auth")
-                    .queryParam("scope", "system/*:*")
+            Response r2 = RESOURCE.target("/v1/Token/auth")
+                    .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .queryParam("client_assertion", jwt)
@@ -332,8 +332,11 @@ class JWTUnitTests {
         final PublicKeyDAO publicKeyDAO = mockKeyDAO();
         Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
-        final JwtKeyResolver resolver = new JwtKeyResolver(publicKeyDAO);
+        final JwtKeyResolver resolver = spy(new JwtKeyResolver(publicKeyDAO));
         final CaffeineJTICache jtiCache = new CaffeineJTICache();
+
+        UUID organizationID = UUID.randomUUID();
+        doReturn(organizationID).when(resolver).getOrganizationID(Mockito.anyString());
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
 
@@ -355,8 +358,8 @@ class JWTUnitTests {
     private static PublicKeyDAO mockKeyDAO() {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
-        Mockito.when(mock.fetchPublicKey(Mockito.any())).then(answer -> {
-            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(0));
+        Mockito.when(mock.fetchPublicKey(Mockito.any(), Mockito.any())).then(answer -> {
+            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(1));
             if (keyPair == null) {
                 return Optional.empty();
             }
@@ -365,15 +368,5 @@ class JWTUnitTests {
             return Optional.of(entity);
         });
         return mock;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public static class ValidationErrorResponse {
-
-        public List<String> errors;
-
-        ValidationErrorResponse() {
-            // Jackson required
-        }
     }
 }

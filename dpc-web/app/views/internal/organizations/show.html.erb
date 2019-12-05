@@ -58,6 +58,11 @@
         <%= @organization.npi %>
       </div>
 
+      <div class="ds-u-margin-bottom--1">
+        <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
+        <%= @organization.vendor %>
+      </div>
+
     </div>
 
     <div class="box__content">
@@ -99,6 +104,24 @@
         </div>
         <div class="ds-u-margin-bottom--1">
           Status: <%= fhir_endpoint.status.titleize %>
+        </div>
+      <% end %>
+    </div>
+</section>
+
+<section class="box">
+    <div class="box__content">
+      <h2 class="box__heading">Users</h2>
+      <% @organization.users.each do |user| %>
+        <div class="module-container">
+          <div class="module-container__id">
+            <%= user.id %>
+          </div>
+          <div class="module-container__primary">
+            <h2 class="module-container__heading">
+              <%= link_to user.name, internal_user_url(user) %>
+            </h2>
+          </div>
         </div>
       <% end %>
     </div>
