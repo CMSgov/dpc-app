@@ -18,6 +18,10 @@ public class MemoryBatchQueue extends JobQueueCommon {
 
     private final Map<UUID, JobQueueBatch> queue;
 
+    public MemoryBatchQueue() {
+        this(100);
+    }
+
     public MemoryBatchQueue(int batchSize) {
         super(batchSize);
         this.queue = new HashMap<>();
