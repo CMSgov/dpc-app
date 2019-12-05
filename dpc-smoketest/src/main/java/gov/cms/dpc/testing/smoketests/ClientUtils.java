@@ -5,22 +5,26 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +54,10 @@ public class ClientUtils {
                 .map(npi -> exportRequestDispatcher(exportClient, npi))
                 .map(search -> (Group) search.getEntryFirstRep().getResource())
                 .map(group -> jobCompletionLambda(exportClient, httpClient, group))
+                .peek(jobResponse -> {
+                    if (jobResponse.getError().size() > 0)
+                        throw new IllegalStateException("Export job completed, but with errors");
+                })
                 .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
                     jobResponseHandler(httpClient, entry);
                 }));
@@ -125,7 +133,19 @@ public class ClientUtils {
                 done = statusCode == HttpStatus.OK_200 || statusCode > 300;
                 if (done) {
                     final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-                    jobResponse = mapper.readValue(response.getEntity().getContent(), JobCompletionModel.class);
+                    // If we're done, make sure we completed successfully, otherwise, throw an error
+                    if (statusCode > 300) {
+                        throw new IllegalStateException(String.format("Awaiting export results failed with status %d: %s", statusCode, EntityUtils.toString(response.getEntity())));
+                    }
+                    String responseBody = "";
+                    try {
+                        responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+                        jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
+                    } catch ( JsonParseException e ) {
+                        logger.error(String.format("Failed to parse job status response: %s", responseBody));
+                        throw e;
+                    }
+
                 }
             }
         }
@@ -210,7 +230,7 @@ public class ClientUtils {
         try {
             return monitorExportRequest(exportOperation, client);
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error monitoring export", e);
+            throw new RuntimeException(String.format("Error monitoring export groupID: %s", group.getId()), e);
         }
     }
 
@@ -219,29 +239,32 @@ public class ClientUtils {
         try (InputStream resource = baseClass.getClassLoader().getResourceAsStream(filename)) {
             final Bundle bundle = parser.parseResource(Bundle.class, resource);
 
-            final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(bundle);
+            bundle
+                    .getEntry()
+                    .stream()
+                    .map(Bundle.BundleEntryComponent::getResource)
+                    .filter(entry -> entry.getClass().equals(clazz))
+                    .forEach(entry -> client
+                            .create()
+                            .resource(entry)
+                            .encodedJson()
+                            .execute());
 
+            // Fetch the new bundle, so we make sure we get the IDs that we're after
             return client
-                    .operation()
-                    .onType(clazz)
-                    .named("submit")
-                    .withParameters(parameters)
-                    .returnResourceType(Bundle.class)
+                    .search()
+                    .forResource(clazz)
+                    .returnBundle(Bundle.class)
                     .encodedJson()
                     .execute();
         }
     }
 
-    static Map<String, Reference> submitPatients(String patientBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+    static Map<String, Reference> submitPatients(String patientBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) throws IOException {
         final Bundle patientBundle;
 
-        try {
-            System.out.println("Submitting patients");
-            patientBundle = bundleSubmitter(baseClass, Patient.class, patientBundleFilename, ctx.newJsonParser(), exportClient);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot submit patients.", e);
-        }
+        System.out.println("Submitting patients");
+        patientBundle = bundleSubmitter(baseClass, Patient.class, patientBundleFilename, ctx.newJsonParser(), exportClient);
 
         final Map<String, Reference> patientReferences = new HashMap<>();
         patientBundle
@@ -254,15 +277,11 @@ public class ClientUtils {
         return patientReferences;
     }
 
-    static List<String> submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) {
+    static List<String> submitPractitioners(String providerBundleFilename, Class<?> baseClass, FhirContext ctx, IGenericClient exportClient) throws IOException {
         final Bundle providerBundle;
 
-        try {
-            System.out.println("Submitting practitioners");
-            providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot submit providers.", e);
-        }
+        System.out.println("Submitting practitioners");
+        providerBundle = bundleSubmitter(baseClass, Practitioner.class, providerBundleFilename, ctx.newJsonParser(), exportClient);
 
         // Get the provider NPIs
         return providerBundle

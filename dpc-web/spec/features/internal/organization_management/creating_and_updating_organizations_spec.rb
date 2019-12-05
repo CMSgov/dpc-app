@@ -25,6 +25,7 @@ RSpec.feature 'creating and updating organizations' do
     select 'South Carolina', from: 'organization_address_attributes_state'
     fill_in 'organization_address_attributes_zip', with: '29601'
 
+    fill_in 'organization_vendor', with: 'Cool EMR Vendor'
     fill_in 'organization_fhir_endpoints_attributes_0_name', with: 'Provider Endpoint'
     fill_in 'organization_fhir_endpoints_attributes_0_uri', with: 'https://FhirEndpoint.example.com'
     fill_in 'organization_npi', with: '555ttt444'
@@ -44,6 +45,7 @@ RSpec.feature 'creating and updating organizations' do
     expect(page.body).to have_content('Provider Endpoint')
     expect(page.body).to have_content('https://FhirEndpoint.example.com')
     expect(page.body).to have_content('Test')
+    expect(page.body).to have_content('Cool EMR Vendor')
 
     find('[data-test="edit-link"]').click
 
@@ -77,11 +79,34 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_css('[data-test="form-submit"]')
   end
 
+  scenario 'sending sandbox emails to org users when sandbox added' do
+    org = create(:organization, api_environments: [])
+    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
+    fishy = create(:user, first_name: 'Fish', last_name: 'Marlin', email: 'fish@beach.com')
+    create(:user, first_name: 'Unrelated', last_name: 'User', email: 'unrelated@beach.com')
+    org.users << crabby
+    org.users << fishy
+
+    mailer = double(UserMailer)
+    allow(UserMailer).to receive(:with).with(user: crabby, organization: org).and_return(mailer)
+    allow(UserMailer).to receive(:with).with(user: fishy, organization: org).and_return(mailer)
+    allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
+    allow(mailer).to receive(:deliver_later)
+
+    visit edit_internal_organization_path(org)
+
+    check 'organization_api_environments_sandbox'
+    find('[data-test="form-submit"]').click
+
+    expect(page).not_to have_css('[data-test="form-submit"]')
+    expect(mailer).to have_received(:organization_sandbox_email).twice
+  end
+
   def stub_creation_request
     allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('112233')
     stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-      headers: { 'Content-Type' => 'application/json', 'Authorization' => 'Bearer 112233' },
+      headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer 112233' },
       body: {
         resourceType: 'Parameters',
         parameter: [{

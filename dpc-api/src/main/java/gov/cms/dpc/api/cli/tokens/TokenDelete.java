@@ -12,8 +12,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
-import java.util.UUID;
-
 public class TokenDelete extends AbstractAdminCommand {
 
     public TokenDelete() {

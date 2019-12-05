@@ -4,16 +4,15 @@ import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
 import gov.cms.dpc.common.utils.PropertiesProvider;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 
-@Path("/v1")
 @Api(value = "Metadata")
 public class BaseResource extends AbstractBaseResource {
 
@@ -56,17 +55,19 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     @Public
     @GET
-    @Path("/version")
+    @Path("/v1/version")
     @ApiOperation(value = "Return the application build version")
+    @Consumes(value = "*/*")
     public String version() {
         return this.pp.getBuildVersion();
     }
 
     @Override
     @GET
-    @Path("/metadata")
+    @Path("/v1/metadata")
     @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
+    @ApiResponses(@ApiResponse(code = 200, message = "Successful operation", examples = @Example(@ExampleProperty(value = ""))))
     public CapabilityStatement metadata() {
         return Capabilities.getCapabilities();
     }

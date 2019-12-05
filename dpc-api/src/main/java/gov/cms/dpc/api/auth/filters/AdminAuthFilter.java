@@ -42,7 +42,7 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         // Validate Macaroon
         final List<Macaroon> m1;
         try {
-            m1 = bakery.deserializeMacaroon(macaroon);
+            m1 = MacaroonBakery.deserializeMacaroon(macaroon);
         } catch (BakeryException e) {
             logger.error("Cannot deserialize Macaroon", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
@@ -60,7 +60,7 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
         // Ensure that we don't have any organization IDs
         // Since we ALWAYS generate organization_id caveats for tokens, its absence indicates that its a Golden Macaroon
-        final boolean isGoldenMacaroon = this.bakery.getCaveats(m1.get(0))
+        final boolean isGoldenMacaroon = MacaroonBakery.getCaveats(m1.get(0))
                 .stream()
                 .map(MacaroonCaveat::getCondition)
                 .anyMatch(cond -> cond.getKey().equals("organization_id"));

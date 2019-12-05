@@ -28,8 +28,9 @@ Rails.application.routes.draw do
 
   match '/dashboard', to: 'dashboard#show', via: :get
 
-  resources :organizations, only: [:show] do
+  resources :organizations, only: [:edit, :update] do
     resources :client_tokens, only: [:new, :create]
+    resources :public_keys, only: [:new, :create]
   end
 
   root to: 'public#home'

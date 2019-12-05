@@ -1,12 +1,15 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.TokenEntity;
-import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -16,6 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -50,7 +54,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testTokenList() throws IOException {
 
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
         assertAll(() -> assertFalse(tokens.getEntities().isEmpty(), "Should have tokens"),
                 () -> assertEquals(3, tokens.getCount(), "Should have 3 tokens"),
                 () -> assertEquals(LocalDate.now(ZoneOffset.UTC), tokens.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate(), "Should have created date"));
@@ -92,7 +96,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         }
 
         // List the tokens
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
         assertEquals(1, tokens
                 .getEntities()
                 .stream()
@@ -132,14 +136,14 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             }
         }
 
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
         assertEquals(1, tokens.getEntities().stream().filter(token -> token.getExpiresAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
     }
 
     @Test
     void testTokenDeletion() throws IOException {
         // Get all the tokens
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
         assertFalse(tokens.getEntities().isEmpty(), "Should have tokens");
         final TokenEntity token = ((List<TokenEntity>) tokens.getEntities()).get(0);
 
@@ -162,10 +166,22 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
-    CollectionResponse<TokenEntity> fetchTokens(String orgID) throws IOException {
+    @Test
+    void testTokenSigning() throws IOException {
+        final IParser parser = ctx.newJsonParser();
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        // Create a new org and make sure it has no providers
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
+
+        // Try to authenticate using the private key for org 1 and the token for org 2, should throw an exception, but in the auth handler
+        final AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), m2, PUBLIC_KEY_ID, PRIVATE_KEY));
+        error.getMessage();
+    }
+
+    CollectionResponse<TokenEntity> fetchTokens(String orgID, String token) throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token");
-            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {

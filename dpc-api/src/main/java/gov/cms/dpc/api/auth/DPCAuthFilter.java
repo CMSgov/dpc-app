@@ -9,6 +9,7 @@ import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -64,7 +65,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
         final List<Macaroon> m1;
         try {
-            m1 = bakery.deserializeMacaroon(macaroon);
+            m1 = MacaroonBakery.deserializeMacaroon(macaroon);
         } catch (BakeryException e) {
             logger.error("Cannot deserialize Macaroon", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
@@ -72,6 +73,10 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
 
         // Lookup the organization by Macaroon id
         final UUID orgID = extractOrgIDFromMacaroon(m1);
+
+        // Now that we have the organization_id, set it in the logging context
+        MDC.clear();
+        MDC.put("organization_id", orgID.toString());
 
         try {
             this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
@@ -97,7 +102,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
                 throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
             }
             // Find the org_id caveat and extract the value
-            orgID = MacaroonHelpers.extractOrgIDFromCaveats(this.bakery, Collections.singletonList(rootMacaroon))
+            orgID = MacaroonHelpers.extractOrgIDFromCaveats(Collections.singletonList(rootMacaroon))
                     .orElseThrow(() -> {
                         logger.error("Cannot find organization_id on Macaroon");
                         throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
