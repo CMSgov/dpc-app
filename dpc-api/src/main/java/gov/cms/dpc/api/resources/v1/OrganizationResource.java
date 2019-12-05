@@ -6,11 +6,14 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
+import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
@@ -27,10 +30,14 @@ import java.util.stream.Collectors;
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private final IGenericClient client;
+    private final TokenDAO tokenDAO;
+    private final PublicKeyDAO keyDAO;
 
     @Inject
-    public OrganizationResource(IGenericClient client) {
+    public OrganizationResource(IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         this.client = client;
+        this.tokenDAO = tokenDAO;
+        this.keyDAO = keyDAO;
     }
 
 
@@ -77,6 +84,35 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .withId(organizationID.toString())
                 .encodedJson()
                 .execute();
+    }
+
+    @DELETE
+    @Path("/{organizationID}")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @AdminOperation
+    @UnitOfWork
+    @Override
+    public Response deleteOrganization(@PathParam("organizationID") UUID organizationID) {
+        // Delete from the attribution service
+        this.client
+                .delete()
+                .resourceById(new IdType("Organization", organizationID.toString()))
+                .encodedJson()
+                .execute();
+
+        // Delete tokens
+        this.tokenDAO
+                .fetchTokens(organizationID)
+                .forEach(this.tokenDAO::deleteToken);
+
+        // Delete public keys
+        this.keyDAO
+                .fetchPublicKeys(organizationID)
+                .forEach(this.keyDAO::deletePublicKey);
+
+        return Response.ok().build();
     }
 
     @PUT

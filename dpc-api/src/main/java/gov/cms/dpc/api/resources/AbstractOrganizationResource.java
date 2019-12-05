@@ -7,10 +7,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.validation.Valid;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("/Organization")
@@ -24,6 +22,10 @@ public abstract class AbstractOrganizationResource {
     @GET
     @Path("/{organizationID}")
     public abstract Organization getOrganization(UUID organizationID);
+
+    @DELETE
+    @Path("/{organizationID}")
+    public abstract Response deleteOrganization(UUID organizationID);
 
     @PUT
     @Path("/{organizationID}")
