@@ -27,7 +27,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -187,7 +186,7 @@ class DataResourceTest {
                 .header(org.apache.http.HttpHeaders.RANGE, "frames=0-1")
                 .get();
 
-        assertAll(() -> assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus(),"Should have correct status code"),
+        assertAll(() -> assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus(), "Should have correct status code"),
                 () -> assertEquals("{\"code\":416,\"message\":\"Only `bytes` are acceptable as ranges\"}", response.readEntity(String.class), "Should have correct error message"));
     }
 

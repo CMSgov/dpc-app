@@ -1,67 +1,48 @@
 package gov.cms.dpc.api.core;
 
 import gov.cms.dpc.common.annotations.ExportPath;
-import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.bouncycastle.util.encoders.Hex;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("rawtypes")
 public class FileManager {
 
     private static final Logger logger = LoggerFactory.getLogger(FileManager.class);
 
     private final String fileLocation;
-    private final SessionFactory factory;
+    private final IJobQueue jobQueue;
 
     @Inject
-    FileManager(@ExportPath String fileLocation, DPCQueueManagedSessionFactory factory) {
+    FileManager(@ExportPath String fileLocation, IJobQueue jobQueue) {
         this.fileLocation = fileLocation;
-        this.factory = factory.getSessionFactory();
+        this.jobQueue = jobQueue;
     }
 
     public FilePointer getFile(UUID organizationID, String fileID) {
-        final JobQueueBatchFile batchFile;
-        final OffsetDateTime creationTime;
-        try (final Session session = this.factory.openSession()) {
 
-            // Using a raw JPA query here, because the Criteria builder doesn't really support joining un-related entities
-            final String queryString =
-                    "SELECT b.completeTime, f FROM gov.cms.dpc.queue.models.JobQueueBatchFile f " +
-                            "LEFT JOIN gov.cms.dpc.queue.models.JobQueueBatch b on b.jobID = f.jobID " +
-                            "WHERE f.fileName = :fileName AND b.orgID = :org";
+        final JobQueueBatchFile batchFile = this.jobQueue.getJobBatchFile(organizationID, fileID)
+                .orElseThrow(() -> new WebApplicationException("Cannot find file", Response.Status.NOT_FOUND));
 
-            final Query query = session.createQuery(queryString);
-            query.setParameter("fileName", fileID);
-            query.setParameter("org", organizationID);
-            final List objects = query.getResultList();
-            final Object[] objectArray = (Object[]) objects.get(0);
-            creationTime = (OffsetDateTime) objectArray[0];
-            batchFile = (JobQueueBatchFile) objectArray[1];
-        } catch (NoResultException e) {
-            throw new WebApplicationException("Cannot find file", Response.Status.NOT_FOUND);
-        }
+        final JobQueueBatch jobQueueBatch = this.jobQueue.getBatch(batchFile.getBatchID())
+                .orElseThrow(() -> new WebApplicationException("Cannot export job for file", Response.Status.NOT_FOUND));
 
         final java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", fileLocation, batchFile.getFileName()));
         logger.debug("Streaming file {}", path.toString());
         return new FilePointer(Hex.toHexString(batchFile.getChecksum()),
                 batchFile.getFileLength(),
                 batchFile.getJobID(),
-                creationTime,
+                jobQueueBatch.getStartTime().orElseThrow(() -> new IllegalStateException("Cannot find start time of completed job")),
                 new File(path.toString()));
     }
 

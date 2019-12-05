@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "rawtypes"})
+@SuppressWarnings({"OptionalGetWithoutIsPresent"})
 @ExtendWith(BufferedLoggerHandler.class)
 class QueueTest {
 
@@ -85,8 +86,8 @@ class QueueTest {
         final UUID orgID = UUID.randomUUID();
 
         // Add a couple of jobs
-        var firstJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Arrays.asList(ResourceType.Patient));
-        var secondJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Arrays.asList(ResourceType.Patient));
+        var firstJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient));
+        var secondJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient));
 
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
 
@@ -114,11 +115,22 @@ class QueueTest {
 
         // Check that the status is COMPLETED and with JobResults
         final Optional<JobQueueBatch> completedOptional = queue.getBatch(firstBatchID);
+        assertTrue(completedOptional.isPresent(), "Should have job result");
         completedOptional.ifPresent(completedJob -> {
             assertEquals(JobStatus.COMPLETED, completedJob.getStatus());
             assertEquals(1, completedJob.getJobQueueBatchFiles().size());
             assertTrue(completedJob.getJobQueueFile(ResourceType.Patient).isPresent());
         });
+
+        // Verify we can match the batches correctly
+        final String fileName = completedOptional.get().getJobQueueFile(ResourceType.Patient).get().getFileName();
+        final Optional<JobQueueBatchFile> jobBatchFile = queue.getJobBatchFile(orgID, fileName);
+        assertAll(() -> assertTrue(jobBatchFile.isPresent(), "Should have batch file"),
+                () -> assertEquals(ResourceType.Patient, jobBatchFile.get().getResourceType(), "Should be a patient resource"));
+
+        // Try with bad file ID and Org ID
+        assertFalse(queue.getJobBatchFile(orgID, "not a real file").isPresent(), "Should not find file");
+        assertFalse(queue.getJobBatchFile(UUID.randomUUID(), fileName).isPresent(), "Should not find file");
 
         // Work the second job
         workBatch = queue.claimBatch(aggregatorID);
