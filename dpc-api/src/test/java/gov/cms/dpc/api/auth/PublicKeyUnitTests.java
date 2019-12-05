@@ -55,7 +55,7 @@ class PublicKeyUnitTests {
             final KeyPair key = APIAuthHelpers.generateKeyPair();
 
             final Response response = RESOURCE
-                    .target("/Key")
+                    .target("/v1/Key")
                     .request()
                     .post(Entity.entity(APIAuthHelpers.generatePublicKey(key.getPublic()), MediaType.APPLICATION_JSON));
 
@@ -65,7 +65,7 @@ class PublicKeyUnitTests {
         @Test
         void testInvalidKey() {
             final Response response = RESOURCE
-                    .target("/Key")
+                    .target("/v1/Key")
                     .request()
                     .post(Entity.entity("APITestHelpers.generatePublicKey(key.getPublic())", MediaType.TEXT_PLAIN));
 
@@ -77,7 +77,7 @@ class PublicKeyUnitTests {
         void testKeyDefaultLabel() throws NoSuchAlgorithmException {
             final KeyPair key = APIAuthHelpers.generateKeyPair();
             final Response response = RESOURCE
-                    .target("/Key")
+                    .target("/v1/Key")
                     .request()
                     .post(Entity.entity(APIAuthHelpers.generatePublicKey(key.getPublic()), MediaType.TEXT_PLAIN));
 
@@ -90,7 +90,7 @@ class PublicKeyUnitTests {
             final String label = "This is a label";
             final KeyPair key = APIAuthHelpers.generateKeyPair();
             final Response response = RESOURCE
-                    .target("/Key")
+                    .target("/v1/Key")
                     .queryParam("label", label)
                     .request()
                     .post(Entity.entity(APIAuthHelpers.generatePublicKey(key.getPublic()), MediaType.TEXT_PLAIN));

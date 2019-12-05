@@ -20,6 +20,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 @Api(value = "StructureDefinition")
+@Path("/v1/StructureDefinition")
 public class DefinitionResource extends AbstractDefinitionResource {
 
     private final FhirContext ctx;

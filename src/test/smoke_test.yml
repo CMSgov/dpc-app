@@ -5,6 +5,7 @@ execution:
   - iterations: 1
     concurrency: 3
     scenario: jmeter
+    ramp-up: 60s
 
 scenarios:
   jmeter:
@@ -14,6 +15,10 @@ scenarios:
       seed-file: ${SEED_FILE}
       provider-bundle: ${PROVIDER_BUNDLE}
       patient-bundle: ${PATIENT_BUNDLE}
+      organization-id: ""
+      client-token: ""
+      private-key: ""
+      key-id: ""
     script: src/main/resources/SmokeTest.jmx
 
 reporting:
