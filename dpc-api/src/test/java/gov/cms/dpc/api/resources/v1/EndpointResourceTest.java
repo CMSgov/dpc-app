@@ -2,6 +2,8 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -62,8 +64,28 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         MethodOutcome updateOutcome = client.update().resource(createdEndpoint).withId(createdEndpoint.getId()).execute();
 
         Endpoint updatedEndpoint = (Endpoint) updateOutcome.getResource();
-        assertEquals(createdEndpoint, updatedEndpoint);
+        assertEquals(createdEndpoint.getName(), updatedEndpoint.getName());
+        assertEquals(createdEndpoint.getAddress(), updatedEndpoint.getAddress());
+        assertEquals(createdEndpoint.getManagingOrganization().getReference(), updatedEndpoint.getManagingOrganization().getReference());
+        assertEquals(createdEndpoint.getStatus(), updatedEndpoint.getStatus());
     }
 
-    void testDeleteEndpoint() {}
+    void testDeleteEndpoint() {
+        Endpoint endpoint = APITestHelpers.makeEndpoint();
+        MethodOutcome createOutcome = client.create().resource(endpoint).execute();
+        Endpoint createdEndpoint = (Endpoint) createOutcome.getResource();
+        String endpointId = FHIRExtractors.getEntityUUID(endpoint.getId()).toString();
+
+        client
+                .delete()
+                .resourceById("Endpoint", endpointId)
+                .execute();
+
+        IReadExecutable readExec = client
+                .read()
+                .resource(Endpoint.class)
+                .withId(endpointId);
+
+        assertThrows(ResourceNotFoundException.class, readExec::execute);
+    }
 }

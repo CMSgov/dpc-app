@@ -139,7 +139,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
         try {
             OrganizationEntity orgEntity = new OrganizationEntity().fromFHIR(organization);
             // OrganizationEntity.fromFHIR() ignores endpoints in submitted resource; they must be copied from original
-            List<EndpointEntity> endpointEntities = organization.getEndpoint().stream().map(
+            Organization original = getOrganization(organizationID);
+            List<EndpointEntity> endpointEntities = original.getEndpoint().stream().map(
                     r -> {
                         UUID endpointID = FHIRExtractors.getEntityUUID(r.getReference());
                         Optional<EndpointEntity> endpointOpt = endpointDAO.fetchEndpoint(endpointID);
