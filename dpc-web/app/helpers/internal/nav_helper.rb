@@ -37,7 +37,7 @@ module Internal
     end
 
     def plural_suffix(count)
-      if count > 1 || count == 0
+      if count > 1 || count.zero?
         's'
       else
         ''
