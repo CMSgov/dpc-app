@@ -62,7 +62,7 @@ These restrictions are subject to change over time.
 The Data at the Point of Care pilot project is currently accessible as a private sandbox environment, which returns sample [NDJSON](http://ndjson.org/) files with synthetic beneficiary data.
 There is no beneficiary PII or PHI in the files you can access via the sandbox.
 
-DPC implements the *SMART Backend Services Authentication* (BSA) as described by the [SMART ON FHIR team](https://build.fhir.org/ig/HL7/bulk-data/authorization/index.html).
+DPC implements the *SMART Backend Services Authentication* (BSA) as described by the [SMART ON FHIR team](https://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html).
 This specification requires the user to exchange their DPC provided `client_token` for an `access_token` which can be used to make API requests to the FHIR endpoints.
 This exchange requires the user to submit a self-signed [JSON Web Token](https://jwt.io) using a public/private key pair that they submit to DPC either via the Web UI or the API.
 
