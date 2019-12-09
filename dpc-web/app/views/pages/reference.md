@@ -433,7 +433,7 @@ POST /api/v1/Token/auth
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Token/auth?grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_asssertions={self-signed JWT} \
+curl -v https://sandbox.dpc.cms.gov/api/v1/Token/auth?grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion={self-signed JWT} \
 -H 'Content-Type: application/x-www-form-urlencoded' \
 -X POST
 ~~~
