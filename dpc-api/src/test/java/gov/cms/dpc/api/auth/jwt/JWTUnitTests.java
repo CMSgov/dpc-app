@@ -75,7 +75,7 @@ class JWTUnitTests {
             // Should have all exceptions
             DPCValidationErrorMessage validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(4, validationErrorResponse.getErrors().size(), "Should have four validations");
+            assertEquals(4, validationErrorResponse.getErrors().size(), "Should have four violations");
 
             // Add the missing scope value and try again
             response = RESOURCE.target("/v1/Token/auth").queryParam("scope", "system/*.*")
@@ -85,7 +85,7 @@ class JWTUnitTests {
             // Should have one less exception
             validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
-            assertEquals(3, validationErrorResponse.getErrors().size(), "Should have three validations");
+            assertEquals(3, validationErrorResponse.getErrors().size(), "Should have three violations");
 
 
             // Add the grant type
@@ -124,7 +124,7 @@ class JWTUnitTests {
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
             // Should have no validation exceptions, but still fail
-            assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus(), "Should have failed but for a different reason");
+            assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus(), "Should be unauthorized");
         }
 
         @Test
@@ -153,8 +153,10 @@ class JWTUnitTests {
                     .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
 
             // Setting the grant type to be blank, should throw a validation error
-            assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertNotNull(response.readEntity(DPCValidationErrorMessage.class), "Should have a validation failure");
+            assertEquals(400, response.getStatus(), "Should have failed");
+            DPCValidationErrorMessage errorMessage = response.readEntity(DPCValidationErrorMessage.class);
+            assertNotNull(errorMessage, "Should have a validation failure");
+            assertEquals("arg1 Grant type is required", errorMessage.getErrors().get(0), "Should fail due to missing grant type");
         }
 
         @Test
@@ -184,7 +186,9 @@ class JWTUnitTests {
 
             // Setting the assertion type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
-            assertNotNull(response.readEntity(DPCValidationErrorMessage.class), "Should have a validation failure");
+            DPCValidationErrorMessage errorMessage = response.readEntity(DPCValidationErrorMessage.class);
+            assertNotNull(errorMessage, "Should have a validation failure");
+            assertEquals("arg2 Assertion type is required", errorMessage.getErrors().get(0), "Should fail due to assertion type");
         }
 
         @Test
