@@ -10,16 +10,16 @@ import io.dropwizard.jersey.validation.ValidationErrorMessage;
  */
 public class DPCValidationErrorMessage extends ValidationErrorMessage {
 
-    private final long id;
+    private final String exceptionID;
 
     @JsonCreator
-    DPCValidationErrorMessage(@JsonProperty("id") long id, @JsonProperty("errors") ImmutableList<String> errors) {
+    DPCValidationErrorMessage(@JsonProperty("id") String exceptionID, @JsonProperty("errors") ImmutableList<String> errors) {
         super(errors);
-        this.id = id;
+        this.exceptionID = exceptionID;
     }
 
     @JsonProperty
-    public long getId() {
-        return id;
+    public String getId() {
+        return exceptionID;
     }
 }
