@@ -5,7 +5,13 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      scope = Organization.all
+      scope = if params[:org_type] == 'vendor'
+                Organization.vendor
+              elsif params[:org_type] == 'provider'
+                Organization.provider
+              else
+                Organization.all
+              end
 
       if params[:keyword].present?
         keyword = "%#{params[:keyword].downcase}%"
