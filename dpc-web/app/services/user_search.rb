@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 class UserSearch
-  ALLOWED_SCOPES = %i[all assigned_non_vendor assigned_vendor].freeze
+  ALLOWED_SCOPES = %w[all provider vendor].freeze
 
   attr_reader :params, :initial_scope
 
-  def initialize(params: {}, scope: :all)
-    raise ArgumentError unless ALLOWED_SCOPES.include? scope
+  def initialize(params: {}, scope: 'all')
+    scope = 'all' unless ALLOWED_SCOPES.include? scope
 
     @params = params
     @initial_scope = scope
@@ -19,7 +19,7 @@ class UserSearch
   private
 
   def query
-    scope = User.send(initial_scope)
+    scope = User.includes(organization_user_assignments: :organization).send(initial_scope)
 
     scope = apply_org_queries(scope)
     scope = apply_date_queries(scope)

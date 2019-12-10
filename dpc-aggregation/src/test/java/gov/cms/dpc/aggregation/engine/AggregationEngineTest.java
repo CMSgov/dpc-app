@@ -47,7 +47,7 @@ class AggregationEngineTest {
 
     @BeforeAll
     static void setupAll() {
-        final var config = ConfigFactory.load("dev-test.application.conf").getConfig("dpc.aggregation");
+        final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
@@ -223,7 +223,7 @@ class AggregationEngineTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_IDS,
-                Arrays.asList(ResourceType.Patient)
+                Collections.singletonList(ResourceType.Patient)
         );
 
         // Work the batch
