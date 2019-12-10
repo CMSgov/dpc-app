@@ -7,7 +7,7 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      results = UserSearch.new(params: params, scope: :all).results
+      results = UserSearch.new(params: params, scope: params[:org_type]).results
 
       @users = results.order('users.created_at DESC').page params[:page]
       render layout: 'table_index'

@@ -46,7 +46,7 @@ class User < ApplicationRecord
     left_joins(:organization_user_assignments).where('organization_user_assignments.id IS NULL')
   end
 
-  scope :assigned_non_vendor, -> do
+  scope :assigned_provider, -> do
     joins(:organizations)
       .where('organizations.organization_type <> :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
   end
@@ -54,6 +54,19 @@ class User < ApplicationRecord
   scope :assigned_vendor, -> do
     joins(:organizations)
       .where('organizations.organization_type = :vendor', vendor: ORGANIZATION_TYPES['health_it_vendor'])
+  end
+
+  scope :vendor, -> do
+    left_joins(organization_user_assignments: :organization)
+      .where('organizations.organization_type = :vendor OR users.requested_organization_type = :vendor',
+             vendor: ORGANIZATION_TYPES['health_it_vendor'])
+  end
+
+  scope :provider, -> do
+    left_joins(organization_user_assignments: :organization)
+      .where('organizations.organization_type <> :vendor OR
+             (users.requested_organization_type <> :vendor AND organization_user_assignments.id IS NULL)',
+             vendor: ORGANIZATION_TYPES['health_it_vendor'])
   end
 
   scope :by_keyword, ->(keyword) do

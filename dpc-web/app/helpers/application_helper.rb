@@ -21,10 +21,6 @@ module ApplicationHelper
     ''
   end
 
-  def current_sidenav_class?(nav_item, current)
-    'ds-c-vertical-nav__label--current' if nav_item.to_s == current.to_s
-  end
-
   def meta_tag(tag, text)
     content_for :"meta_#{tag}", text
   end
