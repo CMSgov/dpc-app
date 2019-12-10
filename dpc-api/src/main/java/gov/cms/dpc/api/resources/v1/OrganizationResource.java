@@ -19,6 +19,7 @@ import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -49,7 +50,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ApiOperation(hidden = true, value = "Create organization by submitting Bundle")
     @AdminOperation
     @Override
-    public Organization submitOrganization(@FHIRParameter(name = "resource") Bundle organizationBundle) {
+    public Organization submitOrganization(@FHIRParameter(name = "resource") @NotNull Bundle organizationBundle) {
         // Validate bundle
         validateOrganizationBundle(organizationBundle);
 
@@ -77,7 +78,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
-    public Organization getOrganization(@PathParam("organizationID") UUID organizationID) {
+    public Organization getOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
         return this.client
                 .read()
                 .resource(Organization.class)
@@ -93,8 +94,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ExceptionMetered
     @AdminOperation
     @UnitOfWork
+    @ApiOperation(value = "Delete Organization",
+            notes = "FHIR endpoint which removes the organization currently registered with the application.\n" +
+                    "This also removes all associated resources",
+            authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Cannot find organization to remove")})
     @Override
-    public Response deleteOrganization(@PathParam("organizationID") UUID organizationID) {
+    public Response deleteOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
         // Delete from the attribution service
         this.client
                 .delete()
@@ -130,7 +137,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 422, message = "Provided resource is not a valid FHIR Organization")
     })
     @Override
-    public Organization updateOrganization(@PathParam("organizationID") UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization) {
+    public Organization updateOrganization(@NotNull @PathParam("organizationID") UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization) {
         MethodOutcome outcome = this.client
                 .update()
                 .resource(organization)

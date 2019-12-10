@@ -45,8 +45,7 @@ public class ProviderEntity implements Serializable {
             })
     private List<PatientEntity> attributedPatients;
 
-    @OneToMany
-    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "attributedProvider")
     private List<RosterEntity> attributionRosters;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
