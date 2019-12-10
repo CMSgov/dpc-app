@@ -22,7 +22,7 @@ public class DataFormatExceptionHandler extends AbstractFHIRExceptionHandler<Dat
         final long exceptionID = super.logException(exception);
 
         final OperationOutcome outcome = new OperationOutcome();
-        outcome.setId(Long.toString(exceptionID));
+        outcome.setId(exceptionIDtoHex(exceptionID));
         outcome
                 .addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.FATAL)
