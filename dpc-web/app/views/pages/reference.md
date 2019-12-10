@@ -394,7 +394,7 @@ This token must be signed with a public key previously registered and contain th
 
 **Authentication JWT Header Values**
 
-`alg`	_required_	- The JWA algorithm (e.g., `RS384`, `EC384`) used for signing the authentication JWT. (DPC only supports RS384)
+`alg`	_required_	- Fixed value: RSA384
 
 `kid`   _required_	- The identifier of the key-pair used to sign this JWT. This must be the ID of a previously registered public key
 
@@ -406,7 +406,7 @@ This token must be signed with a public key previously registered and contain th
 
 `sub`	_required_	Issuer of the JWT -- the `client_token` provided by DPC (note that this is the same as the value for the `iss` claim)
 
-`aud`	_required_	The DPC "token URL" (the same URL to which this authentication JWT will be posted. e.g. https://sandbox.dpc.cms.gov/api/v1/Token/auth)
+`aud`	_required_	The DPC "token URL" (the same URL to which this authentication JWT will be posted. e.g. https://dpc.cms.gov/api/v1/Token/auth)
 
 `exp`	_required_	Expiration time integer for this authentication JWT, expressed in seconds since the "Epoch" (1970-01-01T00:00:00Z UTC). This time SHALL be no more than five minutes in the future.
 
