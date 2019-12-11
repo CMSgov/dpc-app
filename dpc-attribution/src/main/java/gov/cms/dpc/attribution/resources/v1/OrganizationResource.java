@@ -144,9 +144,9 @@ public class OrganizationResource extends AbstractOrganizationResource {
                     r -> {
                         UUID endpointID = FHIRExtractors.getEntityUUID(r.getReference());
                         Optional<EndpointEntity> endpointOpt = endpointDAO.fetchEndpoint(endpointID);
-                        return endpointOpt.get();
+                        return endpointOpt;
                     }
-            ).collect(Collectors.toList());
+            ).filter(eo -> eo.isPresent()).map(eo -> eo.get()).collect(Collectors.toList());
             orgEntity.setEndpoints(endpointEntities);
             orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
             return Response.status(Response.Status.OK).entity(orgEntity.toFHIR()).build();
