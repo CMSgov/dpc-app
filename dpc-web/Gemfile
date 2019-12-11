@@ -65,3 +65,5 @@ gem 'octokit'
 gem 'kaminari'
 gem 'active_model_serializers'
 gem 'macaroons'
+
+gem "newrelic_rpm", "~> 6.7"
