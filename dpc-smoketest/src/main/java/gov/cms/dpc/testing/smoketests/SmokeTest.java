@@ -42,12 +42,10 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
     private FhirContext ctx;
     private String organizationID;
-    private Pair<UUID, PrivateKey> keyTuple;
-    private String clientToken;
     private String goldenMacaroon;
 
     public SmokeTest() {
-        System.out.println("Calling constructor");
+        // Not used
     }
 
     @Override
@@ -105,7 +103,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         logger.info("Running with {} threads", JMeterContextService.getNumberOfThreads());
 
         this.organizationID = javaSamplerContext.getParameter("organization-id");
-        this.clientToken = javaSamplerContext.getParameter("client-token");
+        String clientToken = javaSamplerContext.getParameter("client-token");
         String privateKeyPath = javaSamplerContext.getParameter("private-key");
         final String keyID = javaSamplerContext.getParameter("key-id");
 
@@ -121,6 +119,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         ctx.getRestfulClientFactory().setConnectTimeout(1800);
 
         // If we're not supplied all the init parameters, create a new org
+        Pair<UUID, PrivateKey> keyTuple;
         if (organizationID.equals("") || clientToken.equals("") || privateKeyPath.equals("") || keyID.equals("")) {
             this.organizationID = UUID.randomUUID().toString();
 
@@ -150,7 +149,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
             // Create a new public key
             try {
-                this.keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
+                keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
             } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
                 throw new IllegalStateException("Failed uploading public key", e);
             }
@@ -165,7 +164,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                 if (privateKey == null) {
                     throw new IllegalStateException("Key cannot be null");
                 }
-                this.keyTuple = Pair.of(UUID.fromString(keyID), privateKey);
+                keyTuple = Pair.of(UUID.fromString(keyID), privateKey);
             } catch (IOException e) {
                 throw new IllegalArgumentException(String.format("Cannot read private key from: %s", privateKeyPath));
             }
