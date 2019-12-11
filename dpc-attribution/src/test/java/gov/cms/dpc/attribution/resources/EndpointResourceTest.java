@@ -4,8 +4,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -111,17 +111,5 @@ public class EndpointResourceTest extends AbstractAttributionTest {
                 .withId(endpointId);
 
         assertThrows(ResourceNotFoundException.class, readExec::execute);
-    }
-
-    @Test
-    void testDeleteOnlyEndpoint() {
-        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-delete-only-endpoint", false);
-        String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
-
-        IDeleteTyped delete = client
-                .delete()
-                .resourceById("Endpoint", endpointId);
-
-        assertThrows(InternalErrorException.class, delete::execute);
     }
 }

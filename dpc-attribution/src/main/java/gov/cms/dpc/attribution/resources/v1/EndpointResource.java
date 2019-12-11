@@ -16,6 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -45,8 +46,6 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource")
     @Override
     public Response createEndpoint(Endpoint endpoint) {
-        UUID organizationId = FHIRExtractors.getEntityUUID(endpoint.getManagingOrganization().getReference());
-        endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationId.toString())));
         EndpointEntity entity = endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
         return Response.status(Response.Status.CREATED).entity(EndpointEntityConverter.convert(entity)).build();
     }
@@ -85,7 +84,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Fetch endpoint", notes = "Fetch a specific Endpoint by resource ID")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Endpoint"))
     @Override
-    public Endpoint fetchEndpoint(@PathParam("endpointID") UUID endpointID) {
+    public Endpoint fetchEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
                 .orElseThrow(() -> new WebApplicationException("Unable to find Endpoint", Response.Status.NOT_FOUND));
 
@@ -101,7 +100,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Update an Endpoint", notes = "Update an Endpoint resource")
     @ApiResponses(value = { @ApiResponse(code = 404, message = "Cannot find Endpoint") })
     @Override
-    public Endpoint updateEndpoint(@PathParam("endpointID") UUID endpointID, Endpoint endpoint) {
+    public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, Endpoint endpoint) {
         endpoint.setId(endpointID.toString());
         EndpointEntity entity = this.endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
         return EndpointEntityConverter.convert(entity);
@@ -116,13 +115,13 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Delete an Endpoint", notes = "Delete an Endpoint resource")
     @ApiResponses(value = {})
     @Override
-    public Response deleteEndpoint(@PathParam("endpointID") UUID endpointID) {
+    public Response deleteEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
                 .orElseThrow(() -> new WebApplicationException("Unable to find Endpoint", Response.Status.NOT_FOUND));
         OrganizationEntity organization = endpoint.getOrganization();
         List<EndpointEntity> endpoints = organization.getEndpoints();
         if (endpoints.size() == 1) {
-            throw new WebApplicationException("Cannot delete Organization's only endpoint");
+            throw new WebApplicationException("Cannot delete Organization's only endpoint", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
 
         endpoints.removeIf(e -> endpointID.equals(e.getId()));

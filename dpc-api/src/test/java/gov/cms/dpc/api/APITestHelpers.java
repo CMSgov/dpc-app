@@ -205,16 +205,6 @@ public class APITestHelpers {
         }
     }
 
-    public static Endpoint makeEndpoint() {
-        Endpoint endpoint = new Endpoint();
-        endpoint.setName("Test Endpoint");
-        endpoint.setAddress("http://www.example.com/endpoint");
-        endpoint.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type", "hl7-fhir-rest", ""));
-        endpoint.setManagingOrganization(new Reference(new IdType("Organization", ORGANIZATION_ID)));
-        endpoint.setStatus(Endpoint.EndpointStatus.ACTIVE);
-        return endpoint;
-    }
-
     private static Validator provideValidator(InjectingConstraintValidatorFactory factory) {
         return Validation.byDefaultProvider()
                 .configure().constraintValidatorFactory(factory)

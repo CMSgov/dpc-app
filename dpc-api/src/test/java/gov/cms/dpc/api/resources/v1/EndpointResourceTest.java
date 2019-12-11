@@ -2,14 +2,23 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.OrganizationHelpers;
+import gov.cms.dpc.testing.factories.OrganizationFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +28,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testCreateEndpoint() {
-        Endpoint endpoint = APITestHelpers.makeEndpoint();
+        Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
 
         MethodOutcome outcome = client.create().resource(endpoint).execute();
         assertTrue(outcome.getCreated());
@@ -28,6 +37,22 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         assertEquals(endpoint.getName(), createdEndpoint.getName());
         assertEquals(endpoint.getAddress(), createdEndpoint.getAddress());
         assertEquals(APITestHelpers.ORGANIZATION_ID, FHIRExtractors.getEntityUUID(createdEndpoint.getManagingOrganization().getReference()).toString());
+    }
+
+    @Test
+    void testCreateEndpointWithoutOrg() {
+        Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
+        endpoint.setManagingOrganization((Reference)null);
+        ICreateTyped createExec = client.create().resource(endpoint);
+        assertThrows(UnprocessableEntityException.class, createExec::execute);
+    }
+
+    @Test
+    void testCreateEndpointWithoutAddress() {
+        Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
+        endpoint.setAddress((String)null);
+        ICreateTyped createExec = client.create().resource(endpoint);
+        assertThrows(UnprocessableEntityException.class, createExec::execute);
     }
 
     @Test
@@ -44,37 +69,39 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testFetchEndpoint() {
-        Endpoint endpoint = APITestHelpers.makeEndpoint();
+        Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
         MethodOutcome outcome = client.create().resource(endpoint).execute();
         Endpoint createdEndpoint = (Endpoint) outcome.getResource();
 
         Endpoint readEndpoint = client.read().resource(Endpoint.class).withId(createdEndpoint.getId()).execute();
-        assertEquals(createdEndpoint.getId(), readEndpoint.getId());
-        assertEquals(createdEndpoint.getName(), readEndpoint.getName());
-        assertEquals(createdEndpoint.getAddress(), readEndpoint.getAddress());
+        assertTrue(readEndpoint.equalsDeep(createdEndpoint));
     }
 
     @Test
     void testUpdateEndpoint() {
-        Endpoint endpoint = APITestHelpers.makeEndpoint();
+        Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
         MethodOutcome createOutcome = client.create().resource(endpoint).execute();
         Endpoint createdEndpoint = (Endpoint) createOutcome.getResource();
         createdEndpoint.setName("Test Update Endpoint");
+        // Payload type must be set because it is not in EndpointEntity and will not be returned from the create operation
+        CodeableConcept payloadType = new CodeableConcept();
+        payloadType.addCoding().setCode("nothing").setSystem("http://nothing.com");
+        createdEndpoint.setPayloadType(List.of(payloadType));
 
         MethodOutcome updateOutcome = client.update().resource(createdEndpoint).withId(createdEndpoint.getId()).execute();
 
         Endpoint updatedEndpoint = (Endpoint) updateOutcome.getResource();
-        assertEquals(createdEndpoint.getName(), updatedEndpoint.getName());
-        assertEquals(createdEndpoint.getAddress(), updatedEndpoint.getAddress());
-        assertEquals(createdEndpoint.getManagingOrganization().getReference(), updatedEndpoint.getManagingOrganization().getReference());
-        assertEquals(createdEndpoint.getStatus(), updatedEndpoint.getStatus());
+        // Same as above; not returned by update
+        updatedEndpoint.setPayloadType(List.of(payloadType));
+        assertTrue(updatedEndpoint.equalsDeep(createdEndpoint));
     }
 
+    @Test
     void testDeleteEndpoint() {
-        Endpoint endpoint = APITestHelpers.makeEndpoint();
+        Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
         MethodOutcome createOutcome = client.create().resource(endpoint).execute();
         Endpoint createdEndpoint = (Endpoint) createOutcome.getResource();
-        String endpointId = FHIRExtractors.getEntityUUID(endpoint.getId()).toString();
+        String endpointId = FHIRExtractors.getEntityUUID(createdEndpoint.getId()).toString();
 
         client
                 .delete()
@@ -87,5 +114,21 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
                 .withId(endpointId);
 
         assertThrows(ResourceNotFoundException.class, readExec::execute);
+    }
+
+    @Test
+    void testDeleteOnlyEndpoint() throws IOException {
+        final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
+        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
+
+        final String newOrgID = UUID.randomUUID().toString();
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, adminClient, newOrgID, true);
+        String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
+
+        IDeleteTyped delete = client
+                .delete()
+                .resourceById("Endpoint", endpointId);
+
+        assertThrows(UnprocessableEntityException.class, delete::execute);
     }
 }

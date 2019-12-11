@@ -23,13 +23,13 @@ public abstract class AbstractEndpointResource {
 
     @GET
     @Path("/{endpointID}")
-    public abstract Endpoint fetchEndpoint(UUID endpointID);
+    public abstract Endpoint fetchEndpoint(@NotNull UUID endpointID);
 
     @PUT
     @Path("/{endpointID}")
-    public abstract Endpoint updateEndpoint(UUID endpointID, Endpoint endpoint);
+    public abstract Endpoint updateEndpoint(@NotNull UUID endpointID, Endpoint endpoint);
 
     @DELETE
     @Path("/{endpointID}")
-    public abstract Response deleteEndpoint(UUID endpointID);
+    public abstract Response deleteEndpoint(@NotNull UUID endpointID);
 }

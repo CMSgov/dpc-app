@@ -8,12 +8,16 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractEndpointResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
@@ -36,7 +40,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource for an Organization")
     @ApiResponses(@ApiResponse(code = 204, message = "Endpoint created"))
     @Override
-    public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, Endpoint endpoint) {
+    public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
         endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationPrincipal.getID().toString())));
         MethodOutcome outcome = this.client
                 .create()
@@ -72,7 +76,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Fetch Endpoint resource", notes = "Fetch a specific Endpoint associated to an Organization.")
     @ApiResponses(@ApiResponse(code = 404, message = "Endpoint not found"))
     @Override
-    public Endpoint fetchEndpoint(@PathParam("endpointID") UUID endpointID) {
+    public Endpoint fetchEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         return this.client
                 .read()
                 .resource(Endpoint.class)
@@ -93,7 +97,7 @@ public class EndpointResource extends AbstractEndpointResource {
             @ApiResponse(code = 404, message = "Endpoint not found")
     })
     @Override
-    public Endpoint updateEndpoint(@PathParam("endpointID") UUID endpointID, Endpoint endpoint) {
+    public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
         MethodOutcome outcome = this.client
                 .update()
                 .resource(endpoint)
@@ -116,7 +120,7 @@ public class EndpointResource extends AbstractEndpointResource {
             @ApiResponse(code = 404, message = "Endpoint not found")
     })
     @Override
-    public Response deleteEndpoint(@PathParam("endpointID") UUID endpointID) {
+    public Response deleteEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         this.client
                 .delete()
                 .resourceById("Endpoint", endpointID.toString())
