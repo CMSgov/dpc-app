@@ -16,6 +16,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,14 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     private static final String KEY_ID = "smoke-test-key";
 
     private FhirContext ctx;
+    private String organizationID;
+    private Pair<UUID, PrivateKey> keyTuple;
+    private String clientToken;
+    private String goldenMacaroon;
+
+    public SmokeTest() {
+        System.out.println("Calling constructor");
+    }
 
     @Override
     public Arguments getDefaultParameters() {
@@ -65,6 +74,28 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     }
 
     @Override
+    public void teardownTest(JavaSamplerContext context) {
+        final String hostParam = context.getParameter("host");
+        // Remove the organization, which should delete it all
+        System.out.println(String.format("Deleting organization %s", organizationID));
+        // Build admin client for removing the organization
+        final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
+
+        try {
+            client
+                    .delete()
+                    .resourceById(new IdType("Organization", this.organizationID))
+                    .encodedJson()
+                    .execute();
+        } catch (Exception e) {
+            System.err.println(String.format("Cannot remove organization: %s", e.getMessage()));
+            System.exit(-1);
+        }
+
+        super.teardownTest(context);
+    }
+
+    @Override
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
         // Create things
         final String hostParam = javaSamplerContext.getParameter("host");
@@ -73,11 +104,10 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         logger.info("Admin URL: {}", adminURL);
         logger.info("Running with {} threads", JMeterContextService.getNumberOfThreads());
 
-        String organizationID = javaSamplerContext.getParameter("organization-id");
-        String clientToken = javaSamplerContext.getParameter("client-token");
+        this.organizationID = javaSamplerContext.getParameter("organization-id");
+        this.clientToken = javaSamplerContext.getParameter("client-token");
         String privateKeyPath = javaSamplerContext.getParameter("private-key");
         final String keyID = javaSamplerContext.getParameter("key-id");
-        final Pair<UUID, PrivateKey> keyTuple;
 
         final SampleResult smokeTestResult = new SampleResult();
         smokeTestResult.setSampleLabel("Smoke Test");
@@ -92,13 +122,12 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
         // If we're not supplied all the init parameters, create a new org
         if (organizationID.equals("") || clientToken.equals("") || privateKeyPath.equals("") || keyID.equals("")) {
-            organizationID = UUID.randomUUID().toString();
+            this.organizationID = UUID.randomUUID().toString();
 
             System.out.println(String.format("Creating organization %s", organizationID));
 
-            final String goldenMacaroon;
             try {
-                goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
+                this.goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
             } catch (Exception e) {
                 throw new IllegalStateException("Failed creating Macaroon", e);
             }
@@ -121,7 +150,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
             // Create a new public key
             try {
-                keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
+                this.keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
             } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
                 throw new IllegalStateException("Failed uploading public key", e);
             }
@@ -136,7 +165,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                 if (privateKey == null) {
                     throw new IllegalStateException("Key cannot be null");
                 }
-                keyTuple = Pair.of(UUID.fromString(keyID), privateKey);
+                this.keyTuple = Pair.of(UUID.fromString(keyID), privateKey);
             } catch (IOException e) {
                 throw new IllegalArgumentException(String.format("Cannot read private key from: %s", privateKeyPath));
             }
