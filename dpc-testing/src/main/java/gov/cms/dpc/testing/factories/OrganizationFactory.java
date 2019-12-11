@@ -61,4 +61,10 @@ public class OrganizationFactory {
         endpoint.setAddress("http://www.example.com/endpoint");
         return endpoint;
     }
+
+    public static Endpoint createValidFakeEndpoint(String organizationId) {
+        Endpoint endpoint = createValidFakeEndpoint();
+        endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationId)));
+        return endpoint;
+    }
 }

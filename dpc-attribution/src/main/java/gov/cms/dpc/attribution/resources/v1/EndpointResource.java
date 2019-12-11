@@ -45,7 +45,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @UnitOfWork
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource")
     @Override
-    public Response createEndpoint(Endpoint endpoint) {
+    public Response createEndpoint(@NotNull Endpoint endpoint) {
         EndpointEntity entity = endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
         return Response.status(Response.Status.CREATED).entity(EndpointEntityConverter.convert(entity)).build();
     }
@@ -100,7 +100,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Update an Endpoint", notes = "Update an Endpoint resource")
     @ApiResponses(value = { @ApiResponse(code = 404, message = "Cannot find Endpoint") })
     @Override
-    public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, Endpoint endpoint) {
+    public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @NotNull Endpoint endpoint) {
         endpoint.setId(endpointID.toString());
         EndpointEntity entity = this.endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
         return EndpointEntityConverter.convert(entity);

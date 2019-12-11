@@ -42,17 +42,6 @@ public class AttributionTestHelpers {
         return patient;
     }
 
-    public static Endpoint createEndpoint(String organizationId) {
-        Endpoint endpoint = new Endpoint();
-        endpoint.setName("Test Endpoint");
-        endpoint.setAddress("http://www.example.com/endpoint");
-        endpoint.setConnectionType(new Coding("http://terminology.hl7.org/CodeSystem/endpoint-connection-type", "hl7-fhir-rest", ""));
-        endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationId)));
-        endpoint.setStatus(Endpoint.EndpointStatus.ACTIVE);
-
-        return endpoint;
-    }
-
     public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(serverURL);

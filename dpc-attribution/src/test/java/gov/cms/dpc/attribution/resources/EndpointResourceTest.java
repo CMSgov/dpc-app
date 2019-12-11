@@ -2,14 +2,16 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.OrganizationHelpers;
+import gov.cms.dpc.testing.factories.OrganizationFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +24,7 @@ public class EndpointResourceTest extends AbstractAttributionTest {
     @Test
     void testCreateEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-create-endpoint", false);
-        Endpoint endpoint = AttributionTestHelpers.createEndpoint(organization.getId());
+        Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint(organization.getId());
 
         MethodOutcome outcome = client
                 .create()
@@ -83,9 +85,28 @@ public class EndpointResourceTest extends AbstractAttributionTest {
                 .execute();
 
         Endpoint updatedEndpoint = (Endpoint) outcome.getResource();
-        assertEquals(endpoint.getId(), updatedEndpoint.getId());
-        assertEquals("New Endpoint Name", updatedEndpoint.getName());
-        assertEquals(endpoint.getAddress(), updatedEndpoint.getAddress());
+        assertTrue(updatedEndpoint.equalsDeep(endpoint));
+    }
+
+    void testUpdateEndpointNewOrg() {
+        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-update-endpoint", false);
+        String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
+
+        Endpoint endpoint = client
+                .read()
+                .resource(Endpoint.class)
+                .withId(endpointId)
+                .execute();
+
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, client, "test-update-endpoint", false);
+        endpoint.setManagingOrganization(new Reference(new IdType("Organization", organization2.getId())));
+
+        IUpdateExecutable updateExec = client
+                .update()
+                .resource(endpoint)
+                .withId(endpoint.getId());
+
+        assertThrows(UnprocessableEntityException.class, updateExec::execute);
     }
 
     @Test
@@ -96,7 +117,7 @@ public class EndpointResourceTest extends AbstractAttributionTest {
         // Add another endpoint to organization
         client
                 .create()
-                .resource(AttributionTestHelpers.createEndpoint(organization.getId()))
+                .resource(OrganizationFactory.createValidFakeEndpoint(organization.getId()))
                 .execute();
 
         // Delete original endpoint

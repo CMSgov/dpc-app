@@ -16,7 +16,7 @@ public abstract class AbstractEndpointResource {
     }
 
     @POST
-    public abstract Response createEndpoint(Endpoint endpoint);
+    public abstract Response createEndpoint(@NotNull Endpoint endpoint);
 
     @GET
     public abstract Bundle searchEndpoints(@NotNull String organizationID);
@@ -27,7 +27,7 @@ public abstract class AbstractEndpointResource {
 
     @PUT
     @Path("/{endpointID}")
-    public abstract Endpoint updateEndpoint(@NotNull UUID endpointID, Endpoint endpoint);
+    public abstract Endpoint updateEndpoint(@NotNull UUID endpointID, @NotNull Endpoint endpoint);
 
     @DELETE
     @Path("/{endpointID}")

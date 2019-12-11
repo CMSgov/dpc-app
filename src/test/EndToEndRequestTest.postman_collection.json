@@ -138,7 +138,7 @@
 									"    var respJson = pm.response.json();",
 									"    pm.expect(respJson.name).equals(\"Test Organization Endpoint\");",
 									"    pm.expect(respJson.status).equals(\"test\");",
-									"    pm.expect(respJson.address).equals(\"http://www.example.com/endpoint\");",
+									"    pm.expect(respJson.address).equals(\"http://test-address.nope\");",
 									"    pm.expect(respJson.connectionType.system).equals(\"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\");",
 									"    pm.expect(respJson.connectionType.code).equals(\"hl7-fhir-rest\");",
 									"});"
