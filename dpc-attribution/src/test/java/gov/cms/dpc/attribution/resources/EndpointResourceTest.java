@@ -88,27 +88,6 @@ public class EndpointResourceTest extends AbstractAttributionTest {
         assertTrue(updatedEndpoint.equalsDeep(endpoint));
     }
 
-    void testUpdateEndpointNewOrg() {
-        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-update-endpoint", false);
-        String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
-
-        Endpoint endpoint = client
-                .read()
-                .resource(Endpoint.class)
-                .withId(endpointId)
-                .execute();
-
-        Organization organization2 = OrganizationHelpers.createOrganization(ctx, client, "test-update-endpoint", false);
-        endpoint.setManagingOrganization(new Reference(new IdType("Organization", organization2.getId())));
-
-        IUpdateExecutable updateExec = client
-                .update()
-                .resource(endpoint)
-                .withId(endpoint.getId());
-
-        assertThrows(UnprocessableEntityException.class, updateExec::execute);
-    }
-
     @Test
     void testDeleteEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-delete-endpoint", false);

@@ -13,6 +13,7 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -98,6 +99,11 @@ public class EndpointResource extends AbstractEndpointResource {
     })
     @Override
     public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
+        Endpoint currEndpoint = fetchEndpoint(endpointID);
+        if (!endpoint.getManagingOrganization().getReference().equals(currEndpoint.getManagingOrganization().getReference())) {
+            throw new WebApplicationException("An Endpoint's Organization cannot be changed", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+
         MethodOutcome outcome = this.client
                 .update()
                 .resource(endpoint)

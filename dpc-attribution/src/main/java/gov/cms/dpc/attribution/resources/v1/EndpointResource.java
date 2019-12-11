@@ -101,9 +101,8 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiResponses(value = { @ApiResponse(code = 404, message = "Cannot find Endpoint") })
     @Override
     public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @NotNull Endpoint endpoint) {
-        endpoint.setId(endpointID.toString());
-        EndpointEntity entity = this.endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
-        return EndpointEntityConverter.convert(entity);
+        EndpointEntity updatedEntity = this.endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
+        return EndpointEntityConverter.convert(updatedEntity);
     }
 
     @FHIR

@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
@@ -95,6 +96,32 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         updatedEndpoint.setPayloadType(List.of(payloadType));
         assertTrue(updatedEndpoint.equalsDeep(createdEndpoint));
     }
+
+    @Test
+    void testUpdateEndpointNewOrg() throws IOException {
+        final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
+        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
+
+        final Organization organization1 = OrganizationHelpers.createOrganization(ctx, adminClient, "update-endpoint-new-org1", true);
+        String endpointId = FHIRExtractors.getEntityUUID(organization1.getEndpointFirstRep().getReference()).toString();
+
+        Endpoint endpoint = client
+                .read()
+                .resource(Endpoint.class)
+                .withId(endpointId)
+                .execute();
+
+        final Organization organization2 = OrganizationHelpers.createOrganization(ctx, adminClient, "update-endpoint-new-org2", true);
+        endpoint.setManagingOrganization(new Reference(new IdType("Organization", organization2.getId())));
+
+        IUpdateExecutable updateExec = client
+                .update()
+                .resource(endpoint)
+                .withId(endpoint.getId());
+
+        assertThrows(UnprocessableEntityException.class, updateExec::execute);
+    }
+
 
     @Test
     void testDeleteEndpoint() {
