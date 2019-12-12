@@ -14,7 +14,7 @@
       Download CSV (all users)
     <% end %>
 
-    <h1 class="ds-h1">Viewing <strong><%= @users.total_count %></strong> provider users</h1>
+    <h1 class="ds-h1"><%= internal_users_header(@users.total_count) %></h1>
     <p class=""><%= page_entries_info @users %></p>
     <%= form_tag internal_users_path, method: "get", class: "ds-u-display--flex" do %>
       <%= hidden_field_tag :org_status, params[:org_status] %>

@@ -21,6 +21,9 @@ class Organization < ApplicationRecord
 
   after_save :update_registered_organizations
 
+  scope :vendor, -> { where(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
+  scope :provider, -> { where.not(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
+
   def address_type
     address&.address_type
   end
