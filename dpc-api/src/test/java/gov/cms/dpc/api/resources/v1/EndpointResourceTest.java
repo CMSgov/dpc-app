@@ -41,9 +41,13 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testCreateEndpointWithoutOrg() {
+    void testCreateEndpointDifferentOrg() throws IOException {
+        final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
+        final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, adminClient, "create-endpoint-different-org", true);
+
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
-        endpoint.setManagingOrganization((Reference)null);
+        endpoint.setManagingOrganization(new Reference("Organization/"+ organization.getId()));
         ICreateTyped createExec = client.create().resource(endpoint);
         assertThrows(UnprocessableEntityException.class, createExec::execute);
     }
@@ -98,7 +102,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testUpdateEndpointNewOrg() throws IOException {
+    void testUpdateEndpointDifferentOrg() throws IOException {
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
 

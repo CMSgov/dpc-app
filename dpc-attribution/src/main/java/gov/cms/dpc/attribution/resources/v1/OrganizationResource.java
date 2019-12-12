@@ -146,7 +146,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                         Optional<EndpointEntity> endpointOpt = endpointDAO.fetchEndpoint(endpointID);
                         return endpointOpt;
                     }
-            ).filter(eo -> eo.isPresent()).map(eo -> eo.get()).collect(Collectors.toList());
+            ).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
             orgEntity.setEndpoints(endpointEntities);
             orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
             return Response.status(Response.Status.OK).entity(orgEntity.toFHIR()).build();

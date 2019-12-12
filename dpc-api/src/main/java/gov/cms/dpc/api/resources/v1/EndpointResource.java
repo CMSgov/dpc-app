@@ -39,9 +39,17 @@ public class EndpointResource extends AbstractEndpointResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource for an Organization")
-    @ApiResponses(@ApiResponse(code = 204, message = "Endpoint created"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Endpoint created"),
+            @ApiResponse(code = 422, message = "Endpoint could not be created")
+    })
     @Override
     public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
+        Reference organizationPrincipalRef = new Reference(new IdType("Organization", organizationPrincipal.getID().toString()));
+        if (endpoint.hasManagingOrganization() && !endpoint.getManagingOrganization().getReference().equals(organizationPrincipalRef.getReference())) {
+            throw new WebApplicationException("An Endpoint cannot be created for a different Organization", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+
         endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationPrincipal.getID().toString())));
         MethodOutcome outcome = this.client
                 .create()
@@ -95,7 +103,8 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Update an Endpoint", notes = "Update an Endpoint resource")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Endpoint updated"),
-            @ApiResponse(code = 404, message = "Endpoint not found")
+            @ApiResponse(code = 404, message = "Endpoint not found"),
+            @ApiResponse(code = 422, message = "Endpoint is not valid")
     })
     @Override
     public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
@@ -123,7 +132,8 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Delete an Endpoint", notes = "Delete an Endpoint resource")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Endpoint deleted"),
-            @ApiResponse(code = 404, message = "Endpoint not found")
+            @ApiResponse(code = 404, message = "Endpoint not found"),
+            @ApiResponse(code = 422, message = "Endpoint cannot be deleted")
     })
     @Override
     public Response deleteEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {

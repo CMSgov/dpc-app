@@ -112,7 +112,10 @@ public class EndpointResource extends AbstractEndpointResource {
     @ExceptionMetered
     @UnitOfWork
     @ApiOperation(value = "Delete an Endpoint", notes = "Delete an Endpoint resource")
-    @ApiResponses(value = {})
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find Endpoint"),
+            @ApiResponse(code = 422, message = "Endpoint cannot be deleted")
+    })
     @Override
     public Response deleteEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
