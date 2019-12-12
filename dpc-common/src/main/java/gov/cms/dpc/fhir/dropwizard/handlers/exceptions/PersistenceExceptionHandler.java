@@ -46,7 +46,7 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
         final long exceptionID = this.logException(exception);
 
         final OperationOutcome outcome = new OperationOutcome();
-        outcome.setId(Long.toString(exceptionID));
+        outcome.setId(exceptionIDtoHex(exceptionID));
         outcome.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.FATAL)
                 .setDetails(new CodeableConcept().setText(statusStringPair.getRight()));
