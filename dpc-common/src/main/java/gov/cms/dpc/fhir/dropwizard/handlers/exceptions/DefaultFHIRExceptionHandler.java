@@ -51,7 +51,7 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
         // Log the exception and generate the OperationOutcome
         final long exceptionID = super.logException(exception);
         final OperationOutcome outcome = new OperationOutcome();
-        outcome.setId(Long.toString(exceptionID));
+        outcome.setId(exceptionIDtoHex(exceptionID));
         outcome.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.FATAL)
                 .setDetails(new CodeableConcept().setText(exception.getMessage()));
