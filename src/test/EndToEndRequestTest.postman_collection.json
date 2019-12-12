@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "80645c4c-5755-4dd4-9d38-29e42eb77ae8",
+		"_postman_id": "c51ecc99-c009-4f7b-8067-8c73e371e97f",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -105,15 +105,15 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"resourceType\": \"Endpoint\",\n\t\"status\": \"test\",\n\t\"connectionType\": {\n\t\t\"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n\t\t\"code\": \"hl7-fhir-rest\"\n\t},\n\t\"name\": \"Test Organization Endpoint\",\n\t\"address\": \"http://test-address.nope\",\n\t\"managingOrganization\": {\n\t\t\"reference\": \"{{organization_id}}\"\n\t},\n\t\"payloadType\": [\n\t\t{\n\t\t\t\"coding\": {\n\t\t\t\t\"code\": setCode(\"test\"),\n\t\t\t\t\"system\": \"http://www.example.com/test\"\n\t\t\t}\n\t\t}\n\t]\n}\n    "
+							"raw": "{\n\t\"resourceType\": \"Endpoint\",\n\t\"status\": \"test\",\n\t\"connectionType\": {\n\t\t\"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n\t\t\"code\": \"hl7-fhir-rest\"\n\t},\n\t\"name\": \"Test Organization Endpoint\",\n\t\"address\": \"http://test-address.nope\",\n\t\"managingOrganization\": {\n\t\t\"reference\": \"{{organization_id}}\"\n\t},\n\t\"payloadType\": [\n\t\t{\n\t\t\t\"coding\": {\n\t\t\t\t\"code\": \"test\",\n\t\t\t\t\"system\": \"http://www.example.com/test\"\n\t\t\t}\n\t\t}\n\t]\n}\n    "
 						},
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Endpoint",
+							"raw": "http://{{hostname}}:{{attribution_port}}/v1/Endpoint",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
 							],
-							"port": "{{api_port}}",
+							"port": "{{attribution_port}}",
 							"path": [
 								"v1",
 								"Endpoint"
