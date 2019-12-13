@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "665bcdc6-0a21-450f-b41a-6e61a5076cfc",
+		"_postman_id": "c51ecc99-c009-4f7b-8067-8c73e371e97f",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -72,6 +72,97 @@
 							]
 						},
 						"description": "Create a default organization to run the tests with.\n\nThese organizations are normally created by the DPC team and are pre-existing."
+					},
+					"response": []
+				},
+				{
+					"name": "Create endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b30d587b-5747-4b41-9325-0a868e56210a",
+								"exec": [
+									"pm.test(\"Status is 201 Created\", function () {",
+									"    pm.expect(pm.response.code).equals(201);",
+									"});",
+									"",
+									"pm.globals.set(\"endpoint_id\", pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"resourceType\": \"Endpoint\",\n\t\"status\": \"test\",\n\t\"connectionType\": {\n\t\t\"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n\t\t\"code\": \"hl7-fhir-rest\"\n\t},\n\t\"name\": \"Test Organization Endpoint\",\n\t\"address\": \"http://test-address.nope\",\n\t\"managingOrganization\": {\n\t\t\"reference\": \"{{organization_id}}\"\n\t},\n\t\"payloadType\": [\n\t\t{\n\t\t\t\"coding\": {\n\t\t\t\t\"code\": \"test\",\n\t\t\t\t\"system\": \"http://www.example.com/test\"\n\t\t\t}\n\t\t}\n\t]\n}\n    "
+						},
+						"url": {
+							"raw": "http://{{hostname}}:{{attribution_port}}/v1/Endpoint",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{attribution_port}}",
+							"path": [
+								"v1",
+								"Endpoint"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "50437cf8-aaf6-4f9b-9e40-4ea50c788820",
+								"exec": [
+									"pm.test(\"Status is OK\", function () {",
+									"    pm.response.to.be.ok;",
+									"});",
+									"",
+									"pm.test(\"Body matches expected response\", function() {",
+									"    var respJson = pm.response.json();",
+									"    pm.expect(respJson.name).equals(\"Test Organization Endpoint\");",
+									"    pm.expect(respJson.status).equals(\"test\");",
+									"    pm.expect(respJson.address).equals(\"http://test-address.nope\");",
+									"    pm.expect(respJson.connectionType.system).equals(\"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\");",
+									"    pm.expect(respJson.connectionType.code).equals(\"hl7-fhir-rest\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Endpoint/{{endpoint_id}}",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Endpoint",
+								"{{endpoint_id}}"
+							]
+						}
 					},
 					"response": []
 				}
@@ -914,7 +1005,7 @@
 								"id": "96f38c80-8b9d-4761-b66c-a02bd1de7408",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
-									"    pm.response.to.have.be.ok;",
+									"    pm.response.to.be.ok;",
 									"});",
 									"",
 									"pm.test(\"Body matches expected response\", function() {",
@@ -957,6 +1048,61 @@
 								"v1",
 								"Organization",
 								"{{organization_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b30d587b-5747-4b41-9325-0a868e56210a",
+								"exec": [
+									"pm.test(\"Status is OK\", function () {",
+									"    pm.response.to.be.ok;",
+									"});",
+									"",
+									"pm.test(\"Body matches expected response\", function() {",
+									"    var respJson = pm.response.json();",
+									"    pm.expect(respJson.name).equals(\"Test Organization Endpoint Update\");",
+									"    pm.expect(respJson.status).equals(\"test\");",
+									"    pm.expect(respJson.address).equals(\"http://www.example.com/endpoint\");",
+									"    pm.expect(respJson.connectionType.system).equals(\"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\");",
+									"    pm.expect(respJson.connectionType.code).equals(\"hl7-fhir-rest\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"resourceType\": \"Endpoint\",\n\t\"status\": \"test\",\n\t\"connectionType\": {\n\t\t\"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n\t\t\"code\": \"hl7-fhir-rest\"\n\t},\n\t\"name\": \"Test Organization Endpoint Update\",\n\t\"address\": \"http://www.example.com/endpoint\",\n\t\"managingOrganization\": {\n\t\t\"reference\": \"Organization/{{organization_id}}\"\n\t},\n\t\"payloadType\": [\n\t\t{\n\t\t\t\"coding\": {\n\t\t\t\t\"code\": \"test\",\n\t\t\t\t\"system\": \"http://www.example.com/test\"\n\t\t\t}\n\t\t}\n\t]\n}\n    "
+						},
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Endpoint/{{endpoint_id}}",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Endpoint",
+								"{{endpoint_id}}"
 							]
 						}
 					},
@@ -1183,6 +1329,48 @@
 							]
 						},
 						"description": "When a provider is deleted their patient roster is removed as well."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b30d587b-5747-4b41-9325-0a868e56210a",
+								"exec": [
+									"pm.test(\"Status is OK\", function () {",
+									"    pm.response.to.be.ok;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/fhir+json"
+							}
+						],
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Endpoint/{{endpoint_id}}",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Endpoint",
+								"{{endpoint_id}}"
+							]
+						}
 					},
 					"response": []
 				}
