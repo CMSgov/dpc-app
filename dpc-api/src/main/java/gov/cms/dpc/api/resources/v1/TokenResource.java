@@ -6,6 +6,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
+import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -207,6 +208,35 @@ public class TokenResource extends AbstractTokenResource {
             logger.error("Malformed JWT", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
+    }
+    
+    @POST
+    @Path("/validate")
+    @UnitOfWork
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Validate API token request", notes = "Request access token for API access", authorizations = @Authorization(value = ""))
+    @ApiResponses(
+            value = {@ApiResponse(code = 200, message = "Token request is valid"),
+                    @ApiResponse(code = 400, message = "Token request is invalid")})
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Public
+    @Override
+    public Response validateJWT(@NotEmpty(message = "Must submit JWT") String jwt) {
+
+        try {
+            Jwts.parser()
+                    .requireAudience(this.authURL)
+                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, this.authURL))
+                    .parseClaimsJws(jwt);
+        } catch (IllegalArgumentException e) {
+            // This is fine, we just want the body
+        } catch (MalformedJwtException e) {
+            throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
+        }
+
+        return Response.ok().build();
     }
 
     private void validateJWTQueryParams(String grantType, String clientAssertionType, String scope, String jwtBody) {
