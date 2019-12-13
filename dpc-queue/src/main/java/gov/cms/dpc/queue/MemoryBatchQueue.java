@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,18 +51,26 @@ public class MemoryBatchQueue extends JobQueueCommon {
     }
 
     @Override
+    public synchronized Optional<JobQueueBatchFile> getJobBatchFile(UUID organizationID, String fileID) {
+        return this.queue.values().stream()
+                .filter(batch -> batch.getOrgID().equals(organizationID))
+                .flatMap(batch -> batch.getJobQueueBatchFiles().stream())
+                .filter(file -> file.getFileName().equals(fileID))
+                .findAny();
+    }
+
+    @Override
     public synchronized Optional<JobQueueBatch> claimBatch(UUID aggregatorID) {
         logger.debug("Pulling first QUEUED job");
-        final Optional<JobQueueBatch> first = this.queue.entrySet()
+        final Optional<JobQueueBatch> first = this.queue.values()
                 .stream()
-                .filter(entry -> entry.getValue().getStatus().equals(JobStatus.QUEUED))
-                .map(Map.Entry::getValue)
+                .filter(jobQueueBatch -> jobQueueBatch.getStatus().equals(JobStatus.QUEUED))
                 .findFirst();
 
-        if ( first.isPresent() ) {
+        if (first.isPresent()) {
             try {
                 first.get().setRunningStatus(aggregatorID);
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 logger.error("Failed to mark job as running. Marking the job as failed", e);
                 first.get().setFailedStatus(aggregatorID);
                 return Optional.empty();
@@ -84,7 +93,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
 
     @Override
     public synchronized void completeBatch(JobQueueBatch job, UUID aggregatorID) {
-        if ( job != null ) {
+        if (job != null) {
             job.setCompletedStatus(aggregatorID);
         } else {
             throw new JobQueueFailure("Empty job passed");
