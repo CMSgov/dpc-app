@@ -19,6 +19,10 @@ public class EndpointDAO extends AbstractDAO<EndpointEntity> {
         super(factory.getSessionFactory());
     }
 
+    public EndpointEntity persistEndpoint(EndpointEntity endpointEntity) {
+        return persist(endpointEntity);
+    }
+
     public Optional<EndpointEntity> fetchEndpoint(UUID endpointID) {
         return Optional.ofNullable(get(endpointID));
     }
@@ -34,5 +38,9 @@ public class EndpointDAO extends AbstractDAO<EndpointEntity> {
         query.where(builder.equal(root.get("organization").get("id"), organizationID));
 
         return list(query);
+    }
+
+    public void deleteEndpoint(EndpointEntity endpointEntity) {
+        currentSession().delete(endpointEntity);
     }
 }
