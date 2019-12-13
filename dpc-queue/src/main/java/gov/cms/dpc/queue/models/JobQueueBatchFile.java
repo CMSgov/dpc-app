@@ -101,6 +101,12 @@ public class JobQueueBatchFile implements Serializable {
     @Column(name = "count")
     private int count;
 
+    @Column(name = "checksum")
+    private byte[] checksum;
+
+    @Column(name = "file_length")
+    private long fileLength;
+
     public JobQueueBatchFile() {
         // for hibernate
     }
@@ -142,6 +148,22 @@ public class JobQueueBatchFile implements Serializable {
 
     public void appendCount(int count) {
         this.count += count;
+    }
+
+    public byte[] getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(byte[] checksum) {
+        this.checksum = checksum;
+    }
+
+    public long getFileLength() {
+        return fileLength;
+    }
+
+    public void setFileLength(long fileLength) {
+        this.fileLength = fileLength;
     }
 
     @Override
