@@ -1,11 +1,14 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,12 +77,6 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> {
      * @param provider - {@link ProviderEntity} to remove
      */
     public void deleteProvider(ProviderEntity provider) {
-
-        // For each roster remove the attributions and the roster itself
-        provider.getAttributionRosters()
-                .forEach(roster -> removeRoster(roster.getId()));
-
-        // Remove the provider
         this.currentSession().remove(provider);
     }
 
@@ -91,25 +88,5 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> {
 
         currentSession().merge(fullyUpdated);
         return fullyUpdated;
-    }
-
-    private void removeRoster(UUID rosterID) {
-
-        // Remove relationships
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaDelete<AttributionRelationship> query = builder.createCriteriaDelete(AttributionRelationship.class);
-        final Root<AttributionRelationship> root = query.from(AttributionRelationship.class);
-
-        query.where(builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID));
-
-        this.currentSession().createQuery(query).executeUpdate();
-
-        // Remove roster
-        final CriteriaDelete<RosterEntity> rosterQuery = builder.createCriteriaDelete(RosterEntity.class);
-        final Root<RosterEntity> rosterRoot = rosterQuery.from(RosterEntity.class);
-
-        rosterQuery.where(builder.equal(rosterRoot.get(RosterEntity_.id), rosterID));
-
-        this.currentSession().createQuery(rosterQuery).executeUpdate();
     }
 }

@@ -7,10 +7,9 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.validation.Valid;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("/Organization")
@@ -19,13 +18,17 @@ public abstract class AbstractOrganizationResource {
 
     @POST
     @Path("/$submit")
-    public abstract Organization submitOrganization(Bundle organizationBundle);
+    public abstract Organization submitOrganization(@NotNull Bundle organizationBundle);
 
     @GET
     @Path("/{organizationID}")
-    public abstract Organization getOrganization(UUID organizationID);
+    public abstract Organization getOrganization(@NotNull UUID organizationID);
+
+    @DELETE
+    @Path("/{organizationID}")
+    public abstract Response deleteOrganization(@NotNull UUID organizationID);
 
     @PUT
     @Path("/{organizationID}")
-    public abstract Organization updateOrganization(UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization);
+    public abstract Organization updateOrganization(@NotNull UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization);
 }
