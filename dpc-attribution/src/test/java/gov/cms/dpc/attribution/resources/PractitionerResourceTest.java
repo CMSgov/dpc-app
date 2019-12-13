@@ -10,17 +10,16 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static gov.cms.dpc.attribution.AttributionTestHelpers.createFHIRClient;
+import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PractitionerResourceTest extends AbstractAttributionTest {
@@ -184,6 +183,46 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertAll(() -> assertTrue(pract2.equalsDeep(pract3), "Updated values should match"),
                 () -> assertFalse(pract3.equalsDeep(practitioner), "Should not match original"),
                 () -> assertTrue(createdAt.before(updatedAt), "Creation should be before updated"));
+    }
+
+    @Test
+    void testPractitionerRemoval() {
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        final MethodOutcome outcome = client
+                .create()
+                .resource(practitioner)
+                .encodedJson()
+                .execute();
+
+        final Practitioner pract2 = (Practitioner) outcome.getResource();
+
+        // Add an attribution Group
+        final Group group = createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+
+        client
+                .create()
+                .resource(group)
+                .encodedJson()
+                .execute();
+
+        // Now remove the practitioner
+
+        client
+                .delete()
+                .resourceById("Practitioner", pract2.getIdElement().getIdPart())
+                .encodedJson()
+                .execute();
+
+        // Ensure it's gone
+        final IReadExecutable<Practitioner> getRequest = client
+                .read()
+                .resource(Practitioner.class)
+                .withId(pract2.getId())
+                .encodedJson();
+
+        assertThrows(ResourceNotFoundException.class, getRequest::execute, "Should not have resource");
     }
 
 }
