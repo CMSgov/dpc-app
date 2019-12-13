@@ -54,7 +54,7 @@ public abstract class AbstractTokenResource {
 
     @POST
     @Path("/auth")
-    public abstract JWTAuthResponse authorizeJWT(@NotEmpty(message = "Scope is required") String scope, @NotEmpty(message = "Grant type is required") String grantType, @NotEmpty(message = "Assertion type is required") String clientAssertionType, String jwtBody);
+    public abstract JWTAuthResponse authorizeJWT(@NotEmpty(message = "Scope is required") String scope, @NotEmpty(message = "Grant type is required") String grantType, @NotEmpty(message = "Assertion type is required") String clientAssertionType, @NotEmpty(message = "Assertion is required") String jwtBody);
 
     @DELETE
     @Path("/{tokenID}")

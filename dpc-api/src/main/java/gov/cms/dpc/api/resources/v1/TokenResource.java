@@ -193,9 +193,9 @@ public class TokenResource extends AbstractTokenResource {
             @ApiParam(name = "client_assertion_type", value = "Client Assertion Type", required = true, allowableValues = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
             @QueryParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType,
             @ApiParam(name = "client_assertion", value = "Signed JWT", required = true)
-            @QueryParam(value = "client_assertion") String jwtBody) {
+            @QueryParam(value = "client_assertion") @NotEmpty(message = "Assertion is required") String jwtBody) {
         // Actual scope implementation will come as part of DPC-747
-        validateJWTQueryParams(grantType, clientAssertionType, scope);
+        validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
 
         // Validate JWT signature
         try {
@@ -209,7 +209,7 @@ public class TokenResource extends AbstractTokenResource {
         }
     }
 
-    private void validateJWTQueryParams(String grantType, String clientAssertionType, String scope) {
+    private void validateJWTQueryParams(String grantType, String clientAssertionType, String scope, String jwtBody) {
         if (!grantType.equals("client_credentials")) {
             throw new WebApplicationException("Grant Type must be 'client_credentials'", Response.Status.BAD_REQUEST);
         }
@@ -222,6 +222,9 @@ public class TokenResource extends AbstractTokenResource {
             throw new WebApplicationException(String.format("Access Scope must be '%s'", DEFAULT_ACCESS_SCOPE), Response.Status.BAD_REQUEST);
         }
 
+        if (jwtBody == null || jwtBody.isEmpty()) {
+            throw new WebApplicationException("Client Assertion must be present", Response.Status.BAD_REQUEST);
+        }
     }
 
     private JWTAuthResponse handleJWT(String jwtBody) {

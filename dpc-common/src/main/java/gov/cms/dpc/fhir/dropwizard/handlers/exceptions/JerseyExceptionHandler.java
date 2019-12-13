@@ -41,7 +41,7 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
         final long exceptionID = this.logException(exception);
         final Pair<ImmutableList<String>, Integer> errorStatusPair = processConstraintViolations(exception);
         final OperationOutcome outcome = new OperationOutcome();
-        outcome.setId(Long.toString(exceptionID));
+        outcome.setId(exceptionIDtoHex(exceptionID));
 
         errorStatusPair.getLeft().forEach(error -> {
             final OperationOutcome.OperationOutcomeIssueComponent component = new OperationOutcome.OperationOutcomeIssueComponent();
@@ -62,7 +62,7 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
         final long exceptionID = super.logException(exception);
 
         return Response.status(errorStatusPair.getRight())
-                .entity(new DPCValidationErrorMessage(exceptionID, errorStatusPair.getLeft()))
+                .entity(new DPCValidationErrorMessage(exceptionIDtoHex(exceptionID), errorStatusPair.getLeft()))
                 .build();
     }
 

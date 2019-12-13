@@ -56,7 +56,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(EndpointResource.class);
         binder.bind(GroupResource.class);
         binder.bind(JobResource.class);
-        binder.bind(OrganizationResource.class);
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
 
@@ -103,6 +102,16 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 this.getConfiguration().getTokenPolicy(),
                                 resolver,
                                 cache, publicURL});
+    }
+
+    @Provides
+    public OrganizationResource provideOrganizationResource(IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(OrganizationResource.class,
+                        new Class<?>[]{IGenericClient.class,
+                        TokenDAO.class,
+                        PublicKeyDAO.class},
+                        new Object[]{client, tokenDAO, keyDAO});
     }
 
     @Provides
