@@ -6,16 +6,20 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
+import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -27,10 +31,14 @@ import java.util.stream.Collectors;
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private final IGenericClient client;
+    private final TokenDAO tokenDAO;
+    private final PublicKeyDAO keyDAO;
 
     @Inject
-    public OrganizationResource(IGenericClient client) {
+    public OrganizationResource(IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         this.client = client;
+        this.tokenDAO = tokenDAO;
+        this.keyDAO = keyDAO;
     }
 
 
@@ -42,7 +50,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ApiOperation(hidden = true, value = "Create organization by submitting Bundle")
     @AdminOperation
     @Override
-    public Organization submitOrganization(@FHIRParameter(name = "resource") Bundle organizationBundle) {
+    public Organization submitOrganization(@FHIRParameter(name = "resource") @NotNull Bundle organizationBundle) {
         // Validate bundle
         validateOrganizationBundle(organizationBundle);
 
@@ -70,13 +78,48 @@ public class OrganizationResource extends AbstractOrganizationResource {
             authorizations = @Authorization(value = "apiKey"))
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
-    public Organization getOrganization(@PathParam("organizationID") UUID organizationID) {
+    public Organization getOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
         return this.client
                 .read()
                 .resource(Organization.class)
                 .withId(organizationID.toString())
                 .encodedJson()
                 .execute();
+    }
+
+    @DELETE
+    @Path("/{organizationID}")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @AdminOperation
+    @UnitOfWork
+    @ApiOperation(value = "Delete Organization",
+            notes = "FHIR endpoint which removes the organization currently registered with the application.\n" +
+                    "This also removes all associated resources",
+            authorizations = @Authorization(value = "apiKey"))
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Cannot find organization to remove")})
+    @Override
+    public Response deleteOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
+        // Delete from the attribution service
+        this.client
+                .delete()
+                .resourceById(new IdType("Organization", organizationID.toString()))
+                .encodedJson()
+                .execute();
+
+        // Delete tokens
+        this.tokenDAO
+                .fetchTokens(organizationID)
+                .forEach(this.tokenDAO::deleteToken);
+
+        // Delete public keys
+        this.keyDAO
+                .fetchPublicKeys(organizationID)
+                .forEach(this.keyDAO::deletePublicKey);
+
+        return Response.ok().build();
     }
 
     @PUT
@@ -94,7 +137,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 422, message = "Provided resource is not a valid FHIR Organization")
     })
     @Override
-    public Organization updateOrganization(@PathParam("organizationID") UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization) {
+    public Organization updateOrganization(@NotNull @PathParam("organizationID") UUID organizationID, @Valid @Profiled(profile = OrganizationProfile.PROFILE_URI) Organization organization) {
         MethodOutcome outcome = this.client
                 .update()
                 .resource(organization)
