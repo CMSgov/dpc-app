@@ -5,7 +5,6 @@ import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
-import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
@@ -15,7 +14,6 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
-import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.bouncycastle.util.encoders.Hex;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -27,8 +25,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.FileInputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -48,13 +44,11 @@ public class JobResource extends AbstractJobResource {
 
     private final IJobQueue queue;
     private final String baseURL;
-    private final String fileLocation;
 
     @Inject
-    public JobResource(IJobQueue queue, @APIV1 String baseURL, @ExportPath String exportPath) {
+    public JobResource(IJobQueue queue, @APIV1 String baseURL) {
         this.queue = queue;
         this.baseURL = baseURL;
-        this.fileLocation = exportPath;
     }
 
     @Override
@@ -183,25 +177,16 @@ public class JobResource extends AbstractJobResource {
     }
 
     List<JobCompletionModel.OutputEntryExtension> buildExtension(JobQueueBatchFile batchFile) {
-        String filePath = String.format("%s/%s.ndjson", fileLocation, JobQueueBatchFile.formOutputFileName(batchFile.getBatchID(), batchFile.getResourceType(), batchFile.getSequence()));
-        File file = new File(filePath);
-        String checksum = generateChecksum(file);
-        long fileLength = generateFileLength(file);
-        return List.of(new JobCompletionModel.OutputEntryExtension(JobCompletionModel.CHECKSUM_URL, checksum),
-                new JobCompletionModel.OutputEntryExtension(JobCompletionModel.FILE_LENGTH_URL, fileLength));
-    }
-
-    private String generateChecksum(File file) {
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            byte[] digest = new SHA256.Digest().digest(fileInputStream.readAllBytes());
-            return String.format("%s:%s", "sha256", Hex.toHexString(digest));
-        } catch (Exception e) {
-            logger.error("Failed to generate checksum", e);
-            return "";
+        final byte[] byteChecksum = batchFile.getChecksum();
+        final String stringChecksum;
+        if (byteChecksum == null) {
+            stringChecksum = "";
+        } else {
+            stringChecksum = Hex.toHexString(byteChecksum);
         }
-    }
-
-    private Long generateFileLength(File file) {
-        return file != null ? file.length() : 0;
+        String formattedChecksum = String.format("%s:%s", "sha256", stringChecksum);
+        long fileLength = batchFile.getFileLength();
+        return List.of(new JobCompletionModel.OutputEntryExtension(JobCompletionModel.CHECKSUM_URL, formattedChecksum),
+                new JobCompletionModel.OutputEntryExtension(JobCompletionModel.FILE_LENGTH_URL, fileLength));
     }
 }
