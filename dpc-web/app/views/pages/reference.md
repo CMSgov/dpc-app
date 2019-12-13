@@ -62,7 +62,7 @@ These restrictions are subject to change over time.
 The Data at the Point of Care pilot project is currently accessible as a private sandbox environment, which returns sample [NDJSON](http://ndjson.org/) files with synthetic beneficiary data.
 There is no beneficiary PII or PHI in the files you can access via the sandbox.
 
-DPC implements the *SMART Backend Services Authentication* (BSA) as described by the [SMART ON FHIR team](https://build.fhir.org/ig/HL7/bulk-data/authorization/index.html).
+DPC implements the *SMART Backend Services Authentication* (BSA) as described by the [SMART ON FHIR team](https://hl7.org/fhir/uv/bulkdata/authorization/index.html).
 This specification requires the user to exchange their DPC provided `client_token` for an `access_token` which can be used to make API requests to the FHIR endpoints.
 This exchange requires the user to submit a self-signed [JSON Web Token](https://jwt.io) using a public/private key pair that they submit to DPC either via the Web UI or the API.
 
@@ -331,7 +331,7 @@ This endpoint requires one additional query param:
 The submitted public key must meet the following requirements:
 
 * Be an `RSA` key (ECC keys will be supported in a future release)
-* Have a key length of at least 3072 bits
+* Have a key length of at least 4096 bits
 * Be unique to each environment
 
 ~~~sh
@@ -394,7 +394,7 @@ This token must be signed with a public key previously registered and contain th
 
 **Authentication JWT Header Values**
 
-`alg`	_required_	- The JWA algorithm (e.g., `RS384`, `EC384`) used for signing the authentication JWT. (DPC only supports RS384)
+`alg`	_required_	- Fixed value: RSA384
 
 `kid`   _required_	- The identifier of the key-pair used to sign this JWT. This must be the ID of a previously registered public key
 
@@ -406,7 +406,7 @@ This token must be signed with a public key previously registered and contain th
 
 `sub`	_required_	Issuer of the JWT -- the `client_token` provided by DPC (note that this is the same as the value for the `iss` claim)
 
-`aud`	_required_	The DPC "token URL" (the same URL to which this authentication JWT will be posted. e.g. https://sandbox.dpc.cms.gov/api/v1/Token/auth)
+`aud`	_required_	The DPC "token URL" (the same URL to which this authentication JWT will be posted. e.g. https://dpc.cms.gov/api/v1/Token/auth)
 
 `exp`	_required_	Expiration time integer for this authentication JWT, expressed in seconds since the "Epoch" (1970-01-01T00:00:00Z UTC). This time SHALL be no more than five minutes in the future.
 
@@ -433,7 +433,7 @@ POST /api/v1/Token/auth
 **cURL command**
 
 ~~~sh
-curl -v https://sandbox.dpc.cms.gov/api/v1/Token/auth?grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_asssertions={self-signed JWT} \
+curl -v https://sandbox.dpc.cms.gov/api/v1/Token/auth?grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion={self-signed JWT} \
 -H 'Content-Type: application/x-www-form-urlencoded' \
 -X POST
 ~~~

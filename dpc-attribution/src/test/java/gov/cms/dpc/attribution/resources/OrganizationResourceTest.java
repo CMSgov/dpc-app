@@ -133,7 +133,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testUpdateOrganization() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
+        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "test-update-organization", false);
 
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());

@@ -107,6 +107,10 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         this.endpoints = endpoints;
     }
 
+    public void addEndpoint(EndpointEntity endpoint) {
+        this.endpoints.add(endpoint);
+    }
+
     public List<ProviderEntity> getProviders() {
         return providers;
     }
@@ -230,6 +234,7 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
         this.setOrganizationName(updated.getOrganizationName());
         this.setOrganizationAddress(updated.getOrganizationAddress());
         this.setContacts(updated.getContacts());
+        this.setEndpoints(updated.getEndpoints());
         this.setPatients(updated.getPatients());
         this.setProviders(updated.getProviders());
 

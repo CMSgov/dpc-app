@@ -188,12 +188,12 @@ RSpec.describe User, type: :model do
       end
     end
 
-    describe '.assigned_non_vendor' do
-      it 'includes users with non-vendor org assignment' do
+    describe '.assigned_provider' do
+      it 'includes users with provider org assignment' do
         user = create(:user, :assigned)
         _vendor_user = create(:user, :vendor)
 
-        expect(User.assigned_non_vendor).to match_array([user])
+        expect(User.assigned_provider).to match_array([user])
       end
     end
 
@@ -203,6 +203,28 @@ RSpec.describe User, type: :model do
         vendor_user = create(:user, :vendor)
 
         expect(User.assigned_vendor).to match_array([vendor_user])
+      end
+    end
+
+    describe '.vendor' do
+      it 'includes users with vendor assigned or requested org' do
+        assigned_user = create(:user, :vendor)
+        requested_user = create(:user, requested_organization_type: 'health_it_vendor')
+        _assigned_prov_user = create(:user, :assigned)
+        _requested_prov_user = create(:user)
+
+        expect(User.vendor).to match_array([assigned_user, requested_user])
+      end
+    end
+
+    describe '.provider' do
+      it 'includes users with provider assigned or requested org' do
+        assigned_user = create(:user, :assigned)
+        requested_user = create(:user)
+        _assigned_vendor_user = create(:user, :vendor)
+        _requested_vendor_user = create(:user, requested_organization_type: 'health_it_vendor')
+
+        expect(User.provider).to match_array([assigned_user, requested_user])
       end
     end
 

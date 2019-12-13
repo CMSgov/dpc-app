@@ -27,4 +27,13 @@ public abstract class AbstractFHIRExceptionHandler<E extends Throwable> extends 
         return (this.info.getResourceClass() != null && this.info.getResourceClass().getAnnotation(FHIR.class) != null) ||
                 (this.info.getResourceMethod() != null && this.info.getResourceMethod().getAnnotation(FHIR.class) != null);
     }
+
+    /**
+     * Format the randomly generated exception ID as a 16byte Hex value, padding with zeros if required
+     * @param logID - {@link Long} exception ID to format
+     * @return - {@link String} Hex formatted exception ID
+     */
+    protected String exceptionIDtoHex(long logID) {
+        return String.format("%016x", logID);
+    }
 }
