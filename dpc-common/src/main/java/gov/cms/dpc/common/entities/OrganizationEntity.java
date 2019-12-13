@@ -52,6 +52,9 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "organization")
     private List<PatientEntity> patients;
 
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "managingOrganization")
+    private List<RosterEntity> rosters;
+
     public OrganizationEntity() {
         // Not used
     }
@@ -122,6 +125,14 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     public void setPatients(List<PatientEntity> patients) {
         this.patients = patients;
+    }
+
+    public List<RosterEntity> getRosters() {
+        return rosters;
+    }
+
+    public void setRosters(List<RosterEntity> rosters) {
+        this.rosters = rosters;
     }
 
     @Override

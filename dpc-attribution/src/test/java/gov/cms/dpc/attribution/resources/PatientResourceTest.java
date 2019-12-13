@@ -4,18 +4,19 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
+import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
 import java.util.UUID;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
+import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PatientResourceTest extends AbstractAttributionTest {
@@ -113,22 +114,52 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         assertEquals(1, firstSearch.getTotal(), "Should have a single patient");
 
+        // Create a practitioner and an attribution resource
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
+
+        final MethodOutcome outcome = client
+                .create()
+                .resource(practitioner)
+                .encodedJson()
+                .execute();
+
+        // Add an attribution Group
+        final Group group = createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+
+        group.addMember().setEntity(new Reference(firstSearch.getEntryFirstRep().getResource().getId()));
+
+        final MethodOutcome creationOutcome = client
+                .create()
+                .resource(group)
+                .encodedJson()
+                .execute();
+
+        final Group attributionGroup = (Group) creationOutcome.getResource();
+
         // Remove the patient and try the search again
         final Patient patient = (Patient) firstSearch.getEntryFirstRep().getResource();
 
-        final IBaseOperationOutcome outcome = client
+        final IBaseOperationOutcome deleteOutcome = client
                 .delete()
                 .resource(patient)
                 .encodedJson()
                 .execute();
 
-
-        assertNull(outcome, "Should have succeeded with empty outcome");
-
+        assertNull(deleteOutcome, "Should have succeeded with empty outcome");
         // Try the first search again, which should be empty
 
         final Bundle finalSearch = firstQuery.execute();
         assertEquals(0, finalSearch.getTotal(), "Should not have any patients");
+
+        // Ensure the group still exists
+        final Group g2 = client
+                .read()
+                .resource(Group.class)
+                .withId(attributionGroup.getId())
+                .encodedJson()
+                .execute();
+
+        assertEquals(0, g2.getMember().size(), "Should not have any attributions");
     }
 
     @Test
