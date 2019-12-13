@@ -2,10 +2,12 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.attribution.jdbi.EndpointDAO;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.EndpointConverter;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -30,10 +32,12 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
     private final OrganizationDAO dao;
+    private final EndpointDAO endpointDAO;
 
     @Inject
-    OrganizationResource(OrganizationDAO dao) {
+    OrganizationResource(OrganizationDAO dao, EndpointDAO endpointDAO) {
         this.dao = dao;
+        this.endpointDAO = endpointDAO;
     }
 
     @Override
@@ -133,7 +137,18 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     public Response updateOrganization(@ApiParam(value = "Organization resource ID", required = true) @PathParam("organizationID") UUID organizationID, Organization organization) {
         try {
-            OrganizationEntity orgEntity = this.dao.updateOrganization(organizationID, organization);
+            OrganizationEntity orgEntity = new OrganizationEntity().fromFHIR(organization);
+            // OrganizationEntity.fromFHIR() ignores endpoints in submitted resource; they must be copied from original
+            Organization original = getOrganization(organizationID);
+            List<EndpointEntity> endpointEntities = original.getEndpoint().stream().map(
+                    r -> {
+                        UUID endpointID = FHIRExtractors.getEntityUUID(r.getReference());
+                        Optional<EndpointEntity> endpointOpt = endpointDAO.fetchEndpoint(endpointID);
+                        return endpointOpt;
+                    }
+            ).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+            orgEntity.setEndpoints(endpointEntities);
+            orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
             return Response.status(Response.Status.OK).entity(orgEntity.toFHIR()).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
