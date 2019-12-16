@@ -56,6 +56,10 @@ public abstract class AbstractTokenResource {
     @Path("/auth")
     public abstract JWTAuthResponse authorizeJWT(@NotEmpty(message = "Scope is required") String scope, @NotEmpty(message = "Grant type is required") String grantType, @NotEmpty(message = "Assertion type is required") String clientAssertionType, @NotEmpty(message = "Assertion is required") String jwtBody);
 
+    @GET
+    @Path("/validate")
+    public abstract Response validateJWT(@NotEmpty(message = "Must submit JWT") String jwt);
+
     @DELETE
     @Path("/{tokenID}")
     public abstract Response deleteOrganizationToken(OrganizationPrincipal organizationPrincipal, @NotNull @PathParam("tokenID") UUID tokenID);

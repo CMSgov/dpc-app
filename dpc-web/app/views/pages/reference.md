@@ -410,9 +410,27 @@ This token must be signed with a public key previously registered and contain th
 
 `exp`	_required_	Expiration time integer for this authentication JWT, expressed in seconds since the "Epoch" (1970-01-01T00:00:00Z UTC). This time SHALL be no more than five minutes in the future.
 
-`jti`	_required_	A nonce string value that uniquely identifies this authentication JWT. 
+`jti`	_required_	A nonce string value that uniquely identifies this authentication JWT.
 
-The resulting JWT is then submitted to the `Token/auth` endpoint as the `client_assertion` query param of an `application/x-www-form-urlencoded` POST request, along with the following, additional, query params:
+The DPC API supports a `Token/validate` endpoint, which allows the user to submit their signed JWT for validation.
+This will return an error message with details as to which claims or values on the JWT are missing or incorrect.
+This method *DOES NOT* validate the JWT signature, public key or client tokens, it merely verifies the necessary elements are present in the JWT entity.
+
+~~~sh
+POST /api/v1/Token/validate
+~~~
+
+**cURL command**
+
+~~~sh
+curl -v https://sandbox.dpc.cms.gov/api/v1/Token/validate \
+-H 'Accept: application/json' \
+-H 'Content-Type: text/plain' \
+-X POST \
+-d "{Signed JWT}"
+~~~
+
+In order to receive an `access_token` the JWT is submitted to the `Token/auth` endpoint as the `client_assertion` query param of an `application/x-www-form-urlencoded` POST request, along with the following, additional, query params:
 
 **Parameters**
 

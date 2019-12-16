@@ -99,6 +99,18 @@ public class APIAuthHelpers {
                 .signWith(privateKey, SignatureAlgorithm.RS384)
                 .compact();
 
+        // Verify JWT with /validate endpoint
+        try (final CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
+            final URIBuilder builder = new URIBuilder(String.format("%s/Token/validate", baseURL));
+            final HttpPost post = new HttpPost(builder.build());
+            post.setEntity(new StringEntity(jwt));
+            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+
+            try (CloseableHttpResponse response = client.execute(post)) {
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token validation should have succeeded");
+            }
+        }
+
         // Submit JWT to /auth endpoint
         final AuthResponse authResponse;
         try (final CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
