@@ -215,7 +215,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Validate API token request", notes = "Validates a given JWT ensure the required claims and values are set correctly.", authorizations = @Authorization(value = ""))
+    @ApiOperation(value = "Validate API token request", notes = "Validates a given JWT to ensure the required claims and values are set correctly.", authorizations = @Authorization(value = ""))
     @ApiResponses(
             value = {@ApiResponse(code = 200, message = "Token request is valid"),
                     @ApiResponse(code = 400, message = "Token request is invalid")})

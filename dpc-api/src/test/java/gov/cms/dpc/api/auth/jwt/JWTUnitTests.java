@@ -569,6 +569,57 @@ class JWTUnitTests {
             assertEquals(400, response.getStatus(), "Should not be valid");
             assertTrue(response.readEntity(String.class).contains("JWT is not formatted correctly"), "Should have correct exception");
         }
+
+        @Test
+        void testMissingKID() throws NoSuchAlgorithmException {
+            final String m = buildMacaroon();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setAudience("localhost:3002/v1/Token/auth")
+                    .setIssuer(m)
+                    .setSubject(m)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("JWT header must have `kid` value"), "Should have correct exception");
+        }
+
+        @Test
+        void testInvalidKID() throws NoSuchAlgorithmException {
+            final String m = buildMacaroon();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setAudience("localhost:3002/v1/Token/auth")
+                    .setHeaderParam("kid", "this is not a kid")
+                    .setIssuer(m)
+                    .setSubject(m)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
+        }
     }
 
     private static ResourceExtension buildResources() {

@@ -4,6 +4,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 
 import javax.annotation.Nullable;
@@ -15,6 +16,14 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+/**
+ * Implementation of {@link SigningKeyResolverAdapter} that simply verifies whether or not the required claims and values are present.
+ * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
+ * See: https://github.com/jwtk/jjwt/issues/205
+ * <p>
+ * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
+ */
+@SuppressWarnings("rawtypes") // The JwsHeader comes as a generic, which bothers ErrorProne
 public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
     private final IJTICache cache;
@@ -26,13 +35,28 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
     }
 
     @Override
-    @SuppressWarnings({"rawtypes", "RedundantSuppression"}) // The JwsHeader comes as a generic, which bothers ErrorProne
     public Key resolveSigningKey(JwsHeader header, Claims claims) {
+        validateHeader(header);
         validateExpiration(claims);
         final String issuer = getClaimIfPresent("issuer", claims.getIssuer());
         validateClaims(issuer, claims);
         validateTokenFormat(issuer);
         return null;
+    }
+
+    void validateHeader(JwsHeader header) {
+        final String keyId = header.getKeyId();
+        if (keyId == null) {
+            throw new WebApplicationException("JWT header must have `kid` value", Response.Status.BAD_REQUEST);
+        }
+
+        // Make sure it's a UUID
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            UUID.fromString(keyId);
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException("`kid` value must be a UUID", Response.Status.BAD_REQUEST);
+        }
     }
 
     void validateTokenFormat(String issuer) {
