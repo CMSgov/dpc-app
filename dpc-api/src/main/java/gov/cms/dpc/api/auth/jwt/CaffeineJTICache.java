@@ -25,16 +25,16 @@ public class CaffeineJTICache implements IJTICache {
     }
 
     @Override
-    public boolean isJTIOk(String jti) {
+    public boolean isJTIOk(String jti, boolean persist) {
         final Boolean isPresent = this.cache.getIfPresent(jti);
 
         // If the JTI is present in the cache, that means it's being replayed. Which is no go
         if (isPresent == null) {
-            this.cache.put(jti, true);
+            if (persist)
+                this.cache.put(jti, true);
             return true;
         }
         logger.warn("JTI {} is being replayed", jti);
         return false;
     }
-
 }
