@@ -79,8 +79,8 @@ class ResourceWriter {
             final var jsonParser = fhirContext.newJsonParser();
             OutputStream writer = byteStream;
             String outputPath = formOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence);
-
             JobQueueBatchFile file = job.addJobQueueFile(resourceType, sequence, batch.size());
+
             boolean isStartOfFile = batch.size() == file.getCount();
             Boolean shouldAppendToFile = !isStartOfFile;
 

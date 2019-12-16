@@ -112,6 +112,17 @@ public class EndpointEntity implements Serializable {
         this.validationMessage = validationMessage;
     }
 
+    public EndpointEntity update(EndpointEntity endpointEntity) {
+        this.setName(endpointEntity.getName());
+        this.setAddress(endpointEntity.getAddress());
+        this.setConnectionType(endpointEntity.getConnectionType());
+        this.setStatus(endpointEntity.getStatus());
+        this.setValidationMessage(endpointEntity.getValidationMessage());
+        this.setValidationStatus(endpointEntity.getValidationStatus());
+
+        return this;
+    }
+
     @Embeddable
     public static class ConnectionType implements Serializable {
 

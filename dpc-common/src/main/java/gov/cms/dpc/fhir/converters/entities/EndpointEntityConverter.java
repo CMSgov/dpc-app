@@ -23,7 +23,7 @@ public class EndpointEntityConverter {
 
         endpoint.setId(new IdType("Endpoint", entity.getId().toString()));
         endpoint.setName(entity.getName());
-        endpoint.setAddress(endpoint.getAddress());
+        endpoint.setAddress(entity.getAddress());
 
         endpoint.setManagingOrganization(new Reference(new IdType("Organization", entity.getOrganization().getId().toString())));
         endpoint.setStatus(entity.getStatus());
