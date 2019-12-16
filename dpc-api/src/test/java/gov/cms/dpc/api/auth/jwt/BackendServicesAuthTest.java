@@ -25,6 +25,11 @@ class BackendServicesAuthTest extends AbstractSecureApplicationTest {
 
     @Test
     void testRoundTrip() throws IOException, URISyntaxException {
+
+        // Ensure the token is actually valid
+
+
+
         // Verify we can pull the Organization resource
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 

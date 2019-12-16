@@ -209,18 +209,18 @@ public class TokenResource extends AbstractTokenResource {
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
     }
-    
+
     @POST
     @Path("/validate")
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Validate API token request", notes = "Request access token for API access", authorizations = @Authorization(value = ""))
+    @ApiOperation(value = "Validate API token request", notes = "Validates a given JWT ensure the required claims and values are set correctly.", authorizations = @Authorization(value = ""))
     @ApiResponses(
             value = {@ApiResponse(code = 200, message = "Token request is valid"),
                     @ApiResponse(code = 400, message = "Token request is invalid")})
     @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Public
     @Override
     public Response validateJWT(@NotEmpty(message = "Must submit JWT") String jwt) {
@@ -334,7 +334,7 @@ public class TokenResource extends AbstractTokenResource {
         }
 
         // JTI must be present and have not been used in the past 5 minutes.
-        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getBody().getId()))) {
+        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getBody().getId()), true)) {
             logger.warn("JWT being replayed for organization {}", organizationID);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }

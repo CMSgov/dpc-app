@@ -362,7 +362,7 @@ class JWTUnitTests {
 
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setAudience("localhost:3002/v1/Token/auth")
                     .setIssuer("macaroon")
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
@@ -373,7 +373,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
@@ -388,7 +388,7 @@ class JWTUnitTests {
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setAudience("localhost:3002/v1/Token/auth")
                     .setIssuer(id)
                     .setSubject(id)
                     .setId(id)
@@ -399,7 +399,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
@@ -425,7 +425,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
@@ -451,7 +451,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
@@ -477,7 +477,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
@@ -503,7 +503,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(200, response.getStatus(), "Should be valid");
@@ -527,7 +527,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
@@ -551,7 +551,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
@@ -563,7 +563,7 @@ class JWTUnitTests {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
                     .request()
-                    .accept(MediaType.TEXT_PLAIN)
+                    .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity("this is not a jwt", MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
