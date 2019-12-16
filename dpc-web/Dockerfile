@@ -10,7 +10,7 @@ COPY / /dpc-app
 RUN make ig/publish
 
 
-FROM ruby:2.6.2-alpine AS ruby_builder
+FROM ruby:2.6.5-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk add --no-cache postgresql-dev && \
@@ -27,6 +27,9 @@ COPY /dpc-web/package.json /dpc-web/package-lock.json /dpc-web/
 # Install the website dependencies
 RUN gem install bundler --no-document && bundle install && npm install
 
+# Run bundler audit
+RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
+
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-web /dpc-web
 COPY --from=java_builder /dpc-app/dpc-web/public/ig /dpc-web/public/ig
@@ -38,7 +41,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:2.6.2-alpine
+FROM ruby:2.6.5-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata

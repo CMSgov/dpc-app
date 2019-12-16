@@ -9,7 +9,7 @@ fi
 
 # Run the database migrations
 echo "Migrating the database..."
-rails db:migrate
+bundle exec rails db:migrate
 
 # Seed the database
 # This step is not needed, as there is no database seed data yet
@@ -19,4 +19,4 @@ bin/delayed_job start
 
 # Start the database service (and make accessible outside the Docker container)
 echo "Starting Rails server..."
-rails server -b 0.0.0.0 -p 3000
+bundle exec rails server -b 0.0.0.0 -p 3000
