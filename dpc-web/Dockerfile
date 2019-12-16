@@ -10,7 +10,7 @@ COPY / /dpc-app
 RUN make ig/publish
 
 
-FROM ruby:2.6.2-alpine AS ruby_builder
+FROM ruby:2.6.5-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk add --no-cache postgresql-dev && \
@@ -38,7 +38,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:2.6.2-alpine
+FROM ruby:2.6.5-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata

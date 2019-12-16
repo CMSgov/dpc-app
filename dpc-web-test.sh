@@ -12,11 +12,11 @@ make website
 
 # Run the tests
 docker-compose -f dpc-web/docker-compose.yml up start_core_dependencies
-docker-compose -f dpc-web/docker-compose.yml run web rails db:create db:migrate db:seed
-docker-compose -f dpc-web/docker-compose.yml run web rails spec
+docker-compose -f dpc-web/docker-compose.yml run web bundle exec rails db:create db:migrate db:seed
+docker-compose -f dpc-web/docker-compose.yml run web bundle exec rails spec
 
-# Run bundler audit
-docker-compose -f dpc-web/docker-compose.yml run web cd dpc-web && bundle audit update && bundle audit check --ignore CVE-2015-9284
+# Run bundler audit (wrap all of this up as a shell command, otherwise we get weird PATH issues
+docker-compose -f dpc-web/docker-compose.yml run web sh -c "cd /dpc-web && bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284"
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
