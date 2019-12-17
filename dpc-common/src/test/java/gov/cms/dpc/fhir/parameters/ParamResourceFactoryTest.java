@@ -65,7 +65,7 @@ class ParamResourceFactoryTest {
         final ParamResourceFactory factory = new ParamResourceFactory(mockInjector, null, parser);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw exception");
-        assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, exception.getResponse().getStatus(), "Should be a bad request"),
+        assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, exception.getResponse().getStatus(), "Should be an internal exception"),
                 () -> assertEquals("Cannot read input stream", exception.getMessage(), "Should have wrong resource message"));
     }
 
