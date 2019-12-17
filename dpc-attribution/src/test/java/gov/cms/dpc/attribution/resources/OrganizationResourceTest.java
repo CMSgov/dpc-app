@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -9,13 +10,16 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
 import java.util.Arrays;
+import java.util.Collections;
 
+import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrganizationResourceTest extends AbstractAttributionTest {
@@ -81,8 +85,22 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         final Patient createdPatient = (Patient) patCreated.getResource();
         assertTrue(patCreated.getCreated(), "Should have been created");
 
-        // Then delete the organization
+        // Attribute them
+        final Group newRoster = createBaseAttributionGroup(FHIRExtractors.getProviderNPI(createdPractitioner), organization.getIdElement().getIdPart());
+        final Reference patientReference = new Reference(createdPatient.getId());
+        newRoster.addMember().setEntity(patientReference);
 
+        final Parameters addParam = new Parameters();
+        addParam.addParameter().setResource(newRoster);
+
+        // Update the roster
+        client
+                .create()
+                .resource(newRoster)
+                .encodedJson()
+                .execute();
+
+        // Then delete the organization
         client
                 .delete()
                 .resourceById(new IdType(organization.getId()))
@@ -90,7 +108,6 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute();
 
         // Try to read the resources, should get 404s
-
         assertThrows(ResourceNotFoundException.class, () -> client
                 .read()
                 .resource(Patient.class)
@@ -116,12 +133,12 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testUpdateOrganization() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
+        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "test-update-organization", false);
 
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue("UPDATED012345");
-        organization.setIdentifier(Arrays.asList(identifier));
+        organization.setIdentifier(Collections.singletonList(identifier));
         organization.setName("An Updated Organization");
 
         MethodOutcome outcome = client.update().resource(organization).execute();
@@ -140,7 +157,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue("org-update-npi-duplicate1");
 
-        organization2.setIdentifier(Arrays.asList(identifier));
+        organization2.setIdentifier(Collections.singletonList(identifier));
         IUpdateTyped update = client.update().resource(organization2);
         assertThrows(InvalidRequestException.class, update::execute);
     }

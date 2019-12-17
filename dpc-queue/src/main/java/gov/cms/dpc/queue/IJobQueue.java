@@ -1,6 +1,7 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.util.List;
@@ -39,6 +40,15 @@ public interface IJobQueue {
      * @return a list of batches part of the job if present
      */
     List<JobQueueBatch> getJobBatches(UUID jobID);
+
+    /**
+     * Find the {@link JobQueueBatchFile} that corresponds to the given file name
+     *
+     * @param organizationID - {@link UUID} organization ID to restrict results to
+     * @param fileID         - {@link String} file name to use for filtering batches
+     * @return - {@link Optional} {@link JobQueueBatchFile} that includes the file ID
+     */
+    Optional<JobQueueBatchFile> getJobBatchFile(UUID organizationID, String fileID);
 
     /**
      * Find the next job that is ready to run. Alter the job's {@link JobStatus} to `RUNNING`.
