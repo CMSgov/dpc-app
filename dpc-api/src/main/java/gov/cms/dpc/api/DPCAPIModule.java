@@ -9,6 +9,9 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
+import gov.cms.dpc.api.converters.ChecksumConverterProvider;
+import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
+import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.*;
@@ -53,7 +56,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(EndpointResource.class);
         binder.bind(GroupResource.class);
         binder.bind(JobResource.class);
-        binder.bind(OrganizationResource.class);
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
 
@@ -66,6 +68,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(GenerateKeyPair.class);
         binder.bind(ListClientTokens.class);
         binder.bind(DeleteToken.class);
+
+        binder.bind(FileManager.class);
+        binder.bind(HttpRangeHeaderParamConverterProvider.class);
+        binder.bind(ChecksumConverterProvider.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -96,6 +102,16 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 this.getConfiguration().getTokenPolicy(),
                                 resolver,
                                 cache, publicURL});
+    }
+
+    @Provides
+    public OrganizationResource provideOrganizationResource(IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(OrganizationResource.class,
+                        new Class<?>[]{IGenericClient.class,
+                        TokenDAO.class,
+                        PublicKeyDAO.class},
+                        new Object[]{client, tokenDAO, keyDAO});
     }
 
     @Provides

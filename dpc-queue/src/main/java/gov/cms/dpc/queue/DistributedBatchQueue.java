@@ -8,6 +8,7 @@ import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -130,6 +131,20 @@ public class DistributedBatchQueue extends JobQueueCommon {
             } finally {
                 tx.commit();
             }
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Optional<JobQueueBatchFile> getJobBatchFile(UUID organizationID, String fileID) {
+        try (final Session session = this.factory.openSession()) {
+            final String queryString =
+                    "SELECT f FROM gov.cms.dpc.queue.models.JobQueueBatchFile f LEFT JOIN gov.cms.dpc.queue.models.JobQueueBatch b on b.jobID = f.jobID WHERE f.fileName = :fileName AND b.orgID = :org";
+
+            final Query query = session.createQuery(queryString);
+            query.setParameter("fileName", fileID);
+            query.setParameter("org", organizationID);
+            return query.uniqueResultOptional();
         }
     }
 

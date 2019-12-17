@@ -2,6 +2,8 @@ package gov.cms.dpc.api.auth.jwt;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.github.nitram509.jmacaroons.MacaroonVersion;
+import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.DPCAuthDynamicFeature;
 import gov.cms.dpc.api.auth.DPCAuthFactory;
@@ -134,7 +136,7 @@ class JWTUnitTests {
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "wrong_grant_type")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
-                    .queryParam( "client_assertion", "dummyJWT")
+                    .queryParam("client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -148,7 +150,7 @@ class JWTUnitTests {
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "")
                     .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
-                    .queryParam( "client_assertion", "dummyJWT")
+                    .queryParam("client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -166,7 +168,7 @@ class JWTUnitTests {
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "Not a real assertion_type")
-                    .queryParam( "client_assertion", "dummyJWT")
+                    .queryParam("client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -180,7 +182,7 @@ class JWTUnitTests {
                     .queryParam("scope", "system/*.*")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "")
-                    .queryParam( "client_assertion", "dummyJWT")
+                    .queryParam("client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -198,7 +200,7 @@ class JWTUnitTests {
                     .queryParam("scope", "this is not a scope")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                    .queryParam( "client_assertion", "dummyJWT")
+                    .queryParam("client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -212,7 +214,7 @@ class JWTUnitTests {
                     .queryParam("scope", "")
                     .queryParam("grant_type", "client_credentials")
                     .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                    .queryParam( "client_assertion", "dummyJWT")
+                    .queryParam("client_assertion", "dummyJWT")
                     .request()
                     .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
 
@@ -349,6 +351,277 @@ class JWTUnitTests {
         }
     }
 
+    @Nested
+    @DisplayName("JWT Validation Tests")
+    class ValidationTests {
+
+        @Test
+        void testNonToken() throws NoSuchAlgorithmException {
+            // Submit JWT with non-client token
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience("localhost:3002/v1/Token/auth")
+                    .setIssuer("macaroon")
+                    .setSubject("macaroon")
+                    .setId(UUID.randomUUID().toString())
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Client token is not formatted correctly"), "Should have correct exception");
+        }
+
+        @Test
+        void testUUIDToken() throws NoSuchAlgorithmException {
+            // Submit JWT with non-client token
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience("localhost:3002/v1/Token/auth")
+                    .setIssuer(id)
+                    .setSubject(id)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Cannot use Token ID as `client_token`, must use actual token value"), "Should have correct exception");
+        }
+
+        @Test
+        void testExpiredJWT() throws NoSuchAlgorithmException {
+            // Submit JWT with non-client token
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer(id)
+                    .setSubject(id)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("JWT is expired"), "Should have correct exception");
+        }
+
+        @Test
+        void testOverlongJWT() throws NoSuchAlgorithmException {
+            // Submit JWT with non-client token
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer(id)
+                    .setSubject(id)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(12, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Token expiration cannot be more than 5 minutes in the future"), "Should have correct exception");
+        }
+
+        @Test
+        void testWrongAudClaim() throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final String m = buildMacaroon();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer(m)
+                    .setSubject(m)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Audience claim value is incorrect"), "Should have correct exception");
+        }
+
+        @Test
+        void testSuccess() throws NoSuchAlgorithmException {
+            final String m = buildMacaroon();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience("localhost:3002/v1/Token/auth")
+                    .setIssuer(m)
+                    .setSubject(m)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(200, response.getStatus(), "Should be valid");
+        }
+
+        @Test
+        void testMismatchClaims() throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer("this is")
+                    .setSubject("not matching")
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Issuer and Subject must be identical"), "Should have correct exception");
+        }
+
+        @Test
+        void testMissingClaim() throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setSubject("not matching")
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Claim `issuer` must be present"), "Should have correct exception");
+        }
+
+        @Test
+        void testNotJWT() {
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity("this is not a jwt", MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("JWT is not formatted correctly"), "Should have correct exception");
+        }
+
+        @Test
+        void testMissingKID() throws NoSuchAlgorithmException {
+            final String m = buildMacaroon();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setAudience("localhost:3002/v1/Token/auth")
+                    .setIssuer(m)
+                    .setSubject(m)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("JWT header must have `kid` value"), "Should have correct exception");
+        }
+
+        @Test
+        void testInvalidKID() throws NoSuchAlgorithmException {
+            final String m = buildMacaroon();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setAudience("localhost:3002/v1/Token/auth")
+                    .setHeaderParam("kid", "this is not a kid")
+                    .setIssuer(m)
+                    .setSubject(m)
+                    .setId(id)
+                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
+        }
+    }
+
     private static ResourceExtension buildResources() {
         final IGenericClient client = mock(IGenericClient.class);
         final MacaroonBakery bakery = buildBakery();
@@ -392,5 +665,10 @@ class JWTUnitTests {
             return Optional.of(entity);
         });
         return mock;
+    }
+
+    private static String buildMacaroon() {
+        return MacaroonsBuilder.create("http://local", "secret, secret", "id-one")
+                .serialize(MacaroonVersion.SerializationVersion.V2_JSON);
     }
 }
