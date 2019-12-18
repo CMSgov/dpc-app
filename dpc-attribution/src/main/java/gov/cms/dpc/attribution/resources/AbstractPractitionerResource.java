@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/Practitioner")
@@ -29,7 +30,7 @@ public abstract class AbstractPractitionerResource {
      * @return - {@link Bundle} of {@link Practitioner} resources matching search parameters
      */
     @GET
-    public abstract Bundle getPractitioners(UUID resourceID, String providerNPI, @NotEmpty String organizationTag);
+    public abstract List<Practitioner> getPractitioners(UUID resourceID, String providerNPI, @NotEmpty String organizationTag);
 
     /**
      * Register {@link Practitioner} with application.

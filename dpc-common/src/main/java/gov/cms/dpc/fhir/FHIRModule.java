@@ -7,6 +7,7 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
 import gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter;
+import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.MethodOutcomeHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
@@ -42,6 +43,7 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
     public void configure(Binder binder) {
         // Request/Response handlers
         binder.bind(FHIRHandler.class);
+        binder.bind(BundleHandler.class);
         binder.bind(MethodOutcomeHandler.class);
         binder.bind(FHIRRequestFeature.class);
         binder.bind(FHIRParamValueFactory.class);

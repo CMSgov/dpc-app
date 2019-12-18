@@ -20,6 +20,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
@@ -45,19 +46,22 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "Otherwise, the method returns all Practitioners associated to the given Organization." +
             "<p> It's possible to provide a specific resource ID and Organization ID, for use in Authorization.")
     // TODO: Migrate this signature to a List<Practitioner> in DPC-302
-    public Bundle getPractitioners(@ApiParam(value = "Practitioner resource ID")
+    public List<Practitioner> getPractitioners(@ApiParam(value = "Practitioner resource ID")
                                    @QueryParam("_id") UUID resourceID,
-                                   @ApiParam(value = "Provider NPI")
+                                               @ApiParam(value = "Provider NPI")
                                    @QueryParam("identifier") String providerNPI,
-                                   @NotEmpty @QueryParam("organization") String organizationID) {
+                                               @NotEmpty @QueryParam("organization") String organizationID) {
 
         final Bundle bundle = new Bundle();
-        final List<ProviderEntity> providers = this.dao.getProviders(resourceID, providerNPI, FHIRExtractors.getEntityUUID(organizationID));
+        return this.dao.getProviders(resourceID, providerNPI, FHIRExtractors.getEntityUUID(organizationID))
+                .stream()
+                .map(ProviderEntity::toFHIR)
+                .collect(Collectors.toList());
 
-        bundle.setTotal(providers.size());
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        providers.forEach(provider -> bundle.addEntry().setResource(provider.toFHIR()));
-        return bundle;
+//        bundle.setTotal(providers.size());
+//        bundle.setType(Bundle.BundleType.SEARCHSET);
+//        providers.forEach(provider -> bundle.addEntry().setResource(provider.toFHIR()));
+//        return bundle;
     }
 
     @POST
