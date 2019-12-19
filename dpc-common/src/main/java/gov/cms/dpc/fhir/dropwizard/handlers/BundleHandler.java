@@ -45,14 +45,14 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         final TypeToken<?> typeToken = TypeToken.of(genericType);
-        COLLECTION_TYPE_TOKEN.isSupertypeOf(typeToken);
-        return Collection.class.isAssignableFrom(type);
+        return COLLECTION_TYPE_TOKEN.isSupertypeOf(typeToken);
     }
 
     @Override
     public void writeTo(Collection<Resource> baseResources, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
+        bundle.setTotal(baseResources.size());
         final List<Bundle.BundleEntryComponent> entries = baseResources
                 .stream()
                 .map(resource -> {
