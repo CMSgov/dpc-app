@@ -1,13 +1,12 @@
 package gov.cms.dpc.fhir.converters;
 
 import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.Resource;
 
 public interface FHIRConverter<R extends Base, C> {
 
-    C fromFHIR(R resource);
+    C fromFHIR(FHIREntityConverter converter, R resource);
 
-    R toFHIR(C javaClass);
+    R toFHIR(FHIREntityConverter converter, C javaClass);
 
     Class<R> getFHIRResource();
 

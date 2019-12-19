@@ -1,1 +1,7 @@
 gov.cms.dpc.fhir.converters.TestPatientEntityConverter
+gov.cms.dpc.fhir.converters.rewrite.AddressEntityConverter
+gov.cms.dpc.fhir.converters.rewrite.ContactPointConverter
+gov.cms.dpc.fhir.converters.rewrite.OrganizationContactEntityConverter
+gov.cms.dpc.fhir.converters.rewrite.OrganizationEntityConverter
+gov.cms.dpc.fhir.converters.rewrite.EndpointEntityConverter
+gov.cms.dpc.fhir.converters.rewrite.NameEntityConverter

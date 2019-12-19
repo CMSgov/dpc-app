@@ -12,7 +12,7 @@ public class TestPatientEntityConverter implements FHIRConverter<Patient, Patien
     }
 
     @Override
-    public PatientEntity fromFHIR(Patient resource) {
+    public PatientEntity fromFHIR(FHIREntityConverter converter, Patient resource) {
         final PatientEntity patientEntity = new PatientEntity();
         patientEntity.setGender(resource.getGender());
         patientEntity.setPatientID(UUID.fromString(resource.getIdElement().getIdPart()));
@@ -21,7 +21,7 @@ public class TestPatientEntityConverter implements FHIRConverter<Patient, Patien
     }
 
     @Override
-    public Patient toFHIR(PatientEntity javaClass) {
+    public Patient toFHIR(FHIREntityConverter converter, PatientEntity javaClass) {
         final Patient patient = new Patient();
         patient.setId(javaClass.getPatientID().toString());
         patient.setGender(javaClass.getGender());

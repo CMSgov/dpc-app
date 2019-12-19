@@ -41,7 +41,7 @@ public class FHIREntityConverter {
                     .orElseThrow(() -> new IllegalStateException("Cannot find converter"));
         }
 
-        return converter.fromFHIR(sourceResource);
+        return converter.fromFHIR(this, sourceResource);
     }
 
     public <T extends Base, S> T toFHIR(Class<T> fhirClass, S javaSource) {
@@ -56,7 +56,7 @@ public class FHIREntityConverter {
                     .orElseThrow(() -> new IllegalStateException("Cannot find converter"));
         }
 
-        return converter.toFHIR(javaSource);
+        return converter.toFHIR(this, javaSource);
     }
 
 
