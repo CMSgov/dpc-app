@@ -25,6 +25,7 @@ public class RESTUtils {
      * @param <T>            - {@link T} generic type parameter which extends {@link BaseResource}
      * @return - {@link Bundle} containing the processed results from the bulk submission
      */
+    @SuppressWarnings("unchecked")
     public static <T extends BaseResource> List<T> bulkResourceHandler(Class<T> clazz, Parameters params, Function<T, Response> resourceAction) {
         final Bundle resourceBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Bundle bundle = new Bundle();
@@ -32,7 +33,6 @@ public class RESTUtils {
         // Grab all of the providers and submit them individually (for now)
         // TODO: Optimize insert as part of DPC-490
 
-        //noinspection unchecked
         return resourceBundle
                 .getEntry()
                 .stream()
