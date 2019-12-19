@@ -137,11 +137,13 @@ public class APITestHelpers {
     public static ResourceExtension buildResourceExtension(FhirContext
                                                                    ctx, List<Object> resources, List<Object> providers, boolean validation) {
 
+        final FHIRHandler fhirHandler = new FHIRHandler(ctx);
         final var builder = ResourceExtension
                 .builder()
                 .setRegisterDefaultExceptionMappers(false)
                 .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
-                .addProvider(new FHIRHandler(ctx))
+                .addProvider(fhirHandler)
+                .addProvider(new BundleHandler(fhirHandler))
                 .addProvider(JerseyExceptionHandler.class)
                 .addProvider(PersistenceExceptionHandler.class)
                 .addProvider(HAPIExceptionHandler.class)

@@ -41,7 +41,7 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
     };
 
     @Inject
-    BundleHandler(FHIRHandler handler) {
+    public BundleHandler(FHIRHandler handler) {
         this.handler = handler;
     }
 
