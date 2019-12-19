@@ -2,6 +2,7 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import com.google.common.reflect.TypeToken;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -18,8 +19,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -50,9 +53,7 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
 
     @Override
     public void writeTo(Collection<Resource> baseResources, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        bundle.setTotal(baseResources.size());
+        final Bundle bundle = generateBaseBundle(annotations, baseResources.size());
         final List<Bundle.BundleEntryComponent> entries = baseResources
                 .stream()
                 .map(resource -> {
@@ -64,5 +65,23 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
 
         bundle.setEntry(entries);
         this.handler.writeTo(bundle, type, genericType, annotations, mediaType, httpHeaders, entityStream);
+    }
+
+    private Bundle generateBaseBundle(Annotation[] annotations, int entryCount) {
+        final Optional<BundleReturnProperties> maybeAnnotation = Arrays.stream(annotations)
+                .filter(a -> a.annotationType().equals(BundleReturnProperties.class))
+                .map(a -> (BundleReturnProperties) a)
+                .findAny();
+
+        final Bundle.BundleType bundleType = maybeAnnotation.map(BundleReturnProperties::bundleType).orElse(Bundle.BundleType.SEARCHSET);
+
+        final Bundle bundle = new Bundle();
+        bundle.setType(bundleType);
+
+        if (bundleType.equals(Bundle.BundleType.SEARCHSET)) {
+            bundle.setTotal(entryCount);
+        }
+
+        return bundle;
     }
 }
