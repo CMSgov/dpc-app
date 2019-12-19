@@ -6,6 +6,7 @@ import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
@@ -112,6 +113,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization.", response = Bundle.class)
+    @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
     public List<Practitioner> bulkSubmitProviders(Parameters params) {
         return bulkResourceHandler(Practitioner.class, params, this::submitProvider);

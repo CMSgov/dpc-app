@@ -5,6 +5,7 @@ import gov.cms.dpc.attribution.resources.AbstractPatientResource;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.entities.PatientEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -124,6 +125,7 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization.", response = Bundle.class)
+    @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
     public List<Patient> bulkSubmitPatients(Parameters params) {
         return bulkResourceHandler(Patient.class, params, this::createPatient);
