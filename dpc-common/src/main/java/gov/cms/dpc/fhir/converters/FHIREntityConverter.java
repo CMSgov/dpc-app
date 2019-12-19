@@ -7,6 +7,10 @@ import org.hl7.fhir.dstu3.model.Base;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class FHIREntityConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(FHIREntityConverter.class);
@@ -59,11 +63,19 @@ public class FHIREntityConverter {
         return converter.toFHIR(this, javaSource);
     }
 
-
     public static FHIREntityConverter initialize() {
+        final List<FHIRConverter<?, ?>> converters = ServiceLoaderHelpers.getLoaderStream(FHIRConverter.class)
+                .map(l -> (FHIRConverter<?, ?>) l)
+                .collect(Collectors.toList());
+
+        return FHIREntityConverter.initialize(converters);
+
+    }
+
+    static FHIREntityConverter initialize(Collection<FHIRConverter<?, ?>> converters) {
         final FHIREntityConverter converter = new FHIREntityConverter();
-        // Load the converters
-        ServiceLoaderHelpers.getLoaderStream(FHIRConverter.class)
+
+        converters
                 .forEach(converter::addConverter);
         return converter;
     }
