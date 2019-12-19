@@ -44,24 +44,18 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Search for providers", notes = "FHIR endpoint to search for Practitioner resources." +
             "<p>If a provider NPI is given, the results are filtered accordingly. " +
             "Otherwise, the method returns all Practitioners associated to the given Organization." +
-            "<p> It's possible to provide a specific resource ID and Organization ID, for use in Authorization.")
+            "<p> It's possible to provide a specific resource ID and Organization ID, for use in Authorization.", response = Bundle.class)
     // TODO: Migrate this signature to a List<Practitioner> in DPC-302
     public List<Practitioner> getPractitioners(@ApiParam(value = "Practitioner resource ID")
-                                   @QueryParam("_id") UUID resourceID,
+                                               @QueryParam("_id") UUID resourceID,
                                                @ApiParam(value = "Provider NPI")
-                                   @QueryParam("identifier") String providerNPI,
+                                               @QueryParam("identifier") String providerNPI,
                                                @NotEmpty @QueryParam("organization") String organizationID) {
 
-        final Bundle bundle = new Bundle();
         return this.dao.getProviders(resourceID, providerNPI, FHIRExtractors.getEntityUUID(organizationID))
                 .stream()
                 .map(ProviderEntity::toFHIR)
                 .collect(Collectors.toList());
-
-//        bundle.setTotal(providers.size());
-//        bundle.setType(Bundle.BundleType.SEARCHSET);
-//        providers.forEach(provider -> bundle.addEntry().setResource(provider.toFHIR()));
-//        return bundle;
     }
 
     @POST
@@ -117,9 +111,9 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization.")
+    @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization.", response = Bundle.class)
     @Override
-    public Bundle bulkSubmitProviders(Parameters params) {
+    public List<Practitioner> bulkSubmitProviders(Parameters params) {
         return bulkResourceHandler(Practitioner.class, params, this::submitProvider);
     }
 

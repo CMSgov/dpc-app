@@ -96,14 +96,15 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Search for attribution rosters", notes = "FHIR endpoint to search for Attribution Rosters." +
-            "<p> You can search for Groups associated to a given provider (via the Provider NPI) and groups for which a patient is a member of (by the Patient resource ID)")
+            "<p> You can search for Groups associated to a given provider (via the Provider NPI) and groups for which a patient is a member of (by the Patient resource ID)",
+            response = Bundle.class)
     @Override
-    public Bundle rosterSearch(@ApiParam(value = "Organization ID")
-                               @NotEmpty @QueryParam("_tag") String organizationToken,
-                               @ApiParam(value = "Provider NPI")
-                               @QueryParam(Group.SP_CHARACTERISTIC_VALUE) String providerNPI,
-                               @ApiParam(value = "Patient ID")
-                               @QueryParam(Group.SP_MEMBER) String patientID) {
+    public List<Group> rosterSearch(@ApiParam(value = "Organization ID")
+                                    @NotEmpty @QueryParam("_tag") String organizationToken,
+                                    @ApiParam(value = "Provider NPI")
+                                    @QueryParam(Group.SP_CHARACTERISTIC_VALUE) String providerNPI,
+                                    @ApiParam(value = "Patient ID")
+                                    @QueryParam(Group.SP_MEMBER) String patientID) {
 
         final String providerIDPart;
         if (providerNPI != null) {
@@ -112,17 +113,11 @@ public class GroupResource extends AbstractGroupResource {
             providerIDPart = null;
         }
 
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-
         final UUID organizationID = RESTUtils.tokenTagToUUID(organizationToken);
-        this.rosterDAO.findEntities(organizationID, providerIDPart, patientID)
+        return this.rosterDAO.findEntities(organizationID, providerIDPart, patientID)
                 .stream()
                 .map(RosterEntity::toFHIR)
-                .forEach(entity -> bundle.addEntry().setResource(entity));
-
-        bundle.setTotal(bundle.getEntry().size());
-        return bundle;
+                .collect(Collectors.toList());
     }
 
     @GET
@@ -131,34 +126,26 @@ public class GroupResource extends AbstractGroupResource {
     @UnitOfWork
     @ApiOperation(value = "Get attributed patient IDs", notes = "FHIR endpoint to retrieve the Patient MBIs for roster entities." +
             "<p> This is an operation optimized for returning only the MBIs for the Patient resources linked to the Roster. " +
-            "It returns empty Patient resources with only the MBI added as an identifier.")
+            "It returns empty Patient resources with only the MBI added as an identifier.", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find attribution roster"))
     @Override
-    public Bundle getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID, @ApiParam(name = "active", value = "Return only active patients", defaultValue = "false") @QueryParam(value = "active") boolean activeOnly) {
+    public List<Patient> getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID, @ApiParam(name = "active", value = "Return only active patients", defaultValue = "false") @QueryParam(value = "active") boolean activeOnly) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
 
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-
         // We have to do this because Hibernate/Dropwizard gets confused when returning a single type (like String)
         @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(rosterID, activeOnly);
 
-        final List<Bundle.BundleEntryComponent> patients = patientMBIs
+        return patientMBIs
                 .stream()
                 .map(mbi -> {
                     // Generate a fake patient, with only the ID set
                     final Patient p = new Patient();
                     p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
-                    return new Bundle.BundleEntryComponent().setResource(p);
+                    return p;
                 })
                 .collect(Collectors.toList());
-
-        bundle.setTotal(patientMBIs.size());
-        bundle.setEntry(patients);
-
-        return bundle;
     }
 
 

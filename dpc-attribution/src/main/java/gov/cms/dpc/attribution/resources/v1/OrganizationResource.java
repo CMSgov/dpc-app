@@ -45,8 +45,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Search for an Organization",
-            notes = "FHIR Endpoint to find an Organization resource based on the given Identifier.")
-    public Bundle searchOrganizations(
+            notes = "FHIR Endpoint to find an Organization resource based on the given Identifier.", response = Bundle.class)
+    public List<Organization> searchOrganizations(
             @ApiParam(value = "NPI of Organization")
             @QueryParam("identifier") String identifier) {
 
@@ -54,21 +54,17 @@ public class OrganizationResource extends AbstractOrganizationResource {
         bundle.setType(Bundle.BundleType.SEARCHSET);
 
         if (identifier == null) {
-            final List<OrganizationEntity> organizationEntityList = this.dao.listOrganizations();
-            bundle.setTotal(organizationEntityList.size());
 
-            organizationEntityList.forEach(entity -> bundle.addEntry().setResource(entity.toFHIR()));
-            return bundle;
+            return this.dao.listOrganizations()
+                    .stream()
+                    .map(OrganizationEntity::toFHIR)
+                    .collect(Collectors.toList());
         }
         // Pull out the NPI, keeping it as a string.
-        final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parseTokenTag((tag) -> tag, identifier));
-
-        if (!queryList.isEmpty()) {
-            bundle.setTotal(queryList.size());
-            queryList.forEach(org -> bundle.addEntry().setResource(org.toFHIR()));
-        }
-
-        return bundle;
+        return this.dao.searchByIdentifier(parseTokenTag((tag) -> tag, identifier))
+                .stream()
+                .map(OrganizationEntity::toFHIR)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -143,8 +139,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             List<EndpointEntity> endpointEntities = original.getEndpoint().stream().map(
                     r -> {
                         UUID endpointID = FHIRExtractors.getEntityUUID(r.getReference());
-                        Optional<EndpointEntity> endpointOpt = endpointDAO.fetchEndpoint(endpointID);
-                        return endpointOpt;
+                        return endpointDAO.fetchEndpoint(endpointID);
                     }
             ).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
             orgEntity.setEndpoints(endpointEntities);

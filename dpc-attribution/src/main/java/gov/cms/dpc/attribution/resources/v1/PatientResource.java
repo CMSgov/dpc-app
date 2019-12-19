@@ -38,10 +38,10 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Search for Patients", notes = "Search for Patient records, optionally restricting by associated organization." +
-            "<p>Must provide ONE OF organization ID, patient MBI, or Patient Resource ID to search for")
+            "<p>Must provide ONE OF organization ID, patient MBI, or Patient Resource ID to search for", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 400, message = "Must have Organization ID or Patient MBI in order to search"))
     @Override
-    public Bundle searchPatients(
+    public List<Patient> searchPatients(
             @ApiParam(value = "Patient resource ID")
             @QueryParam("_id") UUID resourceID,
             @ApiParam(value = "Patient MBI")
@@ -66,17 +66,10 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
-        final List<Bundle.BundleEntryComponent> patientEntries = this.dao.patientSearch(resourceID, idValue, organizationID)
+        return this.dao.patientSearch(resourceID, idValue, organizationID)
                 .stream()
                 .map(PatientEntityConverter::convert)
-                .map(patient -> new Bundle.BundleEntryComponent().setResource(patient))
                 .collect(Collectors.toList());
-
-        final Bundle searchBundle = new Bundle();
-        searchBundle.setType(Bundle.BundleType.SEARCHSET);
-        searchBundle.setTotal(patientEntries.size());
-        searchBundle.setEntry(patientEntries);
-        return searchBundle;
     }
 
     @GET
@@ -130,9 +123,9 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/$submit")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization.")
+    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization.", response = Bundle.class)
     @Override
-    public Bundle bulkSubmitPatients(Parameters params) {
+    public List<Patient> bulkSubmitPatients(Parameters params) {
         return bulkResourceHandler(Patient.class, params, this::createPatient);
     }
 

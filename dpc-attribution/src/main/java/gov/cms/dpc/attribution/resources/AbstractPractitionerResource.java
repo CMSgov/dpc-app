@@ -53,7 +53,7 @@ public abstract class AbstractPractitionerResource {
      */
     @POST
     @Path("/$submit")
-    public abstract Bundle bulkSubmitProviders(Parameters providerBundle);
+    public abstract List<Practitioner> bulkSubmitProviders(Parameters providerBundle);
 
     /**
      * Fetch specific {@link Practitioner} resource

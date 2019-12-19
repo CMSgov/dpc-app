@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/Organization")
@@ -18,7 +19,7 @@ public abstract class AbstractOrganizationResource {
 
     @GET
     @FHIR
-    public abstract Bundle searchOrganizations(String identifier);
+    public abstract List<Organization> searchOrganizations(String identifier);
 
     /**
      * Register a {@link Organization} with the API
@@ -51,8 +52,8 @@ public abstract class AbstractOrganizationResource {
      * Update the {@link Organization} with the given ID
      *
      * @param organizationID {@link UUID} of organization
-     * @param organization {@link Organization}
-     * @return
+     * @param organization   {@link Organization}
+     * @return - {@link Response} whether or not the {@link Organization} was updated
      */
     @PUT
     @FHIR
