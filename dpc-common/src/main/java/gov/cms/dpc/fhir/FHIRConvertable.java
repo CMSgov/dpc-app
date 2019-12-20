@@ -12,14 +12,6 @@ import org.hl7.fhir.dstu3.model.Resource;
 public interface FHIRConvertable<O, R extends Resource> {
 
     /**
-     * Converts FHIR {@link Resource} to Java object
-     *
-     * @param resource - {@link Resource} to convert to Java object
-     * @return - {@link O} Java object converted from FHIR {@link Resource} {@link R}
-     */
-    O fromFHIR(R resource);
-
-    /**
      * Converts Java object to FHIR {@link Resource}
      *
      * @return - {@link R} FHIR {@link Resource} created from Java object {@link O}

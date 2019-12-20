@@ -2,7 +2,6 @@ package gov.cms.dpc.fhir.converters.entities;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
-import gov.cms.dpc.fhir.converters.rewrite.ConsentEntityConverter;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.junit.jupiter.api.Test;
 

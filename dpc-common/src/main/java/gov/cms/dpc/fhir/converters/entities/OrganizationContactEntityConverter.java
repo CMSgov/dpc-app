@@ -1,10 +1,10 @@
-package gov.cms.dpc.fhir.converters.rewrite;
+package gov.cms.dpc.fhir.converters.entities;
 
+import gov.cms.dpc.common.entities.AddressEntity;
 import gov.cms.dpc.common.entities.ContactEntity;
 import gov.cms.dpc.common.entities.ContactPointEntity;
 import gov.cms.dpc.common.entities.NameEntity;
 import gov.cms.dpc.fhir.converters.*;
-import gov.cms.dpc.fhir.converters.ContactPointConverter;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -22,13 +22,13 @@ public class OrganizationContactEntityConverter implements FHIRConverter<Organiz
         final List<ContactPointEntity> collect = resource
                 .getTelecom()
                 .stream()
-                .map(ContactPointConverter::convert)
+                .map(c -> converter.fromFHIR(ContactPointEntity.class, c))
                 .collect(Collectors.toList());
 
         // Set the entity reference
         collect.forEach(contact -> contact.setContactEntity(entity));
         entity.setTelecom(collect);
-        entity.setAddress(AddressConverter.convert(resource.getAddress()));
+        entity.setAddress(converter.fromFHIR(AddressEntity.class, resource.getAddress()));
         return entity;
     }
 

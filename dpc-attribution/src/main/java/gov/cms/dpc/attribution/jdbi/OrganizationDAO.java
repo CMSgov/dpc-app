@@ -1,10 +1,8 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
-import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -21,17 +19,12 @@ public class OrganizationDAO extends AbstractDAO<OrganizationEntity> {
         super(factory.getSessionFactory());
     }
 
-    public Organization registerOrganization(Organization resource, List<EndpointEntity> endpoints) {
-        final OrganizationEntity entity = new OrganizationEntity().fromFHIR(resource);
-        endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
-        entity.setEndpoints(endpoints);
-        final OrganizationEntity persisted = persist(entity);
-
-        return persisted.toFHIR();
+    public OrganizationEntity registerOrganization(OrganizationEntity entity) {
+        return this.persist(entity);
     }
 
     public Optional<OrganizationEntity> fetchOrganization(UUID organizationID) {
-     return Optional.ofNullable(get(organizationID));
+        return Optional.ofNullable(get(organizationID));
     }
 
     public List<OrganizationEntity> listOrganizations() {

@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.converters.rewrite;
+package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.entities.ContactPointEntity;
 import gov.cms.dpc.fhir.converters.FHIRConverter;

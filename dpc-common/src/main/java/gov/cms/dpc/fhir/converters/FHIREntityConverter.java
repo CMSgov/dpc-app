@@ -57,7 +57,7 @@ public class FHIREntityConverter {
                     .filter(c -> c.getFHIRResource().isAssignableFrom(fhirClass))
                     .map(c -> (FHIRConverter<T, S>) c)
                     .findAny()
-                    .orElseThrow(() -> new IllegalStateException("Cannot find converter"));
+                    .orElseThrow(() -> new IllegalStateException(String.format("Cannot find converter from %s to %s", javaSource.getClass().getName(), fhirClass.getName())));
         }
 
         return converter.toFHIR(this, javaSource);

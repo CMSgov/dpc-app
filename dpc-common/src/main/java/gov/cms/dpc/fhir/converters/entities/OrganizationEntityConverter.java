@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.converters.rewrite;
+package gov.cms.dpc.fhir.converters.entities;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import gov.cms.dpc.common.entities.AddressEntity;
@@ -6,8 +6,6 @@ import gov.cms.dpc.common.entities.ContactEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.converters.AddressConverter;
-import gov.cms.dpc.fhir.converters.ContactElementConverter;
 import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;

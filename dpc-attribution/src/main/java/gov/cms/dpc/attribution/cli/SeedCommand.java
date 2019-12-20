@@ -15,7 +15,6 @@ import gov.cms.dpc.attribution.jdbi.RosterUtils;
 import gov.cms.dpc.attribution.utils.DBUtils;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.utils.SeedProcessor;
-import gov.cms.dpc.fhir.converters.EndpointConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
@@ -86,7 +85,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             final IParser parser = ctx.newJsonParser();
             final FHIREntityConverter converter = FHIREntityConverter.initialize();
             // Start with the Organizations and their endpoints
-            seedOrganizationBundle(context, parser);
+            seedOrganizationBundle(converter, context, parser);
 
             // Providers next
             seedProviderBundle(converter, context, parser, ORGANIZATION_ID);
@@ -101,15 +100,16 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         }
     }
 
-    private void seedOrganizationBundle(DSLContext context, IParser parser) throws IOException {
+    private void seedOrganizationBundle(FHIREntityConverter converter, DSLContext context, IParser parser) throws IOException {
         try (final InputStream orgBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(ORGANIZATION_BUNDLE)) {
             if (orgBundleStream == null) {
                 throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
             }
-            final OrganizationEntity orgEntity = new OrganizationEntity();
             final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
-            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, EndpointConverter::convert, ORGANIZATION_ID);
-            final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class, bundle, orgEntity::fromFHIR, ORGANIZATION_ID);
+            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, (endpoint) -> converter.fromFHIR(EndpointEntity.class, endpoint), ORGANIZATION_ID);
+            final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class,
+                    bundle,
+                    (org) -> converter.fromFHIR(OrganizationEntity.class, org), ORGANIZATION_ID);
 
             organizationEntities
                     .stream()

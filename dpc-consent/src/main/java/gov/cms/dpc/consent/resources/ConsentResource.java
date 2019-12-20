@@ -8,7 +8,7 @@ import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.converters.rewrite.ConsentEntityConverter;
+import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
