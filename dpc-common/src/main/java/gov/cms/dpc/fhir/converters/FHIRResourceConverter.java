@@ -1,5 +1,6 @@
 package gov.cms.dpc.fhir.converters;
 
+import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BaseResource;
 
 /**
@@ -9,7 +10,7 @@ import org.hl7.fhir.dstu3.model.BaseResource;
  * @param <C> - Java class to convert to
  */
 @FunctionalInterface
-public interface FHIRResourceConverter<R extends BaseResource, C> {
+public interface FHIRResourceConverter<R extends Base, C> {
 
     /**
      * Convert FHIR {@link BaseResource} into a corresponding Java class

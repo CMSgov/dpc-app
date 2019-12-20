@@ -5,12 +5,8 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import gov.cms.dpc.fhir.converters.entities.ConnectionTypeConverter;
 import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.util.UUID;
 
@@ -58,7 +54,7 @@ public class EndpointEntityConverter implements FHIRConverter<Endpoint, Endpoint
 
         endpoint.setManagingOrganization(new Reference(new IdType("Organization", javaClass.getOrganization().getId().toString())));
         endpoint.setStatus(javaClass.getStatus());
-        endpoint.setConnectionType(ConnectionTypeConverter.convert(javaClass.getConnectionType()));
+        endpoint.setConnectionType(converter.toFHIR(Coding.class, javaClass.getConnectionType()));
 
         return endpoint;
     }

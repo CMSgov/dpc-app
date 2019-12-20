@@ -187,27 +187,6 @@ public class PatientEntity implements Serializable {
         return Objects.hash(patientID, beneficiaryID, patientFirstName, patientLastName, dob);
     }
 
-    public static PatientEntity fromFHIR(Patient resource) {
-
-        final PatientEntity patient = new PatientEntity();
-        patient.setDob(PatientEntity.toLocalDate(resource.getBirthDate()));
-        patient.setBeneficiaryID(FHIRExtractors.getPatientMPI(resource));
-        final HumanName name = resource.getNameFirstRep();
-        patient.setPatientFirstName(name.getGivenAsSingleString());
-        patient.setPatientLastName(name.getFamily());
-        patient.setGender(resource.getGender());
-
-        // Set the managing organization
-
-        final Reference managingOrganization = resource.getManagingOrganization();
-        if (managingOrganization.getReference() != null) {
-            final OrganizationEntity organizationEntity = new OrganizationEntity();
-            organizationEntity.setId(FHIRExtractors.getEntityUUID(managingOrganization.getReference()));
-            patient.setOrganization(organizationEntity);
-        }
-        return patient;
-    }
-
     public static LocalDate toLocalDate(Date date) {
         return date.toInstant()
                 .atZone(ZoneOffset.UTC)

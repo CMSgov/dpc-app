@@ -1,7 +1,10 @@
-gov.cms.dpc.fhir.converters.TestPatientEntityConverter
 gov.cms.dpc.fhir.converters.rewrite.AddressEntityConverter
 gov.cms.dpc.fhir.converters.rewrite.ContactPointConverter
 gov.cms.dpc.fhir.converters.rewrite.OrganizationContactEntityConverter
 gov.cms.dpc.fhir.converters.rewrite.OrganizationEntityConverter
 gov.cms.dpc.fhir.converters.rewrite.EndpointEntityConverter
 gov.cms.dpc.fhir.converters.rewrite.NameEntityConverter
+gov.cms.dpc.fhir.converters.rewrite.ConnectionTypeConverter
+gov.cms.dpc.fhir.converters.rewrite.PatientEntityConverter
+gov.cms.dpc.fhir.converters.rewrite.ProviderEntityConverter
+gov.cms.dpc.fhir.converters.rewrite.RosterEntityConverter

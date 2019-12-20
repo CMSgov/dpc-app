@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.converters.entities;
+package gov.cms.dpc.fhir.converters.rewrite;
 
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
