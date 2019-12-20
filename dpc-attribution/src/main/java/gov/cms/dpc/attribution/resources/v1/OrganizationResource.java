@@ -38,9 +38,9 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @Inject
     OrganizationResource(FHIREntityConverter converter, OrganizationDAO dao, EndpointDAO endpointDAO) {
+        this.converter = converter;
         this.dao = dao;
         this.endpointDAO = endpointDAO;
-        this.converter = converter;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             final List<OrganizationEntity> organizationEntityList = this.dao.listOrganizations();
             bundle.setTotal(organizationEntityList.size());
 
-            organizationEntityList.forEach(entity -> bundle.addEntry().setResource(entity.toFHIR()));
+            organizationEntityList.forEach(entity -> bundle.addEntry().setResource(this.converter.toFHIR(Organization.class, entity)));
             return bundle;
         }
         // Pull out the NPI, keeping it as a string.
@@ -130,7 +130,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> orgOptional = this.dao.fetchOrganization(organizationID);
         final OrganizationEntity organizationEntity = orgOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find organization '%s'", organizationID), Response.Status.NOT_FOUND));
-        return organizationEntity.toFHIR();
+        return this.converter.toFHIR(Organization.class, organizationEntity);
     }
 
     @PUT
@@ -155,7 +155,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             ).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
             orgEntity.setEndpoints(endpointEntities);
             orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
-            return Response.status(Response.Status.OK).entity(orgEntity.toFHIR()).build();
+            return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Organization.class, orgEntity)).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
             throw e;

@@ -1,7 +1,6 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRConvertable;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.*;
 
@@ -14,7 +13,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Entity(name = "organizations")
-public class OrganizationEntity implements Serializable, FHIRConvertable<OrganizationEntity, Organization> {
+public class OrganizationEntity implements Serializable {
     public static final long serialVersionUID = 42L;
 
     @Id
@@ -127,34 +126,6 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     public void setRosters(List<RosterEntity> rosters) {
         this.rosters = rosters;
-    }
-
-    @Override
-    public Organization toFHIR() {
-        // TODO: This will be dramatically improved in the future. (DPC-276)
-
-        final Organization org = new Organization();
-
-        org.setId(this.id.toString());
-        org.addIdentifier(this.organizationID.toFHIR());
-        org.setName(this.organizationName);
-        org.setAddress(Collections.singletonList(this.organizationAddress.toFHIR()));
-
-        final List<Organization.OrganizationContactComponent> contactComponents = this.contacts
-                .stream()
-                .map(ContactEntity::toFHIR)
-                .collect(Collectors.toList());
-        org.setContact(contactComponents);
-
-        final List<Reference> endpointReferences = this
-                .endpoints
-                .stream()
-                .map(ep -> new Reference(new IdType("Endpoint", ep.getId().toString())))
-                .collect(Collectors.toList());
-
-        org.setEndpoint(endpointReferences);
-
-        return org;
     }
 
     /**

@@ -9,7 +9,6 @@ import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRFormatters.INSTANT_FORMATTER;

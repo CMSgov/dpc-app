@@ -1,11 +1,8 @@
 package gov.cms.dpc.common.entities;
 
-import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

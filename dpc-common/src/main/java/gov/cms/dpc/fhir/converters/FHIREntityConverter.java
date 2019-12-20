@@ -4,17 +4,12 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import gov.cms.dpc.fhir.helpers.ServiceLoaderHelpers;
 import org.hl7.fhir.dstu3.model.Base;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FHIREntityConverter {
-
-    private static final Logger logger = LoggerFactory.getLogger(FHIREntityConverter.class);
-
     private final Multimap<Class<? extends Base>, FHIRConverter<?, ?>> fhirResourceMap;
     private final Multimap<Class<?>, FHIRConverter<?, ?>> javaClassMap;
 
@@ -33,10 +28,10 @@ public class FHIREntityConverter {
         this.javaClassMap.put(converter.getJavaClass(), converter);
     }
 
+    @SuppressWarnings("unchecked")
     public <T, S extends Base> T fromFHIR(Class<T> targetClass, S sourceResource) {
         final FHIRConverter<S, T> converter;
         synchronized (this) {
-            //noinspection unchecked
             converter = this.fhirResourceMap.get(sourceResource.getClass())
                     .stream()
                     .filter(c -> c.getJavaClass().isAssignableFrom(targetClass))
@@ -48,14 +43,16 @@ public class FHIREntityConverter {
         return converter.fromFHIR(this, sourceResource);
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Base, S> T toFHIR(Class<T> fhirClass, S javaSource) {
         final FHIRConverter<T, S> converter;
         synchronized (this) {
-            //noinspection unchecked
             converter = this.javaClassMap.get(javaSource.getClass())
                     .stream()
                     .filter(c -> c.getFHIRResource().isAssignableFrom(fhirClass))
-                    .map(c -> (FHIRConverter<T, S>) c)
+                    .map(c -> {
+                        return (FHIRConverter<T, S>) c;
+                    })
                     .findAny()
                     .orElseThrow(() -> new IllegalStateException(String.format("Cannot find converter from %s to %s", javaSource.getClass().getName(), fhirClass.getName())));
         }
