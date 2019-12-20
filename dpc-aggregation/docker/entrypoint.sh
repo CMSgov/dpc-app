@@ -29,4 +29,4 @@ if [ $DB_MIGRATION -eq 1 ]; then
 fi
 
 echo "Running server via entrypoint!"
-exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/$(hostname).log
+exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/dpc-aggregation-$(hostname).log

@@ -22,4 +22,4 @@ fi
 
 echo "Running server"
 
-exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/$(hostname).log
+exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/dpc-attribution-$(hostname).log
