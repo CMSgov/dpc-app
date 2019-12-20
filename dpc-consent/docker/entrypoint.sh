@@ -17,4 +17,4 @@ fi
 
 echo "Running server"
 
-exec ${CMDLINE} "$@"
+exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/$(hostname).log
