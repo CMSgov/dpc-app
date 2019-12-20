@@ -22,14 +22,15 @@ public class FHIRRequestFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) {
         // Ensure the Accepts header is set to a FHIR media type
         checkAccepts(requestContext);
-        // Ensure the Content-Type header is set to a FHIR media type
+        // The content type header is optional, but if it's present, it has to be a FHIR resource type
+        // HAPI does NOT set the Content-Type, so we can't require it as part of our requests, otherwise our test suite breaks
         checkContentType(requestContext);
     }
 
     private void checkAccepts(ContainerRequestContext requestContext) {
         final List<MediaType> contentHeader = requestContext.getAcceptableMediaTypes();
 
-        if (!shortCircuitBooleanCheck(contentHeader, FHIRMediaTypes::isFHIRContent)) {
+        if (contentHeader == null || !shortCircuitBooleanCheck(contentHeader, FHIRMediaTypes::isFHIRContent)) {
             throw new WebApplicationException("`Accept:` header must specify valid FHIR content type", Response.SC_UNSUPPORTED_MEDIA_TYPE);
         }
     }
@@ -37,8 +38,8 @@ public class FHIRRequestFilter implements ContainerRequestFilter {
     private void checkContentType(ContainerRequestContext requestContext) {
         final List<String> typeHeaders = requestContext.getHeaders().get(HttpHeaders.CONTENT_TYPE);
 
-        if (!shortCircuitBooleanCheck(typeHeaders, (typeHeader) -> FHIRMediaTypes.isFHIRContent(MediaType.valueOf(typeHeader)))) {
-            throw new WebApplicationException("`Accept:` header must specify valid FHIR content type", Response.SC_UNSUPPORTED_MEDIA_TYPE);
+        if (typeHeaders != null && !shortCircuitBooleanCheck(typeHeaders, (typeHeader) -> FHIRMediaTypes.isFHIRContent(MediaType.valueOf(typeHeader)))) {
+            throw new WebApplicationException("`Content-Type:` header must specify valid FHIR content type", Response.SC_UNSUPPORTED_MEDIA_TYPE);
         }
     }
 

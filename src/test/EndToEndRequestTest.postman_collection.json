@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "4b4ccc16-fbbf-4d39-8186-9a1da5bef04f",
+		"_postman_id": "33c79dd6-30a2-4f92-a571-d13d56feba16",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1151,7 +1151,7 @@
 									"pm.test(\"Body matches expected response\", function() {",
 									"    var respJson = pm.response.json();",
 									"    pm.expect(respJson.issue).to.have.length(1)",
-									"    pm.expect(respJson.issue[0].details.text).to.be.equal(\"`Accept:` header must specify valid FHIR content type\")",
+									"    pm.expect(respJson.issue[0].details.text).to.be.equal(\"`Content-Type:` header must specify valid FHIR content type\")",
 									"});"
 								],
 								"type": "text/javascript"

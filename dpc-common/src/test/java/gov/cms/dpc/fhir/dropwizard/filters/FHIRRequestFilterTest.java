@@ -53,7 +53,16 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
-    void testMissingContentHeader() {
+    void testNullAcceptsHeader() {
+        final ContainerRequestContext request = Mockito.mock(ContainerRequestContext.class);
+        Mockito.when(request.getAcceptableMediaTypes()).thenReturn(null);
+
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
+        assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
+    }
+
+    @Test
+    void testIncorrectContentHeader() {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList("application/fire+json"));
         final ContainerRequestContext request = Mockito.mock(ContainerRequestContext.class);
@@ -62,6 +71,18 @@ public class FHIRRequestFilterTest {
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
         assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
+    }
+
+    @Test
+
+    void testNullContentHeader() {
+        final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
+        Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(null);
+        final ContainerRequestContext request = Mockito.mock(ContainerRequestContext.class);
+        Mockito.when(request.getAcceptableMediaTypes()).thenReturn(Collections.singletonList(MediaType.valueOf(FHIRMediaTypes.FHIR_JSON)));
+        Mockito.when(request.getHeaders()).thenReturn(headerMap);
+
+        filter.filter(request);
     }
 
     @Test
