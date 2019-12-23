@@ -1,7 +1,6 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -52,8 +51,8 @@ public abstract class AbstractOrganizationResource {
      * Update the {@link Organization} with the given ID
      *
      * @param organizationID {@link UUID} of organization
-     * @param organization {@link Organization}
-     * @return
+     * @param organization   {@link Organization}
+     * @return - {@link Response} with the updated organization
      */
     @PUT
     @FHIR

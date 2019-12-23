@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OrganizationEntityTest {
 
     @Test
+    @Disabled
     void testSimpleSerialDeserial() {
 
         final FHIREntityConverter converter = FHIREntityConverter.initialize();

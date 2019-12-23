@@ -1,5 +1,6 @@
 package gov.cms.dpc.fhir.converters;
 
+import gov.cms.dpc.fhir.converters.exceptions.DataTranslationException;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BaseResource;
 
@@ -17,7 +18,7 @@ public interface FHIRResourceConverter<R extends Base, C> {
      *
      * @param resource - {@link BaseResource} to convert
      * @return - {@link C} Java class to convert to
-     * @throws gov.cms.dpc.fhir.exceptions.DataTranslationException if data is missing or invalid
+     * @throws DataTranslationException if data is missing or invalid
      */
     C convert(R resource);
 }

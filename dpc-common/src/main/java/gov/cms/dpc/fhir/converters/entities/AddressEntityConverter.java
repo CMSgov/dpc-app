@@ -3,7 +3,7 @@ package gov.cms.dpc.fhir.converters.entities;
 import gov.cms.dpc.common.entities.AddressEntity;
 import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import gov.cms.dpc.fhir.exceptions.DataTranslationException;
+import gov.cms.dpc.fhir.converters.exceptions.DataTranslationException;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.StringType;
 
