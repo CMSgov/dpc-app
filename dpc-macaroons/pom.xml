@@ -10,9 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dpc-macaroons</artifactId>
-    <properties>
-        <pitest.version>1.4.10</pitest.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -58,12 +55,6 @@
             <version>0.5.0</version>
         </dependency>
         <dependency>
-            <groupId>org.pitest</groupId>
-            <artifactId>pitest-maven</artifactId>
-            <version>${pitest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <version>5.5.2</version>
@@ -71,20 +62,20 @@
         </dependency>
     </dependencies>
 
-    <build>
+    <reporting>
         <plugins>
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
                 <version>${pitest.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.pitest</groupId>
-                        <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>0.10</version>
-                    </dependency>
-                </dependencies>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
             </plugin>
         </plugins>
-    </build>
+    </reporting>
 </project>
