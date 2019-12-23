@@ -11,9 +11,12 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 
 @Api(value = "Metadata")
+@Path("/v1")
 public class BaseResource extends AbstractBaseResource {
 
     private final AbstractKeyResource kr;
@@ -55,16 +58,17 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     @Public
     @GET
-    @Path("/v1/version")
+    @Path("/version")
     @ApiOperation(value = "Return the application build version")
     @Consumes(value = "*/*")
+    @Produces(MediaType.TEXT_PLAIN)
     public String version() {
         return this.pp.getBuildVersion();
     }
 
     @Override
     @GET
-    @Path("/v1/metadata")
+    @Path("/metadata")
     @Public
     @ApiOperation(value = "Get FHIR Metadata", notes = "Returns the FHIR Capabilities statement for the application", response = CapabilityStatement.class)
     @ApiResponses(@ApiResponse(code = 200, message = "Successful operation", examples = @Example(@ExampleProperty(value = ""))))
