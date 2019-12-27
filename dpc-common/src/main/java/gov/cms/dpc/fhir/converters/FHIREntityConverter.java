@@ -37,15 +37,15 @@ public class FHIREntityConverter {
     public synchronized void addConverter(FHIRConverter<?, ?> converter) {
         logger.debug("Attempting to add converter: {}", converter);
         // See if we already have something like this
-        final int converterHash = Objects.hash(converter.getFHIRResource(), converter.getJavaClass());
-        if (this.converterHash.contains(converterHash)) {
+        final int hash = Objects.hash(converter.getFHIRResource(), converter.getJavaClass());
+        if (this.converterHash.contains(hash)) {
             throw new FHIRConverterException(String.format("Existing converter for %s and %s", converter.getFHIRResource().getName(), converter.getJavaClass().getName()));
         }
 
         this.fhirResourceMap.put(converter.getFHIRResource(), converter);
         this.javaClassMap.put(converter.getJavaClass(), converter);
 
-        this.converterHash.add(converterHash);
+        this.converterHash.add(hash);
     }
 
     @SuppressWarnings("unchecked")
@@ -97,7 +97,7 @@ public class FHIREntityConverter {
         return converter;
     }
 
-    private static <S, T> T handleConversion(Supplier<T> converter) {
+    private static <T> T handleConversion(Supplier<T> converter) {
         try {
             return converter.get();
         } catch (DataTranslationException e) {
