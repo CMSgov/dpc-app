@@ -39,6 +39,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -619,6 +621,32 @@ class JWTUnitTests {
 
             assertEquals(400, response.getStatus(), "Should not be valid");
             assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
+        }
+
+        @Test
+        void testIncorrectExpFormat() throws NoSuchAlgorithmException {
+            final String m = buildMacaroon();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience("localhost:3002/v1/Token/auth")
+                    .setIssuer(m)
+                    .setSubject(m)
+                    .setId(id)
+                    .claim("exp", Instant.now().plus(1, ChronoUnit.MINUTES).atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
         }
     }
 
