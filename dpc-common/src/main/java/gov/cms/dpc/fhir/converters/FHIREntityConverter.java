@@ -14,6 +14,10 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * Conversion engine which handles converting between Java {@link Object} and their corresponding FHIR {@link org.hl7.fhir.dstu3.model.Resource} types.
+ * Converters, which implement the {@link FHIRConverter} interface are loaded via the corresponding {@link ServiceLoader}.
+ */
 public class FHIREntityConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(FHIREntityConverter.class);
@@ -48,6 +52,17 @@ public class FHIREntityConverter {
         this.converterHash.add(hash);
     }
 
+    /**
+     * Convert the given {@link Base} resource into a corresponding Java class
+     *
+     * @param targetClass    - {@link Class} of {@link T} to convert FHIR resource into
+     * @param sourceResource -{@link S} FHIR resource to convert
+     * @param <T>            - {@link T} resulting Java class
+     * @param <S>            - {@link S} generic type of FHIR resource
+     * @return - {@link T} converted Java object
+     * @throws MissingConverterException if no {@link FHIRConverter} is registered between the two classes
+     * @throws FHIRConverterException    if the conversion process fails
+     */
     @SuppressWarnings("unchecked")
     public <T, S extends Base> T fromFHIR(Class<T> targetClass, S sourceResource) {
         logger.debug("Finding converter from {} to {}", sourceResource, targetClass);
@@ -64,6 +79,17 @@ public class FHIREntityConverter {
         return handleConversion(() -> converter.fromFHIR(this, sourceResource));
     }
 
+    /**
+     * Convert the given Java object into a corresponding FHIR {@link Base} resource
+     *
+     * @param fhirClass  - {@link T} target FHIR Resource to convert to
+     * @param javaSource -{@link S} source Java object to convert
+     * @param <T>        - {@link T} resulting FHIR Resource
+     * @param <S>        - {@link S} generic type of Java source object
+     * @return - {@link T} converted FHIR Resource
+     * @throws MissingConverterException if no {@link FHIRConverter} is registered between the two classes
+     * @throws FHIRConverterException    if the conversion process fails
+     */
     @SuppressWarnings("unchecked")
     public <T extends Base, S> T toFHIR(Class<T> fhirClass, S javaSource) {
         logger.debug("Finding converter from {} to {}", javaSource, fhirClass);
@@ -80,6 +106,11 @@ public class FHIREntityConverter {
         return handleConversion(() -> converter.toFHIR(this, javaSource));
     }
 
+    /**
+     * Create a new {@link FHIREntityConverter} using the default converters loaded by the {@link FHIRConverter} service loader
+     *
+     * @return - {@link FHIREntityConverter} with default set of converters
+     */
     public static FHIREntityConverter initialize() {
         final List<FHIRConverter<?, ?>> converters = ServiceLoaderHelpers.getLoaderStream(FHIRConverter.class)
                 .map(l -> (FHIRConverter<?, ?>) l)
@@ -89,6 +120,12 @@ public class FHIREntityConverter {
 
     }
 
+    /**
+     * Create a new {@link FHIRConverter} with the given {@link Collection} of {@link FHIRConverter}s
+     *
+     * @param converters - {@link Collection} of {@link FHIRConverter} to register with converter
+     * @return - {@link FHIREntityConverter} with only the given {@link FHIRConverter}s registered
+     */
     static FHIREntityConverter initialize(Collection<FHIRConverter<?, ?>> converters) {
         final FHIREntityConverter converter = new FHIREntityConverter();
 
