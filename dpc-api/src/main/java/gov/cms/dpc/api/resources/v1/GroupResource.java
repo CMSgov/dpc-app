@@ -12,6 +12,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
+import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
@@ -63,7 +64,9 @@ public class GroupResource extends AbstractGroupResource {
             @ApiResponse(code = 200, message = "Roster already exists")
     })
     @Override
-    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, Group attributionRoster) {
+    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ProvenanceHeader Provenance rosterAttestation, Group attributionRoster) {
+        // Log attestation
+        logAttestation(rosterAttestation, attributionRoster);
         addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
         final MethodOutcome outcome = this
@@ -288,39 +291,6 @@ public class GroupResource extends AbstractGroupResource {
         return resources;
     }
 
-    /**
-     * Check the query parameters of the request. If valid, return empty. If not valid,
-     * return an error response with an {@link OperationOutcome} in the body.
-     *
-     * @param outputFormat param to check
-     * @param since        param to check
-     */
-    private static void checkExportRequest(String outputFormat, String since) {
-        // _since is unsupported
-        if (StringUtils.isNotEmpty(since)) {
-            throw new BadRequestException("'_since' is not supported");
-        }
-
-        // _outputFormat only supports FHIR_NDJSON
-        if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
-            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
-        }
-    }
-
-    /**
-     * Convert a single resource type in a query param into a {@link ResourceType}.
-     *
-     * @param queryResourceType - The text from the query param
-     * @return If match is found a {@link ResourceType}
-     */
-    private static Optional<ResourceType> matchResourceType(String queryResourceType) {
-        final var canonical = queryResourceType.trim().toUpperCase();
-        // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
-        return JobQueueBatch.validResourceTypes.stream()
-                .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
-                .findFirst();
-    }
-
     private List<String> fetchPatientMBIs(String groupID) {
 
         final Group attributionRoster = this.client
@@ -354,5 +324,48 @@ public class GroupResource extends AbstractGroupResource {
                 .map(entry -> (Patient) entry.getResource())
                 .map(FHIRExtractors::getPatientMPI)
                 .collect(Collectors.toList());
+    }
+
+    private void logAttestation(Provenance provenance, Group attributionRoster) {
+        final List<Reference> attributedPatients = attributionRoster
+                .getMember()
+                .stream()
+                .map(Group.GroupMemberComponent::getEntity)
+                .collect(Collectors.toList());
+
+        logger.info("Provider {} is attesting relationship for {}", "Something here", attributedPatients);
+    }
+
+    /**
+     * Check the query parameters of the request. If valid, return empty. If not valid,
+     * return an error response with an {@link OperationOutcome} in the body.
+     *
+     * @param outputFormat param to check
+     * @param since        param to check
+     */
+    private static void checkExportRequest(String outputFormat, String since) {
+        // _since is unsupported
+        if (StringUtils.isNotEmpty(since)) {
+            throw new BadRequestException("'_since' is not supported");
+        }
+
+        // _outputFormat only supports FHIR_NDJSON
+        if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
+            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
+        }
+    }
+
+    /**
+     * Convert a single resource type in a query param into a {@link ResourceType}.
+     *
+     * @param queryResourceType - The text from the query param
+     * @return If match is found a {@link ResourceType}
+     */
+    private static Optional<ResourceType> matchResourceType(String queryResourceType) {
+        final var canonical = queryResourceType.trim().toUpperCase();
+        // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
+        return JobQueueBatch.validResourceTypes.stream()
+                .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
+                .findFirst();
     }
 }

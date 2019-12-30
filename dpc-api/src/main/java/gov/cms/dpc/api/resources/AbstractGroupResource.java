@@ -5,6 +5,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.Provenance;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -19,7 +20,7 @@ public abstract class AbstractGroupResource {
     }
 
     @POST
-    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, Group attributionRoster);
+    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, Provenance rosterAttestation, Group attributionRoster);
 
     @GET
     public abstract Bundle rosterSearch(OrganizationPrincipal organizationPrincipal, String providerNPI, String patientID);
