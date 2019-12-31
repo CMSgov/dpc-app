@@ -1,0 +1,113 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "dpc-profile-attestation",
+  "url": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation",
+  "name": "DPC Attribution Attestation",
+  "publisher": "The DPC Team",
+  "status": "draft",
+  "version": "0.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Provenance",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Provenance",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Provenance",
+        "path": "Provenance"
+      },
+      {
+        "id": "Provenance.reason",
+        "path": "Provenance.reason",
+        "definition": "Must have attribution reason",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            },
+            {
+              "type": "value",
+              "path": "code"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Provenance.reason",
+        "path": "Provenance.reason",
+        "sliceName": "provenance-reason",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Provenance.reason[x]:system",
+        "path": "Provenance.reason.system",
+        "min": 1,
+        "fixedCode": "http://hl7.org/fhir/v3/ActReason"
+      },
+      {
+        "id": "Provenance.reason[x]:code",
+        "path": "Provenance.reason.code",
+        "min": 1,
+        "fixedCode": "TREAT"
+      },
+      {
+        "id": "Provenance.agent",
+        "path": "Provenance.agent",
+        "definition": "Must have performing agent",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "role"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "path": "Provenance.agent",
+        "sliceName": "performer",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "path": "Provenance.agent.role",
+        "min": 1,
+        "fixedCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/RoleClass",
+              "code": "AGNT"
+            }
+          ]
+        }
+      },
+      {
+        "id": "Provenance.agent.whoReference",
+        "path": "Provenance.agent.whoReference",
+        "min": 1,
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-organization"
+          }
+        ]
+      },
+      {
+        "id": "Provenance.agent.onBehalfOfReference",
+        "path": "Provenance.agent.onBehalfOfReference",
+        "min": 1,
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner"
+          }
+        ]
+      }
+    ]
+  }
+}
