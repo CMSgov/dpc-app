@@ -12,7 +12,9 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
+import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
+import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
@@ -23,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -64,7 +67,7 @@ public class GroupResource extends AbstractGroupResource {
             @ApiResponse(code = 200, message = "Roster already exists")
     })
     @Override
-    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @ProvenanceHeader Provenance rosterAttestation, Group attributionRoster) {
+    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group attributionRoster) {
         // Log attestation
         logAttestation(rosterAttestation, attributionRoster);
         addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
@@ -144,7 +147,7 @@ public class GroupResource extends AbstractGroupResource {
             "<p>Updates allow for adding or removing patients from the roster.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @ProvenanceHeader Provenance rosterAttestation, Group rosterUpdate) {
+    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group rosterUpdate) {
         logAttestation(rosterAttestation, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
@@ -165,7 +168,7 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Add roster members", notes = "Update specific Attribution roster by adding members given in the provided resource.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
+    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
         logAttestation(rosterAttestation, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }

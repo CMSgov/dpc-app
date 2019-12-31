@@ -84,7 +84,7 @@ public class FHIRExtractors {
         return provenance
                 .getAgent()
                 .stream()
-                .filter(comp -> comp.getRoleFirstRep().getCodingFirstRep().getCode().equals("performer"))
+                .filter(comp -> comp.getRoleFirstRep().getCodingFirstRep().getCode().equals("AGNT"))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Cannot find Provenance performer"));
     }

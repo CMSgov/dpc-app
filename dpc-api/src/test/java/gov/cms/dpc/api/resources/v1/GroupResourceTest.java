@@ -12,10 +12,13 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.r4.model.codesystems.ProvenanceAgentRole;
+import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Collections;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
@@ -83,16 +86,17 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
         // Try again with provenance
         final Provenance provenance = new Provenance();
+        provenance.setRecorded(Date.valueOf(Instant.now().atZone(ZoneOffset.UTC).toLocalDate()));
         final Coding coding = new Coding();
-        coding.setSystem("http://hl7.org/fhir/ValueSet/v3-PurposeOfUse");
+        coding.setSystem("http://hl7.org/fhir/v3/ActReason");
         coding.setCode("TREAT");
         provenance.setReason(Collections.singletonList(coding));
         provenance.setTarget(Collections.singletonList(patientRef));
         final Provenance.ProvenanceAgentComponent component = new Provenance.ProvenanceAgentComponent();
 
         final Coding roleCode = new Coding();
-        roleCode.setSystem(ProvenanceAgentRole.PERFORMER.getSystem());
-        roleCode.setCode(ProvenanceAgentRole.PERFORMER.toCode());
+        roleCode.setSystem(V3RoleClass.AGNT.getSystem());
+        roleCode.setCode(V3RoleClass.AGNT.toCode());
 
         final CodeableConcept roleConcept = new CodeableConcept();
         roleConcept.addCoding(roleCode);
