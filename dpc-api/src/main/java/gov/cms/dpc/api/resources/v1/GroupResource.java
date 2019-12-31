@@ -144,7 +144,8 @@ public class GroupResource extends AbstractGroupResource {
             "<p>Updates allow for adding or removing patients from the roster.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group rosterUpdate) {
+    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @ProvenanceHeader Provenance rosterAttestation, Group rosterUpdate) {
+        logAttestation(rosterAttestation, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
@@ -164,7 +165,8 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Add roster members", notes = "Update specific Attribution roster by adding members given in the provided resource.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
+        logAttestation(rosterAttestation, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
@@ -327,13 +329,17 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     private void logAttestation(Provenance provenance, Group attributionRoster) {
+
+        final Coding reason = provenance.getReasonFirstRep();
+
+        final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
         final List<Reference> attributedPatients = attributionRoster
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .collect(Collectors.toList());
 
-        logger.info("Provider {} is attesting relationship for {}", "Something here", attributedPatients);
+        logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}", performer.getWhoReference(), performer.getOnBehalfOfReference(), reason, attributedPatients);
     }
 
     /**

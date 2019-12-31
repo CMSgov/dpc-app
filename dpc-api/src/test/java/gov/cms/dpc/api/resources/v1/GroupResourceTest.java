@@ -10,20 +10,18 @@ import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
-import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.r4.model.codesystems.ProvenanceAgentRole;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.BadRequestException;
 import java.io.IOException;
 import java.util.Collections;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(BufferedLoggerHandler.class)
+//@ExtendWith(BufferedLoggerHandler.class)
 public class GroupResourceTest extends AbstractSecureApplicationTest {
 
     GroupResourceTest() {
@@ -85,7 +83,26 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
         // Try again with provenance
         final Provenance provenance = new Provenance();
+        final Coding coding = new Coding();
+        coding.setSystem("http://hl7.org/fhir/ValueSet/v3-PurposeOfUse");
+        coding.setCode("TREAT");
+        provenance.setReason(Collections.singletonList(coding));
         provenance.setTarget(Collections.singletonList(patientRef));
+        final Provenance.ProvenanceAgentComponent component = new Provenance.ProvenanceAgentComponent();
+
+        final Coding roleCode = new Coding();
+        roleCode.setSystem(ProvenanceAgentRole.PERFORMER.getSystem());
+        roleCode.setCode(ProvenanceAgentRole.PERFORMER.toCode());
+
+        final CodeableConcept roleConcept = new CodeableConcept();
+        roleConcept.addCoding(roleCode);
+        component.setRole(Collections.singletonList(roleConcept));
+        component.setWho(new Reference(new IdType("Organization", ORGANIZATION_ID)));
+        component
+                .setOnBehalfOf(new Reference(foundProvider.getIdElement()));
+
+        provenance.addAgent(component);
+
         creation
                 .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance));
 
