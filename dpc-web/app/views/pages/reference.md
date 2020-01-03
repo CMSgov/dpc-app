@@ -412,6 +412,32 @@ This token must be signed with a public key previously registered and contain th
 
 `jti`	_required_	A nonce string value that uniquely identifies this authentication JWT.
 
+#### Creating a JSON Web Token (JWT)
+[JWT.io](https://jwt.io/) provides comprehensive information about what JSON Web Tokens are and how to use them.  For testing purposes, the site offers a [debugger](https://jwt.io/#debugger-io) that allows you to enter a header, payload, and keys to generate a signed JWT.
+
+Online tools for creating JWTs **should not** be considered secure and **should not** be used to create tokens to access production data. Instead, use one of the [libraries](https://jwt.io/#libraries-io) listed on JWT.io to generate JWTs in your DPC API client.
+
+##### JWT for testing in the sandbox
+For the DPC sandbox environment, which contains no PII or PHI, a JWT can be created with the [JWT.io debugger](https://jwt.io/#debugger-io). More details on each field can be found under [Authentication JWT Header Values](#authentication-jwt-header-values) and [Authentication JWT Claims](#authentication-jwt-claims).
+1. From the Algorithm dropdown, select `RS384`.
+1. On the "Decoded" side, the "Header: Algorithm & Token Type" text area must contain a JSON object with the fields below. `alg` and `typ` will already be set, so you will need to add `kid`.
+   1. `"alg": "RS384"` (set for you after you select the algorithm)
+   1. `"kid": "{ID of public key}"`
+   1. `"typ": "JWT"` (set by default)
+1. The "Payload: Data" text area must contain a JSON object with the fields below. It will already contain `sub`, `name`, `admin`, and `iat`. The value of `sub` will change, and `name`, `admin`, and `iat` should be removed.
+   1. `"iss": "{client token}"`
+   1. `"sub": "{client token}"`
+   1. `"aud": "https://sandbox.dpc.cms.gov/api/v1/Token/auth"`
+   1. `"exp": "{expiration time}"`
+   1. `"jti": "{nonce}"`
+1. Under "Verify Signature", the first text area should contain your public key, and the second, your private key. This keypair should be for testing in the sandbox, not one that is used to access any production data.
+
+![Example of using JWT.io's debugger](../../assets/images/jwt-io-example.png)
+
+##### JWT for production use
+JWT.io's debugger **should not** be used to create tokens for accessing the production environment. JWTs can be created by your DPC client using one of the many [JWT libraries](https://jwt.io/#libraries-io) in a variety of programming languages. For example, Auth0 has created a [Java library](https://github.com/auth0/java-jwt), and its [README](https://github.com/auth0/java-jwt#usage) shows you how to implement it to create your own tokens.
+
+#### Validating a DPC token
 The DPC API supports a `/Token/validate` endpoint, which allows the user to submit their signed JWT for validation.
 This will return an error message with details as to which claims or values on the JWT are missing or incorrect.
 This method *DOES NOT* validate the JWT signature, public key or client tokens, it merely verifies the necessary elements are present in the JWT entity.
