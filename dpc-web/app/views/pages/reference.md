@@ -10,7 +10,7 @@ This data is made available through a set of [FHIR](http://hl7.org/fhir/STU3/) c
 
 This guide serves as a starting point for users to begin working with the API by introducing the core APIs as well as two key concepts of [Bulk Data](#bulk-data) and [Patient Attribution](#attribution).
 
-Documentation is also available in a comprehensive [OpenAPI format](/api/swagger) as well as a FHIR [implementation guide](/ig/index.html) 
+Documentation is also available in a comprehensive [OpenAPI format](/api/swagger) as well as a FHIR [implementation guide](/ig/index.html).
 
 ## Bulk Data
 
@@ -187,7 +187,7 @@ This endpoint accepts two, optional query params:
 Note, token labels are not guaranteed to be unique. 
 
 *  `expiration` sets a custom expiration for the `client_token`.
-This is provided as an ISO formatted string and if omitted will default to the system specified expiration time.
+This is provided as an [ISO formatted](https://www.iso.org/iso-8601-date-and-time-format.html) string and if omitted will default to the system specified expiration time.
 
 > Note: The user cannot set an expiration time longer than the system allowed maximum.
 This will result in an error being returned to the user.
