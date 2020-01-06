@@ -33,6 +33,8 @@ import org.mockito.Mockito;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -65,37 +67,40 @@ class JWTUnitTests {
 
     @Nested
     @DisplayName("Query Param tests")
-    class QueryParamTests {
+    class FormParamTests {
 
         @Test
-        void testQueryParams() {
+        void testFormParams() {
             final String payload = "this is not a payload";
+            final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+
             Response response = RESOURCE.target("/v1/Token/auth")
                     .request()
-                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             // Should have all exceptions
             DPCValidationErrorMessage validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
             assertEquals(4, validationErrorResponse.getErrors().size(), "Should have four violations");
 
+            formData.add("scope", "system/*.*");
             // Add the missing scope value and try again
-            response = RESOURCE.target("/v1/Token/auth").queryParam("scope", "system/*.*")
+            response = RESOURCE.target("/v1/Token/auth")
                     .request()
-                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             // Should have one less exception
             validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
             assertEquals(400, response.getStatus(), "Should have failed");
             assertEquals(3, validationErrorResponse.getErrors().size(), "Should have three violations");
 
+            formData.add("grant_type", "client_credentials");
+
 
             // Add the grant type
             response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "system/*.*")
-                    .queryParam("grant_type", "client_credentials")
                     .request()
-                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             // Should still have an exception
             validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
@@ -103,12 +108,10 @@ class JWTUnitTests {
             assertEquals(2, validationErrorResponse.getErrors().size(), "Should have two violation");
 
             // Add the assertion type
+            formData.add("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE);
             response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "system/*.*")
-                    .queryParam("grant_type", "client_credentials")
-                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
                     .request()
-                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             // Should another for the empty client_assertion
             validationErrorResponse = response.readEntity(DPCValidationErrorMessage.class);
@@ -117,13 +120,11 @@ class JWTUnitTests {
             assertTrue(validationErrorResponse.getErrors().get(0).contains("Assertion is required"));
 
             // Add the token and try again
+            formData.add("client_assertion", payload);
+
             response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "system/*.*")
-                    .queryParam("grant_type", "client_credentials")
-                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
-                    .queryParam("client_assertion", "badJWT")
                     .request()
-                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             // Should have no validation exceptions, but still fail
             assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus(), "Should be unauthorized");
@@ -131,14 +132,16 @@ class JWTUnitTests {
 
         @Test
         void testInvalidGrantTypeValue() {
+            final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+            formData.add("scope", "system/*.*");
+            formData.add("grant_type", "wrong_grant_type");
+            formData.add("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE);
+            formData.add("client_assertion", "dummyJWT");
+
             final String payload = "not a real payload";
             Response response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "system/*.*")
-                    .queryParam("grant_type", "wrong_grant_type")
-                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
-                    .queryParam("client_assertion", "dummyJWT")
                     .request()
-                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
             assertTrue(response.readEntity(String.class).contains("Grant Type must be 'client_credentials'"), "Should have correct exception");
@@ -146,13 +149,14 @@ class JWTUnitTests {
 
         @Test
         void testEmptyGrantTypeValue() {
+            final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+            formData.add("scope", "system/*.*");
+            formData.add("grant_type", "");
+            formData.add("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE);
+            formData.add("client_assertion", "dummyJWT");
             final Response response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "system/*.*")
-                    .queryParam("grant_type", "")
-                    .queryParam("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE)
-                    .queryParam("client_assertion", "dummyJWT")
                     .request()
-                    .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             // Setting the grant type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed");
@@ -163,14 +167,15 @@ class JWTUnitTests {
 
         @Test
         void testInvalidClientAssertionType() {
-            final String payload = "not a real payload";
+            final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+            formData.add("scope", "system/*.*");
+            formData.add("grant_type", "client_credentials");
+            formData.add("client_assertion_type", "Not a real assertion_type");
+            formData.add("client_assertion", "dummyJWT");
+
             Response response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "system/*.*")
-                    .queryParam("grant_type", "client_credentials")
-                    .queryParam("client_assertion_type", "Not a real assertion_type")
-                    .queryParam("client_assertion", "dummyJWT")
                     .request()
-                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
             assertTrue(response.readEntity(String.class).contains("Client Assertion Type must be 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'"), "Should have correct error message");
@@ -178,13 +183,15 @@ class JWTUnitTests {
 
         @Test
         void testEmptyClientAssertionType() {
+            final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+            formData.add("scope", "system/*.*");
+            formData.add("grant_type", "client_credentials");
+            formData.add("client_assertion_type", "");
+            formData.add("client_assertion", "dummyJWT");
+
             final Response response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "system/*.*")
-                    .queryParam("grant_type", "client_credentials")
-                    .queryParam("client_assertion_type", "")
-                    .queryParam("client_assertion", "dummyJWT")
                     .request()
-                    .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             // Setting the assertion type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
@@ -195,14 +202,16 @@ class JWTUnitTests {
 
         @Test
         void testInvalidScopeType() {
+            final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+            formData.add("scope", "this is not a scope");
+            formData.add("grant_type", "client_credentials");
+            formData.add("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE);
+            formData.add("client_assertion", "dummyJWT");
+
             final String payload = "not a real payload";
             Response response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "this is not a scope")
-                    .queryParam("grant_type", "client_credentials")
-                    .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                    .queryParam("client_assertion", "dummyJWT")
                     .request()
-                    .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
             assertTrue(response.readEntity(String.class).contains("Access Scope must be 'system/*.*'"), "Should have correct error message");
@@ -210,13 +219,15 @@ class JWTUnitTests {
 
         @Test
         void testEmptyScopeType() {
+            final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+            formData.add("scope", "");
+            formData.add("grant_type", "client_credentials");
+            formData.add("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE);
+            formData.add("client_assertion", "dummyJWT");
+
             final Response response = RESOURCE.target("/v1/Token/auth")
-                    .queryParam("scope", "")
-                    .queryParam("grant_type", "client_credentials")
-                    .queryParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                    .queryParam("client_assertion", "dummyJWT")
                     .request()
-                    .post(Entity.entity("payload", MediaType.APPLICATION_FORM_URLENCODED));
+                    .post(Entity.form(formData));
 
             // Setting the assertion type to be blank, should throw a validation error
             assertEquals(400, response.getStatus(), "Should have failed, but for different reasons");
