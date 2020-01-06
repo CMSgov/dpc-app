@@ -10,10 +10,12 @@ import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -24,7 +26,7 @@ import java.util.Collections;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
-//@ExtendWith(BufferedLoggerHandler.class)
+@ExtendWith(BufferedLoggerHandler.class)
 public class GroupResourceTest extends AbstractSecureApplicationTest {
 
     GroupResourceTest() {
@@ -34,7 +36,6 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testMissingProvenance() throws IOException {
         final IParser parser = ctx.newJsonParser();
-        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         APITestHelpers.setupPractitionerTest(client, parser);

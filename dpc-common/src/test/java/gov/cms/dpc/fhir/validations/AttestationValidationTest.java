@@ -33,7 +33,7 @@ class AttestationValidationTest {
 
         fhirValidator = ctx.newValidator();
         fhirValidator.setValidateAgainstStandardSchematron(false);
-        fhirValidator.setValidateAgainstStandardSchema(true);
+        fhirValidator.setValidateAgainstStandardSchema(false);
         fhirValidator.registerValidatorModule(instanceValidator);
 
 
