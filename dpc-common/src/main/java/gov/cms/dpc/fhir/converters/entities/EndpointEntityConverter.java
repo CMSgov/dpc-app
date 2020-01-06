@@ -41,20 +41,20 @@ public class EndpointEntityConverter implements FHIRConverter<Endpoint, Endpoint
     }
 
     @Override
-    public Endpoint toFHIR(FHIREntityConverter converter, EndpointEntity javaClass) {
+    public Endpoint toFHIR(FHIREntityConverter converter, EndpointEntity entity) {
         final Endpoint endpoint = new Endpoint();
         // Add profile
         final Meta meta = new Meta();
         meta.addProfile(EndpointProfile.PROFILE_URI);
         endpoint.setMeta(meta);
 
-        endpoint.setId(new IdType("Endpoint", javaClass.getId().toString()));
-        endpoint.setName(javaClass.getName());
-        endpoint.setAddress(javaClass.getAddress());
+        endpoint.setId(new IdType("Endpoint", entity.getId().toString()));
+        endpoint.setName(entity.getName());
+        endpoint.setAddress(entity.getAddress());
 
-        endpoint.setManagingOrganization(new Reference(new IdType("Organization", javaClass.getOrganization().getId().toString())));
-        endpoint.setStatus(javaClass.getStatus());
-        endpoint.setConnectionType(converter.toFHIR(Coding.class, javaClass.getConnectionType()));
+        endpoint.setManagingOrganization(new Reference(new IdType("Organization", entity.getOrganization().getId().toString())));
+        endpoint.setStatus(entity.getStatus());
+        endpoint.setConnectionType(converter.toFHIR(Coding.class, entity.getConnectionType()));
 
         return endpoint;
     }

@@ -21,14 +21,14 @@ public class NameEntityConverter implements FHIRConverter<HumanName, NameEntity>
     }
 
     @Override
-    public HumanName toFHIR(FHIREntityConverter converter, NameEntity javaClass) {
+    public HumanName toFHIR(FHIREntityConverter converter, NameEntity entity) {
         final HumanName name = new HumanName();
 
-        name.setFamily(javaClass.getFamily());
-        name.setPrefix(List.of(new StringType(javaClass.getPrefix())));
-        name.setSuffix(List.of(new StringType(javaClass.getSuffix())));
-        name.setGiven(List.of(new StringType(javaClass.getGiven())));
-        name.setUse(javaClass.getUse());
+        name.setFamily(entity.getFamily());
+        name.setPrefix(List.of(new StringType(entity.getPrefix())));
+        name.setSuffix(List.of(new StringType(entity.getSuffix())));
+        name.setGiven(List.of(new StringType(entity.getGiven())));
+        name.setUse(entity.getUse());
 
         return name;
     }

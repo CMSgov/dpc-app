@@ -47,22 +47,22 @@ public class ProviderEntityConverter implements FHIRConverter<Practitioner, Prov
     }
 
     @Override
-    public Practitioner toFHIR(FHIREntityConverter converter, ProviderEntity javaClass) {
+    public Practitioner toFHIR(FHIREntityConverter converter, ProviderEntity entity) {
         final Practitioner practitioner = new Practitioner();
 
-        practitioner.setId(javaClass.getProviderID().toString());
+        practitioner.setId(entity.getProviderID().toString());
         practitioner.addName().
-                setFamily(javaClass.getProviderLastName())
-                .addGiven(javaClass.getProviderFirstName());
+                setFamily(entity.getProviderLastName())
+                .addGiven(entity.getProviderFirstName());
 
         practitioner.addIdentifier()
                 .setSystem(DPCIdentifierSystem.NPPES.getSystem())
-                .setValue(javaClass.getProviderNPI());
+                .setValue(entity.getProviderNPI());
 
         final Meta meta = new Meta();
 
-        if (javaClass.getUpdatedAt() != null) {
-            meta.setLastUpdatedElement(new InstantType(javaClass.getUpdatedAt().format(INSTANT_FORMATTER)));
+        if (entity.getUpdatedAt() != null) {
+            meta.setLastUpdatedElement(new InstantType(entity.getUpdatedAt().format(INSTANT_FORMATTER)));
         }
         meta.addProfile(PractitionerProfile.PROFILE_URI);
         practitioner.setMeta(meta);

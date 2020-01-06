@@ -56,7 +56,7 @@ public class FHIREntityConverter {
      * Convert the given {@link Base} resource into a corresponding Java class
      *
      * @param targetClass    - {@link Class} of {@link T} to convert FHIR resource into
-     * @param sourceResource -{@link S} FHIR resource to convert
+     * @param resource -{@link S} FHIR resource to convert
      * @param <T>            - {@link T} resulting Java class
      * @param <S>            - {@link S} generic type of FHIR resource
      * @return - {@link T} converted Java object
@@ -64,26 +64,26 @@ public class FHIREntityConverter {
      * @throws FHIRConverterException    if the conversion process fails
      */
     @SuppressWarnings("unchecked")
-    public <T, S extends Base> T fromFHIR(Class<T> targetClass, S sourceResource) {
-        logger.debug("Finding converter from {} to {}", sourceResource, targetClass);
+    public <T, S extends Base> T fromFHIR(Class<T> targetClass, S resource) {
+        logger.debug("Finding converter from {} to {}", resource, targetClass);
         final FHIRConverter<S, T> converter;
         synchronized (this) {
-            converter = this.fhirResourceMap.get(sourceResource.getClass())
+            converter = this.fhirResourceMap.get(resource.getClass())
                     .stream()
                     .filter(c -> c.getJavaClass().isAssignableFrom(targetClass))
                     .map(c -> (FHIRConverter<S, T>) c)
                     .findAny()
-                    .orElseThrow(() -> new MissingConverterException(sourceResource.getClass(), targetClass));
+                    .orElseThrow(() -> new MissingConverterException(resource.getClass(), targetClass));
         }
 
-        return handleConversion(() -> converter.fromFHIR(this, sourceResource));
+        return handleConversion(() -> converter.fromFHIR(this, resource));
     }
 
     /**
      * Convert the given Java object into a corresponding FHIR {@link Base} resource
      *
      * @param fhirClass  - {@link T} target FHIR Resource to convert to
-     * @param javaSource -{@link S} source Java object to convert
+     * @param source -{@link S} source Java object to convert
      * @param <T>        - {@link T} resulting FHIR Resource
      * @param <S>        - {@link S} generic type of Java source object
      * @return - {@link T} converted FHIR Resource
@@ -91,19 +91,19 @@ public class FHIREntityConverter {
      * @throws FHIRConverterException    if the conversion process fails
      */
     @SuppressWarnings("unchecked")
-    public <T extends Base, S> T toFHIR(Class<T> fhirClass, S javaSource) {
-        logger.debug("Finding converter from {} to {}", javaSource, fhirClass);
+    public <T extends Base, S> T toFHIR(Class<T> fhirClass, S source) {
+        logger.debug("Finding converter from {} to {}", source, fhirClass);
         final FHIRConverter<T, S> converter;
         synchronized (this) {
-            converter = this.javaClassMap.get(javaSource.getClass())
+            converter = this.javaClassMap.get(source.getClass())
                     .stream()
                     .filter(c -> c.getFHIRResource().isAssignableFrom(fhirClass))
                     .map(c -> (FHIRConverter<T, S>) c)
                     .findAny()
-                    .orElseThrow(() -> new MissingConverterException(javaSource.getClass(), fhirClass));
+                    .orElseThrow(() -> new MissingConverterException(source.getClass(), fhirClass));
         }
 
-        return handleConversion(() -> converter.toFHIR(this, javaSource));
+        return handleConversion(() -> converter.toFHIR(this, source));
     }
 
     /**
@@ -121,7 +121,7 @@ public class FHIREntityConverter {
     }
 
     /**
-     * Create a new {@link FHIRConverter} with the given {@link Collection} of {@link FHIRConverter}s
+     * Create a new {@link FHIREntityConverter} with the given {@link Collection} of {@link FHIRConverter}s
      *
      * @param converters - {@link Collection} of {@link FHIRConverter} to register with converter
      * @return - {@link FHIREntityConverter} with only the given {@link FHIRConverter}s registered

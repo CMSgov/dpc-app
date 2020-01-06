@@ -23,23 +23,23 @@ public class RosterEntityConverter implements FHIRConverter<Group, RosterEntity>
     }
 
     @Override
-    public Group toFHIR(FHIREntityConverter converter, RosterEntity javaClass) {
+    public Group toFHIR(FHIREntityConverter converter, RosterEntity entity) {
         final Group group = new Group();
         group.setType(Group.GroupType.PERSON);
         group.setActual(true);
-        group.setId(javaClass.getId().toString());
+        group.setId(entity.getId().toString());
 
         final CodeableConcept attributedConcept = new CodeableConcept();
         attributedConcept.addCoding().setCode("attributed-to");
 
         final CodeableConcept providerConcept = new CodeableConcept();
-        providerConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(javaClass.getAttributedProvider().getProviderNPI());
+        providerConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(entity.getAttributedProvider().getProviderNPI());
         group.addCharacteristic()
                 .setCode(attributedConcept)
                 .setValue(providerConcept)
                 .setExclude(false);
 
-        final List<Group.GroupMemberComponent> patients = javaClass
+        final List<Group.GroupMemberComponent> patients = entity
                 .getAttributions()
                 .stream()
                 .map(RosterEntityConverter::buildComponent)

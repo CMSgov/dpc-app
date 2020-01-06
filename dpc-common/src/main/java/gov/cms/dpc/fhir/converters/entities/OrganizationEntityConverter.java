@@ -79,22 +79,22 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
     }
 
     @Override
-    public Organization toFHIR(FHIREntityConverter converter, OrganizationEntity javaClass) {
+    public Organization toFHIR(FHIREntityConverter converter, OrganizationEntity entity) {
         final Organization org = new Organization();
 
-        org.setId(javaClass.getId().toString());
-        org.addIdentifier(javaClass.getOrganizationID().toFHIR());
-        org.setName(javaClass.getOrganizationName() );
+        org.setId(entity.getId().toString());
+        org.addIdentifier(entity.getOrganizationID().toFHIR());
+        org.setName(entity.getOrganizationName() );
 
-        org.setAddress(Collections.singletonList(converter.toFHIR(Address.class, javaClass.getOrganizationAddress())));
+        org.setAddress(Collections.singletonList(converter.toFHIR(Address.class, entity.getOrganizationAddress())));
 
-        final List<Organization.OrganizationContactComponent> contactComponents = javaClass.getContacts()
+        final List<Organization.OrganizationContactComponent> contactComponents = entity.getContacts()
                 .stream()
                 .map(ContactEntity::toFHIR)
                 .collect(Collectors.toList());
         org.setContact(contactComponents);
 
-        final List<Reference> endpointReferences = javaClass
+        final List<Reference> endpointReferences = entity
                 .getEndpoints()
                 .stream()
                 .map(ep -> new Reference(new IdType("Endpoint", ep.getId().toString())))

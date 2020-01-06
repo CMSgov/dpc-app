@@ -39,17 +39,17 @@ public class AddressEntityConverter implements FHIRConverter<Address, AddressEnt
     }
 
     @Override
-    public Address toFHIR(FHIREntityConverter converter, AddressEntity javaClass) {
+    public Address toFHIR(FHIREntityConverter converter, AddressEntity entity) {
         final Address address = new Address();
 
-        address.setCity(javaClass.getCity());
-        address.setCountry(javaClass.getCountry());
-        address.setDistrict(javaClass.getDistrict());
-        address.setPostalCode(javaClass.getPostalCode());
-        address.setState(javaClass.getState());
-        address.setUse(javaClass.getUse());
-        address.setType(javaClass.getType());
-        address.setLine(List.of(new StringType(javaClass.getLine1()), new StringType(javaClass.getLine2())));
+        address.setCity(entity.getCity());
+        address.setCountry(entity.getCountry());
+        address.setDistrict(entity.getDistrict());
+        address.setPostalCode(entity.getPostalCode());
+        address.setState(entity.getState());
+        address.setUse(entity.getUse());
+        address.setType(entity.getType());
+        address.setLine(List.of(new StringType(entity.getLine1()), new StringType(entity.getLine2())));
 
         return address;
     }

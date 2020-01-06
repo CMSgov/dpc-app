@@ -135,10 +135,10 @@ public class EntityConverterTest {
         }
 
         @Override
-        public Patient toFHIR(FHIREntityConverter converter, PatientGender javaClass) {
+        public Patient toFHIR(FHIREntityConverter converter, PatientGender entity) {
             final Patient patient = new Patient();
-            patient.setGender(Enumerations.AdministrativeGender.valueOf(javaClass.gender));
-            patient.setId(javaClass.id.toString());
+            patient.setGender(Enumerations.AdministrativeGender.valueOf(entity.gender));
+            patient.setId(entity.id.toString());
 
             return patient;
         }
@@ -178,10 +178,10 @@ public class EntityConverterTest {
         }
 
         @Override
-        public Patient toFHIR(FHIREntityConverter converter, PatientBirthdate javaClass) {
+        public Patient toFHIR(FHIREntityConverter converter, PatientBirthdate entity) {
             final Patient patient = new Patient();
-            patient.setId(javaClass.id.toString());
-            patient.setBirthDate(javaClass.birthdate);
+            patient.setId(entity.id.toString());
+            patient.setBirthDate(entity.birthdate);
 
             return patient;
         }

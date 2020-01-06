@@ -6,7 +6,7 @@ public interface FHIRConverter<R extends Base, C> {
 
     C fromFHIR(FHIREntityConverter converter, R resource);
 
-    R toFHIR(FHIREntityConverter converter, C javaClass);
+    R toFHIR(FHIREntityConverter converter, C entity);
 
     Class<R> getFHIRResource();
 

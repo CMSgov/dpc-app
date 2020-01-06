@@ -28,14 +28,14 @@ public class ContactPointConverter implements FHIRConverter<ContactPoint, Contac
     }
 
     @Override
-    public ContactPoint toFHIR(FHIREntityConverter converter, ContactPointEntity javaClass) {
+    public ContactPoint toFHIR(FHIREntityConverter converter, ContactPointEntity entity) {
         final ContactPoint cp = new ContactPoint();
-        cp.setSystem(javaClass.getSystem());
-        cp.setUse(javaClass.getUse());
-        cp.setValue(javaClass.getValue());
+        cp.setSystem(entity.getSystem());
+        cp.setUse(entity.getUse());
+        cp.setValue(entity.getValue());
 
-        if (javaClass.getRank() != null) {
-            cp.setRank(javaClass.getRank());
+        if (entity.getRank() != null) {
+            cp.setRank(entity.getRank());
         }
         return cp;
     }

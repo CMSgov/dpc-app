@@ -33,18 +33,18 @@ public class OrganizationContactEntityConverter implements FHIRConverter<Organiz
     }
 
     @Override
-    public Organization.OrganizationContactComponent toFHIR(FHIREntityConverter converter, ContactEntity javaClass) {
+    public Organization.OrganizationContactComponent toFHIR(FHIREntityConverter converter, ContactEntity entity) {
         final Organization.OrganizationContactComponent contactComponent = new Organization.OrganizationContactComponent();
 
-        contactComponent.setName(converter.toFHIR(HumanName.class, javaClass.getName()));
+        contactComponent.setName(converter.toFHIR(HumanName.class, entity.getName()));
 
-        final List<ContactPoint> cps = javaClass.getTelecom()
+        final List<ContactPoint> cps = entity.getTelecom()
                 .stream()
                 .map(ContactPointEntity::toFHIR)
                 .collect(Collectors.toList());
 
         contactComponent.setTelecom(cps);
-        contactComponent.setAddress(converter.toFHIR(Address.class, javaClass.getAddress()));
+        contactComponent.setAddress(converter.toFHIR(Address.class, entity.getAddress()));
 
         return contactComponent;
     }

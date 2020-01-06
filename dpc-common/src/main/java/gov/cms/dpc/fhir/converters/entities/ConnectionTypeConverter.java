@@ -21,10 +21,10 @@ public class ConnectionTypeConverter implements FHIRConverter<Coding, EndpointEn
     }
 
     @Override
-    public Coding toFHIR(FHIREntityConverter converter, EndpointEntity.ConnectionType javaClass) {
+    public Coding toFHIR(FHIREntityConverter converter, EndpointEntity.ConnectionType entity) {
         final Coding coding = new Coding();
-        coding.setSystem(javaClass.getSystem());
-        coding.setCode(javaClass.getCode());
+        coding.setSystem(entity.getSystem());
+        coding.setCode(entity.getCode());
 
         return coding;
     }

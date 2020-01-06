@@ -39,30 +39,30 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
     }
 
     @Override
-    public Patient toFHIR(FHIREntityConverter converter, PatientEntity javaClass) {
+    public Patient toFHIR(FHIREntityConverter converter, PatientEntity entity) {
         final Patient patient = new Patient();
 
         // Add the patient metadata
         final Meta meta = new Meta();
         meta.addProfile(PatientProfile.PROFILE_URI);
-        meta.setLastUpdatedElement(new InstantType(javaClass.getUpdatedAt().format(INSTANT_FORMATTER)));
+        meta.setLastUpdatedElement(new InstantType(entity.getUpdatedAt().format(INSTANT_FORMATTER)));
         patient.setMeta(meta);
 
-        patient.setId(javaClass.getPatientID().toString());
+        patient.setId(entity.getPatientID().toString());
         patient.addName()
-                .setFamily(javaClass.getPatientLastName())
-                .addGiven(javaClass.getPatientFirstName());
+                .setFamily(entity.getPatientLastName())
+                .addGiven(entity.getPatientFirstName());
 
-        patient.setBirthDate(PatientEntity.fromLocalDate(javaClass.getDob()));
-        patient.setGender(javaClass.getGender());
+        patient.setBirthDate(PatientEntity.fromLocalDate(entity.getDob()));
+        patient.setGender(entity.getGender());
 
         patient
                 .addIdentifier()
                 .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                .setValue(javaClass.getBeneficiaryID());
+                .setValue(entity.getBeneficiaryID());
 
         // Managing organization
-        final Reference organization = new Reference(new IdType("Organization", javaClass.getOrganization().getId().toString()));
+        final Reference organization = new Reference(new IdType("Organization", entity.getOrganization().getId().toString()));
         patient.setManagingOrganization(organization);
 
         return patient;

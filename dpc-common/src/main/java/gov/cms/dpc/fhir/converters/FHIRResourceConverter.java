@@ -5,9 +5,9 @@ import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BaseResource;
 
 /**
- * Converts a FHIR {@link BaseResource} into a corresponding Java class
+ * Converts a FHIR {@link Base} into a corresponding Java class
  *
- * @param <R> - {@link BaseResource} to convert
+ * @param <R> - {@link Base} to convert
  * @param <C> - Java class to convert to
  */
 @FunctionalInterface
