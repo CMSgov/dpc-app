@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(BufferedLoggerHandler.class)
 public abstract class AbstractStoreTest {
 
-    private final IRootKeyStore store;
+    protected final IRootKeyStore store;
 
     public AbstractStoreTest(IRootKeyStore store) {
         this.store = store;
