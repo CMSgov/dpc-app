@@ -189,7 +189,7 @@ Note, token labels are not guaranteed to be unique.
 *  `expiration` sets a custom expiration for the `client_token`.
 This is provided as an [ISO formatted](https://www.iso.org/iso-8601-date-and-time-format.html) string and if omitted will default to the system specified expiration time.
 
-> Note: The user cannot set an expiration time longer than the system allowed maximum.
+> Note: The user cannot set an expiration time longer than the system allowed maximum, which is currently five minutes.
 This will result in an error being returned to the user.
 
 The response from the API includes the `client_token` in the `token` field. 
