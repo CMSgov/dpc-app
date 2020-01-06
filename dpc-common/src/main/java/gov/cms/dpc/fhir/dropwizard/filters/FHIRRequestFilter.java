@@ -20,10 +20,10 @@ public class FHIRRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        // Ensure the Accepts header is set to a FHIR media type
+        // Ensure the `Accept` header is set to a FHIR media type
         checkAccepts(requestContext);
         // The content type header is optional, but if it's present, it has to be a FHIR resource type
-        // HAPI does NOT set the Content-Type, so we can't require it as part of our requests, otherwise our test suite breaks
+        // HAPI does NOT set the Content-Type by default, so we can't require it as part of our requests, otherwise our test suite breaks
         checkContentType(requestContext);
     }
 
