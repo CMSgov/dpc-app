@@ -62,12 +62,17 @@ public class GroupResource extends AbstractGroupResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Create Attribution Roster", notes = "FHIR endpoint to create an Attribution roster (Group resource) associated to the provider listed in the in the Group characteristics.")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
             @ApiResponse(code = 200, message = "Roster already exists")
     })
     @Override
-    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group attributionRoster) {
+    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                 @Valid @Profiled(profile = AttestationProfile.PROFILE_URI)
+                                 @ProvenanceHeader Provenance rosterAttestation,
+                                 Group attributionRoster) {
         // Log attestation
         logAttestation(rosterAttestation, attributionRoster);
         addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
@@ -145,9 +150,14 @@ public class GroupResource extends AbstractGroupResource {
     @ExceptionMetered
     @ApiOperation(value = "Update Attribution Roster", notes = "Update specific Attribution roster." +
             "<p>Updates allow for adding or removing patients from the roster.")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group rosterUpdate) {
+    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
+                              @Valid @Profiled(profile = AttestationProfile.PROFILE_URI)
+                              @ProvenanceHeader Provenance rosterAttestation,
+                              Group rosterUpdate) {
         logAttestation(rosterAttestation, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
@@ -166,6 +176,8 @@ public class GroupResource extends AbstractGroupResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Add roster members", notes = "Update specific Attribution roster by adding members given in the provided resource.")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
     public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
