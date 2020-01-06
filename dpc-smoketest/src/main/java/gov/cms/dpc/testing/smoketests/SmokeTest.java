@@ -2,7 +2,6 @@ package gov.cms.dpc.testing.smoketests;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
@@ -115,8 +114,6 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
         // Disable validation against Attribution service
         this.ctx = FhirContext.forDstu3();
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        ctx.getRestfulClientFactory().setConnectTimeout(1800);
 
         // If we're not supplied all the init parameters, create a new org
         Pair<UUID, PrivateKey> keyTuple;
