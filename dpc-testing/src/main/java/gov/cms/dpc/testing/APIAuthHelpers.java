@@ -17,6 +17,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -41,7 +43,9 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,6 +116,13 @@ public class APIAuthHelpers {
         }
 
         // Submit JWT to /auth endpoint
+        final List<NameValuePair> formData = new ArrayList<>();
+        formData.add(encodeNameValuePair("scope", "system/*.*"));
+        formData.add(encodeNameValuePair("grant_type", "client_credentials"));
+        formData.add(encodeNameValuePair("client_assertion_type", CLIENT_ASSERTION_TYPE));
+        formData.add(encodeNameValuePair("client_assertion", jwt));
+
+        final UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formData);
         final AuthResponse authResponse;
         try (final CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Token/auth", baseURL));
@@ -120,6 +131,7 @@ public class APIAuthHelpers {
             builder.addParameter("client_assertion_type", CLIENT_ASSERTION_TYPE);
             builder.addParameter("client_assertion", jwt);
             final HttpPost post = new HttpPost(builder.build());
+            post.setEntity(entity);
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
             try (CloseableHttpResponse response = client.execute(post)) {
@@ -130,6 +142,21 @@ public class APIAuthHelpers {
             }
         }
         return authResponse;
+    }
+
+    private static NameValuePair encodeNameValuePair(String name, String value) {
+        return new NameValuePair() {
+
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getValue() {
+                return value;
+            }
+        };
     }
 
     public static String createGoldenMacaroon() throws IOException {

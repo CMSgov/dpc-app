@@ -188,13 +188,13 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     public JWTAuthResponse authorizeJWT(
             @ApiParam(name = "scope", allowableValues = "system/*.*", value = "Requested access scope", required = true)
-            @QueryParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
+            @FormParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
             @ApiParam(name = "grant_type", value = "Authorization grant type", required = true, allowableValues = "client_credentials")
-            @QueryParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
+            @FormParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
             @ApiParam(name = "client_assertion_type", value = "Client Assertion Type", required = true, allowableValues = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-            @QueryParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType,
+            @FormParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType,
             @ApiParam(name = "client_assertion", value = "Signed JWT", required = true)
-            @QueryParam(value = "client_assertion") @NotEmpty(message = "Assertion is required") String jwtBody) {
+            @FormParam(value = "client_assertion") @NotEmpty(message = "Assertion is required") String jwtBody) {
         // Actual scope implementation will come as part of DPC-747
         validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
 
