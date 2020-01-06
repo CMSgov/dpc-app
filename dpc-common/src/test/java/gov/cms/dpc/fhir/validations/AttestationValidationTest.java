@@ -33,7 +33,7 @@ class AttestationValidationTest {
 
         fhirValidator = ctx.newValidator();
         fhirValidator.setValidateAgainstStandardSchematron(false);
-        fhirValidator.setValidateAgainstStandardSchema(false);
+        fhirValidator.setValidateAgainstStandardSchema(true);
         fhirValidator.registerValidatorModule(instanceValidator);
 
 
@@ -58,7 +58,6 @@ class AttestationValidationTest {
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
         addAgent(provenance);
-        provenance.addTarget(new Reference("Patient/test"));
 
 
         final ValidationResult result = fhirValidator.validateWithResult(provenance);
@@ -94,7 +93,7 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-        provenance.addTarget(new Reference("Patient/test"));
+//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         // Add an agent
@@ -124,7 +123,7 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-        provenance.addTarget(new Reference("Patient/test"));
+//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
         final Provenance.ProvenanceAgentComponent agent = new Provenance.ProvenanceAgentComponent();
         agent.setWho(new Reference("Organization/test"));
@@ -153,7 +152,7 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-        provenance.addTarget(new Reference("Patient/test"));
+//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         // Add an agent
@@ -183,7 +182,7 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-        provenance.addTarget(new Reference("Patient/test"));
+//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         // Add an agent
@@ -227,7 +226,7 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-        provenance.addTarget(new Reference("Patient/test"));
+//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         // Add an agent
