@@ -10,7 +10,7 @@ This data is made available through a set of [FHIR](http://hl7.org/fhir/STU3/) c
 
 This guide serves as a starting point for users to begin working with the API by introducing the core APIs as well as two key concepts of [Bulk Data](#bulk-data) and [Patient Attribution](#attribution).
 
-Documentation is also available in a comprehensive [OpenAPI format](/api/swagger) as well as a FHIR [implementation guide](/ig/index.html) 
+Documentation is also available in a comprehensive [OpenAPI format](/api/swagger) as well as a FHIR [implementation guide](/ig/index.html).
 
 ## Bulk Data
 
@@ -90,7 +90,7 @@ This can be done either through the Web UI or via the `PublicKey` endpoint in th
 
 2. The user creates a `client_token` to use for a given application.
 
-3. For each API request, the user creates an `access_token` by submitting a self-signed JWT to the `Token/auth` endpoint.
+3. For each API request, the user creates an `access_token` by submitting a self-signed JWT to the `/Token/auth` endpoint.
 
 4. The user sets the provided `access_token` as a `Bearer` token in the `Authorization` header, for each request to the DPC API 
 
@@ -101,7 +101,7 @@ Details on how to create an `access_token` from a given `client_token` are given
 
 #### Listing client_tokens
 
-All client tokens registered by the organization for a given environment can be listed by making a GET request to the `Token/` endpoint.
+All client tokens registered by the organization for a given environment can be listed by making a GET request to the `/Token` endpoint.
 This will return an array of objects which list the token ID, when it was created, when it expires, and the label associated with the token. 
 
 ~~~sh
@@ -150,7 +150,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token \
 }
 ~~~
 
-Specific client_tokens can be listed by making a `GET` request to the `Token/` endpoint using the unique id of the client_token.
+Specific client_tokens can be listed by making a `GET` request to the `/Token` endpoint using the unique id of the client_token.
 
 ~~~sh
 GET /api/v1/Token/{client_token id}
@@ -180,16 +180,16 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token/{client_token id} \
 
 #### Creating a client_token
 
-Creating a `client_token` can be done by making a `POST` request to the `Token/` endpoint. 
+Creating a `client_token` can be done by making a `POST` request to the `/Token` endpoint. 
 This endpoint accepts two, optional query params:
 
 * `label` sets a human readable label for the token. If omitted, DPC will auto-generate one.
 Note, token labels are not guaranteed to be unique. 
 
 *  `expiration` sets a custom expiration for the `client_token`.
-This is provided as an ISO formatted string and if omitted will default to the system specified expiration time.
+This is provided as an [ISO formatted](https://www.iso.org/iso-8601-date-and-time-format.html) string and if omitted will default to the system specified expiration time.
 
-> Note: The user cannot set an expiration time longer than the system allowed maximum.
+> Note: The user cannot set an expiration time longer than the system allowed maximum, which is currently five minutes.
 This will result in an error being returned to the user.
 
 The response from the API includes the `client_token` in the `token` field. 
@@ -226,7 +226,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token?label={token label}&expiration=
 
 #### Deleting a client_token
 
-Client tokens can be removed by sending a `DELETE` request to the `Token/` endpoint, using the unique ID of the client_token, which is returned either on creation, or as the result of listing the client_tokens.
+Client tokens can be removed by sending a `DELETE` request to the `/Token` endpoint, using the unique ID of the client_token, which is returned either on creation, or as the result of listing the client_tokens.
 
 ~~~sh
 DELETE /api/v1/Token/{client_token id}
@@ -260,7 +260,7 @@ Users are required to maintain a list of acceptable public keys with the DPC sys
 
 #### Listing public keys
 
-All public keys registered by the organization for the given endpoint can be listed by making a GET request to the `Key/` endpoint.
+All public keys registered by the organization for the given endpoint can be listed by making a GET request to the `/Key` endpoint.
 This will return an array of objects which list the public key ID, the human readable label, creation time and the PEM encoded value of the public key
 
 ~~~sh
@@ -294,7 +294,7 @@ curl -v http://localhost:3002/v1/Key \
 }
 ~~~
 
-Specific public keys can be listed by making a `GET` request to the `Key/` endpoint using the unique id of the public key.
+Specific public keys can be listed by making a `GET` request to the `/Key` endpoint using the unique id of the public key.
 
 ~~~sh
 GET /api/v1/Key/{public key id}
@@ -323,7 +323,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
 
 #### Uploading a public key
 
-Uploading a public key can be done by making a `POST` request to the `Key/` endpoint. 
+Uploading a public key can be done by making a `POST` request to the `/Key` endpoint. 
 This endpoint requires one additional query param:
 
 * `label` sets a human readable label for the public key (this must be less than 26 characters long). 
@@ -364,7 +364,7 @@ The `id` field of the response will be used as the `kid` JWT header value, as de
 
 #### Deleting a public key
 
-Public keys can be removed by sending a `DELETE` request to the `Key/` endpoint, using the unique ID of the public key, which is returned either on creation, or as the result of listing the public keys.
+Public keys can be removed by sending a `DELETE` request to the `/Key` endpoint, using the unique ID of the public key, which is returned either on creation, or as the result of listing the public keys.
 
 ~~~sh
 DELETE /api/v1/Key/{public key ID}
@@ -388,7 +388,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Key/{public key id} \
 
 ### Creating an access_token
 
-Creating an *access_token* for API access requires the user to submit a self-signed JWT to the `Token/auth` endpoint.
+Creating an *access_token* for API access requires the user to submit a self-signed JWT to the `/Token/auth` endpoint.
 This token must be signed with a public key previously registered and contain the following header and claim values:
 
 
@@ -412,7 +412,33 @@ This token must be signed with a public key previously registered and contain th
 
 `jti`	_required_	A nonce string value that uniquely identifies this authentication JWT.
 
-The DPC API supports a `Token/validate` endpoint, which allows the user to submit their signed JWT for validation.
+#### Creating a JSON Web Token (JWT)
+[JWT.io](https://jwt.io/) provides comprehensive information about what JSON Web Tokens are and how to use them.  For testing purposes, the site offers a [debugger](https://jwt.io/#debugger-io) that allows you to enter a header, payload, and keys to generate a signed JWT.
+
+Online tools for creating JWTs **should not** be considered secure and **should not** be used to create tokens to access production data. Instead, use one of the [libraries](https://jwt.io/#libraries-io) listed on JWT.io to generate JWTs in your DPC API client.
+
+##### JWT for testing in the sandbox
+For the DPC sandbox environment, which contains no PII or PHI, a JWT can be created with the [JWT.io debugger](https://jwt.io/#debugger-io). More details on each field can be found under [Authentication JWT Header Values](#authentication-jwt-header-values) and [Authentication JWT Claims](#authentication-jwt-claims).
+1. From the Algorithm dropdown, select `RS384`.
+1. On the "Decoded" side, the "Header: Algorithm & Token Type" text area must contain a JSON object with the fields below. `alg` and `typ` will already be set, so you will need to add `kid`.
+   1. `"alg": "RS384"` (set for you after you select the algorithm)
+   1. `"kid": "{ID of public key}"`
+   1. `"typ": "JWT"` (set by default)
+1. The "Payload: Data" text area must contain a JSON object with the fields below. It will already contain `sub`, `name`, `admin`, and `iat`. The value of `sub` will change, and `name`, `admin`, and `iat` should be removed.
+   1. `"iss": "{client token}"`
+   1. `"sub": "{client token}"`
+   1. `"aud": "https://sandbox.dpc.cms.gov/api/v1/Token/auth"`
+   1. `"exp": "{expiration time}"`
+   1. `"jti": "{nonce}"`
+1. Under "Verify Signature", the first text area should contain your public key, and the second, your private key. This keypair should be for testing in the sandbox, not one that is used to access any production data.
+
+![Example of using JWT.io's debugger](../../assets/images/jwt-io-example.png)
+
+##### JWT for production use
+JWT.io's debugger **should not** be used to create tokens for accessing the production environment. JWTs can be created by your DPC client using one of the many [JWT libraries](https://jwt.io/#libraries-io) in a variety of programming languages. For example, Auth0 has created a [Java library](https://github.com/auth0/java-jwt), and its [README](https://github.com/auth0/java-jwt#usage) shows you how to implement it to create your own tokens.
+
+#### Validating a DPC token
+The DPC API supports a `/Token/validate` endpoint, which allows the user to submit their signed JWT for validation.
 This will return an error message with details as to which claims or values on the JWT are missing or incorrect.
 This method *DOES NOT* validate the JWT signature, public key or client tokens, it merely verifies the necessary elements are present in the JWT entity.
 
@@ -430,7 +456,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token/validate \
 -d "{Signed JWT}"
 ~~~
 
-In order to receive an `access_token` the JWT is submitted to the `Token/auth` endpoint as the `client_assertion` query param of an `application/x-www-form-urlencoded` POST request, along with the following, additional, query params:
+In order to receive an `access_token` the JWT is submitted to the `/Token/auth` endpoint as the `client_assertion` query param of an `application/x-www-form-urlencoded` POST request, along with the following, additional, query params:
 
 **Parameters**
 
