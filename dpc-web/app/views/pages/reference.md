@@ -981,6 +981,59 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/\$submit
 }
 ~~~
 
+### Create attestation record for data release
+
+CMS requires that the provider attest they have a treatment related purpose for adding a patient to their roster **each** time they make a roster addition.
+This is accomplished by submitting a `Provenance` resource via the `X-Provenance` header, as outlined in the FHIR specification.
+
+Details on the exact data format are given in the [implementation guide](/ig/index.html) but at a minimum, each attestation must include:
+
+- A timestamp of when the attestation is made.
+- The reason for the attestation (currently only: `http://hl7.org/fhir/v3/ActReason#TREAT` is supported).
+- The agent making the attestation (identified by their Organization resource ID) on behalf of a given provider (identified by their resource ID).
+
+**Example attestation**
+
+```javascript
+{
+  "resourceType": "Provenance",
+  "meta": {
+    "profile": [
+      "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation"
+    ]
+  },
+  "recorded": "1990-01-01T00:00:00.000-05:00",
+  "reason": [
+    {
+      "system": "http://hl7.org/fhir/v3/ActReason",
+      "code": "TREAT"
+    }
+  ],
+  "agent": [
+    {
+      "role": [
+        {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/RoleClass",
+              "code": "AGNT"
+            }
+          ]
+        }
+      ],
+      "whoReference": {
+        "reference": "Organization/{organization ID}"
+      },
+      "onBehalfOfReference": {
+        "reference": "Practitioner/{practitioner ID}"
+      }
+    }
+  ]
+}
+```
+
+The provenance resource is then included in the `X-Provenance` header as part of any `/Group` operations which add patients to a given roster.
+
 ### Create an Attribution Group
 
 Once the Provider and Patient records have been created, the final step is to associate the records into an attribution [Group](http://hl7.org/fhir/STU3/patient.html) resource, also known as a Patient roster.
@@ -1001,6 +1054,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group
 -H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Content-Type: application/fhir+json' \
+-H 'X-Provenance: {FHIR provenance resource} \
 -X POST \
 -d @group.json
 ~~~
@@ -1123,6 +1177,7 @@ POST /api/v1/Group/{Group.id}/$add
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
 -H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
+-H 'X-Provenance: {FHIR provenance resource} \
 -X POST \
 -d @group_addition.json
 ~~~
@@ -1232,6 +1287,7 @@ PUT /api/v1/Group/{Group.id}
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
 -H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
+-H 'X-Provenance: {FHIR provenance resource} \
 -X PUT \
 -d @updated_group.json
 ~~~
