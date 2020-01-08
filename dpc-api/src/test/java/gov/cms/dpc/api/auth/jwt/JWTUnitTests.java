@@ -38,6 +38,7 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.Date;
+import java.text.DateFormat;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -432,6 +433,64 @@ class JWTUnitTests {
 
             assertEquals(400, response.getStatus(), "Should not be valid");
             assertTrue(response.readEntity(String.class).contains("JWT is expired"), "Should have correct exception");
+        }
+
+        @Test
+        void testNumericExpiration() throws NoSuchAlgorithmException {
+            // Submit JWT with non-client token
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final Map<String, Object> claims = new HashMap<>();
+            claims.put("exp", -100);
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer(id)
+                    .setSubject(id)
+                    .setId(id)
+                    .addClaims(claims)
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("JWT is expired"), "Should have correct exception");
+        }
+
+        @Test
+        void testDateExpiration() throws NoSuchAlgorithmException {
+            // Submit JWT with non-client token
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+
+            final Map<String, Object> claims = new HashMap<>();
+            claims.put("exp", DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(Instant.now().atOffset(ZoneOffset.UTC)));
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .setHeaderParam("kid", UUID.randomUUID())
+                    .setAudience(String.format("%sToken/auth", "here"))
+                    .setIssuer(id)
+                    .setSubject(id)
+                    .setId(id)
+                    .addClaims(claims)
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
         }
 
         @Test
