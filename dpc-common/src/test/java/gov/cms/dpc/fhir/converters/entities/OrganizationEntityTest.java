@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OrganizationEntityTest extends AbstractEntityConversionTest {
 
     @Test
-    @Disabled
+    @Disabled // Disabled until DPC-935
     void testSimpleRoundTrip() {
         final OrganizationEntity entity = new OrganizationEntity();
         entity.setId(UUID.randomUUID());
