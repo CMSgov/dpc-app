@@ -115,7 +115,7 @@ public class KeyResource extends AbstractKeyResource {
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
                                      @NotEmpty String key,
-                                     @ApiParam(name = "label", value = "Public Key ID (label)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
+                                     @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
                                      @QueryParam(value = "label") Optional<String> keyLabelOptional) {
         final String keyLabel;
         if (keyLabelOptional.isPresent()) {
