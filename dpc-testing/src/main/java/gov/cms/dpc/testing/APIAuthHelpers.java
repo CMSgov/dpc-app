@@ -160,7 +160,7 @@ public class APIAuthHelpers {
     }
 
     public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
-        return generateKeyPair(KeyType.RSA);
+        return generateKeyPair(KeyType.ECC);
     }
 
     public static KeyPair generateKeyPair(KeyType keyType) throws NoSuchAlgorithmException {
