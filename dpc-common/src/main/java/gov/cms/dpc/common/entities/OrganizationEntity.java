@@ -1,26 +1,18 @@
 package gov.cms.dpc.common.entities;
 
-import ca.uhn.fhir.parser.DataFormatException;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRConvertable;
-import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.converters.AddressConverter;
-import gov.cms.dpc.fhir.converters.ContactElementConverter;
-import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity(name = "organizations")
-public class OrganizationEntity implements Serializable, FHIRConvertable<OrganizationEntity, Organization> {
+public class OrganizationEntity implements Serializable {
     public static final long serialVersionUID = 42L;
 
     @Id
@@ -133,94 +125,6 @@ public class OrganizationEntity implements Serializable, FHIRConvertable<Organiz
 
     public void setRosters(List<RosterEntity> rosters) {
         this.rosters = rosters;
-    }
-
-    @Override
-    public OrganizationEntity fromFHIR(Organization resource) {
-        final OrganizationEntity entity = new OrganizationEntity();
-
-        // Add the profile metadata
-        final Meta meta = new Meta();
-        meta.addProfile(OrganizationProfile.PROFILE_URI);
-
-        // If we have an ID, and it parses, use it
-        final String idString = resource.getId();
-        UUID orgID;
-        if (idString == null) {
-            orgID = UUID.randomUUID();
-        } else {
-//             If we have an ID, we need to strip off the ID header, since we already know the resource type
-            orgID = FHIRExtractors.getEntityUUID(idString);
-        }
-
-        entity.setId(orgID);
-
-        // Find the first Organization ID that we can use
-        final Optional<Identifier> identifier = resource
-                .getIdentifier()
-                .stream()
-                // Don't support UNKNOWN systems for now, only things we can use
-                .filter(resourceID -> {
-                    final String system = resourceID.getSystem();
-                    try {
-                        final DPCIdentifierSystem idSys = DPCIdentifierSystem.fromString(system);
-                        // MBI does not work, so filter it out
-                        return idSys != DPCIdentifierSystem.MBI;
-                    } catch (Exception e) {
-                        return false;
-                    }
-                })
-                .findFirst();
-
-        if (identifier.isEmpty()) {
-            throw new DataFormatException("Identifier must be NPPES or PECOS");
-        }
-        entity.setOrganizationID(new OrganizationID(
-                DPCIdentifierSystem.fromString(identifier.get().getSystem()),
-                identifier.get().getValue()));
-
-        entity.setOrganizationName(resource.getName());
-        entity.setOrganizationAddress(AddressConverter.convert(resource.getAddressFirstRep()));
-
-        // Add all contact info
-        final List<ContactEntity> contactEntities = resource
-                .getContact()
-                .stream()
-                .map(ContactElementConverter::convert)
-                .collect(Collectors.toList());
-        // Add the entity reference
-        contactEntities.forEach(contact -> contact.setOrganization(entity));
-        entity.setContacts(contactEntities);
-
-        return entity;
-    }
-
-    @Override
-    public Organization toFHIR() {
-        // TODO: This will be dramatically improved in the future. (DPC-276)
-
-        final Organization org = new Organization();
-
-        org.setId(this.id.toString());
-        org.addIdentifier(this.organizationID.toFHIR());
-        org.setName(this.organizationName);
-        org.setAddress(Collections.singletonList(this.organizationAddress.toFHIR()));
-
-        final List<Organization.OrganizationContactComponent> contactComponents = this.contacts
-                .stream()
-                .map(ContactEntity::toFHIR)
-                .collect(Collectors.toList());
-        org.setContact(contactComponents);
-
-        final List<Reference> endpointReferences = this
-                .endpoints
-                .stream()
-                .map(ep -> new Reference(new IdType("Endpoint", ep.getId().toString())))
-                .collect(Collectors.toList());
-
-        org.setEndpoint(endpointReferences);
-
-        return org;
     }
 
     /**
