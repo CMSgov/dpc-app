@@ -135,6 +135,14 @@ public class KeyResource extends AbstractKeyResource {
             throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
         }
 
+        // Validate public key
+        try {
+            PublicKeyHandler.validatePublicKey(publicKey);
+        } catch (PublicKeyException e) {
+            logger.error("Cannot parse provided public key.", e);
+            throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
+        }
+
         final PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         final OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(organizationPrincipal.getID());

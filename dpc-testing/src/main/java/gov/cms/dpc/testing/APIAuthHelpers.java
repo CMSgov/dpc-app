@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.*;
 import java.security.cert.X509Certificate;
+import java.security.spec.RSAPublicKeySpec;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -159,7 +160,12 @@ public class APIAuthHelpers {
     }
 
     public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+        return generateKeyPair(4096);
+    }
+
+    public static KeyPair generateKeyPair(int keySize) throws NoSuchAlgorithmException {
         final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(keySize);
         return kpg.generateKeyPair();
     }
 

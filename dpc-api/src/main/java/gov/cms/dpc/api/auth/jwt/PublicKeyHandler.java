@@ -2,6 +2,7 @@ package gov.cms.dpc.api.auth.jwt;
 
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.PEMParser;
@@ -17,6 +18,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 public class PublicKeyHandler {
+
+    static final ASN1ObjectIdentifier RSA_PARENT = new ASN1ObjectIdentifier("1.2.840.113549");
 
     private PublicKeyHandler() {
         // Not used
@@ -68,6 +71,29 @@ public class PublicKeyHandler {
         } catch (IOException e) {
             throw new PublicKeyException("Cannot convert public key to PEM", e);
         }
+    }
+
+    public static void validatePublicKey(SubjectPublicKeyInfo value) {
+        // If RSA, do some other validations
+        if (value.getAlgorithm().getAlgorithm().on(RSA_PARENT)) {
+            validateRSAKey(value);
+        } else {
+            // Do other things here
+        }
+
+    }
+
+    private static void validateRSAKey(SubjectPublicKeyInfo value) {
+        // Should have a minimum length
+        try {
+            // Verifies the key is at least 4096 bits, which is 550 bytes of encoded data
+            if (value.getEncoded().length < 550) {
+                throw new PublicKeyException("Public key must be at least 4096 bits.");
+            }
+        } catch (IOException e) {
+            throw new PublicKeyException("Cannot read public key.", e);
+        }
+
     }
 
     /**

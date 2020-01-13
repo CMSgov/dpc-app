@@ -2,7 +2,9 @@ package gov.cms.dpc.api.auth;
 
 import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -87,6 +89,20 @@ class PublicKeyHandlerTest {
 
             final PublicKeyException exception = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.pemEncodePublicKey(keyInfo), "Should throw IO exception");
             assertEquals("Cannot convert public key to PEM", exception.getMessage(), "Should have correct message");
+        }
+    }
+
+    @Nested
+    @DisplayName("Public Key Validation Tests")
+    class PublicKeyValidationTests {
+
+        @Test
+        void testRSAKeyTooShort() throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(2048);
+            final byte[] encoded = keyPair.getPublic().getEncoded();
+            final SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(encoded));
+            final PublicKeyException exception = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.validatePublicKey(publicKeyInfo));
+            assertEquals("Public key must be at least 4096 bits.", exception.getMessage(), "Should have correct error message");
         }
     }
 
