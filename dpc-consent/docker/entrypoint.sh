@@ -8,7 +8,11 @@ else
   JACOCO=""
 fi
 
-CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.consent.DPCConsentService"
+if [ -n "$NEW_RELIC_LICENSE_KEY" ]; then
+    CMDLINE="java -javaagent:/newrelic/newrelic.jar $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.consent.DPCConsentService"
+else
+    CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.consent.DPCConsentService"
+fi
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
