@@ -2,15 +2,13 @@ package gov.cms.dpc.api.auth.jwt;
 
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.*;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.security.Key;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -79,8 +77,13 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
     void validateExpiration(Claims claims) {
         // Verify not expired and not more than 5 minutes in the future
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        final OffsetDateTime expiration = getClaimIfPresent("expiration", claims.getExpiration())
-                .toInstant().atOffset(ZoneOffset.UTC);
+        final OffsetDateTime expiration;
+        try {
+            final Integer epochSeconds = getClaimIfPresent("expiration", claims.get("exp", Integer.class));
+            expiration = Instant.ofEpochSecond(epochSeconds).atOffset(ZoneOffset.UTC);
+        } catch (RequiredTypeException e) {
+            throw new WebApplicationException("Expiration time must be seconds since unix epoch", Response.Status.BAD_REQUEST);
+        }
 
         // ensure Not expired
         if (now.isAfter(expiration)) {
