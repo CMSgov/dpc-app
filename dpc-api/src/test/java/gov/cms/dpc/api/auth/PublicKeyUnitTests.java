@@ -11,6 +11,7 @@ import gov.cms.dpc.api.resources.v1.KeyResource;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.KeyType;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 
 import javax.ws.rs.client.Entity;
@@ -50,9 +53,10 @@ class PublicKeyUnitTests {
     @DisplayName("Key submission tests")
     class KeySubmissionTests {
 
-        @Test
-        void testMediaType() throws NoSuchAlgorithmException {
-            final KeyPair key = APIAuthHelpers.generateKeyPair();
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testMediaType(KeyType keyType) throws NoSuchAlgorithmException {
+            final KeyPair key = APIAuthHelpers.generateKeyPair(keyType);
 
             final Response response = RESOURCE
                     .target("/v1/Key")
@@ -73,9 +77,10 @@ class PublicKeyUnitTests {
                     () -> assertTrue(response.readEntity(String.class).contains("Public key is not valid"), "Should have correct error message"));
         }
 
-        @Test
-        void testKeyDefaultLabel() throws NoSuchAlgorithmException {
-            final KeyPair key = APIAuthHelpers.generateKeyPair();
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testKeyDefaultLabel(KeyType keyType) throws NoSuchAlgorithmException {
+            final KeyPair key = APIAuthHelpers.generateKeyPair(keyType);
             final Response response = RESOURCE
                     .target("/v1/Key")
                     .request()
@@ -85,10 +90,11 @@ class PublicKeyUnitTests {
                     () -> assertTrue(response.readEntity(KeyView.class).label.startsWith("key:"), "Should have default label"));
         }
 
-        @Test
-        void testKeyCustomLabel() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testKeyCustomLabel(KeyType keyType) throws NoSuchAlgorithmException {
             final String label = "This is a label";
-            final KeyPair key = APIAuthHelpers.generateKeyPair();
+            final KeyPair key = APIAuthHelpers.generateKeyPair(keyType);
             final Response response = RESOURCE
                     .target("/v1/Key")
                     .queryParam("label", label)

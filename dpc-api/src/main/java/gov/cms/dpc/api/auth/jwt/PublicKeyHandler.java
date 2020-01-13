@@ -4,6 +4,7 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.jcajce.provider.asymmetric.RSA;
 import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -106,8 +107,10 @@ public class PublicKeyHandler {
     static PublicKey publicKeyFromEntity(PublicKeyEntity entity) {
         X509EncodedKeySpec spec;
         try {
-            spec = new X509EncodedKeySpec(entity.getPublicKey().getEncoded());
-            return KeyFactory.getInstance("RSA").generatePublic(spec);
+            final SubjectPublicKeyInfo publicKeySpec = entity.getPublicKey();
+            final String keyType = publicKeySpec.getAlgorithm().getAlgorithm().on(RSA_PARENT) ? "RSA" : "EC";
+            spec = new X509EncodedKeySpec(publicKeySpec.getEncoded());
+            return KeyFactory.getInstance(keyType).generatePublic(spec);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new PublicKeyException("Cannot convert Key Spec to Public Key", e);
         }
