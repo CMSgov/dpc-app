@@ -21,7 +21,11 @@ if [ -n "$BOOTSTRAP" ]; then
   bootstrap_config
 fi
 
-CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
+if [ -n "$NEW_RELIC_LICENSE_KEY" ]; then
+    CMDLINE="java -javaagent:/newrelic/newrelic.jar $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
+else
+    CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
+fi
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
