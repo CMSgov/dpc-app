@@ -3,19 +3,27 @@ package gov.cms.dpc.fhir.converters.entities;
 import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.converters.FHIRConverter;
+import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RosterEntityConverter {
+public class RosterEntityConverter implements FHIRConverter<Group, RosterEntity> {
 
-    private RosterEntityConverter() {
+    public RosterEntityConverter() {
         // Not used
     }
 
-    public static Group convert(RosterEntity entity) {
+    @Override
+    public RosterEntity fromFHIR(FHIREntityConverter converter, Group resource) {
+        throw new UnsupportedOperationException("Entity cannot be converted from FHIR, using this class");
+    }
+
+    @Override
+    public Group toFHIR(FHIREntityConverter converter, RosterEntity entity) {
         final Group group = new Group();
         group.setType(Group.GroupType.PERSON);
         group.setActual(true);
@@ -40,6 +48,16 @@ public class RosterEntityConverter {
         group.setMember(patients);
 
         return group;
+    }
+
+    @Override
+    public Class<Group> getFHIRResource() {
+        return Group.class;
+    }
+
+    @Override
+    public Class<RosterEntity> getJavaClass() {
+        return RosterEntity.class;
     }
 
     private static Group.GroupMemberComponent buildComponent(AttributionRelationship relationship) {
