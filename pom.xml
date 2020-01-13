@@ -50,6 +50,7 @@
         <jacoco.version>0.8.5</jacoco.version>
         <jooq.version>3.12.1</jooq.version>
         <bouncey.version>1.64</bouncey.version>
+        <pitest.version>1.4.10</pitest.version>
     </properties>
 
     <developers>
@@ -260,6 +261,12 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <version>${pitest.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -342,7 +349,9 @@
                                     <compilerArgs>
                                         <arg>-XDcompilePolicy=simple</arg>
                                         <!--All ErrorProne configuration options need to be included in a single arg line-->
-                                        <arg>-Xplugin:ErrorProne -XepExcludedPaths:.*/target/generated-sources/.* -Xep:RemoveUnusedImports:ERROR</arg>
+                                        <arg>-Xplugin:ErrorProne -XepExcludedPaths:.*/target/generated-sources/.*
+                                            -Xep:RemoveUnusedImports:ERROR
+                                        </arg>
                                         <!-- Tell ErrorProne to ignore checking for processed annotations-->
                                         <arg>-Xlint:all,-processing</arg>
                                         <arg>-Werror</arg>
@@ -574,11 +583,28 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>${pitest.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>0.11</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 
     <reporting>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
+            </plugin>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>3.0.0</version>

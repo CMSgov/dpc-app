@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f480471d-e5b0-4c11-ab69-38c0f1f8b094",
+		"_postman_id": "33c79dd6-30a2-4f92-a571-d13d56feba16",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1136,6 +1136,59 @@
 		{
 			"name": "Updating",
 			"item": [
+				{
+					"name": "Check update invalid content type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "96f38c80-8b9d-4761-b66c-a02bd1de7408",
+								"exec": [
+									"pm.test(\"Status is 415\", function () {",
+									"    pm.response.to.have.status(415);",
+									"});",
+									"",
+									"pm.test(\"Body matches expected response\", function() {",
+									"    var respJson = pm.response.json();",
+									"    pm.expect(respJson.issue).to.have.length(1)",
+									"    pm.expect(respJson.issue[0].details.text).to.be.equal(\"`Content-Type:` header must specify valid FHIR content type\")",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/fire+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resourceType\": \"Organization\",\n    \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n    \"identifier\": [\n        {\n            \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n            \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n        }\n    ],\n    \"name\": \"Beth Israel Deaconess HealthCare - Chestnut Hill\",\n    \"address\": [\n        {\n            \"use\": \"work\",\n            \"type\": \"both\",\n            \"line\": [\n                \"200 Boylston Street, 4th Floor\"\n            ],\n            \"city\": \"Chestnut Hill\",\n            \"state\": \"MA\",\n            \"postalCode\": \"02467\",\n            \"country\": \"US\"\n        }\n    ],\n    \"endpoint\": [\n        {\n            \"reference\": \"Endpoint/0a60c95c-48b4-4f39-8bf4-09f7dfe2e3cc\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Organization/{{organization_id}}",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Organization",
+								"{{organization_id}}"
+							]
+						},
+						"description": "Attempt to update the organization value, but via an incorrect Content-Type header"
+					},
+					"response": []
+				},
 				{
 					"name": "Update organization",
 					"event": [
