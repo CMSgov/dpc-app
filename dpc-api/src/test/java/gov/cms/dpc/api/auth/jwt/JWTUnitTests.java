@@ -19,6 +19,7 @@ import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.KeyType;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import io.jsonwebtoken.Jwts;
@@ -29,6 +30,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 
 import javax.ws.rs.client.Entity;
@@ -36,6 +39,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -71,7 +75,6 @@ class JWTUnitTests {
     @DisplayName("Form Param Tests")
     class FormParamTests {
 
-        @Test
         void testFormParams() {
             final String payload = "this is not a payload";
             final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
@@ -242,10 +245,11 @@ class JWTUnitTests {
     @DisplayName("JWT Tests")
     class JWTests {
 
-        @Test
-        void testMissingJWTPublicKey() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testMissingJWTPublicKey(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with missing key
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", UUID.randomUUID())
@@ -254,7 +258,7 @@ class JWTUnitTests {
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -270,7 +274,6 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Cannot find public key"), "Should have correct exception");
         }
 
-        @Test
         void testExpiredJWT() {
             final KeyPair keyPair = JWTKeys.get(correctKEYID);
 
@@ -281,7 +284,7 @@ class JWTUnitTests {
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.ES256)
                     .compact();
 
             // Submit the JWT
@@ -297,9 +300,10 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Invalid JWT"), "Should have correct exception");
         }
 
-        @Test
-        void testJWTWrongSigningKey() throws NoSuchAlgorithmException {
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testJWTWrongSigningKey(KeyType keyType) throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", correctKEYID)
@@ -308,7 +312,7 @@ class JWTUnitTests {
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -335,7 +339,7 @@ class JWTUnitTests {
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.ES256)
                     .compact();
 
             // Submit the JWT
@@ -368,10 +372,11 @@ class JWTUnitTests {
     @DisplayName("JWT Validation Tests")
     class ValidationTests {
 
-        @Test
-        void testNonToken() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testNonToken(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String jwt = Jwts.builder()
                     .setHeaderParam("kid", UUID.randomUUID())
@@ -380,7 +385,7 @@ class JWTUnitTests {
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -393,10 +398,11 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Client token is not formatted correctly"), "Should have correct exception");
         }
 
-        @Test
-        void testUUIDToken() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testUUIDToken(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -406,7 +412,7 @@ class JWTUnitTests {
                     .setSubject(id)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -419,10 +425,11 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Cannot use Token ID as `client_token`, must use actual token value"), "Should have correct exception");
         }
 
-        @Test
-        void testExpiredJWT() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testExpiredJWT(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -432,7 +439,7 @@ class JWTUnitTests {
                     .setSubject(id)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -503,10 +510,12 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
         }
 
-        @Test
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testOverlongJWT(KeyType keyType) throws NoSuchAlgorithmException {
         void testOverlongJWT() throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -516,7 +525,7 @@ class JWTUnitTests {
                     .setSubject(id)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(12, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -529,9 +538,10 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Token expiration cannot be more than 5 minutes in the future"), "Should have correct exception");
         }
 
-        @Test
-        void testWrongAudClaim() throws NoSuchAlgorithmException {
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testWrongAudClaim(KeyType keyType) throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
             final String m = buildMacaroon();
 
             final String id = UUID.randomUUID().toString();
@@ -542,7 +552,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -555,10 +565,11 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Audience claim value is incorrect"), "Should have correct exception");
         }
 
-        @Test
-        void testSuccess() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testSuccess(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -568,7 +579,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -580,9 +591,10 @@ class JWTUnitTests {
             assertEquals(200, response.getStatus(), "Should be valid");
         }
 
-        @Test
-        void testMismatchClaims() throws NoSuchAlgorithmException {
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testMismatchClaims(KeyType keyType) throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -592,7 +604,7 @@ class JWTUnitTests {
                     .setSubject("not matching")
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -605,9 +617,10 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Issuer and Subject must be identical"), "Should have correct exception");
         }
 
-        @Test
-        void testMissingClaim() throws NoSuchAlgorithmException {
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testMissingClaim(KeyType keyType) throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -616,7 +629,7 @@ class JWTUnitTests {
                     .setSubject("not matching")
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -629,7 +642,6 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Claim `issuer` must be present"), "Should have correct exception");
         }
 
-        @Test
         void testNotJWT() {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
@@ -641,10 +653,11 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("JWT is not formatted correctly"), "Should have correct exception");
         }
 
-        @Test
-        void testMissingKID() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testMissingKID(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -653,7 +666,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -666,10 +679,11 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("JWT header must have `kid` value"), "Should have correct exception");
         }
 
-        @Test
-        void testInvalidKID() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testInvalidKID(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -679,7 +693,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -767,5 +781,9 @@ class JWTUnitTests {
     private static String buildMacaroon() {
         return MacaroonsBuilder.create("http://local", "secret, secret", "id-one")
                 .serialize(MacaroonVersion.SerializationVersion.V2_JSON);
+    }
+
+    private static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
+        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
     }
 }
