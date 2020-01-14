@@ -274,6 +274,7 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Cannot find public key"), "Should have correct exception");
         }
 
+        @Test
         void testExpiredJWT() {
             final KeyPair keyPair = JWTKeys.get(correctKEYID);
 
@@ -642,6 +643,7 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Claim `issuer` must be present"), "Should have correct exception");
         }
 
+        @Test
         void testNotJWT() {
             // Submit the JWT
             Response response = RESOURCE.target("/v1/Token/validate")
@@ -706,10 +708,11 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
         }
 
-        @Test
-        void testIncorrectExpFormat() throws NoSuchAlgorithmException {
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
+        void testIncorrectExpFormat(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair();
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -719,7 +722,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .claim("exp", Instant.now().plus(1, ChronoUnit.MINUTES).atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
