@@ -142,6 +142,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
     private String generatePublicKey() throws NoSuchAlgorithmException {
         final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(4096);
         final KeyPair keyPair = kpg.generateKeyPair();
 
         final String encoded = Base64.getMimeEncoder().encodeToString(keyPair.getPublic().getEncoded());

@@ -7,16 +7,16 @@ public enum KeyType {
     RSA ("RSA", 4096),
     ECC ("EC", 256);
 
-    private final String keyType;
+    private final String name;
     private final int keySize;
 
-    KeyType(String keyType, int keySize) {
-        this.keyType = keyType;
-        this.keySize = keySize;
+    KeyType(String name, int size) {
+        this.name = name;
+        this.keySize = size;
     }
 
-    public String getKeyType() {
-        return keyType;
+    public String getName() {
+        return name;
     }
 
     public int getKeySize() {

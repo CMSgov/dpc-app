@@ -164,7 +164,7 @@ public class APIAuthHelpers {
     }
 
     public static KeyPair generateKeyPair(KeyType keyType) throws NoSuchAlgorithmException {
-        final KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyType.getKeyType());
+        final KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyType.getName());
         if (keyType == KeyType.RSA) {
             kpg.initialize(keyType.getKeySize());
         } else {
