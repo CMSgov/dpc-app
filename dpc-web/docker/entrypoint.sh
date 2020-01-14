@@ -19,4 +19,8 @@ bin/delayed_job start
 
 # Start the database service (and make accessible outside the Docker container)
 echo "Starting Rails server..."
-bundle exec rails server -b 0.0.0.0 -p 3000
+if [ -n "$JACOCO" ]; then
+  bundle exec rails server -b 0.0.0.0 -p 3000
+else
+  bundle exec rails server -b 0.0.0.0 -p 3000 2>&1 | tee -a /var/log/dpc-web-$(hostname).log
+fi
