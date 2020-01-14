@@ -1,6 +1,6 @@
-package gov.cms.dpc.fhir.exceptions;
+package gov.cms.dpc.fhir.converters.exceptions;
 
-public class DataTranslationException extends RuntimeException {
+public class DataTranslationException extends FHIRConverterException {
     public static final long serialVersionUID = 42L;
 
     private final Class<?> clazz;

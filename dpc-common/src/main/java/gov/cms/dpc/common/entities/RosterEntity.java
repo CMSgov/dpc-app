@@ -1,7 +1,6 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.converters.entities.RosterEntityConverter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hl7.fhir.dstu3.model.Group;
@@ -98,10 +97,6 @@ public class RosterEntity implements Serializable {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public Group toFHIR() {
-        return RosterEntityConverter.convert(this);
     }
 
     @Override

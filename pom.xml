@@ -50,7 +50,9 @@
         <jacoco.version>0.8.5</jacoco.version>
         <jooq.version>3.12.1</jooq.version>
         <bouncey.version>1.64</bouncey.version>
-        <pitest.version>1.4.10</pitest.version>
+        <pitest.version>1.4.11</pitest.version>
+        <newrelic.agent.version>5.9.0</newrelic.agent.version>
+        <newrelic.agent.type>zip</newrelic.agent.type>
     </properties>
 
     <developers>
@@ -184,6 +186,13 @@
                 <groupId>org.knowm</groupId>
                 <artifactId>dropwizard-sundial</artifactId>
                 <version>1.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.newrelic.agent.java</groupId>
+                <artifactId>newrelic-java</artifactId>
+                <version>${newrelic.agent.version}</version>
+                <scope>provided</scope>
+                <type>${newrelic.agent.type}</type>
             </dependency>
             <!--Test dependencies-->
             <dependency>
@@ -412,6 +421,28 @@
                 </plugin>
                 <!-- Base configuration for Docker images -->
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <executions>
+                        <execution>
+                            <id>unpack-newrelic</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>unpack-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <includeGroupIds>com.newrelic.agent.java</includeGroupIds>
+                                <includeArtifactIds>newrelic-java</includeArtifactIds>
+                                <overWriteReleases>false</overWriteReleases>
+                                <overWriteSnapshots>false</overWriteSnapshots>
+                                <overWriteIfNewer>true</overWriteIfNewer>
+                                <outputDirectory>${project.build.directory}/newrelic-agent</outputDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>1.8.0</version>
@@ -586,7 +617,7 @@
                     <dependency>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>0.10</version>
+                        <version>0.11</version>
                     </dependency>
                 </dependencies>
             </plugin>
