@@ -108,7 +108,10 @@ public class KeyResource extends AbstractKeyResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Register public key for Organization",
             notes = "This endpoint registers the provided public key with the organization." +
-                    "<p>The provided key MUST be PEM encoded.")
+                    "<p>The provided key MUST be PEM encoded." +
+                    "<p>RSA keys of 4096-bits or greater are supported, as well as ECC keys using one of the following curves:" +
+                    "- secp256r1" +
+                    "- secp384r1")
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork
     @Override
