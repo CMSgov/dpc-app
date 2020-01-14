@@ -103,7 +103,7 @@ public class APIAuthHelpers {
                 .setSubject(macaroon)
                 .setId(UUID.randomUUID().toString())
                 .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
-                .signWith(privateKey, SignatureAlgorithm.RS384)
+                .signWith(privateKey, getSigningAlgorithm(KeyType.ECC))
                 .compact();
 
         // Verify JWT with /validate endpoint
@@ -275,6 +275,16 @@ public class APIAuthHelpers {
             }
 
         }};
+    }
+
+    /**
+     * Get the correct {@link SignatureAlgorithm} for the given {@link KeyType}
+     *
+     * @param keyType - {@link KeyType} to get algorithm for
+     * @return - {@link SignatureAlgorithm} to use for signing JWT
+     */
+    public static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
+        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
     }
 
 

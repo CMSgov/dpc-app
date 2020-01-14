@@ -39,7 +39,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -258,7 +257,7 @@ class JWTUnitTests {
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -313,7 +312,7 @@ class JWTUnitTests {
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -386,7 +385,7 @@ class JWTUnitTests {
                     .setSubject("macaroon")
                     .setId(UUID.randomUUID().toString())
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -413,7 +412,7 @@ class JWTUnitTests {
                     .setSubject(id)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -440,7 +439,7 @@ class JWTUnitTests {
                     .setSubject(id)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -469,7 +468,7 @@ class JWTUnitTests {
                     .setSubject(id)
                     .setId(id)
                     .addClaims(claims)
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -498,7 +497,7 @@ class JWTUnitTests {
                     .setSubject(id)
                     .setId(id)
                     .addClaims(claims)
-                    .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS384)
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -526,7 +525,7 @@ class JWTUnitTests {
                     .setSubject(id)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(12, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -553,7 +552,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -580,7 +579,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -605,7 +604,7 @@ class JWTUnitTests {
                     .setSubject("not matching")
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -630,7 +629,7 @@ class JWTUnitTests {
                     .setSubject("not matching")
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -668,7 +667,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -695,7 +694,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -722,7 +721,7 @@ class JWTUnitTests {
                     .setSubject(m)
                     .setId(id)
                     .claim("exp", Instant.now().plus(1, ChronoUnit.MINUTES).atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-                    .signWith(keyPair.getPrivate(), getSigningAlgorithm(keyType))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
             // Submit the JWT
@@ -786,7 +785,4 @@ class JWTUnitTests {
                 .serialize(MacaroonVersion.SerializationVersion.V2_JSON);
     }
 
-    private static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
-        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
-    }
 }
