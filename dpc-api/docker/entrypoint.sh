@@ -34,4 +34,8 @@ fi
 
 echo "Running server via entrypoint!"
 
-exec ${CMDLINE} "$@"
+if [ -n "$JACOCO" ]; then
+  exec ${CMDLINE} "$@"
+else
+  exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/dpc-api-$(hostname).log
+fi

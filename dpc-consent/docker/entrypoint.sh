@@ -21,4 +21,8 @@ fi
 
 echo "Running server"
 
-exec ${CMDLINE} "$@"
+if [ -n "$JACOCO" ]; then
+  exec ${CMDLINE} "$@"
+else
+  exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/dpc-consent-$(hostname).log
+fi
