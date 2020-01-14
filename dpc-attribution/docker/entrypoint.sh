@@ -26,7 +26,7 @@ fi
 
 echo "Running server"
 
-if [ -n "$JACOCO" ]
+if [ -n "$JACOCO" ]; then
   exec ${CMDLINE} "$@"
 else
   exec ${CMDLINE} "$@" 2>&1 | tee -a /var/log/dpc-attribution-$(hostname).log
