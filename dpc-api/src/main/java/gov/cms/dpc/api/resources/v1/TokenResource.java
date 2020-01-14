@@ -200,7 +200,7 @@ public class TokenResource extends AbstractTokenResource {
 
         // Validate JWT signature
         try {
-            return handleJWT(jwtBody);
+            return handleJWT(jwtBody, scope);
         } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
@@ -257,7 +257,7 @@ public class TokenResource extends AbstractTokenResource {
         }
     }
 
-    private JWTAuthResponse handleJWT(String jwtBody) {
+    private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
         final Jws<Claims> claims = Jwts.parser()
                 .setSigningKeyResolver(this.resolver)
                 .requireAudience(this.authURL)
@@ -284,6 +284,7 @@ public class TokenResource extends AbstractTokenResource {
         final List<Macaroon> discharged = this.bakery.dischargeAll(Collections.singletonList(restrictedMacaroon), this.bakery::discharge);
         final JWTAuthResponse response = new JWTAuthResponse();
         response.setExpiresIn(tokenLifetime);
+        response.setScope(requestedScope);
         response.setDischargedMacaroons(new String(this.bakery.serializeMacaroon(discharged, true), StandardCharsets.UTF_8));
 
         return response;

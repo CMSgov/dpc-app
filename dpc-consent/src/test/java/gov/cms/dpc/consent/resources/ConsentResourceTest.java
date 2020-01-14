@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.AbstractConsentTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
@@ -65,7 +64,7 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
-        final IQuery sut = client
+        @SuppressWarnings("rawtypes") final IQuery sut = client
                 .search()
                 .forResource(Consent.class)
                 .encodedJson();
@@ -127,7 +126,7 @@ class ConsentResourceTest extends AbstractConsentTest {
                 .execute();
 
         final Consent found = (Consent) sut.getEntryFirstRep().getResource();
-        System.out.println(ctx.forDstu3().newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+        System.out.println(ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
         assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
