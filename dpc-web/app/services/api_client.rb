@@ -1,23 +1,42 @@
 # frozen_string_literal: true
 
 class APIClient
-  attr_reader :api_env, :response_body, :response_status
+  attr_reader :api_env, :base_url, :response_body, :response_status
 
   def initialize(api_env)
     @api_env = api_env
+    @base_url = base_urls[api_env]
   end
 
   def create_organization(org)
-    uri_string = base_urls[api_env] + '/Organization/$submit'
+    uri_string = base_url + '/Organization/$submit'
     json = OrganizationSubmitSerializer.new(org).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
   end
 
+  def update_organization(reg_org)
+    org = reg_org.organization
+    fhir_org = FHIR::Organization.new(id: reg_org.api_id, name: org.name, identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi}])
+
+    client = FHIR::Client.new(base_url)
+    client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
+    response = client.update(fhir_org, reg_org.api_id)
+    if response.response[:code] == '200'
+      true
+    else
+      Rails.logger.warn 'Unsuccessulful request to API'
+      @response_status = response.response[:code]
+      @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
+      false
+    end
+    # TODO update fhir endpoint from reg_org.api_endpoint_ref
+  end
+
   def delete_organization(org); end
 
   def create_client_token(reg_org_id, params: {})
-    uri_string = base_urls[api_env] + '/Token'
+    uri_string = base_url + '/Token'
 
     json = params.to_json
     macaroon = delegated_macaroon(reg_org_id)
@@ -27,12 +46,12 @@ class APIClient
   end
 
   def get_client_tokens(reg_org_id)
-    uri_string = base_urls[api_env] + '/Token'
+    uri_string = base_url + '/Token'
     get_request(uri_string, delegated_macaroon(reg_org_id))
   end
 
   def create_public_key(reg_org_id, params: {})
-    uri_string = base_urls[api_env] + '/Key'
+    uri_string = base_url + '/Key'
 
     post_text_request(
       uri_string,
@@ -45,7 +64,7 @@ class APIClient
   end
 
   def get_public_keys(reg_org_id)
-    uri_string = base_urls[api_env] + '/Key'
+    uri_string = base_url + '/Key'
     get_request(uri_string, delegated_macaroon(reg_org_id))
   end
 
