@@ -354,7 +354,7 @@ public class GroupResource extends AbstractGroupResource {
                 .map(Group.GroupMemberComponent::getEntity)
                 .collect(Collectors.toList());
 
-        logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}", performer.getWhoReference(), performer.getOnBehalfOfReference(), reason, attributedPatients);
+        logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}", performer.getWhoReference(), reason, performer.getOnBehalfOfReference(), attributedPatients);
     }
 
     /**
