@@ -150,6 +150,10 @@
             <version>${newrelic.agent.version}</version>
             <type>${newrelic.agent.type}</type>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-json-logging</artifactId>
+        </dependency>
         <!--Test resources-->
         <dependency>
             <groupId>io.dropwizard</groupId>
