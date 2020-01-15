@@ -2,7 +2,6 @@ package gov.cms.dpc.common.consent.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -10,8 +9,12 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 @Entity(name = "consent")
 public class ConsentEntity implements Serializable {
@@ -23,6 +26,28 @@ public class ConsentEntity implements Serializable {
     public static final String SCOPE_CODE = "patient-privacy";
 
     private static final long serialVersionUID = 8702499693412507926L;
+
+    public enum SourceCode {
+        ETL_1800("1-800"),
+        DPC("DPC");
+
+        private final String code;
+        private static final Map<String, SourceCode> stringToCode = Stream.of(values()).collect(toMap(Object::toString, e -> e ));
+
+        SourceCode(String code) {
+            this.code = code;
+        }
+
+        public static SourceCode fromString(String code) {
+            // consider returning Optional?
+            return stringToCode.get(code);
+        }
+
+        @Override
+        public String toString() {
+            return code;
+        }
+    }
 
     public ConsentEntity() {
         // Hibernate required
@@ -36,7 +61,6 @@ public class ConsentEntity implements Serializable {
     @Column(name = "mbi")
     private String mbi;
 
-    @NotEmpty
     @Column(name = "hicn")
     private String hicn;
 
@@ -66,6 +90,12 @@ public class ConsentEntity implements Serializable {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
+
+    @Column(name = "custodian", columnDefinition = "uuid")
+    private UUID custodian;
+
+    @Column(name = "source_code")
+    private String sourceCode;
 
     public UUID getId() {
         return id;
@@ -151,6 +181,15 @@ public class ConsentEntity implements Serializable {
         this.updatedAt = updatedAt;
     }
 
+    public UUID getCustodian() { return custodian; }
+
+    public void setCustodian(UUID custodian) { this.custodian = custodian; }
+
+    public String getSourceCode() { return sourceCode; }
+
+    public void setSourceCode(String sourceCode) { this.sourceCode = sourceCode; }
+
+
     public static ConsentEntity defaultConsentEntity(Optional<UUID> id, Optional<String> hicn, Optional<String> mbi) {
         ConsentEntity ce = new ConsentEntity();
 
@@ -168,6 +207,7 @@ public class ConsentEntity implements Serializable {
         ce.setPolicyCode(OPT_IN);
         ce.setPurposeCode(TREATMENT);
         ce.setScopeCode(SCOPE_CODE);
+        ce.setSourceCode(SourceCode.DPC.toString());
 
         return ce;
     }
