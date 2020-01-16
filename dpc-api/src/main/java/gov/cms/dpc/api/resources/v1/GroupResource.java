@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -74,7 +75,7 @@ public class GroupResource extends AbstractGroupResource {
                                  @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
-        logAttestation(rosterAttestation, attributionRoster);
+        logAttestation(rosterAttestation, null, attributionRoster);
         addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
         final MethodOutcome outcome = this
@@ -158,7 +159,7 @@ public class GroupResource extends AbstractGroupResource {
                               @Valid @Profiled(profile = AttestationProfile.PROFILE_URI)
                               @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
-        logAttestation(rosterAttestation, rosterUpdate);
+        logAttestation(rosterAttestation, rosterID, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
@@ -181,7 +182,7 @@ public class GroupResource extends AbstractGroupResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
     public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
-        logAttestation(rosterAttestation, groupUpdate);
+        logAttestation(rosterAttestation, rosterID, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
@@ -343,18 +344,38 @@ public class GroupResource extends AbstractGroupResource {
                 .collect(Collectors.toList());
     }
 
-    private void logAttestation(Provenance provenance, Group attributionRoster) {
+    /**
+     * Log the attribution attestation, as required by Office of Civil Rights
+     * Eventually, this will need to get persisted into durable storage, but for now, Splunk is fine.
+     * <p>
+     * We require the roster ID to be passed in from the query itself, rather than extracted from the {@link Group}, because it's possible for the {@link Group} ID to be empty, if the user doesn't manually set it before uploading.
+     *
+     * @param provenance        - {@link Provenance} attestation to log
+     * @param rosterID          - {@link UUID} of roster being updated
+     * @param attributionRoster - {@link Group} roster being attested
+     */
+    private void logAttestation(Provenance provenance, @Nullable UUID rosterID, Group attributionRoster) {
+
+        final String groupIDLog;
+        if (rosterID == null) {
+            groupIDLog = "";
+        } else {
+            groupIDLog = String.format(" for roster %s", new IdType("Group", rosterID.toString()));
+        }
 
         final Coding reason = provenance.getReasonFirstRep();
 
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
-        final List<Reference> attributedPatients = attributionRoster
+        final List<String> attributedPatients = attributionRoster
                 .getMember()
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
+                .map(Reference::getReference)
                 .collect(Collectors.toList());
 
-        logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}", performer.getWhoReference(), reason, performer.getOnBehalfOfReference(), attributedPatients);
+        logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}{}", performer.getWhoReference().getReference(),
+                reason.getCode(),
+                performer.getOnBehalfOfReference().getReference(), attributedPatients, groupIDLog);
     }
 
     /**
