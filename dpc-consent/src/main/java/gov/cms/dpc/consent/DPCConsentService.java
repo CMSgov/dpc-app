@@ -7,6 +7,7 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.consent.cli.ConsentCommands;
 import gov.cms.dpc.consent.cli.SeedCommand;
 import gov.cms.dpc.fhir.FHIRModule;
 import io.dropwizard.Application;
@@ -43,9 +44,9 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
         GuiceBundle<DPCConsentConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
                 .modules(
-                        new ConsentAppModule(),
                         new DPCConsentHibernateModule<>(hibernateBundle),
-                        new FHIRModule<>()
+                        new FHIRModule<>(),
+                        new ConsentAppModule()
                 ).build();
 
         bootstrap.addBundle(hibernateBundle);
@@ -70,6 +71,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
             }
         });
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
+        bootstrap.addCommand(new ConsentCommands());
     }
 
     @Override

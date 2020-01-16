@@ -1,19 +1,45 @@
 package gov.cms.dpc.fhir.converters.entities;
 
+import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.converters.FHIRConverter;
+import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import org.hl7.fhir.dstu3.model.*;
 
 import static gov.cms.dpc.fhir.FHIRFormatters.INSTANT_FORMATTER;
 
-public class PatientEntityConverter {
+public class PatientEntityConverter implements FHIRConverter<Patient, PatientEntity> {
 
-    private PatientEntityConverter() {
+    public PatientEntityConverter() {
         // Not used
     }
 
-    public static Patient convert(PatientEntity entity) {
+    @Override
+    public PatientEntity fromFHIR(FHIREntityConverter converter, Patient resource) {
+        final PatientEntity patient = new PatientEntity();
+        patient.setDob(PatientEntity.toLocalDate(resource.getBirthDate()));
+        patient.setBeneficiaryID(FHIRExtractors.getPatientMPI(resource));
+        final HumanName name = resource.getNameFirstRep();
+        patient.setPatientFirstName(name.getGivenAsSingleString());
+        patient.setPatientLastName(name.getFamily());
+        patient.setGender(resource.getGender());
+
+        // Set the managing organization
+        final Reference managingOrganization = resource.getManagingOrganization();
+        if (managingOrganization.getReference() != null) {
+            final OrganizationEntity organizationEntity = new OrganizationEntity();
+            organizationEntity.setId(FHIRExtractors.getEntityUUID(managingOrganization.getReference()));
+            patient.setOrganization(organizationEntity);
+        }
+        
+        return patient;
+    }
+
+    @Override
+    public Patient toFHIR(FHIREntityConverter converter, PatientEntity entity) {
         final Patient patient = new Patient();
 
         // Add the patient metadata
@@ -40,5 +66,15 @@ public class PatientEntityConverter {
         patient.setManagingOrganization(organization);
 
         return patient;
+    }
+
+    @Override
+    public Class<Patient> getFHIRResource() {
+        return Patient.class;
+    }
+
+    @Override
+    public Class<PatientEntity> getJavaClass() {
+        return PatientEntity.class;
     }
 }
