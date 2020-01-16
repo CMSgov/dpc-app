@@ -97,7 +97,11 @@ public class ConsentEntityConverter {
 
         c.setCategory(category(consentEntity.getLoincCode()));
 
-        c.setOrganization(List.of(new Reference().setReference(orgURL).setDisplay("Data at the Point of Care")));
+        if (consentEntity.getCustodian() == null) {
+            c.setOrganization(List.of(new Reference().setReference(orgURL).setDisplay("Data at the Point of Care")));
+        } else {
+            c.setOrganization(List.of(new Reference(new IdType("Organization", consentEntity.getCustodian().toString()))));
+        }
 
         return c;
     }

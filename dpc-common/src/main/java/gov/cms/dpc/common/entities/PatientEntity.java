@@ -1,11 +1,8 @@
 package gov.cms.dpc.common.entities;
 
-import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -185,27 +182,6 @@ public class PatientEntity implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(patientID, beneficiaryID, patientFirstName, patientLastName, dob);
-    }
-
-    public static PatientEntity fromFHIR(Patient resource) {
-
-        final PatientEntity patient = new PatientEntity();
-        patient.setDob(PatientEntity.toLocalDate(resource.getBirthDate()));
-        patient.setBeneficiaryID(FHIRExtractors.getPatientMPI(resource));
-        final HumanName name = resource.getNameFirstRep();
-        patient.setPatientFirstName(name.getGivenAsSingleString());
-        patient.setPatientLastName(name.getFamily());
-        patient.setGender(resource.getGender());
-
-        // Set the managing organization
-
-        final Reference managingOrganization = resource.getManagingOrganization();
-        if (managingOrganization.getReference() != null) {
-            final OrganizationEntity organizationEntity = new OrganizationEntity();
-            organizationEntity.setId(FHIRExtractors.getEntityUUID(managingOrganization.getReference()));
-            patient.setOrganization(organizationEntity);
-        }
-        return patient;
     }
 
     public static LocalDate toLocalDate(Date date) {

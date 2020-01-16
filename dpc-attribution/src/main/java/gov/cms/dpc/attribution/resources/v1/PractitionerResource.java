@@ -7,6 +7,7 @@ import gov.cms.dpc.attribution.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -28,10 +29,12 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 public class PractitionerResource extends AbstractPractitionerResource {
 
     private final ProviderDAO dao;
+    private final FHIREntityConverter converter;
 
     @Inject
-    PractitionerResource(ProviderDAO dao) {
+    PractitionerResource(FHIREntityConverter converter, ProviderDAO dao) {
         this.dao = dao;
+        this.converter = converter;
     }
 
     @GET
@@ -56,7 +59,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
         bundle.setTotal(providers.size());
         bundle.setType(Bundle.BundleType.SEARCHSET);
-        providers.forEach(provider -> bundle.addEntry().setResource(provider.toFHIR()));
+        providers.forEach(provider -> bundle.addEntry().setResource(this.converter.toFHIR(Practitioner.class, provider)));
         return bundle;
     }
 
@@ -75,14 +78,14 @@ public class PractitionerResource extends AbstractPractitionerResource {
     })
     public Response submitProvider(Practitioner provider) {
 
-        final ProviderEntity entity = ProviderEntity.fromFHIR(provider);
+        final ProviderEntity entity = this.converter.fromFHIR(ProviderEntity.class, provider);
         final List<ProviderEntity> existingProviders = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
         if (existingProviders.isEmpty()) {
             final ProviderEntity persisted = this.dao.persistProvider(entity);
-            return Response.status(Response.Status.CREATED).entity(persisted.toFHIR()).build();
+            return Response.status(Response.Status.CREATED).entity(this.converter.toFHIR(Practitioner.class, persisted)).build();
         }
 
-        return Response.ok().entity(existingProviders.get(0).toFHIR()).build();
+        return Response.ok().entity(this.converter.toFHIR(Practitioner.class, existingProviders.get(0))).build();
     }
 
     @GET
@@ -104,7 +107,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
                         new WebApplicationException(String.format("Provider %s is not registered",
                                 providerID), Response.Status.NOT_FOUND));
 
-        return providerEntity.toFHIR();
+        return this.converter.toFHIR(Practitioner.class, providerEntity);
     }
 
     @POST
@@ -150,7 +153,8 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Update provider", notes = "FHIR endpoint to update the given Practitioner resource with new values.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Practitioner"))
     public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, Practitioner provider) {
-        final ProviderEntity providerEntity = this.dao.updateProvider(providerID, ProviderEntity.fromFHIR(provider, providerID));
-        return providerEntity.toFHIR();
+        final ProviderEntity providerEntity = this.converter.fromFHIR(ProviderEntity.class, provider);
+        providerEntity.setProviderID(providerID);
+        return this.converter.toFHIR(Practitioner.class, this.dao.updateProvider(providerID, providerEntity));
     }
 }

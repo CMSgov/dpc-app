@@ -51,8 +51,8 @@ public abstract class AbstractOrganizationResource {
      * Update the {@link Organization} with the given ID
      *
      * @param organizationID {@link UUID} of organization
-     * @param organization {@link Organization}
-     * @return
+     * @param organization   {@link Organization}
+     * @return - {@link Response} with the updated organization
      */
     @PUT
     @FHIR

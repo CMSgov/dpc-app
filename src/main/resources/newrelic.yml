@@ -1,0 +1,76 @@
+common: &default_settings
+  agent_enabled: true
+  app_name: Data at the Point of Care
+  enable_auto_app_naming: false
+  enable_auto_transaction_naming: true
+  log_level: info
+  audit_mode: false
+  log_file_count: 1
+  log_limit_in_kbytes: 0
+  log_daily: false
+  log_file_name: STDOUT
+
+  # Limits the number of lines to capture for each stack trace.
+  # Default is 30
+  max_stack_trace_lines: 100
+
+  # Transaction tracer captures deep information about slow
+  # transactions and sends this to the New Relic service once a
+  # minute. Included in the transaction is the exact call sequence of
+  # the transactions including any SQL statements issued.
+  transaction_tracer:
+    enabled: true
+    transaction_threshold: apdex_f
+    record_sql: obfuscated
+    log_sql: false
+    stack_trace_threshold: 0.5
+    explain_enabled: true
+    explain_threshold: 0.5
+    top_n: 20
+
+  error_collector:
+    enabled: true
+
+    # Use this property to exclude specific exceptions from being reported as errors
+    # by providing a comma separated list of full class names.
+    # The default is to exclude akka.actor.ActorKilledException. If you want to override
+    # this, you must provide any new value as an empty list is ignored.
+    ignore_errors: akka.actor.ActorKilledException
+    ignore_status_codes: 404
+
+  transaction_events:
+    enabled: true
+    max_samples_stored: 2000
+
+  distributed_tracing:
+    enabled: false
+
+  cross_application_tracer:
+    enabled: true
+
+  thread_profiler:
+    enabled: true
+
+  browser_monitoring:
+    auto_instrument: false
+
+  class_transformer:
+    com.newrelic.instrumentation.servlet-user:
+      enabled: false
+
+    com.newrelic.instrumentation.spring-aop-2:
+      enabled: false
+
+    com.newrelic.instrumentation.jdbc-resultset:
+      enabled: false
+
+    # Classes loaded by classloaders in this list will not be instrumented.
+    # This is a useful optimization for runtimes which use classloaders to
+    # load dynamic classes which the agent would not instrument.
+    classloader_excludes:
+      groovy.lang.GroovyClassLoader$InnerLoader,
+      org.codehaus.groovy.runtime.callsite.CallSiteClassLoader,
+      com.collaxa.cube.engine.deployment.BPELClassLoader,
+      org.springframework.data.convert.ClassGeneratingEntityInstantiator$ObjectInstantiatorClassGenerator,
+      org.mvel2.optimizers.impl.asm.ASMAccessorOptimizer$ContextClassLoader,
+      gw.internal.gosu.compiler.SingleServingGosuClassLoader,

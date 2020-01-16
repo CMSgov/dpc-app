@@ -48,12 +48,13 @@ public class ConsentResource {
     @ApiOperation(value = "Search for Consent Entries", notes = "Search for Consent records. " +
             "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.")
     @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public Bundle search(
             @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
             @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
-        List<ConsentEntity> entities = null;
+        List<ConsentEntity> entities;
 
         // Priority order for processing params. If multiple params are passed, we only pay attention to one
         if (id.isPresent()) {
