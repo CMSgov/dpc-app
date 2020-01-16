@@ -16,7 +16,7 @@
     </h2>
     <div id="a1" class="usa-accordion__content">
       <ul>
-        <li>First, <% unless user_signed_in? %><%= link_to "Request access page", new_registration_path(User) %><% else %> Request access page <% end %> to the pilot. This puts you on the list of providers who are interested, regardless of whether your vendors are ready to participate.</li>
+        <li>First, <% unless user_signed_in? %><%= link_to "Request access page", new_registration_path(User) %><% else %> request access <% end %> to the pilot. This puts you on the list of providers who are interested, regardless of whether your vendors are ready to participate.</li>
         <li>Ask your software provider if they have implemented the Bulk FHIR specification.</li>
         <li>Direct them to this website and encourage them to use the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a>.</li>
         <li>Ask them if they can commit to working with you on this project and if so, when will they be ready.</li>
@@ -26,15 +26,15 @@
     <!-- Use the accurate heading level to maintain the document outline -->
     <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="a2">
-        What type of providers is CMS looking to join the pilot?
+        What type of providers is CMS looking for to join the pilot?
       </button>
     </h2>
     <div id="a2" class="usa-accordion__content">
       <ul>
         <li>Fee-for-Service (FFS) providers who treat Medicare patients</li>
         <li>Already receive claims from other payers and who have successfully integrated the information into provider's existing workflow</li>
-        <li>Have experience using Blue Button 2.0 or the Beneficiary Claims Data API pilot project
-Already using or testing wth FHIR, especially Bulk FHIR</li>
+        <li>Have experience using Blue Button 2.0 or the Beneficiary Claims Data API pilot project</li>
+        <li>Already use or test with FHIR, especially Bulk FHIR</li>
       </ul>
     </div>
 
@@ -48,10 +48,10 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
       <ul>
         <li>Any FFS provider can request access to synthetic data</li>
         <li>Providers will receive an email with instructions on how to access the synthetic (test data) sandbox. This usually happens in 1 - 2 business days after the request.</li>
-        <li>The provider and/or their vendor develops and tests the functionality in the synthetic sandbox.</li>
+        <li>The provider and/or their vendor will develop and test the functionality in the synthetic sandbox.</li>
         <li>When the provider/vendor feel that they are ready to request production access, they can email <a href="mailto:DPCInfo@cms.hhs.gov">DPCInfo@cms.hhs.gov</a> and include the following:
           <ul>
-            <li>Written summary of the rostering process and logic of how patients are added and removed from rosters and when physician intervention is required to renew an expired roster</li>
+            <li>Written summary of the rostering process: logic of how patients are added and removed from rosters, and when physician intervention is required to renew an expired roster</li>
             <li>HITRUST validation or certification (or be prepared to share the HHS ONC HIT Technology certification information for the version you are using, including the CHPL ID and version)</li>
             <li>Confirmation of understanding the Terms of Service</li>
             <li>The initial providers NPIs for production use</li>
@@ -59,7 +59,7 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
         </li>
         <li>The DPC team will schedule a demo session.  Remember, this is a pilot project and scheduling will move slowly.</li>
         <li>The provider and their vendor will demonstrate the functionality and review the implementation decisions with the DPC team. </li>
-        <li>The DPC team provides production access and gets feedback from the provider as the solution is implemented.</li>
+        <li>The DPC team will provide production access and get feedback from the provider as the solution is implemented.</li>
         <li>There is not a limit to the number of providers who can test in the sandbox or who can go into production. However, the production access will move very slowly and may discontinue if the pilot is not successful.</li>
       </ul>
     </div>
@@ -85,7 +85,7 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
       <ul>
         <li>Blue Button 2.0 provides FHIR-formatted data for one individual Medicare beneficiary at a time, to registered applications with beneficiary authorization. See <a href="https://bluebutton.cms.gov/">https://bluebutton.cms.gov/</a>.</li>
         <li>BCDA provides FHIR-formatted bulk data files to an Accountable Care Organization (ACO) for all of the beneficiaries assigned to a given ACO. BCDA follows the ACO data sharing process where patients can choose to opt out of data sharing.</li>
-        <li>Data at the Point of Care Pilot provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. Data is shared for between covered entities for treatment purposes as defined under HIPAA. Patient can choose to opt out of data sharing.</li>
+        <li>Data at the Point of Care Pilot provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. Data is shared between covered entities for treatment purposes as defined under HIPAA. Patients can choose to opt out of data sharing.</li>
       </ul>
     </div>
 
@@ -105,7 +105,7 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
     </h2>
     <div id="a7" class="usa-accordion__content">
       <ul>
-        <li>Usefulness of the data to evaluate helpful CMS claims data is for impacting treatment, provider burden, and quality of care for Fee-for-Service (FFS) providers at the point of care</li>
+        <li>Usefulness of the data to evaluate how helpful CMS claims data is for impacting treatment, provider burden, and quality of care for Fee-for-Service (FFS) providers at the point of care</li>
         <li>Ease of implementation for vendors and providers to evaluate how easy it is to configure and get started with requesting and receiving claims data</li>
         <li>Practicality and effectiveness of attribution logic that determines which providers can request and receive claims data for which patients and for how long</li>
         <li>Ease and effectiveness of ways that providers can share their access with vendors without breaking trust in the chain</li>
@@ -148,9 +148,9 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
     </h2>
     <div id="a10" class="usa-accordion__content">
       <ul>
-        <li>Review the <%= link_to "Terms of Service", terms_of_service_path %>. You will be attesting that you follow those with each roster add and renewal.</li>
+        <li>Review the <%= link_to "Terms of Service", terms_of_service_path %>. You will be attesting that you follow those with each roster addition and renewal.</li>
         <li>Make sure your vendor can support the APIs as described in the <%= link_to "Documentation", docs_path %>.</li>
-        <li>Enter your FHIR end points in the <a href="https://nppes.cms.hhs.gov">National Provider and Plan Enumeration System (NPPES)</a>. No production access is provided until this step is completed for each provider.</li>
+        <li>Enter your FHIR endpoints in the <a href="https://nppes.cms.hhs.gov">National Provider and Plan Enumeration System (NPPES)</a>. No production access is provided until this step is completed for each provider.</li>
       </ul>
     </div>
 
@@ -161,11 +161,11 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
     </h2>
     <div id="a11" class="usa-accordion__content">
       <ul>
-        <li>Review the <%= link_to "Terms of Service", terms_of_service_path %>. You will be attesting that you follow those with each roster add and renewal. </li>
+        <li>Review the <%= link_to "Terms of Service", terms_of_service_path %>. You will be attesting that you follow those with each roster addition and renewal. </li>
         <li>Make sure you have at least one of security certifications
           <ul>
             <li>HHS ONC Health IT Certification (2015)</li>
-            <li>HITRUST Validated Assessment (or an audited self-assessment if you are working toward HITRUST Validated Assessment within a calendar year</li>
+            <li>HITRUST Validated Assessment (or an audited self-assessment if you are working toward HITRUST Validated Assessment within a calendar year)</li>
           </ul>
         </li>
         <li>Develop to the <%= link_to "Documentation", docs_path %> and test with the synthetic data</li>
@@ -194,12 +194,12 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
       </button>
     </h2>
     <div id="a13" class="usa-accordion__content">
-      <p>Yes! The emergency room scenario is a great use of claims data. When adding patients to the roster from an emergency room, the time period will be 72 hours instead of the 90 days that occurs for outpatient visits. Otherwise, you can add patients to your roster as they are admitted to the emergency room.</p>
+      <p>Yes! The emergency room scenario is a great use of claims data. You can add patients to your roster as they are admitted to the emergency room.</p>
     </div>
 
     <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="a14">
-        I have questions about whether I would be a good pilot. How can I learn more?
+        I have questions about whether I would be a good provider for the pilot. How can I learn more?
       </button>
     </h2>
     <div id="a14" class="usa-accordion__content">
@@ -217,8 +217,8 @@ Already using or testing wth FHIR, especially Bulk FHIR</li>
         <li>Within 1 - 2 business days of your request, you will receive an email with instructions on how to access the synthetic (or test data) sandbox.</li>
         <li>Once you have a working solution that has been well tested, email <a href="mailto:DPCInfo@cms.hhs.gov">DPCInfo@cms.hhs.gov</a> to request a demo.</li>
         <li>The DPC team will schedule a demo session.  Remember, this is a pilot project and scheduling will move slowly.</li>
-        <li>The provider and their vendor demonstrate the functionality and review the implementation decisions with the DPC team. </li>
-        <li>The DPC team provides production access and gets feedback from the provider as the solution is implemented.</li>
+        <li>The provider and their vendor will demonstrate the functionality and review the implementation decisions with the DPC team. </li>
+        <li>The DPC team will provide production access and get feedback from the provider as the solution is implemented.</li>
         <li>Updates will be posted to the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a> as CMS progresses through the pilot process.</li>
       </ul>
     </div>
