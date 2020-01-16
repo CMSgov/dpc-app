@@ -26,6 +26,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
@@ -117,10 +118,10 @@ public class APIAuthHelpers {
 
         // Submit JWT to /auth endpoint
         final List<NameValuePair> formData = new ArrayList<>();
-        formData.add(encodeNameValuePair("scope", "system/*.*"));
-        formData.add(encodeNameValuePair("grant_type", "client_credentials"));
-        formData.add(encodeNameValuePair("client_assertion_type", CLIENT_ASSERTION_TYPE));
-        formData.add(encodeNameValuePair("client_assertion", jwt));
+        formData.add(new BasicNameValuePair("scope", "system/*.*"));
+        formData.add(new BasicNameValuePair("grant_type", "client_credentials"));
+        formData.add(new BasicNameValuePair("client_assertion_type", CLIENT_ASSERTION_TYPE));
+        formData.add(new BasicNameValuePair("client_assertion", jwt));
 
         final UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formData);
         final AuthResponse authResponse;
@@ -142,21 +143,6 @@ public class APIAuthHelpers {
             }
         }
         return authResponse;
-    }
-
-    private static NameValuePair encodeNameValuePair(String name, String value) {
-        return new NameValuePair() {
-
-            @Override
-            public String getName() {
-                return name;
-            }
-
-            @Override
-            public String getValue() {
-                return value;
-            }
-        };
     }
 
     public static String createGoldenMacaroon() throws IOException {
