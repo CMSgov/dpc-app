@@ -9,7 +9,7 @@ import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.converters.EndpointConverter;
+import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
@@ -31,11 +31,14 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 public class OrganizationResource extends AbstractOrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
+
     private final OrganizationDAO dao;
     private final EndpointDAO endpointDAO;
+    private final FHIREntityConverter converter;
 
     @Inject
-    OrganizationResource(OrganizationDAO dao, EndpointDAO endpointDAO) {
+    OrganizationResource(FHIREntityConverter converter, OrganizationDAO dao, EndpointDAO endpointDAO) {
+        this.converter = converter;
         this.dao = dao;
         this.endpointDAO = endpointDAO;
     }
@@ -57,7 +60,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             final List<OrganizationEntity> organizationEntityList = this.dao.listOrganizations();
             bundle.setTotal(organizationEntityList.size());
 
-            organizationEntityList.forEach(entity -> bundle.addEntry().setResource(entity.toFHIR()));
+            organizationEntityList.forEach(entity -> bundle.addEntry().setResource(this.converter.toFHIR(Organization.class, entity)));
             return bundle;
         }
         // Pull out the NPI, keeping it as a string.
@@ -65,7 +68,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
         if (!queryList.isEmpty()) {
             bundle.setTotal(queryList.size());
-            queryList.forEach(org -> bundle.addEntry().setResource(org.toFHIR()));
+            queryList.forEach(org -> bundle.addEntry().setResource(this.converter.toFHIR(Organization.class, org)));
         }
 
         return bundle;
@@ -101,9 +104,14 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY_422).entity("Must provide organization to register").build();
         }
 
+        final OrganizationEntity entity = this.converter.fromFHIR(OrganizationEntity.class, organization.get());
+        final List<EndpointEntity> endpoints = extractEndpoints(transactionBundle);
+        endpoints.forEach(endpointEntity -> endpointEntity.setOrganization(entity));
+        entity.setEndpoints(endpoints);
+
         try {
-            final Organization persistedOrg = this.dao.registerOrganization(organization.get(), extractEndpoints(transactionBundle));
-            return Response.status(Response.Status.CREATED).entity(persistedOrg).build();
+            final OrganizationEntity persistedOrg = this.dao.registerOrganization(entity);
+            return Response.status(Response.Status.CREATED).entity(this.converter.toFHIR(Organization.class, persistedOrg)).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
             throw e;
@@ -122,7 +130,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> orgOptional = this.dao.fetchOrganization(organizationID);
         final OrganizationEntity organizationEntity = orgOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find organization '%s'", organizationID), Response.Status.NOT_FOUND));
-        return organizationEntity.toFHIR();
+        return this.converter.toFHIR(Organization.class, organizationEntity);
     }
 
     @PUT
@@ -137,19 +145,17 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     public Response updateOrganization(@ApiParam(value = "Organization resource ID", required = true) @PathParam("organizationID") UUID organizationID, Organization organization) {
         try {
-            OrganizationEntity orgEntity = new OrganizationEntity().fromFHIR(organization);
-            // OrganizationEntity.fromFHIR() ignores endpoints in submitted resource; they must be copied from original
+            OrganizationEntity orgEntity = this.converter.fromFHIR(OrganizationEntity.class, organization);
             Organization original = getOrganization(organizationID);
             List<EndpointEntity> endpointEntities = original.getEndpoint().stream().map(
                     r -> {
                         UUID endpointID = FHIRExtractors.getEntityUUID(r.getReference());
-                        Optional<EndpointEntity> endpointOpt = endpointDAO.fetchEndpoint(endpointID);
-                        return endpointOpt;
+                        return endpointDAO.fetchEndpoint(endpointID);
                     }
             ).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
             orgEntity.setEndpoints(endpointEntities);
             orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
-            return Response.status(Response.Status.OK).entity(orgEntity.toFHIR()).build();
+            return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Organization.class, orgEntity)).build();
         } catch (Exception e) {
             logger.error("Error: ", e);
             throw e;
@@ -178,7 +184,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .stream()
                 .filter(entry -> entry.hasResource() && entry.getResource().getResourceType() == ResourceType.Endpoint)
                 .map(entry -> (Endpoint) entry.getResource())
-                .map(EndpointConverter::convert)
+                .map(e -> this.converter.fromFHIR(EndpointEntity.class, e))
                 .collect(Collectors.toList());
     }
 }

@@ -1,11 +1,5 @@
 package gov.cms.dpc.common.entities;
 
-import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Practitioner;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -142,10 +136,6 @@ public class ProviderEntity implements Serializable {
         this.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
     }
 
-    public Practitioner toFHIR() {
-        return ProviderEntityConverter.convert(this);
-    }
-
     public ProviderEntity update(ProviderEntity entity) {
         this.setProviderFirstName(entity.getProviderFirstName());
         this.setProviderLastName(entity.getProviderLastName());
@@ -169,27 +159,4 @@ public class ProviderEntity implements Serializable {
         return Objects.hash(providerID, providerNPI, providerFirstName, providerLastName, attributedPatients);
     }
 
-    public static ProviderEntity fromFHIR(Practitioner resource) {
-        return fromFHIR(resource, null);
-    }
-
-    public static ProviderEntity fromFHIR(Practitioner resource, UUID resourceID) {
-        final ProviderEntity provider = new ProviderEntity();
-
-        // Get the Organization, from the tag field
-        final String organizationID = FHIRExtractors.getOrganizationID(resource);
-
-        final OrganizationEntity organizationEntity = new OrganizationEntity();
-        organizationEntity.setId(UUID.fromString(new IdType(organizationID).getIdPart()));
-
-        provider.setOrganization(organizationEntity);
-        provider.setProviderID(Objects.requireNonNullElseGet(resourceID, UUID::randomUUID));
-
-        provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));
-        final HumanName name = resource.getNameFirstRep();
-        provider.setProviderFirstName(name.getGivenAsSingleString());
-        provider.setProviderLastName(name.getFamily());
-
-        return provider;
-    }
 }
