@@ -354,7 +354,7 @@ public class GroupResource extends AbstractGroupResource {
      * @param rosterID          - {@link UUID} of roster being updated
      * @param attributionRoster - {@link Group} roster being attested
      */
-    private void logAttestation(Provenance provenance, @Nullable UUID rosterID, Group attributionRoster) {
+    private void logAttestation(Provenance provenance, UUID rosterID, Group attributionRoster) {
 
         final String groupIDLog;
         if (rosterID == null) {
