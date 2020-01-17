@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir.validations;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import gov.cms.dpc.fhir.helpers.ServiceLoaderHelpers;
 import gov.cms.dpc.fhir.validations.profiles.IProfileLoader;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -19,7 +20,6 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.StreamSupport;
 
 /**
  * DPC specific implementation of FHIR's {@link IValidationSupport}, which allows us to load our own {@link StructureDefinition}s from the JAR.
@@ -115,22 +115,13 @@ public class DPCProfileSupport implements IValidationSupport {
 
         final IParser parser = ctx.newJsonParser();
 
-
-        final Iterator<IProfileLoader> loader = createLoader();
-        Iterable<IProfileLoader> targetStream = () -> loader;
-
-        StreamSupport.stream(targetStream.spliterator(), false)
+        ServiceLoaderHelpers.getLoaderStream(IProfileLoader.class)
                 .map(profileLoader -> toStructureDefinition(parser, profileLoader.getPath()))
                 .filter(Objects::nonNull)
                 .map(diffStructure -> mergeDiff(ctx, defaultValidation, profileUtilities, diffStructure))
                 .forEach(structure -> definitionMap.put(structure.getUrl(), structure));
 
         return definitionMap;
-    }
-
-    private Iterator<IProfileLoader> createLoader() {
-        final ServiceLoader<IProfileLoader> loader = ServiceLoader.load(IProfileLoader.class);
-        return loader.iterator();
     }
 
     private StructureDefinition toStructureDefinition(IParser parser, String structurePath) {

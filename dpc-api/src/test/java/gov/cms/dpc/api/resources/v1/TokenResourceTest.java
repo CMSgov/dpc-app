@@ -167,11 +167,18 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testTokenSigning() throws IOException {
+    void testTokenSigning() throws IOException, URISyntaxException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         // Create a new org and make sure it has no providers
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
+
+        // Create a new JWT
+        final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);
+        assertAll(() -> assertNotEquals("", authResponse.accessToken, "Should have token"),
+                () -> assertEquals(300, authResponse.expiresIn, "Should be valid for 300 seconds"),
+                () -> assertEquals("system/*.*", authResponse.scope, "Should have correct scope"),
+                () -> assertEquals("bearer", authResponse.tokenType, "Should be a macaroon"));
 
         // Try to authenticate using the private key for org 1 and the token for org 2, should throw an exception, but in the auth handler
         final AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), m2, PUBLIC_KEY_ID, PRIVATE_KEY));

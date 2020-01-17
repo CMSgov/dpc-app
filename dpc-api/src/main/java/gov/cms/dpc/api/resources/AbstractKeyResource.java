@@ -30,5 +30,5 @@ public abstract class AbstractKeyResource {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    public abstract PublicKeyEntity submitKey(OrganizationPrincipal organizationPrincipal, @NotEmpty String key, Optional<String> keyLabel);
+    public abstract PublicKeyEntity submitKey(OrganizationPrincipal organizationPrincipal, @NotEmpty String key, Optional<String> keyLabelOptional);
 }
