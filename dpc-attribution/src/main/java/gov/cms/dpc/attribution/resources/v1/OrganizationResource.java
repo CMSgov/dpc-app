@@ -9,6 +9,7 @@ import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
@@ -78,14 +79,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 422, message = "Must provide a single Organization resource to register", response = OperationOutcome.class),
             @ApiResponse(code = 201, message = "Organization was successfully registered")
     })
-    public Response submitOrganization(Parameters parameters) {
-        // TODO: This method signature should be migrated to using the FHIRParams annotation
-        final Parameters.ParametersParameterComponent firstRep = parameters.getParameterFirstRep();
-
-        if (!firstRep.hasResource()) {
-            throw new WebApplicationException("Must submit bundle", HttpStatus.UNPROCESSABLE_ENTITY_422);
-        }
-        final Bundle transactionBundle = (Bundle) firstRep.getResource();
+    public Response submitOrganization(@FHIRParameter(name = "resource") Bundle transactionBundle) {
 
         final Optional<Organization> organization = transactionBundle
                 .getEntry()
