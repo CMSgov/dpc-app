@@ -17,6 +17,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -24,6 +26,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
@@ -41,7 +44,9 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,14 +117,18 @@ public class APIAuthHelpers {
         }
 
         // Submit JWT to /auth endpoint
+        final List<NameValuePair> formData = new ArrayList<>();
+        formData.add(new BasicNameValuePair("scope", "system/*.*"));
+        formData.add(new BasicNameValuePair("grant_type", "client_credentials"));
+        formData.add(new BasicNameValuePair("client_assertion_type", CLIENT_ASSERTION_TYPE));
+        formData.add(new BasicNameValuePair("client_assertion", jwt));
+
+        final UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formData);
         final AuthResponse authResponse;
         try (final CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Token/auth", baseURL));
-            builder.addParameter("scope", "system/*.*");
-            builder.addParameter("grant_type", "client_credentials");
-            builder.addParameter("client_assertion_type", CLIENT_ASSERTION_TYPE);
-            builder.addParameter("client_assertion", jwt);
             final HttpPost post = new HttpPost(builder.build());
+            post.setEntity(entity);
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
             try (CloseableHttpResponse response = client.execute(post)) {
