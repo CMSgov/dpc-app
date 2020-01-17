@@ -115,9 +115,18 @@ public class KeyResource extends AbstractKeyResource {
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
                                      @NotEmpty String key,
-                                     @ApiParam(name = "label", value = "Public Key ID (label)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
-                                     @QueryParam(value = "label") Optional<String> keyID) {
-        final String keyLabel = keyID.orElseGet(this::buildDefaultKeyID);
+                                     @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
+                                     @QueryParam(value = "label") Optional<String> keyLabelOptional) {
+        final String keyLabel;
+        if (keyLabelOptional.isPresent()) {
+            if (keyLabelOptional.get().length() > 25) {
+                throw new WebApplicationException("Key label cannot be more than 25 characters", Response.Status.BAD_REQUEST);
+            }
+            keyLabel = keyLabelOptional.get();
+        } else {
+            keyLabel = this.buildDefaultKeyID();
+        }
+
         final SubjectPublicKeyInfo publicKey;
         try {
             publicKey = PublicKeyHandler.parsePEMString(key);
