@@ -7,7 +7,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.converters.entities.PatientEntityConverter;
+import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -28,11 +28,13 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 public class PatientResource extends AbstractPatientResource {
 
     private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
+    private final FHIREntityConverter converter;
     private final PatientDAO dao;
 
     @Inject
-    PatientResource(PatientDAO dao) {
+    PatientResource(FHIREntityConverter converter, PatientDAO dao) {
         this.dao = dao;
+        this.converter = converter;
     }
 
     @GET
@@ -69,7 +71,7 @@ public class PatientResource extends AbstractPatientResource {
         final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
         return this.dao.patientSearch(resourceID, idValue, organizationID)
                 .stream()
-                .map(PatientEntityConverter::convert)
+                .map(p -> this.converter.toFHIR(Patient.class, p))
                 .collect(Collectors.toList());
     }
 
@@ -85,7 +87,7 @@ public class PatientResource extends AbstractPatientResource {
                 .orElseThrow(() ->
                         new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND));
 
-        return PatientEntityConverter.convert(patientEntity);
+        return this.converter.toFHIR(Patient.class, patientEntity);
     }
 
     @POST
@@ -112,11 +114,11 @@ public class PatientResource extends AbstractPatientResource {
             entity = patientEntities.get(0);
         } else {
             status = Response.Status.CREATED;
-            entity = this.dao.persistPatient(PatientEntity.fromFHIR(patient));
+            entity = this.dao.persistPatient(this.converter.fromFHIR(PatientEntity.class, patient));
         }
 
         return Response.status(status)
-                .entity(PatientEntityConverter.convert(entity))
+                .entity(this.converter.toFHIR(Patient.class, entity))
                 .build();
     }
 
@@ -157,10 +159,10 @@ public class PatientResource extends AbstractPatientResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to update"))
     @Override
     public Response updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
-        final PatientEntity patientEntity = this.dao.updatePatient(patientID, PatientEntity.fromFHIR(patient));
+        final PatientEntity patientEntity = this.dao.updatePatient(patientID, this.converter.fromFHIR(PatientEntity.class, patient));
 
         return Response.ok()
-                .entity(PatientEntityConverter.convert(patientEntity))
+                .entity(this.converter.toFHIR(Patient.class, patientEntity))
                 .build();
     }
 }

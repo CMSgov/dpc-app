@@ -17,6 +17,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,14 +50,16 @@ public class GroupResource extends AbstractGroupResource {
     private final RosterDAO rosterDAO;
     private final RelationshipDAO relationshipDAO;
     private final DPCAttributionConfiguration config;
+    private final FHIREntityConverter converter;
 
     @Inject
-    GroupResource(ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO, RelationshipDAO relationshipDAO, DPCAttributionConfiguration config) {
+    GroupResource(FHIREntityConverter converter, ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO, RelationshipDAO relationshipDAO, DPCAttributionConfiguration config) {
         this.rosterDAO = rosterDAO;
         this.providerDAO = providerDAO;
         this.patientDAO = patientDAO;
         this.relationshipDAO = relationshipDAO;
         this.config = config;
+        this.converter = converter;
     }
 
     @POST
@@ -76,7 +79,8 @@ public class GroupResource extends AbstractGroupResource {
         final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));
         final List<RosterEntity> entities = this.rosterDAO.findEntities(organizationID, providerNPI, null);
         if (!entities.isEmpty()) {
-            return Response.status(Response.Status.OK).entity(entities.get(0).toFHIR()).build();
+            final RosterEntity rosterEntity = entities.get(0);
+            return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Group.class, rosterEntity)).build();
         }
         final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, organizationID);
         if (providers.isEmpty()) {
@@ -87,7 +91,7 @@ public class GroupResource extends AbstractGroupResource {
 
         // Add the first provider
         final RosterEntity persisted = this.rosterDAO.persistEntity(rosterEntity);
-        final Group persistedGroup = persisted.toFHIR();
+        final Group persistedGroup = this.converter.toFHIR(Group.class, persisted);
 
         return Response.status(Response.Status.CREATED).entity(persistedGroup).build();
     }
@@ -116,7 +120,7 @@ public class GroupResource extends AbstractGroupResource {
         final UUID organizationID = RESTUtils.tokenTagToUUID(organizationToken);
         return this.rosterDAO.findEntities(organizationID, providerIDPart, patientID)
                 .stream()
-                .map(RosterEntity::toFHIR)
+                .map(r -> this.converter.toFHIR(Group.class, r))
                 .collect(Collectors.toList());
     }
 
@@ -182,9 +186,10 @@ public class GroupResource extends AbstractGroupResource {
                 .peek(relationship -> relationship.setPeriodBegin(now))
                 .forEach(relationshipDAO::addAttributionRelationship);
 
-        return this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION)
-                .toFHIR();
+        final RosterEntity rosterEntity1 = rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        return converter.toFHIR(Group.class, rosterEntity1);
     }
 
     @POST
@@ -231,8 +236,10 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .forEach(this.relationshipDAO::addAttributionRelationship);
 
-        return this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION).toFHIR();
+        final RosterEntity rosterEntity1 = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        return converter.toFHIR(Group.class, rosterEntity1);
     }
 
     @POST
@@ -267,8 +274,10 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .forEach(this.relationshipDAO::updateAttributionRelationship);
 
-        return this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION).toFHIR();
+        final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        return this.converter.toFHIR(Group.class, rosterEntity);
     }
 
     @DELETE
@@ -303,9 +312,10 @@ public class GroupResource extends AbstractGroupResource {
             @PathParam("rosterID") UUID rosterID) {
         logger.debug("API request to retrieve attributed patients for {}", rosterID);
 
-        return this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> NOT_FOUND_EXCEPTION)
-                .toFHIR();
+        final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+        return converter.toFHIR(Group.class, rosterEntity);
     }
 
     private OffsetDateTime generateExpirationTime() {

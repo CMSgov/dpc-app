@@ -90,6 +90,11 @@
             <artifactId>httpclient</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>28.1-jre</version>
+        </dependency>
         <!--Test resources-->
         <dependency>
             <groupId>org.mockito</groupId>

@@ -9,15 +9,15 @@ import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.converters.EndpointConverter;
-import gov.cms.dpc.fhir.converters.entities.EndpointEntityConverter;
+import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -32,9 +32,11 @@ public class EndpointResource extends AbstractEndpointResource {
 
     private final EndpointDAO endpointDAO;
     private final OrganizationDAO organizationDAO;
+    private final FHIREntityConverter converter;
 
     @Inject
-    public EndpointResource(EndpointDAO endpointDAO, OrganizationDAO organizationDAO) {
+    public EndpointResource(FHIREntityConverter converter, EndpointDAO endpointDAO, OrganizationDAO organizationDAO) {
+        this.converter = converter;
         this.endpointDAO = endpointDAO;
         this.organizationDAO = organizationDAO;
     }
@@ -47,8 +49,8 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource")
     @Override
     public Response createEndpoint(@NotNull Endpoint endpoint) {
-        EndpointEntity entity = endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
-        return Response.status(Response.Status.CREATED).entity(EndpointEntityConverter.convert(entity)).build();
+        EndpointEntity entity = endpointDAO.persistEndpoint(converter.fromFHIR(EndpointEntity.class, endpoint));
+        return Response.status(Response.Status.CREATED).entity(converter.toFHIR(Endpoint.class, entity)).build();
     }
 
     @FHIR
@@ -65,7 +67,7 @@ public class EndpointResource extends AbstractEndpointResource {
 
         return endpointList
                 .stream()
-                .map(EndpointEntityConverter::convert)
+                .map(e -> converter.toFHIR(Endpoint.class, e))
                 .collect(Collectors.toList());
     }
 
@@ -82,7 +84,7 @@ public class EndpointResource extends AbstractEndpointResource {
         final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
                 .orElseThrow(() -> new WebApplicationException("Unable to find Endpoint", Response.Status.NOT_FOUND));
 
-        return EndpointEntityConverter.convert(endpoint);
+        return converter.toFHIR(Endpoint.class, endpoint);
     }
 
     @FHIR
@@ -92,11 +94,11 @@ public class EndpointResource extends AbstractEndpointResource {
     @ExceptionMetered
     @UnitOfWork
     @ApiOperation(value = "Update an Endpoint", notes = "Update an Endpoint resource")
-    @ApiResponses(value = { @ApiResponse(code = 404, message = "Cannot find Endpoint") })
+    @ApiResponses(value = {@ApiResponse(code = 404, message = "Cannot find Endpoint")})
     @Override
     public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @NotNull Endpoint endpoint) {
-        EndpointEntity updatedEntity = this.endpointDAO.persistEndpoint(EndpointConverter.convert(endpoint));
-        return EndpointEntityConverter.convert(updatedEntity);
+        EndpointEntity updatedEntity = this.endpointDAO.persistEndpoint(converter.fromFHIR(EndpointEntity.class, endpoint));
+        return converter.toFHIR(Endpoint.class, updatedEntity);
     }
 
     @FHIR

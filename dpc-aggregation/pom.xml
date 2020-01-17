@@ -104,11 +104,21 @@
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-json-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-java</artifactId>
+            <version>${newrelic.agent.version}</version>
+            <type>${newrelic.agent.type}</type>
         </dependency>
     </dependencies>
 
@@ -178,6 +188,10 @@
             </plugin>
             <!-- For building docker image -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
@@ -186,6 +200,7 @@
                             <path>${project.basedir}/../bbcerts</path>
                             <path>${project.basedir}/target/jacoco-agent</path>
                             <path>${project.basedir}/docker</path>
+                            <path>${project.basedir}/target/newrelic-agent</path>
                         </paths>
                         <permissions>
                             <permission>

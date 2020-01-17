@@ -50,7 +50,9 @@
         <jacoco.version>0.8.5</jacoco.version>
         <jooq.version>3.12.1</jooq.version>
         <bouncey.version>1.64</bouncey.version>
-        <pitest.version>1.4.10</pitest.version>
+        <pitest.version>1.4.11</pitest.version>
+        <newrelic.agent.version>5.9.0</newrelic.agent.version>
+        <newrelic.agent.type>zip</newrelic.agent.type>
     </properties>
 
     <developers>
@@ -161,6 +163,11 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-json-logging</artifactId>
+                <version>${dropwizard.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>${hapi.fhir.groupID}</groupId>
                 <artifactId>hapi-fhir-base</artifactId>
                 <version>${hapi.fhir.version}</version>
@@ -189,6 +196,13 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>28.1-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>com.newrelic.agent.java</groupId>
+                <artifactId>newrelic-java</artifactId>
+                <version>${newrelic.agent.version}</version>
+                <scope>provided</scope>
+                <type>${newrelic.agent.type}</type>
             </dependency>
             <!--Test dependencies-->
             <dependency>
@@ -416,6 +430,28 @@
                     <version>3.8.1</version>
                 </plugin>
                 <!-- Base configuration for Docker images -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <executions>
+                        <execution>
+                            <id>unpack-newrelic</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>unpack-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <includeGroupIds>com.newrelic.agent.java</includeGroupIds>
+                                <includeArtifactIds>newrelic-java</includeArtifactIds>
+                                <overWriteReleases>false</overWriteReleases>
+                                <overWriteSnapshots>false</overWriteSnapshots>
+                                <overWriteIfNewer>true</overWriteIfNewer>
+                                <outputDirectory>${project.build.directory}/newrelic-agent</outputDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
