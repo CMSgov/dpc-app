@@ -64,7 +64,7 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
     ports:
-      - "3600:3002"
+      - "3600:3600"
       - "9004:9900"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
