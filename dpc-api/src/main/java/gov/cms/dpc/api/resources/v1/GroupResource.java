@@ -24,7 +24,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
