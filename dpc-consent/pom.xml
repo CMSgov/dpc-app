@@ -68,6 +68,10 @@
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-json-logging</artifactId>
+        </dependency>
         <!--Testing dependencies-->
         <dependency>
             <groupId>io.dropwizard</groupId>
