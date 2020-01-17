@@ -127,10 +127,6 @@ public class APIAuthHelpers {
         final AuthResponse authResponse;
         try (final CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Token/auth", baseURL));
-            builder.addParameter("scope", "system/*.*");
-            builder.addParameter("grant_type", "client_credentials");
-            builder.addParameter("client_assertion_type", CLIENT_ASSERTION_TYPE);
-            builder.addParameter("client_assertion", jwt);
             final HttpPost post = new HttpPost(builder.build());
             post.setEntity(entity);
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);

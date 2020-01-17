@@ -40,7 +40,6 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.Date;
-import java.text.DateFormat;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -69,7 +68,7 @@ class JWTUnitTests {
     }
 
     @Nested
-    @DisplayName("Query Param tests")
+    @DisplayName("Form Param Tests")
     class FormParamTests {
 
         @Test
