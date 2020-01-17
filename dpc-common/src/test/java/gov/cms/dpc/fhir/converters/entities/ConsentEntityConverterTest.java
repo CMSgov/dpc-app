@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.Consent;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,6 +42,19 @@ public class ConsentEntityConverterTest {
         final Consent result = ConsentEntityConverter.convert(ce, TEST_DPC_URL, TEST_FHIR_URL);
 
         assertEquals(ConsentEntityConverter.OPT_OUT_MAGIC, result.getPolicyRule());
+        assertDoesNotThrow(() -> {
+            FhirContext.forDstu3().newJsonParser().encodeResourceToString(result);
+        });
+    }
+
+    @Test
+    final void convert_correctlyConverts_fromCustodianEntity() {
+        ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
+        UUID uuid = UUID.randomUUID();
+        ce.setCustodian(uuid);
+        final Consent result = ConsentEntityConverter.convert(ce, TEST_DPC_URL, TEST_FHIR_URL);
+
+        assertEquals("Organization/" + uuid.toString(), result.getOrganizationFirstRep().getReference());
         assertDoesNotThrow(() -> {
             FhirContext.forDstu3().newJsonParser().encodeResourceToString(result);
         });
