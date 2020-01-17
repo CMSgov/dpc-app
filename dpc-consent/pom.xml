@@ -72,6 +72,10 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-json-logging</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-client</artifactId>
+        </dependency>
         <!--Testing dependencies-->
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -88,11 +92,6 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-client</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-client</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
