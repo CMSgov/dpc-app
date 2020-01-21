@@ -33,6 +33,10 @@ active: profiles
 <td>Profile for required address information for Organizations</td>
 </tr>
 <tr>
+<td><a href="StructureDefinition-dpc-profile-attestation.html">DPC Attribution Attestation</a></td>
+<td>Profile for required information for attesting a treatment purpose for attributing patients to an organization on behalf of a practitioner</td>
+</tr>
+<tr>
 <td><a href="StructureDefinition-dpc-profile-attribution-roster.html">DPC Attribution Roster</a></td>
 <td>Profile for Patient attribution roster submission</td>
 </tr>
