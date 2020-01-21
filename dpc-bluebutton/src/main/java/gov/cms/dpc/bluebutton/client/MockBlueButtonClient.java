@@ -39,6 +39,14 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
+    public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
+        Patient patient = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, TEST_PATIENT_IDS.get(0));
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(patient);
+        return bundle;
+    }
+
+    @Override
     public Bundle requestEOBFromServer(String patientID) throws ResourceNotFoundException {
         return loadBundle(SAMPLE_EOB_PATH_PREFIX, patientID);
     }

@@ -9,11 +9,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.utils.MetricMaker;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Coverage;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +62,23 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                 .read()
                 .resource(Patient.class)
                 .withId(patientID)
+                .execute());
+    }
+
+    /**
+     * Queries Blue Button server for patient data by hashed Medicare Beneficiary Identifier (MBI).
+     *
+     * @param mbiHash The hashed MBI
+     * @return {@link Bundle} A FHIR Bundle of Patient resources
+     */
+    @Override
+    public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
+        logger.debug("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
+        return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash))
+                .returnBundle(Bundle.class)
                 .execute());
     }
 
