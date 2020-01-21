@@ -82,6 +82,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             labelViolationPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
             try (CloseableHttpResponse response = client.execute(labelViolationPost)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key label cannot be too long");
+                assertEquals("{\"code\":400,\"message\":\"Key label cannot be more than 25 characters\"}", EntityUtils.toString(response.getEntity()), "Key label should have correct error message");
             }
         }
     }
