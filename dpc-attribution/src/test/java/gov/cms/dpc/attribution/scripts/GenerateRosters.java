@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * Generate Rosters from SyntheticMass data
+ * This is marked as {@link Disabled} because it's not actually a test, we put it here to prevent it from being pulled into the runtime JAR.
  * <p>
  * Make sure APIKEY environment variable it set
  */

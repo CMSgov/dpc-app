@@ -14,6 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Helper script for adding MBI identifiers to patient rosters.
+ * This is marked as {@link Disabled} because it's not actually a test, we put it here to prevent it from being pulled into the runtime JAR.
+ */
 @Disabled
 public class AddMBIToPatients {
 
