@@ -34,7 +34,7 @@
   "packageId" : "cms-dpc-ig",
   "license" : "MIT",
   "fhirVersion" : ["3.0.1",
-  "3.0.1"],
+  "3.0.2"],
   "definition" : {
     "grouping" : [{
       "id" : "p1",
@@ -60,6 +60,14 @@
       "reference" : {
         "reference" : "StructureDefinition/dpc-profile-address",
         "display" : "DPCAddress.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
+        "reference" : "StructureDefinition/dpc-profile-attestation",
+        "display" : "DPCAttestation.json"
       },
       "exampleBoolean" : false,
       "groupingId" : "p1"

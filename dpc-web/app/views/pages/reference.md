@@ -456,7 +456,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Token/validate \
 -d "{Signed JWT}"
 ~~~
 
-In order to receive an `access_token` the JWT is submitted to the `/Token/auth` endpoint as the `client_assertion` query param of an `application/x-www-form-urlencoded` POST request, along with the following, additional, query params:
+In order to receive an `access_token` the JWT is submitted to the `/Token/auth` endpoint as the `client_assertion` form param of an `application/x-www-form-urlencoded` POST request, along with the following, additional, form params:
 
 **Parameters**
 
@@ -477,10 +477,11 @@ POST /api/v1/Token/auth
 **cURL command**
 
 ~~~sh
-curl -v "https://sandbox.dpc.cms.gov/api/v1/Token/auth?grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion={self-signed JWT}" \
+curl -v "https://sandbox.dpc.cms.gov/api/v1/Token/auth" \
 -H 'Content-Type: application/x-www-form-urlencoded' \
 -H 'Accept: application/json' \
 -X POST
+-d "grant_type=client_credentials&scope=system%2F*.*&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion={self-signed JWT}"
 ~~~
 
 **Response**
@@ -981,6 +982,59 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Patient/\$submit
 }
 ~~~
 
+### Create attestation record for data release
+
+CMS requires that the provider attest they have a treatment related purpose for adding a patient to their roster **each** time they make a roster addition.
+This is accomplished by submitting a `Provenance` resource via the `X-Provenance` header, as outlined in the FHIR specification.
+
+Details on the exact data format are given in the [implementation guide](/ig/index.html) but at a minimum, each attestation must include:
+
+- A timestamp of when the attestation is made.
+- The reason for the attestation (currently only: `http://hl7.org/fhir/v3/ActReason#TREAT` is supported).
+- The agent making the attestation (identified by their Organization resource ID) on behalf of a given provider (identified by their resource ID).
+
+**Example attestation**
+
+```javascript
+{
+  "resourceType": "Provenance",
+  "meta": {
+    "profile": [
+      "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation"
+    ]
+  },
+  "recorded": "1990-01-01T00:00:00.000-05:00",
+  "reason": [
+    {
+      "system": "http://hl7.org/fhir/v3/ActReason",
+      "code": "TREAT"
+    }
+  ],
+  "agent": [
+    {
+      "role": [
+        {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/RoleClass",
+              "code": "AGNT"
+            }
+          ]
+        }
+      ],
+      "whoReference": {
+        "reference": "Organization/{organization ID}"
+      },
+      "onBehalfOfReference": {
+        "reference": "Practitioner/{practitioner ID}"
+      }
+    }
+  ]
+}
+```
+
+The provenance resource is then included in the `X-Provenance` header as part of any `/Group` operations which add patients to a given roster.
+
 ### Create an Attribution Group
 
 Once the Provider and Patient records have been created, the final step is to associate the records into an attribution [Group](http://hl7.org/fhir/STU3/patient.html) resource, also known as a Patient roster.
@@ -1001,6 +1055,7 @@ curl -v https://sandbox.dpc.cms.gov/api/v1/Group
 -H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
 -H 'Content-Type: application/fhir+json' \
+-H 'X-Provenance: {FHIR provenance resource} \
 -X POST \
 -d @group.json
 ~~~
@@ -1123,6 +1178,7 @@ POST /api/v1/Group/{Group.id}/$add
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}/\$add
 -H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
+-H 'X-Provenance: {FHIR provenance resource} \
 -X POST \
 -d @group_addition.json
 ~~~
@@ -1232,6 +1288,7 @@ PUT /api/v1/Group/{Group.id}
 curl -v https://sandbox.dpc.cms.gov/api/v1/Group/{Group.id}
 -H 'Authorization: Bearer {access_token}' \
 -H 'Accept: application/fhir+json' \
+-H 'X-Provenance: {FHIR provenance resource} \
 -X PUT \
 -d @updated_group.json
 ~~~

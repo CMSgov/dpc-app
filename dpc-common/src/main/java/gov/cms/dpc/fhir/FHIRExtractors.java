@@ -80,6 +80,15 @@ public class FHIRExtractors {
         return UUID.fromString(id);
     }
 
+    public static Provenance.ProvenanceAgentComponent getProvenancePerformer(Provenance provenance) {
+        return provenance
+                .getAgent()
+                .stream()
+                .filter(comp -> comp.getRoleFirstRep().getCodingFirstRep().getCode().equals("AGNT"))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Provenance performer"));
+    }
+
     /**
      * Extracts an {@link Identifier} from a FHIR search parameter.
      *

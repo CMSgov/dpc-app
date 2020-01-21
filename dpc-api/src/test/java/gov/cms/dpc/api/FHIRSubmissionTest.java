@@ -9,6 +9,7 @@ import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.resources.v1.GroupResource;
 import gov.cms.dpc.api.resources.v1.JobResource;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -18,6 +19,7 @@ import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
+import org.glassfish.jersey.server.spi.internal.ValueFactoryProvider;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -52,6 +54,7 @@ class FHIRSubmissionTest {
     private static IRead mockRead = mock(IRead.class);
     private static IReadTyped mockTypedRead = mock(IReadTyped.class);
     private static IReadExecutable mockExecutable = mock(IReadExecutable.class);
+    private static ProvenanceResourceFactoryProvider factory = mock(ProvenanceResourceFactoryProvider.class);
 
     private static final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
@@ -65,13 +68,15 @@ class FHIRSubmissionTest {
             .setTestContainerFactory(testContainer)
             .addProvider(staticFilter)
             .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))
+            .addProvider(factory)
             .build();
-
 
     @BeforeAll
     static void setup() {
         mockClient();
+        mockFactory();
         doCallRealMethod().when(queue).createJob(Mockito.any(UUID.class), Mockito.anyString(), Mockito.anyList(), Mockito.anyList());
+
     }
 
     @Test
@@ -251,5 +256,12 @@ class FHIRSubmissionTest {
 
             return bundle;
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void mockFactory() {
+        Mockito.when(factory.getPriority()).thenReturn(ValueFactoryProvider.Priority.NORMAL);
+        final org.glassfish.hk2.api.Factory f = mock(org.glassfish.hk2.api.Factory.class);
+        Mockito.when(factory.getValueFactory(Mockito.any())).thenReturn(f);
     }
 }

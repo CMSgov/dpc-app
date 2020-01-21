@@ -38,7 +38,7 @@ class DefinitionResourceTest {
 
         final Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, (InputStream) response.getEntity());
 
-        assertEquals(6, bundle.getEntry().size(), "Should have all the structure definitions");
+        assertEquals(7, bundle.getEntry().size(), "Should have all the structure definitions");
     }
 
     @Test
@@ -69,7 +69,7 @@ class DefinitionResourceTest {
 
         final DPCProfileSupport profileSupport = new DPCProfileSupport(ctx);
 
-        final DefinitionResource definitionResource = new DefinitionResource(ctx, profileSupport, APITestHelpers.BASE_URL);
+        final DefinitionResource definitionResource = new DefinitionResource(ctx, profileSupport);
         return APITestHelpers.buildResourceExtension(ctx,
                 List.of(definitionResource),
                 Collections.emptyList(), true);

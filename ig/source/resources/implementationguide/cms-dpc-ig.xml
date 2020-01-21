@@ -39,6 +39,13 @@
         <resource>
             <example value="false"/>
             <sourceReference>
+                <reference value="StructureDefinition/dpc-profile-attestation"/>
+                <display value="DPCAttestation.json"/>
+            </sourceReference>
+        </resource>
+        <resource>
+            <example value="false"/>
+            <sourceReference>
                 <reference value="StructureDefinition/dpc-profile-attribution-roster"/>
                 <display value="DPCAttributionRoster.json"/>
             </sourceReference>

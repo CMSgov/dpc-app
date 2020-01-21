@@ -197,6 +197,7 @@
 									"    pm.expect(responseOutput.total).to.equal(1);",
 									"    pm.expect(responseOutput.entry[0].resource.identifier[0].system).to.equal(\"http://hl7.org/fhir/sid/us-npi\");",
 									"    pm.environment.set(\"provider_npi\", responseOutput.entry[0].resource.identifier[0].value);",
+									"    pm.environment.set(\"provider_id\", responseOutput.entry[0].resource.id)",
 									"});"
 								],
 								"type": "text/javascript"
@@ -385,7 +386,41 @@
 									"    }))",
 									"    ",
 									"console.log(\"Group:\", group);",
-									"pm.environment.set(\"roster_body\", JSON.stringify(group));"
+									"pm.environment.set(\"roster_body\", JSON.stringify(group));",
+									"",
+									"",
+									"// Build the attestation header",
+									"var attestation = {",
+									"    \"resourceType\": \"Provenance\",",
+									"    \"recorded\": new Date(),",
+									"    \"reason\": [",
+									"        {",
+									"      \"system\": \"http://hl7.org/fhir/v3/ActReason\",",
+									"      \"code\": \"TREAT\"",
+									"    }],",
+									"    \"agent\": [",
+									"    {",
+									"      \"role\": [",
+									"        {",
+									"          \"coding\": [",
+									"            {",
+									"              \"system\": \"http://hl7.org/fhir/v3/RoleClass\",",
+									"              \"code\": \"AGNT\"",
+									"            }",
+									"          ]",
+									"        }",
+									"      ],",
+									"      \"whoReference\": {",
+									"        \"reference\": `Organization/${pm.globals.get(\"organization_id\")}`",
+									"      },",
+									"      \"onBehalfOfReference\": {",
+									"        \"reference\": `Practitioner/${pm.environment.get(\"provider_id\")}`",
+									"      }",
+									"    }",
+									"  ]",
+									"}",
+									"",
+									"pm.environment.set(\"attestationHeader\", JSON.stringify(attestation))"
 								],
 								"type": "text/javascript"
 							}
@@ -398,6 +433,11 @@
 								"key": "Content-Type",
 								"name": "Content-Type",
 								"value": "application/fhir+json",
+								"type": "text"
+							},
+							{
+								"key": "X-Provenance",
+								"value": "{{attestationHeader}}",
 								"type": "text"
 							}
 						],
@@ -640,7 +680,38 @@
 							"script": {
 								"id": "f6abd191-547c-476b-b6f9-778097f05b8e",
 								"exec": [
-									""
+									"// Build the attestation header",
+									"var attestation = {",
+									"    \"resourceType\": \"Provenance\",",
+									"    \"recorded\": new Date(),",
+									"    \"reason\": [",
+									"        {",
+									"      \"system\": \"http://hl7.org/fhir/v3/ActReason\",",
+									"      \"code\": \"TREAT\"",
+									"    }],",
+									"    \"agent\": [",
+									"    {",
+									"      \"role\": [",
+									"        {",
+									"          \"coding\": [",
+									"            {",
+									"              \"system\": \"http://hl7.org/fhir/v3/RoleClass\",",
+									"              \"code\": \"AGNT\"",
+									"            }",
+									"          ]",
+									"        }",
+									"      ],",
+									"      \"whoReference\": {",
+									"        \"reference\": `Organization/${pm.globals.get(\"organization_id\")}`",
+									"      },",
+									"      \"onBehalfOfReference\": {",
+									"        \"reference\": `Practitioner/${pm.environment.get(\"provider_id\")}`",
+									"      }",
+									"    }",
+									"  ]",
+									"}",
+									"",
+									"pm.environment.set(\"attestationHeader\", JSON.stringify(attestation))"
 								],
 								"type": "text/javascript"
 							}
@@ -683,6 +754,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/fhir+json",
+								"type": "text"
+							},
+							{
+								"key": "X-Provenance",
+								"value": "{{attestationHeader}}",
 								"type": "text"
 							}
 						],

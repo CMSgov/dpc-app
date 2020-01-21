@@ -12,6 +12,9 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
+import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
+import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
@@ -22,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -58,12 +62,19 @@ public class GroupResource extends AbstractGroupResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Create Attribution Roster", notes = "FHIR endpoint to create an Attribution roster (Group resource) associated to the provider listed in the in the Group characteristics.")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
             @ApiResponse(code = 200, message = "Roster already exists")
     })
     @Override
-    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, Group attributionRoster) {
+    public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                 @Valid @Profiled(profile = AttestationProfile.PROFILE_URI)
+                                 @ProvenanceHeader Provenance rosterAttestation,
+                                 Group attributionRoster) {
+        // Log attestation
+        logAttestation(rosterAttestation, null, attributionRoster);
         addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
         final MethodOutcome outcome = this
@@ -139,9 +150,15 @@ public class GroupResource extends AbstractGroupResource {
     @ExceptionMetered
     @ApiOperation(value = "Update Attribution Roster", notes = "Update specific Attribution roster." +
             "<p>Updates allow for adding or removing patients from the roster.")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group rosterUpdate) {
+    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
+                              @Valid @Profiled(profile = AttestationProfile.PROFILE_URI)
+                              @ProvenanceHeader Provenance rosterAttestation,
+                              Group rosterUpdate) {
+        logAttestation(rosterAttestation, rosterID, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
@@ -159,9 +176,12 @@ public class GroupResource extends AbstractGroupResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Add roster members", notes = "Update specific Attribution roster by adding members given in the provided resource.")
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
+        logAttestation(rosterAttestation, rosterID, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
@@ -288,39 +308,6 @@ public class GroupResource extends AbstractGroupResource {
         return resources;
     }
 
-    /**
-     * Check the query parameters of the request. If valid, return empty. If not valid,
-     * return an error response with an {@link OperationOutcome} in the body.
-     *
-     * @param outputFormat param to check
-     * @param since        param to check
-     */
-    private static void checkExportRequest(String outputFormat, String since) {
-        // _since is unsupported
-        if (StringUtils.isNotEmpty(since)) {
-            throw new BadRequestException("'_since' is not supported");
-        }
-
-        // _outputFormat only supports FHIR_NDJSON
-        if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
-            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
-        }
-    }
-
-    /**
-     * Convert a single resource type in a query param into a {@link ResourceType}.
-     *
-     * @param queryResourceType - The text from the query param
-     * @return If match is found a {@link ResourceType}
-     */
-    private static Optional<ResourceType> matchResourceType(String queryResourceType) {
-        final var canonical = queryResourceType.trim().toUpperCase();
-        // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
-        return JobQueueBatch.validResourceTypes.stream()
-                .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
-                .findFirst();
-    }
-
     private List<String> fetchPatientMBIs(String groupID) {
 
         final Group attributionRoster = this.client
@@ -354,5 +341,72 @@ public class GroupResource extends AbstractGroupResource {
                 .map(entry -> (Patient) entry.getResource())
                 .map(FHIRExtractors::getPatientMPI)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Log the attribution attestation, as required by Office of Civil Rights
+     * Eventually, this will need to get persisted into durable storage, but for now, Splunk is fine.
+     * <p>
+     * We require the roster ID to be passed in from the query itself, rather than extracted from the {@link Group}, because it's possible for the {@link Group} ID to be empty, if the user doesn't manually set it before uploading.
+     *
+     * @param provenance        - {@link Provenance} attestation to log
+     * @param rosterID          - {@link UUID} of roster being updated
+     * @param attributionRoster - {@link Group} roster being attested
+     */
+    private void logAttestation(Provenance provenance, UUID rosterID, Group attributionRoster) {
+
+        final String groupIDLog;
+        if (rosterID == null) {
+            groupIDLog = "";
+        } else {
+            groupIDLog = String.format(" for roster %s", new IdType("Group", rosterID.toString()));
+        }
+
+        final Coding reason = provenance.getReasonFirstRep();
+
+        final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
+        final List<String> attributedPatients = attributionRoster
+                .getMember()
+                .stream()
+                .map(Group.GroupMemberComponent::getEntity)
+                .map(Reference::getReference)
+                .collect(Collectors.toList());
+
+        logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}{}", performer.getWhoReference().getReference(),
+                reason.getCode(),
+                performer.getOnBehalfOfReference().getReference(), attributedPatients, groupIDLog);
+    }
+
+    /**
+     * Check the query parameters of the request. If valid, return empty. If not valid,
+     * return an error response with an {@link OperationOutcome} in the body.
+     *
+     * @param outputFormat param to check
+     * @param since        param to check
+     */
+    private static void checkExportRequest(String outputFormat, String since) {
+        // _since is unsupported
+        if (StringUtils.isNotEmpty(since)) {
+            throw new BadRequestException("'_since' is not supported");
+        }
+
+        // _outputFormat only supports FHIR_NDJSON
+        if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
+            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
+        }
+    }
+
+    /**
+     * Convert a single resource type in a query param into a {@link ResourceType}.
+     *
+     * @param queryResourceType - The text from the query param
+     * @return If match is found a {@link ResourceType}
+     */
+    private static Optional<ResourceType> matchResourceType(String queryResourceType) {
+        final var canonical = queryResourceType.trim().toUpperCase();
+        // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
+        return JobQueueBatch.validResourceTypes.stream()
+                .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
+                .findFirst();
     }
 }
