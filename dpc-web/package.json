@@ -2,7 +2,7 @@
   "name": "dpc-website",
   "private": true,
   "dependencies": {
-    "@cmsgov/design-system-layout": "^3.4.2",
+    "@cmsgov/design-system-layout": "^3.5.0",
     "@cmsgov/design-system-core": "^3.4.2",
     "normalize.css": "^8.0.1",
     "svg4everybody": "^2.1.9"
