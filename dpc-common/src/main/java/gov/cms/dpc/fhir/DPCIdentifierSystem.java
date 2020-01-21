@@ -10,6 +10,7 @@ public enum DPCIdentifierSystem {
     PECOS("http://bluebutton.cms.hhs.gov/identifier#pecos"),
     NPPES("http://hl7.org/fhir/sid/us-npi"),
     MBI("https://bluebutton.cms.gov/resources/variables/bene_id"),
+    MBI_HASH("https://bluebutton.cms.gov/resources/identifier/mbi-hash"),
     DPC("https://dpc.cms.gov/organization_id#"),
     HICN("http://bluebutton.cms.hhs.gov/identifier#hicnHash"),
     UNKNOWN ("");
