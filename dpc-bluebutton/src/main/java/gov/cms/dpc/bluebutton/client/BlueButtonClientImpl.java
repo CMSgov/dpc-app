@@ -10,11 +10,17 @@ import com.codahale.metrics.Timer;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.bouncycastle.util.encoders.Hex;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.GeneralSecurityException;
+import java.security.spec.KeySpec;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -148,6 +154,16 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                         .capabilities()
                         .ofType(CapabilityStatement.class)
                         .execute());
+    }
+
+    @Override
+    public String hashMbi(String mbi) throws GeneralSecurityException {
+        String pepper = config.getBfdHashPepper();
+        int iterations = config.getBfdHashIter();
+        KeySpec keySpec = new PBEKeySpec(mbi.toCharArray(), Hex.decode(pepper), iterations, 256);
+        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        SecretKey secretKey = skf.generateSecret(keySpec);
+        return Hex.toHexString(secretKey.getEncoded());
     }
 
     /**

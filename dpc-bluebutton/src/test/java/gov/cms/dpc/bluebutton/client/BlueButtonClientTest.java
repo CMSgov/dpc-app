@@ -27,6 +27,7 @@ import org.mockserver.model.Parameter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.List;
@@ -220,6 +221,16 @@ class BlueButtonClientTest {
                 () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID),
                 "BlueButton client should throw exceptions when asked to retrieve EOBs for a non-existent patient"
         );
+    }
+
+    @Test
+    void shouldHashMbi() throws GeneralSecurityException {
+        // Cases from BFD tests https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderTest.java
+        String hash = bbc.hashMbi("123456789A");
+        assertEquals("d95a418b0942c7910fb1d0e84f900fe12e5a7fd74f312fa10730cc0fda230e9a", hash);
+
+        hash = bbc.hashMbi("3456789");
+        assertEquals("ec49dc08f8dd8b4e189f623ab666cfc8b81f201cc94fe6aef860a4c3bd57f278", hash);
     }
 
     /**
