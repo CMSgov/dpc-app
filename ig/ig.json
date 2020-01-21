@@ -116,6 +116,11 @@
       "defns": "StructureDefinition-dpc-profile-address-definitions.html",
       "source": "DPCAddress.json"
     },
+    "StructureDefinition/dpc-profile-attestation": {
+      "base": "StructureDefinition-dpc-profile-attestation.html",
+      "defns": "StructureDefinition-dpc-profile-attestation-definitions.html",
+      "source": "DPCAttestation.json"
+    },
     "StructureDefinition/dpc-profile-attribution-roster": {
       "base": "StructureDefinition-dpc-profile-attribution-roster.html",
       "defns": "StructureDefinition-dpc-profile-attribution-roster-definitions.html",
