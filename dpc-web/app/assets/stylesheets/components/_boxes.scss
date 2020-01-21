@@ -26,15 +26,6 @@
   margin-top: -$spacer-2;
 }
 
-.box__code {
-  overflow-x: auto;
-  white-space: pre-wrap;
-  white-space: -moz-pre-wrap;
-  white-space: -pre-wrap;
-  white-space: -o-pre-wrap;
-  word-wrap: break-word;
-}
-
 .box__content {
   flex: 1 0 0;
   padding: $spacer-4;
