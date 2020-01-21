@@ -20,15 +20,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.sql.Date;
+import java.time.Instant;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -90,6 +90,7 @@ public class ClientUtils {
      * @throws IOException - throws if unable to read the file
      */
     private static void createRosterSubmission(IGenericClient client, InputStream resource, UUID organizationID, Map<String, Reference> patientReferences) throws IOException {
+        final FhirContext ctx = FhirContext.forDstu3();
 
         final Map<String, List<Pair<String, String>>> providerMap = SeedProcessor.extractProviderMap(resource);
 
@@ -97,13 +98,16 @@ public class ClientUtils {
         providerMap
                 .entrySet()
                 .forEach(providerRoster -> {
-
                     final Group attributionRoster = SeedProcessor.generateAttributionGroup(providerRoster, organizationID, patientReferences);
+
+                    // Create the attestation
+                    final Provenance provenance = createAttestation(organizationID, providerRoster.getKey());
 
                     // Now, submit the bundle
                     client
                             .create()
                             .resource(attributionRoster)
+                            .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
                             .encodedJson()
                             .execute();
                 });
@@ -141,7 +145,7 @@ public class ClientUtils {
                     try {
                         responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
                         jobResponse = mapper.readValue(responseBody, JobCompletionModel.class);
-                    } catch ( JsonParseException e ) {
+                    } catch (JsonParseException e) {
                         logger.error(String.format("Failed to parse job status response: %s", responseBody));
                         throw e;
                     }
@@ -300,5 +304,28 @@ public class ClientUtils {
             System.out.println("Uploading Patient roster");
             createRosterSubmission(client, resource, organizationID, patientReferences);
         }
+    }
+
+    private static Provenance createAttestation(UUID organizationID, String practitioner) {
+        final Provenance provenance = new Provenance();
+        provenance.setRecorded(Date.from(Instant.now()));
+
+        provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
+
+        // Add an agent
+        final Provenance.ProvenanceAgentComponent agent = new Provenance.ProvenanceAgentComponent();
+        agent.setWho(new Reference(new IdType("Organization", organizationID.toString())));
+        agent.setOnBehalfOf(new Reference(new IdType("Practitioner", practitioner)));
+
+        final Coding roleCode = new Coding();
+        roleCode.setSystem(V3RoleClass.AGNT.getSystem());
+        roleCode.setCode(V3RoleClass.AGNT.toCode());
+
+        final CodeableConcept roleConcept = new CodeableConcept();
+        roleConcept.addCoding(roleCode);
+        agent.setRole(Collections.singletonList(roleConcept));
+        provenance.addAgent(agent);
+
+        return provenance;
     }
 }
