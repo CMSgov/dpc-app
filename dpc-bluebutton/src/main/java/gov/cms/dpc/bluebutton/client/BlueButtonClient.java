@@ -11,6 +11,8 @@ public interface BlueButtonClient {
 
     Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException;
 
+    Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException;
+
     Bundle requestEOBFromServer(String patientID) throws ResourceNotFoundException;
 
     Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException;
