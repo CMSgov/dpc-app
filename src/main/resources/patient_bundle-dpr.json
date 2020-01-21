@@ -8,11 +8,11 @@
         "resourceType": "Patient",
         "id": "728b270d-d7de-4143-82fe-d3ccd92cebe4",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjczNTM5MjYwMDAwMA",
-          "lastUpdated": "2019-04-09T12:25:35.392600+00:00"
+          "lastUpdated": "2019-04-09T12:25:35.392600+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -142,6 +142,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001809"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819"
           }
         ],
         "name": [
@@ -223,11 +247,11 @@
         "resourceType": "Patient",
         "id": "6f7acde5-db81-4361-82cf-886893a3280c",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjczNjQ1MTMxNjAwMA",
-          "lastUpdated": "2019-04-09T12:25:36.451316+00:00"
+          "lastUpdated": "2019-04-09T12:25:36.451316+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -357,6 +381,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002210"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90"
           }
         ],
         "name": [
@@ -438,11 +486,11 @@
         "resourceType": "Patient",
         "id": "78b28fcd-c455-4da1-81c5-ba94c1f3f5b6",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjczMjE4MzkxMTAwMA",
-          "lastUpdated": "2019-04-09T12:25:32.183911+00:00"
+          "lastUpdated": "2019-04-09T12:25:32.183911+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -544,6 +592,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002209"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419"
           }
         ],
         "name": [
@@ -622,11 +694,11 @@
         "resourceType": "Patient",
         "id": "5acc8bb4-2d14-4461-a560-228d96459cc3",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjczMzI3NTg1MTAwMA",
-          "lastUpdated": "2019-04-09T12:25:33.275851+00:00"
+          "lastUpdated": "2019-04-09T12:25:33.275851+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -756,6 +828,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002208"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756"
           }
         ],
         "name": [
@@ -847,11 +943,11 @@
         "resourceType": "Patient",
         "id": "933c5ad6-11aa-4228-a5ae-72f075aa4681",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjczMDA0OTU4NDAwMA",
-          "lastUpdated": "2019-04-09T12:25:30.049584+00:00"
+          "lastUpdated": "2019-04-09T12:25:30.049584+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -981,6 +1077,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002203"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "08c60332c596e5178806e7d513846d067c06c166993afb61c974e46632beb6ab"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "08c60332c596e5178806e7d513846d067c06c166993afb61c974e46632beb6ab"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "08c60332c596e5178806e7d513846d067c06c166993afb61c974e46632beb6ab"
           }
         ],
         "name": [
@@ -1072,11 +1192,11 @@
         "resourceType": "Patient",
         "id": "d819cfa2-c349-4920-94ab-dc244da43c50",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyODk3Nzk3MTAwMA",
-          "lastUpdated": "2019-04-09T12:25:28.977971+00:00"
+          "lastUpdated": "2019-04-09T12:25:28.977971+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -1178,6 +1298,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003018"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5e44b589db780094380b407f0083de7b6c6aee6f42786fddd0e69881bf2965cb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5e44b589db780094380b407f0083de7b6c6aee6f42786fddd0e69881bf2965cb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5e44b589db780094380b407f0083de7b6c6aee6f42786fddd0e69881bf2965cb"
           }
         ],
         "name": [
@@ -1256,11 +1400,11 @@
         "resourceType": "Patient",
         "id": "0cd47600-e7d5-426a-9320-b1d817e8a73a",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyODM2NTY2MjAwMA",
-          "lastUpdated": "2019-04-09T12:25:28.365662+00:00"
+          "lastUpdated": "2019-04-09T12:25:28.365662+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -1390,6 +1534,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002202"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "ca01d6d9dae453a0d6c6bd4f00169eabbea9319ae14b7c5c1acfaceb1bfbbbb8"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "ca01d6d9dae453a0d6c6bd4f00169eabbea9319ae14b7c5c1acfaceb1bfbbbb8"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "ca01d6d9dae453a0d6c6bd4f00169eabbea9319ae14b7c5c1acfaceb1bfbbbb8"
           }
         ],
         "name": [
@@ -1481,11 +1649,11 @@
         "resourceType": "Patient",
         "id": "b24efd46-fae3-47e5-97a5-a1545da053fe",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNzg2ODQwMTAwMA",
-          "lastUpdated": "2019-04-09T12:25:27.868401+00:00"
+          "lastUpdated": "2019-04-09T12:25:27.868401+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -1615,6 +1783,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003019"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5a37974af572b0ae54b13397d88d63ef77eb25fff2120e947bcb47319980fa0a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5a37974af572b0ae54b13397d88d63ef77eb25fff2120e947bcb47319980fa0a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5a37974af572b0ae54b13397d88d63ef77eb25fff2120e947bcb47319980fa0a"
           }
         ],
         "name": [
@@ -1696,11 +1888,11 @@
         "resourceType": "Patient",
         "id": "7e38c1b6-0b23-486c-b497-08902390a31d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNzg5MDgwMDAwMA",
-          "lastUpdated": "2019-04-09T12:25:27.890800+00:00"
+          "lastUpdated": "2019-04-09T12:25:27.890800+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -1830,6 +2022,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002201"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2b4433f39337097f7e4d5430f19274223d1745e75e516b33b9bdc6d693ee9ad3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2b4433f39337097f7e4d5430f19274223d1745e75e516b33b9bdc6d693ee9ad3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2b4433f39337097f7e4d5430f19274223d1745e75e516b33b9bdc6d693ee9ad3"
           }
         ],
         "name": [
@@ -1921,11 +2137,11 @@
         "resourceType": "Patient",
         "id": "db252ad1-7748-4b86-bac7-61184decb0ae",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNjI1OTA3MjAwMA",
-          "lastUpdated": "2019-04-09T12:25:26.259072+00:00"
+          "lastUpdated": "2019-04-09T12:25:26.259072+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -2055,6 +2271,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002207"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d14af85d0e3671ee523909129bfd22519f0fb4e083a7c1168da386184dc18803"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d14af85d0e3671ee523909129bfd22519f0fb4e083a7c1168da386184dc18803"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d14af85d0e3671ee523909129bfd22519f0fb4e083a7c1168da386184dc18803"
           }
         ],
         "name": [
@@ -2136,11 +2376,11 @@
         "resourceType": "Patient",
         "id": "f6d2bf6d-5c91-40b6-ba88-9bcbca6ebfbd",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNjI4MzI0NDAwMA",
-          "lastUpdated": "2019-04-09T12:25:26.283244+00:00"
+          "lastUpdated": "2019-04-09T12:25:26.283244+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -2270,6 +2510,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003014"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f5deb1c7659c4c265ef9b80af88a485d9ec109b2bd54539269ab188d9713275e"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f5deb1c7659c4c265ef9b80af88a485d9ec109b2bd54539269ab188d9713275e"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f5deb1c7659c4c265ef9b80af88a485d9ec109b2bd54539269ab188d9713275e"
           }
         ],
         "name": [
@@ -2361,11 +2625,11 @@
         "resourceType": "Patient",
         "id": "f9501d43-81e0-4c40-8306-9f9cb1769b3d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNTczMzQ3NTAwMA",
-          "lastUpdated": "2019-04-09T12:25:25.733475+00:00"
+          "lastUpdated": "2019-04-09T12:25:25.733475+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -2495,6 +2759,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002206"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a556efb9fbe98b40cedf016747ae9af100620294cb8a1d03604b380570d380eb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a556efb9fbe98b40cedf016747ae9af100620294cb8a1d03604b380570d380eb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S58A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a556efb9fbe98b40cedf016747ae9af100620294cb8a1d03604b380570d380eb"
           }
         ],
         "name": [
@@ -2586,11 +2874,11 @@
         "resourceType": "Patient",
         "id": "570cbad5-a727-4720-9a97-b46088196cd7",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNDY2NzAzMDAwMA",
-          "lastUpdated": "2019-04-09T12:25:24.667030+00:00"
+          "lastUpdated": "2019-04-09T12:25:24.667030+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -2692,6 +2980,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003015"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2c57f196d238b65275f91f1ac517a1fb262aa25d688dfb33171db38eeb5b7b5c"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2c57f196d238b65275f91f1ac517a1fb262aa25d688dfb33171db38eeb5b7b5c"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2c57f196d238b65275f91f1ac517a1fb262aa25d688dfb33171db38eeb5b7b5c"
           }
         ],
         "name": [
@@ -2770,11 +3082,11 @@
         "resourceType": "Patient",
         "id": "69639ae1-8cf3-4112-9097-6ad93a5997dc",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNTc1MzcwNTAwMA",
-          "lastUpdated": "2019-04-09T12:25:25.753705+00:00"
+          "lastUpdated": "2019-04-09T12:25:25.753705+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -2904,6 +3216,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002048"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SK4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "07b4537cf8af9ff1a6953cf8120e0910c536fc9d14960f1745c736855e2716f3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SK4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "07b4537cf8af9ff1a6953cf8120e0910c536fc9d14960f1745c736855e2716f3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SK4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "07b4537cf8af9ff1a6953cf8120e0910c536fc9d14960f1745c736855e2716f3"
           }
         ],
         "name": [
@@ -2995,11 +3331,11 @@
         "resourceType": "Patient",
         "id": "580625f2-cb5f-4d81-87d2-0f1e66862969",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNDE1MjU4OTAwMA",
-          "lastUpdated": "2019-04-09T12:25:24.152589+00:00"
+          "lastUpdated": "2019-04-09T12:25:24.152589+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -3129,6 +3465,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002205"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "df7aaf70b259af179e6b5df055a0bfdb594772ec48328e665e4bdc1e19ab458a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "df7aaf70b259af179e6b5df055a0bfdb594772ec48328e665e4bdc1e19ab458a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "df7aaf70b259af179e6b5df055a0bfdb594772ec48328e665e4bdc1e19ab458a"
           }
         ],
         "name": [
@@ -3220,11 +3580,11 @@
         "resourceType": "Patient",
         "id": "167d8dd6-7ecd-4ad5-8e7a-63a6d6f077da",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyNDE0NzUzNTAwMA",
-          "lastUpdated": "2019-04-09T12:25:24.147535+00:00"
+          "lastUpdated": "2019-04-09T12:25:24.147535+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -3354,6 +3714,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003016"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "710f6e805391f1f808a93974634f53cbb02391ce43d68c35acec6147ea3ad36a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "710f6e805391f1f808a93974634f53cbb02391ce43d68c35acec6147ea3ad36a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "710f6e805391f1f808a93974634f53cbb02391ce43d68c35acec6147ea3ad36a"
           }
         ],
         "name": [
@@ -3435,11 +3819,11 @@
         "resourceType": "Patient",
         "id": "b83daa26-3eea-41a0-be57-74beb42f6504",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyMzYwNTMwMzAwMA",
-          "lastUpdated": "2019-04-09T12:25:23.605303+00:00"
+          "lastUpdated": "2019-04-09T12:25:23.605303+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -3569,6 +3953,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002204"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8d7cb1504b844ed4af682f67934a06de360e14cb155cf01ed5664063a34d6bbb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8d7cb1504b844ed4af682f67934a06de360e14cb155cf01ed5664063a34d6bbb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S48A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8d7cb1504b844ed4af682f67934a06de360e14cb155cf01ed5664063a34d6bbb"
           }
         ],
         "name": [
@@ -3650,11 +4058,11 @@
         "resourceType": "Patient",
         "id": "05306f3b-c7c3-4f9a-a441-87feb2ec6a66",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyMzA5Nzg2OTAwMA",
-          "lastUpdated": "2019-04-09T12:25:23.097869+00:00"
+          "lastUpdated": "2019-04-09T12:25:23.097869+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -3784,6 +4192,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003017"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "570145b748c582ec68ceaec0060364b49f4b9ab008c258d206f391458b29a8ad"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "570145b748c582ec68ceaec0060364b49f4b9ab008c258d206f391458b29a8ad"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S51C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "570145b748c582ec68ceaec0060364b49f4b9ab008c258d206f391458b29a8ad"
           }
         ],
         "name": [
@@ -3866,11 +4298,11 @@
         "resourceType": "Patient",
         "id": "871c83f5-5674-450b-a3b6-be3bbcf8a095",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyMjUxODIzMDAwMA",
-          "lastUpdated": "2019-04-09T12:25:22.518230+00:00"
+          "lastUpdated": "2019-04-09T12:25:22.518230+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -4000,6 +4432,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003010"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "bb6c18e1c2287b87add9d9872d14bdbbea8dbe736ee7c38438f479a4d132470c"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "bb6c18e1c2287b87add9d9872d14bdbbea8dbe736ee7c38438f479a4d132470c"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "bb6c18e1c2287b87add9d9872d14bdbbea8dbe736ee7c38438f479a4d132470c"
           }
         ],
         "name": [
@@ -4082,11 +4538,11 @@
         "resourceType": "Patient",
         "id": "995a1c0f-b6bc-4d16-b6b0-b8a6597c6e1d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcyMTQ0Njg0OTAwMA",
-          "lastUpdated": "2019-04-09T12:25:21.446849+00:00"
+          "lastUpdated": "2019-04-09T12:25:21.446849+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -4216,6 +4672,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003011"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2201cf8f02ff1abba6f1b2cf03ae3dda994391a1f0f2d73a11df51eed5328c24"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2201cf8f02ff1abba6f1b2cf03ae3dda994391a1f0f2d73a11df51eed5328c24"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2201cf8f02ff1abba6f1b2cf03ae3dda994391a1f0f2d73a11df51eed5328c24"
           }
         ],
         "name": [
@@ -4297,11 +4777,11 @@
         "resourceType": "Patient",
         "id": "b6ab974a-0cd3-4a45-9c8f-0543b79a007d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxOTM0MjkxMjAwMA",
-          "lastUpdated": "2019-04-09T12:25:19.342912+00:00"
+          "lastUpdated": "2019-04-09T12:25:19.342912+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -4431,6 +4911,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003012"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "19ab5cbd345a1757db3f63ccc1ad9e81c6a16d6e688506a97b7a3b79c66d0ebb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "19ab5cbd345a1757db3f63ccc1ad9e81c6a16d6e688506a97b7a3b79c66d0ebb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "19ab5cbd345a1757db3f63ccc1ad9e81c6a16d6e688506a97b7a3b79c66d0ebb"
           }
         ],
         "name": [
@@ -4522,11 +5026,11 @@
         "resourceType": "Patient",
         "id": "b2360a02-ec1b-4463-b5e8-0996f7b6a4ac",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxODI1MDI4NjAwMA",
-          "lastUpdated": "2019-04-09T12:25:18.250286+00:00"
+          "lastUpdated": "2019-04-09T12:25:18.250286+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -4628,6 +5132,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003013"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2b645acbe583a288f4c1aeb4a8d5c513ac373a2a60acd91b11435af726b2dd1c"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2b645acbe583a288f4c1aeb4a8d5c513ac373a2a60acd91b11435af726b2dd1c"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S41C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2b645acbe583a288f4c1aeb4a8d5c513ac373a2a60acd91b11435af726b2dd1c"
           }
         ],
         "name": [
@@ -4706,11 +5234,11 @@
         "resourceType": "Patient",
         "id": "81471da3-aaab-458a-bae3-c71525fe7415",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxNzE4MTc2NjAwMA",
-          "lastUpdated": "2019-04-09T12:25:17.181766+00:00"
+          "lastUpdated": "2019-04-09T12:25:17.181766+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -4840,6 +5368,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002915"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "496ea9da918aa9ddf26cde505a2f7c2c02fd267f2b59a06766d4dfeae169d0d8"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "496ea9da918aa9ddf26cde505a2f7c2c02fd267f2b59a06766d4dfeae169d0d8"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "496ea9da918aa9ddf26cde505a2f7c2c02fd267f2b59a06766d4dfeae169d0d8"
           }
         ],
         "name": [
@@ -4931,11 +5483,11 @@
         "resourceType": "Patient",
         "id": "615c67c5-5ac0-4538-84ae-bd8d4e19dc5d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxNzIwNjQ0MjAwMA",
-          "lastUpdated": "2019-04-09T12:25:17.206442+00:00"
+          "lastUpdated": "2019-04-09T12:25:17.206442+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -5065,6 +5617,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002001"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c565464051cc4bb41bbfb3ce5ac4ef5e2b66563f8de3431f1cb858d20001f548"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c565464051cc4bb41bbfb3ce5ac4ef5e2b66563f8de3431f1cb858d20001f548"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c565464051cc4bb41bbfb3ce5ac4ef5e2b66563f8de3431f1cb858d20001f548"
           }
         ],
         "name": [
@@ -5157,11 +5733,11 @@
         "resourceType": "Patient",
         "id": "789fce0b-d5a5-4d8b-9fa9-070ccfb7d474",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxNjE0MjEzNTAwMA",
-          "lastUpdated": "2019-04-09T12:25:16.142135+00:00"
+          "lastUpdated": "2019-04-09T12:25:16.142135+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -5263,6 +5839,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002914"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f7c7db0a54a5893526b1ca39baff9209282f16e2d14abc33c0ea4fb4e0f58ce4"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f7c7db0a54a5893526b1ca39baff9209282f16e2d14abc33c0ea4fb4e0f58ce4"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f7c7db0a54a5893526b1ca39baff9209282f16e2d14abc33c0ea4fb4e0f58ce4"
           }
         ],
         "name": [
@@ -5342,11 +5942,11 @@
         "resourceType": "Patient",
         "id": "6c1c89d0-27fc-4289-ba21-ed79a200ebe6",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxNjE2MTQ2OTAwMA",
-          "lastUpdated": "2019-04-09T12:25:16.161469+00:00"
+          "lastUpdated": "2019-04-09T12:25:16.161469+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -5476,6 +6076,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002913"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "05f5993cca026cc47a5afbab64925342a4aa21a10329a57bea1612b763b0a799"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "05f5993cca026cc47a5afbab64925342a4aa21a10329a57bea1612b763b0a799"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "05f5993cca026cc47a5afbab64925342a4aa21a10329a57bea1612b763b0a799"
           }
         ],
         "name": [
@@ -5557,11 +6181,11 @@
         "resourceType": "Patient",
         "id": "326299d1-23d8-46bf-8266-e58efe60c0ea",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxNTA3Mjk4ODAwMA",
-          "lastUpdated": "2019-04-09T12:25:15.072988+00:00"
+          "lastUpdated": "2019-04-09T12:25:15.072988+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -5663,6 +6287,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002003"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "43665cb73d34692449b0b4d3e8570a8821d24724583c82ad19ec8a8201161b77"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "43665cb73d34692449b0b4d3e8570a8821d24724583c82ad19ec8a8201161b77"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "43665cb73d34692449b0b4d3e8570a8821d24724583c82ad19ec8a8201161b77"
           }
         ],
         "name": [
@@ -5741,11 +6389,11 @@
         "resourceType": "Patient",
         "id": "c0c6a188-d377-413e-8dc7-6ded539c96d9",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxNDAyODg5NTAwMA",
-          "lastUpdated": "2019-04-09T12:25:14.028895+00:00"
+          "lastUpdated": "2019-04-09T12:25:14.028895+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -5875,6 +6523,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002912"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9ad1e7232ed01bb7bd6276b6f03329318c6fcd7209ec5542c985559ffb753788"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9ad1e7232ed01bb7bd6276b6f03329318c6fcd7209ec5542c985559ffb753788"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9ad1e7232ed01bb7bd6276b6f03329318c6fcd7209ec5542c985559ffb753788"
           }
         ],
         "name": [
@@ -5966,11 +6638,11 @@
         "resourceType": "Patient",
         "id": "155835fd-7f1d-414b-94d2-41d44adcf250",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxMjk0MTEzMjAwMA",
-          "lastUpdated": "2019-04-09T12:25:12.941132+00:00"
+          "lastUpdated": "2019-04-09T12:25:12.941132+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -6100,6 +6772,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002002"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8ac9eb610098878e3bc3b31697868e5bb577ab9ee023a6d0367dcf36add5c6b2"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8ac9eb610098878e3bc3b31697868e5bb577ab9ee023a6d0367dcf36add5c6b2"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SE4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8ac9eb610098878e3bc3b31697868e5bb577ab9ee023a6d0367dcf36add5c6b2"
           }
         ],
         "name": [
@@ -6181,11 +6877,11 @@
         "resourceType": "Patient",
         "id": "ef25ddf1-615e-43d5-b539-6af200ae7da4",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcxMTg3MDQ4OTAwMA",
-          "lastUpdated": "2019-04-09T12:25:11.870489+00:00"
+          "lastUpdated": "2019-04-09T12:25:11.870489+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -6315,6 +7011,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002919"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "1d0da2c2229684052b387217c8215803cf2bb26bde9fb35beba247bbf2244bc0"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "1d0da2c2229684052b387217c8215803cf2bb26bde9fb35beba247bbf2244bc0"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "1d0da2c2229684052b387217c8215803cf2bb26bde9fb35beba247bbf2244bc0"
           }
         ],
         "name": [
@@ -6396,11 +7116,11 @@
         "resourceType": "Patient",
         "id": "d41ef714-15e0-44d3-afe3-3be47689f873",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwOTc0MzMzMTAwMA",
-          "lastUpdated": "2019-04-09T12:25:09.743331+00:00"
+          "lastUpdated": "2019-04-09T12:25:09.743331+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -6530,6 +7250,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002918"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fd563fd0cda40bd4ab160c84be17c0e9a297c92a994d2c56df42ddd5b3ab2913"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fd563fd0cda40bd4ab160c84be17c0e9a297c92a994d2c56df42ddd5b3ab2913"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fd563fd0cda40bd4ab160c84be17c0e9a297c92a994d2c56df42ddd5b3ab2913"
           }
         ],
         "name": [
@@ -6614,11 +7358,11 @@
         "resourceType": "Patient",
         "id": "fde02360-8b61-40c1-b5c9-e686627d8207",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwOTc3MTYwNDAwMA",
-          "lastUpdated": "2019-04-09T12:25:09.771604+00:00"
+          "lastUpdated": "2019-04-09T12:25:09.771604+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -6748,6 +7492,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006839"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e8d76a11b0c581f7c53bf51ce7cf33155b647f761a093f05b48143bbb91155e3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e8d76a11b0c581f7c53bf51ce7cf33155b647f761a093f05b48143bbb91155e3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e8d76a11b0c581f7c53bf51ce7cf33155b647f761a093f05b48143bbb91155e3"
           }
         ],
         "name": [
@@ -6829,11 +7597,11 @@
         "resourceType": "Patient",
         "id": "0d28e708-12c0-4282-ab1f-831599e61792",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwODY3NDIxODAwMA",
-          "lastUpdated": "2019-04-09T12:25:08.674218+00:00"
+          "lastUpdated": "2019-04-09T12:25:08.674218+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -6963,6 +7731,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002917"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cc3d8d6bd6df66e2d38b90da3a4e7d0c62ea31ba52dd1e60067d11db2914eb90"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cc3d8d6bd6df66e2d38b90da3a4e7d0c62ea31ba52dd1e60067d11db2914eb90"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SS0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cc3d8d6bd6df66e2d38b90da3a4e7d0c62ea31ba52dd1e60067d11db2914eb90"
           }
         ],
         "name": [
@@ -7044,11 +7836,11 @@
         "resourceType": "Patient",
         "id": "89645076-a956-485d-9de0-bef62b10daa6",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwODcwMDIzNTAwMA",
-          "lastUpdated": "2019-04-09T12:25:08.700235+00:00"
+          "lastUpdated": "2019-04-09T12:25:08.700235+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -7178,6 +7970,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002916"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "eade277b9b3f2ce96b51a2b7799713d10b6abb89e1671d9d88edce5406dcd2fe"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "eade277b9b3f2ce96b51a2b7799713d10b6abb89e1671d9d88edce5406dcd2fe"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "eade277b9b3f2ce96b51a2b7799713d10b6abb89e1671d9d88edce5406dcd2fe"
           }
         ],
         "name": [
@@ -7259,11 +8075,11 @@
         "resourceType": "Patient",
         "id": "c3e58176-8e84-4721-a6b9-0d7eea88d109",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwNzYwMjg1MjAwMA",
-          "lastUpdated": "2019-04-09T12:25:07.602852+00:00"
+          "lastUpdated": "2019-04-09T12:25:07.602852+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -7393,6 +8209,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006836"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "753dcc491c48bd8610c45fb07d72a4fa4b3bf36ac29eee5b5b5909435ac4aea9"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "753dcc491c48bd8610c45fb07d72a4fa4b3bf36ac29eee5b5b5909435ac4aea9"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "753dcc491c48bd8610c45fb07d72a4fa4b3bf36ac29eee5b5b5909435ac4aea9"
           }
         ],
         "name": [
@@ -7474,11 +8314,11 @@
         "resourceType": "Patient",
         "id": "03a27898-d209-48aa-a2ec-a03f6fdaf1fe",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwNTUwMTU3NTAwMA",
-          "lastUpdated": "2019-04-09T12:25:05.501575+00:00"
+          "lastUpdated": "2019-04-09T12:25:05.501575+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -7594,6 +8434,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001821"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b159281e56f2bfe4c61ea7a82226e330665615d78da42259a87c54d7df138ccf"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b159281e56f2bfe4c61ea7a82226e330665615d78da42259a87c54d7df138ccf"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b159281e56f2bfe4c61ea7a82226e330665615d78da42259a87c54d7df138ccf"
           }
         ],
         "name": [
@@ -7675,11 +8539,11 @@
         "resourceType": "Patient",
         "id": "47fc4fcb-2862-406c-9931-929fc1892ca2",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwNTQ3MzEzNTAwMA",
-          "lastUpdated": "2019-04-09T12:25:05.473135+00:00"
+          "lastUpdated": "2019-04-09T12:25:05.473135+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -7809,6 +8673,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006835"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b1dab8de23a63504c33d78b73981fd8dbb88b91ce5e0d78a340a01bcab94d859"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b1dab8de23a63504c33d78b73981fd8dbb88b91ce5e0d78a340a01bcab94d859"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b1dab8de23a63504c33d78b73981fd8dbb88b91ce5e0d78a340a01bcab94d859"
           }
         ],
         "name": [
@@ -7890,11 +8778,11 @@
         "resourceType": "Patient",
         "id": "d02546e8-aa0a-4b24-97a4-b6147a599478",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwMjI5NTY1MDAwMA",
-          "lastUpdated": "2019-04-09T12:25:02.295650+00:00"
+          "lastUpdated": "2019-04-09T12:25:02.295650+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -8024,6 +8912,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001822"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cb84f2f97d797f5a40cb5e02bfa15a243b3a432c2eacaa7b03f07f564a989acb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cb84f2f97d797f5a40cb5e02bfa15a243b3a432c2eacaa7b03f07f564a989acb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cb84f2f97d797f5a40cb5e02bfa15a243b3a432c2eacaa7b03f07f564a989acb"
           }
         ],
         "name": [
@@ -8115,11 +9027,11 @@
         "resourceType": "Patient",
         "id": "fd71330e-ebd7-4e86-a43c-39ea210caf5c",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjcwMTIxNjkwODAwMA",
-          "lastUpdated": "2019-04-09T12:25:01.216908+00:00"
+          "lastUpdated": "2019-04-09T12:25:01.216908+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -8249,6 +9161,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006838"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "89c84dd2e93adf6bfd33014d676eca22d77e7df8a3d5210bd5ae7b78878b89f7"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "89c84dd2e93adf6bfd33014d676eca22d77e7df8a3d5210bd5ae7b78878b89f7"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "89c84dd2e93adf6bfd33014d676eca22d77e7df8a3d5210bd5ae7b78878b89f7"
           }
         ],
         "name": [
@@ -8330,11 +9266,11 @@
         "resourceType": "Patient",
         "id": "c784b280-c6e9-4205-975e-b89057e23a2e",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5OTEzODU2NjAwMA",
-          "lastUpdated": "2019-04-09T12:24:59.138566+00:00"
+          "lastUpdated": "2019-04-09T12:24:59.138566+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -8436,6 +9372,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001823"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fa048137442aebd63413afffe27fd4630644dbdb32e5547ef73c2478be85a965"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fa048137442aebd63413afffe27fd4630644dbdb32e5547ef73c2478be85a965"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fa048137442aebd63413afffe27fd4630644dbdb32e5547ef73c2478be85a965"
           }
         ],
         "name": [
@@ -8514,11 +9474,11 @@
         "resourceType": "Patient",
         "id": "326c4936-086b-4967-9970-4db1d7a169c9",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5ODA2Nzc1ODAwMA",
-          "lastUpdated": "2019-04-09T12:24:58.067758+00:00"
+          "lastUpdated": "2019-04-09T12:24:58.067758+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -8620,6 +9580,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006837"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "1ce5eb272025ff7cc3fb940c298fe0f126e0c4ee5b3beca1d8d7940fa9fe86bb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "1ce5eb272025ff7cc3fb940c298fe0f126e0c4ee5b3beca1d8d7940fa9fe86bb"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "1ce5eb272025ff7cc3fb940c298fe0f126e0c4ee5b3beca1d8d7940fa9fe86bb"
           }
         ],
         "name": [
@@ -8698,11 +9682,11 @@
         "resourceType": "Patient",
         "id": "57091303-30fb-4bcc-a4e6-1f76dc7993a7",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5Njk3MTg5NjAwMA",
-          "lastUpdated": "2019-04-09T12:24:56.971896+00:00"
+          "lastUpdated": "2019-04-09T12:24:56.971896+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -8832,6 +9816,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001824"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6dddcbc5087bea699d537b47976b129f1898adc6a230ded4ec04310072cafc31"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6dddcbc5087bea699d537b47976b129f1898adc6a230ded4ec04310072cafc31"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6dddcbc5087bea699d537b47976b129f1898adc6a230ded4ec04310072cafc31"
           }
         ],
         "name": [
@@ -8923,11 +9931,11 @@
         "resourceType": "Patient",
         "id": "245c115e-eeba-4d79-88fb-9ff7029cc662",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5NjkwNTA4OTAwMA",
-          "lastUpdated": "2019-04-09T12:24:56.905089+00:00"
+          "lastUpdated": "2019-04-09T12:24:56.905089+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -9057,6 +10065,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002911"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8d0595c45f8cd93a78450dc58288bd9459a47639fde0c1e4d54cb7690c2d6524"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8d0595c45f8cd93a78450dc58288bd9459a47639fde0c1e4d54cb7690c2d6524"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8d0595c45f8cd93a78450dc58288bd9459a47639fde0c1e4d54cb7690c2d6524"
           }
         ],
         "name": [
@@ -9148,11 +10180,11 @@
         "resourceType": "Patient",
         "id": "a29211ce-0014-43f5-a103-6368fa664749",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5NDgxNTQ1MjAwMA",
-          "lastUpdated": "2019-04-09T12:24:54.815452+00:00"
+          "lastUpdated": "2019-04-09T12:24:54.815452+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -9254,6 +10286,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006832"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9c153930e45d60182bdfb2dd1ba490b1f0d3798c5152d2c1e4fb6480a2f6db22"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9c153930e45d60182bdfb2dd1ba490b1f0d3798c5152d2c1e4fb6480a2f6db22"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9c153930e45d60182bdfb2dd1ba490b1f0d3798c5152d2c1e4fb6480a2f6db22"
           }
         ],
         "name": [
@@ -9332,11 +10388,11 @@
         "resourceType": "Patient",
         "id": "2cd701bf-b781-493c-ab3c-30a8603015df",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5NDg0MjI1OTAwMA",
-          "lastUpdated": "2019-04-09T12:24:54.842259+00:00"
+          "lastUpdated": "2019-04-09T12:24:54.842259+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -9466,6 +10522,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002910"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e403f770479acf1bc77a30f017519ca578fb4bc3ba900c08c6dac1adadb5d0e0"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e403f770479acf1bc77a30f017519ca578fb4bc3ba900c08c6dac1adadb5d0e0"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "e403f770479acf1bc77a30f017519ca578fb4bc3ba900c08c6dac1adadb5d0e0"
           }
         ],
         "name": [
@@ -9547,11 +10627,11 @@
         "resourceType": "Patient",
         "id": "a28cfad3-f1da-421e-91e2-0f16f1d7253d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5MzcyMTQzNDAwMA",
-          "lastUpdated": "2019-04-09T12:24:53.721434+00:00"
+          "lastUpdated": "2019-04-09T12:24:53.721434+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -9681,6 +10761,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006831"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S85D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "938a16c7e22adc328f9e9f6c9f53fa1c49d5479220c5e9db16d24bb33aa1168d"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S85D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "938a16c7e22adc328f9e9f6c9f53fa1c49d5479220c5e9db16d24bb33aa1168d"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S85D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "938a16c7e22adc328f9e9f6c9f53fa1c49d5479220c5e9db16d24bb33aa1168d"
           }
         ],
         "name": [
@@ -9762,11 +10866,11 @@
         "resourceType": "Patient",
         "id": "78226741-3095-42a9-87e2-9a18604edb7d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5MTY0ODA1NDAwMA",
-          "lastUpdated": "2019-04-09T12:24:51.648054+00:00"
+          "lastUpdated": "2019-04-09T12:24:51.648054+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -9896,6 +11000,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006834"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f100caec664739e904d8544860a6a96c0fb6aca8c9a54f1c2e6bcc7117bac3d1"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f100caec664739e904d8544860a6a96c0fb6aca8c9a54f1c2e6bcc7117bac3d1"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f100caec664739e904d8544860a6a96c0fb6aca8c9a54f1c2e6bcc7117bac3d1"
           }
         ],
         "name": [
@@ -9977,11 +11105,11 @@
         "resourceType": "Patient",
         "id": "5294faca-cba1-4606-a079-23539a3e26e2",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY5MjY1NzYyNjAwMA",
-          "lastUpdated": "2019-04-09T12:24:52.657626+00:00"
+          "lastUpdated": "2019-04-09T12:24:52.657626+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -10083,6 +11211,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006833"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "ac1e80c302e6f5dcbf42dc78d3cd7be47868ff3e7d618e110c8e5fb443a712b0"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "ac1e80c302e6f5dcbf42dc78d3cd7be47868ff3e7d618e110c8e5fb443a712b0"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2S95D00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "ac1e80c302e6f5dcbf42dc78d3cd7be47868ff3e7d618e110c8e5fb443a712b0"
           }
         ],
         "name": [
@@ -10161,11 +11313,11 @@
         "resourceType": "Patient",
         "id": "bbb2ec77-c5cf-408f-aab8-3f1496334617",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4OTQ5MDk1NDAwMA",
-          "lastUpdated": "2019-04-09T12:24:49.490954+00:00"
+          "lastUpdated": "2019-04-09T12:24:49.490954+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -10295,6 +11447,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001820"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "460b72581892a1da2fc06997bf08c4feba1c8a975b5819d88c790251ced3bf72"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "460b72581892a1da2fc06997bf08c4feba1c8a975b5819d88c790251ced3bf72"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "460b72581892a1da2fc06997bf08c4feba1c8a975b5819d88c790251ced3bf72"
           }
         ],
         "name": [
@@ -10386,11 +11562,11 @@
         "resourceType": "Patient",
         "id": "aaae7cd0-c632-4b28-8aa7-c5ae41e4753d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4ODQyNDEyNTAwMA",
-          "lastUpdated": "2019-04-09T12:24:48.424125+00:00"
+          "lastUpdated": "2019-04-09T12:24:48.424125+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -10520,6 +11696,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001829"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b194fca8e2bd6625aac4ee85d56b43cca765f1fb9496e728b6307cfef05f807d"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b194fca8e2bd6625aac4ee85d56b43cca765f1fb9496e728b6307cfef05f807d"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b194fca8e2bd6625aac4ee85d56b43cca765f1fb9496e728b6307cfef05f807d"
           }
         ],
         "name": [
@@ -10601,11 +11801,11 @@
         "resourceType": "Patient",
         "id": "770a1931-b6d8-485e-8da8-9256f3208c27",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4ODQyOTA5MjAwMA",
-          "lastUpdated": "2019-04-09T12:24:48.429092+00:00"
+          "lastUpdated": "2019-04-09T12:24:48.429092+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -10735,6 +11935,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001825"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "16f1bce6b37c7c816f21582abe37da96ee5098a15e5e4c55c36f3756f877de1d"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "16f1bce6b37c7c816f21582abe37da96ee5098a15e5e4c55c36f3756f877de1d"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "16f1bce6b37c7c816f21582abe37da96ee5098a15e5e4c55c36f3756f877de1d"
           }
         ],
         "name": [
@@ -10817,11 +12041,11 @@
         "resourceType": "Patient",
         "id": "fe8a77cd-facf-471d-97ad-6a7a7cf6561d",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4NjI5OTQyNjAwMA",
-          "lastUpdated": "2019-04-09T12:24:46.299426+00:00"
+          "lastUpdated": "2019-04-09T12:24:46.299426+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -10951,6 +12175,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001826"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "3d36c7d4563f318d0dd9dd85f9718c08c32a03095d7c97d77f1534360575e540"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "3d36c7d4563f318d0dd9dd85f9718c08c32a03095d7c97d77f1534360575e540"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "3d36c7d4563f318d0dd9dd85f9718c08c32a03095d7c97d77f1534360575e540"
           }
         ],
         "name": [
@@ -11032,11 +12280,11 @@
         "resourceType": "Patient",
         "id": "4fdb156f-e87a-4f69-bca2-d8d61e595ce9",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4NjI4NjYzNjAwMA",
-          "lastUpdated": "2019-04-09T12:24:46.286636+00:00"
+          "lastUpdated": "2019-04-09T12:24:46.286636+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -11166,6 +12414,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001827"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "62fad42e0edc01fdf38cc0f69cd0c91f731c1766a4de6d63b82d2a1aa76c1c4b"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "62fad42e0edc01fdf38cc0f69cd0c91f731c1766a4de6d63b82d2a1aa76c1c4b"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "62fad42e0edc01fdf38cc0f69cd0c91f731c1766a4de6d63b82d2a1aa76c1c4b"
           }
         ],
         "name": [
@@ -11257,11 +12529,11 @@
         "resourceType": "Patient",
         "id": "ef59d34d-e132-4bca-9246-d2efc1df73da",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4NTIxMDM0NjAwMA",
-          "lastUpdated": "2019-04-09T12:24:45.210346+00:00"
+          "lastUpdated": "2019-04-09T12:24:45.210346+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -11391,6 +12663,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001828"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fcff0cd90e37ced0431cc913856b3e18da0c328ac39a874af04f832ad1aa7eef"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fcff0cd90e37ced0431cc913856b3e18da0c328ac39a874af04f832ad1aa7eef"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SS3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fcff0cd90e37ced0431cc913856b3e18da0c328ac39a874af04f832ad1aa7eef"
           }
         ],
         "name": [
@@ -11482,11 +12778,11 @@
         "resourceType": "Patient",
         "id": "dcf240d2-ad7d-4bd2-8952-cebd9ebc6003",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4NDExNzI5NjAwMA",
-          "lastUpdated": "2019-04-09T12:24:44.117296+00:00"
+          "lastUpdated": "2019-04-09T12:24:44.117296+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -11616,6 +12912,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002909"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5441ad193359e666940f79dbdd79093f1863f395fd307191b14be0060e6f8fba"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5441ad193359e666940f79dbdd79093f1863f395fd307191b14be0060e6f8fba"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5441ad193359e666940f79dbdd79093f1863f395fd307191b14be0060e6f8fba"
           }
         ],
         "name": [
@@ -11707,11 +13027,11 @@
         "resourceType": "Patient",
         "id": "41d0b3e0-264a-41d7-9370-84a1521ec505",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4MzA0OTExMTAwMA",
-          "lastUpdated": "2019-04-09T12:24:43.049111+00:00"
+          "lastUpdated": "2019-04-09T12:24:43.049111+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -11841,6 +13161,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002904"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "238970ad438a3f800fddfe8a03b3f795a68619f50d63f0a7169bb7b2ec939ac8"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "238970ad438a3f800fddfe8a03b3f795a68619f50d63f0a7169bb7b2ec939ac8"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "238970ad438a3f800fddfe8a03b3f795a68619f50d63f0a7169bb7b2ec939ac8"
           }
         ],
         "name": [
@@ -11932,11 +13276,11 @@
         "resourceType": "Patient",
         "id": "81fdf5bf-e03f-4662-a727-6804a7870021",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY4MDkzODk5MDAwMA",
-          "lastUpdated": "2019-04-09T12:24:40.938990+00:00"
+          "lastUpdated": "2019-04-09T12:24:40.938990+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -12038,6 +13382,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002903"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6ab34be529e00c28be4deb5b0e635a354a9ded3d2b6b4386ea6288b2e895a093"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6ab34be529e00c28be4deb5b0e635a354a9ded3d2b6b4386ea6288b2e895a093"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6ab34be529e00c28be4deb5b0e635a354a9ded3d2b6b4386ea6288b2e895a093"
           }
         ],
         "name": [
@@ -12116,11 +13484,11 @@
         "resourceType": "Patient",
         "id": "9b84f3aa-1ac8-4a74-b07b-f5853a365494",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3OTg1ODA0NDAwMA",
-          "lastUpdated": "2019-04-09T12:24:39.858044+00:00"
+          "lastUpdated": "2019-04-09T12:24:39.858044+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -12250,6 +13618,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002902"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c532625124d09c17d5584f77ccc33b8f720d6ddcbf53d37f00c4228d4f91c8bd"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c532625124d09c17d5584f77ccc33b8f720d6ddcbf53d37f00c4228d4f91c8bd"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c532625124d09c17d5584f77ccc33b8f720d6ddcbf53d37f00c4228d4f91c8bd"
           }
         ],
         "name": [
@@ -12341,11 +13733,11 @@
         "resourceType": "Patient",
         "id": "ed011cc9-cf28-4234-bc62-e96ad02d06bf",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3NzczMzU3NzAwMA",
-          "lastUpdated": "2019-04-09T12:24:37.733577+00:00"
+          "lastUpdated": "2019-04-09T12:24:37.733577+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -12475,6 +13867,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002901"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f58254f864e044882a01ec014a32d7a7ec2eb8101468f5fa5ad71696595fafa3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f58254f864e044882a01ec014a32d7a7ec2eb8101468f5fa5ad71696595fafa3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f58254f864e044882a01ec014a32d7a7ec2eb8101468f5fa5ad71696595fafa3"
           }
         ],
         "name": [
@@ -12556,11 +13972,11 @@
         "resourceType": "Patient",
         "id": "fc0b3924-0ca8-424f-81b0-08f7f37b6e9b",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3NjY2MTkyMjAwMA",
-          "lastUpdated": "2019-04-09T12:24:36.661922+00:00"
+          "lastUpdated": "2019-04-09T12:24:36.661922+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -12690,6 +14106,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002908"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6620c3b358d943c07ee51214ebae045b84434bef1a9a5964d8418f00254ffbe5"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6620c3b358d943c07ee51214ebae045b84434bef1a9a5964d8418f00254ffbe5"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SR0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6620c3b358d943c07ee51214ebae045b84434bef1a9a5964d8418f00254ffbe5"
           }
         ],
         "name": [
@@ -12781,11 +14221,11 @@
         "resourceType": "Patient",
         "id": "4dafccb6-7548-43f4-b394-39170367f1ef",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3NTYwNTU1NTAwMA",
-          "lastUpdated": "2019-04-09T12:24:35.605555+00:00"
+          "lastUpdated": "2019-04-09T12:24:35.605555+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -12915,6 +14355,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002907"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "bf1493b754d3c7f61da98783ebf3d4658a972043853a8c01fcebe89bbaf34631"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "bf1493b754d3c7f61da98783ebf3d4658a972043853a8c01fcebe89bbaf34631"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "bf1493b754d3c7f61da98783ebf3d4658a972043853a8c01fcebe89bbaf34631"
           }
         ],
         "name": [
@@ -12996,11 +14460,11 @@
         "resourceType": "Patient",
         "id": "772fe3d7-c13c-4f24-bf0f-fc714cbf98b1",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3NDU1MzM5NjAwMA",
-          "lastUpdated": "2019-04-09T12:24:34.553396+00:00"
+          "lastUpdated": "2019-04-09T12:24:34.553396+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -13130,6 +14594,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002906"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d81981839e2c6a075a0030b4608e6abdc7489e321eacbcb4ab9ae62651104007"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d81981839e2c6a075a0030b4608e6abdc7489e321eacbcb4ab9ae62651104007"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d81981839e2c6a075a0030b4608e6abdc7489e321eacbcb4ab9ae62651104007"
           }
         ],
         "name": [
@@ -13211,11 +14699,11 @@
         "resourceType": "Patient",
         "id": "9958eb49-ff3b-4797-b720-52a32d0fc7d0",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3MzQ4MDgxOTAwMA",
-          "lastUpdated": "2019-04-09T12:24:33.480819+00:00"
+          "lastUpdated": "2019-04-09T12:24:33.480819+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -13345,6 +14833,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002905"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "3cd3a6a6209b3c0a3648072404a316e1fce36be2bcd3c99731d37be0c6804839"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "3cd3a6a6209b3c0a3648072404a316e1fce36be2bcd3c99731d37be0c6804839"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SQ0C00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "3cd3a6a6209b3c0a3648072404a316e1fce36be2bcd3c99731d37be0c6804839"
           }
         ],
         "name": [
@@ -13426,11 +14938,11 @@
         "resourceType": "Patient",
         "id": "a490a01b-4d69-4498-8ef3-caa8ed5ea3ba",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3MTMzMDg1MDAwMA",
-          "lastUpdated": "2019-04-09T12:24:31.330850+00:00"
+          "lastUpdated": "2019-04-09T12:24:31.330850+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -13560,6 +15072,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001810"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "70816f785a65bae93de375969a0f4a4e9c245748e49f36aac22de555d21a7431"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "70816f785a65bae93de375969a0f4a4e9c245748e49f36aac22de555d21a7431"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "70816f785a65bae93de375969a0f4a4e9c245748e49f36aac22de555d21a7431"
           }
         ],
         "name": [
@@ -13651,11 +15187,11 @@
         "resourceType": "Patient",
         "id": "9e87ed0a-d759-4407-a0dc-c629fc102c89",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3MjQ0ODA0MzAwMA",
-          "lastUpdated": "2019-04-09T12:24:32.448043+00:00"
+          "lastUpdated": "2019-04-09T12:24:32.448043+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -13785,6 +15321,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000600"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "961b4100c40f9b9d4eafb2adc84de7f0f571d31ad71dc8c2ede6115c94e00d72"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "961b4100c40f9b9d4eafb2adc84de7f0f571d31ad71dc8c2ede6115c94e00d72"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "961b4100c40f9b9d4eafb2adc84de7f0f571d31ad71dc8c2ede6115c94e00d72"
           }
         ],
         "name": [
@@ -13866,11 +15426,11 @@
         "resourceType": "Patient",
         "id": "3ee3e7f0-bfeb-476b-abc2-eb6517d2d0b2",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMjY3MDI5MTEyMzAwMA",
-          "lastUpdated": "2019-04-09T12:24:30.291123+00:00"
+          "lastUpdated": "2019-04-09T12:24:30.291123+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -14000,6 +15560,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001811"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a9bc69664392f89ce088628fa8630b72242a857085174a1614896c9f557e208c"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a9bc69664392f89ce088628fa8630b72242a857085174a1614896c9f557e208c"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a9bc69664392f89ce088628fa8630b72242a857085174a1614896c9f557e208c"
           }
         ],
         "name": [
@@ -14091,11 +15675,11 @@
         "resourceType": "Patient",
         "id": "9bcf15aa-c5cc-4d5d-b16b-325eef407f9f",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYyNjk5MDczMzAwMA",
-          "lastUpdated": "2019-04-09T12:07:06.990733+00:00"
+          "lastUpdated": "2019-04-09T12:07:06.990733+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -14225,6 +15809,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001812"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "13baca5ec3de2c122b3b7848f480f0f68fbcbc70a35cac7f6def4cc1debdd25e"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "13baca5ec3de2c122b3b7848f480f0f68fbcbc70a35cac7f6def4cc1debdd25e"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "13baca5ec3de2c122b3b7848f480f0f68fbcbc70a35cac7f6def4cc1debdd25e"
           }
         ],
         "name": [
@@ -14306,11 +15914,11 @@
         "resourceType": "Patient",
         "id": "d82dd97f-b76e-4d49-bae7-38f3d3bef190",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYyNDkwNTM0NTAwMA",
-          "lastUpdated": "2019-04-09T12:07:04.905345+00:00"
+          "lastUpdated": "2019-04-09T12:07:04.905345+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -14412,6 +16020,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001813"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a68ecf5ce1cc9a2602df72418f91d4bf18a0ffff832813c6e5d1ff273412011a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a68ecf5ce1cc9a2602df72418f91d4bf18a0ffff832813c6e5d1ff273412011a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a68ecf5ce1cc9a2602df72418f91d4bf18a0ffff832813c6e5d1ff273412011a"
           }
         ],
         "name": [
@@ -14490,11 +16122,11 @@
         "resourceType": "Patient",
         "id": "8e43e552-17d9-406d-9a5b-250c3c33ce83",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYyMzc4NzMzNTAwMA",
-          "lastUpdated": "2019-04-09T12:07:03.787335+00:00"
+          "lastUpdated": "2019-04-09T12:07:03.787335+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -14624,6 +16256,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001818"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4ac3d3656afe6de821b306a8f466f5984385ecc938d4da8b641bcf8d94ee0b7b"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4ac3d3656afe6de821b306a8f466f5984385ecc938d4da8b641bcf8d94ee0b7b"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4ac3d3656afe6de821b306a8f466f5984385ecc938d4da8b641bcf8d94ee0b7b"
           }
         ],
         "name": [
@@ -14705,11 +16361,11 @@
         "resourceType": "Patient",
         "id": "46b6a07a-2e13-4460-85a5-cc9c63747c73",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYyMzgzMTY3NTAwMA",
-          "lastUpdated": "2019-04-09T12:07:03.831675+00:00"
+          "lastUpdated": "2019-04-09T12:07:03.831675+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -14839,6 +16495,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001819"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "835f033befd137b3180ec1646e86481d8fa17abd6f920c188c0f8061a4e46d80"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "835f033befd137b3180ec1646e86481d8fa17abd6f920c188c0f8061a4e46d80"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SR3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "835f033befd137b3180ec1646e86481d8fa17abd6f920c188c0f8061a4e46d80"
           }
         ],
         "name": [
@@ -14921,11 +16601,11 @@
         "resourceType": "Patient",
         "id": "818cf547-5821-46eb-b2f2-14e2a46fccbb",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYxNjMyNjczOTAwMA",
-          "lastUpdated": "2019-04-09T12:06:56.326739+00:00"
+          "lastUpdated": "2019-04-09T12:06:56.326739+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -15055,6 +16735,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001814"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fa3e5b8228c01fbc1de86ee7f2897478982add15e880877dda8a6b42cd0cf592"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fa3e5b8228c01fbc1de86ee7f2897478982add15e880877dda8a6b42cd0cf592"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "fa3e5b8228c01fbc1de86ee7f2897478982add15e880877dda8a6b42cd0cf592"
           }
         ],
         "name": [
@@ -15136,11 +16840,11 @@
         "resourceType": "Patient",
         "id": "67cf4015-f9fc-4e22-bc90-b40e17442039",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwOTQ0NjM1MTAwMA",
-          "lastUpdated": "2019-04-09T12:06:49.446351+00:00"
+          "lastUpdated": "2019-04-09T12:06:49.446351+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -15270,6 +16974,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001815"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2c7baa8470bf9282044cb4f0c60d12cb5b9c944f8fd3129cb15782342b073993"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2c7baa8470bf9282044cb4f0c60d12cb5b9c944f8fd3129cb15782342b073993"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "2c7baa8470bf9282044cb4f0c60d12cb5b9c944f8fd3129cb15782342b073993"
           }
         ],
         "name": [
@@ -15351,11 +17079,11 @@
         "resourceType": "Patient",
         "id": "9ee5abef-b073-4926-8cf1-6b0c7caf31ac",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwODM3ODE4NjAwMA",
-          "lastUpdated": "2019-04-09T12:06:48.378186+00:00"
+          "lastUpdated": "2019-04-09T12:06:48.378186+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -15485,6 +17213,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001816"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9c743e26cd61ba6fe7dbb06b99f29b8df64350ca0e9bbb59103c9378167128cc"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9c743e26cd61ba6fe7dbb06b99f29b8df64350ca0e9bbb59103c9378167128cc"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "9c743e26cd61ba6fe7dbb06b99f29b8df64350ca0e9bbb59103c9378167128cc"
           }
         ],
         "name": [
@@ -15567,11 +17319,11 @@
         "resourceType": "Patient",
         "id": "67fc74cc-7e9b-4eb8-9ad6-47dfe73121e1",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwNzMzNDU4NDAwMA",
-          "lastUpdated": "2019-04-09T12:06:47.334584+00:00"
+          "lastUpdated": "2019-04-09T12:06:47.334584+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -15701,6 +17453,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001817"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "33acbcb2dba2e783eec4e9ecc19524d414ce6a8dadf4ad692e7b074d240e8dbc"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "33acbcb2dba2e783eec4e9ecc19524d414ce6a8dadf4ad692e7b074d240e8dbc"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SQ3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "33acbcb2dba2e783eec4e9ecc19524d414ce6a8dadf4ad692e7b074d240e8dbc"
           }
         ],
         "name": [
@@ -15782,11 +17558,11 @@
         "resourceType": "Patient",
         "id": "b93f0e35-b955-49f2-807d-187788137edf",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwNDEwMjAzNjAwMA",
-          "lastUpdated": "2019-04-09T12:06:44.102036+00:00"
+          "lastUpdated": "2019-04-09T12:06:44.102036+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -15902,6 +17678,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002023"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cbd15528159ba15e4e7ee9d261fdaf7d5ef2b670507e9163318214dc337f2d1a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cbd15528159ba15e4e7ee9d261fdaf7d5ef2b670507e9163318214dc337f2d1a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cbd15528159ba15e4e7ee9d261fdaf7d5ef2b670507e9163318214dc337f2d1a"
           }
         ],
         "name": [
@@ -15980,11 +17780,11 @@
         "resourceType": "Patient",
         "id": "ffdaff70-25f4-419b-a55e-f718a8c3efc3",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwNTE1NDk5ODAwMA",
-          "lastUpdated": "2019-04-09T12:06:45.154998+00:00"
+          "lastUpdated": "2019-04-09T12:06:45.154998+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -16114,6 +17914,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002022"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4a1ac05ec3f87975a3fbac15782ca666251f0741367971269e7b84b78b6bab2a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4a1ac05ec3f87975a3fbac15782ca666251f0741367971269e7b84b78b6bab2a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4a1ac05ec3f87975a3fbac15782ca666251f0741367971269e7b84b78b6bab2a"
           }
         ],
         "name": [
@@ -16195,11 +18019,11 @@
         "resourceType": "Patient",
         "id": "dbef14f5-f48e-458e-9a2a-5479db87db38",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwNTE2MzA1NDAwMA",
-          "lastUpdated": "2019-04-09T12:06:45.163054+00:00"
+          "lastUpdated": "2019-04-09T12:06:45.163054+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -16329,6 +18153,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002025"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SH4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7d37daed210975bc15a1526fe149ae03badc9311023591317cd02ee7342ea052"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SH4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7d37daed210975bc15a1526fe149ae03badc9311023591317cd02ee7342ea052"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SH4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7d37daed210975bc15a1526fe149ae03badc9311023591317cd02ee7342ea052"
           }
         ],
         "name": [
@@ -16420,11 +18268,11 @@
         "resourceType": "Patient",
         "id": "142149fa-b73b-4466-9eb8-d88af9eb5448",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwMzI4ODg2MTAwMA",
-          "lastUpdated": "2019-04-09T12:06:43.288861+00:00"
+          "lastUpdated": "2019-04-09T12:06:43.288861+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -16554,6 +18402,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000880"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "243674bf77a0b76687fefbb29df9587f3a4ff1d3aa07da0cb91b5e3d90c1965d"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "243674bf77a0b76687fefbb29df9587f3a4ff1d3aa07da0cb91b5e3d90c1965d"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "8S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "243674bf77a0b76687fefbb29df9587f3a4ff1d3aa07da0cb91b5e3d90c1965d"
           }
         ],
         "name": [
@@ -16636,11 +18508,11 @@
         "resourceType": "Patient",
         "id": "80c54830-4add-48fd-b9f6-a76020b0570a",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwMTgxMzExNDAwMA",
-          "lastUpdated": "2019-04-09T12:06:41.813114+00:00"
+          "lastUpdated": "2019-04-09T12:06:41.813114+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -16770,6 +18642,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002024"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "53c05549d4145e3e8cf42093444fe54fe5f6da48f97ca8ffd6aa048c273c275b"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "53c05549d4145e3e8cf42093444fe54fe5f6da48f97ca8ffd6aa048c273c275b"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "53c05549d4145e3e8cf42093444fe54fe5f6da48f97ca8ffd6aa048c273c275b"
           }
         ],
         "name": [
@@ -16851,11 +18747,11 @@
         "resourceType": "Patient",
         "id": "474a5860-bbac-4101-8890-10ad29351845",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTYwMDc0NjUwMTAwMA",
-          "lastUpdated": "2019-04-09T12:06:40.746501+00:00"
+          "lastUpdated": "2019-04-09T12:06:40.746501+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -16957,6 +18853,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000881"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6f1b08fcc66a054bcdb57afc4b721e4b8234157e52a580b8ac03f428bb9be3e4"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6f1b08fcc66a054bcdb57afc4b721e4b8234157e52a580b8ac03f428bb9be3e4"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6f1b08fcc66a054bcdb57afc4b721e4b8234157e52a580b8ac03f428bb9be3e4"
           }
         ],
         "name": [
@@ -17035,11 +18955,11 @@
         "resourceType": "Patient",
         "id": "b6e5a598-87a8-43f7-9677-dc51ca76b72a",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5ODYxNTA2MzAwMA",
-          "lastUpdated": "2019-04-09T12:06:38.615063+00:00"
+          "lastUpdated": "2019-04-09T12:06:38.615063+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -17169,6 +19089,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002021"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5612ca15e3f71e857d06f152b678a35588b7a18a7248b4763715f4904cf13ec5"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5612ca15e3f71e857d06f152b678a35588b7a18a7248b4763715f4904cf13ec5"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5612ca15e3f71e857d06f152b678a35588b7a18a7248b4763715f4904cf13ec5"
           }
         ],
         "name": [
@@ -17260,11 +19204,11 @@
         "resourceType": "Patient",
         "id": "07605caa-9b62-4c90-a939-5fb630cab028",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5OTcwNzIyNDAwMA",
-          "lastUpdated": "2019-04-09T12:06:39.707224+00:00"
+          "lastUpdated": "2019-04-09T12:06:39.707224+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -17394,6 +19338,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002020"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cd98679dddb0237444ad201bee21adb8cdb91bf8849d6ee23b8095b23b620bb3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cd98679dddb0237444ad201bee21adb8cdb91bf8849d6ee23b8095b23b620bb3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "cd98679dddb0237444ad201bee21adb8cdb91bf8849d6ee23b8095b23b620bb3"
           }
         ],
         "name": [
@@ -17475,11 +19443,11 @@
         "resourceType": "Patient",
         "id": "e7190189-9c85-497d-a7b5-3972ca3c0ecb",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5ODMzMzU2MTAwMA",
-          "lastUpdated": "2019-04-09T12:06:38.333561+00:00"
+          "lastUpdated": "2019-04-09T12:06:38.333561+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -17609,6 +19577,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000875"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5dc301c5af5d2fbdd4dccaff0ef5f79dc4a16f88662f7e6140d692fab3938d33"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5dc301c5af5d2fbdd4dccaff0ef5f79dc4a16f88662f7e6140d692fab3938d33"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5dc301c5af5d2fbdd4dccaff0ef5f79dc4a16f88662f7e6140d692fab3938d33"
           }
         ],
         "name": [
@@ -17700,11 +19692,11 @@
         "resourceType": "Patient",
         "id": "a91c0655-0f40-4253-864e-2f9a77d37667",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5NzU0NTgzNzAwMA",
-          "lastUpdated": "2019-04-09T12:06:37.545837+00:00"
+          "lastUpdated": "2019-04-09T12:06:37.545837+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -17834,6 +19826,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002019"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5c7973cc88e7200a5ad31682a0aca0891232021133d22dc50017c1eb3ab95dc4"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5c7973cc88e7200a5ad31682a0aca0891232021133d22dc50017c1eb3ab95dc4"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "5c7973cc88e7200a5ad31682a0aca0891232021133d22dc50017c1eb3ab95dc4"
           }
         ],
         "name": [
@@ -17915,11 +19931,11 @@
         "resourceType": "Patient",
         "id": "673c9383-9b88-4a28-a4d0-4c6df1190690",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5NzI2Nzg2MDAwMA",
-          "lastUpdated": "2019-04-09T12:06:37.267860+00:00"
+          "lastUpdated": "2019-04-09T12:06:37.267860+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -18021,6 +20037,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000876"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "34518300446b07eda3c60c5886d2723903787a99d86bfcae180f52872b093f00"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "34518300446b07eda3c60c5886d2723903787a99d86bfcae180f52872b093f00"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "34518300446b07eda3c60c5886d2723903787a99d86bfcae180f52872b093f00"
           }
         ],
         "name": [
@@ -18099,11 +20139,11 @@
         "resourceType": "Patient",
         "id": "4323f5df-289a-4aa5-8795-b048f8c8fdf8",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5NjQ2OTkyNDAwMA",
-          "lastUpdated": "2019-04-09T12:06:36.469924+00:00"
+          "lastUpdated": "2019-04-09T12:06:36.469924+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -18233,6 +20273,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000877"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "97e21ee0d5fd894a507153525ada2d0013193e604d412763e2af92a8dfadbe07"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "97e21ee0d5fd894a507153525ada2d0013193e604d412763e2af92a8dfadbe07"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "97e21ee0d5fd894a507153525ada2d0013193e604d412763e2af92a8dfadbe07"
           }
         ],
         "name": [
@@ -18317,11 +20381,11 @@
         "resourceType": "Patient",
         "id": "46f99b9f-ab88-40d6-a3a2-24adec933bb3",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5NjIzOTk1ODAwMA",
-          "lastUpdated": "2019-04-09T12:06:36.239958+00:00"
+          "lastUpdated": "2019-04-09T12:06:36.239958+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -18451,6 +20515,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000878"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8b60191be07bb7aec0e340aecdd24cd4cd67b43ae13e0685d8d7850ce83e80ab"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8b60191be07bb7aec0e340aecdd24cd4cd67b43ae13e0685d8d7850ce83e80ab"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "8b60191be07bb7aec0e340aecdd24cd4cd67b43ae13e0685d8d7850ce83e80ab"
           }
         ],
         "name": [
@@ -18532,11 +20620,11 @@
         "resourceType": "Patient",
         "id": "6064dd35-f93a-4fba-902b-2f92191554c3",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5NjE4ODc4NTAwMA",
-          "lastUpdated": "2019-04-09T12:06:36.188785+00:00"
+          "lastUpdated": "2019-04-09T12:06:36.188785+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -18652,6 +20740,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002016"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f2454cf21044f79165fd6dcda5695279aa8d04343b4bc89162c8570d0b91a953"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f2454cf21044f79165fd6dcda5695279aa8d04343b4bc89162c8570d0b91a953"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "1SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f2454cf21044f79165fd6dcda5695279aa8d04343b4bc89162c8570d0b91a953"
           }
         ],
         "name": [
@@ -18730,11 +20842,11 @@
         "resourceType": "Patient",
         "id": "7e866b75-a36d-4531-b1e3-57aae634ae04",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5NTM5MDU0NDAwMA",
-          "lastUpdated": "2019-04-09T12:06:35.390544+00:00"
+          "lastUpdated": "2019-04-09T12:06:35.390544+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -18864,6 +20976,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001840"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SU3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f0ed38a98f86d5bcb7735a2c44f6c3908c727373c8c82eeada456a281eee273a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SU3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f0ed38a98f86d5bcb7735a2c44f6c3908c727373c8c82eeada456a281eee273a"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SU3F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "f0ed38a98f86d5bcb7735a2c44f6c3908c727373c8c82eeada456a281eee273a"
           }
         ],
         "name": [
@@ -18945,11 +21081,11 @@
         "resourceType": "Patient",
         "id": "6a49d9e8-6c8b-4326-80dc-bb54856b07f2",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5NDMyMDA2MDAwMA",
-          "lastUpdated": "2019-04-09T12:06:34.320060+00:00"
+          "lastUpdated": "2019-04-09T12:06:34.320060+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -19079,6 +21215,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000597"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "56886f3ac99e3539e6657b036b1e2d36a2a2a5110cb78503366c10fa0d26c1e3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "56886f3ac99e3539e6657b036b1e2d36a2a2a5110cb78503366c10fa0d26c1e3"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "56886f3ac99e3539e6657b036b1e2d36a2a2a5110cb78503366c10fa0d26c1e3"
           }
         ],
         "name": [
@@ -19160,11 +21320,11 @@
         "resourceType": "Patient",
         "id": "f7b6050c-2986-4175-8026-688ca4062543",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5Mjk5Mjc4MDAwMA",
-          "lastUpdated": "2019-04-09T12:06:32.992780+00:00"
+          "lastUpdated": "2019-04-09T12:06:32.992780+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -19294,6 +21454,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002015"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6385293c43ab4faa4e9cf1db2e131a82c34698b544f64843939bebe02702a60e"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6385293c43ab4faa4e9cf1db2e131a82c34698b544f64843939bebe02702a60e"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "9SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6385293c43ab4faa4e9cf1db2e131a82c34698b544f64843939bebe02702a60e"
           }
         ],
         "name": [
@@ -19385,11 +21569,11 @@
         "resourceType": "Patient",
         "id": "6f526a1e-eae2-4583-bb15-856d7b2d9289",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5MzI1MzUwMzAwMA",
-          "lastUpdated": "2019-04-09T12:06:33.253503+00:00"
+          "lastUpdated": "2019-04-09T12:06:33.253503+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -19519,6 +21703,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000598"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c014712ea07bca70ca7201647f22481935cc965359b18392425b67d195ca8d4f"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c014712ea07bca70ca7201647f22481935cc965359b18392425b67d195ca8d4f"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "c014712ea07bca70ca7201647f22481935cc965359b18392425b67d195ca8d4f"
           }
         ],
         "name": [
@@ -19600,11 +21808,11 @@
         "resourceType": "Patient",
         "id": "7da4a2c2-144f-46a6-bba0-78c384efae03",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5MTExNjQwNjAwMA",
-          "lastUpdated": "2019-04-09T12:06:31.116406+00:00"
+          "lastUpdated": "2019-04-09T12:06:31.116406+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -19734,6 +21942,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002018"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b5ac5f53334c75ad5f1a9186ade26efa2cf5b7a93e46fa21343bf467ff680593"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b5ac5f53334c75ad5f1a9186ade26efa2cf5b7a93e46fa21343bf467ff680593"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "b5ac5f53334c75ad5f1a9186ade26efa2cf5b7a93e46fa21343bf467ff680593"
           }
         ],
         "name": [
@@ -19815,11 +22047,11 @@
         "resourceType": "Patient",
         "id": "088828a0-7ef6-43a5-aa4e-0c6292e59389",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU5MTE0NzIwNDAwMA",
-          "lastUpdated": "2019-04-09T12:06:31.147204+00:00"
+          "lastUpdated": "2019-04-09T12:06:31.147204+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -19921,6 +22153,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000599"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7e9b262820778a2b8154e107ea5fa863792047f86b9a032e803bb6527292d6d9"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7e9b262820778a2b8154e107ea5fa863792047f86b9a032e803bb6527292d6d9"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6S79E00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7e9b262820778a2b8154e107ea5fa863792047f86b9a032e803bb6527292d6d9"
           }
         ],
         "name": [
@@ -19999,11 +22255,11 @@
         "resourceType": "Patient",
         "id": "fda8df83-a8d9-4c5c-bc5b-e7b294889414",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU4OTc3MjIyMTAwMA",
-          "lastUpdated": "2019-04-09T12:06:29.772221+00:00"
+          "lastUpdated": "2019-04-09T12:06:29.772221+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -20133,6 +22389,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002017"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7cb2c31f168455dd4d2ac2af3464407fb99c7c8b4aee89c3b5113b530a9a8eb5"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7cb2c31f168455dd4d2ac2af3464407fb99c7c8b4aee89c3b5113b530a9a8eb5"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "2SG4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "7cb2c31f168455dd4d2ac2af3464407fb99c7c8b4aee89c3b5113b530a9a8eb5"
           }
         ],
         "name": [
@@ -20214,11 +22494,11 @@
         "resourceType": "Patient",
         "id": "22b0e94a-c395-4c38-ab65-7b34084e15dc",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU4ODk4MzU0NjAwMA",
-          "lastUpdated": "2019-04-09T12:06:28.983546+00:00"
+          "lastUpdated": "2019-04-09T12:06:28.983546+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -20348,6 +22628,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002371"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR8A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a7cc3410ab07d6305afeb20ac2a74cbc14bef680a189258bf4f06ea5e7e7ca51"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR8A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a7cc3410ab07d6305afeb20ac2a74cbc14bef680a189258bf4f06ea5e7e7ca51"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "4SR8A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "a7cc3410ab07d6305afeb20ac2a74cbc14bef680a189258bf4f06ea5e7e7ca51"
           }
         ],
         "name": [
@@ -20439,11 +22743,11 @@
         "resourceType": "Patient",
         "id": "d59c197a-0115-47c0-ad90-01799d32e01e",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU4NzYxMzAyMDAwMA",
-          "lastUpdated": "2019-04-09T12:06:27.613020+00:00"
+          "lastUpdated": "2019-04-09T12:06:27.613020+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -20573,6 +22877,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002370"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR8A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6ec07011cd751b25f817c6afd217940440c686beb6766ed0bd0fb711c25bb6ee"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR8A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6ec07011cd751b25f817c6afd217940440c686beb6766ed0bd0fb711c25bb6ee"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "3SR8A00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "6ec07011cd751b25f817c6afd217940440c686beb6766ed0bd0fb711c25bb6ee"
           }
         ],
         "name": [
@@ -20665,11 +22993,11 @@
         "resourceType": "Patient",
         "id": "ea39dc3c-1e38-484f-b6db-c03d5e96347a",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU4NTc3NTAyOTAwMA",
-          "lastUpdated": "2019-04-09T12:06:25.775029+00:00"
+          "lastUpdated": "2019-04-09T12:06:25.775029+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -20799,6 +23127,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000879"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4e2f4baee8d01751665fde0f16964294b477d14577cfd056d21a2d4383065245"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4e2f4baee8d01751665fde0f16964294b477d14577cfd056d21a2d4383065245"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "7S80F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "4e2f4baee8d01751665fde0f16964294b477d14577cfd056d21a2d4383065245"
           }
         ],
         "name": [
@@ -20890,11 +23242,11 @@
         "resourceType": "Patient",
         "id": "0e0d36f4-6653-4ae0-b83d-2530f90deff5",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU4NDQxODI3NjAwMA",
-          "lastUpdated": "2019-04-09T12:06:24.418276+00:00"
+          "lastUpdated": "2019-04-09T12:06:24.418276+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -21024,6 +23376,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002012"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d1a2753725d0b96afd2b5a4689a74fa1a8f35b3002c8537ea109b80a8aec66a2"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d1a2753725d0b96afd2b5a4689a74fa1a8f35b3002c8537ea109b80a8aec66a2"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "6SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "d1a2753725d0b96afd2b5a4689a74fa1a8f35b3002c8537ea109b80a8aec66a2"
           }
         ],
         "name": [
@@ -21105,11 +23481,11 @@
         "resourceType": "Patient",
         "id": "52e68ec6-3662-4d7a-b612-dff264d7f071",
         "meta": {
-          "profile":[
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
-          ],
           "versionId": "MTU1NDgxMTU4NDM5MDIyMjAwMA",
-          "lastUpdated": "2019-04-09T12:06:24.390222+00:00"
+          "lastUpdated": "2019-04-09T12:06:24.390222+00:00",
+          "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-patient"
+          ]
         },
         "text": {
           "status": "generated",
@@ -21239,6 +23615,30 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002011"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "559d6e1514157389657620b3130a024b95319aabd9d49b85e4b4cc83c85e31e4"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "559d6e1514157389657620b3130a024b95319aabd9d49b85e4b4cc83c85e31e4"
+          },
+          {
+            "system": "http://hl7.org/fhir/sid/us-mbi",
+            "value": "5SF4F00AA00"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+            "value": "559d6e1514157389657620b3130a024b95319aabd9d49b85e4b4cc83c85e31e4"
           }
         ],
         "name": [
