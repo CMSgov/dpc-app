@@ -422,4 +422,10 @@
                 columnName="gender"
                 defaultNullValue="3"/>
     </changeSet>
+
+    <changeSet id="add-mbi-hash" author="embh">
+        <addColumn tableName="PATIENTS">
+            <column name="mbi_hash" type="VARCHAR"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
