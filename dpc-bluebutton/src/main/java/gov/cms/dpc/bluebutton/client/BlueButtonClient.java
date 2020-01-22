@@ -6,6 +6,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
+import java.security.GeneralSecurityException;
+
 
 public interface BlueButtonClient {
 
@@ -20,5 +22,7 @@ public interface BlueButtonClient {
     Bundle requestNextBundleFromServer(Bundle bundle) throws ResourceNotFoundException;
 
     CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException;
+
+    String hashMbi(String mbi) throws GeneralSecurityException;
 }
 
