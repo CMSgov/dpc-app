@@ -10,7 +10,7 @@ common: &default_settings
   log_daily: false
   log_file_name: STDOUT
   circuit_breaker:
-    enabled: false
+    gc_cpu_threshold: 30
 
   # Limits the number of lines to capture for each stack trace.
   # Default is 30
