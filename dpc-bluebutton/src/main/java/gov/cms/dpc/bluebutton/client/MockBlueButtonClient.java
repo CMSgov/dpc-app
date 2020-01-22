@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class MockBlueButtonClient implements BlueButtonClient {
@@ -77,6 +78,11 @@ public class MockBlueButtonClient implements BlueButtonClient {
     public CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException {
         final var path = SAMPLE_METADATA_PATH_PREFIX + "meta.xml";
         return loadOne(CapabilityStatement.class, path, null);
+    }
+
+    @Override
+    public String hashMbi(String mbi) throws GeneralSecurityException {
+        return "";
     }
 
     /**
