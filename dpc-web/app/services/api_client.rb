@@ -15,25 +15,80 @@ class APIClient
     self
   end
 
+  def get_organization(reg_org)
+    client = FHIR::Client.new(base_url)
+    client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
+    response = client.read(FHIR::Organization, reg_org.api_id)
+    binding.pry
+  end
+
   def update_organization(reg_org)
-    org = reg_org.organization
-    fhir_org = FHIR::Organization.new(id: reg_org.api_id, name: org.name, identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi}])
+    # build the FHIR::Organization with latest attributes
+    # build the FHIR::Endpoint with latest attributes
+    # instantiate the FHIR::Client
+    # add auth heads to client
+    # client makes org update request
+    # client makes endpoint update request
+    # return true or false
+
+    fhir_org = build_fhir_org(reg_org)
+    fhir_endpoint = build_fhir_endpoint(reg_org)
 
     client = FHIR::Client.new(base_url)
     client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
-    response = client.update(fhir_org, reg_org.api_id)
-    if response.response[:code] == '200'
+
+    org_response = client.update(fhir_org, reg_org.api_id)
+    endpoint_response = client.update(fhir_endpoint, fhir_endpoint.id)
+
+    if org_response.response[:code] == '200' && endpoint_response.response[:code] == '200'
       true
     else
       Rails.logger.warn 'Unsuccessulful request to API'
-      @response_status = response.response[:code]
+      @response_status = org_response.response[:code]
       @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
       false
     end
-    # TODO update fhir endpoint from reg_org.api_endpoint_ref
   end
 
-  def delete_organization(org); end
+  def build_fhir_org(reg_org)
+    org = reg_org.organization
+    fhir_org = FHIR::Organization.new(
+      id: reg_org.api_id,
+      name: org.name,
+      identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi}]
+    )
+    fhir_org.endpoint = { reference: reg_org.api_endpoint_ref }
+
+    fhir_address = FHIR::Address.new(
+      line: org.address_street,
+      city: org.address_city,
+      postalCode: org.address_zip,
+      state: org.address_state,
+      country: 'US',
+      use: org.address_use,
+      type: org.address_type
+    )
+    fhir_org.address = fhir_address
+    fhir_org
+  end
+
+  def build_fhir_endpoint(reg_org)
+    org = reg_org.organization
+    org_endpoint = org.fhir_endpoints.first
+    fhir_endpoint_id = reg_org.api_endpoint_ref.split("/")[1]
+    FHIR::Endpoint.new(
+      id: fhir_endpoint_id,
+      status: org_endpoint.status,
+      name: org_endpoint.name,
+      address: org_endpoint.uri,
+      managingOrganization: reg_org.api_id
+    )
+  end
+
+  def delete_organization(org)
+    # DELETE
+    # client.destroy(FHIR::Organization, org.id)
+  end
 
   def create_client_token(reg_org_id, params: {})
     uri_string = base_url + '/Token'
@@ -137,6 +192,7 @@ class APIClient
     response = http.request(request)
     @response_status = response.code.to_i
     @response_body = parsed_response(response)
+
   rescue Errno::ECONNREFUSED
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500

@@ -40,10 +40,6 @@ class OrganizationRegistrar
     @existing_registered_orgs ||= organization.registered_organizations
   end
 
-  def no_env_change?
-    existing_envs.sort == api_environments.sort
-  end
-
   def remove_old_registered_organizations
     removed_envs = existing_envs - api_environments
     removed_reg_orgs = existing_registered_orgs.where(api_env: removed_envs)

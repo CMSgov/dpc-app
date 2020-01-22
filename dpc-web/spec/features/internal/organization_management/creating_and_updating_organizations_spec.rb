@@ -159,7 +159,7 @@ RSpec.feature 'creating and updating organizations' do
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo')
     stub_request(:put, "http://dpc.example.com/Organization/#{reg_org_id}").with(
       headers: { 'Content-Type' => 'application/fhir+json;charset=utf-8', 'Authorization' => /Bearer .*/ },
-      body: "{\n  \"id\": \"#{reg_org_id}\",\n  \"identifier\": [\n    {\n      \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n      \"value\": \"555ttt444\"\n    }\n  ],\n  \"name\": \"#{new_name}\",\n  \"resourceType\": \"Organization\"\n}"
+      body: "{\n  \"id\": \"#{reg_org_id}\",\n  \"identifier\": [\n    {\n      \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n      \"value\": \"555ttt444\"\n    }\n  ],\n  \"name\": \"#{new_name}\",\n  \"address\": {\n    \"use\": \"temp\",\n    \"type\": \"both\",\n    \"line\": [\n      \"50 River St\"\n    ],\n    \"city\": \"Greenville\",\n    \"state\": \"SC\",\n    \"postalCode\": \"29601\",\n    \"country\": \"US\"\n  },\n  \"endpoint\": {\n    \"reference\": \"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"\n  },\n  \"resourceType\": \"Organization\"\n}"
     ).to_return(
       status: 200,
       body: "{\"id\":\"#{reg_org_id}\"}"
