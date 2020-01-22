@@ -9,6 +9,8 @@ common: &default_settings
   log_limit_in_kbytes: 0
   log_daily: false
   log_file_name: STDOUT
+  circuit_breaker:
+    enabled: false
 
   # Limits the number of lines to capture for each stack trace.
   # Default is 30
