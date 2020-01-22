@@ -46,7 +46,7 @@ common: &default_settings
     enabled: true
 
   cross_application_tracer:
-    enabled: true
+    enabled: false
 
   thread_profiler:
     enabled: true
