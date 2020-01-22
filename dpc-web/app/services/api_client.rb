@@ -19,18 +19,9 @@ class APIClient
     client = FHIR::Client.new(base_url)
     client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
     response = client.read(FHIR::Organization, reg_org.api_id)
-    binding.pry
   end
 
   def update_organization(reg_org)
-    # build the FHIR::Organization with latest attributes
-    # build the FHIR::Endpoint with latest attributes
-    # instantiate the FHIR::Client
-    # add auth heads to client
-    # client makes org update request
-    # client makes endpoint update request
-    # return true or false
-
     fhir_org = build_fhir_org(reg_org)
     fhir_endpoint = build_fhir_endpoint(reg_org)
 
@@ -55,11 +46,16 @@ class APIClient
     fhir_org = FHIR::Organization.new(
       id: reg_org.api_id,
       name: org.name,
-      identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi}]
+      identifier: [{ system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi }]
     )
     fhir_org.endpoint = { reference: reg_org.api_endpoint_ref }
 
-    fhir_address = FHIR::Address.new(
+    fhir_org.address = build_fhir_address(org)
+    fhir_org
+  end
+
+  def build_fhir_address(org)
+    FHIR::Address.new(
       line: org.address_street,
       city: org.address_city,
       postalCode: org.address_zip,
@@ -68,8 +64,6 @@ class APIClient
       use: org.address_use,
       type: org.address_type
     )
-    fhir_org.address = fhir_address
-    fhir_org
   end
 
   def build_fhir_endpoint(reg_org)
@@ -206,7 +200,6 @@ class APIClient
     response = http.request(request)
     @response_status = response.code.to_i
     @response_body = parsed_response(response)
-
   rescue Errno::ECONNREFUSED
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500
