@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OrganizationRegistrar
-  attr_reader :organization, :api_environments, :existing_envs, :existing_registered_orgs
+  attr_reader :organization, :api_environments, :existing_envs
 
   def self.run(organization:, api_environments:)
     new(organization: organization, api_environments: api_environments).register_all
@@ -34,11 +34,11 @@ class OrganizationRegistrar
     end
   end
 
-  private
-
   def existing_registered_orgs
     @existing_registered_orgs ||= organization.registered_organizations
   end
+
+  private
 
   def remove_old_registered_organizations
     removed_envs = existing_envs - api_environments

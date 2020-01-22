@@ -77,10 +77,10 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
         },
         payloadType: [
           {
-            "coding": [
+            'coding': [
               {
-                "system": "http://hl7.org/fhir/endpoint-payload-type",
-                "code": "any"
+                'system': 'http://hl7.org/fhir/endpoint-payload-type',
+                'code': 'any'
               }
             ]
           }

@@ -18,12 +18,12 @@ class APIClient
   def get_organization(reg_org)
     client = FHIR::Client.new(base_url)
     client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
-    response = client.read(FHIR::Organization, reg_org.api_id)
+    client.read(FHIR::Organization, reg_org.api_id).resource
   end
 
   def update_organization(reg_org)
-    fhir_org = build_fhir_org(reg_org)
-    fhir_endpoint = build_fhir_endpoint(reg_org)
+    fhir_org = FhirResourceBuilder.new.fhir_org(reg_org)
+    fhir_endpoint = FhirResourceBuilder.new.fhir_endpoint(reg_org)
 
     client = FHIR::Client.new(base_url)
     client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
@@ -39,58 +39,6 @@ class APIClient
       @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
       false
     end
-  end
-
-  def build_fhir_org(reg_org)
-    org = reg_org.organization
-    fhir_org = FHIR::Organization.new(
-      id: reg_org.api_id,
-      name: org.name,
-      identifier: [{ system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi }]
-    )
-    fhir_org.endpoint = { reference: reg_org.api_endpoint_ref }
-
-    fhir_org.address = build_fhir_address(org)
-    fhir_org
-  end
-
-  def build_fhir_address(org)
-    FHIR::Address.new(
-      line: org.address_street,
-      city: org.address_city,
-      postalCode: org.address_zip,
-      state: org.address_state,
-      country: 'US',
-      use: org.address_use,
-      type: org.address_type
-    )
-  end
-
-  def build_fhir_endpoint(reg_org)
-    org = reg_org.organization
-    org_endpoint = org.fhir_endpoints.first
-    fhir_endpoint_id = reg_org.api_endpoint_ref.split("/")[1]
-    FHIR::Endpoint.new(
-      id: fhir_endpoint_id,
-      status: org_endpoint.status,
-      name: org_endpoint.name,
-      address: org_endpoint.uri,
-      managingOrganization: { reference: "Organization/#{reg_org.api_id}" },
-      payloadType: [
-        {
-          "coding": [
-            {
-              "system": "http://hl7.org/fhir/endpoint-payload-type",
-              "code": "any"
-            }
-          ]
-        }
-      ],
-      connectionType: {
-        system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
-        code: 'hl7-fhir-rest'
-      },
-    )
   end
 
   def delete_organization(org)
