@@ -35,7 +35,7 @@ RSpec.describe OrganizationRegistrar do
       expect(prod_creation_api_client).to have_received(:create_organization).with(org)
     end
 
-    it 'updates existing registered organizations' do
+    it 'updates existing registered organizations and endpoints' do
       org = create(:organization, :with_endpoint, api_environments: [0])
       sandbox_reg_org = create(:registered_organization, api_env: 'sandbox', organization: org)
 
@@ -43,6 +43,7 @@ RSpec.describe OrganizationRegistrar do
 
       allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
       allow(api_client).to receive(:update_organization).with(sandbox_reg_org).and_return(true)
+      allow(api_client).to receive(:update_endpoint).with(sandbox_reg_org).and_return(true)
 
       allow(api_client).to receive(:response_successful?).and_return(true)
       allow(api_client).to receive(:response_body).and_return(

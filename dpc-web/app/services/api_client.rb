@@ -23,27 +23,19 @@ class APIClient
 
   def update_organization(reg_org)
     fhir_org = FhirResourceBuilder.new.fhir_org(reg_org)
-    fhir_endpoint = FhirResourceBuilder.new.fhir_endpoint(reg_org)
 
-    client = FHIR::Client.new(base_url)
-    client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
-
-    org_response = client.update(fhir_org, reg_org.api_id)
-    endpoint_response = client.update(fhir_endpoint, fhir_endpoint.id)
-
-    if org_response.response[:code] == '200' && endpoint_response.response[:code] == '200'
-      true
-    else
-      Rails.logger.warn 'Unsuccessulful request to API'
-      @response_status = org_response.response[:code]
-      @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
-      false
-    end
+    fhir_client_update_request(reg_org.api_id, fhir_org, reg_org.api_id)
   end
 
   def delete_organization(org)
     # DELETE
     # client.destroy(FHIR::Organization, org.id)
+  end
+
+  def update_endpoint(reg_org)
+    fhir_endpoint = FhirResourceBuilder.new.fhir_endpoint(reg_org)
+
+    fhir_client_update_request(reg_org.api_id, fhir_endpoint, fhir_endpoint.id)
   end
 
   def create_client_token(reg_org_id, params: {})
@@ -81,6 +73,10 @@ class APIClient
 
   def response_successful?
     @response_status == 200
+  end
+
+  def fhir_client
+    @fhir_client ||= FHIR::Client.new(base_url)
   end
 
   private
@@ -152,6 +148,20 @@ class APIClient
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
+  end
+
+  def fhir_client_update_request(reg_org_id, resource, resource_id)
+    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_id))
+    response = fhir_client.update(resource, resource_id)
+
+    if response.response[:code] == '200'
+      true
+    else
+      Rails.logger.warn 'Unsuccessulful request to API'
+      @response_status = response.response[:code]
+      @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
+      false
+    end
   end
 
   def headers(token)

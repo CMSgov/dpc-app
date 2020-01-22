@@ -30,7 +30,9 @@ class OrganizationRegistrar
 
   def update_existing_registered_orgs
     existing_registered_orgs.each do |registered_org|
-      APIClient.new(registered_org.api_env).update_organization(registered_org)
+      api_client = APIClient.new(registered_org.api_env)
+      api_client.update_organization(registered_org)
+      api_client.update_endpoint(registered_org)
     end
   end
 
