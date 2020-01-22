@@ -164,5 +164,12 @@ RSpec.feature 'creating and updating organizations' do
       status: 200,
       body: "{\"id\":\"#{reg_org_id}\"}"
     )
+    stub_request(:put, "http://dpc.example.com/Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66").with(
+      headers: { 'Content-Type' => 'application/fhir+json;charset=utf-8', 'Authorization' => /Bearer .*/ },
+      body:  "{\n  \"id\": \"d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\",\n  \"status\": \"off\",\n  \"connectionType\": {\n    \"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n    \"code\": \"hl7-fhir-rest\"\n  },\n  \"name\": \"Provider Endpoint\",\n  \"managingOrganization\": {\n    \"reference\": \"Organization/8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d\"\n  },\n  \"payloadType\": [\n    {\n      \"coding\": [\n        {\n          \"system\": \"http://hl7.org/fhir/endpoint-payload-type\",\n          \"code\": \"any\"\n        }\n      ]\n    }\n  ],\n  \"address\": \"https://FhirEndpoint.example.com\",\n  \"resourceType\": \"Endpoint\"\n}"
+    ).to_return(
+      status: 200,
+      body: "{\"id\":\"d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}"
+    )
   end
 end

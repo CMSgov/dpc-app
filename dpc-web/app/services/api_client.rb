@@ -81,7 +81,21 @@ class APIClient
       status: org_endpoint.status,
       name: org_endpoint.name,
       address: org_endpoint.uri,
-      managingOrganization: reg_org.api_id
+      managingOrganization: { reference: "Organization/#{reg_org.api_id}" },
+      payloadType: [
+        {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/endpoint-payload-type",
+              "code": "any"
+            }
+          ]
+        }
+      ],
+      connectionType: {
+        system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
+        code: 'hl7-fhir-rest'
+      },
     )
   end
 
