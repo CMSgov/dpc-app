@@ -233,6 +233,15 @@ class BlueButtonClientTest {
         assertEquals("ec49dc08f8dd8b4e189f623ab666cfc8b81f201cc94fe6aef860a4c3bd57f278", hash);
     }
 
+    @Test
+    void shouldNotHashMbi() throws GeneralSecurityException {
+        String hash = bbc.hashMbi(null);
+        assertEquals("", hash);
+
+        hash = bbc.hashMbi("");
+        assertEquals("", hash);
+    }
+
     /**
      * Helper method that configures the mock server to respond to a given GET request
      *

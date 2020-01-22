@@ -10,6 +10,7 @@ import com.codahale.metrics.Timer;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Hex;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,6 +21,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.KeySpec;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,9 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     private BBClientConfiguration config;
     private Map<String, Timer> timers;
     private Map<String, Meter> exceptionMeters;
+    private SecretKeyFactory secretKeyFactory = null;
+    private byte[] bfdHashPepper;
+    private int bfdHashIter;
 
     private static String formBeneficiaryID(String fromPatientID) {
         return "Patient/" + fromPatientID;
@@ -52,6 +57,17 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         final var metricMaker = new MetricMaker(metricRegistry, BlueButtonClientImpl.class);
         this.exceptionMeters = metricMaker.registerMeters(REQUEST_METRICS);
         this.timers = metricMaker.registerTimers(REQUEST_METRICS);
+
+        String alg = "PBKDF2WithHmacSHA256";
+        try {
+            this.secretKeyFactory = SecretKeyFactory.getInstance(alg);
+            bfdHashIter = config.getBfdHashIter();
+            if (config.getBfdHashPepper() != null) {
+                bfdHashPepper = Hex.decode(config.getBfdHashPepper());
+            }
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Secret key factory could not be created due to invalid algorithm: {}", alg);
+        }
     }
 
     /**
@@ -158,11 +174,17 @@ public class BlueButtonClientImpl implements BlueButtonClient {
 
     @Override
     public String hashMbi(String mbi) throws GeneralSecurityException {
-        String pepper = config.getBfdHashPepper();
-        int iterations = config.getBfdHashIter();
-        KeySpec keySpec = new PBEKeySpec(mbi.toCharArray(), Hex.decode(pepper), iterations, 256);
-        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        SecretKey secretKey = skf.generateSecret(keySpec);
+        if (StringUtils.isBlank(mbi)) {
+            logger.error("Could not generate hash; provided MBI string was null or empty");
+            return "";
+        }
+
+        if (secretKeyFactory == null) {
+            throw new GeneralSecurityException("Secret key factory is null");
+        }
+
+        KeySpec keySpec = new PBEKeySpec(mbi.toCharArray(), bfdHashPepper, bfdHashIter, 256);
+        SecretKey secretKey = secretKeyFactory.generateSecret(keySpec);
         return Hex.toHexString(secretKey.getEncoded());
     }
 

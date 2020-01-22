@@ -425,7 +425,7 @@
 
     <changeSet id="add-mbi-hash" author="embh">
         <addColumn tableName="PATIENTS">
-            <column name="mbi_hash" type="VARCHAR"/>
+            <column name="mbi_hash" type="VARCHAR(64)"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>
