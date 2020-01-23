@@ -26,7 +26,7 @@ class OrganizationRegistrationTest extends AbstractAttributionTest {
 
         // Create a fake org
         final Organization resource = new Organization();
-        resource.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
+        resource.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mbi");
 
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(resource);

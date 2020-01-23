@@ -154,7 +154,7 @@ public class GroupResource extends AbstractGroupResource {
                 .map(mbi -> {
                     // Generate a fake patient, with only the ID set
                     final Patient p = new Patient();
-                    p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
+                    p.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue(mbi);
                     return new Bundle.BundleEntryComponent().setResource(p);
                 })
                 .collect(Collectors.toList());

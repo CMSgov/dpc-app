@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -28,7 +27,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientProfile() throws IOException, URISyntaxException {
+    void testPatientProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         // Create a new patient record
 
@@ -58,7 +57,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
 
         // Try for a valid patient
         final Patient validPatient = invalidPatient.copy();
-        validPatient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
+        validPatient.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mbi");
         validPatient.setGender(Enumerations.AdministrativeGender.MALE);
         validPatient.setBirthDate(Date.valueOf("1990-01-01"));
 
@@ -90,7 +89,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testProviderProfile() throws IOException, URISyntaxException {
+    void testProviderProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Practitioner invalidPractitioner = new Practitioner();
@@ -147,7 +146,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
     @Test
     @Disabled
         // Disabled until DPC-614 and DPC-616 are merged.
-    void testAttributionProfile() throws IOException, URISyntaxException {
+    void testAttributionProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Group invalidGroup = new Group();

@@ -59,7 +59,7 @@ public class PatientResource extends AbstractPatientResource {
         // Extract the Patient MBI from the query param
         if (patientMBI != null) {
             final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
-            if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
+            if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.BENE_ID.getSystem())) {
                 throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
             }
             idValue = patientIdentifier.getValue();
