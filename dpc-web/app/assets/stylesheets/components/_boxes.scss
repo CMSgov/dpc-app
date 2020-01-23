@@ -10,6 +10,10 @@
   border-style: dashed;
 }
 
+.box--flex {
+  flex-wrap: wrap;
+}
+
 .box--inverse {
   background-color: $color-primary-alt-lightest ;
   border-color: $color-primary-alt-light ;
@@ -28,6 +32,7 @@
 
 .box__content {
   flex: 1 0 0;
+  min-width: 380px;
   padding: $spacer-4;
 }
 
@@ -42,4 +47,11 @@
 
 .box__subhead {
   margin: 0;
+}
+
+@media (max-width: $layout-breakpoint) {
+  .box__content + .box__content {
+    border-left: 0;
+    border-top: 1px solid $color-gray-light;
+  }
 }
