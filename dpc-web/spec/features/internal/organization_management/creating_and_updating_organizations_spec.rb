@@ -49,7 +49,11 @@ RSpec.feature 'creating and updating organizations' do
 
     find('[data-test="edit-link"]').click
 
-    fill_in 'organization_name', with: 'Health Revisited'
+    new_name = 'Health Revisited'
+    reg_org = Organization.find_by(name: 'Good Health').registered_organizations.first
+    stub_update_request(reg_org.api_id, new_name)
+
+    fill_in 'organization_name', with: new_name
     select 'Multispecialty Clinic', from: 'organization_organization_type'
     uncheck 'organization_api_environments_sandbox'
     fill_in 'organization_address_attributes_street', with: '50 River St'
@@ -57,7 +61,7 @@ RSpec.feature 'creating and updating organizations' do
     find('[data-test="form-submit"]').click
 
     expect(page).not_to have_css('[data-test="form-submit"]')
-    expect(page.body).to have_content('Health Revisited')
+    expect(page.body).to have_content(new_name)
     expect(page.body).to have_content('Multispecialty Clinic')
     expect(page.body).to have_content('50 River St')
     expect(page.body).to have_content('Off')
@@ -68,11 +72,9 @@ RSpec.feature 'creating and updating organizations' do
     org = create(:organization, name: 'Good Health')
 
     visit edit_internal_organization_path(org)
-
     expect(page.body).to have_content('Good Health')
 
     fill_in 'organization_name', with: ''
-
     find('[data-test="form-submit"]').click
 
     # Still on edit page
@@ -140,6 +142,16 @@ RSpec.feature 'creating and updating organizations' do
                 resourceType: 'Endpoint',
                 status: 'test',
                 connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
+                payloadType: [
+                  {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/endpoint-payload-type",
+                        "code": "any"
+                      }
+                    ]
+                  }
+                ],
                 name: 'Provider Endpoint', address: 'https://FhirEndpoint.example.com'
               }
             }]
@@ -149,6 +161,25 @@ RSpec.feature 'creating and updating organizations' do
     ).to_return(
       status: 200,
       body: "{\"id\":\"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d\",\"endpoint\":[{\"reference\":\"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}]}"
+    )
+  end
+
+  def stub_update_request(reg_org_id, new_name)
+    allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
+    allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON_SANDBOX').and_return('MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo')
+    stub_request(:put, "http://dpc.example.com/Organization/#{reg_org_id}").with(
+      headers: { 'Content-Type' => 'application/fhir+json;charset=utf-8', 'Authorization' => /Bearer .*/ },
+      body: "{\n  \"id\": \"#{reg_org_id}\",\n  \"identifier\": [\n    {\n      \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n      \"value\": \"555ttt444\"\n    }\n  ],\n  \"name\": \"#{new_name}\",\n  \"address\": {\n    \"use\": \"temp\",\n    \"type\": \"both\",\n    \"line\": [\n      \"50 River St\"\n    ],\n    \"city\": \"Greenville\",\n    \"state\": \"SC\",\n    \"postalCode\": \"29601\",\n    \"country\": \"US\"\n  },\n  \"endpoint\": {\n    \"reference\": \"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"\n  },\n  \"resourceType\": \"Organization\"\n}"
+    ).to_return(
+      status: 200,
+      body: "{\"id\":\"#{reg_org_id}\"}"
+    )
+    stub_request(:put, "http://dpc.example.com/Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66").with(
+      headers: { 'Content-Type' => 'application/fhir+json;charset=utf-8', 'Authorization' => /Bearer .*/ },
+      body:  "{\n  \"id\": \"d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\",\n  \"status\": \"off\",\n  \"connectionType\": {\n    \"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n    \"code\": \"hl7-fhir-rest\"\n  },\n  \"name\": \"Provider Endpoint\",\n  \"managingOrganization\": {\n    \"reference\": \"Organization/8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d\"\n  },\n  \"payloadType\": [\n    {\n      \"coding\": [\n        {\n          \"system\": \"http://hl7.org/fhir/endpoint-payload-type\",\n          \"code\": \"any\"\n        }\n      ]\n    }\n  ],\n  \"address\": \"https://FhirEndpoint.example.com\",\n  \"resourceType\": \"Endpoint\"\n}"
+    ).to_return(
+      status: 200,
+      body: "{\"id\":\"d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}"
     )
   end
 end
