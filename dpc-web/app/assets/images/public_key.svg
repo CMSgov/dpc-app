@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 750 200" style="enable-background:new 0 0 750 200;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;}
+	.st1{font-family:'Helvetica-Bold';}
+	.st2{font-size:16px;}
+	.st3{font-family:'Helvetica';}
+	.st4{font-size:15px;}
+</style>
+<rect x="9" y="10.24" class="st0" width="106" height="33.66"/>
+<text transform="matrix(1 0 0 1 9 21.748)" class="st1 st2">Public Key</text>
+<g>
+	<path d="M728.46,36c2.51,0,4.54,2.04,4.54,4.54v139.91c0,2.51-2.04,4.54-4.54,4.54H17.54c-2.51,0-4.54-2.04-4.54-4.54V40.54
+		c0-2.51,2.04-4.54,4.54-4.54H728.46 M728.46,34H17.54C13.93,34,11,36.93,11,40.54v139.91c0,3.61,2.93,6.54,6.54,6.54h710.91
+		c3.61,0,6.54-2.93,6.54-6.54V40.54C735,36.93,732.07,34,728.46,34L728.46,34z"/>
+</g>
+<rect x="21.83" y="41.1" class="st0" width="702.93" height="141.95"/>
+<text transform="matrix(1 0 0 1 21.8291 51.8828)"><tspan x="0" y="0" class="st3 st4">-----BEGIN PUBLIC KEY-----</tspan><tspan x="0" y="18" class="st3 st4">MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAqIQQ5CbyLyCGiB1Low1J5BRL2/G5R4hJ</tspan><tspan x="0" y="36" class="st3 st4">seGTSbp3xQQ2sjEJIWxnl3UDpzEobm+rBFlzm9XhA/KkYGVbCFqt0TBc1lKsIG+Hi4lHc6nLPvX7T1S</tspan><tspan x="0" y="54" class="st3 st4">714joQabVTxrpNYx4wobj0BkofHpxN5LSJJk5v6mS3TeKlnh/Z3TOgfA8f9Nd1Ww3dqpFBl2usIWNmhl</tspan><tspan x="0" y="72" class="st3 st4">sbb1Ll/3qXwFDesduuIFWrNwhwq5d6EGlh3ezx0gIq0GgBsMrlKReqhLJIKnyK7BocULlC7Xp3gIuy+wI</tspan><tspan x="0" y="90" class="st3 st4">f7XrE6FWq84XvmhxQOazrWAnxjCa6r/rVh09zs+s3FKung1PqZ68w4iycXdqeS6M/6DXbvtBtKpN9Do</tspan><tspan x="0" y="108" class="st3 st4">QeJVFs</tspan><tspan x="0" y="126" class="st3 st4">-----END PUBLIC KEY-----</tspan></text>
+</svg>
