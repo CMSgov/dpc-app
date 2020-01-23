@@ -1,3 +1,10 @@
+.code-inline {
+  background: $color-code-bg;
+  border-radius: 5px;
+  color: $color-code-words;
+  padding: 0 3px;
+}
+
 .dashboard-section-header {
   align-items: center;
   border-bottom: 1px solid $color-gray-light;

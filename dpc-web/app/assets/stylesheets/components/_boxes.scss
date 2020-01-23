@@ -6,6 +6,14 @@
   margin: $spacer-3 0;
 }
 
+.box--code {
+  background-color: $color-code-bg;
+  color: $color-code-words;
+  padding: 20px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 .box--dashed {
   border-style: dashed;
 }
@@ -50,8 +58,10 @@
 }
 
 @media (max-width: $layout-breakpoint) {
-  .box__content + .box__content {
-    border-left: 0;
-    border-top: 1px solid $color-gray-light;
+  .box--flex {
+    .box__content + .box__content {
+      border-left: 0;
+      border-top: 1px solid $color-gray-light;
+    }
   }
 }
