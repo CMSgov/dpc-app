@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_23_163410) do
+ActiveRecord::Schema.define(version: 2020_01_24_204655) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,9 +49,8 @@ ActiveRecord::Schema.define(version: 2020_01_23_163410) do
     t.string "name", null: false
     t.integer "status", null: false
     t.string "uri", null: false
-    t.integer "organization_id", null: false
+    t.integer "organization_id"
     t.integer "registered_organization_id"
-    t.index ["organization_id"], name: "index_fhir_endpoints_on_organization_id"
     t.index ["registered_organization_id"], name: "index_fhir_endpoints_on_registered_organization_id"
   end
 

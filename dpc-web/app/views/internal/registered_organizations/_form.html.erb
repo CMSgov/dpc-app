@@ -4,10 +4,15 @@
   </div>
 
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
-    <span class="ds-c-field__hint">To enable API Access, you must provide a FHIR endpoint. For sandbox, you can use the default fields provided.</span>
+    <span class="ds-c-field__hint">To enable API Access, you must provide a FHIR endpoint.</span>
 
+    <%= f.hidden_field :api_env, value: @api_env %>
     <%= f.fields_for :fhir_endpoint do |ff| %>
-      <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
+      <div class="ds-l-col--12 ds-l-md-col--9">
+        <% if @registered_organization.api_env == 'sandbox' %>
+          <span class="ds-c-field__hint">For sandbox, you can use the default fields provided.</span>
+        <% end %>
+
         <%= ff.label :status, class: "ds-c-label" %>
         <%= ff.select :status, statuses_for_select, {include_blank: true}, class: "ds-c-field" %>
 
@@ -27,6 +32,7 @@
   </div>
 
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
+    <%= hidden_field_tag :api_env, @api_env %>
     <%= f.submit locals[:button_label], class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
     <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
   </div>

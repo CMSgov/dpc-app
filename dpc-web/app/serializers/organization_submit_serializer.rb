@@ -63,14 +63,14 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
   end
 
   def endpoint_resources
-    object.fhir_endpoints.map { |fhir_endpoint| endpoint_resource(fhir_endpoint) }
+    [ endpoint_resource(instance_options[:fhir_endpoint]) ]
   end
 
   def endpoint_resource(fhir_endpoint)
     {
       resource: {
         resourceType: 'Endpoint',
-        status: fhir_endpoint.status,
+        status: fhir_endpoint[:status],
         connectionType: {
           system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
           code: 'hl7-fhir-rest'
@@ -85,8 +85,8 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
             ]
           }
         ],
-        name: fhir_endpoint.name,
-        address: fhir_endpoint.uri
+        name: fhir_endpoint[:name],
+        address: fhir_endpoint[:uri]
       }
     }
   end

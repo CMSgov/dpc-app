@@ -8,9 +8,9 @@ class APIClient
     @base_url = base_urls[api_env]
   end
 
-  def create_organization(org)
+  def create_organization(org, fhir_endpoint: {})
     uri_string = base_url + '/Organization/$submit'
-    json = OrganizationSubmitSerializer.new(org).to_json
+    json = OrganizationSubmitSerializer.new(org, fhir_endpoint: fhir_endpoint).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
   end

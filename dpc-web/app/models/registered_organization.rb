@@ -15,6 +15,21 @@ class RegisteredOrganization < ApplicationRecord
 
   validates :api_id, :api_env, :organization, presence: true
 
+  before_validation :create_org_in_api, on: :create
+
+  def create_org_in_api
+    if valid_without_api_id?
+      api_resource = APIClient.new(api_env)
+        .create_organization(organization, fhir_endpoint: fhir_endpoint.attributes)
+        .response_body
+      self[:api_id] = api_resource['id']
+    end
+  end
+
+  def valid_without_api_id?
+    errors.details.reject{|k,v| k == :api_id}.none?
+  end
+
   def client_tokens
     ClientTokenManager.new(api_env: api_env, organization: organization).client_tokens
   end

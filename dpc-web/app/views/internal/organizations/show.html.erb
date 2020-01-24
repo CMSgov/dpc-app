@@ -96,9 +96,15 @@
     <div class="box__content">
       <h2 class="box__heading">Enabled Environments</h2>
 
+      <h3>Sandbox</h3>
       <% if @organization.sandbox_enabled? %>
-        <h3>Sandbox</h3>
+        <div class="ds-u-margin-bottom--1">
+          API ID: <%= @organization.sandbox_registered_organization.api_id %>
+        </div>
         <h4>FHIR Endpoint</h4>
+        <div class="ds-u-margin-bottom--1">
+          API Reference: <%= @organization.sandbox_registered_organization.api_endpoint_ref %>
+        </div>
         <div class="ds-u-margin-bottom--1">
           Name: <%= @organization.sandbox_fhir_endpoint.name %>
         </div>
@@ -108,13 +114,26 @@
         <div class="ds-u-margin-bottom--1">
           Status: <%= @organization.sandbox_fhir_endpoint.status.titleize %>
         </div>
+
+        <%= link_to "Edit", edit_internal_organization_registered_organization_path(
+          organization_id: @organization.id,
+          id: @organization.sandbox_registered_organization.id,
+          api_env: 'sandbox'
+          ) %>
+        <%= link_to "Disable Sandbox", "#" %>
       <% else %>
         <%= link_to 'Enable Sandbox', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox') %>
       <% end %>
 
       <h3>Production</h3>
       <% if production_api_access_enabled? %>
+        <div class="ds-u-margin-bottom--1">
+          API ID: <%= @organization.production_registered_organization.api_id %>
+        </div>
         <% if @organization.production_enabled? %>
+          <div class="ds-u-margin-bottom--1">
+            API Reference: <%= @organization.production_registered_organization.api_endpoint_ref %>
+          </div>
           <h4>FHIR Endpoint</h4>
           <div class="ds-u-margin-bottom--1">
             Name: <%= @organization.production_fhir_endpoint.name %>
@@ -128,6 +147,13 @@
         <% else %>
           <%= link_to 'Enable Production', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'production') %>
         <% end %>
+
+        <%= link_to "Edit", edit_internal_organization_registered_organization_path(
+          organization_id: @organization.id,
+          id: @organization.production_registered_organization.id,
+          api_env: 'production'
+          ) %>
+        <%= link_to "Disable Production", "#" %>
       <% else %>
         Production API access not yet available.
       <% end %>
