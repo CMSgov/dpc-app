@@ -75,6 +75,16 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
           system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
           code: 'hl7-fhir-rest'
         },
+        payloadType: [
+          {
+            'coding': [
+              {
+                'system': 'http://hl7.org/fhir/endpoint-payload-type',
+                'code': 'any'
+              }
+            ]
+          }
+        ],
         name: fhir_endpoint.name,
         address: fhir_endpoint.uri
       }

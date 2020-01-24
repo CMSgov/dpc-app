@@ -1,23 +1,45 @@
 # frozen_string_literal: true
 
 class APIClient
-  attr_reader :api_env, :response_body, :response_status
+  attr_reader :api_env, :base_url, :response_body, :response_status
 
   def initialize(api_env)
     @api_env = api_env
+    @base_url = base_urls[api_env]
   end
 
   def create_organization(org)
-    uri_string = base_urls[api_env] + '/Organization/$submit'
+    uri_string = base_url + '/Organization/$submit'
     json = OrganizationSubmitSerializer.new(org).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
   end
 
-  def delete_organization(org); end
+  def get_organization(reg_org)
+    client = FHIR::Client.new(base_url)
+    client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
+    client.read(FHIR::Organization, reg_org.api_id).resource
+  end
+
+  def update_organization(reg_org)
+    fhir_org = FhirResourceBuilder.new.fhir_org(reg_org)
+
+    fhir_client_update_request(reg_org.api_id, fhir_org, reg_org.api_id)
+  end
+
+  def delete_organization(org)
+    # DELETE
+    # client.destroy(FHIR::Organization, org.id)
+  end
+
+  def update_endpoint(reg_org)
+    fhir_endpoint = FhirResourceBuilder.new.fhir_endpoint(reg_org)
+
+    fhir_client_update_request(reg_org.api_id, fhir_endpoint, fhir_endpoint.id)
+  end
 
   def create_client_token(reg_org_id, params: {})
-    uri_string = base_urls[api_env] + '/Token'
+    uri_string = base_url + '/Token'
 
     json = params.to_json
     macaroon = delegated_macaroon(reg_org_id)
@@ -27,12 +49,12 @@ class APIClient
   end
 
   def get_client_tokens(reg_org_id)
-    uri_string = base_urls[api_env] + '/Token'
+    uri_string = base_url + '/Token'
     get_request(uri_string, delegated_macaroon(reg_org_id))
   end
 
   def create_public_key(reg_org_id, params: {})
-    uri_string = base_urls[api_env] + '/Key'
+    uri_string = base_url + '/Key'
 
     post_text_request(
       uri_string,
@@ -45,12 +67,16 @@ class APIClient
   end
 
   def get_public_keys(reg_org_id)
-    uri_string = base_urls[api_env] + '/Key'
+    uri_string = base_url + '/Key'
     get_request(uri_string, delegated_macaroon(reg_org_id))
   end
 
   def response_successful?
     @response_status == 200
+  end
+
+  def fhir_client
+    @fhir_client ||= FHIR::Client.new(base_url)
   end
 
   private
@@ -122,6 +148,20 @@ class APIClient
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
+  end
+
+  def fhir_client_update_request(reg_org_id, resource, resource_id)
+    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_id))
+    response = fhir_client.update(resource, resource_id)
+
+    if response.response[:code] == '200'
+      true
+    else
+      Rails.logger.warn 'Unsuccessulful request to API'
+      @response_status = response.response[:code]
+      @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
+      false
+    end
   end
 
   def headers(token)
