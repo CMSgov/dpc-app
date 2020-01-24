@@ -1,3 +1,6 @@
 common: &default_settings
   log_level: info
   log_file_name: STDOUT
+
+  distributed_tracing:
+    enabled: true
