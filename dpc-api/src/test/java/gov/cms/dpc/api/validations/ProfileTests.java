@@ -13,8 +13,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +37,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
                 .resource(invalidPatient)
                 .encodedJson();
 
-        final UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, patientCreate::execute, "Should fail with unfulfilled profile");
+        assertThrows(UnprocessableEntityException.class, patientCreate::execute, "Should fail with unfulfilled profile");
 
         final Parameters vParams = new Parameters();
         vParams.addParameter().setResource(invalidPatient);
@@ -57,16 +55,15 @@ class ProfileTests extends AbstractSecureApplicationTest {
 
         // Try for a valid patient
         final Patient validPatient = invalidPatient.copy();
+        // TODO(nickrobison): This will need to be switched to the MBI system, once those changes are complete.
         validPatient.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mbi");
         validPatient.setGender(Enumerations.AdministrativeGender.MALE);
         validPatient.setBirthDate(Date.valueOf("1990-01-01"));
-
-        final MethodOutcome created = client
+        client
                 .create()
                 .resource(validPatient)
                 .encodedJson()
                 .execute();
-
 
         // Now, try a bulk submission, which should fail
 
