@@ -31,6 +31,9 @@ public class PatientEntity implements Serializable {
     @Column(name = "beneficiary_id", unique = true)
     private String beneficiaryID;
 
+    @Column(name = "mbi_hash")
+    private String mbiHash;
+
     @Column(name = "first_name")
     private String patientFirstName;
     @Column(name = "last_name")
@@ -74,6 +77,14 @@ public class PatientEntity implements Serializable {
 
     public void setBeneficiaryID(String beneficiaryID) {
         this.beneficiaryID = beneficiaryID;
+    }
+
+    public String getMbiHash() {
+        return mbiHash;
+    }
+
+    public void setMbiHash(String mbiHash) {
+        this.mbiHash = mbiHash;
     }
 
     public String getPatientFirstName() {

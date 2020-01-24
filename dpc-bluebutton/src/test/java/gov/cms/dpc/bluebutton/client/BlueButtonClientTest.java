@@ -10,6 +10,7 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
@@ -26,6 +27,7 @@ import org.mockserver.model.Parameter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BlueButtonClientTest {
     // A random example patient (Jane Doe)
     private static final String TEST_PATIENT_ID = "20140000008325";
+    private static final String TEST_PATIENT_MBI_HASH = "abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6";
     // A patient that only has a single EOB record in bluebutton
     private static final String TEST_SINGLE_EOB_PATIENT_ID = "20140000009893";
     // A patient id that should not exist in bluebutton
@@ -86,6 +89,13 @@ class BlueButtonClientTest {
             );
         }
 
+        createMockServerExpectation(
+                "/v1/fhir/Patient",
+                HttpStatus.OK_200,
+                getRawXML(SAMPLE_PATIENT_PATH_PREFIX + TEST_PATIENT_ID + "-bundle.xml"),
+                Collections.singletonList(Parameter.param("identifier", DPCIdentifierSystem.MBI_HASH.getSystem() + "|" + TEST_PATIENT_MBI_HASH))
+        );
+
         // Create mocks for pages of the results
         for(String startIndex: List.of("10", "20", "30")) {
             createMockServerExpectation(
@@ -117,6 +127,23 @@ class BlueButtonClientTest {
         assertEquals(ret.getName().size(), 1, patientDataCorrupted);
         assertEquals(ret.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
         assertEquals(ret.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
+    }
+
+    @Test
+    void shouldGetFHIRFromPatientMbiHash() {
+        Bundle ret = bbc.requestPatientFromServerByMbiHash(TEST_PATIENT_MBI_HASH);
+
+        assertNotNull(ret, "Bundle returned from BlueButtonClient should not be null");
+        assertTrue(ret.hasEntry(), "Bundle should have an entry");
+        assertEquals(1, ret.getEntry().size(), "Entry should have size 1");
+        Patient pt = (Patient) ret.getEntryFirstRep().getResource();
+
+        String patientDataCorrupted = "The demo Patient object data differs from what is expected";
+        assertEquals(pt.getBirthDate(), Date.valueOf("2014-06-01"), patientDataCorrupted);
+        assertEquals(pt.getGender().getDisplay(), "Unknown", patientDataCorrupted);
+        assertEquals(pt.getName().size(), 1, patientDataCorrupted);
+        assertEquals(pt.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
+        assertEquals(pt.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
     }
 
     @Test
@@ -194,6 +221,25 @@ class BlueButtonClientTest {
                 () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID),
                 "BlueButton client should throw exceptions when asked to retrieve EOBs for a non-existent patient"
         );
+    }
+
+    @Test
+    void shouldHashMbi() throws GeneralSecurityException {
+        // Cases from BFD tests https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderTest.java
+        String hash = bbc.hashMbi("123456789A");
+        assertEquals("d95a418b0942c7910fb1d0e84f900fe12e5a7fd74f312fa10730cc0fda230e9a", hash);
+
+        hash = bbc.hashMbi("3456789");
+        assertEquals("ec49dc08f8dd8b4e189f623ab666cfc8b81f201cc94fe6aef860a4c3bd57f278", hash);
+    }
+
+    @Test
+    void shouldNotHashMbi() throws GeneralSecurityException {
+        String hash = bbc.hashMbi(null);
+        assertEquals("", hash);
+
+        hash = bbc.hashMbi("");
+        assertEquals("", hash);
     }
 
     /**

@@ -91,19 +91,18 @@ public class APITestHelpers {
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
         try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("provider_bundle.json")) {
-            final Bundle orgBundle = (Bundle) parser.parseResource(inputStream);
+            final Bundle providerBundle = (Bundle) parser.parseResource(inputStream);
 
-            // Post them all
-            orgBundle
-                    .getEntry()
-                    .stream()
-                    .map(Bundle.BundleEntryComponent::getResource)
-                    .map(resource -> (Practitioner) resource)
-                    .forEach(practitioner -> client
-                            .create()
-                            .resource(practitioner)
-                            .encodedJson()
-                            .execute());
+            final Parameters parameters = new Parameters();
+            parameters.addParameter().setResource(providerBundle).setName("resource");
+
+            client
+                    .operation()
+                    .onType(Practitioner.class)
+                    .named("submit")
+                    .withParameters(parameters)
+                    .encodedJson()
+                    .execute();
         }
     }
 
@@ -111,17 +110,16 @@ public class APITestHelpers {
         try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
             final Bundle patientBundle = (Bundle) parser.parseResource(inputStream);
 
-            // Post them all
-            patientBundle
-                    .getEntry()
-                    .stream()
-                    .map(Bundle.BundleEntryComponent::getResource)
-                    .map(resource -> (Patient) resource)
-                    .forEach(patient -> client
-                            .create()
-                            .resource(patient)
-                            .encodedJson()
-                            .execute());
+            final Parameters parameters = new Parameters();
+            parameters.addParameter().setResource(patientBundle).setName("resource");
+
+            client
+                    .operation()
+                    .onType(Patient.class)
+                    .named("submit")
+                    .withParameters(parameters)
+                    .encodedJson()
+                    .execute();
         }
     }
 

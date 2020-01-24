@@ -31,6 +31,12 @@ public class BBClientConfiguration {
     @JsonProperty("keyStore")
     private KeystoreConfiguration keystore = new KeystoreConfiguration();
 
+    @NotEmpty
+    private String bfdHashPepper;
+
+    private int bfdHashIter;
+
+
     public TimeoutConfiguration getTimeouts() {
         return timeouts;
     }
@@ -60,6 +66,10 @@ public class BBClientConfiguration {
     public void setHealthcheckName(String healthcheckName) {
         this.healthcheckName = healthcheckName;
     }
+
+    public String getBfdHashPepper() { return bfdHashPepper; }
+
+    public int getBfdHashIter() { return bfdHashIter; }
 
     public static class TimeoutConfiguration {
 

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class MockBlueButtonClient implements BlueButtonClient {
@@ -36,6 +37,14 @@ public class MockBlueButtonClient implements BlueButtonClient {
     @Override
     public Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException {
         return loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, patientID);
+    }
+
+    @Override
+    public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
+        Patient patient = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, TEST_PATIENT_IDS.get(0));
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(patient);
+        return bundle;
     }
 
     @Override
@@ -69,6 +78,11 @@ public class MockBlueButtonClient implements BlueButtonClient {
     public CapabilityStatement requestCapabilityStatement() throws ResourceNotFoundException {
         final var path = SAMPLE_METADATA_PATH_PREFIX + "meta.xml";
         return loadOne(CapabilityStatement.class, path, null);
+    }
+
+    @Override
+    public String hashMbi(String mbi) throws GeneralSecurityException {
+        return "";
     }
 
     /**

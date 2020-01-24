@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation.engine;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
@@ -131,6 +132,7 @@ public class AggregationEngine implements Runnable {
      *
      * @param job - the job to process
      */
+    @Trace
     protected void processJobBatch(JobQueueBatch job) {
         try {
             logger.info("Processing job {} batch {}, exporting to: {}.", job.getJobID(), job.getBatchID(), this.operationsConfig.getExportPath());

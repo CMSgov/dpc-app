@@ -1,7 +1,6 @@
 package gov.cms.dpc.consent.cli;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import io.dropwizard.cli.Command;
 import io.dropwizard.cli.ConfiguredCommand;
@@ -18,7 +17,7 @@ public abstract class ConsentCommand extends ConfiguredCommand<DPCConsentConfigu
     protected ConsentCommand(String name, String description) {
         super(name, description);
         this.ctx = FhirContext.forDstu3();
-        this.ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+//        this.ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
     }
 
     @Override
