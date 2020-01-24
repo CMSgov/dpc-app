@@ -69,6 +69,7 @@ class OrganizationRegistrar
     )
   end
 
+  # TODO remove
   def create_sandbox_endpoint(api_env)
     return unless api_env == 'sandbox' && organization.fhir_endpoints.empty?
 

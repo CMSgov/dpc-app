@@ -15,7 +15,9 @@ Rails.application.routes.draw do
     end
     resources :taggings, only: [:create, :destroy]
     resources :tags, only: [:index, :create, :destroy]
-    resources :organizations
+    resources :organizations do
+      resources :registered_organizations, only: [:new, :create, :edit, :update]
+    end
   end
 
   authenticated :user do

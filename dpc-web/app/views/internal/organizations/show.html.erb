@@ -94,17 +94,42 @@
 
 <section class="box">
     <div class="box__content">
-      <h2 class="box__heading">FHIR Endpoint</h2>
-      <% @organization.fhir_endpoints.each do |fhir_endpoint| %>
+      <h2 class="box__heading">Enabled Environments</h2>
+
+      <% if @organization.sandbox_enabled? %>
+        <h3>Sandbox</h3>
+        <h4>FHIR Endpoint</h4>
         <div class="ds-u-margin-bottom--1">
-          Name: <%= fhir_endpoint.name %>
+          Name: <%= @organization.sandbox_fhir_endpoint.name %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          URI: <%= fhir_endpoint.uri %>
+          URI: <%= @organization.sandbox_fhir_endpoint.uri %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          Status: <%= fhir_endpoint.status.titleize %>
+          Status: <%= @organization.sandbox_fhir_endpoint.status.titleize %>
         </div>
+      <% else %>
+        <%= link_to 'Enable Sandbox', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox') %>
+      <% end %>
+
+      <h3>Production</h3>
+      <% if production_api_access_enabled? %>
+        <% if @organization.production_enabled? %>
+          <h4>FHIR Endpoint</h4>
+          <div class="ds-u-margin-bottom--1">
+            Name: <%= @organization.production_fhir_endpoint.name %>
+          </div>
+          <div class="ds-u-margin-bottom--1">
+            URI: <%= @organization.production_fhir_endpoint.uri %>
+          </div>
+          <div class="ds-u-margin-bottom--1">
+            Status: <%= @organization.production_fhir_endpoint.status.titleize %>
+          </div>
+        <% else %>
+          <%= link_to 'Enable Production', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'production') %>
+        <% end %>
+      <% else %>
+        Production API access not yet available.
       <% end %>
     </div>
 </section>
