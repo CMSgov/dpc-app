@@ -14,9 +14,8 @@ class OrganizationRegistrar
   end
 
   def register_all
-    return true if no_change?
-
     remove_old_registered_organizations
+    update_existing_registered_orgs
     register_new_organizations
   end
 
@@ -26,18 +25,26 @@ class OrganizationRegistrar
     api_client = APIClient.new(api_env).create_organization(organization)
     api_org = api_client.response_body
 
-    create_registered_org(api_env, api_org) if api_client.response_successful?
+    create_registered_organization(api_env, api_org) if api_client.response_successful?
+  end
+
+  def update_existing_registered_orgs
+    existing_registered_orgs.each do |registered_org|
+      api_client = APIClient.new(registered_org.api_env)
+      api_client.update_organization(registered_org)
+      api_client.update_endpoint(registered_org)
+    end
+  end
+
+  def existing_registered_orgs
+    @existing_registered_orgs ||= organization.registered_organizations
   end
 
   private
 
-  def no_change?
-    existing_envs.sort == api_environments.sort
-  end
-
   def remove_old_registered_organizations
     removed_envs = existing_envs - api_environments
-    removed_reg_orgs = organization.registered_organizations.where(api_env: removed_envs)
+    removed_reg_orgs = existing_registered_orgs.where(api_env: removed_envs)
 
     removed_reg_orgs.each do |registered_org|
       if APIClient.new(registered_org.api_env).delete_organization(registered_org)
@@ -54,7 +61,7 @@ class OrganizationRegistrar
     end
   end
 
-  def create_registered_org(api_env, api_org)
+  def create_registered_organization(api_env, api_org)
     organization.registered_organizations.create(
       api_id: api_org['id'],
       api_env: api_env,
