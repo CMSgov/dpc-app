@@ -2,12 +2,13 @@ package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/Group")
@@ -22,7 +23,7 @@ public abstract class AbstractGroupResource {
     public abstract Response createRoster(Group attributionRoster);
 
     @GET
-    public abstract Bundle rosterSearch(@NotEmpty String organizationID, String providerNPI, String patientID);
+    public abstract List<Group> rosterSearch(@NotEmpty String organizationID, String providerNPI, String patientID);
 
     @GET
     @Path("/{rosterID}")
@@ -30,7 +31,7 @@ public abstract class AbstractGroupResource {
 
     @GET
     @Path("/{rosterID}/$patients")
-    public abstract Bundle getAttributedPatients(@NotNull UUID rosterID, boolean activeOnly);
+    public abstract List<Patient> getAttributedPatients(@NotNull UUID rosterID, boolean activeOnly);
 
     @PUT
     @Path("/{rosterID}")

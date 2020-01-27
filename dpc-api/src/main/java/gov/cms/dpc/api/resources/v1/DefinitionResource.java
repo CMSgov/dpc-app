@@ -17,6 +17,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @Api(value = "StructureDefinition")
 @Path("/v1/StructureDefinition")
@@ -37,14 +38,8 @@ public class DefinitionResource extends AbstractDefinitionResource {
     @ExceptionMetered
     @ApiOperation(value = "Fetch all structure definitions", notes = "FHIR endpoint which fetches all structure definitions from the server", response = Bundle.class)
     @Override
-    public Bundle getStructureDefinitions() {
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        profileSupport.fetchAllStructureDefinitions(ctx)
-                .forEach(structureDefinition -> bundle.addEntry().setResource(structureDefinition));
-        bundle.setTotal(bundle.getEntry().size());
-
-        return bundle;
+    public List<StructureDefinition> getStructureDefinitions() {
+        return profileSupport.fetchAllStructureDefinitions(ctx);
     }
 
     @Override

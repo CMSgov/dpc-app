@@ -6,6 +6,7 @@ import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -21,6 +22,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
@@ -46,21 +48,17 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Search for providers", notes = "FHIR endpoint to search for Practitioner resources." +
             "<p>If a provider NPI is given, the results are filtered accordingly. " +
             "Otherwise, the method returns all Practitioners associated to the given Organization." +
-            "<p> It's possible to provide a specific resource ID and Organization ID, for use in Authorization.")
-    // TODO: Migrate this signature to a List<Practitioner> in DPC-302
-    public Bundle getPractitioners(@ApiParam(value = "Practitioner resource ID")
-                                   @QueryParam("_id") UUID resourceID,
-                                   @ApiParam(value = "Provider NPI")
-                                   @QueryParam("identifier") String providerNPI,
-                                   @NotEmpty @QueryParam("organization") String organizationID) {
-
-        final Bundle bundle = new Bundle();
-        final List<ProviderEntity> providers = this.dao.getProviders(resourceID, providerNPI, FHIRExtractors.getEntityUUID(organizationID));
-
-        bundle.setTotal(providers.size());
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        providers.forEach(provider -> bundle.addEntry().setResource(this.converter.toFHIR(Practitioner.class, provider)));
-        return bundle;
+            "<p> It's possible to provide a specific resource ID and Organization ID, for use in Authorization.", response = Bundle.class)
+    public List<Practitioner> getPractitioners(@ApiParam(value = "Practitioner resource ID")
+                                               @QueryParam("_id") UUID resourceID,
+                                               @ApiParam(value = "Provider NPI")
+                                               @QueryParam("identifier") String providerNPI,
+                                               @NotEmpty @QueryParam("organization") String organizationID) {
+        return this.dao
+                .getProviders(resourceID, providerNPI, FHIRExtractors.getEntityUUID(organizationID))
+                .stream()
+                .map(p -> this.converter.toFHIR(Practitioner.class, p))
+                .collect(Collectors.toList());
     }
 
     @POST
@@ -116,9 +114,10 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization.")
+    @ApiOperation(value = "Bulk submit Practitioner resources", notes = "FHIR operation for submitting a Bundle of Practitioner resources, which will be associated to the given Organization.", response = Bundle.class)
+    @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
-    public Bundle bulkSubmitProviders(Parameters params) {
+    public List<Practitioner> bulkSubmitProviders(Parameters params) {
         return bulkResourceHandler(Practitioner.class, params, this::submitProvider);
     }
 
