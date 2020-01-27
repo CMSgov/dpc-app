@@ -1,12 +1,12 @@
 package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/Patient")
@@ -18,14 +18,14 @@ public abstract class AbstractPatientResource {
     }
 
     @GET
-    public abstract Bundle searchPatients(UUID resourceID, String patientMBI, String organizationReference);
+    public abstract List<Patient> searchPatients(UUID resourceID, String patientMBI, String organizationReference);
 
     @POST
     public abstract Response createPatient(Patient patient);
 
     @POST
     @Path("/$submit")
-    public abstract Bundle bulkSubmitPatients(Parameters params);
+    public abstract List<Patient> bulkSubmitPatients(Parameters params);
 
     @GET
     @Path("/{patientID}")
