@@ -29,7 +29,6 @@ class APIClient
 
   def delete_organization(org)
     # DELETE
-    
     # client.destroy(FHIR::Organization, org.id)
   end
 
