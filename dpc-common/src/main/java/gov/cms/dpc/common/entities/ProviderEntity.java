@@ -3,10 +3,8 @@ package gov.cms.dpc.common.entities;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity(name = "providers")
 public class ProviderEntity extends PersonEntity {
@@ -65,35 +63,6 @@ public class ProviderEntity extends PersonEntity {
 
     public void setOrganization(OrganizationEntity organization) {
         this.organization = organization;
-    }
-
-    // Temporal setters/getters need to be on the child class, in order for Jooq to find them
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(OffsetDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public OffsetDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(OffsetDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    @PrePersist
-    public void setCreation() {
-        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        this.setCreatedAt(now);
-        this.setUpdatedAt(now);
-    }
-
-    @PreUpdate
-    public void setUpdateTime() {
-        this.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     public ProviderEntity update(ProviderEntity entity) {

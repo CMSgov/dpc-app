@@ -91,18 +91,6 @@ public class PatientEntity extends PersonEntity {
         this.attributions = attributions;
     }
 
-    @PrePersist
-    public void setCreation() {
-        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        this.setCreatedAt(now);
-        this.setUpdatedAt(now);
-    }
-
-    @PreUpdate
-    public void setUpdateTime() {
-        this.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
-    }
-
     /**
      * Update {@link Patient} fields.
      * Only first/last name and DOB is supported at this point.

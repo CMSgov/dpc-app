@@ -3,6 +3,7 @@ package gov.cms.dpc.common.entities;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @MappedSuperclass
@@ -62,5 +63,17 @@ public class PersonEntity implements Serializable {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @PrePersist
+    public void setCreation() {
+        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        this.setCreatedAt(now);
+        this.setUpdatedAt(now);
+    }
+
+    @PreUpdate
+    public void setUpdateTime() {
+        this.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
     }
 }
