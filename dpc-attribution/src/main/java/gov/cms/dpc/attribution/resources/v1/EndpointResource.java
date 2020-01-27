@@ -25,6 +25,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Api(value = "Endpoint")
 public class EndpointResource extends AbstractEndpointResource {
@@ -57,24 +58,17 @@ public class EndpointResource extends AbstractEndpointResource {
     @Timed
     @ExceptionMetered
     @UnitOfWork
-    @ApiOperation(value = "Search Endpoints", notes = "Search for Endpoints associated to the given Organization")
+    @ApiOperation(value = "Search Endpoints", notes = "Search for Endpoints associated to the given Organization", response = Bundle.class)
     @Override
-    public Bundle searchEndpoints(@NotNull @QueryParam("organization") String organizationID) {
+    public List<Endpoint> searchEndpoints(@NotNull @QueryParam("organization") String organizationID) {
         final UUID entityID = FHIRExtractors.getEntityUUID(organizationID);
 
         final List<EndpointEntity> endpointList = this.endpointDAO.findByOrganization(entityID);
 
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-
-        endpointList
+        return endpointList
                 .stream()
                 .map(e -> converter.toFHIR(Endpoint.class, e))
-                .forEach(endpoint -> bundle.addEntry().setResource(endpoint));
-
-        bundle.setTotal(endpointList.size());
-
-        return bundle;
+                .collect(Collectors.toList());
     }
 
     @FHIR

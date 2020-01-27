@@ -9,6 +9,8 @@ common: &default_settings
   log_limit_in_kbytes: 0
   log_daily: false
   log_file_name: STDOUT
+  circuit_breaker:
+    gc_cpu_threshold: 30
 
   # Limits the number of lines to capture for each stack trace.
   # Default is 30
@@ -43,10 +45,10 @@ common: &default_settings
     max_samples_stored: 2000
 
   distributed_tracing:
-    enabled: false
+    enabled: true
 
   cross_application_tracer:
-    enabled: true
+    enabled: false
 
   thread_profiler:
     enabled: true

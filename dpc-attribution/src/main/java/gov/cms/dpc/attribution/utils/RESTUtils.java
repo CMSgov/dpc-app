@@ -25,14 +25,15 @@ public class RESTUtils {
      * @param <T>            - {@link T} generic type parameter which extends {@link BaseResource}
      * @return - {@link Bundle} containing the processed results from the bulk submission
      */
-    public static <T extends BaseResource> Bundle bulkResourceHandler(Class<T> clazz, Parameters params, Function<T, Response> resourceAction) {
+    @SuppressWarnings("unchecked")
+    public static <T extends BaseResource> List<T> bulkResourceHandler(Class<T> clazz, Parameters params, Function<T, Response> resourceAction) {
         final Bundle resourceBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.COLLECTION);
         // Grab all of the providers and submit them individually (for now)
         // TODO: Optimize insert as part of DPC-490
 
-        final List<Bundle.BundleEntryComponent> bundleEntries = resourceBundle
+        return resourceBundle
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
@@ -47,12 +48,8 @@ public class RESTUtils {
                     // If there's an error, rethrow the original method
                     throw new WebApplicationException(response);
                 })
-                .map(resource -> new Bundle.BundleEntryComponent().setResource(resource))
+                .map(r -> (T) r)
                 .collect(Collectors.toList());
-
-        bundle.setEntry(bundleEntries);
-        bundle.setTotal(bundleEntries.size());
-        return bundle;
     }
 
     /**
