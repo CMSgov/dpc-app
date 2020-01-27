@@ -28,7 +28,3 @@
 /public/ig/**/*
 
 .env
-
-# Ignore keys
-private.pem
-public.pem
