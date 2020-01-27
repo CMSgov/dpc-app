@@ -12,7 +12,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -24,7 +24,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -36,7 +36,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -48,7 +48,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -63,7 +63,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -77,7 +77,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -89,7 +89,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -105,7 +105,7 @@
           %>
           <div class="field field--follow-up" hidden>
             <div class="required">
-              <div class="ast">
+              <div class="ast-label">
                 * &nbsp;
               </div>
               <div>
@@ -122,7 +122,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -139,7 +139,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -151,7 +151,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -168,7 +168,7 @@
 
         <div class="field">
           <div class="required">
-            <div class="ast">
+            <div class="ast-label">
               * &nbsp;
             </div>
             <div>
@@ -179,10 +179,17 @@
         </div>
 
         <div class="field ds-u-margin-top--3">
-          <%= f.check_box :agree_to_terms, class: 'ds-c-choice' %>
-          <%= f.label :agree_to_terms do %>
-          I agree to the <%= link_to " terms of service", terms_of_service_path %>
-          <% end %>
+          <div class="required">
+            <div class="ast-inline">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.check_box :agree_to_terms, class: 'ds-c-choice' %>
+              <%= f.label :agree_to_terms do %>
+              I agree to the <%= link_to " terms of service", terms_of_service_path %>
+              <% end %>
+            </div>
+          </div>
         </div>
 
         <div class="actions ds-u-margin-top--3">

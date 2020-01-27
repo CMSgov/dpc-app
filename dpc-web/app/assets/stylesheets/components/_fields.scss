@@ -8,7 +8,12 @@
   display: flex;
   flex-wrap: nowrap;
 
-  .ast {
+  .ast-inline {
+    color: $color-error-dark;
+  }
+
+  .ast-label {
+    color: $color-error-dark;
     margin-top: 24px;
   }
 }
