@@ -11,7 +11,14 @@
         <p class="ds-u-color--error-dark">* - required fields</p>
 
         <div class="field">
-          <%= f.label :first_name, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :first_name, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.text_field :first_name, class: "ds-c-field" %>
         </div>
 
