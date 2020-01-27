@@ -43,6 +43,3 @@ venv.bak/
 # Ignore smoke tests
 jmeter.log
 smoke.out
-
-# Ignore screenshots
-screenshots/
