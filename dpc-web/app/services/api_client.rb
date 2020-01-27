@@ -27,9 +27,19 @@ class APIClient
     self
   end
 
-  def delete_organization(org)
-    # DELETE
-    # client.destroy(FHIR::Organization, org.id)
+  def delete_organization(reg_org)
+    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
+
+    response = fhir_client.destroy(FHIR::Organization, reg_org.api_id)
+
+    if response.response[:code] == '200'
+      true
+    else
+      Rails.logger.warn 'Unsuccessulful request to API'
+      @response_status = response.response[:code]
+      @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
+      false
+    end
   end
 
   def update_endpoint(reg_org)
@@ -91,9 +101,9 @@ class APIClient
     { 'Authorization': "Bearer #{token}" }
   end
 
-  def delegated_macaroon(reg_org_id)
+  def delegated_macaroon(reg_org_api_id)
     m = Macaroon.from_binary(golden_macaroon)
-    m.add_first_party_caveat("organization_id = #{reg_org_id}")
+    m.add_first_party_caveat("organization_id = #{reg_org_api_id}")
     m.add_first_party_caveat("expires = #{2.minutes.from_now.iso8601}")
     m.add_first_party_caveat('dpc_macaroon_version = 1')
     m.serialize
