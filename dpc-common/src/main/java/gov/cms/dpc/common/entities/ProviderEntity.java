@@ -2,12 +2,13 @@ package gov.cms.dpc.common.entities;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "providers")
 public class ProviderEntity extends PersonEntity {
+
+    public static final long serialVersionUID = 42L;
 
     @Column(name = "provider_id", unique = true)
     private String providerNPI;
@@ -74,7 +75,7 @@ public class ProviderEntity extends PersonEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ProviderEntity)) return false;
         ProviderEntity that = (ProviderEntity) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(providerNPI, that.providerNPI) &&
