@@ -207,7 +207,7 @@ RSpec.describe APIClient do
       end
     end
 
-    context 'unsuccessul request' do
+    context 'unsuccessful request' do
       it 'uses fhir_client to send org data to API' do
         org = create(:organization, api_environments: [0])
         reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
@@ -224,6 +224,44 @@ RSpec.describe APIClient do
 
         client = APIClient.new('sandbox')
         expect(client.update_organization(reg_org)).to eq(false)
+      end
+    end
+  end
+  
+  describe '#delete_organization' do
+    context 'successful request' do
+      it 'uses fhir_client to delete registered org from API' do
+        org = create(:organization, api_environments: [0])
+        reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
+
+        stub_request(:delete, "http://dpc.example.com/Organization/#{reg_org.api_id}").
+        with(
+          headers: {
+            'Accept' => 'application/fhir+json',
+            'Authorization' => /.*/
+          }).
+        to_return(status: 200, body: "", headers: {})
+
+        client = APIClient.new('sandbox')
+        expect(client.delete_organization(reg_org)).to eq(true)
+      end
+    end
+
+    context 'unsucessful request' do
+      it 'uses fhir_client to delete registered org from API' do
+        org = create(:organization, api_environments: [0])
+        reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
+
+        stub_request(:delete, "http://dpc.example.com/Organization/#{reg_org.api_id}").
+        with(
+          headers: {
+            'Accept' => 'application/fhir+json',
+            'Authorization' => /.*/
+          }).
+        to_return(status: 404, body: "", headers: {})
+
+        client = APIClient.new('sandbox')
+        expect(client.delete_organization(reg_org)).to eq(false)
       end
     end
   end
