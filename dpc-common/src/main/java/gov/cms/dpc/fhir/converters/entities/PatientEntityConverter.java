@@ -23,8 +23,8 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
         patient.setDob(PatientEntity.toLocalDate(resource.getBirthDate()));
         patient.setBeneficiaryID(FHIRExtractors.getPatientMPI(resource));
         final HumanName name = resource.getNameFirstRep();
-        patient.setPatientFirstName(name.getGivenAsSingleString());
-        patient.setPatientLastName(name.getFamily());
+        patient.setFirstName(name.getGivenAsSingleString());
+        patient.setLastName(name.getFamily());
         patient.setGender(resource.getGender());
 
         // Set the managing organization
@@ -48,10 +48,10 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
         meta.setLastUpdatedElement(new InstantType(entity.getUpdatedAt().format(INSTANT_FORMATTER)));
         patient.setMeta(meta);
 
-        patient.setId(entity.getPatientID().toString());
+        patient.setId(entity.getID().toString());
         patient.addName()
-                .setFamily(entity.getPatientLastName())
-                .addGiven(entity.getPatientFirstName());
+                .setFamily(entity.getLastName())
+                .addGiven(entity.getFirstName());
 
         patient.setBirthDate(PatientEntity.fromLocalDate(entity.getDob()));
         patient.setGender(entity.getGender());

@@ -36,12 +36,13 @@ public class ProviderEntityConverter implements FHIRConverter<Practitioner, Prov
         } else {
             providerID = UUID.fromString(resource.getIdElement().getIdPart());
         }
-        provider.setProviderID(providerID);
+
+        provider.setID(providerID);
 
         provider.setProviderNPI(FHIRExtractors.getProviderNPI(resource));
         final HumanName name = resource.getNameFirstRep();
-        provider.setProviderFirstName(name.getGivenAsSingleString());
-        provider.setProviderLastName(name.getFamily());
+        provider.setFirstName(name.getGivenAsSingleString());
+        provider.setLastName(name.getFamily());
 
         return provider;
     }
@@ -50,10 +51,10 @@ public class ProviderEntityConverter implements FHIRConverter<Practitioner, Prov
     public Practitioner toFHIR(FHIREntityConverter converter, ProviderEntity entity) {
         final Practitioner practitioner = new Practitioner();
 
-        practitioner.setId(entity.getProviderID().toString());
+        practitioner.setId(entity.getID().toString());
         practitioner.addName().
-                setFamily(entity.getProviderLastName())
-                .addGiven(entity.getProviderFirstName());
+                setFamily(entity.getFirstName())
+                .addGiven(entity.getLastName());
 
         practitioner.addIdentifier()
                 .setSystem(DPCIdentifierSystem.NPPES.getSystem())

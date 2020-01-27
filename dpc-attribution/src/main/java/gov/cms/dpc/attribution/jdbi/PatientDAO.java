@@ -110,8 +110,8 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
 
         criteriaDelete.where(builder.equal(root
                         .get(AttributionRelationship_.patient)
-                        .get(PatientEntity_.patientID),
-                patientEntity.getPatientID()));
+                        .get(PatientEntity_.id),
+                patientEntity.getID()));
         return this.currentSession().createQuery(criteriaDelete).executeUpdate();
     }
 }

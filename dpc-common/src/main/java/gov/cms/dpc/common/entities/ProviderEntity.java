@@ -2,7 +2,6 @@ package gov.cms.dpc.common.entities;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -10,20 +9,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "providers")
-public class ProviderEntity implements Serializable {
-
-    public static final long serialVersionUID = 42L;
-
-    @Id
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
-    private UUID providerID;
+public class ProviderEntity extends PersonEntity {
 
     @Column(name = "provider_id", unique = true)
     private String providerNPI;
-    @Column(name = "first_name")
-    private String providerFirstName;
-    @Column(name = "last_name")
-    private String providerLastName;
 
     @NotNull
     @ManyToOne
@@ -42,22 +31,8 @@ public class ProviderEntity implements Serializable {
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "attributedProvider")
     private List<RosterEntity> attributionRosters;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime updatedAt;
-
     public ProviderEntity() {
         // Hibernate required
-    }
-
-    public UUID getProviderID() {
-        return providerID;
-    }
-
-    public void setProviderID(UUID providerID) {
-        this.providerID = providerID;
     }
 
     public String getProviderNPI() {
@@ -66,22 +41,6 @@ public class ProviderEntity implements Serializable {
 
     public void setProviderNPI(String providerNPI) {
         this.providerNPI = providerNPI;
-    }
-
-    public String getProviderFirstName() {
-        return providerFirstName;
-    }
-
-    public void setProviderFirstName(String providerFirstName) {
-        this.providerFirstName = providerFirstName;
-    }
-
-    public String getProviderLastName() {
-        return providerLastName;
-    }
-
-    public void setProviderLastName(String providerLastName) {
-        this.providerLastName = providerLastName;
     }
 
     public List<PatientEntity> getAttributedPatients() {
@@ -108,6 +67,7 @@ public class ProviderEntity implements Serializable {
         this.organization = organization;
     }
 
+    // Temporal setters/getters need to be on the child class, in order for Jooq to find them
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
@@ -137,26 +97,25 @@ public class ProviderEntity implements Serializable {
     }
 
     public ProviderEntity update(ProviderEntity entity) {
-        this.setProviderFirstName(entity.getProviderFirstName());
-        this.setProviderLastName(entity.getProviderLastName());
+        this.setFirstName(entity.getFirstName());
+        this.setLastName(entity.getLastName());
         return this;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ProviderEntity)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         ProviderEntity that = (ProviderEntity) o;
-        return Objects.equals(providerID, that.providerID) &&
+        return Objects.equals(id, that.id) &&
                 Objects.equals(providerNPI, that.providerNPI) &&
-                Objects.equals(providerFirstName, that.providerFirstName) &&
-                Objects.equals(providerLastName, that.providerLastName) &&
-                Objects.equals(attributedPatients, that.attributedPatients);
+                Objects.equals(organization, that.organization) &&
+                Objects.equals(attributedPatients, that.attributedPatients) &&
+                Objects.equals(attributionRosters, that.attributionRosters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(providerID, providerNPI, providerFirstName, providerLastName, attributedPatients);
+        return Objects.hash(id, providerNPI, organization, attributedPatients, attributionRosters);
     }
-
 }
