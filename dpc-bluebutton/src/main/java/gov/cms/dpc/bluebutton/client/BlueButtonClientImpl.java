@@ -26,9 +26,7 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.KeySpec;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 
@@ -128,10 +126,14 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestEOBFromServer(String patientID) {
         logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", patientID, client.getServerBase());
+
+        List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
+        criteria.add(ExplanationOfBenefit.PATIENT.hasId(patientID));
+        criteria.add(new TokenClientParam("excludeSAMHSA").exactly().code("true"));
+
         return instrumentCall(REQUEST_EOB_METRIC, () ->
                 fetchBundle(ExplanationOfBenefit.class,
-                        List.of(ExplanationOfBenefit.PATIENT.hasId(patientID),
-                                new TokenClientParam("excludeSAMHSA").exactly().code("true")),
+                        criteria,
                         patientID));
     }
 
@@ -155,8 +157,12 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", patientID, client.getServerBase());
+
+        List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
+        criteria.add(Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientID)));
+
         return instrumentCall(REQUEST_COVERAGE_METRIC, () ->
-                fetchBundle(Coverage.class, Collections.singletonList(Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientID))), patientID));
+                fetchBundle(Coverage.class, criteria, patientID));
     }
 
     @Override
@@ -208,10 +214,10 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                                                          String patientID) {
         IQuery<IBaseBundle> query = client.search()
                 .forResource(resourceClass)
-                .where(criteria.get(0));
+                .where(criteria.remove(0));
 
-        for (int i = 1; i < criteria.size(); i++) {
-            query = query.and(criteria.get(i));
+        for (ICriterion<? extends IParam> criterion : criteria) {
+            query = query.and(criterion);
         }
 
         final Bundle bundle = query.count(config.getResourcesCount())
