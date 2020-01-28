@@ -8,23 +8,53 @@
 
         <h1 class="ds-u-margin-top--0">Request access</h1>
 
+        <p class="ds-u-color--error-dark">* - required fields</p>
+
         <div class="field">
-          <%= f.label :first_name, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :first_name, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.text_field :first_name, class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :last_name, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :last_name, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.text_field :last_name, class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :email, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :email, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.email_field :email, autocomplete: "email", class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :password, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :password, class: "ds-c-label" %>
+            </div>
+          </div>
           <% if @minimum_password_length %>
           <em>(<%= @minimum_password_length %> characters minimum)</em>
           <% end %><br />
@@ -32,19 +62,40 @@
         </div>
 
         <div class="field">
-          <%= f.label :password_confirmation, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :password_confirmation, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.password_field :password_confirmation, class: "ds-c-field" %>
         </div>
 
         <h2>Your organization</h2>
 
         <div class="field">
-          <%= f.label :requested_organization, "Name of your organization", class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :requested_organization, "Name of your organization", class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.text_field :requested_organization, class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :requested_organization_type, 'Type of organization', class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :requested_organization_type, 'Type of organization', class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.select :requested_organization_type,
             organization_types_for_select,
             { include_blank: 'Please select' },
@@ -53,8 +104,16 @@
             value: @user.requested_organization_type
           %>
           <div class="field field--follow-up" hidden>
-            <%= f.label :requested_num_providers, class: "ds-c-label" do %>
-            Number of Providers at Your Organization
+            <div class="required">
+              <div class="ast-label">
+                * &nbsp;
+              </div>
+              <div>
+                <%= f.label :requested_num_providers, class: "ds-c-label" do %>
+                Number of Providers at Your Organization
+              </div>
+            </div>
+            
             <span class="ds-c-field__hint">You may use an approximate number.</span>
             <% end %>
             <%= f.number_field :requested_num_providers, min: 0, class: "ds-c-field ds-c-field--small" %>
@@ -62,7 +121,14 @@
         </div>
 
         <div class="field">
-          <%= f.label :address_1, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :address_1, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.text_field :address_1, class: "ds-c-field" %>
         </div>
 
@@ -72,12 +138,26 @@
         </div>
 
         <div class="field">
-          <%= f.label :city, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :city, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.text_field :city, class: "ds-c-field" %>
         </div>
 
         <div class="field">
-          <%= f.label :state, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :state, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.select :state,
                 states_for_select,
                 { include_blank: 'Please select a state' },
@@ -87,15 +167,29 @@
         </div>
 
         <div class="field">
-          <%= f.label :zip, class: "ds-c-label" %>
+          <div class="required">
+            <div class="ast-label">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.label :zip, class: "ds-c-label" %>
+            </div>
+          </div>
           <%= f.text_field :zip, class: "ds-c-field" %>
         </div>
 
         <div class="field ds-u-margin-top--3">
-          <%= f.check_box :agree_to_terms, class: 'ds-c-choice' %>
-          <%= f.label :agree_to_terms do %>
-          I agree to the <%= link_to " terms of service", terms_of_service_path %>
-          <% end %>
+          <div class="required">
+            <div class="ast-inline">
+              * &nbsp;
+            </div>
+            <div>
+              <%= f.check_box :agree_to_terms, class: 'ds-c-choice' %>
+              <%= f.label :agree_to_terms do %>
+              I agree to the <%= link_to " terms of service", terms_of_service_path %>
+              <% end %>
+            </div>
+          </div>
         </div>
 
         <div class="actions ds-u-margin-top--3">
