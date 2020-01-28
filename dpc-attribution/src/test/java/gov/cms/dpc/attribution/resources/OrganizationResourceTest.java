@@ -30,7 +30,6 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBasicRegistration() {
-
         final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
         assertAll(() -> assertNotNull(organization, "Should have an org back"),
                 () -> assertFalse(organization.getEndpoint().isEmpty(), "Should have endpoints"));
@@ -38,6 +37,29 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testInvalidOrganization() {
+
+        // Create fake organization with missing data
+        final Organization resource = new Organization();
+        resource.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
+
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(resource).setName("resource");
+
+        final var submit = client
+                .operation()
+                .onType(Organization.class)
+                .named("submit")
+                .withParameters(parameters)
+                .returnResourceType(Organization.class)
+                .encodedJson();
+
+        assertThrows(InvalidRequestException.class, submit::execute, "Should throw an error for not supporting Organizations");
+    }
+
+    @Test
+    void testUnnamedParameterSubmission() {
 
         // Create fake organization with missing data
         final Organization resource = new Organization();
@@ -56,7 +78,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .returnResourceType(Organization.class)
                 .encodedJson();
 
-        assertThrows(InternalErrorException.class, submit::execute, "Should throw an internal server error");
+        assertThrows(InvalidRequestException.class, submit::execute, "Should throw an error for not supporting Organizations");
     }
 
     @Test
