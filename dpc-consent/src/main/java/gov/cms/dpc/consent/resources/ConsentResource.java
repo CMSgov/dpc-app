@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("v1/Consent")
 public class ConsentResource {
@@ -40,21 +41,21 @@ public class ConsentResource {
         this.consentOrganizationURL = consentOrganizationURL;
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @GET
     @FHIR
     @Timed
     @ExceptionMetered
     @UnitOfWork
     @ApiOperation(value = "Search for Consent Entries", notes = "Search for Consent records. " +
-            "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.")
+            "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public Bundle search(
+    public List<Consent> search(
             @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
             @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
-        List<ConsentEntity> entities;
+        final List<ConsentEntity> entities;
 
         // Priority order for processing params. If multiple params are passed, we only pay attention to one
         if (id.isPresent()) {
@@ -77,7 +78,14 @@ public class ConsentResource {
             throw new WebApplicationException("Must have some form of Consent Resource ID or Patient ID", Response.Status.BAD_REQUEST);
         }
 
-        return bundleOf(entities);
+        if (entities.isEmpty()) {
+            throw new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
+        }
+
+        return entities
+                .stream()
+                .map(e -> ConsentEntityConverter.convert(e, consentOrganizationURL, fhirReferenceURL))
+                .collect(Collectors.toList());
     }
 
     @GET
@@ -124,19 +132,5 @@ public class ConsentResource {
             entities = List.of(ConsentEntity.defaultConsentEntity(Optional.empty(), hicnValue, mbiValue));
         }
         return entities;
-    }
-
-    private Bundle bundleOf(List<ConsentEntity> consentEntities) {
-
-        if (consentEntities.isEmpty()) {
-            throw new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
-        }
-
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        consentEntities.forEach(e -> bundle.addEntry().setResource(ConsentEntityConverter.convert(e, consentOrganizationURL, fhirReferenceURL)));
-        bundle.setTotal(bundle.getEntry().size());
-
-        return bundle;
     }
 }
