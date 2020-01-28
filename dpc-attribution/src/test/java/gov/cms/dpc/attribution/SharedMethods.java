@@ -4,13 +4,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.UUID;
 
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,7 +33,7 @@ public class SharedMethods {
         // Add some random values to the patient
         final Patient patient = new Patient();
         final Identifier patientIdentifier = new Identifier();
-        patientIdentifier.setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(patientID);
+        patientIdentifier.setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue(patientID);
         patient.addIdentifier(patientIdentifier);
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());

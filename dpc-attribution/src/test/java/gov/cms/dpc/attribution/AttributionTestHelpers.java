@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 
-import java.io.InputStream;
 import java.sql.Date;
 
 public class AttributionTestHelpers {
@@ -31,7 +30,7 @@ public class AttributionTestHelpers {
     public static Patient createPatientResource(String MBI, String organizationID) {
         final Patient patient = new Patient();
         patient.addIdentifier()
-                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
                 .setValue(MBI);
 
         patient.addName().setFamily("Patient").addGiven("Test");
