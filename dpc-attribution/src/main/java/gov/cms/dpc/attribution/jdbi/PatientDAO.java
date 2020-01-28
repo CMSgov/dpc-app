@@ -35,14 +35,14 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
 
         List<Predicate> predicates = new ArrayList<>();
         if (resourceID != null) {
-            predicates.add(builder.equal(root.get("patientID"), resourceID));
+            predicates.add(builder.equal(root.get(PatientEntity_.id), resourceID));
         }
 
         if (patientMBI != null) {
-            predicates.add(builder.equal(root.get("beneficiaryID"), patientMBI));
+            predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), patientMBI));
         }
         if (organizationID != null) {
-            predicates.add(builder.equal(root.get("organization").get("id"), organizationID));
+            predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationID));
         }
         if (predicates.isEmpty()) {
             throw new IllegalStateException("Must have at least one search predicate!");
