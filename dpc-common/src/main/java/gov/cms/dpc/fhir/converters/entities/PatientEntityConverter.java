@@ -68,7 +68,7 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
 
         patient
                 .addIdentifier()
-                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
                 .setValue(entity.getBeneficiaryID());
 
         // Managing organization

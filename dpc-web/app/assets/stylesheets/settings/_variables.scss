@@ -3,6 +3,7 @@ $color-warn-alt: #e27100;
 $color-warn-alt-light: rgba($color-warn-lightest, .9);
 $color-primary-alt-dark: #004972;
 $color-gray-ultra-light: #f6f6f6;
+$color-gray-med: #cbcbcb;
 $color-success-alt-lightest: rgba($color-success-lightest, .9);
 
 // Focus
@@ -17,6 +18,7 @@ $measuer-5:  77ch;
 
 // Breakpoints
 $width-nav: 860px;
+$layout-breakpoint: 965px;
 
 // Replace US WDS font stacks with HealthCare.gov font stacks
 $font-sans: 'Roboto', sans-serif;
