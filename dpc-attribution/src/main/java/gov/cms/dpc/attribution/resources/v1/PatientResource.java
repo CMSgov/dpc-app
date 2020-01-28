@@ -5,6 +5,7 @@ import gov.cms.dpc.attribution.resources.AbstractPatientResource;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -40,10 +41,10 @@ public class PatientResource extends AbstractPatientResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Search for Patients", notes = "Search for Patient records, optionally restricting by associated organization." +
-            "<p>Must provide ONE OF organization ID, patient MBI, or Patient Resource ID to search for")
+            "<p>Must provide ONE OF organization ID, patient MBI, or Patient Resource ID to search for", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 400, message = "Must have Organization ID or Patient MBI in order to search"))
     @Override
-    public Bundle searchPatients(
+    public List<Patient> searchPatients(
             @ApiParam(value = "Patient resource ID")
             @QueryParam("_id") UUID resourceID,
             @ApiParam(value = "Patient MBI")
@@ -59,7 +60,7 @@ public class PatientResource extends AbstractPatientResource {
         // Extract the Patient MBI from the query param
         if (patientMBI != null) {
             final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
-            if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
+            if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.BENE_ID.getSystem())) {
                 throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
             }
             idValue = patientIdentifier.getValue();
@@ -68,17 +69,10 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
-        final List<Bundle.BundleEntryComponent> patientEntries = this.dao.patientSearch(resourceID, idValue, organizationID)
+        return this.dao.patientSearch(resourceID, idValue, organizationID)
                 .stream()
                 .map(p -> this.converter.toFHIR(Patient.class, p))
-                .map(patient -> new Bundle.BundleEntryComponent().setResource(patient))
                 .collect(Collectors.toList());
-
-        final Bundle searchBundle = new Bundle();
-        searchBundle.setType(Bundle.BundleType.SEARCHSET);
-        searchBundle.setTotal(patientEntries.size());
-        searchBundle.setEntry(patientEntries);
-        return searchBundle;
     }
 
     @GET
@@ -132,9 +126,10 @@ public class PatientResource extends AbstractPatientResource {
     @Path("/$submit")
     @FHIR
     @UnitOfWork
-    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization.")
+    @ApiOperation(value = "Bulk submit Patient resources", notes = "FHIR operation for submitting a Bundle of Patient resources, which will be associated to the given Organization.", response = Bundle.class)
+    @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
-    public Bundle bulkSubmitPatients(Parameters params) {
+    public List<Patient> bulkSubmitPatients(Parameters params) {
         return bulkResourceHandler(Patient.class, params, this::createPatient);
     }
 
