@@ -114,7 +114,7 @@ public class ConsentResource {
         // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
         // we need to determine which database field that system's value is stored in
         switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
-            case MBI:
+            case BENE_ID:
                 mbiValue = Optional.of(patientIdentifier.getValue());
                 field = "mbi";
                 break;

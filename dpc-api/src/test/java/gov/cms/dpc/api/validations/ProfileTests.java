@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -14,8 +13,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,7 +25,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientProfile() throws IOException, URISyntaxException {
+    void testPatientProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         // Create a new patient record
 
@@ -40,7 +37,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
                 .resource(invalidPatient)
                 .encodedJson();
 
-        final UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, patientCreate::execute, "Should fail with unfulfilled profile");
+        assertThrows(UnprocessableEntityException.class, patientCreate::execute, "Should fail with unfulfilled profile");
 
         final Parameters vParams = new Parameters();
         vParams.addParameter().setResource(invalidPatient);
@@ -58,16 +55,15 @@ class ProfileTests extends AbstractSecureApplicationTest {
 
         // Try for a valid patient
         final Patient validPatient = invalidPatient.copy();
-        validPatient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
+        // TODO(nickrobison): This will need to be switched to the MBI system, once those changes are complete.
+        validPatient.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mbi");
         validPatient.setGender(Enumerations.AdministrativeGender.MALE);
         validPatient.setBirthDate(Date.valueOf("1990-01-01"));
-
-        final MethodOutcome created = client
+        client
                 .create()
                 .resource(validPatient)
                 .encodedJson()
                 .execute();
-
 
         // Now, try a bulk submission, which should fail
 
@@ -90,7 +86,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testProviderProfile() throws IOException, URISyntaxException {
+    void testProviderProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Practitioner invalidPractitioner = new Practitioner();
@@ -147,7 +143,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
     @Test
     @Disabled
         // Disabled until DPC-614 and DPC-616 are merged.
-    void testAttributionProfile() throws IOException, URISyntaxException {
+    void testAttributionProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Group invalidGroup = new Group();
