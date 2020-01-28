@@ -7,7 +7,7 @@ import java.time.ZoneOffset;
 import java.util.UUID;
 
 @MappedSuperclass
-public class PersonEntity implements Serializable {
+public abstract class PersonEntity implements Serializable {
 
     public static final long serialVersionUID = 42L;
 
@@ -19,10 +19,9 @@ public class PersonEntity implements Serializable {
     protected OffsetDateTime createdAt;
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     protected OffsetDateTime updatedAt;
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
-    @Access(AccessType.PROPERTY)
     protected UUID id;
 
     public String getFirstName() {

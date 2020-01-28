@@ -9,6 +9,8 @@ import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import org.hl7.fhir.dstu3.model.*;
 
+import java.util.UUID;
+
 import static gov.cms.dpc.fhir.FHIRFormatters.INSTANT_FORMATTER;
 
 public class PatientEntityConverter implements FHIRConverter<Patient, PatientEntity> {
@@ -34,7 +36,15 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
             organizationEntity.setId(FHIRExtractors.getEntityUUID(managingOrganization.getReference()));
             patient.setOrganization(organizationEntity);
         }
-        
+
+        // Set the ID, if one exists
+        final String id = resource.getId();
+        if (id == null) {
+            patient.setID(UUID.randomUUID());
+        } else {
+            patient.setID(UUID.fromString(new IdType(id).getIdPart()));
+        }
+
         return patient;
     }
 

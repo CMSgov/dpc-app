@@ -52,9 +52,9 @@ public class ProviderEntityConverter implements FHIRConverter<Practitioner, Prov
         final Practitioner practitioner = new Practitioner();
 
         practitioner.setId(entity.getID().toString());
-        practitioner.addName().
-                setFamily(entity.getFirstName())
-                .addGiven(entity.getLastName());
+        practitioner.addName()
+                .setFamily(entity.getLastName())
+                .addGiven(entity.getFirstName());
 
         practitioner.addIdentifier()
                 .setSystem(DPCIdentifierSystem.NPPES.getSystem())
