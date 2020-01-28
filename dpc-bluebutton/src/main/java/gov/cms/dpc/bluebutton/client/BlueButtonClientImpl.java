@@ -2,7 +2,9 @@ package gov.cms.dpc.bluebutton.client;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
-import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.IParam;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -13,6 +15,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.encoders.Hex;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +26,7 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.KeySpec;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 
@@ -124,8 +126,15 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestEOBFromServer(String patientID) {
         logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", patientID, client.getServerBase());
+
+        List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
+        criteria.add(ExplanationOfBenefit.PATIENT.hasId(patientID));
+        criteria.add(new TokenClientParam("excludeSAMHSA").exactly().code("true"));
+
         return instrumentCall(REQUEST_EOB_METRIC, () ->
-                fetchBundle(ExplanationOfBenefit.class, ExplanationOfBenefit.PATIENT.hasId(patientID), patientID));
+                fetchBundle(ExplanationOfBenefit.class,
+                        criteria,
+                        patientID));
     }
 
     /**
@@ -148,8 +157,12 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", patientID, client.getServerBase());
+
+        List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
+        criteria.add(Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientID)));
+
         return instrumentCall(REQUEST_COVERAGE_METRIC, () ->
-                fetchBundle(Coverage.class, Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientID)), patientID));
+                fetchBundle(Coverage.class, criteria, patientID));
     }
 
     @Override
@@ -192,17 +205,22 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      * Read a FHIR Bundle from BlueButton. Limits the returned size by resourcesPerRequest.
      *
      * @param resourceClass - FHIR Resource class
-     * @param criterion - For the resource class the correct criterion that matches the patientID
+     * @param criteria - For the resource class the correct criteria that match the patientID
      * @param patientID - id of patient
      * @return FHIR Bundle resource
      */
     private <T extends IBaseResource> Bundle fetchBundle(Class<T> resourceClass,
-                                                         ICriterion<ReferenceClientParam> criterion,
+                                                         List<ICriterion<? extends IParam>> criteria,
                                                          String patientID) {
-        final Bundle bundle = client.search()
+        IQuery<IBaseBundle> query = client.search()
                 .forResource(resourceClass)
-                .where(criterion)
-                .count(config.getResourcesCount())
+                .where(criteria.remove(0));
+
+        for (ICriterion<? extends IParam> criterion : criteria) {
+            query = query.and(criterion);
+        }
+
+        final Bundle bundle = query.count(config.getResourcesCount())
                 .returnBundle(Bundle.class)
                 .execute();
 
