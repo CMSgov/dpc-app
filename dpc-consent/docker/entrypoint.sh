@@ -8,18 +8,22 @@ else
   JACOCO=""
 fi
 
+JAVA_CLASSES="-cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.consent.DPCConsentService"
+
 if [ -n "$NEW_RELIC_LICENSE_KEY" ]; then
-    CMDLINE="java -javaagent:/newrelic/newrelic.jar $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.consent.DPCConsentService"
+    NR_AGENT="-javaagent:/newrelic/newrelic.jar"
 else
-    CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.consent.DPCConsentService"
+    NR_AGENT=""
 fi
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
-  eval ${CMDLINE} db migrate
+  eval java ${JVM_FLAGS} ${JAVA_CLASSES} db migrate
 fi
 
-echo "Running server"
+CMDLINE="java ${JVM_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
+
+echo "Running server via entrypoint!"
 
 if [ -n "$JACOCO" ]; then
   exec ${CMDLINE} "$@"
