@@ -1,10 +1,9 @@
 <% title "Enable API access" %>
 
 <div class="ds-l-container ds-u-padding-x--0">
-
   <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
 
-    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0" data-test="new-org-page">
+    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0" data-test="new-reg-org-<%= @registered_organization.api_env %>">
       Enable <%= @api_env.capitalize %> API access for <%= @organization.name %>
     </h1>
 

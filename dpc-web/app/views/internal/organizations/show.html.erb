@@ -122,7 +122,9 @@
           ) %>
         <%= link_to "Disable Sandbox", "#" %>
       <% else %>
-        <%= link_to 'Enable Sandbox', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox') %>
+        <%= link_to 'Enable Sandbox',
+                    new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox'),
+                    data: { test: 'enable-sandbox' } %>
       <% end %>
 
       <h3>Production</h3>

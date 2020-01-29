@@ -1,7 +1,12 @@
 FactoryBot.define do
   factory :registered_organization do
-    organization { organization }
-    api_id { '923a4f7b-eade-494a-8ca4-7a685edacfad' }
-    api_env { 0 }
+    api_id { SecureRandom.uuid }
+    api_env { 'sandbox' }
+
+    organization
+
+    after(:create) do |reg_org|
+      create(:fhir_endpoint, registered_organization: reg_org)
+    end
   end
 end

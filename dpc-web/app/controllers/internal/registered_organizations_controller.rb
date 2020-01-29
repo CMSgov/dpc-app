@@ -17,15 +17,17 @@ module Internal
 
     def create
       @organization = Organization.find(params[:organization_id])
-      @registered_organization = @organization.registered_organizations.
-        build(registered_organization_params)
+      @registered_organization = @organization.registered_organizations
+                                              .build(registered_organization_params)
       @api_env = params[:api_env] || @registered_organization.api_env
 
       if @registered_organization.save
-        flash[:notice] = "Access to #{@registered_organization.api_env} enabled."
+        api_response = @registered_organization.create_api_organization
+        creation_flash_from_api_response(api_response)
         redirect_to internal_organization_path(@organization)
       else
-        flash[:alert]  = "Access to #{@registered_organization.api_env} could not be enabled: #{model_error_string(@registered_organization)}."
+        flash[:alert] = "Access to #{@registered_organization.api_env} could not be enabled:
+                        #{model_error_string(@registered_organization)}."
         render :new
       end
     end
@@ -40,17 +42,28 @@ module Internal
       @organization = Organization.find(params[:organization_id])
       @registered_organization = @organization.registered_organizations.find(params[:id])
       @api_env = @registered_organization.api_env
+
       if @registered_organization.update(registered_organization_params)
-        flash[:notice] = "#{@registered_organization.api_env} access updated."
+        @registered_organization.update_api_organization
+        flash[:notice] = "#{@registered_organization.api_env.capitalize} access updated."
         redirect_to internal_organization_path(@organization)
       else
-        flash[:alert] =
-          "#{@registered_organization.api_env} access could not be updated: #{model_error_string(@registered_organization)}."
+        flash[:alert] = "#{@registered_organization.api_env.capitalize} access could not be
+                        updated: #{model_error_string(@registered_organization)}."
         render :edit
       end
     end
 
     private
+
+    def creation_flash_from_api_response(api_response)
+      if api_response['id'].present?
+        flash[:notice] = "Access to #{@registered_organization.api_env} enabled."
+      else
+        flash[:alert] = "Organization could not be created in the #{@registered_organization.api_env}
+                        API: #{api_response}. Edit the organization's environment to try again."
+      end
+    end
 
     def registered_organization_params
       params.fetch(:registered_organization).permit(

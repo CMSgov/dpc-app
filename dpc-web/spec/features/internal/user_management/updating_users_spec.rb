@@ -139,7 +139,7 @@ RSpec.feature 'updating users' do
 
   scenario 'sending sandbox email to user added to a sandbox org' do
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
-    org = create(:organization, api_environments: [0])
+    org = create(:organization, :sandbox_enabled)
 
     mailer = double(UserMailer)
     allow(UserMailer).to receive(:with).with(user: crabby, organization: org).and_return(mailer)

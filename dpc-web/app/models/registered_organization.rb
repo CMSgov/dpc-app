@@ -13,21 +13,31 @@ class RegisteredOrganization < ApplicationRecord
     'production' => 1
   }
 
-  validates :api_id, :api_env, :organization, presence: true
+  validates :api_env, :organization, presence: true
 
-  before_validation :create_org_in_api, on: :create
+  def create_api_organization
+    api_request = APIClient.new(api_env).create_organization(
+      organization,
+      fhir_endpoint: fhir_endpoint.attributes
+    )
 
-  def create_org_in_api
-    if valid_without_api_id?
-      api_resource = APIClient.new(api_env)
-        .create_organization(organization, fhir_endpoint: fhir_endpoint.attributes)
-        .response_body
-      self[:api_id] = api_resource['id']
+    api_response = api_request.response_body
+
+    if api_request.response_successful?
+      update_api_attributes!(api_response)
+      organization.notify_users_of_sandbox_access if sandbox?
     end
+
+    api_response
   end
 
-  def valid_without_api_id?
-    errors.details.reject{|k,v| k == :api_id}.none?
+  def update_api_organization
+    if api_id.nil?
+      create_api_organization
+    else
+      api_request = APIClient.new(api_env).update_organization(self)
+      api_request.response_body
+    end
   end
 
   def client_tokens
@@ -43,6 +53,15 @@ class RegisteredOrganization < ApplicationRecord
       status: 'test',
       name: 'DPC Sandbox Test Endpoint',
       uri: 'https://dpc.cms.gov/test-endpoint'
+    )
+  end
+
+  private
+
+  def update_api_attributes!(api_response)
+    update!(
+      api_id: api_response['id'],
+      api_endpoint_ref: api_response['endpoint'][0]['reference']
     )
   end
 end

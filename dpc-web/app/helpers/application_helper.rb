@@ -2,7 +2,7 @@
 
 module ApplicationHelper
   def production_api_access_enabled?
-    ENV.fetch('PROD_API_ACCESS_ENABLED') == 'true'
+    ENV.fetch('PROD_API_ACCESS_ENABLED', 'false') == 'true'
   end
 
   def title(page_title)

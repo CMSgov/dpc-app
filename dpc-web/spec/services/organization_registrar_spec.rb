@@ -4,40 +4,26 @@ require 'rails_helper'
 
 RSpec.describe OrganizationRegistrar do
   describe '#register_all' do
-    it 'cleans up old registered org and creates new one' do
-      org = create(:organization, :with_endpoint, api_environments: [0])
-      sandbox_reg_org = create(:registered_organization, api_env: 'sandbox', organization: org)
+    it 'cleans up old registered org' do
+      org = create(:organization, :sandbox_enabled)
+      sandbox_reg_org = org.sandbox_registered_organization
 
       deletion_api_client = instance_double(APIClient)
-      prod_creation_api_client = instance_double(APIClient)
 
       allow(APIClient).to receive(:new).with('sandbox').and_return(deletion_api_client)
       allow(deletion_api_client).to receive(:delete_organization).with(sandbox_reg_org).and_return(true)
 
-      allow(APIClient).to receive(:new).with('production').and_return(prod_creation_api_client)
-      allow(prod_creation_api_client).to receive(:create_organization)
-        .with(org).and_return(prod_creation_api_client)
-      allow(prod_creation_api_client).to receive(:response_successful?).and_return(true)
-      allow(prod_creation_api_client).to receive(:response_body).and_return(
-        'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
-        'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
-      )
-
-      initial_fhir_endpoint_count = FhirEndpoint.count
-
       expect do
         OrganizationRegistrar.new(organization: org, api_environments: %w[production]).
           register_all
-      end.to change(RegisteredOrganization, :count).by(0)
+      end.to change(RegisteredOrganization, :count).by(-1)
 
-      expect(FhirEndpoint.count).to eq(initial_fhir_endpoint_count)
       expect(deletion_api_client).to have_received(:delete_organization).with(sandbox_reg_org)
-      expect(prod_creation_api_client).to have_received(:create_organization).with(org)
     end
 
     it 'updates existing registered organizations and endpoints' do
-      org = create(:organization, :with_endpoint, api_environments: [0])
-      sandbox_reg_org = create(:registered_organization, api_env: 'sandbox', organization: org)
+      org = create(:organization, :sandbox_enabled)
+      sandbox_reg_org = org.sandbox_registered_organization
 
       api_client = instance_double(APIClient)
 
@@ -57,50 +43,6 @@ RSpec.describe OrganizationRegistrar do
       end.to change(RegisteredOrganization, :count).by(0)
 
       expect(api_client).to have_received(:update_organization).with(sandbox_reg_org)
-    end
-
-    it 'creates a test fhir_endpoint for a sandbox org without one' do
-      org = create(:organization)
-      api_client = instance_double(APIClient)
-
-      allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
-      allow(api_client).to receive(:create_organization).with(org).and_return(api_client)
-      allow(api_client).to receive(:response_successful?).and_return(true)
-      allow(api_client).to receive(:response_body).and_return(
-        {
-          'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
-          'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
-        }
-      )
-
-      expect do
-        OrganizationRegistrar.new(organization: org, api_environments: %w[sandbox]).
-          register_all
-      end.to change(FhirEndpoint, :count).by(1)
-
-      expect(FhirEndpoint.last.organization).to eq(org)
-    end
-  end
-
-  describe '#register_organization' do
-    it 'registers the organization for the given api_env' do
-      org = create(:organization)
-      api_client = instance_double(APIClient)
-
-      allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
-      allow(api_client).to receive(:create_organization).with(org).and_return(api_client)
-      allow(api_client).to receive(:response_successful?).and_return(true)
-      allow(api_client).to receive(:response_body).and_return(
-        {
-          'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
-          'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
-        }
-      )
-
-      expect do
-        OrganizationRegistrar.new(organization: org, api_environments: %w[sandbox]).
-          register_organization('sandbox')
-      end.to change(RegisteredOrganization, :count).by(1)
     end
   end
 end

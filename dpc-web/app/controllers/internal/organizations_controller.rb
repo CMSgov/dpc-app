@@ -61,10 +61,8 @@ module Internal
 
     def update
       @organization = Organization.find params[:id]
-      notify_users = sandbox_added?
 
       if @organization.update organization_params
-        @organization.notify_users_of_sandbox_access if notify_users
         flash[:notice] = 'Organization updated.'
         redirect_to internal_organization_path(@organization)
       else
@@ -91,12 +89,6 @@ module Internal
         :name, :organization_type, :num_providers, :npi, :vendor,
         api_environments: [], address_attributes: %i[id street street_2 city state zip address_use address_type]
       )
-    end
-
-    # Find out if the input params include 'sandbox' for api_environments, and whether the organization
-    # already has sandbox or not. '0' corresponds to 'sandbox'.
-    def sandbox_added?
-      (organization_params[:api_environments] - @organization.api_environments.map(&:to_s)).include?('0')
     end
   end
 end

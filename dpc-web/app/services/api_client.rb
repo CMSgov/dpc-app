@@ -143,7 +143,11 @@ class APIClient
 
     response = http.request(request)
     @response_status = response.code.to_i
-    @response_body = parsed_response(response)
+    if response_successful?
+      @response_body = parsed_response(response)
+    else
+      @response_body = response.body
+    end
   rescue Errno::ECONNREFUSED
     Rails.logger.warn 'Could not connect to API'
     @response_status = 500

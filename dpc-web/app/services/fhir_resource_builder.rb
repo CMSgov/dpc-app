@@ -27,14 +27,13 @@ class FhirResourceBuilder
   end
 
   def fhir_endpoint(reg_org)
-    org = reg_org.organization
-    org_endpoint = org.fhir_endpoints.first
     fhir_endpoint_id = reg_org.api_endpoint_ref.split('/')[1]
+    fhir_endpoint = reg_org.fhir_endpoint
     FHIR::Endpoint.new(
       id: fhir_endpoint_id,
-      status: org_endpoint.status,
-      name: org_endpoint.name,
-      address: org_endpoint.uri,
+      status: fhir_endpoint.status,
+      name: fhir_endpoint.name,
+      address: fhir_endpoint.uri,
       managingOrganization: { reference: "Organization/#{reg_org.api_id}" },
       payloadType: payload_type,
       connectionType: connection_type

@@ -39,8 +39,8 @@ RSpec.feature 'managing api credentials' do
 
     before(:each) do
       org = user.organizations.first
-      org.update(api_environments: [0], npi: SecureRandom.uuid)
-      create(:registered_organization, organization: org, api_env: 0, api_id: '923a4f7b-eade-494a-8ca4-7a685edacfad')
+      org.update(npi: '3324567833')
+      create(:registered_organization, organization: org, api_env: 'sandbox', api_id: '923a4f7b-eade-494a-8ca4-7a685edacfad')
 
       sign_in user, scope: :user
     end

@@ -17,7 +17,8 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
-  after_save :update_registered_organizations
+  # TODO update this
+  # after_save :update_registered_organizations
 
   scope :vendor, -> { where(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
   scope :provider, -> { where.not(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
@@ -55,9 +56,7 @@ class Organization < ApplicationRecord
   end
 
   def api_environment_strings
-    RegisteredOrganization.api_envs.select do |_key, val|
-      api_environments.include? val
-    end.keys
+    registered_organizations.pluck(:api_env)
   end
 
   def sandbox_enabled?

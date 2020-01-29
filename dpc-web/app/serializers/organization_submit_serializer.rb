@@ -70,7 +70,7 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
     {
       resource: {
         resourceType: 'Endpoint',
-        status: fhir_endpoint[:status],
+        status: fhir_endpoint['status'],
         connectionType: {
           system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
           code: 'hl7-fhir-rest'
@@ -85,8 +85,8 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
             ]
           }
         ],
-        name: fhir_endpoint[:name],
-        address: fhir_endpoint[:uri]
+        name: fhir_endpoint['name'],
+        address: fhir_endpoint['uri']
       }
     }
   end
