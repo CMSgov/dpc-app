@@ -3,3 +3,17 @@
   margin-left: $spacer-2;
   padding: 0 0 $spacer-1 $spacer-3;
 }
+
+.required {
+  display: flex;
+  flex-wrap: nowrap;
+
+  .ast-inline {
+    color: $color-error-dark;
+  }
+
+  .ast-label {
+    color: $color-error-dark;
+    margin-top: 24px;
+  }
+}

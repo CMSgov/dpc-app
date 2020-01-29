@@ -2,7 +2,6 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -16,7 +15,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
-import java.util.Arrays;
 import java.util.Collections;
 
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
@@ -30,7 +28,6 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBasicRegistration() {
-
         final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
         assertAll(() -> assertNotNull(organization, "Should have an org back"),
                 () -> assertFalse(organization.getEndpoint().isEmpty(), "Should have endpoints"));
@@ -38,6 +35,29 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testInvalidOrganization() {
+
+        // Create fake organization with missing data
+        final Organization resource = new Organization();
+        resource.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mbi");
+
+        final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(resource).setName("resource");
+
+        final var submit = client
+                .operation()
+                .onType(Organization.class)
+                .named("submit")
+                .withParameters(parameters)
+                .returnResourceType(Organization.class)
+                .encodedJson();
+
+        assertThrows(InvalidRequestException.class, submit::execute, "Should throw an error for not supporting Organizations");
+    }
+
+    @Test
+    void testUnnamedParameterSubmission() {
 
         // Create fake organization with missing data
         final Organization resource = new Organization();
@@ -56,7 +76,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .returnResourceType(Organization.class)
                 .encodedJson();
 
-        assertThrows(InternalErrorException.class, submit::execute, "Should throw an internal server error");
+        assertThrows(InvalidRequestException.class, submit::execute, "Should throw an error for not supporting Organizations");
     }
 
     @Test
@@ -177,7 +197,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     private Patient createFakePatient(Organization organization) {
         final Patient patient = new Patient();
         patient.addName().setFamily("Test").addGiven("Patient");
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-fake-mbi");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-fake-mbi");
         patient.setBirthDate(Date.valueOf("1990-01-02"));
         patient.setGender(Enumerations.AdministrativeGender.MALE);
         patient.setManagingOrganization(new Reference(organization.getId()));

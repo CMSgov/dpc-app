@@ -9,6 +9,7 @@ import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
@@ -48,30 +49,24 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @FHIR
     @UnitOfWork
     @ApiOperation(value = "Search for an Organization",
-            notes = "FHIR Endpoint to find an Organization resource based on the given Identifier.")
-    public Bundle searchOrganizations(
+            notes = "FHIR Endpoint to find an Organization resource based on the given Identifier.", response = Bundle.class)
+    public List<Organization> searchOrganizations(
             @ApiParam(value = "NPI of Organization")
             @QueryParam("identifier") String identifier) {
 
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-
         if (identifier == null) {
-            final List<OrganizationEntity> organizationEntityList = this.dao.listOrganizations();
-            bundle.setTotal(organizationEntityList.size());
-
-            organizationEntityList.forEach(entity -> bundle.addEntry().setResource(this.converter.toFHIR(Organization.class, entity)));
-            return bundle;
+            return this.dao.listOrganizations()
+                    .stream()
+                    .map(o -> this.converter.toFHIR(Organization.class, o))
+                    .collect(Collectors.toList());
         }
         // Pull out the NPI, keeping it as a string.
         final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parseTokenTag((tag) -> tag, identifier));
 
-        if (!queryList.isEmpty()) {
-            bundle.setTotal(queryList.size());
-            queryList.forEach(org -> bundle.addEntry().setResource(this.converter.toFHIR(Organization.class, org)));
-        }
-
-        return bundle;
+        return queryList
+                .stream()
+                .map(o -> this.converter.toFHIR(Organization.class, o))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -84,14 +79,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 422, message = "Must provide a single Organization resource to register", response = OperationOutcome.class),
             @ApiResponse(code = 201, message = "Organization was successfully registered")
     })
-    public Response submitOrganization(Parameters parameters) {
-        // TODO: This method signature should be migrated to using the FHIRParams annotation
-        final Parameters.ParametersParameterComponent firstRep = parameters.getParameterFirstRep();
-
-        if (!firstRep.hasResource()) {
-            throw new WebApplicationException("Must submit bundle", HttpStatus.UNPROCESSABLE_ENTITY_422);
-        }
-        final Bundle transactionBundle = (Bundle) firstRep.getResource();
+    public Response submitOrganization(@FHIRParameter(name = "resource") Bundle transactionBundle) {
 
         final Optional<Organization> organization = transactionBundle
                 .getEntry()
