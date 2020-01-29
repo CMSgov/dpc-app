@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -224,7 +225,15 @@ public class APIAuthHelpers {
 
         ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
 
-        return ctx.newRestfulGenericClient(baseURL);
+        IGenericClient client = ctx.newRestfulGenericClient(baseURL);
+
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
+        return client;
     }
 
     private static SSLContext createTrustingSSLContext() throws KeyManagementException, NoSuchAlgorithmException {

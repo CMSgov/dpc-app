@@ -3,6 +3,7 @@ package gov.cms.dpc.consent;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,6 +32,14 @@ public abstract class AbstractConsentTest {
 
     public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        return ctx.newRestfulGenericClient(serverURL);
+        IGenericClient client = ctx.newRestfulGenericClient(serverURL);
+
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
+        return client;
     }
 }

@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.jobs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -43,7 +44,7 @@ class ExpirationJobTest {
     void initDB() throws Exception {
         JobTestUtils.resetScheduler();
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "migrate");
+        APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
         // Seed the database, but use a really early time
         APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z");
 
@@ -64,6 +65,13 @@ class ExpirationJobTest {
         // Submit the attribution bundle
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");
+
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
         final Group group = submitAttributionBundle(client, updateBundle);
 
         int statusCode = JobTestUtils.startJob(APPLICATION, this.client, "ExpireAttributions");

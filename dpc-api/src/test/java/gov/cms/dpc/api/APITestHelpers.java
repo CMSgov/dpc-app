@@ -2,16 +2,14 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.client.api.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.nitram509.jmacaroons.MacaroonVersion;
-import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
-import gov.cms.dpc.fhir.dropwizard.handlers.*;
+import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
@@ -22,18 +20,11 @@ import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -42,23 +33,12 @@ import org.hl7.fhir.dstu3.model.*;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.sql.Date;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Base64;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
-import static gov.cms.dpc.api.resources.v1.TokenResource.CLIENT_ASSERTION_TYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class APITestHelpers {
     private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
@@ -86,7 +66,15 @@ public class APITestHelpers {
 
     public static IGenericClient buildAttributionClient(FhirContext ctx) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        return ctx.newRestfulGenericClient(ATTRIBUTION_URL);
+        IGenericClient client = ctx.newRestfulGenericClient(ATTRIBUTION_URL);
+
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
+        return client;
     }
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
@@ -174,8 +162,8 @@ public class APITestHelpers {
         truncateDatabase();
         application.before();
         // Truncate the Auth DB
-        application.getApplication().run("db", "drop-all", "--confirm-delete-everything");
-        application.getApplication().run("db", "migrate");
+        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
+        application.getApplication().run("db", "migrate", "ci.application.conf");
 
     }
 
