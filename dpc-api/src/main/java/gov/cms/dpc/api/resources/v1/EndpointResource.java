@@ -120,7 +120,7 @@ public class EndpointResource extends AbstractEndpointResource {
                 .encodedJson()
                 .execute();
 
-       return (Endpoint) outcome.getResource();
+        return (Endpoint) outcome.getResource();
     }
 
     @DELETE

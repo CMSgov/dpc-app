@@ -21,16 +21,21 @@ if [ -n "$BOOTSTRAP" ]; then
   bootstrap_config
 fi
 
+JAVA_CLASSES="-cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
+
+# If we have NewRelic license, enable the java agent.
 if [ -n "$NEW_RELIC_LICENSE_KEY" ]; then
-    CMDLINE="java -javaagent:/newrelic/newrelic.jar $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
+    NR_AGENT="-javaagent:/newrelic/newrelic.jar"
 else
-    CMDLINE="java $JVM_FLAGS ${JACOCO} -cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.api.DPCAPIService"
+    NR_AGENT=""
 fi
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
-  eval ${CMDLINE} db migrate
+  eval "java ${JVM_FLAGS} ${JAVA_CLASSES} db migrate"
 fi
+
+CMDLINE="java ${JVM_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
 echo "Running server via entrypoint!"
 

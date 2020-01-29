@@ -77,7 +77,7 @@ class GenerateRosters {
 
             // Add the patient MBI to the resource
             patient.addIdentifier()
-                    .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                    .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
                     .setValue(patientMBI);
 
             // Add to the Bundle
