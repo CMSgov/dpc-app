@@ -34,7 +34,7 @@ public abstract class AbstractAttributionTest {
     public static void initDB() throws Exception {
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate" , "ci.application.conf");
-        APPLICATION.getApplication().run("seed");
+        APPLICATION.getApplication().run("seed", "ci.application.conf");
     }
 
     @AfterAll

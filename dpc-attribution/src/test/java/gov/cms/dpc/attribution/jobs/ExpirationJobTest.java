@@ -46,7 +46,7 @@ class ExpirationJobTest {
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
         // Seed the database, but use a really early time
-        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z");
+        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z", "ci.application.conf");
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
     }
