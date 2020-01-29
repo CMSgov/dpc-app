@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
+import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
