@@ -100,7 +100,7 @@ public class APIAuthHelpers {
                 .setIssuer(macaroon)
                 .setSubject(macaroon)
                 .setId(UUID.randomUUID().toString())
-                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
                 .signWith(privateKey, SignatureAlgorithm.RS384)
                 .compact();
 
