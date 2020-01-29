@@ -540,6 +540,8 @@
                             <excludePackageNames>gov.cms.dpc.attribution.dao;gov.cms.dpc.attribution.dao.*;
                                 gov.cms.dpc.consent.dao;gov.cms.dpc.consent.dao.*
                             </excludePackageNames>
+                            <!--Log only errors during the build-->
+                            <quiet>true</quiet>
                         </configuration>
                     </execution>
                 </executions>
