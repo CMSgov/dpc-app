@@ -49,7 +49,7 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - exportPath=/app/data
-      - JVM_FLAGS=-Ddpc.api.authenticationDisabled=${AUTH_DISABLED:-true}
+      - JVM_FLAGS=-Ddpc.api.authenticationDisabled=${AUTH_DISABLED:-false}
     depends_on:
       - attribution
     volumes:
