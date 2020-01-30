@@ -52,11 +52,12 @@ RSpec.feature 'managing api credentials' do
     end
 
     scenario 'creating and viewing a client token' do
-      api_client = stub_token_creation_request
-      api_client = stub_key_get_request(api_client)
-      api_client = stub_token_get_request(api_client)
+      api_client = stub_empty_key_request
+      api_client = stub_empty_token_request(api_client)
 
       visit dashboard_path
+
+      api_client = stub_token_creation_request(api_client)
       find('[data-test="new-client-token"]').click
       select 'sandbox', from: 'api_environment'
       fill_in 'label', with: 'Sandbox Token 1'
@@ -66,6 +67,9 @@ RSpec.feature 'managing api credentials' do
       expect(page).to have_content('1234567890')
       expect(page).to have_content('11/07/2019 at 5:15PM UTC')
 
+      api_client = stub_key_get_request(api_client)
+      stub_token_get_request(api_client)
+
       find('[data-test="dashboard-link"]').click
 
       expect(page).to have_content('Sandbox Token 1')
@@ -74,18 +78,24 @@ RSpec.feature 'managing api credentials' do
     end
 
     scenario 'creating and viewing a public key' do
-      api_client = stub_key_creation_request
-      api_client = stub_key_get_request(api_client)
-      api_client = stub_token_get_request(api_client)
+      api_client = stub_empty_key_request
+      api_client = stub_empty_token_request(api_client)
 
       visit dashboard_path
       find('[data-test="new-public-key"]').click
+
       select 'sandbox', from: 'api_environment'
       fill_in 'label', with: 'Sandbox Key 1'
       fill_in 'public_key', with: stubbed_key
+
+      # FIXME this stubbing is a bit wonky
+      api_client = stub_key_creation_request(api_client)
+      api_client = stub_token_get_request(api_client)
+      api_client = stub_key_get_request(api_client)
+
       find('[data-test="form-submit"]').click
 
-      # expect page location to be dashboard path
+      expect(page).to have_css('[data-test="new-public-key"]')
       expect(page).to have_content('3fa85f64-5717-4562-b3fc-2c963f66afa6')
     end
   end
@@ -100,6 +110,14 @@ RSpec.feature 'managing api credentials' do
       'createdAt' => '2019-11-07T19:38:44.205Z',
       'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
     })
+  end
+
+  def stub_empty_key_request(api_client=nil)
+    stub_api_client(api_client: api_client, message: :get_public_keys, success: true, response: { 'entities' => [] })
+  end
+
+  def stub_empty_token_request(api_client=nil)
+    stub_api_client(api_client: api_client, message: :get_client_tokens, success: true, response: { 'entities' => [] })
   end
 
   def stub_key_get_request(api_client=nil)

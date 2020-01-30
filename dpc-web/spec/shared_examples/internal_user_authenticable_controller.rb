@@ -50,6 +50,7 @@ RSpec.shared_examples 'an internal user authenticable controller action' do |met
       send meth, action, params: params
     end
 
+    # FIXME this should be meth, but will require some test refactoring
     if action == :get
       scenario 'renders the requested page' do
         expect(response).to render_template(action)
