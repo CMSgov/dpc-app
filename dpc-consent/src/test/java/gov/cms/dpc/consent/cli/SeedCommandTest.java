@@ -60,7 +60,7 @@ class SeedCommandTest {
     @Test
     void testSeedCommand() throws Exception {
 
-        final boolean success = cli.run("seed");
+        final boolean success = cli.run("seed", "ci.application.conf");
         /* dies here with the following error
         Should not have errors ==> expected: <> but was: <io.dropwizard.configuration.ConfigurationParsingException: default configuration has an error:
           * Unrecognized field at: consentDatabase
