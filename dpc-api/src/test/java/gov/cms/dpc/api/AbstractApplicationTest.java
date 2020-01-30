@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
@@ -38,7 +37,7 @@ public class AbstractApplicationTest {
     private static final String KEY_PREFIX = "dpc.api";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, null,
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAPIService.class, "ci.application.conf",
             ConfigOverride.config(KEY_PREFIX, "authenticationDisabled", "true"),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
     protected FhirContext ctx;

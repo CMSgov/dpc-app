@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.jobs;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -33,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 class ExpirationJobTest {
     private static final String KEY_PREFIX = "dpc.attribution";
-    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
+    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
     private static final String PROVIDER_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
     private static final FhirContext ctx = FhirContext.forDstu3();
@@ -43,9 +44,9 @@ class ExpirationJobTest {
     void initDB() throws Exception {
         JobTestUtils.resetScheduler();
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "migrate");
+        APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
         // Seed the database, but use a really early time
-        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z");
+        APPLICATION.getApplication().run("seed", "-t 2015-01-01T12:12:12Z", "ci.application.conf");
 
         this.client = new JerseyClientBuilder(APPLICATION.getEnvironment()).build("test");
     }
@@ -64,6 +65,13 @@ class ExpirationJobTest {
         // Submit the attribution bundle
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");
+
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
         final Group group = submitAttributionBundle(client, updateBundle);
 
         int statusCode = JobTestUtils.startJob(APPLICATION, this.client, "ExpireAttributions");
