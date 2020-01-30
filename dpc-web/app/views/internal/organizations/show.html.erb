@@ -120,7 +120,10 @@
           id: @organization.sandbox_registered_organization.id,
           api_env: 'sandbox'
           ) %>
-        <%= link_to "Disable Sandbox", "#" %>
+        <%= link_to "Disable Sandbox", internal_organization_registered_organization_path(
+          organization_id: @organization.id,
+          id: @organization.sandbox_registered_organization.id,
+          ), method: :delete, data: { test: 'disable-sandbox' } %>
       <% else %>
         <%= link_to 'Enable Sandbox',
                     new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox'),
@@ -155,7 +158,10 @@
           id: @organization.production_registered_organization.id,
           api_env: 'production'
           ) %>
-        <%= link_to "Disable Production", "#" %>
+        <%= link_to "Disable Production", internal_organization_registered_organization_path(
+          organization_id: @organization.id,
+          id: @organization.production_registered_organization.id,
+          ), method: :delete, data: { test: 'disable-production' } %>
       <% else %>
         Production API access not yet available.
       <% end %>

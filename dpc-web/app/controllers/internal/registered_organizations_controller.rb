@@ -43,7 +43,6 @@ module Internal
       @api_env = @registered_organization.api_env
 
       if @registered_organization.update(registered_organization_params)
-        @registered_organization.update_api_organization
         flash[:notice] = "#{@registered_organization.api_env.capitalize} access updated."
         redirect_to internal_organization_path(@organization)
       else
@@ -51,6 +50,19 @@ module Internal
                         updated: #{model_error_string(@registered_organization)}."
         render :edit
       end
+    end
+
+    def destroy
+      @organization = Organization.find(params[:organization_id])
+      @registered_organization = @organization.registered_organizations.find(params[:id])
+
+      if @registered_organization.destroy
+        flash[:notice] = "#{@registered_organization.api_env.capitalize} access disabled."
+      else
+        flash[:alert] = "#{@registered_organization.api_env.capitalize} access could not be
+                        disabled: #{model_error_string(@registered_organization)}."
+      end
+      redirect_to internal_organization_path(@organization)
     end
 
     private

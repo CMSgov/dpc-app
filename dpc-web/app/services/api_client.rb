@@ -32,14 +32,9 @@ class APIClient
 
     response = fhir_client.destroy(FHIR::Organization, reg_org.api_id)
 
-    if response.response[:code] == '200'
-      true
-    else
-      Rails.logger.warn 'Unsuccessulful request to API'
-      @response_status = response.response[:code]
-      @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
-      false
-    end
+    @response_status = response.response[:code].to_i
+    @response_body = response.response[:body].body
+    self
   end
 
   def update_endpoint(reg_org)
@@ -153,29 +148,17 @@ class APIClient
 
     response = http.request(request)
     @response_status = response.code.to_i
-    if response_successful?
-      @response_body = parsed_response(response)
-    else
-      @response_body = response.body
-    end
+    @response_body = response_successful? ? parsed_response(response) : response.body
   rescue Errno::ECONNREFUSED
-    Rails.logger.warn 'Could not connect to API'
-    @response_status = 500
-    @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
+    connection_error
   end
 
   def fhir_client_update_request(reg_org_id, resource, resource_id)
     fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_id))
     response = fhir_client.update(resource, resource_id)
 
-    if response.response[:code] == '200'
-      @response_status = 200
-      @response_body = response.response[:body]
-    else
-      Rails.logger.warn 'Unsuccessulful request to API'
-      @response_status = response.response[:code]
-      @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
-    end
+    @response_status = response.response[:code].to_i
+    @response_body = response.response[:body]
   end
 
   def headers(token)
@@ -192,5 +175,11 @@ class APIClient
 
   def verify_ssl_cert?
     ENV.fetch('VERIFY_SSL_CERT') != 'false'
+  end
+
+  def connection_error
+    Rails.logger.warn 'Could not connect to API'
+    @response_status = 500
+    @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
   end
 end

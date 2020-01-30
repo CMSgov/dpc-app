@@ -224,12 +224,11 @@ RSpec.describe APIClient do
       end
     end
   end
-  
+
   describe '#delete_organization' do
     context 'successful request' do
       it 'uses fhir_client to delete registered org from API' do
-        org = create(:organization, api_environments: [0])
-        reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
+        reg_org = build(:registered_organization, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
 
         stub_request(:delete, "http://dpc.example.com/Organization/#{reg_org.api_id}").
         with(
@@ -237,17 +236,19 @@ RSpec.describe APIClient do
             'Accept' => 'application/fhir+json',
             'Authorization' => /.*/
           }).
-        to_return(status: 200, body: "", headers: {})
+        to_return(status: 200, body: '', headers: {})
 
         client = APIClient.new('sandbox')
-        expect(client.delete_organization(reg_org)).to eq(true)
+        client.delete_organization(reg_org)
+        expect(client.response_successful?).to eq(true)
+        expect(client.response_status).to eq(200)
+        expect(client.response_body).to eq('')
       end
     end
 
     context 'unsucessful request' do
       it 'uses fhir_client to delete registered org from API' do
-        org = create(:organization, api_environments: [0])
-        reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
+        reg_org = build(:registered_organization, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
 
         stub_request(:delete, "http://dpc.example.com/Organization/#{reg_org.api_id}").
         with(
@@ -255,10 +256,13 @@ RSpec.describe APIClient do
             'Accept' => 'application/fhir+json',
             'Authorization' => /.*/
           }).
-        to_return(status: 404, body: "", headers: {})
+        to_return(status: 404, body: '', headers: {})
 
         client = APIClient.new('sandbox')
-        expect(client.delete_organization(reg_org)).to eq(false)
+        client.delete_organization(reg_org)
+        expect(client.response_successful?).to eq(false)
+        expect(client.response_status).to eq(404)
+        expect(client.response_body).to eq('')
       end
     end
   end

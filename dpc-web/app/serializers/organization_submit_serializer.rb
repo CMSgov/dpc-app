@@ -63,7 +63,7 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
   end
 
   def endpoint_resources
-    [ endpoint_resource(instance_options[:fhir_endpoint]) ]
+    [endpoint_resource(instance_options[:fhir_endpoint])]
   end
 
   def endpoint_resource(fhir_endpoint)

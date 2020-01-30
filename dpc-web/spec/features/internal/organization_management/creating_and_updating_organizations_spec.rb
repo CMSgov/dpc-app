@@ -123,7 +123,24 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'disabling sandbox access successfully' do
-    # TODO with separate #delete_organization work
+    stub_api_client(
+      message: :create_organization,
+      success: true,
+      response: default_org_creation_response
+    )
+
+    org = create(:organization, :sandbox_enabled)
+    visit internal_organization_path(org)
+
+    api_client = stub_api_client(
+      message: :delete_organization,
+      success: true,
+      response: ''
+    )
+
+    find('[data-test="disable-sandbox"]').click
+
+    expect(page).to have_content('Sandbox access disabled')
   end
 
   def stub_sandbox_notification_mailer(org, users=[])
