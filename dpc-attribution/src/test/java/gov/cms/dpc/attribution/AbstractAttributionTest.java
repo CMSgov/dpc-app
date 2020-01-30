@@ -23,7 +23,7 @@ public abstract class AbstractAttributionTest {
     private static final String KEY_PREFIX = "dpc.attribution";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, null, ConfigOverride.config(KEY_PREFIX, "", ""),
+    protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config(KEY_PREFIX, "", ""),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
 
     protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
@@ -33,8 +33,8 @@ public abstract class AbstractAttributionTest {
     @BeforeAll
     public static void initDB() throws Exception {
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "migrate");
-        APPLICATION.getApplication().run("seed");
+        APPLICATION.getApplication().run("db", "migrate" , "ci.application.conf");
+        APPLICATION.getApplication().run("seed", "ci.application.conf");
     }
 
     @AfterAll

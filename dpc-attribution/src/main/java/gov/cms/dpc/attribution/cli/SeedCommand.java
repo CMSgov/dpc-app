@@ -62,6 +62,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                 .type(String.class)
                 .required(false)
                 .help("Custom timestamp to use when adding attributed relationships.");
+
+        // Preserve config override capabilities
+        super.configure(subparser);
     }
 
     @Override

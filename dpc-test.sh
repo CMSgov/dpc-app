@@ -1,6 +1,9 @@
 #!/bin/bash
 set -Ee
 
+# Configure the Maven log level
+export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
+
 function _finally {
   docker-compose down
 }
