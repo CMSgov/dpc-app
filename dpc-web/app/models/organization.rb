@@ -17,8 +17,7 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
-  # TODO update this
-  # after_save :update_registered_organizations
+  after_update :update_registered_organizations
 
   scope :vendor, -> { where(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
   scope :provider, -> { where.not(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
@@ -52,11 +51,7 @@ class Organization < ApplicationRecord
   def update_registered_organizations
     return unless npi.present?
 
-    OrganizationRegistrar.delay.run(organization: self, api_environments: api_environment_strings)
-  end
-
-  def api_environment_strings
-    registered_organizations.pluck(:api_env)
+    registered_organizations.each(&:update_api_organization)
   end
 
   def sandbox_enabled?

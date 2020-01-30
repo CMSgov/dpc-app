@@ -27,10 +27,9 @@ class FhirResourceBuilder
   end
 
   def fhir_endpoint(reg_org)
-    fhir_endpoint_id = reg_org.api_endpoint_ref.split('/')[1]
     fhir_endpoint = reg_org.fhir_endpoint
     FHIR::Endpoint.new(
-      id: fhir_endpoint_id,
+      id: reg_org.fhir_endpoint_id,
       status: fhir_endpoint.status,
       name: fhir_endpoint.name,
       address: fhir_endpoint.uri,

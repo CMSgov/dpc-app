@@ -3,37 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Organization, type: :model do
-  describe 'callbacks' do
-    describe '#update_registered_organizations' do
-      # TODO when adding back update API call
-      context 'with NPI' do
-        xit 'kicks off OrganizationRegistrar after save', :perform_enqueued do
-          allow(OrganizationRegistrar).to receive(:run)
-
-          org = create(:organization, :sandbox_enabled, npi: SecureRandom.uuid)
-
-          expect(OrganizationRegistrar).to have_received(:run).
-            with(organization: org, api_environments: ['sandbox'])
-
-          org.update(api_environments: [1])
-
-          expect(OrganizationRegistrar).to have_received(:run).
-            with(organization: org, api_environments: ['production'])
-        end
-      end
-
-      context 'without NPI' do
-        xit 'does not kick off OrganizationRegistrar', :perform_enqueued do
-          allow(OrganizationRegistrar).to receive(:run)
-          org = create(:organization, npi: nil)
-          org.update(api_environments: [1])
-
-          expect(OrganizationRegistrar).not_to have_received(:run).
-            with(organization: org, api_environments: ['production'])
-        end
-      end
-    end
-  end
+  include APIClientSupport
 
   describe '#npi=' do
     it 'replaces blank string with nil' do
@@ -49,31 +19,25 @@ RSpec.describe Organization, type: :model do
 
   describe '#registered_api_envs' do
     it 'returns array of environments of registered organizations' do
+      stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
       org = create(:organization)
       create(:registered_organization, organization: org, api_env: 'sandbox')
 
       expect(org.registered_api_envs).to match_array(['sandbox'])
     end
-  end
-
-  describe '#api_environment_strings' do
-    it 'returns array of api_envs from registered_organizations' do
-      org = create(:organization, :sandbox_enabled)
-
-      expect(org.api_environment_strings).to match_array(['sandbox'])
-    end
 
     it 'returns empty array if no registered_organizations' do
       org = create(:organization)
 
-      expect(org.api_environment_strings).to match_array([])
+      expect(org.registered_api_envs).to match_array([])
     end
   end
 
   describe '#api_credentialable?' do
     it 'returns true if org has a registered org and an npi' do
-      org = create(:organization, :sandbox_enabled, npi: SecureRandom.uuid)
-      create(:registered_organization, organization: org)
+      stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+      org = create(:organization, npi: '1010101010')
+      create(:registered_organization, organization: org, api_env: 'sandbox')
 
       expect(org.api_credentialable?).to be true
     end
@@ -85,6 +49,7 @@ RSpec.describe Organization, type: :model do
     end
 
     it 'returns false if registered org present but no npi' do
+      stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
       org = create(:organization, :sandbox_enabled, npi: nil)
       create(:registered_organization, organization: org)
 
@@ -100,7 +65,6 @@ RSpec.describe Organization, type: :model do
 
   describe '#notify_users_of_sandbox_access' do
     let!(:organization) { create(:organization) }
-    let!(:assignment) { create(:organization_user_assignment, organization: organization) }
     let!(:mailer) { double(UserMailer) }
 
     before(:each) do
@@ -110,12 +74,16 @@ RSpec.describe Organization, type: :model do
     end
 
     it 'does nothing if sandbox is not enabled' do
+      create(:organization_user_assignment, organization: organization)
       organization.notify_users_of_sandbox_access
       expect(UserMailer).not_to have_received(:with)
     end
 
     it 'sends org sandbox email to users if sandbox was added' do
+      stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
       create(:registered_organization, api_env: 'sandbox', organization: organization)
+
+      assignment = create(:organization_user_assignment, organization: organization)
       organization.notify_users_of_sandbox_access
 
       expect(UserMailer).to have_received(:with)

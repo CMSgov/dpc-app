@@ -23,8 +23,8 @@ class APIClient
 
   def update_organization(reg_org)
     fhir_org = FhirResourceBuilder.new.fhir_org(reg_org)
-
     fhir_client_update_request(reg_org.api_id, fhir_org, reg_org.api_id)
+    self
   end
 
   def delete_organization(org)
@@ -34,8 +34,8 @@ class APIClient
 
   def update_endpoint(reg_org)
     fhir_endpoint = FhirResourceBuilder.new.fhir_endpoint(reg_org)
-
     fhir_client_update_request(reg_org.api_id, fhir_endpoint, fhir_endpoint.id)
+    self
   end
 
   def create_client_token(reg_org_id, params: {})
@@ -159,12 +159,12 @@ class APIClient
     response = fhir_client.update(resource, resource_id)
 
     if response.response[:code] == '200'
-      true
+      @response_status = 200
+      @response_body = response.response[:body]
     else
       Rails.logger.warn 'Unsuccessulful request to API'
       @response_status = response.response[:code]
       @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
-      false
     end
   end
 

@@ -22,8 +22,7 @@ module Internal
       @api_env = params[:api_env] || @registered_organization.api_env
 
       if @registered_organization.save
-        api_response = @registered_organization.create_api_organization
-        creation_flash_from_api_response(api_response)
+        flash[:notice] = "Access to #{@registered_organization.api_env} enabled."
         redirect_to internal_organization_path(@organization)
       else
         flash[:alert] = "Access to #{@registered_organization.api_env} could not be enabled:
@@ -55,15 +54,6 @@ module Internal
     end
 
     private
-
-    def creation_flash_from_api_response(api_response)
-      if api_response['id'].present?
-        flash[:notice] = "Access to #{@registered_organization.api_env} enabled."
-      else
-        flash[:alert] = "Organization could not be created in the #{@registered_organization.api_env}
-                        API: #{api_response}. Edit the organization's environment to try again."
-      end
-    end
 
     def registered_organization_params
       params.fetch(:registered_organization).permit(

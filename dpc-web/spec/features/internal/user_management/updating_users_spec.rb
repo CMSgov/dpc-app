@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.feature 'updating users' do
+  include APIClientSupport
   let!(:internal_user) { create :internal_user }
 
   before(:each) do
@@ -138,6 +139,11 @@ RSpec.feature 'updating users' do
   end
 
   scenario 'sending sandbox email to user added to a sandbox org' do
+    stub_api_client(
+      message: :create_organization,
+      success: true,
+      response: default_org_creation_response
+    )
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
     org = create(:organization, :sandbox_enabled)
 
