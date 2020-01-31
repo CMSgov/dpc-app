@@ -130,6 +130,11 @@ public class KeyResource extends AbstractKeyResource {
             keyLabel = this.buildDefaultKeyID();
         }
 
+        final SubjectPublicKeyInfo publicKey = parseAndValidateKey(key);
+        return savePublicKeyEntry(organizationPrincipal, keyLabel, publicKey);
+    }
+
+    private SubjectPublicKeyInfo parseAndValidateKey(String key) {
         final SubjectPublicKeyInfo publicKey;
         try {
             publicKey = PublicKeyHandler.parsePEMString(key);
@@ -145,7 +150,10 @@ public class KeyResource extends AbstractKeyResource {
             logger.error("Cannot parse provided public key.", e);
             throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
         }
+        return publicKey;
+    }
 
+    private PublicKeyEntity savePublicKeyEntry(OrganizationPrincipal organizationPrincipal, String keyLabel, SubjectPublicKeyInfo publicKey) {
         final PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         final OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(organizationPrincipal.getID());
