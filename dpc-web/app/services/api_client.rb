@@ -43,37 +43,37 @@ class APIClient
     self
   end
 
-  def create_client_token(reg_org_id, params: {})
+  def create_client_token(reg_org_api_id, params: {})
     uri_string = base_url + '/Token'
 
     json = params.to_json
-    macaroon = delegated_macaroon(reg_org_id)
+    macaroon = delegated_macaroon(reg_org_api_id)
     post_request(uri_string, json, headers(macaroon))
 
     self
   end
 
-  def get_client_tokens(reg_org_id)
+  def get_client_tokens(reg_org_api_id)
     uri_string = base_url + '/Token'
-    get_request(uri_string, delegated_macaroon(reg_org_id))
+    get_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
-  def create_public_key(reg_org_id, params: {})
+  def create_public_key(reg_org_api_id, params: {})
     uri_string = base_url + '/Key'
 
     post_text_request(
       uri_string,
       params[:public_key],
       { label: params[:label] },
-      delegated_macaroon(reg_org_id)
+      delegated_macaroon(reg_org_api_id)
     )
 
     self
   end
 
-  def get_public_keys(reg_org_id)
+  def get_public_keys(reg_org_api_id)
     uri_string = base_url + '/Key'
-    get_request(uri_string, delegated_macaroon(reg_org_id))
+    get_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
   def response_successful?
@@ -153,8 +153,8 @@ class APIClient
     connection_error
   end
 
-  def fhir_client_update_request(reg_org_id, resource, resource_id)
-    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_id))
+  def fhir_client_update_request(reg_org_api_id, resource, resource_id)
+    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_api_id))
     response = fhir_client.update(resource, resource_id)
 
     @response_status = response.response[:code].to_i

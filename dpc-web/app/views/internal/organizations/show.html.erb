@@ -132,10 +132,10 @@
 
       <h3>Production</h3>
       <% if production_api_access_enabled? %>
-        <div class="ds-u-margin-bottom--1">
-          API ID: <%= @organization.production_registered_organization.api_id %>
-        </div>
         <% if @organization.production_enabled? %>
+          <div class="ds-u-margin-bottom--1">
+            API ID: <%= @organization.production_registered_organization.api_id %>
+          </div>
           <div class="ds-u-margin-bottom--1">
             API Reference: <%= @organization.production_registered_organization.api_endpoint_ref %>
           </div>
@@ -149,19 +149,19 @@
           <div class="ds-u-margin-bottom--1">
             Status: <%= @organization.production_fhir_endpoint.status.titleize %>
           </div>
+
+          <%= link_to "Edit", edit_internal_organization_registered_organization_path(
+            organization_id: @organization.id,
+            id: @organization.production_registered_organization.id,
+            api_env: 'production'
+            ) %>
+          <%= link_to "Disable Production", internal_organization_registered_organization_path(
+            organization_id: @organization.id,
+            id: @organization.production_registered_organization.id,
+            ), method: :delete, data: { test: 'disable-production' } %>
         <% else %>
           <%= link_to 'Enable Production', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'production') %>
         <% end %>
-
-        <%= link_to "Edit", edit_internal_organization_registered_organization_path(
-          organization_id: @organization.id,
-          id: @organization.production_registered_organization.id,
-          api_env: 'production'
-          ) %>
-        <%= link_to "Disable Production", internal_organization_registered_organization_path(
-          organization_id: @organization.id,
-          id: @organization.production_registered_organization.id,
-          ), method: :delete, data: { test: 'disable-production' } %>
       <% else %>
         Production API access not yet available.
       <% end %>
