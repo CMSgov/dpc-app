@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_27_141604) do
+ActiveRecord::Schema.define(version: 2020_01_31_173905) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -86,7 +86,6 @@ ActiveRecord::Schema.define(version: 2020_01_27_141604) do
     t.integer "num_providers", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "api_environments", default: [], array: true
     t.string "npi"
     t.string "vendor"
   end
