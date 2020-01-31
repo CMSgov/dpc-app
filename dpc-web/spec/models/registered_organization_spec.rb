@@ -137,33 +137,33 @@ RSpec.describe RegisteredOrganization, type: :model do
       context 'successful API request' do
         it 'makes update API request before update and updates object' do
           stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-          old_attr = 1.day.ago
-          new_attr = Time.now
-          reg_org = create(:registered_organization, updated_at: old_attr)
+          old_attr = 2.days.ago
+          new_attr = 1.day.ago
+          reg_org = create(:registered_organization, created_at: old_attr)
 
           api_client = stub_api_client(message: :update_endpoint, success: true, response: default_org_creation_response)
           allow(reg_org).to receive(:update_api_organization)
-          reg_org.update(updated_at: new_attr)
+          reg_org.update(created_at: new_attr)
 
           expect(api_client).to have_received(:update_endpoint).with(reg_org)
-          expect(reg_org.updated_at).to eq(new_attr)
+          expect(reg_org.created_at).to eq(new_attr)
         end
       end
 
       context 'failed API request' do
         it 'adds to errors and does not update object' do
           stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-          old_attr = 1.day.ago
-          new_attr = Time.now
-          reg_org = create(:registered_organization, updated_at: old_attr)
+          old_attr = 2.days.ago
+          new_attr = 1.day.ago
+          reg_org = create(:registered_organization, created_at: old_attr)
 
           api_client = stub_api_client(message: :update_endpoint, success: false, response: { issues: ['Bad request'] })
           allow(reg_org).to receive(:update_api_organization)
-          reg_org.update(updated_at: new_attr)
+          reg_org.update(created_at: new_attr)
 
           expect(api_client).to have_received(:update_endpoint).with(reg_org)
           expect(reg_org.errors.count).to eq(1)
-          expect(reg_org.reload.updated_at).to eq(old_attr)
+          expect(reg_org.reload.created_at).to eq(old_attr)
         end
       end
     end
