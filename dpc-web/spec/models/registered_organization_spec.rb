@@ -146,7 +146,7 @@ RSpec.describe RegisteredOrganization, type: :model do
           reg_org.update(created_at: new_attr)
 
           expect(api_client).to have_received(:update_endpoint).with(reg_org)
-          expect(reg_org.created_at).to eq(new_attr)
+          expect(reg_org.created_at.to_i).to eq(new_attr.to_i)
         end
       end
 
@@ -163,7 +163,7 @@ RSpec.describe RegisteredOrganization, type: :model do
 
           expect(api_client).to have_received(:update_endpoint).with(reg_org)
           expect(reg_org.errors.count).to eq(1)
-          expect(reg_org.reload.created_at).to eq(old_attr)
+          expect(reg_org.reload.created_at.to_i).to eq(old_attr.to_i)
         end
       end
     end
