@@ -52,7 +52,7 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
             final UUID patientID = FHIRExtractors.getEntityUUID(patientReference);
             final Join<RosterEntity, AttributionRelationship> attrJoin = root.join(RosterEntity_.ATTRIBUTIONS);
             final Join<AttributionRelationship, PatientEntity> patientJoin = attrJoin.join(AttributionRelationship_.PATIENT);
-            predicates.add(builder.equal(patientJoin.get(PatientEntity_.PATIENT_ID), patientID));
+            predicates.add(builder.equal(patientJoin.get(PatientEntity_.id), patientID));
         }
 
         query.where(predicates.toArray(new Predicate[0]));
