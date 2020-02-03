@@ -61,7 +61,7 @@ public class RosterEntityConverter implements FHIRConverter<Group, RosterEntity>
     }
 
     private static Group.GroupMemberComponent buildComponent(AttributionRelationship relationship) {
-        final IdType id = new IdType("Patient", relationship.getPatient().getPatientID().toString());
+        final IdType id = new IdType("Patient", relationship.getPatient().getID().toString());
         final Reference reference = new Reference(id);
         final Group.GroupMemberComponent component = new Group.GroupMemberComponent();
         component.setInactive(relationship.isInactive());
