@@ -15,7 +15,7 @@
       <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
         <div class="field ds-u-margin-y--5">
           <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
-          <%= select_tag :api_environment, options_for_select(@organization.api_environment_strings, params[:api_environment]), include_blank: true, class: "ds-c-field" %>
+          <%= select_tag :api_environment, options_for_select(@organization.registered_api_envs, params[:api_environment]), include_blank: true, class: "ds-c-field" %>
         </div>
 
         <div class="field ds-u-margin-y--5">

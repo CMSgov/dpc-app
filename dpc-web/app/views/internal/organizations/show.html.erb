@@ -21,7 +21,7 @@
 
   <section>
     <div class="ds-u-color--success">
-      <% @organization.api_environment_strings.each do |api_env| %>
+      <% @organization.registered_api_envs.each do |api_env| %>
         <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <use xlink:href="/assets/solid.svg#database"></use>
         </svg>
@@ -94,17 +94,76 @@
 
 <section class="box">
     <div class="box__content">
-      <h2 class="box__heading">FHIR Endpoint</h2>
-      <% @organization.fhir_endpoints.each do |fhir_endpoint| %>
+      <h2 class="box__heading">Enabled Environments</h2>
+
+      <h3>Sandbox</h3>
+      <% if @organization.sandbox_enabled? %>
         <div class="ds-u-margin-bottom--1">
-          Name: <%= fhir_endpoint.name %>
+          API ID: <%= @organization.sandbox_registered_organization.api_id %>
+        </div>
+        <h4>FHIR Endpoint</h4>
+        <div class="ds-u-margin-bottom--1">
+          API Reference: <%= @organization.sandbox_registered_organization.api_endpoint_ref %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          URI: <%= fhir_endpoint.uri %>
+          Name: <%= @organization.sandbox_fhir_endpoint.name %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          Status: <%= fhir_endpoint.status.titleize %>
+          URI: <%= @organization.sandbox_fhir_endpoint.uri %>
         </div>
+        <div class="ds-u-margin-bottom--1">
+          Status: <%= @organization.sandbox_fhir_endpoint.status.titleize %>
+        </div>
+
+        <%= link_to "Edit", edit_internal_organization_registered_organization_path(
+          organization_id: @organization.id,
+          id: @organization.sandbox_registered_organization.id,
+          api_env: 'sandbox'
+          ) %>
+        <%= link_to "Disable Sandbox", internal_organization_registered_organization_path(
+          organization_id: @organization.id,
+          id: @organization.sandbox_registered_organization.id,
+          ), method: :delete, data: { test: 'disable-sandbox' } %>
+      <% else %>
+        <%= link_to 'Enable Sandbox',
+                    new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox'),
+                    data: { test: 'enable-sandbox' } %>
+      <% end %>
+
+      <h3>Production</h3>
+      <% if production_api_access_enabled? %>
+        <% if @organization.production_enabled? %>
+          <div class="ds-u-margin-bottom--1">
+            API ID: <%= @organization.production_registered_organization.api_id %>
+          </div>
+          <div class="ds-u-margin-bottom--1">
+            API Reference: <%= @organization.production_registered_organization.api_endpoint_ref %>
+          </div>
+          <h4>FHIR Endpoint</h4>
+          <div class="ds-u-margin-bottom--1">
+            Name: <%= @organization.production_fhir_endpoint.name %>
+          </div>
+          <div class="ds-u-margin-bottom--1">
+            URI: <%= @organization.production_fhir_endpoint.uri %>
+          </div>
+          <div class="ds-u-margin-bottom--1">
+            Status: <%= @organization.production_fhir_endpoint.status.titleize %>
+          </div>
+
+          <%= link_to "Edit", edit_internal_organization_registered_organization_path(
+            organization_id: @organization.id,
+            id: @organization.production_registered_organization.id,
+            api_env: 'production'
+            ) %>
+          <%= link_to "Disable Production", internal_organization_registered_organization_path(
+            organization_id: @organization.id,
+            id: @organization.production_registered_organization.id,
+            ), method: :delete, data: { test: 'disable-production' } %>
+        <% else %>
+          <%= link_to 'Enable Production', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'production') %>
+        <% end %>
+      <% else %>
+        Production API access not yet available.
       <% end %>
     </div>
 </section>

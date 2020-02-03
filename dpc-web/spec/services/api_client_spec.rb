@@ -3,10 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe APIClient do
-  let!(:org) { create(:organization, npi: 'cool-npi-1') }
-  let!(:registered_org) { create(:registered_organization, organization: org) }
-  let!(:fhir_endpoint) { create(:fhir_endpoint, name: 'Cool SBX', uri: 'https://cool.com',
-                                                status: 'active', organization: org) }
+  let!(:org) { create(:organization, npi: '1111111111') }
+  let!(:registered_org) { build(:registered_organization, organization: org, api_env: 'sandbox') }
+  let!(:fhir_endpoint) { build(:fhir_endpoint, name: 'Cool SBX', uri: 'https://cool.com',
+                                                status: 'active', registered_organization: registered_org) }
 
   before(:each) do
     allow(ENV).to receive(:fetch).with('API_METADATA_URL_SANDBOX').and_return('http://dpc.example.com')
@@ -36,7 +36,7 @@ RSpec.describe APIClient do
                       postalCode: org.address_zip,
                       state: org.address_state
                     }],
-                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: 'cool-npi-1'}],
+                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi}],
                     name: org.name,
                     resourceType: 'Organization',
                     type: [{
@@ -74,7 +74,7 @@ RSpec.describe APIClient do
 
         api_client = APIClient.new('sandbox')
 
-        api_client.create_organization(org)
+        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
 
         expect(api_client.response_status).to eq(200)
         expect(api_client.response_body).to eq(
@@ -95,7 +95,7 @@ RSpec.describe APIClient do
 
         api_client = APIClient.new('sandbox')
 
-        api_client.create_organization(org)
+        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq(
@@ -130,7 +130,7 @@ RSpec.describe APIClient do
                       postalCode: org.address_zip,
                       state: org.address_state
                     }],
-                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: 'cool-npi-1'}],
+                    identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi}],
                     name: org.name,
                     resourceType: 'Organization',
                     type: [{
@@ -168,10 +168,11 @@ RSpec.describe APIClient do
 
         api_client = APIClient.new('sandbox')
 
-        api_client.create_organization(org)
+        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
+        parse_response = JSON.parse api_client.response_body
 
         expect(api_client.response_status).to eq(500)
-        expect(api_client.response_body).to eq(
+        expect(parse_response).to eq(
           {
             'resourceType'=>'OperationOutcome',
             'issue'=>[{
@@ -189,12 +190,9 @@ RSpec.describe APIClient do
   describe '#update_organization' do
     context 'successful request' do
       it 'uses fhir_client to send org data to API' do
-        org = create(:organization, api_environments: [0])
-        reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
-
-        stub_request(:put, "http://dpc.example.com/Organization/#{reg_org.api_id}").
+        stub_request(:put, "http://dpc.example.com/Organization/#{registered_org.api_id}").
           with(
-            body: /#{reg_org.api_id}/,
+            body: /#{registered_org.api_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
               'Content-Type' => 'application/fhir+json;charset=utf-8',
@@ -203,18 +201,16 @@ RSpec.describe APIClient do
           to_return(status: 200, body: "{}", headers: {})
 
         client = APIClient.new('sandbox')
-        expect(client.update_organization(reg_org)).to eq(true)
+        expect(client.update_organization(registered_org)).to eq(client)
+        expect(client.response_successful?).to eq(true)
       end
     end
 
-    context 'unsuccessul request' do
+    context 'unsuccessful request' do
       it 'uses fhir_client to send org data to API' do
-        org = create(:organization, api_environments: [0])
-        reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
-
-        stub_request(:put, "http://dpc.example.com/Organization/#{reg_org.api_id}").
+        stub_request(:put, "http://dpc.example.com/Organization/#{registered_org.api_id}").
           with(
-            body: /#{reg_org.api_id}/,
+            body: /#{registered_org.api_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
               'Content-Type' => 'application/fhir+json;charset=utf-8',
@@ -223,7 +219,50 @@ RSpec.describe APIClient do
           to_return(status: 500, body: "", headers: {})
 
         client = APIClient.new('sandbox')
-        expect(client.update_organization(reg_org)).to eq(false)
+        expect(client.update_organization(registered_org)).to eq(client)
+        expect(client.response_successful?).to eq(false)
+      end
+    end
+  end
+
+  describe '#delete_organization' do
+    context 'successful request' do
+      it 'uses fhir_client to delete registered org from API' do
+        reg_org = build(:registered_organization, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
+
+        stub_request(:delete, "http://dpc.example.com/Organization/#{reg_org.api_id}").
+        with(
+          headers: {
+            'Accept' => 'application/fhir+json',
+            'Authorization' => /.*/
+          }).
+        to_return(status: 200, body: '', headers: {})
+
+        client = APIClient.new('sandbox')
+        client.delete_organization(reg_org)
+        expect(client.response_successful?).to eq(true)
+        expect(client.response_status).to eq(200)
+        expect(client.response_body).to eq('')
+      end
+    end
+
+    context 'unsucessful request' do
+      it 'uses fhir_client to delete registered org from API' do
+        reg_org = build(:registered_organization, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
+
+        stub_request(:delete, "http://dpc.example.com/Organization/#{reg_org.api_id}").
+        with(
+          headers: {
+            'Accept' => 'application/fhir+json',
+            'Authorization' => /.*/
+          }).
+        to_return(status: 404, body: '', headers: {})
+
+        client = APIClient.new('sandbox')
+        client.delete_organization(reg_org)
+        expect(client.response_successful?).to eq(false)
+        expect(client.response_status).to eq(404)
+        expect(client.response_body).to eq('')
       end
     end
   end
@@ -231,13 +270,11 @@ RSpec.describe APIClient do
   describe '#update_endpoint' do
     context 'successful request' do
       it 'uses fhir_client to send endpoint data to API' do
-        org = create(:organization, api_environments: [0])
-        create(:fhir_endpoint, organization: org)
-        reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
+        build(:fhir_endpoint, registered_organization: registered_org)
 
-        stub_request(:put, "http://dpc.example.com/Endpoint/12345").
+        stub_request(:put, "http://dpc.example.com/Endpoint/#{registered_org.fhir_endpoint_id}").
           with(
-            body: /12345/,
+            body: /#{registered_org.fhir_endpoint_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
               'Content-Type' => 'application/fhir+json;charset=utf-8',
@@ -246,28 +283,28 @@ RSpec.describe APIClient do
           to_return(status: 200, body: "{}", headers: {})
 
         client = APIClient.new('sandbox')
-        expect(client.update_endpoint(reg_org)).to eq(true)
+        expect(client.update_endpoint(registered_org)).to eq(client)
+        expect(client.response_successful?).to eq(true)
       end
     end
 
     context 'unsuccessul request' do
       it 'uses fhir_client to send org data to API' do
-        org = create(:organization, api_environments: [0])
-        create(:fhir_endpoint, organization: org)
-        reg_org = create(:registered_organization, organization: org, api_env: 'sandbox', api_endpoint_ref: 'Endpoint/12345')
+        build(:fhir_endpoint, registered_organization: registered_org)
 
-          stub_request(:put, "http://dpc.example.com/Endpoint/12345").
-            with(
-              body: /12345/,
-              headers: {
-                'Accept' => 'application/fhir+json',
-                'Content-Type' => 'application/fhir+json;charset=utf-8',
-                'Authorization' => /.*/
-              }).
-            to_return(status: 500, body: "", headers: {})
+        stub_request(:put, "http://dpc.example.com/Endpoint/#{registered_org.fhir_endpoint_id}").
+          with(
+            body: /#{registered_org.fhir_endpoint_id}/,
+            headers: {
+              'Accept' => 'application/fhir+json',
+              'Content-Type' => 'application/fhir+json;charset=utf-8',
+              'Authorization' => /.*/
+            }).
+          to_return(status: 500, body: "", headers: {})
 
         client = APIClient.new('sandbox')
-        expect(client.update_endpoint(reg_org)).to eq(false)
+        expect(client.update_endpoint(registered_org)).to eq(client)
+        expect(client.response_successful?).to eq(false)
       end
     end
   end
@@ -313,9 +350,7 @@ RSpec.describe APIClient do
         api_client.create_client_token(registered_org.api_id, params: { label: 'Sandbox Token 1' })
 
         expect(api_client.response_status).to eq(500)
-        expect(api_client.response_body).to eq(
-          {}
-        )
+        expect(api_client.response_body).to eq('{}')
       end
     end
   end
@@ -374,7 +409,7 @@ RSpec.describe APIClient do
           headers: { 'Content-Type' => 'application/json' }
         ).to_return(
           status: 500,
-          body: '{}'
+          body: ''
         )
 
         api_client = APIClient.new('sandbox')
@@ -382,9 +417,7 @@ RSpec.describe APIClient do
         api_client.get_client_tokens(registered_org.api_id)
 
         expect(api_client.response_status).to eq(500)
-        expect(api_client.response_body).to eq(
-          {}
-        )
+        expect(api_client.response_body).to eq('')
       end
     end
   end
@@ -424,9 +457,7 @@ RSpec.describe APIClient do
         api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', public_key: stubbed_key })
 
         expect(api_client.response_status).to eq(500)
-        expect(api_client.response_body).to eq(
-          {}
-        )
+        expect(api_client.response_body).to eq('{}')
       end
     end
   end
@@ -470,9 +501,7 @@ RSpec.describe APIClient do
         api_client.get_public_keys(registered_org.api_id)
 
         expect(api_client.response_status).to eq(500)
-        expect(api_client.response_body).to eq(
-          {}
-        )
+        expect(api_client.response_body).to eq('{}')
       end
     end
   end
