@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe ClientTokensController, type: :controller do
+  include APIClientSupport
 
   describe "GET #new" do
     let!(:user) { create(:user, :assigned) }
@@ -46,7 +47,7 @@ RSpec.describe ClientTokensController, type: :controller do
           expect(response).to render_template(:new)
         end
 
-        it 'redirects to dashboard' do
+        it 'redirects to dashboard if invalid org' do
           other_org = create(:organization)
           post :create, params: { organization_id: other_org.id, label: 'Test', api_environment: 'sandbox' }
           expect(response.location).to include(dashboard_path)
@@ -56,9 +57,12 @@ RSpec.describe ClientTokensController, type: :controller do
       context 'with valid params' do
         context 'successful API request' do
           before(:each) do
+            stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+            reg_org = create(:registered_organization, api_env: 'sandbox', organization: organization)
+
             manager = instance_double(ClientTokenManager)
             allow(ClientTokenManager).to receive(:new)
-              .with(api_env: 'sandbox', organization: organization)
+              .with(api_env: 'sandbox', registered_organization: reg_org)
               .and_return(manager)
 
             allow(manager).to receive(:create_client_token).with(label: 'Token')
@@ -75,9 +79,12 @@ RSpec.describe ClientTokensController, type: :controller do
 
         context 'unsuccessful API request' do
           before(:each) do
+            stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+            reg_org = create(:registered_organization, api_env: 'sandbox', organization: organization)
+
             manager = instance_double(ClientTokenManager)
             allow(ClientTokenManager).to receive(:new)
-              .with(api_env: 'sandbox', organization: organization)
+              .with(api_env: 'sandbox', registered_organization: reg_org)
               .and_return(manager)
 
             allow(manager).to receive(:create_client_token).with(label: 'Token')
