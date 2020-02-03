@@ -234,7 +234,7 @@ public class MacaroonBakery {
         }
         try {
             return MacaroonsBuilder.deserialize(new String(decodedString, StandardCharsets.UTF_8));
-        } catch (NotDeSerializableException e) {
+        } catch (Exception e) {
             throw new BakeryException("Cannot deserialize Macaroon", e);
         }
     }
@@ -301,12 +301,10 @@ public class MacaroonBakery {
 
         // addCaveats adds any required third party caveats to the need slice
         // that aren't already present .
-        Consumer<Macaroon> addCaveats = (macaroon) -> {
-            MacaroonBakery.getCaveats(macaroon)
-                    .stream()
-                    .filter(cav -> cav.getVerificationID().length > 1 && !haveCaveat.containsKey(cav.toString()))
-                    .forEach(needCaveat::add);
-        };
+        Consumer<Macaroon> addCaveats = (macaroon) -> MacaroonBakery.getCaveats(macaroon)
+                .stream()
+                .filter(cav -> cav.getVerificationID().length > 1 && !haveCaveat.containsKey(cav.toString()))
+                .forEach(needCaveat::add);
 
         macaroons.forEach(addCaveats);
 
