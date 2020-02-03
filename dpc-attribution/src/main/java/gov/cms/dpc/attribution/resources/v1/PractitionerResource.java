@@ -153,7 +153,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Practitioner"))
     public Practitioner updateProvider(@ApiParam(value = "Practitioner resource ID", required = true) @PathParam("providerID") UUID providerID, Practitioner provider) {
         final ProviderEntity providerEntity = this.converter.fromFHIR(ProviderEntity.class, provider);
-        providerEntity.setProviderID(providerID);
+        providerEntity.setID(providerID);
         return this.converter.toFHIR(Practitioner.class, this.dao.updateProvider(providerID, providerEntity));
     }
 }
