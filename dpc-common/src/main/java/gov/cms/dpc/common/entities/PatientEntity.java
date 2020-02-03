@@ -4,28 +4,22 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @SuppressWarnings("WeakerAccess")
 @Entity(name = "patients")
-public class PatientEntity implements Serializable {
+public class PatientEntity extends PersonEntity {
 
     public static final long serialVersionUID = 42L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
-    @Access(AccessType.PROPERTY)
-    private UUID patientID;
 
     @NotEmpty
     @Column(name = "beneficiary_id", unique = true)
@@ -34,23 +28,12 @@ public class PatientEntity implements Serializable {
     @Column(name = "mbi_hash")
     private String mbiHash;
 
-    @Column(name = "first_name")
-    private String patientFirstName;
-    @Column(name = "last_name")
-    private String patientLastName;
-
     @NotNull
     @Column(name = "dob")
     private LocalDate dob;
 
     @NotNull
     private AdministrativeGender gender;
-
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime updatedAt;
 
     @NotNull
     @ManyToOne
@@ -61,14 +44,6 @@ public class PatientEntity implements Serializable {
 
     public PatientEntity() {
 //        Hibernate Required
-    }
-
-    public UUID getPatientID() {
-        return patientID;
-    }
-
-    public void setPatientID(UUID patientID) {
-        this.patientID = patientID;
     }
 
     public String getBeneficiaryID() {
@@ -87,22 +62,6 @@ public class PatientEntity implements Serializable {
         this.mbiHash = mbiHash;
     }
 
-    public String getPatientFirstName() {
-        return patientFirstName;
-    }
-
-    public void setPatientFirstName(String patientFirstName) {
-        this.patientFirstName = patientFirstName;
-    }
-
-    public String getPatientLastName() {
-        return patientLastName;
-    }
-
-    public void setPatientLastName(String patientLastName) {
-        this.patientLastName = patientLastName;
-    }
-
     public LocalDate getDob() {
         return dob;
     }
@@ -117,22 +76,6 @@ public class PatientEntity implements Serializable {
 
     public void setGender(AdministrativeGender gender) {
         this.gender = gender;
-    }
-
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(OffsetDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public OffsetDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(OffsetDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public OrganizationEntity getOrganization() {
@@ -151,18 +94,6 @@ public class PatientEntity implements Serializable {
         this.attributions = attributions;
     }
 
-    @PrePersist
-    public void setCreation() {
-        final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        this.setCreatedAt(now);
-        this.setUpdatedAt(now);
-    }
-
-    @PreUpdate
-    public void setUpdateTime() {
-        this.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
-    }
-
     /**
      * Update {@link Patient} fields.
      * Only first/last name and DOB is supported at this point.
@@ -171,8 +102,8 @@ public class PatientEntity implements Serializable {
      * @return - {@link PatientEntity} existing record with updated fields.
      */
     public PatientEntity update(PatientEntity updated) {
-        this.setPatientFirstName(updated.getPatientFirstName());
-        this.setPatientLastName(updated.getPatientLastName());
+        this.setFirstName(updated.getFirstName());
+        this.setLastName(updated.getLastName());
         this.setDob(updated.getDob());
         this.setGender(updated.getGender());
         return this;
@@ -183,16 +114,18 @@ public class PatientEntity implements Serializable {
         if (this == o) return true;
         if (!(o instanceof PatientEntity)) return false;
         PatientEntity that = (PatientEntity) o;
-        return patientID.equals(that.patientID) &&
-                beneficiaryID.equals(that.beneficiaryID) &&
-                Objects.equals(patientFirstName, that.patientFirstName) &&
-                Objects.equals(patientLastName, that.patientLastName) &&
-                dob.equals(that.dob);
+        return Objects.equals(getID(), that.getID()) &&
+                Objects.equals(beneficiaryID, that.beneficiaryID) &&
+                Objects.equals(mbiHash, that.mbiHash) &&
+                Objects.equals(dob, that.dob) &&
+                gender == that.gender &&
+                Objects.equals(organization, that.organization) &&
+                Objects.equals(attributions, that.attributions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(patientID, beneficiaryID, patientFirstName, patientLastName, dob);
+        return Objects.hash(getID(), beneficiaryID, mbiHash, dob, gender, organization, attributions);
     }
 
     public static LocalDate toLocalDate(Date date) {
@@ -204,4 +137,6 @@ public class PatientEntity implements Serializable {
     public static Date fromLocalDate(LocalDate date) {
         return Date.from(date.atStartOfDay().toInstant(ZoneOffset.UTC));
     }
+
+
 }
