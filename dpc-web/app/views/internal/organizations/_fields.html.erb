@@ -66,53 +66,6 @@
       <%= ff.text_field :zip, class: "ds-c-field ds-c-field--medium" %>
     <% end %>
   </div>
-
-</fieldset>
-
-<fieldset class="ds-l-row field-group">
-  <div class="ds-l-col--12 ds-l-md-col--3">
-    <legend class="field-group__heading">Environments</legend>
-
-  </div>
-
-  <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
-    <span class="ds-c-field__hint">Select all that apply. Unselecting all will remove all env access for organization.</span>
-
-    <input name="organization[api_environments][]" value="" hidden>
-
-    <span>
-      <input id="organization_api_environments_sandbox" name="organization[api_environments][]" type="checkbox" value="0" class="ds-c-choice" <%= "checked" if @organization.sandbox_enabled? %> >
-      <label for="organization_api_environments_sandbox">Sandbox</label>
-    </span>
-
-    <span>
-      <input id="organization_api_environments_production" name="organization[api_environments][]" type="checkbox" class="ds-c-choice" disabled>
-      <label for="organization_api_environments_production">Production</label>
-    </span>
-  </div>
-</fieldset>
-
-
-<fieldset class="ds-l-row field-group">
-  <div class="ds-l-col--12 ds-l-md-col--3">
-    <legend class="field-group__heading">FHIR Endpoint</legend>
-
-  </div>
-
-  <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
-    <span class="ds-c-field__hint">You are not required to enter FHIR endponts unless the organization is graduating from Sandbox.</span>
-
-    <%= f.fields_for :fhir_endpoints do |ff| %>
-      <%= ff.label :status, class: "ds-c-label" %>
-      <%= ff.select :status, statuses_for_select, {include_blank: true}, class: "ds-c-field" %>
-
-      <%= ff.label :name, class: "ds-c-label" %>
-      <%= ff.text_field :name, class: "ds-c-field" %>
-
-      <%= ff.label :uri, "URI", class: "ds-c-label" %>
-      <%= ff.text_field :uri, class: "ds-c-field" %>
-    <% end %>
-  </div>
 </fieldset>
 
 <div class="ds-l-row actions ds-u-margin-top--3 field-group">
