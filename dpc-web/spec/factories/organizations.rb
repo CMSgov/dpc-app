@@ -11,9 +11,9 @@ FactoryBot.define do
       create(:address, addressable: org)
     end
 
-    trait :with_endpoint do
+    trait :sandbox_enabled do
       after(:create) do |org|
-        create(:fhir_endpoint, organization: org)
+        create(:registered_organization, organization: org, api_env: 'sandbox')
       end
     end
   end
