@@ -9,7 +9,7 @@ module Internal
       if @tagging.save
         flash[:notice] = 'Tag added.'
       else
-        flash[:alert] = "Tag could not be added. Errors:#{@tagging.errors.full_messages.join(', ')}"
+        flash[:alert] = "Tag could not be added. Errors:#{model_error_string(@tagging)}"
       end
       redirect_back(fallback_location: taggable_path)
     end
@@ -19,7 +19,7 @@ module Internal
       if @tagging.destroy
         flash[:notice] = 'Tag removed.'
       else
-        flash[:alert] = "Tag could not be removed. Errors:#{@tagging.errors.full_messages.join(', ')}"
+        flash[:alert] = "Tag could not be removed. Errors:#{model_error_string(@tagging)}"
       end
       redirect_back(fallback_location: taggable_path)
     end

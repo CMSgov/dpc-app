@@ -6,8 +6,7 @@ RSpec.describe ClientTokenManager do
   describe '#create_client_token' do
     context 'successful API request' do
       it 'responds true with @client_token set' do
-        org = create(:organization)
-        registered_org = create(:registered_organization, api_env: 0, organization: org)
+        registered_org = build(:registered_organization, api_env: 'sandbox')
         token = { 'token' => 'exampleToken' }
         api_client = instance_double(APIClient)
         allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
@@ -17,7 +16,7 @@ RSpec.describe ClientTokenManager do
         allow(api_client).to receive(:response_successful?).and_return(true)
         allow(api_client).to receive(:response_body).and_return(token)
 
-        manager = ClientTokenManager.new(api_env: 'sandbox', organization: registered_org.organization)
+        manager = ClientTokenManager.new(api_env: 'sandbox', registered_organization: registered_org)
         expect(manager.create_client_token(label: 'Test Token 1')).to eq(true)
         expect(manager.client_token).to eq(token)
       end
@@ -25,8 +24,7 @@ RSpec.describe ClientTokenManager do
 
     context 'failed API request' do
       it 'responds false' do
-        org = create(:organization)
-        registered_org = create(:registered_organization, api_env: 0, organization: org)
+        registered_org = build(:registered_organization, api_env: 'sandbox')
         api_client = instance_double(APIClient)
         allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
         allow(api_client).to receive(:create_client_token)
@@ -35,7 +33,7 @@ RSpec.describe ClientTokenManager do
         allow(api_client).to receive(:response_successful?).and_return(false)
         allow(api_client).to receive(:response_body).and_return(nil)
 
-        manager = ClientTokenManager.new(api_env: 'sandbox', organization: registered_org.organization)
+        manager = ClientTokenManager.new(api_env: 'sandbox', registered_organization: registered_org)
         expect(manager.create_client_token(label: 'Test Token 1')).to eq(false)
         expect(manager.client_token).to eq(nil)
       end
@@ -45,8 +43,7 @@ RSpec.describe ClientTokenManager do
   describe '#client_tokens' do
     context 'successful API request' do
       it 'responds with client_tokens array' do
-        org = create(:organization)
-        registered_org = create(:registered_organization, api_env: 0, organization: org)
+        registered_org = build(:registered_organization, api_env: 'sandbox')
         tokens = [{ 'token' => 'exampleToken' }]
         api_client = instance_double(APIClient)
         allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
@@ -56,15 +53,14 @@ RSpec.describe ClientTokenManager do
         allow(api_client).to receive(:response_successful?).and_return(true)
         allow(api_client).to receive(:response_body).and_return('entities' => tokens)
 
-        manager = ClientTokenManager.new(api_env: 'sandbox', organization: registered_org.organization)
+        manager = ClientTokenManager.new(api_env: 'sandbox', registered_organization: registered_org)
         expect(manager.client_tokens).to eq(tokens)
       end
     end
 
     context 'failed API request' do
       it 'responds with empty array' do
-        org = create(:organization)
-        registered_org = create(:registered_organization, api_env: 0, organization: org)
+        registered_org = build(:registered_organization, api_env: 'sandbox')
         api_client = instance_double(APIClient)
         allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
         allow(api_client).to receive(:get_client_tokens)
@@ -73,7 +69,7 @@ RSpec.describe ClientTokenManager do
         allow(api_client).to receive(:response_successful?).and_return(false)
         allow(api_client).to receive(:response_body).and_return(error: 'Bad credentials')
 
-        manager = ClientTokenManager.new(api_env: 'sandbox', organization: registered_org.organization)
+        manager = ClientTokenManager.new(api_env: 'sandbox', registered_organization: registered_org)
         expect(manager.client_tokens).to eq([])
       end
     end
