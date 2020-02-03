@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class PublicKeyManager
-  attr_reader :api_env, :organization, :errors
+  attr_reader :api_env, :registered_organization, :errors
 
-  def initialize(api_env:, organization:)
+  def initialize(api_env:, registered_organization:)
     @api_env = api_env
-    @organization = organization
+    @registered_organization = registered_organization
     @errors = []
   end
 
@@ -14,7 +14,7 @@ class PublicKeyManager
     return false if invalid_encoding?(public_key)
 
     api_client = APIClient.new(api_env)
-    api_client.create_public_key(registered_org.api_id, params: { label: label, public_key: public_key })
+    api_client.create_public_key(registered_organization.api_id, params: { label: label, public_key: public_key })
 
     api_client.response_successful?
   end
@@ -34,7 +34,7 @@ class PublicKeyManager
 
   def public_keys
     api_client = APIClient.new(api_env)
-    api_client.get_public_keys(registered_org.api_id)
+    api_client.get_public_keys(registered_organization.api_id)
 
     if api_client.response_successful?
       api_client.response_body['entities']
@@ -43,10 +43,6 @@ class PublicKeyManager
       @errors << api_client.response_body
       []
     end
-  end
-
-  def registered_org
-    @registered_org ||= organization.registered_organizations.find_by(api_env: api_env)
   end
 
   def strip_carriage_returns(str)

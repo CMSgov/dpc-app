@@ -21,4 +21,8 @@ class ApplicationController < ActionController::Base
       )
     end
   end
+
+  def model_error_string(resource)
+    resource.errors.full_messages.join(', ')
+  end
 end

@@ -34,7 +34,6 @@ module Internal
                                   city: params[:organization_address_attributes_city],
                                   state: params[:organization_address_attributes_state],
                                   zip: params[:organization_address_attributes_zip]
-      @organization.fhir_endpoints.build
     end
 
     def create
@@ -47,7 +46,7 @@ module Internal
           redirect_to internal_organization_path(@organization)
         end
       else
-        flash[:alert] = "Organization could not be created: #{@organization.errors.full_messages.join(', ')}"
+        flash[:alert] = "Organization could not be created: #{model_error_string(@organization)}"
         render :new
       end
     end
@@ -58,19 +57,16 @@ module Internal
 
     def edit
       @organization = Organization.find params[:id]
-      @organization.fhir_endpoints.build if @organization.fhir_endpoints.empty?
     end
 
     def update
       @organization = Organization.find params[:id]
-      notify_users = sandbox_added?
 
       if @organization.update organization_params
-        @organization.notify_users_of_sandbox_access if notify_users
         flash[:notice] = 'Organization updated.'
         redirect_to internal_organization_path(@organization)
       else
-        flash[:alert] = "Organization could not be updated: #{@organization.errors.full_messages.join(', ')}"
+        flash[:alert] = "Organization could not be updated: #{model_error_string(@organization)}"
         render :edit
       end
     end
@@ -81,7 +77,7 @@ module Internal
         flash[:notice] = 'Organization deleted.'
         redirect_to internal_organizations_path
       else
-        flash[:alert] = "Organization could not be deleted: #{@organization.errors.full_messages.join(', ')}"
+        flash[:alert] = "Organization could not be deleted: #{model_error_string(@organization)}"
         redirect_to internal_organization_path(@organization)
       end
     end
@@ -91,15 +87,8 @@ module Internal
     def organization_params
       params.fetch(:organization).permit(
         :name, :organization_type, :num_providers, :npi, :vendor,
-        api_environments: [], address_attributes: %i[id street street_2 city state zip address_use address_type],
-        fhir_endpoints_attributes: %i[id name status uri]
+        address_attributes: %i[id street street_2 city state zip address_use address_type]
       )
-    end
-
-    # Find out if the input params include 'sandbox' for api_environments, and whether the organization
-    # already has sandbox or not. '0' corresponds to 'sandbox'.
-    def sandbox_added?
-      (organization_params[:api_environments] - @organization.api_environments.map(&:to_s)).include?('0')
     end
   end
 end

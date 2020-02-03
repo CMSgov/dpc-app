@@ -14,7 +14,7 @@ module Internal
       if @tag.save
         flash[:notice] = 'Tag created.'
       else
-        flash[:alert] = "Tag could not be created. Errors: #{@tag.errors.full_messages.join(', ')}"
+        flash[:alert] = "Tag could not be created. Errors: #{model_error_string(@tag)}"
       end
       redirect_to internal_tags_path
     end
@@ -24,7 +24,7 @@ module Internal
       if @tag.destroy
         flash[:notice] = 'Tag deleted.'
       else
-        flash[:alert] = "Tag could not be deleted. Errors:#{@tag.errors.full_messages.join(', ')}"
+        flash[:alert] = "Tag could not be deleted. Errors:#{model_error_string(@tag)}"
       end
       redirect_to internal_tags_path
     end
