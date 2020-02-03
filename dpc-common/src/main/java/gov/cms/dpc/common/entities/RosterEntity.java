@@ -155,7 +155,7 @@ public class RosterEntity implements Serializable {
                 .map(IdType::new)
                 .map(id -> {
                     final PatientEntity patientEntity = new PatientEntity();
-                    patientEntity.setPatientID(UUID.fromString(id.getIdPart()));
+                    patientEntity.setID(UUID.fromString(id.getIdPart()));
                     final AttributionRelationship relationship = new AttributionRelationship(roster, patientEntity, now);
                     relationship.setPeriodEnd(expires);
                     return relationship;
