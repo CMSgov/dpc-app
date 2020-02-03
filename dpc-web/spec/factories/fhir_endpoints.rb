@@ -5,6 +5,7 @@ FactoryBot.define do
     name { 'Fhir Endpoint' }
     uri { 'https://example.com/valid-endpoint' }
     status { 'active' }
-    organization { create(:organization) }
+
+    registered_organization
   end
 end
