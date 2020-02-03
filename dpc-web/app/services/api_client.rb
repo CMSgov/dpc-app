@@ -8,9 +8,9 @@ class APIClient
     @base_url = base_urls[api_env]
   end
 
-  def create_organization(org)
+  def create_organization(org, fhir_endpoint: {})
     uri_string = base_url + '/Organization/$submit'
-    json = OrganizationSubmitSerializer.new(org).to_json
+    json = OrganizationSubmitSerializer.new(org, fhir_endpoint: fhir_endpoint).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
   end
@@ -23,52 +23,57 @@ class APIClient
 
   def update_organization(reg_org)
     fhir_org = FhirResourceBuilder.new.fhir_org(reg_org)
-
     fhir_client_update_request(reg_org.api_id, fhir_org, reg_org.api_id)
+    self
   end
 
-  def delete_organization(org)
-    # DELETE
-    # client.destroy(FHIR::Organization, org.id)
+  def delete_organization(reg_org)
+    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
+
+    response = fhir_client.destroy(FHIR::Organization, reg_org.api_id)
+
+    @response_status = response.response[:code].to_i
+    @response_body = response.response[:body].body
+    self
   end
 
   def update_endpoint(reg_org)
     fhir_endpoint = FhirResourceBuilder.new.fhir_endpoint(reg_org)
-
     fhir_client_update_request(reg_org.api_id, fhir_endpoint, fhir_endpoint.id)
+    self
   end
 
-  def create_client_token(reg_org_id, params: {})
+  def create_client_token(reg_org_api_id, params: {})
     uri_string = base_url + '/Token'
 
     json = params.to_json
-    macaroon = delegated_macaroon(reg_org_id)
+    macaroon = delegated_macaroon(reg_org_api_id)
     post_request(uri_string, json, headers(macaroon))
 
     self
   end
 
-  def get_client_tokens(reg_org_id)
+  def get_client_tokens(reg_org_api_id)
     uri_string = base_url + '/Token'
-    get_request(uri_string, delegated_macaroon(reg_org_id))
+    get_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
-  def create_public_key(reg_org_id, params: {})
+  def create_public_key(reg_org_api_id, params: {})
     uri_string = base_url + '/Key'
 
     post_text_request(
       uri_string,
       params[:public_key],
       { label: params[:label] },
-      delegated_macaroon(reg_org_id)
+      delegated_macaroon(reg_org_api_id)
     )
 
     self
   end
 
-  def get_public_keys(reg_org_id)
+  def get_public_keys(reg_org_api_id)
     uri_string = base_url + '/Key'
-    get_request(uri_string, delegated_macaroon(reg_org_id))
+    get_request(uri_string, delegated_macaroon(reg_org_api_id))
   end
 
   def response_successful?
@@ -91,9 +96,9 @@ class APIClient
     { 'Authorization': "Bearer #{token}" }
   end
 
-  def delegated_macaroon(reg_org_id)
+  def delegated_macaroon(reg_org_api_id)
     m = Macaroon.from_binary(golden_macaroon)
-    m.add_first_party_caveat("organization_id = #{reg_org_id}")
+    m.add_first_party_caveat("organization_id = #{reg_org_api_id}")
     m.add_first_party_caveat("expires = #{2.minutes.from_now.iso8601}")
     m.add_first_party_caveat('dpc_macaroon_version = 1')
     m.serialize
@@ -143,25 +148,17 @@ class APIClient
 
     response = http.request(request)
     @response_status = response.code.to_i
-    @response_body = parsed_response(response)
+    @response_body = response_successful? ? parsed_response(response) : response.body
   rescue Errno::ECONNREFUSED
-    Rails.logger.warn 'Could not connect to API'
-    @response_status = 500
-    @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
+    connection_error
   end
 
-  def fhir_client_update_request(reg_org_id, resource, resource_id)
-    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_id))
+  def fhir_client_update_request(reg_org_api_id, resource, resource_id)
+    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_api_id))
     response = fhir_client.update(resource, resource_id)
 
-    if response.response[:code] == '200'
-      true
-    else
-      Rails.logger.warn 'Unsuccessulful request to API'
-      @response_status = response.response[:code]
-      @response_body = { 'issue' => [{ 'details' => { 'text' => 'Request error' } }] }
-      false
-    end
+    @response_status = response.response[:code].to_i
+    @response_body = response.response[:body]
   end
 
   def headers(token)
@@ -178,5 +175,11 @@ class APIClient
 
   def verify_ssl_cert?
     ENV.fetch('VERIFY_SSL_CERT') != 'false'
+  end
+
+  def connection_error
+    Rails.logger.warn 'Could not connect to API'
+    @response_status = 500
+    @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
   end
 end
