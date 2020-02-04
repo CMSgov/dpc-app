@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.cli.tokens;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import gov.cms.dpc.api.entities.TokenEntity;

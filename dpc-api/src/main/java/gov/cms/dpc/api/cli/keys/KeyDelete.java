@@ -39,8 +39,8 @@ public class KeyDelete extends AbstractAdminCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         // Get the reference
         final String orgReference = namespace.getString(ORG_REFERENCE);
-        final String tokenID = namespace.getString(KEY_ID);
-        System.out.println(String.format("Deleting public key %s for organization %s", tokenID, orgReference));
+        final String keyID = namespace.getString(KEY_ID);
+        System.out.println(String.format("Deleting public key %s for organization %s", keyID, orgReference));
 
         final String apiService = namespace.getString(API_HOSTNAME);
         System.out.println(String.format("Connecting to API service at: %s", apiService));
@@ -49,10 +49,10 @@ public class KeyDelete extends AbstractAdminCommand {
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/delete-key", apiService));
             builder.setParameter("organization", new IdType(orgReference).getIdPart());
-            builder.setParameter("key", tokenID);
-            final HttpPost tokenDelete = new HttpPost(builder.build());
+            builder.setParameter("key", keyID);
+            final HttpPost keyDelete = new HttpPost(builder.build());
 
-            try (CloseableHttpResponse response = httpClient.execute(tokenDelete)) {
+            try (CloseableHttpResponse response = httpClient.execute(keyDelete)) {
                 if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
                     System.err.println("Error deleting key: " + response.getStatusLine().getReasonPhrase());
                     System.exit(1);
@@ -60,6 +60,6 @@ public class KeyDelete extends AbstractAdminCommand {
             }
         }
 
-        System.out.println("Successfully deleted Public key");
+        System.out.println("Successfully deleted public key");
     }
 }
