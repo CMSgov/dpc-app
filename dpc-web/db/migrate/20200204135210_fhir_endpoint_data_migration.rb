@@ -1,6 +1,9 @@
 class FhirEndpointDataMigration < ActiveRecord::Migration[5.2]
   def up
     FhirEndpoint.all.each do |fhir_endpoint|
+      # Skip if this fhir endpoint has a registered organization (meaning it was created after the refactor)
+      next if fhir_endpoint.registered_organization.present?
+
       organization = Organization.find_by id: fhir_endpoint.organization_id
 
       # If organization, carry on. If not, then this is an orphaned fhir_endpoint record
