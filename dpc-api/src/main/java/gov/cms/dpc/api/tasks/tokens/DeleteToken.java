@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.tasks;
+package gov.cms.dpc.api.tasks.tokens;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
@@ -14,6 +14,8 @@ import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.util.UUID;
 
+import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
+
 @Singleton
 public class DeleteToken extends Task {
 
@@ -26,23 +28,16 @@ public class DeleteToken extends Task {
     }
 
     @Override
-    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) throws Exception {
-        final ImmutableCollection<String> organizationCollection = parameters.get("organization");
-
-        if (organizationCollection.isEmpty()) {
-            throw new WebApplicationException("Must have organization", Response.Status.BAD_REQUEST);
-        }
+    public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) {
+        final Organization organization = extractOrganization(parameters);
 
         final ImmutableCollection<String> tokenCollection = parameters.get("token");
 
         if (tokenCollection.isEmpty()) {
             throw new WebApplicationException("Must have token", Response.Status.BAD_REQUEST);
         }
-        final String organizationID = organizationCollection.asList().get(0);
-        final String tokenID = tokenCollection.asList().get(0);
 
-        final Organization organization = new Organization();
-        organization.setId(organizationID);
+        final String tokenID = tokenCollection.asList().get(0);
 
         this.resource
                 .deleteOrganizationToken(

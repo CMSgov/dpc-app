@@ -20,6 +20,12 @@ import java.io.PrintWriter;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
+/**
+ * Admin task to create a new {@link BakeryKeyPair} for use by the {@link gov.cms.dpc.macaroons.MacaroonBakery} component.
+ * This will generated an X25519 keypair that is used to encrypt the third-party caveats.
+ * <p>
+ * Note: This is not in the `keys` package because it doesn't pertain to the organization public signing keys
+ */
 @Singleton
 public class GenerateKeyPair extends Task {
 
