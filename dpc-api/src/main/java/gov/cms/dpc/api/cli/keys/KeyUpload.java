@@ -67,7 +67,7 @@ public class KeyUpload extends AbstractAdminCommand {
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void uploadKey(String apiService, String orgID, Optional<String> label, String pem) throws IOException {
+    private void uploadKey(String apiService, String orgID, Optional<String> label, String pem) throws IOException, URISyntaxException {
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/upload-key", apiService));
 
@@ -87,8 +87,6 @@ public class KeyUpload extends AbstractAdminCommand {
                 final String token = EntityUtils.toString(response.getEntity());
                 System.out.println(String.format("Organization token: %s", token));
             }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
     }
 }
