@@ -2,8 +2,9 @@
   "name": "dpc-website",
   "private": true,
   "dependencies": {
-    "@cmsgov/design-system-layout": "^3.6.1",
-    "@cmsgov/design-system-core": "^3.6.0",
+    "@cmsgov/design-system-core": "^3.5.0",
+    "@cmsgov/design-system-layout": "^3.5.0",
+    "@okta/okta-signin-widget": "^3.7.0",
     "normalize.css": "^8.0.1",
     "svg4everybody": "^2.1.9"
   }
