@@ -68,7 +68,7 @@ public class PractitionerValidationTest {
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
         // Add an NPI
-        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mbi");
+        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
 
         final ValidationResult r2 = fhirValidator.validateWithResult(practitioner);
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),

@@ -184,7 +184,7 @@ class AttributionFHIRTest {
         // Create the new patient and submit them
         final Patient patient = new Patient();
         final Identifier patientIdentifier = new Identifier();
-        patientIdentifier.setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-new-patient-id");
+        patientIdentifier.setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-new-patient-id");
         patient.addIdentifier(patientIdentifier);
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());

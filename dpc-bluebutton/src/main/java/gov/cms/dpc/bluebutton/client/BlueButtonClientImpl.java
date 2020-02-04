@@ -90,6 +90,18 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     }
 
     /**
+     * Hashes MBI and queries Blue Button server for patient data.
+     *
+     * @param mbi The MBI
+     * @return {@link Bundle} A FHIR Bundle of Patient resources
+     */
+    @Override
+    public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException, GeneralSecurityException {
+        String mbiHash = hashMbi(mbi);
+        return requestPatientFromServerByMbiHash(mbiHash);
+    }
+
+    /**
      * Queries Blue Button server for patient data by hashed Medicare Beneficiary Identifier (MBI).
      *
      * @param mbiHash The hashed MBI

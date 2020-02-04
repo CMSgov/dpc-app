@@ -17,6 +17,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.Map;
 
 public class MockBlueButtonClient implements BlueButtonClient {
 
@@ -25,7 +26,13 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     public static final List<String> TEST_PATIENT_IDS = List.of("20140000008325", "20140000009893");
-    public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", "20140000008325",  "20140000009893", "-3");
+    public static final List<String> TEST_PATIENT_MBIS = List.of("2SW4N00AA00", "4SP0P00AA00");
+    public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", "2SW4N00AA00", "4SP0P00AA00", "-3");
+    private static final Map<String, String> MBI_BENE_MAP = Map.of("2SW4N00AA00", "20140000008325",
+            "4SP0P00AA00", "20140000009893",
+            "-1", "-1",
+            "-2", "-2",
+            "-3", "-3");
 
     private final IParser parser;
 
@@ -40,8 +47,16 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
+    public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException {
+        Patient patient = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, TEST_PATIENT_MBIS.get(0));
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(patient);
+        return bundle;
+    }
+
+    @Override
     public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
-        Patient patient = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, TEST_PATIENT_IDS.get(0));
+        Patient patient = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, TEST_PATIENT_MBIS.get(0));
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(patient);
         return bundle;

@@ -40,7 +40,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class BlueButtonClientTest {
     // A random example patient (Jane Doe)
     private static final String TEST_PATIENT_ID = "20140000008325";
-    private static final String TEST_PATIENT_MBI_HASH = "abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6";
+    //private static final String TEST_PATIENT_MBI = "2SW4N00AA00";
+    private static final String TEST_PATIENT_MBI_HASH = "6a288931dd0a911809e977093b1257e344fb29df3f5eacb622aadade8adcc581";
     // A patient that only has a single EOB record in bluebutton
     private static final String TEST_SINGLE_EOB_PATIENT_ID = "20140000009893";
     // A patient id that should not exist in bluebutton

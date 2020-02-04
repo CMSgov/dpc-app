@@ -31,7 +31,7 @@ public class AttributionTestHelpers {
     public static Patient createPatientResource(String MBI, String organizationID) {
         final Patient patient = new Patient();
         patient.addIdentifier()
-                .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
                 .setValue(MBI);
 
         patient.addName().setFamily("Patient").addGiven("Test");

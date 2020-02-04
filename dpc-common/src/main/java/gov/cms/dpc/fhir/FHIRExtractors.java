@@ -49,7 +49,7 @@ public class FHIRExtractors {
      * @return - {@link String} patient MBI
      */
     public static String getPatientMPI(Patient patient) {
-        return findMatchingIdentifier(patient.getIdentifier(), DPCIdentifierSystem.BENE_ID).getValue();
+        return findMatchingIdentifier(patient.getIdentifier(), DPCIdentifierSystem.MBI).getValue();
     }
 
     /**
