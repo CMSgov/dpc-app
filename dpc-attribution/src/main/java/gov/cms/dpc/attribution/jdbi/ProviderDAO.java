@@ -1,6 +1,8 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.common.entities.ProviderEntity_;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
@@ -50,20 +52,20 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> {
         List<Predicate> predicates = new ArrayList<>();
         // Always restrict by Organization
         predicates.add(builder
-                .equal(root.join("organization").get("id"),
+                .equal(root.join(ProviderEntity_.organization).get(OrganizationEntity_.id),
                         organizationID));
 
         // If we're provided a resource ID, query for that
         if (providerID != null) {
             predicates.add(builder
-                    .equal(root.get("providerID"), providerID));
+                    .equal(root.get(ProviderEntity_.id), providerID));
         }
 
         // If we've provided an NPI, use it as a query restriction.
         // Otherwise, return everything
         if (providerNPI != null && !providerNPI.isEmpty()) {
             predicates.add(builder
-                    .equal(root.get("providerNPI"),
+                    .equal(root.get(ProviderEntity_.providerNPI),
                             providerNPI));
         }
 

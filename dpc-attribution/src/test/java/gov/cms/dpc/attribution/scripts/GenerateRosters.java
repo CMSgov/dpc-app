@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.scripts;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -42,6 +43,12 @@ class GenerateRosters {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         final IGenericClient client = ctx.newRestfulGenericClient(SYNTHEA_URL);
 
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
         // Create a Bundle to hold everything
         final Bundle patientBundle = new Bundle();
 
@@ -70,7 +77,7 @@ class GenerateRosters {
 
             // Add the patient MBI to the resource
             patient.addIdentifier()
-                    .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                    .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
                     .setValue(patientMBI);
 
             // Add to the Bundle

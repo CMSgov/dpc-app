@@ -1,6 +1,7 @@
 package gov.cms.dpc.api;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
@@ -57,6 +58,12 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
         // Try for empty Macaroon
         client.registerInterceptor(new APIAuthHelpers.MacaroonsInterceptor(""));
 
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
         final IReadExecutable<Organization> fetchOrg = client
                 .read()
                 .resource(Organization.class)
@@ -67,6 +74,9 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
 
         final IGenericClient c2 = ctx.newRestfulGenericClient(getBaseURL());
         c2.registerInterceptor(new APIAuthHelpers.MacaroonsInterceptor(Base64.getUrlEncoder().encodeToString("not a valid {token}".getBytes(StandardCharsets.UTF_8))));
+
+        // Disable logging for tests
+        c2.registerInterceptor(loggingInterceptor);
 
         final IReadExecutable<Organization> fo2 = c2
                 .read()

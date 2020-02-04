@@ -46,7 +46,7 @@ public class RelationshipDAO extends AbstractDAO<AttributionRelationship> {
 
         query.where(builder.and(
                 builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID),
-                builder.equal(root.get(AttributionRelationship_.patient).get(PatientEntity_.patientID), patient)));
+                builder.equal(root.get(AttributionRelationship_.patient).get(PatientEntity_.id), patient)));
 
         return Optional.ofNullable(uniqueResult(query));
     }

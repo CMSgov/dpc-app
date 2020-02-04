@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class FhirEndpoint < ApplicationRecord
-  belongs_to :organization
+  belongs_to :registered_organization
 
   enum status: {
     'test' => 0,

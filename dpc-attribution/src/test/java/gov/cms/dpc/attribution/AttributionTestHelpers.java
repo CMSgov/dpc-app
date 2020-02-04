@@ -3,10 +3,10 @@ package gov.cms.dpc.attribution;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 
-import java.io.InputStream;
 import java.sql.Date;
 
 public class AttributionTestHelpers {
@@ -31,7 +31,7 @@ public class AttributionTestHelpers {
     public static Patient createPatientResource(String MBI, String organizationID) {
         final Patient patient = new Patient();
         patient.addIdentifier()
-                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
                 .setValue(MBI);
 
         patient.addName().setFamily("Patient").addGiven("Test");
@@ -44,6 +44,14 @@ public class AttributionTestHelpers {
 
     public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        return ctx.newRestfulGenericClient(serverURL);
+        IGenericClient client = ctx.newRestfulGenericClient(serverURL);
+
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
+        return client;
     }
 }

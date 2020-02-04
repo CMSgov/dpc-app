@@ -50,7 +50,7 @@ class ConsentCommandsTest {
     @BeforeAll
     void cliSetup() throws Exception {
 
-        app.run("db", "migrate");
+        app.run("db", "migrate", "ci.application.conf");
 
         // Redirect stdout and stderr to our byte streams
         System.setOut(new PrintStream(stdOut));

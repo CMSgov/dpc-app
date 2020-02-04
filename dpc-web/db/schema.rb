@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_20_215051) do
+ActiveRecord::Schema.define(version: 2020_02_04_135210) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,8 +49,9 @@ ActiveRecord::Schema.define(version: 2019_11_20_215051) do
     t.string "name", null: false
     t.integer "status", null: false
     t.string "uri", null: false
-    t.integer "organization_id", null: false
-    t.index ["organization_id"], name: "index_fhir_endpoints_on_organization_id"
+    t.integer "organization_id"
+    t.integer "registered_organization_id"
+    t.index ["registered_organization_id"], name: "index_fhir_endpoints_on_registered_organization_id"
   end
 
   create_table "internal_users", force: :cascade do |t|
@@ -85,14 +86,13 @@ ActiveRecord::Schema.define(version: 2019_11_20_215051) do
     t.integer "num_providers", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "api_environments", default: [], array: true
     t.string "npi"
     t.string "vendor"
   end
 
   create_table "registered_organizations", force: :cascade do |t|
     t.integer "organization_id", null: false
-    t.string "api_id", null: false
+    t.string "api_id"
     t.integer "api_env", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

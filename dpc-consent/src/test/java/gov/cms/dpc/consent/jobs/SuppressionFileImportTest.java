@@ -35,7 +35,9 @@ import static org.junit.Assert.*;
 
 public class SuppressionFileImportTest {
 
-    private static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, null, ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
+    private static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, "ci.application.conf",
+            ConfigOverride.config("server.applicationConnectors[0].port", "3727")
+    );
     private Client client;
     private ConsentDAO consentDAO;
     final Path PATH_1800_COPY = Paths.get("./src/test/resources/synthetic-1800-files/copy");

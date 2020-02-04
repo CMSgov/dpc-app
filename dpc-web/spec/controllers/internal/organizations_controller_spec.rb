@@ -37,29 +37,15 @@ RSpec.describe Internal::OrganizationsController, type: :controller do
 
     context 'authenticated internal user' do
       let!(:internal_user) { create(:internal_user) }
-      let!(:organization) { create(:organization, api_environments: []) }
-      let!(:assignment) { create(:organization_user_assignment, organization: organization) }
-      let!(:mailer) { double(UserMailer) }
+      let!(:organization) { create(:organization, name: 'Old Name') }
 
       before(:each) do
-        allow(UserMailer).to receive(:with).and_return(mailer)
-        allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
-        allow(mailer).to receive(:deliver_later)
-
         sign_in internal_user, scope: :internal_user
       end
 
-      it 'does not kick off notification if sandbox is not added' do
-        patch :update, params: { id: organization.id, organization: { api_environments: ['1']} }
-        expect(UserMailer).not_to have_received(:with)
-      end
-
-      it 'kicks off notification if sandbox is added' do
-        patch :update, params: { id: organization.id, organization: { api_environments: ['0']} }
-
-        expect(UserMailer).to have_received(:with)
-          .once.with(user: assignment.user, organization: organization)
-        expect(mailer).to have_received(:organization_sandbox_email)
+      it 'updates organization attributes' do
+        patch :update, params: { id: organization.id, organization: { name: 'New Name'} }
+        expect(organization.reload.name).to eq('New Name')
       end
     end
   end

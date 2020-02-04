@@ -9,6 +9,8 @@ import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import org.hl7.fhir.dstu3.model.*;
 
+import java.util.UUID;
+
 import static gov.cms.dpc.fhir.FHIRFormatters.INSTANT_FORMATTER;
 
 public class PatientEntityConverter implements FHIRConverter<Patient, PatientEntity> {
@@ -23,8 +25,8 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
         patient.setDob(PatientEntity.toLocalDate(resource.getBirthDate()));
         patient.setBeneficiaryID(FHIRExtractors.getPatientMPI(resource));
         final HumanName name = resource.getNameFirstRep();
-        patient.setPatientFirstName(name.getGivenAsSingleString());
-        patient.setPatientLastName(name.getFamily());
+        patient.setFirstName(name.getGivenAsSingleString());
+        patient.setLastName(name.getFamily());
         patient.setGender(resource.getGender());
 
         // Set the managing organization
@@ -34,7 +36,15 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
             organizationEntity.setId(FHIRExtractors.getEntityUUID(managingOrganization.getReference()));
             patient.setOrganization(organizationEntity);
         }
-        
+
+        // Set the ID, if one exists
+        final String id = resource.getId();
+        if (id == null) {
+            patient.setID(UUID.randomUUID());
+        } else {
+            patient.setID(UUID.fromString(new IdType(id).getIdPart()));
+        }
+
         return patient;
     }
 
@@ -48,17 +58,17 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
         meta.setLastUpdatedElement(new InstantType(entity.getUpdatedAt().format(INSTANT_FORMATTER)));
         patient.setMeta(meta);
 
-        patient.setId(entity.getPatientID().toString());
+        patient.setId(entity.getID().toString());
         patient.addName()
-                .setFamily(entity.getPatientLastName())
-                .addGiven(entity.getPatientFirstName());
+                .setFamily(entity.getLastName())
+                .addGiven(entity.getFirstName());
 
         patient.setBirthDate(PatientEntity.fromLocalDate(entity.getDob()));
         patient.setGender(entity.getGender());
 
         patient
                 .addIdentifier()
-                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
                 .setValue(entity.getBeneficiaryID());
 
         // Managing organization

@@ -146,7 +146,7 @@ public class GroupResource extends AbstractGroupResource {
                 .map(mbi -> {
                     // Generate a fake patient, with only the ID set
                     final Patient p = new Patient();
-                    p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
+                    p.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue(mbi);
                     return p;
                 })
                 .collect(Collectors.toList());
@@ -178,7 +178,7 @@ public class GroupResource extends AbstractGroupResource {
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(ref -> {
                     final PatientEntity pe = new PatientEntity();
-                    pe.setPatientID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
+                    pe.setID(UUID.fromString(new IdType(ref.getReference()).getIdPart()));
                     return pe;
                 })
                 .map(pe -> new AttributionRelationship(rosterEntity, pe))
@@ -224,7 +224,7 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .map(patient -> {
                     // Check to see if the attribution already exists, if so, re-extend the expiration time
-                    final AttributionRelationship relationship = this.relationshipDAO.lookupAttributionRelationship(rosterID, patient.getPatientID())
+                    final AttributionRelationship relationship = this.relationshipDAO.lookupAttributionRelationship(rosterID, patient.getID())
                             .orElse(new AttributionRelationship(rosterEntity, patient, now));
                     // If the relationship is inactive, then we need to update the period begin for the new membership span
                     if (relationship.isInactive()) {
@@ -264,7 +264,7 @@ public class GroupResource extends AbstractGroupResource {
                 .map(entity -> {
                     final PatientEntity patientEntity = new PatientEntity();
                     final UUID patientID = UUID.fromString(new IdType(entity.getReference()).getIdPart());
-                    patientEntity.setPatientID(patientID);
+                    patientEntity.setID(patientID);
                     return this.relationshipDAO.lookupAttributionRelationship(rosterID, patientID);
                 })
                 .map(rOptional -> rOptional.orElseThrow(() -> new WebApplicationException("Cannot find attribution relationship.", Response.Status.BAD_REQUEST)))

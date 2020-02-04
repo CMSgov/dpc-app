@@ -8,14 +8,14 @@
 
   </section>
 
-  <section class="box">
+  <section class="box box--flex">
     <div class="box__content">
       <p class="ds-text--lead">This key will be added for <strong><%= @organization.name %></strong>.</p>
 
       <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
         <div class="field ds-u-margin-y--5">
           <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
-          <%= select_tag :api_environment, options_for_select(@organization.api_environment_strings, params[:api_environment]), include_blank: true, class: "ds-c-field" %>
+          <%= select_tag :api_environment, options_for_select(@organization.registered_api_envs, params[:api_environment]), include_blank: true, class: "ds-c-field" %>
         </div>
 
         <div class="field ds-u-margin-y--5">
@@ -30,6 +30,11 @@
 
         <%= submit_tag "Add key", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
       <% end %>
+    </div>
+    <div class="box__content box--flex">
+      <p class="ds-text--lead">Copy the whole public key including the <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">BEGIN PUBLIC KEY</code> and <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">END PUBLIC KEY</code> tags before and after.</p>
+      <p><strong>Example:</strong></p>
+      <%= image_tag("public_key.svg", class: "img--outline", alt: "") %>
     </div>
   </section>
 </div>

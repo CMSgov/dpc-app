@@ -1,6 +1,9 @@
 #!/bin/bash
 set -Ee
 
+# Configure the Maven log level
+export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
+
 function _finally {
   docker-compose down
 }
@@ -52,7 +55,7 @@ docker-compose up start_api_dependencies
 mvn test -Pintegration-tests -pl dpc-api -am
 
 # Start the API server
-docker-compose up start_api
+AUTH_DISABLED=true docker-compose up start_api
 
 # Run the Postman tests
 npm install
