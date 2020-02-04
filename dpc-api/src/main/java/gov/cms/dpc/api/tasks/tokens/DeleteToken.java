@@ -16,6 +16,11 @@ import java.util.UUID;
 
 import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
 
+/**
+ * Admin task to delete a {@link gov.cms.dpc.api.entities.TokenEntity} registered for a given {@link Organization}
+ * <p>
+ * This requires `organization` and `token` query parms.
+ */
 @Singleton
 public class DeleteToken extends Task {
 
@@ -38,7 +43,6 @@ public class DeleteToken extends Task {
         }
 
         final String tokenID = tokenCollection.asList().get(0);
-
         this.resource
                 .deleteOrganizationToken(
                         new OrganizationPrincipal(organization),
