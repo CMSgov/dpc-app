@@ -77,7 +77,7 @@ The application (along with all required dependencies) can be automatically star
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
 ```bash
-docker-compose up {db,dpc-aggregation,dpc-attribution,dpc-api}
+docker-compose up {db,aggregation,attribution,api}
 ``` 
 
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always return the same value.
