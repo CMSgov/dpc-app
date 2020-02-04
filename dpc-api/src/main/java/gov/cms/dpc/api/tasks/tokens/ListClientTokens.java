@@ -1,7 +1,6 @@
-package gov.cms.dpc.api.tasks;
+package gov.cms.dpc.api.tasks.tokens;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -12,10 +11,15 @@ import org.hl7.fhir.dstu3.model.Organization;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 
+import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
+
+/**
+ * Admin task for listing {@link TokenEntity}s registered with the given {@link Organization}
+ * <p>
+ * This requries an `organization` query param.
+ */
 @Singleton
 public class ListClientTokens extends Task {
 
@@ -31,19 +35,10 @@ public class ListClientTokens extends Task {
 
     @Override
     public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) throws Exception {
-        final ImmutableCollection<String> organizationCollection = parameters.get("organization");
-
-        if (organizationCollection.isEmpty()) {
-            throw new WebApplicationException("Must have organization", Response.Status.BAD_REQUEST);
-        }
-
-        final String organizationID = organizationCollection.asList().get(0);
-        final Organization orgResource = new Organization();
-        orgResource.setId(organizationID);
+        final Organization organization = extractOrganization(parameters);
 
         final CollectionResponse<TokenEntity> organizationTokens = this.resource.getOrganizationTokens(
-                new OrganizationPrincipal(orgResource));
-
+                new OrganizationPrincipal(organization));
         this.mapper.writeValue(output, organizationTokens);
     }
 }

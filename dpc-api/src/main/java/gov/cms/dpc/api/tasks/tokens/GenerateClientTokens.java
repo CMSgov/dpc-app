@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.tasks;
+package gov.cms.dpc.api.tasks.tokens;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
