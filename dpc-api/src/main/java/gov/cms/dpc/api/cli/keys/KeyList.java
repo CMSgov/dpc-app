@@ -1,10 +1,9 @@
-package gov.cms.dpc.api.cli.tokens;
+package gov.cms.dpc.api.cli.keys;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
-import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -23,10 +22,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TokenList extends AbstractAdminCommand {
+public class KeyList extends AbstractAdminCommand {
 
-    public TokenList() {
-        super("list", "List tokens for registered Organization");
+    public KeyList() {
+        super("list", "List public keys for registered Organization.");
     }
 
     @Override
@@ -39,21 +38,19 @@ public class TokenList extends AbstractAdminCommand {
     }
 
     @Override
-    public void run(Bootstrap<?> bootstrap, Namespace namespace) throws IOException, URISyntaxException {
+    public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
-        System.out.println(String.format("Listing tokens for organization: %s.", orgReference));
+        System.out.println(String.format("Listing keys for organization: %s.", orgReference));
 
         final String apiService = namespace.getString(API_HOSTNAME);
         System.out.println(String.format("Connecting to API service at: %s", apiService));
-
-        listTokens(apiService, orgReference);
+        listKeys(apiService, orgReference);
     }
 
-    private void listTokens(String apiService, String organization) throws IOException, URISyntaxException {
-        // List all the tokens
+    private void listKeys(String apiService, String organization) throws IOException, URISyntaxException {
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final URIBuilder builder = new URIBuilder(String.format("%s/list-tokens", apiService));
+            final URIBuilder builder = new URIBuilder(String.format("%s/list-keys", apiService));
             builder.addParameter("organization", new IdType(organization).getIdPart());
             final HttpPost tokenPost = new HttpPost(builder.build());
 
@@ -63,23 +60,20 @@ public class TokenList extends AbstractAdminCommand {
                     System.exit(1);
                 }
 
-                CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
+                CollectionResponse<PublicKeyEntity> keys = mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<PublicKeyEntity>>() {
                 });
-                generateTable(new ArrayList<>(tokens.getEntities()));
+                generateTable(new ArrayList<>(keys.getEntities()));
             }
         }
     }
 
-    private void generateTable(List<TokenEntity> tokens) {
-        // Generate the table
-        final String[] headers = {"Token ID", "Label", "Type", "Created At", "Expires At"};
+    private void generateTable(List<PublicKeyEntity> keys) {
+        final String[] headers = {"Key ID", "Label", "Created At"};
 
-        System.out.println(FlipTable.of(headers, tokens
+        System.out.println(FlipTable.of(headers, keys
                 .stream()
-                .map(token -> new String[]{token.getId(),
-                        token.getLabel(),
-                        token.getTokenType().toString(),
-                        token.getCreatedAt().format(DateTimeFormatter.ISO_DATE_TIME),
-                        token.getExpiresAt().format(DateTimeFormatter.ISO_DATE_TIME)}).toArray(String[][]::new)));
+                .map(key -> new String[]{key.getId().toString(),
+                        key.getLabel(),
+                        key.getCreatedAt().format(DateTimeFormatter.ISO_DATE_TIME)}).toArray(String[][]::new)));
     }
 }
