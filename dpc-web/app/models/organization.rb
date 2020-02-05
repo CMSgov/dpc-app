@@ -17,6 +17,10 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
+  has_secure_token :vendor_id
+  # has_secure_token :vendor, if: :vendor <--- does not work (throws an error)
+
+  after_create :create_vendor_id
   after_update :update_registered_organizations
 
   scope :vendor, -> { where(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
@@ -36,6 +40,10 @@ class Organization < ApplicationRecord
 
   def api_credentialable?
     registered_organizations.count.positive? && npi.present?
+  end
+
+  def create_vendor_id
+    # binding.pry
   end
 
   def registered_api_envs
