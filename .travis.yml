@@ -6,11 +6,15 @@ env:
     # The RAILS_MASTER_KEY
     - secure: 5+IeEXflMPvZ2hIHsf1sHq+eY2q1J5PXF8tVHH4J39rWMar1jB0hgjJ9X+q6vDr3oRWTcxOYFyZB0O3Kg1t80op8ywisKU5SGOuYOyvl1wBo8+1meJ95B+pku/5+3zS+mTLj7nhZJWoIByaZvNRNCvUCm8kKCRlEe0LzJ3d8wIf8KqlgledrYdYN+/kqAxPxqMMafkN4hzJvcCmy76/28fhoo47ZmPe4jR2HTDJjUjgJRxUYNehUEKYFTw2d2eS029tFjdLDfKY8FvWGzx0xXVnYK/o1Jv6woE10N+zVQRoGrmW2AFALgupfTt5ROda+SRF4pnrGc90ELvR9Agj3zpKE56LbB1q8Qwcv7+USrsBI+vEiFkW5WL33Z2UJYanRVbCxVKeBAWv9y8N6ngD8dGyHHS5PJB+crY7Q9Tynva2+ygMy174L/0lMqjmRVJEbGSHjD7Lmc6uxcKVMWRo4UIhjxEZ/OPcP352Tz2kQ+717BGnGYrFI7tKvOc7gt2DtD8iaLtNPRjWOA87FFDJ/w1XfvQsFiMkEdR/K7iEzfBV61mJ33JyMEu3tpiw/fhz5XayFbJg4eeeqS2AaFYQSVBFRNnRjbrLFIbO1SiCPjeTmGYTq09m+f9DIti9b5oLbaEfJo+K+oc0/xgvoM+HrhQe9Y7HQkwoIAUyAmrc0WMY=
     - REPORT_COVERAGE=true
+    # VAULT_PW
+    - secure: mIdRO4fmFO9+aa2fwyLR4aOsdRsHa5vF+IWmPZ6EA39dCqm9+MbEOgKJL6han7xTBQDzhnx/SYS8wT/o+gIaV58BKUnyYCh12A+l+yNRKrmH03xpXaXjU/vtbOWoiu6l3mwSDGND5u1e1+CVTBVZS+c8+lsDIyYqXnceWebuvpR+7tuc1L/2Q0MFmT8P+VgtuBs4DZD+Mu2ea83zXvvMwzYvSKYqTXjo+74tuaLtlnjg9UqicrkJUVpmPgm9TRafodvEnqtuKyDhicwcfOaEDJtovJzjiV5As1TQ3OcvLL/dXm8terhRoivfYXjwPSCCNOxk1VM5hRWbFmknP5/DXm7oJX1zGwmsjQXmJzovTpd6lOQQ8lqFGyp1HZgv5UtHBcNNaaPH4ARGE9gOdS+JI8duD48ubCwwJHEoX0sahv7iBLx8o5kRFN45e+XU7uJGYhDAoU+YkYzX6dweDWyaUvMEDoUO9vYBl1q6l9o8v689sA6NdNha8OUYIohqvEFMfi3+5KOnRcSlcha6yfm9UdaYSXvofjzv841qtVv1N25Lm2O3zyjIIRCYcqMvdbO13DY9bZjvA+GAhOgfWUH7YSXQTDupD4FCGRnDrm1qNp57r47EPvvhnntidt8Bjz9PQQrrZt1c2ldfBEKNvJMNMOYBhWGul4TyzR91pWzxlNA=
 
 dist: xenial
 language: java
 jdk:
   - openjdk11
+python:
+  - 3.8.1
 
 cache:
   directories:
@@ -30,3 +34,9 @@ jobs:
 
 before_install:
   - sudo /etc/init.d/postgresql stop
+
+before_script:
+  - sudo pip install ansible
+  - echo $VAULT_PW > /home/travis/build/CMSgov/dpc-app/ops/.vault_password
+  - bash /home/travis/build/CMSgov/dpc-app/ops/scripts/secrets --decrypt
+  - mv -fv /home/travis/build/CMSgov/dpc-app/ops/config/encrypted/* /home/travis/build/CMSgov/dpc-app/ops/config/decrypted/
