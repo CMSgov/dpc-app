@@ -12,7 +12,7 @@ make website
 
 # Run the tests
 docker-compose -f dpc-web/docker-compose.yml up start_core_dependencies
-docker-compose -f dpc-web/docker-compose.yml run web bundle exec rails db:create db:migrate db:seed
+docker-compose -f dpc-web/docker-compose.yml run web bundle exec rails db:create db:migrate RAILS_ENV=test
 docker-compose -f dpc-web/docker-compose.yml run web bundle exec rails spec
 
 echo "┌──────────────────────────────────┐"
