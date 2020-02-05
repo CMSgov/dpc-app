@@ -29,12 +29,12 @@ public class FHIRBuilders {
     /**
      * Generates a {@link Patient} resource which contains an associated Medicare Beneficiary ID (MBI)
      *
-     * @param MPI - {@link} MPI of provider to use
-     * @return - {@link Patient} with associated MPI as an Identifier
+     * @param mbi - {@link} MBI of provider to use
+     * @return - {@link Patient} with associated MBI as an Identifier
      */
-    public static Patient buildPatientFromMBI(String MPI) {
+    public static Patient buildPatientFromMBI(String mbi) {
         final Patient patient = new Patient();
-        patient.addIdentifier().setValue(MPI).setSystem(DPCIdentifierSystem.BENE_ID.getSystem());
+        patient.addIdentifier().setValue(mbi).setSystem(DPCIdentifierSystem.BENE_ID.getSystem());
 
         return patient;
     }
