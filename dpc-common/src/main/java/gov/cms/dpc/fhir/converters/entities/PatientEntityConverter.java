@@ -23,7 +23,7 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
     public PatientEntity fromFHIR(FHIREntityConverter converter, Patient resource) {
         final PatientEntity patient = new PatientEntity();
         patient.setDob(PatientEntity.toLocalDate(resource.getBirthDate()));
-        patient.setBeneficiaryID(FHIRExtractors.getPatientMPI(resource));
+        patient.setBeneficiaryID(FHIRExtractors.getPatientMBI(resource));
         final HumanName name = resource.getNameFirstRep();
         patient.setFirstName(name.getGivenAsSingleString());
         patient.setLastName(name.getFamily());
