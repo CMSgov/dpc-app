@@ -4,6 +4,7 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.PEMParser;
@@ -20,12 +21,10 @@ import java.security.spec.X509EncodedKeySpec;
 
 public class PublicKeyHandler {
 
-    static final ASN1ObjectIdentifier RSA_PARENT = new ASN1ObjectIdentifier("1.2.840.113549");
-    static final ASN1ObjectIdentifier ECC_KEY = new ASN1ObjectIdentifier("1.2.840.10045.2.1");
     // ECC Curve names are defined here: https://tools.ietf.org/search/rfc4492#section-5.1.1
     // They're in two separate namespaces, certicom and ansi-x962
-    static final ASN1ObjectIdentifier SECP256_KEY = new ASN1ObjectIdentifier("1.2.840.10045.3.1.7");
-    static final ASN1ObjectIdentifier SECP384_KEY = new ASN1ObjectIdentifier("1.3.132.0.34");
+    static final ASN1ObjectIdentifier RSA_PARENT = new ASN1ObjectIdentifier("1.2.840.113549");
+    static final ASN1ObjectIdentifier ECC_KEY = new ASN1ObjectIdentifier("1.2.840.10045.2.1");
 
     private PublicKeyHandler() {
         // Not used
@@ -108,7 +107,7 @@ public class PublicKeyHandler {
     private static void validateECCKey(SubjectPublicKeyInfo value) {
         // Verify we have a supported curve, which is currently secp256r1 or secp384r1
         final ASN1Primitive curveName = value.getAlgorithm().getParameters().toASN1Primitive();
-        if (!(curveName.equals(SECP256_KEY) || curveName.equals(SECP384_KEY))) {
+        if (!(curveName.equals(SECObjectIdentifiers.secp256k1) || curveName.equals(SECObjectIdentifiers.secp384r1))) {
             throw new PublicKeyException(String.format("ECC curve `%s` is not supported.", curveName.toString()));
         }
     }
