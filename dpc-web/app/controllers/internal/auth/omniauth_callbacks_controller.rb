@@ -8,8 +8,8 @@ module Internal
       # You should configure your model like this:
       # devise :omniauthable, omniauth_providers: [:twitter]
 
-      def github
-        if valid_org_team?
+      def oktaoauth
+        if authorized_internal_user?
           @internal_user = InternalUser.from_omniauth(request.env['omniauth.auth'])
           flash[:notice] = "You have successfully signed in as #{@internal_user.email || @internal_user.name}"
           sign_in_and_redirect @internal_user
@@ -38,16 +38,10 @@ module Internal
       #   super(scope)
       # end
 
-      def valid_org_team?
-        github_client.user_teams.any? do |team|
-          team[:id].to_s == ENV.fetch('GITHUB_ORG_TEAM_ID')
-        end
-      end
-
-      def github_client
-        @github_client ||= Octokit::Client.new(
-          access_token: request.env['omniauth.auth']['credentials']['token']
-        )
+      # TODO: Right now this means the email domain must be cms.hhs.gov (or mine) and should be changed.
+      def authorized_internal_user?
+        email = request.env['omniauth.auth']['info']['email']
+        email.match(/@cms.hhs.gov\z/) || email == 'shelbyswitzer@gmail.com'
       end
     end
   end

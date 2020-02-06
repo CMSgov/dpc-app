@@ -87,14 +87,18 @@ export DB_PASS=password
 export DATABASE_URL=postgresql://localhost/dpc-website_development
 ```
 
-You also need to set the Github ENV variables to enable Github OAuth login for internal users:
+You also need to set the Okta ENV variables to enable Okta OAuth login for internal users:
 
 ```
-export GITHUB_APP_ID=xxx
-export GITHUB_APP_SECRET=yyy
-export GITHUB_ORG_TEAM_ID=123
+export OKTA_CLIENT_ID=aaa
+export OKTA_CLIENT_SECRET=bbb
+export OKTA_ORG=
+export OKTA_DOMAIN=
+export OKTA_URL=
+export OKTA_ISSUER=
+export OKTA_AUTH_SERVER_ID="default"
+export OKTA_REDIRECT_URI="http://localhost:3000/internal/auth/oktaoauth/callback"
 ```
-
 
 #### Background job processing
 In order to process background jobs such as sending email, you need to make sure [DelayedJob](https://github.com/collectiveidea/delayed_job) is running:
