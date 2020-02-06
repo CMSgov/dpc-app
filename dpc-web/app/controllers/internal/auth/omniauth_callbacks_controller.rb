@@ -9,6 +9,7 @@ module Internal
       # devise :omniauthable, omniauth_providers: [:twitter]
 
       def oktaoauth
+        binding.pry
         if authorized_internal_user?
           @internal_user = InternalUser.from_omniauth(request.env['omniauth.auth'])
           flash[:notice] = "You have successfully signed in as #{@internal_user.email || @internal_user.name}"

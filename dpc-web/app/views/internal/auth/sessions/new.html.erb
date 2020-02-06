@@ -5,6 +5,9 @@
     <div class="card card--border-top card--shadow">
       <h1 class="ds-u-margin-top--0">Log in</h1>
 
+      <div id='widget'>
+      </div>
+
       <p>
         <%= link_to "Sign in with Okta", internal_user_oktaoauth_omniauth_authorize_path, method: :post, data: { test: 'internal-user-sign-in-form' } %>
       </p>
