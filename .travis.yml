@@ -37,6 +37,6 @@ before_install:
 
 before_script:
   - sudo pip install ansible
-  - echo $VAULT_PW > /home/travis/build/CMSgov/dpc-app/ops/.vault_password
+  - echo $VAULT_PW > /home/travis/build/CMSgov/dpc-app/.vault_password
   - bash /home/travis/build/CMSgov/dpc-app/ops/scripts/secrets --decrypt
   - mv -fv /home/travis/build/CMSgov/dpc-app/ops/config/encrypted/* /home/travis/build/CMSgov/dpc-app/ops/config/decrypted/
