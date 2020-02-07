@@ -27,7 +27,7 @@ public class ListClientTokens extends Task {
     private final ObjectMapper mapper;
 
     @Inject
-    ListClientTokens(TokenResource resource) {
+    public ListClientTokens(TokenResource resource) {
         super("list-tokens");
         this.resource = resource;
         this.mapper = new ObjectMapper();
