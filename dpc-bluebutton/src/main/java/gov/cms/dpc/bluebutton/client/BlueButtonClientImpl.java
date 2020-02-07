@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.utils.MetricMaker;
@@ -57,7 +56,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         return "Patient/" + fromPatientID;
     }
 
-    public BlueButtonClientImpl(IGenericClient client, BBClientConfiguration config, MetricRegistry metricRegistry) {
+    public BlueButtonClientImpl(@Named("bbclient") IGenericClient client, BBClientConfiguration config, MetricRegistry metricRegistry) {
         this.client = client;
         this.config = config;
         final var metricMaker = new MetricMaker(metricRegistry, BlueButtonClientImpl.class);
@@ -229,15 +228,15 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                                                          DateRangeParam lastUpdated) {
         IQuery<IBaseBundle> query = client.search()
                 .forResource(resourceClass)
-                .where(criteria.remove(0));
+                .where(criteria.get(0));
 
-        for (ICriterion<? extends IParam> criterion : criteria) {
+        for (ICriterion<? extends IParam> criterion : criteria.subList(1, criteria.size())) {
             query = query.and(criterion);
         }
 
         final Bundle bundle = query
-                .lastUpdated(lastUpdated)
                 .count(config.getResourcesCount())
+                .lastUpdated(lastUpdated)
                 .returnBundle(Bundle.class)
                 .execute();
 

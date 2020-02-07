@@ -1,5 +1,7 @@
 dpc {
   api {
+    bbclient.keyStore.location = "bbcerts/bb.keystore"
+
     server {
       registerDefaultExceptionMappers = false
       applicationConnectors = [{
