@@ -31,6 +31,14 @@ if [ -n "$REPORT_COVERAGE" ]; then
   ./cc-test-reporter before-build
 fi
 
+# Decrypt local environment configuration
+if [ ! -z $VAULT_PW ] && [ ! -f .vault_password ]; then
+  echo $VAULT_PW > .vault_password
+fi
+bash ops/scripts/secrets --decrypt
+cp -fv ops/config/encrypted/* ops/config/decrypted/
+bash ops/scripts/secrets --encrypt
+
 # Build the application
 docker-compose up start_core_dependencies
 mvn clean compile -Perror-prone -B -V
@@ -76,6 +84,8 @@ if [ -n "$REPORT_COVERAGE" ]; then
     ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
     ./cc-test-reporter upload-coverage
 fi
+
+rm ops/config/decrypted/*.env
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"
