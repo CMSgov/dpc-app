@@ -29,7 +29,6 @@ import org.mockserver.model.Parameter;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.sql.Date;
 import java.util.Collections;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -68,7 +67,7 @@ class BlueButtonClientTest {
         final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
 
-        mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));
+        mockServer = ClientAndServer.startClientAndServer(8083);
         createMockServerExpectation("/v1/fhir/metadata", HttpStatus.OK_200, getRawXML(METADATA_PATH), List.of());
 
         for (String patientId : TEST_PATIENT_IDS) {
@@ -95,6 +94,7 @@ class BlueButtonClientTest {
                     List.of(
                             Parameter.param("patient", patientId),
                             Parameter.param("excludeSAMHSA", "true"),
+                            Parameter.param("_count", "10"),
                             Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
 
@@ -104,6 +104,7 @@ class BlueButtonClientTest {
                     getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
                     List.of(
                             Parameter.param("beneficiary", "Patient/" + patientId),
+                            Parameter.param("_count", "10"),
                             Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
         }
@@ -113,6 +114,17 @@ class BlueButtonClientTest {
                 HttpStatus.OK_200,
                 getRawXML(SAMPLE_PATIENT_PATH_PREFIX + TEST_PATIENT_ID + ".xml"),
                 Collections.singletonList(Parameter.param("identifier", DPCIdentifierSystem.MBI_HASH.getSystem() + "|" + TEST_PATIENT_MBI_HASH))
+        );
+
+        createMockServerExpectation(
+            "/v1/fhir/ExplainationOfBenefit", 
+            HttpStatus.OK_200, 
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"), 
+            List.of(
+                    Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
+                    Parameter.param("excludeSAMHSA", "true"),
+                    Parameter.param("_count", "10"),
+                    Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
         );
 
         // Create mocks for pages of the results
@@ -245,13 +257,13 @@ class BlueButtonClientTest {
     void shouldThrowExceptionWhenResourceNotFound() {
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID, TEST_LAST_UPDATED),
+                () -> bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID, null),
                 "BlueButton client should throw exceptions when asked to retrieve a non-existent patient"
         );
 
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID, TEST_LAST_UPDATED),
+                () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID, null),
                 "BlueButton client should throw exceptions when asked to retrieve EOBs for a non-existent patient"
         );
     }
@@ -284,7 +296,7 @@ class BlueButtonClientTest {
      * @param qStringParams The query string parameters that must be present to generate this response
      */
     private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams) {
-        new MockServerClient("localhost", conf.getInt("test.mockServerPort"))
+        new MockServerClient("localhost", 8083)
                 .when(
                         HttpRequest.request()
                                 .withMethod("GET")

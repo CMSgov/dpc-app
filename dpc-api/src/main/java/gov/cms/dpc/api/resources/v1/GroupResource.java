@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
@@ -58,7 +59,7 @@ public class GroupResource extends AbstractGroupResource {
     private final BlueButtonClient bfdClient;
 
     @Inject
-    public GroupResource(IJobQueue queue, IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient) {
+    public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient) {
         this.queue = queue;
         this.client = client;
         this.baseURL = baseURL;
