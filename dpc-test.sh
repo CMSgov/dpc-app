@@ -32,12 +32,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 # Decrypt local environment configuration
-if [ ! -z $VAULT_PW ] && [ ! -f .vault_password ]; then
-  echo $VAULT_PW > .vault_password
-fi
-bash ops/scripts/secrets --decrypt
-cp -fv ops/config/encrypted/* ops/config/decrypted/
-bash ops/scripts/secrets --encrypt
+export $(bash ops/scripts/secrets --decrypt | tail -n +3 | sed -e'/^$/d' -e '/^#/d' | xargs)
 
 # Build the application
 docker-compose up start_core_dependencies
@@ -84,8 +79,6 @@ if [ -n "$REPORT_COVERAGE" ]; then
     ./cc-test-reporter sum-coverage reports/codeclimate.* -o coverage/codeclimate.json
     ./cc-test-reporter upload-coverage
 fi
-
-rm ops/config/decrypted/*.env
 
 echo "┌──────────────────────────────────────────┐"
 echo "│                                          │"

@@ -20,8 +20,6 @@ services:
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
-    env_file:
-      - ./ops/config/decrypted/local.env
     depends_on:
       - db
     volumes:
