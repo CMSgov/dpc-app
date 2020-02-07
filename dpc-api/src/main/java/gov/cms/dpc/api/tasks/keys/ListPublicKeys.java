@@ -27,7 +27,7 @@ public class ListPublicKeys extends Task {
     private final ObjectMapper mapper;
 
     @Inject
-    ListPublicKeys(KeyResource resource) {
+    public ListPublicKeys(KeyResource resource) {
         super("list-keys");
         this.resource = resource;
         this.mapper = new ObjectMapper();
