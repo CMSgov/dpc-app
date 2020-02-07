@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.tasks.keys;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
@@ -27,7 +28,7 @@ public class UploadPublicKey extends PostBodyTask {
     private final ObjectMapper mapper;
 
     @Inject
-    UploadPublicKey(KeyResource resource) {
+    public UploadPublicKey(KeyResource resource) {
         super("upload-key");
         this.resource = resource;
         this.mapper = new ObjectMapper();
@@ -36,8 +37,16 @@ public class UploadPublicKey extends PostBodyTask {
     @Override
     public void execute(ImmutableMultimap<String, String> parameters, String body, PrintWriter output) throws Exception {
         final Organization organization = TasksCommon.extractOrganization(parameters);
+        final ImmutableCollection<String> labelParams = parameters.get("label");
 
-        final PublicKeyEntity publicKeyEntity = this.resource.submitKey(new OrganizationPrincipal(organization), body, Optional.empty());
+        final Optional<String> label;
+        if (labelParams.isEmpty()) {
+            label = Optional.empty();
+        } else {
+            label = Optional.ofNullable(labelParams.asList().get(0));
+        }
+
+        final PublicKeyEntity publicKeyEntity = this.resource.submitKey(new OrganizationPrincipal(organization), body, label);
         this.mapper.writeValue(output, publicKeyEntity);
     }
 }

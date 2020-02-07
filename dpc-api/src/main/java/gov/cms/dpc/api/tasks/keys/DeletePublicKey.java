@@ -27,7 +27,7 @@ public class DeletePublicKey extends Task {
     private final KeyResource resource;
 
     @Inject
-    DeletePublicKey(KeyResource resource) {
+    public DeletePublicKey(KeyResource resource) {
         super("delete-key");
         this.resource = resource;
     }
