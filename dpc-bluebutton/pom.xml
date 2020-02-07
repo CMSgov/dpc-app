@@ -13,7 +13,7 @@
     <name>DPC BlueButton Interaction Client</name>
 
     <properties>
-        <mockserverVersion>5.8.1</mockserverVersion>
+        <mockserverVersion>5.9.0</mockserverVersion>
     </properties>
 
     <dependencies>
@@ -70,6 +70,11 @@
           <version>0.4.0-SNAPSHOT</version>
           <scope>compile</scope>
        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bouncey.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
