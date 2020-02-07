@@ -32,7 +32,7 @@ public class GenerateClientTokens extends Task {
     private final TokenResource resource;
 
     @Inject
-    GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
+    public GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
         super("generate-token");
         this.bakery = bakery;
         this.resource = resource;

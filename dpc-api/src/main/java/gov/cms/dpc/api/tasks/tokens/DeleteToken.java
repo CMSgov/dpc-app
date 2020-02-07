@@ -27,7 +27,7 @@ public class DeleteToken extends Task {
     private final TokenResource resource;
 
     @Inject
-    DeleteToken(TokenResource resource) {
+    public DeleteToken(TokenResource resource) {
         super("delete-token");
         this.resource = resource;
     }
