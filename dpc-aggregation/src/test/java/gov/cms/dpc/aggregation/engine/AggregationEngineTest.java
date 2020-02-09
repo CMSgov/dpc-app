@@ -77,7 +77,7 @@ class AggregationEngineTest {
      */
     @Test
     void mockBlueButtonClientTest() {
-        Patient patient = bbclient.requestPatientFromServer(MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)));
+        Bundle patient = bbclient.requestPatientFromServer(MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)), null);
         assertNotNull(patient);
     }
 
@@ -187,7 +187,7 @@ class AggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Work the batch
@@ -218,7 +218,7 @@ class AggregationEngineTest {
                 new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Work the batch
@@ -248,7 +248,7 @@ class AggregationEngineTest {
                 Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Assert the queue size
@@ -270,7 +270,7 @@ class AggregationEngineTest {
                 new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
                 JobQueueBatch.validResourceTypes,
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Work the batch
@@ -308,7 +308,7 @@ class AggregationEngineTest {
                 new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
                 Arrays.asList(ResourceType.Patient),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Work the batch
@@ -344,7 +344,7 @@ class AggregationEngineTest {
                 List.of(),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Work the batch
@@ -376,7 +376,7 @@ class AggregationEngineTest {
                 new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
                 Collections.singletonList(ResourceType.Schedule),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Work the batch
@@ -436,7 +436,7 @@ class AggregationEngineTest {
                 mbis,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Work the batch
@@ -544,7 +544,7 @@ class AggregationEngineTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(ResourceType.Patient),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC)
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Work the batch
