@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -253,15 +254,37 @@ public class JobResourceTest {
      * Test building extension for a file.
      */
     @Test
-    public void testBuildExtension() {
+    public void testBuildOutputEntryExtension() {
         final var resource = new JobResource(null, "");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), ResourceType.Patient, 0, 11);
         file.setChecksum(Hex.decode("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b"));
         file.setFileLength(7202L);
-        List<JobCompletionModel.OutputEntryExtension> extension = resource.buildExtension(file);
+        List<JobCompletionModel.FhirExtension> extension = resource.buildOutputEntryExtension(file);
         assertAll(() -> assertEquals(JobCompletionModel.CHECKSUM_URL, extension.get(0).getUrl()),
                 () -> assertEquals("sha256:9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b", extension.get(0).getValueString()),
                 () -> assertEquals(JobCompletionModel.FILE_LENGTH_URL, extension.get(1).getUrl()),
                 () -> assertEquals(7202L, extension.get(1).getValueDecimal()));
+    }
+
+    @Test
+    public void testBuildJobExtension() {
+        final var resource = new JobResource(null, "");
+        final var batch = new JobQueueBatch(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "1",
+                Collections.emptyList(),
+                Collections.emptyList(),
+                null,
+                OffsetDateTime.now());
+        final var aggregatorId = UUID.randomUUID();
+        batch.setRunningStatus(aggregatorId);
+        batch.setCompletedStatus(aggregatorId);
+        List<JobCompletionModel.FhirExtension> extension = resource.buildJobExtension(Collections.singletonList(batch));
+        assertAll(
+                () -> assertEquals(JobCompletionModel.SUBMIT_TIME_URL, extension.get(0).getUrl()),
+                () -> assertEquals(batch.getSubmitTime().orElseThrow(), extension.get(0).getValueDateTime()),
+                () -> assertEquals(JobCompletionModel.COMPLETE_TIME_URL, extension.get(1).getUrl()),
+                () -> assertEquals(batch.getCompleteTime().orElseThrow(), extension.get(1).getValueDateTime()));
     }
 }

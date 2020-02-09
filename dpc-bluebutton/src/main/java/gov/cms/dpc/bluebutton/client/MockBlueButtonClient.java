@@ -14,6 +14,11 @@ import java.io.InputStream;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +28,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
+
     public static final List<String> TEST_PATIENT_MBIS = List.of("2SW4N00AA00", "4SP0P00AA00");
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
             TEST_PATIENT_MBIS.get(0), "-20140000008325",
@@ -34,6 +40,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
     public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
+    public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
 
     private final IParser parser;
 
@@ -83,7 +90,9 @@ public class MockBlueButtonClient implements BlueButtonClient {
         var path = SAMPLE_EOB_PATH_PREFIX + patient + "_" + startIndex + ".xml";
 
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path)) {
-            return parser.parseResource(Bundle.class, sampleData);
+            final var nextBundle = parser.parseResource(Bundle.class, sampleData);
+            nextBundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
+            return nextBundle;
         } catch(IOException ex) {
             throw new ResourceNotFoundException("Missing next bundle");
         }
@@ -113,7 +122,9 @@ public class MockBlueButtonClient implements BlueButtonClient {
      */
     private Bundle loadBundle(String pathPrefix, String beneId) {
         try(InputStream sampleData = loadResource(pathPrefix, beneId)) {
-            return parser.parseResource(Bundle.class, sampleData);
+            final var bundle = parser.parseResource(Bundle.class, sampleData);
+            bundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
+            return bundle;
         } catch(IOException ex) {
             throw formNoPatientException(beneId);
         }
