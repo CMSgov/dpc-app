@@ -39,8 +39,7 @@ class BatchAggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
 
     // lastUpdate date range to test
-    private static final OffsetDateTime TEST_SINCE = OffsetDateTime.now(ZoneOffset.UTC);
-    private static final OffsetDateTime TEST_TRANSACTION_TIME = TEST_SINCE.plusSeconds(10);
+    private static final OffsetDateTime TEST_SINCE = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(10);
 
     private IJobQueue queue;
     private AggregationEngine engine;
@@ -85,7 +84,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 TEST_SINCE,
-                TEST_TRANSACTION_TIME
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job
@@ -120,7 +119,7 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
                 JobQueueBatch.validResourceTypes,
                 TEST_SINCE,
-                TEST_TRANSACTION_TIME
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job
@@ -158,7 +157,7 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
                 TEST_SINCE,
-                TEST_TRANSACTION_TIME
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job

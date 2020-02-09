@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -85,6 +86,7 @@ class ResourceFetcher {
      */
     private List<Resource> fetchAllBundles(Bundle firstBundle, String fetchId) {
         final var resources = new ArrayList<Resource>();
+        checkBundleTransactionTime(firstBundle);
         addResources(resources, firstBundle);
 
         // Loop until no more next bundles
@@ -92,6 +94,7 @@ class ResourceFetcher {
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {
             logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), fetchId);
             bundle = blueButtonClient.requestNextBundleFromServer(bundle);
+            checkBundleTransactionTime(bundle);
             addResources(resources, bundle);
         }
 
@@ -126,13 +129,7 @@ class ResourceFetcher {
     private Bundle fetchFirst(String mbi) {
         Patient patient = fetchPatient(mbi);
         var beneId = getBeneIdFromPatient(patient);
-        // Note: FHIR bulk spec says that since is exclusive and transactionTime is inclusive
-        // It is also says that all resources should not have lastUpdated after the transactionTime.
-        // This is true for the both the since and the non-since cases.
-        // BFD will include resources that do not have a lastUpdated if there isn't a complete range.
-        final var lastUpdated = since != null ?
-                new DateRangeParam().setUpperBoundInclusive(Date.from(transactionTime.toInstant())).setLowerBoundExclusive(Date.from(since.toInstant())) :
-                new DateRangeParam().setUpperBoundInclusive(Date.from(transactionTime.toInstant()));
+        final var lastUpdated = formLastUpdatedParam();
         switch (resourceType) {
             case Patient:
                 return blueButtonClient.requestPatientFromServer(beneId, lastUpdated);
@@ -214,5 +211,41 @@ class ResourceFetcher {
                 .setDetails(new CodeableConcept().setText(details))
                 .setLocation(patientLocation);
         return outcome;
+    }
+
+    /**
+     * Form a date range for the lastUpdated parameter for this export job
+     *
+     * @return a date range for this job
+     */
+    private DateRangeParam formLastUpdatedParam() {
+        // Note: FHIR bulk spec says that since is exclusive and transactionTime is inclusive
+        // It is also says that all resources should not have lastUpdated after the transactionTime.
+        // This is true for the both the since and the non-since cases.
+        // BFD will include resources that do not have a lastUpdated if there isn't a complete range.
+        return since != null ?
+                new DateRangeParam()
+                        .setUpperBoundInclusive(Date.from(transactionTime.toInstant()))
+                        .setLowerBoundExclusive(Date.from(since.toInstant())) :
+                new DateRangeParam()
+                        .setUpperBoundInclusive(Date.from(transactionTime.toInstant()));
+    }
+
+    /**
+     * Check the transaction time of the bundle against the transaction time of the export job
+     *
+     * @param bundle to check
+     */
+    private void checkBundleTransactionTime(Bundle bundle) {
+        if (bundle.getMeta() == null || bundle.getMeta().getLastUpdated() == null) return;
+        final var bundleTransactionTime = bundle.getMeta().getLastUpdated().toInstant().atOffset(ZoneOffset.UTC);
+        if (bundleTransactionTime.isBefore(transactionTime)) {
+            logger.info("About to throw an BFD Runtime: bundle {}, job {}", bundleTransactionTime, transactionTime);
+            /**
+             * See BFD's RFC0004 for a discussion on why this type error may occur.
+             * Note: Retrying after a delay may fix this problem.
+             */
+            throw new RuntimeException("BFD's transaction time regression");
+        }
     }
 }
