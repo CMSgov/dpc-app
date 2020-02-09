@@ -31,9 +31,6 @@ if [ -n "$REPORT_COVERAGE" ]; then
   ./cc-test-reporter before-build
 fi
 
-# Decrypt local environment configuration
-export $(bash ops/scripts/secrets --decrypt | tail -n +3 | sed -e'/^$/d' -e '/^#/d' | xargs)
-
 # Build the application
 docker-compose up start_core_dependencies
 mvn clean compile -Perror-prone -B -V
