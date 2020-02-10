@@ -42,7 +42,7 @@
         <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
         <hapi.fhir.groupID>${jitpack.groupID}.hapi-fhir</hapi.fhir.groupID>
         <hapi.fhir.version>72317801c7ef73c62b1ab236a4a1666d94c47a3a</hapi.fhir.version>
-        <pgsql.version>42.2.9</pgsql.version>
+        <pgsql.version>42.2.10</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
@@ -97,6 +97,12 @@
             <name>Ron Heft</name>
             <email>ronald.k.heft@omb.eop.gov</email>
             <organization>United States Digital Service</organization>
+        </developer>
+        <developer>
+            <id>will</id>
+            <name>Will Huang</name>
+            <email>will.huang@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
         </developer>
     </developers>
 

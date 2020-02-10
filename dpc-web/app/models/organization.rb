@@ -13,6 +13,7 @@ class Organization < ApplicationRecord
   validates :organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :name, uniqueness: true, presence: true
   validates :npi, uniqueness: { allow_blank: true }
+  validates :vendor_id, uniqueness: { allow_blank: true }
 
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
