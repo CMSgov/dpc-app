@@ -103,7 +103,7 @@ public class PatientResource extends AbstractPatientResource {
     public Response createPatient(Patient patient) {
 
         final UUID organizationID = FHIRExtractors.getEntityUUID(patient.getManagingOrganization().getReference());
-        final String patientMPI = FHIRExtractors.getPatientMPI(patient);
+        final String patientMPI = FHIRExtractors.getPatientMBI(patient);
 
         final Response.Status status;
         final PatientEntity entity;

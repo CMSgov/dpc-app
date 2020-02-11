@@ -12,7 +12,7 @@
     <entry>
         <resource>
             <Patient xmlns="http://hl7.org/fhir">
-                <id value="20140000008325"/>
+                <id value="-20140000008325"/>
                 <extension url="https://bluebutton.cms.gov/resources/variables/race">
                     <valueCoding>
                         <system value="https://bluebutton.cms.gov/resources/variables/race"/>
@@ -22,11 +22,11 @@
                 </extension>
                 <identifier>
                     <system value="https://bluebutton.cms.gov/resources/variables/bene_id"/>
-                    <value value="20140000008325"/>
+                    <value value="-20140000008325"/>
                 </identifier>
                 <identifier>
-                    <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"/>
-                    <value value="2025fbc612a884853f0c245e686780bf748e5652360ecd7430575491f4e018c5"/>
+                    <system value="http://bluebutton.cms.hhs.gov/identifier#hicnHash"/>
+                    <value value="ee78989d1d9ba0b98f3cfbd52479f10c7631679c17563186f70fbef038cc9536"/>
                 </identifier>
                 <identifier>
                     <system value="https://bluebutton.cms.gov/resources/identifier/mbi-hash"/>

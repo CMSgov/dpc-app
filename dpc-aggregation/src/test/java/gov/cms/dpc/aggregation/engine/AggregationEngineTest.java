@@ -71,7 +71,7 @@ class AggregationEngineTest {
      */
     @Test
     void mockBlueButtonClientTest() {
-        Patient patient = bbclient.requestPatientFromServer(MockBlueButtonClient.TEST_PATIENT_IDS.get(0));
+        Patient patient = bbclient.requestPatientFromServer(MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)));
         assertNotNull(patient);
     }
 
@@ -110,7 +110,7 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)),
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.Patient)
         );
 
@@ -139,7 +139,7 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
+                new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
                 JobQueueBatch.validResourceTypes
         );
 
@@ -187,7 +187,7 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_MBIS,
+                new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
                 JobQueueBatch.validResourceTypes
         );
 
@@ -223,7 +223,7 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_MBIS,
+                new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
                 Collections.singletonList(ResourceType.Patient)
         );
 
@@ -287,7 +287,7 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_MBIS,
+                new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
                 Collections.singletonList(ResourceType.Schedule)
         );
 
@@ -305,10 +305,10 @@ class AggregationEngineTest {
      */
     @Test
     void badPatientIDTest() throws GeneralSecurityException {
-        final List<String> patientIDs = new ArrayList<>(MockBlueButtonClient.TEST_PATIENT_MBIS);
+        final List<String> mbis = new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet());
         // Add bad patient ID
-        patientIDs.add("-1");
-        assertEquals(3, patientIDs.size());
+        mbis.add("-1");
+        assertEquals(3, mbis.size());
 
         final var orgID = UUID.randomUUID();
 
@@ -316,7 +316,7 @@ class AggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                patientIDs,
+                mbis,
                 List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient)
         );
 
@@ -348,7 +348,7 @@ class AggregationEngineTest {
     }
 
     @Test
-    void testBlueButtonException() {
+    void testBlueButtonException() throws GeneralSecurityException {
         // Test generic runtime exception
         testWithThrowable(new RuntimeException("Error!!!!"));
 
@@ -357,7 +357,7 @@ class AggregationEngineTest {
 
     }
 
-    private void testWithThrowable(Throwable throwable) {
+    private void testWithThrowable(Throwable throwable) throws GeneralSecurityException {
         Mockito.reset(bbclient);
         // Override throwing an error on fetching a patient
         Mockito.doThrow(throwable).when(bbclient).requestPatientFromServer(Mockito.anyString());
@@ -382,7 +382,7 @@ class AggregationEngineTest {
 
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServer(idCaptor.capture());
+        Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
         assertEquals(3, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called 3 times to get the patient, but with errors instead");
 
         // Look at the result. It should have one error, but be successful otherwise.

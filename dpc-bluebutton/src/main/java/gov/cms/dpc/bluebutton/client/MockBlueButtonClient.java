@@ -25,14 +25,16 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
-    public static final List<String> TEST_PATIENT_IDS = List.of("20140000008325", "20140000009893");
     public static final List<String> TEST_PATIENT_MBIS = List.of("2SW4N00AA00", "4SP0P00AA00");
-    public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", "2SW4N00AA00", "4SP0P00AA00", "-3");
-    private static final Map<String, String> MBI_BENE_MAP = Map.of("2SW4N00AA00", "20140000008325",
-            "4SP0P00AA00", "20140000009893",
-            "-1", "-1",
-            "-2", "-2",
-            "-3", "-3");
+    public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
+            TEST_PATIENT_MBIS.get(0), "-20140000008325",
+            TEST_PATIENT_MBIS.get(1), "-20140000009893"
+    );
+    public static final Map<String, String> MBI_HASH_MAP = Map.of(
+            TEST_PATIENT_MBIS.get(0), "abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6",
+            TEST_PATIENT_MBIS.get(1), "8930cab29ba5fe4311a5f5bcfd5b7384f3722b711402aacf796d2ae6fea54242"
+    );
+    public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
 
     private final IParser parser;
 
@@ -42,34 +44,40 @@ public class MockBlueButtonClient implements BlueButtonClient {
     }
 
     @Override
-    public Patient requestPatientFromServer(String patientID) throws ResourceNotFoundException {
-        return loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, patientID);
+    public Patient requestPatientFromServer(String beneId) throws ResourceNotFoundException {
+        return loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, beneId);
     }
 
     @Override
     public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException {
-        Patient patient = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, TEST_PATIENT_MBIS.get(0));
-        Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(patient);
-        return bundle;
+        Patient p = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.get(mbi));
+        Bundle b = new Bundle();
+        b.setTotal(1);
+        b.addEntry().setResource(p);
+        return b;
     }
 
     @Override
     public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
-        Patient patient = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, TEST_PATIENT_MBIS.get(0));
-        Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(patient);
-        return bundle;
+        String mbi = MBI_HASH_MAP.values().stream()
+                .filter(h -> h.equals(mbiHash))
+                .findFirst()
+                .orElse("");
+        Patient p = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.get(mbi));
+        Bundle b = new Bundle();
+        b.setTotal(1);
+        b.addEntry().setResource(p);
+        return b;
     }
 
     @Override
-    public Bundle requestEOBFromServer(String patientID) throws ResourceNotFoundException {
-        return loadBundle(SAMPLE_EOB_PATH_PREFIX, patientID);
+    public Bundle requestEOBFromServer(String beneId) throws ResourceNotFoundException {
+        return loadBundle(SAMPLE_EOB_PATH_PREFIX, beneId);
     }
 
     @Override
-    public Bundle requestCoverageFromServer(String patientID) throws ResourceNotFoundException {
-        return loadBundle(SAMPLE_COVERAGE_PATH_PREFIX, patientID);
+    public Bundle requestCoverageFromServer(String beneId) throws ResourceNotFoundException {
+        return loadBundle(SAMPLE_COVERAGE_PATH_PREFIX, beneId);
     }
 
     @Override
@@ -97,21 +105,21 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     @Override
     public String hashMbi(String mbi) throws GeneralSecurityException {
-        return "";
+        return MBI_HASH_MAP.get(mbi);
     }
 
     /**
      * Read a Bundle FHIR Resource from jar's Bundle resource file.
      *
      * @param pathPrefix - Path to the XML sample data
-     * @param patientID - id of patient
+     * @param beneId - CCW/BFD beneficiary ID of patient (https://bluebutton.cms.gov/resources/variables/bene_id)
      * @return FHIR Resource
      */
-    private Bundle loadBundle(String pathPrefix, String patientID) {
-        try(InputStream sampleData = loadResource(pathPrefix, patientID)) {
+    private Bundle loadBundle(String pathPrefix, String beneId) {
+        try(InputStream sampleData = loadResource(pathPrefix, beneId)) {
             return parser.parseResource(Bundle.class, sampleData);
         } catch(IOException ex) {
-            throw formNoPatientException(patientID);
+            throw formNoPatientException(beneId);
         }
     }
 
@@ -134,14 +142,14 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * Create a stream from a resource.
      *
      * @param pathPrefix - The path to the resource file
-     * @param patientID - The patient associated with the file
+     * @param beneId - The beneficiary ID of the patient associated with the file
      * @return the stream associated with the resource
      */
-    private InputStream loadResource(String pathPrefix, String patientID) throws ResourceNotFoundException {
-        if (!TEST_PATIENT_IDS.contains(patientID)) {
-            throw formNoPatientException(patientID);
+    private InputStream loadResource(String pathPrefix, String beneId) throws ResourceNotFoundException {
+        if (!MBI_BENE_ID_MAP.values().contains(beneId)) {
+            throw formNoPatientException(beneId);
         }
-        final var path = pathPrefix + patientID + ".xml";
+        final var path = pathPrefix + beneId + ".xml";
         return MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path);
     }
 

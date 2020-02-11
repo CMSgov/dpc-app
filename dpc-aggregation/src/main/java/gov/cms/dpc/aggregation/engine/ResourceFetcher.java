@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
@@ -14,6 +15,7 @@ import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -55,23 +57,24 @@ class ResourceFetcher {
      * Fetch all the resources for a specific patient. If errors are encountered from BlueButton,
      * a OperationalOutcome resource is used.
      *
-     * @param patientID to use
+     * @param mbi to use
      * @return a flow with all the resources for specific patient
      */
-    Flowable<Resource> fetchResources(String patientID) {
+    Flowable<Resource> fetchResources(String mbi) {
         Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
         return Flowable.fromCallable(() -> {
-            logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), patientID);
-            final Resource firstFetched = fetchFirst(patientID);
+            String fetchId = UUID.randomUUID().toString();
+            logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
+            final Resource firstFetched = fetchFirst(mbi);
             if (ResourceType.Coverage.equals(resourceType) || ResourceType.ExplanationOfBenefit.equals(resourceType)) {
-                return fetchAllBundles(patientID, (Bundle)firstFetched);
+                return fetchAllBundles((Bundle)firstFetched, fetchId);
             } else {
-                logger.debug("Done fetching {} for {}", resourceType.toString(), patientID);
+                logger.debug("Done fetching {} for {}", resourceType.toString(), fetchId);
                 return List.of(firstFetched);
             }
         })
                 .compose(RetryTransformer.of(retry))
-                .onErrorResumeNext((Throwable error) -> handleError(patientID, error))
+                .onErrorResumeNext((Throwable error) -> handleError(mbi, error))
                 .flatMap(Flowable::fromIterable);
     }
 
@@ -79,33 +82,32 @@ class ResourceFetcher {
      * Given a bundle, return a list of resources in the passed in bundle and all
      * the resources from the next bundles.
      *
-     * @param patientID to fetch for
      * @param firstBundle of resources. Included in the result list
      * @return a list of all the resources in the first bundle and all next bundles
      */
-    private List<Resource> fetchAllBundles(String patientID, Bundle firstBundle) {
+    private List<Resource> fetchAllBundles(Bundle firstBundle, String fetchId) {
         final var resources = new ArrayList<Resource>();
         addResources(resources, firstBundle);
 
         // Loop until no more next bundles
         var bundle = firstBundle;
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {
-            logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), patientID);
+            logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), fetchId);
             bundle = blueButtonClient.requestNextBundleFromServer(bundle);
             addResources(resources, bundle);
         }
 
-        logger.debug("Done fetching bundles {} for {}", resourceType.toString(), patientID);
+        logger.debug("Done fetching bundles {} for {}", resourceType.toString(), fetchId);
         return resources;
     }
 
     /**
      * Turn an error into a flow.
-     * @param patientID the flow
+     * @param mbi MBI
      * @param error the error
      * @return a Flowable of list of resources
      */
-    private Publisher<List<Resource>> handleError(String patientID, Throwable error) {
+    private Publisher<List<Resource>> handleError(String mbi, Throwable error) {
         if (error instanceof JobQueueFailure) {
             // JobQueueFailure is an internal error. Just pass it along as an error.
             return Flowable.error(error);
@@ -113,27 +115,54 @@ class ResourceFetcher {
 
         // Other errors should be turned into OperationalOutcome and just recorded.
         logger.error("Turning error into OperationalOutcome. Error is: ", error);
-        final var operationOutcome = formOperationOutcome(patientID, error);
+        final var operationOutcome = formOperationOutcome(mbi, error);
         return Flowable.just(List.of(operationOutcome));
     }
 
     /**
      * Based on resourceType, fetch a resource or a bundle of resources.
      *
-     * @param patientID of the resource to fetch
+     * @param mbi of the resource to fetch
      * @return either a single resource or the first bundle of resources
      */
-    private Resource fetchFirst(String patientID) {
+    private Resource fetchFirst(String mbi) {
+        Patient patient = fetchPatient(mbi);
+        String beneId;
         switch (resourceType) {
             case Patient:
-                return blueButtonClient.requestPatientFromServer(patientID);
+                return patient;
             case ExplanationOfBenefit:
-                return blueButtonClient.requestEOBFromServer(patientID);
+                beneId = getBeneIdFromPatient(patient);
+                return blueButtonClient.requestEOBFromServer(beneId);
             case Coverage:
-                return blueButtonClient.requestCoverageFromServer(patientID);
+                beneId = getBeneIdFromPatient(patient);
+                return blueButtonClient.requestCoverageFromServer(beneId);
             default:
                 throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
         }
+    }
+
+    private Patient fetchPatient(String mbi) {
+        Bundle patients = null;
+        try {
+            patients = blueButtonClient.requestPatientFromServerByMbi(mbi);
+        } catch (GeneralSecurityException e) {
+            throw new JobQueueFailure(jobID, batchID, "Failed to retrieve Patient");
+        }
+
+        if (patients.getTotal() == 1) {
+            return (Patient) patients.getEntryFirstRep().getResource();
+        }
+
+        throw new JobQueueFailure(jobID, batchID, String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
+    }
+
+    private String getBeneIdFromPatient(Patient patient) {
+        return patient.getIdentifier().stream()
+                .filter(id -> DPCIdentifierSystem.BENE_ID.getSystem().equals(id.getSystem()))
+                .findFirst()
+                .map(Identifier::getValue)
+                .orElseThrow(() -> new JobQueueFailure(jobID, batchID, "No bene_id found in Patient resource"));
     }
 
     /**

@@ -39,11 +39,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 class BlueButtonClientTest {
     // A random example patient (Jane Doe)
-    private static final String TEST_PATIENT_ID = "20140000008325";
-    //private static final String TEST_PATIENT_MBI = "2SW4N00AA00";
+    private static final String TEST_PATIENT_ID = "-20140000008325";
     private static final String TEST_PATIENT_MBI_HASH = "6a288931dd0a911809e977093b1257e344fb29df3f5eacb622aadade8adcc581";
     // A patient that only has a single EOB record in bluebutton
-    private static final String TEST_SINGLE_EOB_PATIENT_ID = "20140000009893";
+    private static final String TEST_SINGLE_EOB_PATIENT_ID = "-20140000009893";
     // A patient id that should not exist in bluebutton
     private static final String TEST_NONEXISTENT_PATIENT_ID = "31337";
 
@@ -52,7 +51,7 @@ class BlueButtonClientTest {
     private static final String SAMPLE_EOB_PATH_PREFIX = "bb-test-data/eob/";
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
-    private static final String[] TEST_PATIENT_IDS = {"20140000008325", "20140000009893"};
+    private static final String[] TEST_PATIENT_IDS = {"-20140000008325", "-20140000009893"};
 
     private static BlueButtonClient bbc;
     private static ClientAndServer mockServer;

@@ -1,5 +1,5 @@
 <Patient xmlns="http://hl7.org/fhir">
-   <id value="20140000008325"/>
+   <id value="20140000009893"/>
    <extension url="https://bluebutton.cms.gov/resources/variables/race">
       <valueCoding>
          <system value="https://bluebutton.cms.gov/resources/variables/race"/>
@@ -9,23 +9,27 @@
    </extension>
    <identifier>
       <system value="https://bluebutton.cms.gov/resources/variables/bene_id"/>
-      <value value="20140000008325"/>
+      <value value="-20140000009893"/>
    </identifier>
    <identifier>
-      <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"/>
-      <value value="2025fbc612a884853f0c245e686780bf748e5652360ecd7430575491f4e018c5"/>
+      <system value="http://bluebutton.cms.hhs.gov/identifier#hicnHash"/>
+      <value value="fc463c4b2788ad575acf9194fc132c53cdad9b93d36955315d1af1ec7445d330"/>
+   </identifier>
+   <identifier>
+      <system value="https://bluebutton.cms.gov/resources/identifier/mbi-hash"/>
+      <value value="8930cab29ba5fe4311a5f5bcfd5b7384f3722b711402aacf796d2ae6fea54242"/>
    </identifier>
    <name>
       <use value="usual"/>
       <family value="Doe"/>
-      <given value="Jane"/>
+      <given value="John"/>
       <given value="X"/>
    </name>
    <gender value="unknown"/>
    <birthDate value="2014-06-01"/>
    <address>
       <district value="999"/>
-      <state value="15"/>
+      <state value="20"/>
       <postalCode value="99999"/>
    </address>
 </Patient>
