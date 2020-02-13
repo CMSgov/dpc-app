@@ -44,17 +44,12 @@ class Organization < ApplicationRecord
 
   def assign_vendor_id
     current_org = Organization.find(id)
-    create_vendor_id(current_org)
-  end
-
-  def create_vendor_id(current_org)
-    current_org.vendor_id = "V_" + SecureRandom.alphanumeric(10)
+    current_org.vendor_id = 'V_#{SecureRandom.alphanumeric(10)}'
     current_org.save!
-    binding.pry
   end
 
   def health_it_vendor?
-    organization_type == "health_it_vendor" && vendor_id.blank?
+    organization_type == 'health_it_vendor' && vendor_id.blank?
   end
 
   def registered_api_envs
