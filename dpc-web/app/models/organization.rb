@@ -18,9 +18,10 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
-  before_create :create_vendor_id, if: :health_it_vendor?
+  after_create :assign_vendor_id, if: :health_it_vendor?
 
   after_update :update_registered_organizations
+  after_update :assign_vendor_id, if: :health_it_vendor?
 
   scope :vendor, -> { where(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
   scope :provider, -> { where.not(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
@@ -41,14 +42,19 @@ class Organization < ApplicationRecord
     registered_organizations.count.positive? && npi.present?
   end
 
-  def create_vendor_id
-    new_org = Organization.last
-    new_org.vendor_id = SecureRandom.uuid
+  def assign_vendor_id
+    current_org = Organization.find(id)
+    create_vendor_id(current_org)
+  end
+
+  def create_vendor_id(current_org)
+    current_org.vendor_id = "V_" + SecureRandom.alphanumeric(10)
+    current_org.save!
     binding.pry
   end
 
   def health_it_vendor?
-    organization_type == "health_it_vendor" ? true : false
+    organization_type == "health_it_vendor" && vendor_id.blank?
   end
 
   def registered_api_envs
