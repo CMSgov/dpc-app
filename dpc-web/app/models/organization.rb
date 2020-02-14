@@ -18,6 +18,9 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
+  after_create :assign_vendor_id, if: :health_it_vendor?
+
+  after_update :assign_vendor_id, if: :health_it_vendor?
   after_update :update_registered_organizations
 
   scope :vendor, -> { where(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
@@ -37,6 +40,16 @@ class Organization < ApplicationRecord
 
   def api_credentialable?
     registered_organizations.count.positive? && npi.present?
+  end
+
+  def assign_vendor_id
+    current_org = Organization.find(id)
+    current_org.vendor_id = "V_#{SecureRandom.alphanumeric(10)}"
+    current_org.save!
+  end
+
+  def health_it_vendor?
+    organization_type == 'health_it_vendor' && vendor_id.blank?
   end
 
   def registered_api_envs
