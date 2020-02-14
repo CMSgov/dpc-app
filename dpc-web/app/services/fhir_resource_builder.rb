@@ -7,9 +7,9 @@ class FhirResourceBuilder
       id: reg_org.api_id,
       name: org.name,
       identifier: [
-        { 
-          system: 'http://hl7.org/fhir/sid/us-npi', 
-          value: object.organization_type == 'health_it_vendor' ? object.vendor_id : object.npi 
+        {
+          system: 'http://hl7.org/fhir/sid/us-npi',
+          value: object.organization_type == 'health_it_vendor' ? object.vendor_id : object.npi
         }
       ]
     )
