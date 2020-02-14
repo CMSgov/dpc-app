@@ -44,7 +44,7 @@ class Organization < ApplicationRecord
 
   def assign_vendor_id
     current_org = Organization.find(id)
-    current_org.vendor_id = 'V_#{SecureRandom.alphanumeric(10)}'
+    current_org.vendor_id = "V_#{SecureRandom.alphanumeric(10)}"
     current_org.save!
   end
 
