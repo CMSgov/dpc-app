@@ -201,10 +201,6 @@
   font-size: $h5-font-size;
   font-weight: $font-bold;
   text-decoration: none;
-
-  @media (min-width: $width-nav) {
-    color: white;
-  }
 }
 
 .topnav__dropdown__link:hover {
@@ -212,6 +208,10 @@
     color: $color-primary-alt-lightest;
     text-decoration: underline;
   }
+}
+
+.topnav__dropdown__link:visited {
+  color: $color-white;
 }
 
 // Overrides for accorion functionality
