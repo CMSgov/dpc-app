@@ -6,10 +6,6 @@
   margin: $spacer-3 0;
 }
 
-.box__key__container {
-  padding: $spacer-4;
-}
-
 .box--dashed {
   border-style: dashed;
 }
@@ -33,6 +29,10 @@
 .box__header__actions {
   margin-top: -$spacer-2;
   margin-left: $spacer-4;
+}
+
+.box__container {
+  padding: $spacer-4;
 }
 
 .box__content {
