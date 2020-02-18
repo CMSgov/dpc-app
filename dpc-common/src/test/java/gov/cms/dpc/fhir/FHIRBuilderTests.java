@@ -1,7 +1,5 @@
-package gov.cms.dpc;
+package gov.cms.dpc.fhir;
 
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Meta;

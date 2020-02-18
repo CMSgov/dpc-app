@@ -1,14 +1,12 @@
 package gov.cms.dpc.fhir;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.WebApplicationException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
