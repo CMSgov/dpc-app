@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.tasks;
+package gov.cms.dpc.api.tasks.tokens;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
@@ -32,7 +32,7 @@ public class GenerateClientTokens extends Task {
     private final TokenResource resource;
 
     @Inject
-    GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
+    public GenerateClientTokens(MacaroonBakery bakery, TokenResource resource) {
         super("generate-token");
         this.bakery = bakery;
         this.resource = resource;
