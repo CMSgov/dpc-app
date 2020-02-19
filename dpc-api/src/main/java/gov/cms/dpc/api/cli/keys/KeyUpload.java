@@ -37,7 +37,7 @@ public class KeyUpload extends AbstractAdminCommand {
                 .addArgument("id")
                 .required(true)
                 .dest("org-reference")
-                .help("ID of Organization to list tokens");
+                .help("ID of Organization to upload keys tokens");
 
         subparser
                 .addArgument("--label", "-l")
