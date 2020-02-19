@@ -62,7 +62,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         System.out.println("Registering Organization");
 
-        // Read the file and parser it
+        // Read the file and parse it
         final Path filePath = FileSystems.getDefault().getPath(namespace.getString(ORG_FILE)).normalize().toAbsolutePath();
         Bundle organization;
         try (FileInputStream fileInputStream = new FileInputStream(new File(filePath.toUri()))) {
