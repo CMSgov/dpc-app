@@ -34,7 +34,7 @@ public class KeyList extends AbstractAdminCommand {
                 .addArgument("id")
                 .required(true)
                 .dest("org-reference")
-                .help("ID of Organization to list tokens");
+                .help("ID of Organization to list keys");
     }
 
     @Override
