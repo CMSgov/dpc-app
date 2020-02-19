@@ -15,10 +15,13 @@ import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.*;
-import gov.cms.dpc.api.tasks.DeleteToken;
-import gov.cms.dpc.api.tasks.GenerateClientTokens;
-import gov.cms.dpc.api.tasks.GenerateKeyPair;
-import gov.cms.dpc.api.tasks.ListClientTokens;
+import gov.cms.dpc.api.tasks.*;
+import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
+import gov.cms.dpc.api.tasks.keys.ListPublicKeys;
+import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
+import gov.cms.dpc.api.tasks.tokens.DeleteToken;
+import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
+import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
@@ -68,6 +71,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(GenerateKeyPair.class);
         binder.bind(ListClientTokens.class);
         binder.bind(DeleteToken.class);
+        binder.bind(UploadPublicKey.class);
+        binder.bind(ListPublicKeys.class);
+        binder.bind(DeletePublicKey.class);
 
         binder.bind(FileManager.class);
         binder.bind(HttpRangeHeaderParamConverterProvider.class);
