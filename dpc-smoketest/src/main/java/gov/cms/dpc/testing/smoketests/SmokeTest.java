@@ -79,7 +79,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         logger.info(String.format("Deleting organization %s", organizationID));
 
         // Build admin client for removing the organization
-        final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
+        final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true, true);
 
         try {
             client
@@ -123,7 +123,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         if (organizationID.equals("") || clientToken.equals("") || privateKeyPath.equals("") || keyID.equals("")) {
             this.organizationID = UUID.randomUUID().toString();
 
-            System.out.println(String.format("Creating organization %s", organizationID));
+            logger.info(String.format("Creating organization %s", organizationID));
 
             try {
                 this.goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
@@ -131,7 +131,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                 throw new IllegalStateException("Failed creating Macaroon", e);
             }
             // Create admin client for registering organization
-            final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
+            final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true, true);
 
             final SampleResult orgRegistrationResult = new SampleResult();
             smokeTestResult.addSubResult(orgRegistrationResult);
@@ -172,7 +172,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
 
-        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true);
+        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true, true);
 
         // Upload a batch of patients and a batch of providers
         logger.debug("Submitting practitioners");
