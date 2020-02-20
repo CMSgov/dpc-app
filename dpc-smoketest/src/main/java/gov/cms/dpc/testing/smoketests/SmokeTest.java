@@ -73,8 +73,11 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     @Override
     public void teardownTest(JavaSamplerContext context) {
         final String hostParam = context.getParameter("host");
+        logger.info("Cleaning up tests against {}", hostParam);
+
         // Remove the organization, which should delete it all
-        System.out.println(String.format("Deleting organization %s", organizationID));
+        logger.info(String.format("Deleting organization %s", organizationID));
+
         // Build admin client for removing the organization
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
 
@@ -85,8 +88,8 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                     .encodedJson()
                     .execute();
         } catch (Exception e) {
-            System.err.println(String.format("Cannot remove organization: %s", e.getMessage()));
-            System.exit(-1);
+            logger.error(String.format("Cannot remove organization: %s", e.getMessage()));
+            System.exit(1);
         }
 
         super.teardownTest(context);
