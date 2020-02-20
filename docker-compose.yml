@@ -20,6 +20,8 @@ services:
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
+      - BFD_HASH_ITER=${BFD_HASH_ITER}
+      - BFD_HASH_PEPPER=${BFD_HASH_PEPPER}
     depends_on:
       - db
     volumes:
