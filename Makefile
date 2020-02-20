@@ -30,13 +30,13 @@ website:
 	@docker build -f dpc-web/Dockerfile . -t dpc-web
 
 .PHONY: start-app
-start-app:
+start-app: secure-envs
 	@docker-compose up start_core_dependencies
 	@docker-compose up start_api_dependencies
 	@docker-compose up start_api
 
 .PHONY: ci-app
-ci-app: docker-base
+ci-app: docker-base secure-envs
 	@./dpc-test.sh
 
 .PHONY: ci-web
@@ -70,3 +70,7 @@ smoke/prod-sbx: venv smoke
 .PHONY: docker-base
 docker-base:
 	@docker-compose -f ./docker-compose.base.yml build base
+
+.PHONY: secure-envs
+secure-envs:
+	@export $(bash ops/scripts/secrets --decrypt | tail -n +3 | sed -e'/^$/d' -e '/^#/d' | xargs)
