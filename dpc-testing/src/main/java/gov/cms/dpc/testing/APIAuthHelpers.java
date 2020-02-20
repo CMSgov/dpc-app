@@ -71,7 +71,7 @@ public class APIAuthHelpers {
     }
 
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck, boolean enableRequestLog) {
-        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck);
+        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck, enableRequestLog);
         client.registerInterceptor(new HAPISmartInterceptor(baseURL, macaroon, keyID, privateKey));
 
         // Add the async header the hard way
