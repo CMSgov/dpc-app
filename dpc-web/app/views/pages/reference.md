@@ -10,7 +10,7 @@ This data is made available through a set of [FHIR](http://hl7.org/fhir/STU3/) c
 
 This guide serves as a starting point for users to begin working with the API by introducing the core APIs as well as two key concepts of [Bulk Data](#bulk-data) and [Patient Attribution](#attribution).
 
-Documentation is also available in a comprehensive [OpenAPI format](/api/swagger) as well as a FHIR [implementation guide](/ig/index.html).
+Documentation is also available in a comprehensive [OpenAPI format](https://sandbox.dpc.cms.gov/api/swagger) as well as a FHIR [implementation guide](/ig/index.html).
 
 ## Bulk Data
 
@@ -1809,7 +1809,7 @@ The DPC team has created a FHIR Implementation Guide which provides detailed inf
 
 ## OpenAPI Documentation
 
-The DPC team has created comprehensive [OpenAPI](https://swagger.io/docs/specification/about/) (formerly Swagger) documentation which provides detailed information regarding public endpoints avilable for the DPC project.
+The DPC team has created comprehensive [OpenAPI](https://swagger.io/docs/specification/about/) (formerly Swagger) documentation which provides detailed information regarding public endpoints available for the DPC project.
 In addition, this documentation allows organizations to interactively explore the API, using their own access tokens and datasets.
 
-<a href="api/swagger" class="ds-c-button">View the OpenAPI Documentation</a>
+<a href="https://sandbox.dpc.cms.gov/api/swagger" class="ds-c-button">View the OpenAPI Documentation</a>
