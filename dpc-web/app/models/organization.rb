@@ -42,9 +42,14 @@ class Organization < ApplicationRecord
   end
 
   def assign_vendor_id
-    if vendor_id.blank?
-      self.vendor_id = "V_#{SecureRandom.alphanumeric(10)}"
-      binding.pry
+    return true if vendor_id.present?
+    self.vendor_id = generate_vendor_id
+  end
+
+  def generate_vendor_id
+    loop do
+      vendor_id = "V_#{SecureRandom.alphanumeric(10)}"
+      break vendor_id unless Organization.where(vendor_id: vendor_id).exists?
     end
   end
 

@@ -9,7 +9,7 @@ class FhirResourceBuilder
       identifier: [
         {
           system: 'http://hl7.org/fhir/sid/us-npi',
-          value: org.organization_type == 'health_it_vendor' ? org.vendor_id : org.npi
+          value: org.health_it_vendor? ? org.vendor_id : org.npi
         }
       ]
     )
