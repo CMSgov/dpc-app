@@ -1,6 +1,6 @@
 settings:
   env:
-    HOST: https://dpc.cms.gov/api/v1
+    HOST: https://sandbox.dpc.cms.gov/api/v1
     ADMIN_URL: **REMOVED**
     SEED_FILE: src/main/resources/test_associations-dpr.csv
     PROVIDER_BUNDLE: provider_bundle.json
