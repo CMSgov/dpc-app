@@ -22,6 +22,7 @@ services:
       - JACOCO=${REPORT_COVERAGE}
       - BFD_HASH_ITER=${BFD_HASH_ITER}
       - BFD_HASH_PEPPER=${BFD_HASH_PEPPER}
+      - BFD_URL=${BFD_URL}
     depends_on:
       - db
     volumes:

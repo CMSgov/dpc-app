@@ -73,4 +73,5 @@ docker-base:
 
 .PHONY: secure-envs
 secure-envs:
-	@export $(bash ops/scripts/secrets --decrypt | tail -n +3 | sed -e'/^$/d' -e '/^#/d' | xargs)
+	@bash ops/scripts/secrets --decrypt ops/config/encrypted/bb.keystore | tail -n +2 > bbcerts/bb.keystore
+	@export $(bash ops/scripts/secrets --decrypt ops/config/encrypted/local.env | tail -n +2 | sed -e'/^$/d' -e '/^#/d') | xargs
