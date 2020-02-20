@@ -104,7 +104,7 @@ class AttributionFHIRTest {
         // Disable logging for tests
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         loggingInterceptor.setLogRequestSummary(false);
-        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
 
         final Group createdGroup = submitAttributionBundle(client, bundle);
@@ -197,7 +197,7 @@ class AttributionFHIRTest {
         // Disable logging for tests
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         loggingInterceptor.setLogRequestSummary(false);
-        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
 
         final MethodOutcome patientCreated = client
@@ -354,7 +354,7 @@ class AttributionFHIRTest {
         // Disable logging for tests
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         loggingInterceptor.setLogRequestSummary(false);
-        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
 
         final IQuery<Bundle> bundleSearchRequest = client

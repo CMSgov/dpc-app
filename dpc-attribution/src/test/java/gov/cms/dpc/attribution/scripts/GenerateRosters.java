@@ -46,7 +46,7 @@ class GenerateRosters {
         // Disable logging for tests
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         loggingInterceptor.setLogRequestSummary(false);
-        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
 
         // Create a Bundle to hold everything

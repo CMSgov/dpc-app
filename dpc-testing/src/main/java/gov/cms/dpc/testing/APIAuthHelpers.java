@@ -242,7 +242,7 @@ public class APIAuthHelpers {
         // Disable logging for tests
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         loggingInterceptor.setLogRequestSummary(enableRequestLog);
-        loggingInterceptor.setLogRequestSummary(enableRequestLog);
+        loggingInterceptor.setLogResponseSummary(enableRequestLog);
         client.registerInterceptor(loggingInterceptor);
 
         return client;
