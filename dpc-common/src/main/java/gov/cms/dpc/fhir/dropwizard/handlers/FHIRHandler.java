@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -12,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
@@ -39,9 +41,14 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
     }
 
     @Override
-    public BaseResource readFrom(Class<BaseResource> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
+    public BaseResource readFrom(Class<BaseResource> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws WebApplicationException {
         final IParser parser = ctx.newJsonParser();
-        return (BaseResource) parser.parseResource(new InputStreamReader(entityStream, StandardCharsets.UTF_8));
+        try {
+            return (BaseResource) parser.parseResource(new InputStreamReader(entityStream, StandardCharsets.UTF_8));
+            // We need to manually handle the DataFormatException because our custom exception handlers aren't loaded yet.
+        } catch (DataFormatException e) {
+            throw new WebApplicationException(e.getCause().getMessage(), Response.Status.BAD_REQUEST);
+        }
     }
 
     @Override
