@@ -210,3 +210,33 @@ Building the Additional Services
 Documentation on building the DPC Website is covered in the specific [README](dpc-web/README.md).
 
 Building the FHIR implementation guide is detailed [here](ig/README.md).
+
+Secrets management
+---
+
+### Sensitive Docker configuration files
+
+The files committed in the `ops/config/encrypted` directory hold secret information, and are encrypted with [Ansible Vault](https://docs.ansible.com/ansible/2.4/vault.html).
+
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory. Contact another team member to gain access to the vault password.
+
+**IMPORTANT:** Files containing sensitive information are enumerated in the `.secrets` file in this directory. If you want to protect the contents of a file using the `ops/scripts/secrets` helper script, it must match a pattern listed in `.secrets`.
+
+To avoid committing and pushing unencrypted secret files, use the included `ops/scripts/pre-commit` Git pre-commit hook from this directory:
+
+```
+cp ops/scripts/pre-commit .git/hooks
+```
+
+### Managing encrypted files
+* Temporarily decrypt files by running the following command from this directory:
+```
+./ops/scripts/secrets --decrypt
+```
+
+* While files are decrypted, copy the files from `ops/config/encrypted` to the sibling directory `ops/config/decrypted`.
+
+* Encrypt changed files with:
+```
+./ops/scripts/secrets --encrypt <filename>
+```
