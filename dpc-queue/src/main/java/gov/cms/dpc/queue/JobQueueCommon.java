@@ -6,7 +6,6 @@ import io.reactivex.Observable;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;

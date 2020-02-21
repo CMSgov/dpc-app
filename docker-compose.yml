@@ -51,6 +51,9 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
       - exportPath=/app/data
+      - BFD_HASH_ITER=${BFD_HASH_ITER}
+      - BFD_HASH_PEPPER=${BFD_HASH_PEPPER}
+      - BFD_URL=${BFD_URL}
       - JVM_FLAGS=-Ddpc.api.authenticationDisabled=${AUTH_DISABLED:-false}
     depends_on:
       - attribution
