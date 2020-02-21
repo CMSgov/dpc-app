@@ -7,7 +7,7 @@ import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.servlets.tasks.Task;
 import org.jooq.DSLContext;
-import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 
@@ -40,7 +40,7 @@ public class TruncateDatabase extends Task {
         final ManagedDataSource dataSource = dataSourceFactory.build(null, "attribution-seeder");
 
         try (final Connection connection = dataSource.getConnection();
-             DSLContext context = DSL.using(connection, new Settings().withRenderNameStyle(RenderNameStyle.AS_IS))) {
+             DSLContext context = DSL.using(connection, new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED))) {
 
             DBUtils.truncateAllTables(context, "public");
         }
