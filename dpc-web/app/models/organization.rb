@@ -43,8 +43,8 @@ class Organization < ApplicationRecord
 
   def assign_vendor_id
     return true if vendor_id.present?
-    
-    self.vendor_id = generate_vendor_id
+
+      self.vendor_id = generate_vendor_id
   end
 
   def external_identifier
