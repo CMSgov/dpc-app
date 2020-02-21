@@ -208,7 +208,7 @@ public class JobResource extends AbstractJobResource {
                 .map(b -> b.getCompleteTime().orElse(OffsetDateTime.MIN))
                 .max(OffsetDateTime::compareTo)
                 .orElse(OffsetDateTime.MIN);
-        if (submitTime == OffsetDateTime.MIN || completeTime == OffsetDateTime.MIN) return null;
+        if (submitTime.isEqual(OffsetDateTime.MIN) || completeTime.isEqual(OffsetDateTime.MIN)) return null;
         return List.of(
                 new JobCompletionModel.FhirExtension(JobCompletionModel.SUBMIT_TIME_URL, submitTime),
                 new JobCompletionModel.FhirExtension(JobCompletionModel.COMPLETE_TIME_URL, completeTime));

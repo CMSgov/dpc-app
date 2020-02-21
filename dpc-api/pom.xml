@@ -286,6 +286,7 @@
                     </container>
                     <extraDirectories>
                         <paths>
+                            <path>${project.basedir}/../bbcerts</path>
                             <path>${project.basedir}/target/jacoco-agent</path>
                             <path>${project.basedir}/docker</path>
                             <path>${project.basedir}/../src/main/resources/keypair</path>
