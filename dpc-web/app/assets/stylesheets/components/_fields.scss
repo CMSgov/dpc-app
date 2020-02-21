@@ -9,10 +9,6 @@
   padding: 0 0 $spacer-1 $spacer-3;
 }
 
-.remove_focus:focus {
-  box-shadow: 0 !important;
-}
-
 .required {
   display: flex;
   flex-wrap: nowrap;
