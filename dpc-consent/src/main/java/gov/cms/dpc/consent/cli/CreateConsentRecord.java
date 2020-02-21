@@ -12,7 +12,7 @@ import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.jooq.DSLContext;
-import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -51,7 +51,7 @@ public class CreateConsentRecord extends ConsentCommand {
 
     CreateConsentRecord() {
         super("create", "Create a new consent record");
-        this.settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
+        this.settings = new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
     }
 
     @Override
@@ -91,13 +91,14 @@ public class CreateConsentRecord extends ConsentCommand {
     }
 
     @Override
-    protected void run(Bootstrap<DPCConsentConfiguration> bootstrap, Namespace namespace, DPCConsentConfiguration dpcConsentConfiguration) throws DataAccessException, SQLException  {
+    protected void run(Bootstrap<DPCConsentConfiguration> bootstrap, Namespace namespace, DPCConsentConfiguration dpcConsentConfiguration) throws DataAccessException, SQLException {
         final String mbi = namespace.getString("mbi");
         final LocalDate effectiveDate = LocalDate.parse(namespace.getString("effective-date"));
         final String inOrOut = namespace.getString(IN_OR_OUT_ARG);
 
         final String orgUuid = namespace.getString("org-uuid");
         if (orgUuid != null && !orgUuid.isBlank()) {
+            //noinspection ResultOfMethodCallIgnored
             UUID.fromString(orgUuid);
             // using UUID conversion to verify the UUID provided is valid; will throw IllegalArgumentException if invalid
         }
