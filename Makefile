@@ -71,7 +71,11 @@ smoke/prod-sbx: venv smoke
 docker-base:
 	@docker-compose -f ./docker-compose.base.yml build base
 
+envTmp := $(bash ops/scripts/secrets --decrypt ops/config/encrypted/local.env | tail -n +2)
+BFD_HASH_ITER ?= $(shell echo $(envTmp) | awk '{print $$1}')
+BFD_HASH_PEPPER ?= $(shell echo $(envTmp) | awk '{print $$2}')
+BFD_URL ?= $(shell echo $(envTmp) | awk '{print $$3}')
+
 .PHONY: secure-envs
 secure-envs:
 	@bash ops/scripts/secrets --decrypt ops/config/encrypted/bb.keystore | tail -n +2 > bbcerts/bb.keystore
-	@export $(bash ops/scripts/secrets --decrypt ops/config/encrypted/local.env | tail -n +2 | sed -e'/^$/d' -e '/^#/d' | xargs)
