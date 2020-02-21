@@ -468,7 +468,7 @@ ij_continuation_indent_size = 2
 ij_yaml_keep_indents_on_empty_lines = false
 ij_yaml_keep_line_breaks = true
 
-[{.stylelintrc,.eslintrc,.babelrc,jest.config,*.json,*.bowerrc,*.jsb3,*.jsb2}]
+[{.stylelintrc,.eslintrc,.babelrc,jest.config,*.json,*.bowerrc,*.jsb3,*.jsb2,*.conf}]
 indent_size = 2
 ij_json_keep_blank_lines_in_code = 0
 ij_json_keep_indents_on_empty_lines = false
