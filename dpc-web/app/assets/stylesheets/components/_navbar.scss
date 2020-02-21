@@ -203,7 +203,7 @@
   text-decoration: none;
 
   @media (min-width: $width-nav) {
-    color: white;
+    color: $color-white;
   }
 }
 
@@ -212,6 +212,10 @@
     color: $color-primary-alt-lightest;
     text-decoration: underline;
   }
+}
+
+.topnav__dropdown__link:visited {
+  color: $color-white;
 }
 
 // Overrides for accorion functionality
