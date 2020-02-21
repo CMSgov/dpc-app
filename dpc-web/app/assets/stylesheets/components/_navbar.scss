@@ -214,6 +214,10 @@
   }
 }
 
+.topnav__dropdown__link:visited {
+  color: $color-white;
+}
+
 // Overrides for accorion functionality
 .topnav__item.usa-accordion {
   position: relative;
