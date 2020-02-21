@@ -43,53 +43,57 @@ class Organization < ApplicationRecord
 
   def assign_vendor_id
     return true if vendor_id.present?
+    
     self.vendor_id = generate_vendor_id
   end
 
-  def generate_vendor_id
-    loop do
-      vendor_id = "V_#{SecureRandom.alphanumeric(10)}"
-      break vendor_id unless Organization.where(vendor_id: vendor_id).exists?
-    end
-  end
-
+  
   def registered_api_envs
     registered_organizations.pluck(:api_env)
   end
-
+  
   def notify_users_of_sandbox_access
     return unless sandbox_enabled?
-
+    
     organization_user_assignments.each(&:send_organization_sandbox_email)
   end
-
+  
   def update_registered_organizations
     return unless npi.present?
-
+    
     registered_organizations.each(&:update_api_organization)
   end
-
+  
   def sandbox_enabled?
     sandbox_registered_organization.present?
   end
-
+  
   def sandbox_registered_organization
     registered_organizations.find_by(api_env: 'sandbox')
   end
-
+  
   def sandbox_fhir_endpoint
     sandbox_registered_organization.fhir_endpoint
   end
-
+  
   def production_enabled?
     production_registered_organization.present?
   end
-
+  
   def production_registered_organization
     registered_organizations.find_by(api_env: 'production')
   end
-
+  
   def production_fhir_endpoint
     production_registered_organization.fhir_endpoint
+  end
+end
+
+private
+
+def generate_vendor_id
+  loop do
+    vendor_id = "V_#{SecureRandom.alphanumeric(10)}"
+    break vendor_id unless Organization.where(vendor_id: vendor_id).exists?
   end
 end
