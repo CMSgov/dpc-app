@@ -28,6 +28,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
     private static final String SAMPLE_COVERAGE_PATH_PREFIX = "bb-test-data/coverage/";
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
+    private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty.xml";
 
     public static final List<String> TEST_PATIENT_MBIS = List.of("2SW4N00AA00", "4SP0P00AA00");
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
@@ -41,6 +42,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
     public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
+    public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
+    public static final DateRangeParam BFD_LAST_UPDATE_RANGE = new DateRangeParam().setUpperBoundInclusive(new Date());
 
     private final IParser parser;
 
@@ -56,7 +59,9 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     @Override
     public Bundle requestPatientFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
-        return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, beneId);
+        return isInDateRange(lastUpdated) ?
+                loadBundle(SAMPLE_PATIENT_PATH_PREFIX, beneId) :
+                loadEmptyBundle();
     }
 
 
@@ -71,12 +76,16 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     @Override
     public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
-        return loadBundle(SAMPLE_EOB_PATH_PREFIX, beneId);
+        return isInDateRange(lastUpdated) ?
+                loadBundle(SAMPLE_EOB_PATH_PREFIX, beneId) :
+                loadEmptyBundle();
     }
 
     @Override
     public Bundle requestCoverageFromServer(String beneId, DateRangeParam lastUpdated) throws ResourceNotFoundException {
-        return loadBundle(SAMPLE_COVERAGE_PATH_PREFIX, beneId);
+        return isInDateRange(lastUpdated) ?
+                loadBundle(SAMPLE_COVERAGE_PATH_PREFIX, beneId) :
+                loadEmptyBundle();
     }
 
     @Override
@@ -143,6 +152,35 @@ public class MockBlueButtonClient implements BlueButtonClient {
         }
         final var path = pathPrefix + beneId + ".xml";
         return MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path);
+    }
+
+    /**
+     * Does the passed in date range matches resources without lastUpdated
+     *
+     * @param range to test
+     * @return true iff date range matches
+     */
+    private boolean isInDateRange(DateRangeParam range) {
+        if (range == null) return true;
+        final var upperBound = range.getUpperBoundAsInstant();
+        final var lowerBound = range.getLowerBoundAsInstant();
+        return (upperBound == null || upperBound.toInstant().isAfter(TEST_LAST_UPDATED.toInstant())) &&
+            (lowerBound == null || lowerBound.toInstant().isBefore(TEST_LAST_UPDATED.toInstant()));
+    }
+
+    /**
+     * Return an empty bundle.
+     *
+     * @return a Bundle
+     */
+    private Bundle loadEmptyBundle() {
+        try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(SAMPLE_EMPTY_BUNDLE)) {
+            final var bundle = parser.parseResource(Bundle.class, sampleData);
+            bundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
+            return bundle;
+        } catch(IOException ex) {
+            throw formNoPatientException(null);
+        }
     }
 
     private ResourceNotFoundException formNoPatientException(String patientID) {

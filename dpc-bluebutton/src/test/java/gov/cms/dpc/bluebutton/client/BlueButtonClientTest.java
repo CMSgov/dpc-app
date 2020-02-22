@@ -30,6 +30,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.concurrent.TimeUnit;
@@ -167,6 +168,16 @@ class BlueButtonClientTest {
     @Test
     void shouldGetFHIRFromPatientIDWithoutLastUpdated() {
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, null);
+        // Verify that the bundle has one
+        assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
+        assertEquals(ResourceType.Bundle, ret.getResourceType());
+        assertEquals(1, ret.getEntry().size());
+        assertEquals(ResourceType.Patient, ret.getEntry().get(0).getResource().getResourceType());
+    }
+
+    @Test
+    void shouldGetFHIRFromPatientIDWithLastUpdated() {
+        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
         assertEquals(ResourceType.Bundle, ret.getResourceType());
