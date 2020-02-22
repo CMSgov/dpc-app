@@ -205,6 +205,36 @@ class AggregationEngineTest {
     }
 
     /**
+     * Test if a engine can handle a simple job with one resource type, one test provider, one patient and since.
+     */
+    @Test
+    void sinceJobTest() {
+        final var orgID = UUID.randomUUID();
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
+                Collections.singletonList(ResourceType.Patient),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
+        );
+
+        // Work the batch
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result. Should be not have any output file.
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
+        assertFalse(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+    }
+
+    /**
      * Test if the engine can handle a job with multiple output files and patients
      */
     @Test
