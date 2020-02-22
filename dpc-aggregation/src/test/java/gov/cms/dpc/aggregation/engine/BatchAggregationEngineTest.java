@@ -2,7 +2,6 @@ package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -24,9 +23,6 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,9 +33,6 @@ import static org.mockito.Mockito.doReturn;
 class BatchAggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_PROVIDER_ID = "1";
-
-    // lastUpdate date range to test
-    private static final OffsetDateTime TEST_SINCE = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(10);
 
     private IJobQueue queue;
     private AggregationEngine engine;
@@ -83,7 +76,7 @@ class BatchAggregationEngineTest {
                 TEST_PROVIDER_ID,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
-                TEST_SINCE,
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
@@ -118,7 +111,7 @@ class BatchAggregationEngineTest {
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
                 JobQueueBatch.validResourceTypes,
-                TEST_SINCE,
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
@@ -156,7 +149,7 @@ class BatchAggregationEngineTest {
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
                 Collections.singletonList(ResourceType.ExplanationOfBenefit),
-                TEST_SINCE,
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 

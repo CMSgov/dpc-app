@@ -13,6 +13,9 @@
         <resource>
             <Patient xmlns="http://hl7.org/fhir">
                 <id value="-20140000008325"/>
+                <meta>
+                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+                </meta>
                 <extension url="https://bluebutton.cms.gov/resources/variables/race">
                     <valueCoding>
                         <system value="https://bluebutton.cms.gov/resources/variables/race"/>
