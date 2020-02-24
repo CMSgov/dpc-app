@@ -6,7 +6,12 @@ class FhirResourceBuilder
     fhir_org = FHIR::Organization.new(
       id: reg_org.api_id,
       name: org.name,
-      identifier: [{ system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi }]
+      identifier: [
+        {
+          system: 'http://hl7.org/fhir/sid/us-npi',
+          value: org.external_identifier
+        }
+      ]
     )
     fhir_org.endpoint = { reference: reg_org.api_endpoint_ref }
 
