@@ -259,7 +259,7 @@ public class GroupResource extends AbstractGroupResource {
                            @QueryParam("_type") String resourceTypes,
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") String outputFormat,
-                           @ApiParam(value = "Request resources that have been updated after this time.")
+                           @ApiParam(value = "Resources updated after this period will be included in the response. Must be a FHIR date-time.")
                            @QueryParam("_since") String since) {
         logger.debug("Exporting data for provider: {}", rosterID);
 
