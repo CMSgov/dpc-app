@@ -17,6 +17,8 @@ services:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
     ports:
       - "9901:9900"
+    env_file:
+      - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
