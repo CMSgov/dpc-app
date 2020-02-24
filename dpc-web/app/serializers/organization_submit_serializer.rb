@@ -26,7 +26,7 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
         identifier: [
           {
             system: 'http://hl7.org/fhir/sid/us-npi',
-            value: object.npi
+            value: object.external_identifier
           }
         ],
         name: object.name,
