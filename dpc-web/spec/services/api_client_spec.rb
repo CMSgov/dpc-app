@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe APIClient do
   let!(:org) { create(:organization, npi: '1111111111') }
+  let!(:vendor_org) { create(:organization, organization_type: 'health_it_vendor') }
   let!(:registered_org) { build(:registered_organization, organization: org, api_env: 'sandbox') }
   let!(:fhir_endpoint) { build(:fhir_endpoint, name: 'Cool SBX', uri: 'https://cool.com',
                                                 status: 'active', registered_organization: registered_org) }
@@ -15,6 +16,79 @@ RSpec.describe APIClient do
 
   describe '#create_organization' do
     context 'successful API request' do
+      context 'when creating a vendor org' do
+        it 'sends vendor_id as identifier' do
+          stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
+            headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
+            body: {
+              resourceType: 'Parameters',
+              parameter: [{
+                name: 'resource',
+                resource: {
+                  resourceType: 'Bundle',
+                  type: 'collection',
+                  entry: [{
+                    resource: {
+                      address: [{
+                        use: vendor_org.address_use,
+                        type: vendor_org.address_type,
+                        city: vendor_org.address_city,
+                        country: 'US',
+                        line: [vendor_org.address_street, vendor_org.address_street_2],
+                        postalCode: vendor_org.address_zip,
+                        state: vendor_org.address_state
+                      }],
+                      identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: vendor_org.vendor_id}],
+                      name: vendor_org.name,
+                      resourceType: 'Organization',
+                      type: [{
+                        coding: [{
+                          code: 'prov', display: 'Healthcare Provider', system: 'http://hl7.org/fhir/organization-type'
+                        }],
+                        text: 'Healthcare Provider'
+                      }]
+                    }
+                  }, {
+                    resource: {
+                      resourceType: 'Endpoint',
+                      status: fhir_endpoint.status,
+                      connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
+                      payloadType: [
+                        {
+                          "coding": [
+                            {
+                              "system": "http://hl7.org/fhir/endpoint-payload-type",
+                              "code": "any"
+                            }
+                          ]
+                        }
+                      ],
+                      name: fhir_endpoint.name, address: fhir_endpoint.uri
+                    }
+                  }]
+                }
+              }]
+            }.to_json
+          ).to_return(
+            status: 200,
+            body: "{\"id\":\"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d\",\"endpoint\":[{\"reference\":\"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}]}"
+          )
+  
+          api_client = APIClient.new('sandbox')
+  
+          # Reusing another organization's fhir endpoint for efficiency
+          api_client.create_organization(vendor_org, fhir_endpoint: fhir_endpoint.attributes)
+  
+          expect(api_client.response_status).to eq(200)
+          expect(api_client.response_body).to eq(
+            {
+              'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
+              'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
+            }
+          )
+        end
+      end
+
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
           headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
@@ -189,6 +263,25 @@ RSpec.describe APIClient do
 
   describe '#update_organization' do
     context 'successful request' do
+      context 'when updating to a vendor org' do
+        it 'sends vendor_id as identifier' do
+          registered_vendor_org = build(:registered_organization, organization: vendor_org, api_env: 'sandbox')
+          stub_request(:put, "http://dpc.example.com/Organization/#{registered_vendor_org.api_id}").
+          with(
+            body: /#{vendor_org.vendor_id}/,
+            headers: {
+              'Accept' => 'application/fhir+json',
+              'Content-Type' => 'application/fhir+json;charset=utf-8',
+              'Authorization' => /.*/
+            }).
+          to_return(status: 200, body: "{}", headers: {})
+
+          client = APIClient.new('sandbox')
+          expect(client.update_organization(registered_vendor_org)).to eq(client)
+          expect(client.response_successful?).to eq(true)
+        end
+      end
+
       it 'uses fhir_client to send org data to API' do
         stub_request(:put, "http://dpc.example.com/Organization/#{registered_org.api_id}").
           with(
