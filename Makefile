@@ -21,7 +21,7 @@ ig/publish: ${IG_PUBLISHER}
 	@echo "Building Implementation Guide"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
-.PHONY: travis
+.PHONY: travis secure-envs
 travis:
 	@./dpc-test.sh
 
