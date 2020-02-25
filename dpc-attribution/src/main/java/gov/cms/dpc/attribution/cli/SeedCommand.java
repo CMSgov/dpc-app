@@ -25,7 +25,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.*;
 import org.jooq.DSLContext;
-import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
     public SeedCommand(Application<DPCAttributionConfiguration> application) {
         super(application, "seed", "Seed the attribution roster");
-        this.settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
+        this.settings = new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
     }
 
     @Override

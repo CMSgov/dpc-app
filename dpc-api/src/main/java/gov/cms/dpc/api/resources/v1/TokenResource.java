@@ -226,9 +226,10 @@ public class TokenResource extends AbstractTokenResource {
     public Response validateJWT(@NotEmpty(message = "Must submit JWT") String jwt) {
 
         try {
-            Jwts.parser()
+            Jwts.parserBuilder()
                     .requireAudience(this.authURL)
                     .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, this.authURL))
+                    .build()
                     .parseClaimsJws(jwt);
         } catch (IllegalArgumentException e) {
             // This is fine, we just want the body
@@ -258,9 +259,10 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
-        final Jws<Claims> claims = Jwts.parser()
+        final Jws<Claims> claims = Jwts.parserBuilder()
                 .setSigningKeyResolver(this.resolver)
                 .requireAudience(this.authURL)
+                .build()
                 .parseClaimsJws(jwtBody);
 
         // Determine if claims are present and valid

@@ -34,7 +34,7 @@
           <%= f.select :requested_organization_type,
             organization_types_for_select,
             { include_blank: 'Please select a practice type' },
-            class: "ds-c-field",
+            class: "ds-c-field drop-down",
             :data => {:hide_follow_up => 'health_it_vendor'},
             value: @user.requested_organization_type
           %>
@@ -71,7 +71,7 @@
           <%= f.select :state,
                 states_for_select,
                 { include_blank: 'Please select a state' },
-                class: "ds-c-field",
+                class: "ds-c-field drop-down",
                 value: @user.state
           %>
         </div>
