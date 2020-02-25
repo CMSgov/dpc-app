@@ -127,12 +127,11 @@ class ResourceFetcher {
      */
     private Resource fetchFirst(String mbi) {
         Patient patient = fetchPatient(mbi);
-        String beneId;
         switch (resourceType) {
             case Patient:
                 return patient;
             case ExplanationOfBenefit:
-                beneId = getBeneIdFromPatient(patient);
+                String beneId = getBeneIdFromPatient(patient);
                 return blueButtonClient.requestEOBFromServer(beneId);
             case Coverage:
                 beneId = getBeneIdFromPatient(patient);

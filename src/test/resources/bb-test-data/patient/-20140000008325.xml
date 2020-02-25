@@ -12,7 +12,7 @@
       <value value="-20140000008325"/>
    </identifier>
    <identifier>
-      <system value="http://bluebutton.cms.hhs.gov/identifier#hicnHash"/>
+      <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"/>
       <value value="ee78989d1d9ba0b98f3cfbd52479f10c7631679c17563186f70fbef038cc9536"/>
    </identifier>
    <identifier>
