@@ -40,8 +40,8 @@
         <!--Custom group IDs for pulling dependencies from JitPack-->
         <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
         <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
-        <hapi.fhir.groupID>${jitpack.groupID}.hapi-fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>72317801c7ef73c62b1ab236a4a1666d94c47a3a</hapi.fhir.version>
+        <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
+        <hapi.fhir.version>4.2.0</hapi.fhir.version>
         <pgsql.version>42.2.10</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
