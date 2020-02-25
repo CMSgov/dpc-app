@@ -33,7 +33,7 @@
             <%= label_tag :requested_org, 'Requested organization', class: "ds-c-label ds-u-margin-top--0" %>
             <%= text_field_tag :requested_org, params[:requested_org], class: "ds-c-field" %>
             <%= label_tag :requested_org_type, 'Requested organization type', class: "ds-c-label" %>
-            <%= select_tag(:requested_org_type, options_for_select(organization_types_for_select, params[:requested_org_type]), :class => 'ds-c-field', include_blank: 'All organization types') %>
+            <%= select_tag(:requested_org_type, options_for_select(organization_types_for_select, params[:requested_org_type]), :class => 'ds-c-field drop-down', include_blank: 'All organization types') %>
           </div>
         </fieldset>
 

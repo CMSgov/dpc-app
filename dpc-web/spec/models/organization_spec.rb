@@ -5,6 +5,40 @@ require 'rails_helper'
 RSpec.describe Organization, type: :model do
   include APIClientSupport
 
+  describe 'callbacks' do
+    describe '#assign_vendor_id' do
+      context 'when organization_type equals health_it_vendor on create' do
+        it 'sets vendor_id' do
+          org = create(:organization, organization_type: 'health_it_vendor')
+          expect(org.vendor_id).to be_present
+        end
+      end
+
+      context 'when organization_type does not equal health_it_vendor on create' do
+        it 'does not set vendor_id' do
+          org = create(:organization, organization_type: 'primary_care_clinic')
+          expect(org.vendor_id).to be_nil
+        end
+      end
+
+      context 'when organization_type is updated to be health_it_vendor' do
+        it 'sets vendor_id' do
+          org = create(:organization, organization_type: 'primary_care_clinic')
+          org.update(organization_type: 'health_it_vendor')
+          expect(org.vendor_id).to be_present
+        end
+      end
+
+      context 'when organization type is updated to not be health_it_vendor' do
+        it 'keeps vendor_id' do
+          org = create(:organization, organization_type: 'health_it_vendor')
+          org.update(organization_type: 'primary_care_clinic')
+          expect(org.vendor_id).to be_present
+        end
+      end
+    end
+  end
+
   describe '#npi=' do
     it 'replaces blank string with nil' do
       org = create(:organization, npi: '')
@@ -14,6 +48,20 @@ RSpec.describe Organization, type: :model do
     it 'does not replace non-blank values' do
       org = create(:organization, npi: '1234567890')
       expect(org.npi).to eq('1234567890')
+    end
+  end
+
+  describe '#assign_vendor_id' do
+    it 'sets vendor_id if vendor_id is not present' do
+      org = create(:organization, vendor_id: nil)
+      org.assign_vendor_id
+      expect(org.vendor_id).to be_present
+    end
+
+    it 'does not set vendor_id if vendor_id is present' do
+      org = create(:organization, vendor_id: 'V_111111')
+      org.assign_vendor_id
+      expect(org.vendor_id).to eq('V_111111')
     end
   end
 
