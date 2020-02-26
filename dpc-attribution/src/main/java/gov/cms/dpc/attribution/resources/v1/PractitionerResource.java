@@ -82,12 +82,10 @@ public class PractitionerResource extends AbstractPractitionerResource {
     public Response submitProvider(Practitioner provider) {
 
         final ProviderEntity entity = this.converter.fromFHIR(ProviderEntity.class, provider);
-        final List<ProviderEntity> existingProvidersByOrganization = this.dao.getProviders(null, null, entity.getOrganization().getId());
-        final List<ProviderEntity> existingProvidersByNPI = existingProvidersByOrganization.stream()
-                .filter(providerEntity -> providerEntity.getProviderNPI().equals(entity.getProviderNPI()))
-                .collect(Collectors.toList());
+        final Long totalExistingProviders = this.dao.getProvidersCount(null, null, entity.getOrganization().getId());
+        final List<ProviderEntity> existingProvidersByNPI = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
 
-        if (providerLimit != null && existingProvidersByOrganization.size() >= providerLimit) {
+        if (providerLimit != null && totalExistingProviders >= providerLimit) {
             return Response.status(Response.Status.NOT_MODIFIED).entity(this.converter.toFHIR(Practitioner.class, existingProvidersByNPI.get(0))).build();
         }
 
