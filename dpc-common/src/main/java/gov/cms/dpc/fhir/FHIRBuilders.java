@@ -34,7 +34,7 @@ public class FHIRBuilders {
      */
     public static Patient buildPatientFromMBI(String MPI) {
         final Patient patient = new Patient();
-        patient.addIdentifier().setValue(MPI).setSystem(DPCIdentifierSystem.BENE_ID.getSystem());
+        patient.addIdentifier().setValue(MPI).setSystem(DPCIdentifierSystem.MBI.getSystem());
 
         return patient;
     }

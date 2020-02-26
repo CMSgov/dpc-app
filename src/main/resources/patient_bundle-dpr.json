@@ -150,22 +150,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819"
           }
         ],
         "name": [
@@ -389,22 +373,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90"
           }
         ],
         "name": [
@@ -592,22 +560,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002209"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -828,22 +780,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002208"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -1085,22 +1021,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "08c60332c596e5178806e7d513846d067c06c166993afb61c974e46632beb6ab"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "08c60332c596e5178806e7d513846d067c06c166993afb61c974e46632beb6ab"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "08c60332c596e5178806e7d513846d067c06c166993afb61c974e46632beb6ab"
           }
         ],
         "name": [
@@ -1298,22 +1218,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003018"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3S51C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5e44b589db780094380b407f0083de7b6c6aee6f42786fddd0e69881bf2965cb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3S51C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5e44b589db780094380b407f0083de7b6c6aee6f42786fddd0e69881bf2965cb"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -1534,22 +1438,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002202"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "ca01d6d9dae453a0d6c6bd4f00169eabbea9319ae14b7c5c1acfaceb1bfbbbb8"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "ca01d6d9dae453a0d6c6bd4f00169eabbea9319ae14b7c5c1acfaceb1bfbbbb8"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -1791,22 +1679,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "5a37974af572b0ae54b13397d88d63ef77eb25fff2120e947bcb47319980fa0a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S51C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5a37974af572b0ae54b13397d88d63ef77eb25fff2120e947bcb47319980fa0a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S51C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5a37974af572b0ae54b13397d88d63ef77eb25fff2120e947bcb47319980fa0a"
           }
         ],
         "name": [
@@ -2022,22 +1894,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002201"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2b4433f39337097f7e4d5430f19274223d1745e75e516b33b9bdc6d693ee9ad3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2b4433f39337097f7e4d5430f19274223d1745e75e516b33b9bdc6d693ee9ad3"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -2279,22 +2135,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "d14af85d0e3671ee523909129bfd22519f0fb4e083a7c1168da386184dc18803"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "d14af85d0e3671ee523909129bfd22519f0fb4e083a7c1168da386184dc18803"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "d14af85d0e3671ee523909129bfd22519f0fb4e083a7c1168da386184dc18803"
           }
         ],
         "name": [
@@ -2510,22 +2350,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003014"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f5deb1c7659c4c265ef9b80af88a485d9ec109b2bd54539269ab188d9713275e"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f5deb1c7659c4c265ef9b80af88a485d9ec109b2bd54539269ab188d9713275e"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -2767,22 +2591,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "a556efb9fbe98b40cedf016747ae9af100620294cb8a1d03604b380570d380eb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a556efb9fbe98b40cedf016747ae9af100620294cb8a1d03604b380570d380eb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S58A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a556efb9fbe98b40cedf016747ae9af100620294cb8a1d03604b380570d380eb"
           }
         ],
         "name": [
@@ -2980,22 +2788,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003015"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2c57f196d238b65275f91f1ac517a1fb262aa25d688dfb33171db38eeb5b7b5c"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2c57f196d238b65275f91f1ac517a1fb262aa25d688dfb33171db38eeb5b7b5c"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -3216,22 +3008,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002048"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SK4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "07b4537cf8af9ff1a6953cf8120e0910c536fc9d14960f1745c736855e2716f3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SK4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "07b4537cf8af9ff1a6953cf8120e0910c536fc9d14960f1745c736855e2716f3"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -3473,22 +3249,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "df7aaf70b259af179e6b5df055a0bfdb594772ec48328e665e4bdc1e19ab458a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "df7aaf70b259af179e6b5df055a0bfdb594772ec48328e665e4bdc1e19ab458a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "df7aaf70b259af179e6b5df055a0bfdb594772ec48328e665e4bdc1e19ab458a"
           }
         ],
         "name": [
@@ -3722,22 +3482,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "710f6e805391f1f808a93974634f53cbb02391ce43d68c35acec6147ea3ad36a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S51C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "710f6e805391f1f808a93974634f53cbb02391ce43d68c35acec6147ea3ad36a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S51C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "710f6e805391f1f808a93974634f53cbb02391ce43d68c35acec6147ea3ad36a"
           }
         ],
         "name": [
@@ -3961,22 +3705,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "8d7cb1504b844ed4af682f67934a06de360e14cb155cf01ed5664063a34d6bbb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "8d7cb1504b844ed4af682f67934a06de360e14cb155cf01ed5664063a34d6bbb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8S48A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "8d7cb1504b844ed4af682f67934a06de360e14cb155cf01ed5664063a34d6bbb"
           }
         ],
         "name": [
@@ -4192,22 +3920,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003017"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2S51C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "570145b748c582ec68ceaec0060364b49f4b9ab008c258d206f391458b29a8ad"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2S51C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "570145b748c582ec68ceaec0060364b49f4b9ab008c258d206f391458b29a8ad"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -4440,22 +4152,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "bb6c18e1c2287b87add9d9872d14bdbbea8dbe736ee7c38438f479a4d132470c"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "bb6c18e1c2287b87add9d9872d14bdbbea8dbe736ee7c38438f479a4d132470c"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "bb6c18e1c2287b87add9d9872d14bdbbea8dbe736ee7c38438f479a4d132470c"
           }
         ],
         "name": [
@@ -4672,22 +4368,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003011"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2201cf8f02ff1abba6f1b2cf03ae3dda994391a1f0f2d73a11df51eed5328c24"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2201cf8f02ff1abba6f1b2cf03ae3dda994391a1f0f2d73a11df51eed5328c24"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -4919,22 +4599,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "19ab5cbd345a1757db3f63ccc1ad9e81c6a16d6e688506a97b7a3b79c66d0ebb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "19ab5cbd345a1757db3f63ccc1ad9e81c6a16d6e688506a97b7a3b79c66d0ebb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "19ab5cbd345a1757db3f63ccc1ad9e81c6a16d6e688506a97b7a3b79c66d0ebb"
           }
         ],
         "name": [
@@ -5132,22 +4796,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000003013"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2b645acbe583a288f4c1aeb4a8d5c513ac373a2a60acd91b11435af726b2dd1c"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S41C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2b645acbe583a288f4c1aeb4a8d5c513ac373a2a60acd91b11435af726b2dd1c"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -5368,22 +5016,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002915"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "496ea9da918aa9ddf26cde505a2f7c2c02fd267f2b59a06766d4dfeae169d0d8"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "496ea9da918aa9ddf26cde505a2f7c2c02fd267f2b59a06766d4dfeae169d0d8"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -5625,22 +5257,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "c565464051cc4bb41bbfb3ce5ac4ef5e2b66563f8de3431f1cb858d20001f548"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SE4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "c565464051cc4bb41bbfb3ce5ac4ef5e2b66563f8de3431f1cb858d20001f548"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SE4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "c565464051cc4bb41bbfb3ce5ac4ef5e2b66563f8de3431f1cb858d20001f548"
           }
         ],
         "name": [
@@ -5839,22 +5455,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002914"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f7c7db0a54a5893526b1ca39baff9209282f16e2d14abc33c0ea4fb4e0f58ce4"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f7c7db0a54a5893526b1ca39baff9209282f16e2d14abc33c0ea4fb4e0f58ce4"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -6084,22 +5684,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "05f5993cca026cc47a5afbab64925342a4aa21a10329a57bea1612b763b0a799"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "05f5993cca026cc47a5afbab64925342a4aa21a10329a57bea1612b763b0a799"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "05f5993cca026cc47a5afbab64925342a4aa21a10329a57bea1612b763b0a799"
           }
         ],
         "name": [
@@ -6287,22 +5871,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002003"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SE4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "43665cb73d34692449b0b4d3e8570a8821d24724583c82ad19ec8a8201161b77"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SE4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "43665cb73d34692449b0b4d3e8570a8821d24724583c82ad19ec8a8201161b77"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -6523,22 +6091,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002912"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "9ad1e7232ed01bb7bd6276b6f03329318c6fcd7209ec5542c985559ffb753788"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "9ad1e7232ed01bb7bd6276b6f03329318c6fcd7209ec5542c985559ffb753788"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -6780,22 +6332,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "8ac9eb610098878e3bc3b31697868e5bb577ab9ee023a6d0367dcf36add5c6b2"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SE4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "8ac9eb610098878e3bc3b31697868e5bb577ab9ee023a6d0367dcf36add5c6b2"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SE4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "8ac9eb610098878e3bc3b31697868e5bb577ab9ee023a6d0367dcf36add5c6b2"
           }
         ],
         "name": [
@@ -7019,22 +6555,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "1d0da2c2229684052b387217c8215803cf2bb26bde9fb35beba247bbf2244bc0"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SS0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "1d0da2c2229684052b387217c8215803cf2bb26bde9fb35beba247bbf2244bc0"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SS0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "1d0da2c2229684052b387217c8215803cf2bb26bde9fb35beba247bbf2244bc0"
           }
         ],
         "name": [
@@ -7250,22 +6770,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002918"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SS0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "fd563fd0cda40bd4ab160c84be17c0e9a297c92a994d2c56df42ddd5b3ab2913"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SS0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "fd563fd0cda40bd4ab160c84be17c0e9a297c92a994d2c56df42ddd5b3ab2913"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -7500,22 +7004,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "e8d76a11b0c581f7c53bf51ce7cf33155b647f761a093f05b48143bbb91155e3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "e8d76a11b0c581f7c53bf51ce7cf33155b647f761a093f05b48143bbb91155e3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "e8d76a11b0c581f7c53bf51ce7cf33155b647f761a093f05b48143bbb91155e3"
           }
         ],
         "name": [
@@ -7731,22 +7219,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002917"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SS0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "cc3d8d6bd6df66e2d38b90da3a4e7d0c62ea31ba52dd1e60067d11db2914eb90"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SS0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "cc3d8d6bd6df66e2d38b90da3a4e7d0c62ea31ba52dd1e60067d11db2914eb90"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -7978,22 +7450,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "eade277b9b3f2ce96b51a2b7799713d10b6abb89e1671d9d88edce5406dcd2fe"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "eade277b9b3f2ce96b51a2b7799713d10b6abb89e1671d9d88edce5406dcd2fe"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "eade277b9b3f2ce96b51a2b7799713d10b6abb89e1671d9d88edce5406dcd2fe"
           }
         ],
         "name": [
@@ -8217,22 +7673,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "753dcc491c48bd8610c45fb07d72a4fa4b3bf36ac29eee5b5b5909435ac4aea9"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "753dcc491c48bd8610c45fb07d72a4fa4b3bf36ac29eee5b5b5909435ac4aea9"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "753dcc491c48bd8610c45fb07d72a4fa4b3bf36ac29eee5b5b5909435ac4aea9"
           }
         ],
         "name": [
@@ -8434,22 +7874,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001821"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "b159281e56f2bfe4c61ea7a82226e330665615d78da42259a87c54d7df138ccf"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "b159281e56f2bfe4c61ea7a82226e330665615d78da42259a87c54d7df138ccf"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -8681,22 +8105,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "b1dab8de23a63504c33d78b73981fd8dbb88b91ce5e0d78a340a01bcab94d859"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "b1dab8de23a63504c33d78b73981fd8dbb88b91ce5e0d78a340a01bcab94d859"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "b1dab8de23a63504c33d78b73981fd8dbb88b91ce5e0d78a340a01bcab94d859"
           }
         ],
         "name": [
@@ -8912,22 +8320,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001822"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "cb84f2f97d797f5a40cb5e02bfa15a243b3a432c2eacaa7b03f07f564a989acb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "cb84f2f97d797f5a40cb5e02bfa15a243b3a432c2eacaa7b03f07f564a989acb"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -9169,22 +8561,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "89c84dd2e93adf6bfd33014d676eca22d77e7df8a3d5210bd5ae7b78878b89f7"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "89c84dd2e93adf6bfd33014d676eca22d77e7df8a3d5210bd5ae7b78878b89f7"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "89c84dd2e93adf6bfd33014d676eca22d77e7df8a3d5210bd5ae7b78878b89f7"
           }
         ],
         "name": [
@@ -9380,22 +8756,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "fa048137442aebd63413afffe27fd4630644dbdb32e5547ef73c2478be85a965"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "fa048137442aebd63413afffe27fd4630644dbdb32e5547ef73c2478be85a965"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "fa048137442aebd63413afffe27fd4630644dbdb32e5547ef73c2478be85a965"
           }
         ],
         "name": [
@@ -9580,22 +8940,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006837"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "1ce5eb272025ff7cc3fb940c298fe0f126e0c4ee5b3beca1d8d7940fa9fe86bb"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "1ce5eb272025ff7cc3fb940c298fe0f126e0c4ee5b3beca1d8d7940fa9fe86bb"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -9816,22 +9160,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001824"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6dddcbc5087bea699d537b47976b129f1898adc6a230ded4ec04310072cafc31"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6dddcbc5087bea699d537b47976b129f1898adc6a230ded4ec04310072cafc31"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -10073,22 +9401,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "8d0595c45f8cd93a78450dc58288bd9459a47639fde0c1e4d54cb7690c2d6524"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "8d0595c45f8cd93a78450dc58288bd9459a47639fde0c1e4d54cb7690c2d6524"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "8d0595c45f8cd93a78450dc58288bd9459a47639fde0c1e4d54cb7690c2d6524"
           }
         ],
         "name": [
@@ -10286,22 +9598,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006832"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "9c153930e45d60182bdfb2dd1ba490b1f0d3798c5152d2c1e4fb6480a2f6db22"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "9c153930e45d60182bdfb2dd1ba490b1f0d3798c5152d2c1e4fb6480a2f6db22"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -10522,22 +9818,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002910"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "e403f770479acf1bc77a30f017519ca578fb4bc3ba900c08c6dac1adadb5d0e0"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "e403f770479acf1bc77a30f017519ca578fb4bc3ba900c08c6dac1adadb5d0e0"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -10769,22 +10049,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "938a16c7e22adc328f9e9f6c9f53fa1c49d5479220c5e9db16d24bb33aa1168d"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9S85D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "938a16c7e22adc328f9e9f6c9f53fa1c49d5479220c5e9db16d24bb33aa1168d"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9S85D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "938a16c7e22adc328f9e9f6c9f53fa1c49d5479220c5e9db16d24bb33aa1168d"
           }
         ],
         "name": [
@@ -11008,22 +10272,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "f100caec664739e904d8544860a6a96c0fb6aca8c9a54f1c2e6bcc7117bac3d1"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f100caec664739e904d8544860a6a96c0fb6aca8c9a54f1c2e6bcc7117bac3d1"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f100caec664739e904d8544860a6a96c0fb6aca8c9a54f1c2e6bcc7117bac3d1"
           }
         ],
         "name": [
@@ -11211,22 +10459,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000006833"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "ac1e80c302e6f5dcbf42dc78d3cd7be47868ff3e7d618e110c8e5fb443a712b0"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2S95D00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "ac1e80c302e6f5dcbf42dc78d3cd7be47868ff3e7d618e110c8e5fb443a712b0"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -11447,22 +10679,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001820"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "460b72581892a1da2fc06997bf08c4feba1c8a975b5819d88c790251ced3bf72"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "460b72581892a1da2fc06997bf08c4feba1c8a975b5819d88c790251ced3bf72"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -11704,22 +10920,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "b194fca8e2bd6625aac4ee85d56b43cca765f1fb9496e728b6307cfef05f807d"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SS3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "b194fca8e2bd6625aac4ee85d56b43cca765f1fb9496e728b6307cfef05f807d"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SS3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "b194fca8e2bd6625aac4ee85d56b43cca765f1fb9496e728b6307cfef05f807d"
           }
         ],
         "name": [
@@ -11935,22 +11135,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001825"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "16f1bce6b37c7c816f21582abe37da96ee5098a15e5e4c55c36f3756f877de1d"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "16f1bce6b37c7c816f21582abe37da96ee5098a15e5e4c55c36f3756f877de1d"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -12183,22 +11367,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "3d36c7d4563f318d0dd9dd85f9718c08c32a03095d7c97d77f1534360575e540"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "3d36c7d4563f318d0dd9dd85f9718c08c32a03095d7c97d77f1534360575e540"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "3d36c7d4563f318d0dd9dd85f9718c08c32a03095d7c97d77f1534360575e540"
           }
         ],
         "name": [
@@ -12414,22 +11582,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001827"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SS3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "62fad42e0edc01fdf38cc0f69cd0c91f731c1766a4de6d63b82d2a1aa76c1c4b"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SS3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "62fad42e0edc01fdf38cc0f69cd0c91f731c1766a4de6d63b82d2a1aa76c1c4b"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -12671,22 +11823,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "fcff0cd90e37ced0431cc913856b3e18da0c328ac39a874af04f832ad1aa7eef"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SS3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "fcff0cd90e37ced0431cc913856b3e18da0c328ac39a874af04f832ad1aa7eef"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SS3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "fcff0cd90e37ced0431cc913856b3e18da0c328ac39a874af04f832ad1aa7eef"
           }
         ],
         "name": [
@@ -12912,22 +12048,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002909"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5441ad193359e666940f79dbdd79093f1863f395fd307191b14be0060e6f8fba"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5441ad193359e666940f79dbdd79093f1863f395fd307191b14be0060e6f8fba"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -13169,22 +12289,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "238970ad438a3f800fddfe8a03b3f795a68619f50d63f0a7169bb7b2ec939ac8"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "238970ad438a3f800fddfe8a03b3f795a68619f50d63f0a7169bb7b2ec939ac8"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "238970ad438a3f800fddfe8a03b3f795a68619f50d63f0a7169bb7b2ec939ac8"
           }
         ],
         "name": [
@@ -13382,22 +12486,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002903"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6ab34be529e00c28be4deb5b0e635a354a9ded3d2b6b4386ea6288b2e895a093"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6ab34be529e00c28be4deb5b0e635a354a9ded3d2b6b4386ea6288b2e895a093"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -13618,22 +12706,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002902"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "c532625124d09c17d5584f77ccc33b8f720d6ddcbf53d37f00c4228d4f91c8bd"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "c532625124d09c17d5584f77ccc33b8f720d6ddcbf53d37f00c4228d4f91c8bd"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -13875,22 +12947,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "f58254f864e044882a01ec014a32d7a7ec2eb8101468f5fa5ad71696595fafa3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f58254f864e044882a01ec014a32d7a7ec2eb8101468f5fa5ad71696595fafa3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f58254f864e044882a01ec014a32d7a7ec2eb8101468f5fa5ad71696595fafa3"
           }
         ],
         "name": [
@@ -14106,22 +13162,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002908"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6620c3b358d943c07ee51214ebae045b84434bef1a9a5964d8418f00254ffbe5"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SR0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6620c3b358d943c07ee51214ebae045b84434bef1a9a5964d8418f00254ffbe5"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -14363,22 +13403,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "bf1493b754d3c7f61da98783ebf3d4658a972043853a8c01fcebe89bbaf34631"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "bf1493b754d3c7f61da98783ebf3d4658a972043853a8c01fcebe89bbaf34631"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "bf1493b754d3c7f61da98783ebf3d4658a972043853a8c01fcebe89bbaf34631"
           }
         ],
         "name": [
@@ -14594,22 +13618,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002906"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "d81981839e2c6a075a0030b4608e6abdc7489e321eacbcb4ab9ae62651104007"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "d81981839e2c6a075a0030b4608e6abdc7489e321eacbcb4ab9ae62651104007"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -14841,22 +13849,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "3cd3a6a6209b3c0a3648072404a316e1fce36be2bcd3c99731d37be0c6804839"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "3cd3a6a6209b3c0a3648072404a316e1fce36be2bcd3c99731d37be0c6804839"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SQ0C00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "3cd3a6a6209b3c0a3648072404a316e1fce36be2bcd3c99731d37be0c6804839"
           }
         ],
         "name": [
@@ -15072,22 +14064,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001810"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "70816f785a65bae93de375969a0f4a4e9c245748e49f36aac22de555d21a7431"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "70816f785a65bae93de375969a0f4a4e9c245748e49f36aac22de555d21a7431"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -15329,22 +14305,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "961b4100c40f9b9d4eafb2adc84de7f0f571d31ad71dc8c2ede6115c94e00d72"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S79E00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "961b4100c40f9b9d4eafb2adc84de7f0f571d31ad71dc8c2ede6115c94e00d72"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S79E00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "961b4100c40f9b9d4eafb2adc84de7f0f571d31ad71dc8c2ede6115c94e00d72"
           }
         ],
         "name": [
@@ -15560,22 +14520,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001811"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a9bc69664392f89ce088628fa8630b72242a857085174a1614896c9f557e208c"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a9bc69664392f89ce088628fa8630b72242a857085174a1614896c9f557e208c"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -15817,22 +14761,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "13baca5ec3de2c122b3b7848f480f0f68fbcbc70a35cac7f6def4cc1debdd25e"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "13baca5ec3de2c122b3b7848f480f0f68fbcbc70a35cac7f6def4cc1debdd25e"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "13baca5ec3de2c122b3b7848f480f0f68fbcbc70a35cac7f6def4cc1debdd25e"
           }
         ],
         "name": [
@@ -16020,22 +14948,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001813"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a68ecf5ce1cc9a2602df72418f91d4bf18a0ffff832813c6e5d1ff273412011a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a68ecf5ce1cc9a2602df72418f91d4bf18a0ffff832813c6e5d1ff273412011a"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -16264,22 +15176,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "4ac3d3656afe6de821b306a8f466f5984385ecc938d4da8b641bcf8d94ee0b7b"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "4ac3d3656afe6de821b306a8f466f5984385ecc938d4da8b641bcf8d94ee0b7b"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "4ac3d3656afe6de821b306a8f466f5984385ecc938d4da8b641bcf8d94ee0b7b"
           }
         ],
         "name": [
@@ -16495,22 +15391,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001819"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "835f033befd137b3180ec1646e86481d8fa17abd6f920c188c0f8061a4e46d80"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SR3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "835f033befd137b3180ec1646e86481d8fa17abd6f920c188c0f8061a4e46d80"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -16743,22 +15623,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "fa3e5b8228c01fbc1de86ee7f2897478982add15e880877dda8a6b42cd0cf592"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "fa3e5b8228c01fbc1de86ee7f2897478982add15e880877dda8a6b42cd0cf592"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "fa3e5b8228c01fbc1de86ee7f2897478982add15e880877dda8a6b42cd0cf592"
           }
         ],
         "name": [
@@ -16982,22 +15846,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "2c7baa8470bf9282044cb4f0c60d12cb5b9c944f8fd3129cb15782342b073993"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2c7baa8470bf9282044cb4f0c60d12cb5b9c944f8fd3129cb15782342b073993"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "2c7baa8470bf9282044cb4f0c60d12cb5b9c944f8fd3129cb15782342b073993"
           }
         ],
         "name": [
@@ -17213,22 +16061,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001816"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "9c743e26cd61ba6fe7dbb06b99f29b8df64350ca0e9bbb59103c9378167128cc"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "9c743e26cd61ba6fe7dbb06b99f29b8df64350ca0e9bbb59103c9378167128cc"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -17461,22 +16293,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "33acbcb2dba2e783eec4e9ecc19524d414ce6a8dadf4ad692e7b074d240e8dbc"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "33acbcb2dba2e783eec4e9ecc19524d414ce6a8dadf4ad692e7b074d240e8dbc"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SQ3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "33acbcb2dba2e783eec4e9ecc19524d414ce6a8dadf4ad692e7b074d240e8dbc"
           }
         ],
         "name": [
@@ -17678,22 +16494,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002023"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "cbd15528159ba15e4e7ee9d261fdaf7d5ef2b670507e9163318214dc337f2d1a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "cbd15528159ba15e4e7ee9d261fdaf7d5ef2b670507e9163318214dc337f2d1a"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -17922,22 +16722,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "4a1ac05ec3f87975a3fbac15782ca666251f0741367971269e7b84b78b6bab2a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "4a1ac05ec3f87975a3fbac15782ca666251f0741367971269e7b84b78b6bab2a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "4a1ac05ec3f87975a3fbac15782ca666251f0741367971269e7b84b78b6bab2a"
           }
         ],
         "name": [
@@ -18153,22 +16937,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002025"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SH4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "7d37daed210975bc15a1526fe149ae03badc9311023591317cd02ee7342ea052"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SH4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "7d37daed210975bc15a1526fe149ae03badc9311023591317cd02ee7342ea052"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -18410,22 +17178,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "243674bf77a0b76687fefbb29df9587f3a4ff1d3aa07da0cb91b5e3d90c1965d"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "243674bf77a0b76687fefbb29df9587f3a4ff1d3aa07da0cb91b5e3d90c1965d"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "8S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "243674bf77a0b76687fefbb29df9587f3a4ff1d3aa07da0cb91b5e3d90c1965d"
           }
         ],
         "name": [
@@ -18650,22 +17402,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "53c05549d4145e3e8cf42093444fe54fe5f6da48f97ca8ffd6aa048c273c275b"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "53c05549d4145e3e8cf42093444fe54fe5f6da48f97ca8ffd6aa048c273c275b"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "53c05549d4145e3e8cf42093444fe54fe5f6da48f97ca8ffd6aa048c273c275b"
           }
         ],
         "name": [
@@ -18853,22 +17589,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000881"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6f1b08fcc66a054bcdb57afc4b721e4b8234157e52a580b8ac03f428bb9be3e4"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6f1b08fcc66a054bcdb57afc4b721e4b8234157e52a580b8ac03f428bb9be3e4"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -19089,22 +17809,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002021"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5612ca15e3f71e857d06f152b678a35588b7a18a7248b4763715f4904cf13ec5"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5612ca15e3f71e857d06f152b678a35588b7a18a7248b4763715f4904cf13ec5"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -19346,22 +18050,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "cd98679dddb0237444ad201bee21adb8cdb91bf8849d6ee23b8095b23b620bb3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "cd98679dddb0237444ad201bee21adb8cdb91bf8849d6ee23b8095b23b620bb3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "cd98679dddb0237444ad201bee21adb8cdb91bf8849d6ee23b8095b23b620bb3"
           }
         ],
         "name": [
@@ -19577,22 +18265,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000875"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5dc301c5af5d2fbdd4dccaff0ef5f79dc4a16f88662f7e6140d692fab3938d33"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5dc301c5af5d2fbdd4dccaff0ef5f79dc4a16f88662f7e6140d692fab3938d33"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -19834,22 +18506,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "5c7973cc88e7200a5ad31682a0aca0891232021133d22dc50017c1eb3ab95dc4"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5c7973cc88e7200a5ad31682a0aca0891232021133d22dc50017c1eb3ab95dc4"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "5c7973cc88e7200a5ad31682a0aca0891232021133d22dc50017c1eb3ab95dc4"
           }
         ],
         "name": [
@@ -20037,22 +18693,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000876"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "34518300446b07eda3c60c5886d2723903787a99d86bfcae180f52872b093f00"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "34518300446b07eda3c60c5886d2723903787a99d86bfcae180f52872b093f00"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -20273,22 +18913,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000877"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "97e21ee0d5fd894a507153525ada2d0013193e604d412763e2af92a8dfadbe07"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "97e21ee0d5fd894a507153525ada2d0013193e604d412763e2af92a8dfadbe07"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -20523,22 +19147,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "8b60191be07bb7aec0e340aecdd24cd4cd67b43ae13e0685d8d7850ce83e80ab"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "8b60191be07bb7aec0e340aecdd24cd4cd67b43ae13e0685d8d7850ce83e80ab"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "8b60191be07bb7aec0e340aecdd24cd4cd67b43ae13e0685d8d7850ce83e80ab"
           }
         ],
         "name": [
@@ -20740,22 +19348,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002016"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f2454cf21044f79165fd6dcda5695279aa8d04343b4bc89162c8570d0b91a953"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "1SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f2454cf21044f79165fd6dcda5695279aa8d04343b4bc89162c8570d0b91a953"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -20976,22 +19568,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000001840"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SU3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f0ed38a98f86d5bcb7735a2c44f6c3908c727373c8c82eeada456a281eee273a"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SU3F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "f0ed38a98f86d5bcb7735a2c44f6c3908c727373c8c82eeada456a281eee273a"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -21223,22 +19799,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "56886f3ac99e3539e6657b036b1e2d36a2a2a5110cb78503366c10fa0d26c1e3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S79E00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "56886f3ac99e3539e6657b036b1e2d36a2a2a5110cb78503366c10fa0d26c1e3"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4S79E00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "56886f3ac99e3539e6657b036b1e2d36a2a2a5110cb78503366c10fa0d26c1e3"
           }
         ],
         "name": [
@@ -21454,22 +20014,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002015"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SF4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6385293c43ab4faa4e9cf1db2e131a82c34698b544f64843939bebe02702a60e"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9SF4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6385293c43ab4faa4e9cf1db2e131a82c34698b544f64843939bebe02702a60e"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -21711,22 +20255,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "c014712ea07bca70ca7201647f22481935cc965359b18392425b67d195ca8d4f"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S79E00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "c014712ea07bca70ca7201647f22481935cc965359b18392425b67d195ca8d4f"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5S79E00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "c014712ea07bca70ca7201647f22481935cc965359b18392425b67d195ca8d4f"
           }
         ],
         "name": [
@@ -21950,22 +20478,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "b5ac5f53334c75ad5f1a9186ade26efa2cf5b7a93e46fa21343bf467ff680593"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "b5ac5f53334c75ad5f1a9186ade26efa2cf5b7a93e46fa21343bf467ff680593"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "b5ac5f53334c75ad5f1a9186ade26efa2cf5b7a93e46fa21343bf467ff680593"
           }
         ],
         "name": [
@@ -22153,22 +20665,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000000599"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S79E00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "7e9b262820778a2b8154e107ea5fa863792047f86b9a032e803bb6527292d6d9"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6S79E00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "7e9b262820778a2b8154e107ea5fa863792047f86b9a032e803bb6527292d6d9"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -22397,22 +20893,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "7cb2c31f168455dd4d2ac2af3464407fb99c7c8b4aee89c3b5113b530a9a8eb5"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "7cb2c31f168455dd4d2ac2af3464407fb99c7c8b4aee89c3b5113b530a9a8eb5"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "2SG4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "7cb2c31f168455dd4d2ac2af3464407fb99c7c8b4aee89c3b5113b530a9a8eb5"
           }
         ],
         "name": [
@@ -22628,22 +21108,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002371"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SR8A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a7cc3410ab07d6305afeb20ac2a74cbc14bef680a189258bf4f06ea5e7e7ca51"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "4SR8A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "a7cc3410ab07d6305afeb20ac2a74cbc14bef680a189258bf4f06ea5e7e7ca51"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -22877,22 +21341,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-19990000002370"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SR8A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6ec07011cd751b25f817c6afd217940440c686beb6766ed0bd0fb711c25bb6ee"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "3SR8A00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "6ec07011cd751b25f817c6afd217940440c686beb6766ed0bd0fb711c25bb6ee"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",
@@ -23135,22 +21583,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "4e2f4baee8d01751665fde0f16964294b477d14577cfd056d21a2d4383065245"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "4e2f4baee8d01751665fde0f16964294b477d14577cfd056d21a2d4383065245"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "7S80F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "4e2f4baee8d01751665fde0f16964294b477d14577cfd056d21a2d4383065245"
           }
         ],
         "name": [
@@ -23384,22 +21816,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
             "value": "d1a2753725d0b96afd2b5a4689a74fa1a8f35b3002c8537ea109b80a8aec66a2"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SF4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "d1a2753725d0b96afd2b5a4689a74fa1a8f35b3002c8537ea109b80a8aec66a2"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "6SF4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "d1a2753725d0b96afd2b5a4689a74fa1a8f35b3002c8537ea109b80a8aec66a2"
           }
         ],
         "name": [
@@ -23615,22 +22031,6 @@
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
             "value": "-20000000002011"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SF4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "559d6e1514157389657620b3130a024b95319aabd9d49b85e4b4cc83c85e31e4"
-          },
-          {
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "5SF4F00AA00"
-          },
-          {
-            "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-            "value": "559d6e1514157389657620b3130a024b95319aabd9d49b85e4b4cc83c85e31e4"
           },
           {
             "system": "http://hl7.org/fhir/sid/us-mbi",

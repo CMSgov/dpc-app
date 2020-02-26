@@ -21,7 +21,7 @@ ig/publish: ${IG_PUBLISHER}
 	@echo "Building Implementation Guide"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
-.PHONY: travis
+.PHONY: travis secure-envs
 travis:
 	@./dpc-test.sh
 
@@ -73,4 +73,5 @@ docker-base:
 
 .PHONY: secure-envs
 secure-envs:
-	@export $(bash ops/scripts/secrets --decrypt | tail -n +3 | sed -e'/^$/d' -e '/^#/d' | xargs)
+	@bash ops/scripts/secrets --decrypt ops/config/encrypted/bb.keystore | tail -n +2 > bbcerts/bb.keystore
+	@bash ops/scripts/secrets --decrypt ops/config/encrypted/local.env | tail -n +2 > ops/config/decrypted/local.env

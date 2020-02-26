@@ -78,7 +78,7 @@ public class PatientResource extends AbstractPatientResource {
             if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
                 expandedMBI = patientMBI;
             } else {
-                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.BENE_ID.getSystem(), patientMBI);
+                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
             }
             return request
                     .where(Patient.IDENTIFIER.exactly().identifier(expandedMBI))
