@@ -73,9 +73,11 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system." +
             "<p>Each provider must have a metadata Tag with the responsible Organization ID included." +
             "If not, we'll reject it." +
-            "<p> If a provider is already registered with the Organization, an errorr is thrown.")
+            "<p> If a provider is already registered with the Organization, an error is thrown." +
+            "<p> If a provider has already registered providers past the provider limit, then return 304")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "New resource was created"),
+            @ApiResponse(code = 304, message = "Resource was not created")
     })
     public Response submitProvider(Practitioner provider) {
 
