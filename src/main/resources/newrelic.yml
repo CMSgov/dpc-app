@@ -45,7 +45,7 @@ common: &default_settings
     max_samples_stored: 2000
 
   distributed_tracing:
-    enabled: true
+    enabled: false
 
   cross_application_tracer:
     enabled: false
