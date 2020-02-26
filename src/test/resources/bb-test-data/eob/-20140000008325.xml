@@ -7,11 +7,11 @@
    <total value="32"/>
    <link>
       <relation value="self"/>
-      <url value="http://localhost:8083/v1/fhir/ExplanationOfBenefit?patient=20140000008325&amp;count=10&amp;startIndex=0&amp;excludeSAMHSA=true"/>
+      <url value="http://localhost:8083/v1/fhir/ExplanationOfBenefit?patient=-20140000008325&amp;count=10&amp;startIndex=0&amp;excludeSAMHSA=true"/>
    </link>
    <link>
       <relation value="next"/>
-      <url value="http://localhost:8083/v1/fhir/ExplanationOfBenefit?patient=20140000008325&amp;count=10&amp;startIndex=10&amp;excludeSAMHSA=true"/>
+      <url value="http://localhost:8083/v1/fhir/ExplanationOfBenefit?patient=-20140000008325&amp;count=10&amp;startIndex=10&amp;excludeSAMHSA=true"/>
    </link>
    <entry>
       <resource>

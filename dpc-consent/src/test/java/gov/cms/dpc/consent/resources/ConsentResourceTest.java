@@ -111,8 +111,7 @@ class ConsentResourceTest extends AbstractConsentTest {
     }
 
     @ParameterizedTest
-    // TODO: nickrobison This needs to be reverted to the MBI identifier system, once we complete the transition from BENE_ID -> MBI
-    @CsvSource({"BENE_ID,mbi_1", "HICN,hicn_1"})
+    @CsvSource({"MBI,mbi_1", "HICN,hicn_1"})
     final void searchConsentResource_finds_validPatientParam(String system, String patientId) {
 
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
