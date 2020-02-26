@@ -250,7 +250,7 @@ class FHIRSubmissionTest {
 
             testBeneficiaries.forEach(id -> {
                 final Patient p = new Patient();
-                p.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue(id);
+                p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(id);
                 bundle.addEntry().setResource(p);
             });
 
