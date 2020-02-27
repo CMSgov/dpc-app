@@ -143,7 +143,7 @@ class ResourceFetcher {
     }
 
     private Patient fetchPatient(String mbi) {
-        Bundle patients = null;
+        Bundle patients;
         try {
             patients = blueButtonClient.requestPatientFromServerByMbi(mbi);
         } catch (GeneralSecurityException e) {
@@ -243,9 +243,9 @@ class ResourceFetcher {
             logger.info("About to throw an BFD Runtime: bundle {}, job {}", bundleTransactionTime, transactionTime);
             /**
              * See BFD's RFC0004 for a discussion on why this type error may occur.
-             * Note: Retrying after a delay may fix this problem.
+             * Note: Retrying the job after a delay may fix this problem.
              */
-            throw new RuntimeException("BFD's transaction time regression");
+            throw new JobQueueFailure("BFD's transaction time regression");
         }
     }
 }
