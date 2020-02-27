@@ -3,7 +3,7 @@
 class InternalUser < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable, :registerable
-  devise :database_authenticatable, :rememberable,
+  devise :database_authenticatable,
          :trackable, :timeoutable,
          :omniauthable, omniauth_providers: %i[github]
 
