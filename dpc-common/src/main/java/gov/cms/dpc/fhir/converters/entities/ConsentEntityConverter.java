@@ -39,7 +39,7 @@ public class ConsentEntityConverter {
         sb.append(" for the patient with identifiers [");
         sb.append(noHicn ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn));
         sb.append((!noHicn && !noMbi) ? "], [" : "");
-        sb.append(noMbi ? "" : patientIdentifier(DPCIdentifierSystem.BENE_ID, mbi));
+        sb.append(noMbi ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi));
         sb.append("]");
 
         Narrative text = new Narrative();

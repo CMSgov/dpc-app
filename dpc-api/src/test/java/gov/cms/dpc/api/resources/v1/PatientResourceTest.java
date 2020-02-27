@@ -48,7 +48,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final Bundle specificSearch = client
                 .search()
                 .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.BENE_ID.getSystem(), "19990000002901"))
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();

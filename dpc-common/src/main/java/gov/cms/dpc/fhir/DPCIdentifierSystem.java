@@ -13,7 +13,7 @@ public enum DPCIdentifierSystem {
     MBI("http://hl7.org/fhir/sid/us-mbi"),
     MBI_HASH("https://bluebutton.cms.gov/resources/identifier/mbi-hash"),
     DPC("https://dpc.cms.gov/organization_id#"),
-    HICN("http://bluebutton.cms.hhs.gov/identifier#hicnHash"),
+    HICN("https://bluebutton.cms.gov/resources/identifier/hicn-hash"),
     UNKNOWN ("");
 
     private final String system;

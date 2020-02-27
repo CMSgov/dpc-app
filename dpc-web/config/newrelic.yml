@@ -3,4 +3,4 @@ common: &default_settings
   log_file_name: STDOUT
 
   distributed_tracing:
-    enabled: true
+    enabled: false

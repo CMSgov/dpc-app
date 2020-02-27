@@ -75,7 +75,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         final IQuery<Bundle> firstQuery = client
                 .search()
                 .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.BENE_ID.getSystem(), DEFAULT_PATIENT_MBI))
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
                 .and(Patient.ORGANIZATION.hasId("Organization/" + DEFAULT_ORG_ID))
                 .returnBundle(Bundle.class)
                 .encodedJson();
@@ -89,7 +89,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         final Bundle secondSearch = client
                 .search()
                 .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.BENE_ID.getSystem(), DEFAULT_PATIENT_MBI))
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
                 .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
@@ -105,7 +105,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         final IQuery<Bundle> firstQuery = client
                 .search()
                 .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.BENE_ID.getSystem(), DEFAULT_PATIENT_MBI))
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
                 .and(Patient.ORGANIZATION.hasId("Organization/" + DEFAULT_ORG_ID))
                 .returnBundle(Bundle.class)
                 .encodedJson();
@@ -169,7 +169,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         final IQuery<Bundle> firstQuery = client
                 .search()
                 .forResource(Patient.class)
-                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.BENE_ID.getSystem(), "19990000002902"))
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
                 .and(Patient.ORGANIZATION.hasId("Organization/" + DEFAULT_ORG_ID))
                 .returnBundle(Bundle.class)
                 .encodedJson();

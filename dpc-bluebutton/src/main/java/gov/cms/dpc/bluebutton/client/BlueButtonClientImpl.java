@@ -45,7 +45,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     private BBClientConfiguration config;
     private Map<String, Timer> timers;
     private Map<String, Meter> exceptionMeters;
-    private SecretKeyFactory secretKeyFactory = null;
+    private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
     private byte[] bfdHashPepper;
     private int bfdHashIter;
 
@@ -60,15 +60,9 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         this.exceptionMeters = metricMaker.registerMeters(REQUEST_METRICS);
         this.timers = metricMaker.registerTimers(REQUEST_METRICS);
 
-        String alg = "PBKDF2WithHmacSHA256";
-        try {
-            this.secretKeyFactory = SecretKeyFactory.getInstance(alg);
-            bfdHashIter = config.getBfdHashIter();
-            if (config.getBfdHashPepper() != null) {
-                bfdHashPepper = Hex.decode(config.getBfdHashPepper());
-            }
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("Secret key factory could not be created due to invalid algorithm: {}", alg);
+        bfdHashIter = config.getBfdHashIter();
+        if (config.getBfdHashPepper() != null) {
+            bfdHashPepper = Hex.decode(config.getBfdHashPepper());
         }
     }
 
@@ -87,6 +81,18 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                 .resource(Patient.class)
                 .withId(patientID)
                 .execute());
+    }
+
+    /**
+     * Hashes MBI and queries Blue Button server for patient data.
+     *
+     * @param mbi The MBI
+     * @return {@link Bundle} A FHIR Bundle of Patient resources
+     */
+    @Override
+    public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException, GeneralSecurityException {
+        String mbiHash = hashMbi(mbi);
+        return requestPatientFromServerByMbiHash(mbiHash);
     }
 
     /**
@@ -192,12 +198,16 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             return "";
         }
 
-        if (secretKeyFactory == null) {
-            throw new GeneralSecurityException("Secret key factory is null");
+        final SecretKeyFactory instance;
+        try {
+            instance = SecretKeyFactory.getInstance(HASH_ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Secret key factory could not be created due to invalid algorithm: {}", HASH_ALGORITHM);
+            throw new GeneralSecurityException(e);
         }
 
         KeySpec keySpec = new PBEKeySpec(mbi.toCharArray(), bfdHashPepper, bfdHashIter, 256);
-        SecretKey secretKey = secretKeyFactory.generateSecret(keySpec);
+        SecretKey secretKey = instance.generateSecret(keySpec);
         return Hex.toHexString(secretKey.getEncoded());
     }
 
