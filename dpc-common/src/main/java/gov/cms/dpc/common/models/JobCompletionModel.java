@@ -159,7 +159,7 @@ public class JobCompletionModel {
         this.request = request;
         this.output = output;
         this.error = error;
-        this.extension = extension;
+        this.extension = extension != null && extension.isEmpty() ? null : extension;
     }
 
     public OffsetDateTime getTransactionTime() {
