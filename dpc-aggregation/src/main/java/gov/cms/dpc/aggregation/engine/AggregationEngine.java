@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.newrelic.api.agent.Trace;
+import gov.cms.dpc.aggregation.client.ConsentClient;
+import gov.cms.dpc.aggregation.exceptions.SuppressionException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
@@ -49,6 +51,7 @@ public class AggregationEngine implements Runnable {
     private final UUID aggregatorID;
     private final IJobQueue queue;
     private final BlueButtonClient bbclient;
+    private final ConsentClient consentClient;
     private final OperationsConfig operationsConfig;
     private final FhirContext fhirContext;
     private final Meter resourceMeter;
@@ -67,10 +70,11 @@ public class AggregationEngine implements Runnable {
      * @param operationsConfig - The {@link OperationsConfig} to use for writing the output files
      */
     @Inject
-    public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, IJobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
+    public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, ConsentClient consentClient, IJobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
         this.aggregatorID = aggregatorID;
         this.queue = queue;
         this.bbclient = bbclient;
+        this.consentClient = consentClient;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
 
@@ -187,7 +191,17 @@ public class AggregationEngine implements Runnable {
      * @param patientID - The current patient id processing
      */
     private List<JobQueueBatchFile> processJobBatchPartial(JobQueueBatch job, String patientID) {
-        final var results = Flowable.fromIterable(job.getResourceTypes())
+        final var results = Flowable.fromCallable(() -> this.consentClient.fetchConsentByMBI(patientID))
+                .map(option -> {
+                    if (option.isPresent()) {
+                        if (option.get().getPolicyRule().equals("http://hl7.org/fhir/ConsentPolicy/opt-out")) {
+                            throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, patientID, "Patient has opted-out");
+                        }
+                    }
+                    return option;
+                })
+                .switchMap(consent -> Flowable.fromIterable(job.getResourceTypes()))
+//        final var results = Flowable.fromIterable(job.getResourceTypes())
                 .flatMap(resourceType -> completeResource(job, patientID, resourceType))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
