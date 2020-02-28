@@ -5,8 +5,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -267,6 +267,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertNotNull(pract2, "Should be created");
 
         // Try again, should fail
-        assertThrows(NotModifiedException.class, creation::execute, "Should not modify");
+        assertThrows(UnprocessableEntityException.class, creation::execute, "Should not modify");
     }
 }

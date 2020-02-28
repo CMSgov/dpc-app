@@ -77,7 +77,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "<p> If a provider has already registered providers past the provider limit, then return 304")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "New resource was created"),
-            @ApiResponse(code = 304, message = "Resource was not created")
+            @ApiResponse(code = 422, message = "Unprocessable resource")
     })
     public Response submitProvider(Practitioner provider) {
 
@@ -86,7 +86,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final List<ProviderEntity> existingProvidersByNPI = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
 
         if (providerLimit != null && totalExistingProviders >= providerLimit) {
-            return Response.status(Response.Status.NOT_MODIFIED).entity(this.converter.toFHIR(Practitioner.class, existingProvidersByNPI.get(0))).build();
+            return Response.status(422).entity(this.converter.toFHIR(Practitioner.class, existingProvidersByNPI.get(0))).build();
         }
 
         if (existingProvidersByNPI.isEmpty()) {
