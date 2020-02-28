@@ -75,7 +75,7 @@ class BatchAggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_IDS.get(0)),
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(ResourceType.ExplanationOfBenefit)
         );
 
@@ -108,7 +108,7 @@ class BatchAggregationEngineTest {
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
-                MockBlueButtonClient.TEST_PATIENT_IDS,
+                MockBlueButtonClient.TEST_PATIENT_MBIS,
                 JobQueueBatch.validResourceTypes
         );
 

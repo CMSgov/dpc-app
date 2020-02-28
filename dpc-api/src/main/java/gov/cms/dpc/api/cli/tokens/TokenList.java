@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.cli.tokens;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -25,11 +24,8 @@ import java.util.List;
 
 public class TokenList extends AbstractAdminCommand {
 
-    private final ObjectMapper mapper;
-
     public TokenList() {
         super("list", "List tokens for registered Organization");
-        this.mapper = new ObjectMapper();
     }
 
     @Override
@@ -53,10 +49,10 @@ public class TokenList extends AbstractAdminCommand {
         listTokens(apiService, orgReference);
     }
 
-    private void listTokens(String attributionService, String organization) throws IOException, URISyntaxException {
-        // List all the tokens, switching
+    private void listTokens(String apiService, String organization) throws IOException, URISyntaxException {
+        // List all the tokens
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            final URIBuilder builder = new URIBuilder(String.format("%s/list-tokens", attributionService));
+            final URIBuilder builder = new URIBuilder(String.format("%s/list-tokens", apiService));
             builder.addParameter("organization", new IdType(organization).getIdPart());
             final HttpPost tokenPost = new HttpPost(builder.build());
 
