@@ -4,6 +4,22 @@ module Users
   class RegistrationsController < Devise::RegistrationsController
     include MultiModelLoginHelper
     skip_before_action :check_user, except: %i[new create]
+
+    def destroy
+      @user = User.find(current_user.id)
+      if @user.destroy_with_password(user_params[:current_password])
+          redirect_to root_url, notice: "User deleted."
+      else
+        redirect_to edit_user_registration_url
+        flash[:notice] = "Couldn't delete"
+      end
+    end
+
+    def user_params
+      params.require(:user).permit(:first_name, :last_name, :requested_organization, :requested_organization_type,
+                                    :address_1, :address_2, :city, :state, :zip, :agree_to_terms,
+                                    :email, :password, :password_confirmation, :current_password, :requested_num_providers )
+    end
     # before_action :configure_sign_up_params, only: [:create]
     # before_action :configure_account_update_params, only: [:update]
 
