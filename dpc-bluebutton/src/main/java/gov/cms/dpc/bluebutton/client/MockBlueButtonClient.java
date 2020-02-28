@@ -35,6 +35,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
             TEST_PATIENT_MBIS.get(1), "8930cab29ba5fe4311a5f5bcfd5b7384f3722b711402aacf796d2ae6fea54242"
     );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
+    public static final List<String> TEST_PATIENT_WITH_OPT_OUT = List.of("2SW4N00AA00", "4SP0P00AA00", "1SQ3F00AA00");
 
     private final IParser parser;
 
