@@ -194,10 +194,8 @@ public class AggregationEngine implements Runnable {
     private List<JobQueueBatchFile> processJobBatchPartial(JobQueueBatch job, String patientID) {
         final var results = Flowable.fromCallable(() -> this.consentClient.fetchConsentByMBI(patientID))
                 .map(option -> {
-                    if (option.isPresent()) {
-                        if (option.get().getPolicyRule().equals("http://hl7.org/fhir/ConsentPolicy/opt-out")) {
-                            throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, patientID, "Patient has opted-out");
-                        }
+                    if (option.isPresent() && option.get().getPolicyRule().equals("http://hl7.org/fhir/ConsentPolicy/opt-out")) {
+                        throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, patientID, "Patient has opted-out");
                     }
                     return option;
                 })
@@ -205,7 +203,7 @@ public class AggregationEngine implements Runnable {
                 .flatMap(resourceType -> completeResource(job, patientID, resourceType))
                 .onErrorResumeNext(error -> {
                     if (error instanceof SuppressionException) {
-//                        logger.debug(error.getMessage());
+                        logger.debug("Suppressed.", error);
                         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
                         final OperationOutcome oo = new OperationOutcome();
                         final var errorResourceCount = new AtomicInteger();
@@ -242,7 +240,7 @@ public class AggregationEngine implements Runnable {
             sequenceCount.set(file.getSequence());
         });
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount, resourceMeter));
+        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose(upstream -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount, resourceMeter));
 
         // Batch the error resources into files
         final var errorResourceCount = new AtomicInteger();
@@ -252,7 +250,7 @@ public class AggregationEngine implements Runnable {
             errorSequenceCount.set(file.getSequence());
         });
         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter));
+        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose(upstream -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter));
 
         // Merge the resultant flows
         return resourceFlow.mergeWith(outcomeFlow);

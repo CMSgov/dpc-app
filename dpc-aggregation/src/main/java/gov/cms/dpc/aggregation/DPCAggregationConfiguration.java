@@ -36,6 +36,10 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @NotEmpty
     private String exportPath;
 
+    // The address of the consent service
+    @NotEmpty
+    private String consentService;
+
     // The number of retries per request to Blue Button
     @Min(1)
     @Max(5)
@@ -78,6 +82,14 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     public int getResourcesPerFileCount() {
         return resourcesPerFileCount;
+    }
+
+    public String getConsentService() {
+        return consentService;
+    }
+
+    public void setConsentService(String consentService) {
+        this.consentService = consentService;
     }
 
     @Override

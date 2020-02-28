@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Optional;
 
 public class ConsentClientImpl implements ConsentClient {
@@ -12,7 +13,7 @@ public class ConsentClientImpl implements ConsentClient {
     private final IGenericClient client;
 
     @Inject
-    ConsentClientImpl(IGenericClient client) {
+    ConsentClientImpl(@Named("consent") IGenericClient client) {
         this.client = client;
     }
 

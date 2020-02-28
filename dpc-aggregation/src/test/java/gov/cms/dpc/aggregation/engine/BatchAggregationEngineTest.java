@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.client.ConsentClient;
+import gov.cms.dpc.aggregation.client.MockConsentClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
@@ -32,7 +33,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(BufferedLoggerHandler.class)
 class BatchAggregationEngineTest {
@@ -61,7 +61,7 @@ class BatchAggregationEngineTest {
     void setupEach() {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        final ConsentClient consentClient = mock(ConsentClient.class);
+        final ConsentClient consentClient = Mockito.spy(new MockConsentClient());
         engine = new AggregationEngine(aggregatorID, bbclient, consentClient, queue, fhirContext, metricRegistry, operationsConfig);
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -168,5 +168,42 @@ class BatchAggregationEngineTest {
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect no error file");
+    }
+
+    /**
+     * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
+     */
+    @Test
+    void largeJobTestOptOutResource() {
+        // Make a simple job with one resource type
+        final var orgID = UUID.randomUUID();
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                MockBlueButtonClient.TEST_PATIENT_WITH_OPT_OUT,
+                Collections.singletonList(ResourceType.ExplanationOfBenefit)
+        );
+
+        // Do the job
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        completeJob.getJobQueueBatchFiles()
+                .forEach(batchFile -> {
+                    final var outputFilePath = String.format("%s/%s.ndjson", exportPath, batchFile.getFileName());
+                    final File file = new File(Path.of(outputFilePath).toString());
+                    assertAll(() -> assertNotNull(file, "Should have input file"),
+                            () -> assertArrayEquals(AggregationEngine.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"),
+                            () -> assertEquals(file.length(), batchFile.getFileLength(), "Should have matching file length"));
+                });
+
+        // Look at the output files
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file");
     }
 }

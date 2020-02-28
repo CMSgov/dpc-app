@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
@@ -12,6 +13,7 @@ import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
@@ -69,5 +71,11 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
                 config.getRetryCount(),
                 config.getPollingFrequency()
         );
+    }
+
+    @Provides
+    @Named("consent")
+    IGenericClient provideConsentClient(FhirContext ctx) {
+        return ctx.newRestfulGenericClient(getConfiguration().getConsentService());
     }
 }
