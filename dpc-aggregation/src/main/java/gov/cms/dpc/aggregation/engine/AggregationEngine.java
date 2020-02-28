@@ -18,6 +18,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
@@ -201,8 +202,20 @@ public class AggregationEngine implements Runnable {
                     return option;
                 })
                 .switchMap(consent -> Flowable.fromIterable(job.getResourceTypes()))
-//        final var results = Flowable.fromIterable(job.getResourceTypes())
                 .flatMap(resourceType -> completeResource(job, patientID, resourceType))
+                .onErrorResumeNext(error -> {
+                    if (error instanceof SuppressionException) {
+//                        logger.debug(error.getMessage());
+                        final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
+                        final OperationOutcome oo = new OperationOutcome();
+                        final var errorResourceCount = new AtomicInteger();
+                        final var errorSequenceCount = new AtomicInteger();
+                        return bufferAndWrite(Flowable.just(oo), errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter);
+                    } else {
+                        logger.error("Whoops");
+                        throw new RuntimeException(error);
+                    }
+                })
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
         this.queue.completePartialBatch(job, aggregatorID);

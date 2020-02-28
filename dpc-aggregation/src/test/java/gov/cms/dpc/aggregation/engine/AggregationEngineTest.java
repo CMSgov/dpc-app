@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.client.ConsentClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -14,6 +15,7 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.reactivex.disposables.Disposable;
+import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Assert;
@@ -45,6 +47,7 @@ class AggregationEngineTest {
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
+    private ConsentClient consentClient;
 
     @BeforeAll
     static void setupAll() {
@@ -58,8 +61,9 @@ class AggregationEngineTest {
     void setupEach() {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
+        consentClient = mock(ConsentClient.class);
         var operationalConfig = new OperationsConfig(1000, exportPath, 500);
-        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        engine = new AggregationEngine(aggregatorID, bbclient, consentClient, queue, fhirContext, metricRegistry, operationalConfig);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -114,6 +118,70 @@ class AggregationEngineTest {
                 Collections.singletonList(ResourceType.Patient)
         );
 
+        // Work the batch
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertEquals(1000, completeJob.getPriority());
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+    }
+
+    @Test
+    void simpleOptOutJobTest() {
+        final var orgID = UUID.randomUUID();
+
+        final String testMBI = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        Mockito.when(consentClient.fetchConsentByMBI(Mockito.eq(testMBI))).then(answer -> {
+            final Consent consent = new Consent();
+            consent.setPolicyRule("http://hl7.org/fhir/ConsentPolicy/opt-out");
+            return Optional.of(consent);
+        });
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList(testMBI),
+                Collections.singletonList(ResourceType.Patient)
+        );
+        // Work the batch
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertEquals(1000, completeJob.getPriority());
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
+        assertFalse(Files.exists(Path.of(outputFilePath)), "expect no output file");
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file");
+    }
+
+    @Test
+    void simpleOptInJobTest() {
+        final var orgID = UUID.randomUUID();
+
+        final String testMBI = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        Mockito.when(consentClient.fetchConsentByMBI(Mockito.eq(testMBI))).then(answer -> {
+            final Consent consent = new Consent();
+            consent.setPolicyRule("http://hl7.org/fhir/ConsentPolicy/opt-in");
+            return Optional.of(consent);
+        });
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList(testMBI),
+                Collections.singletonList(ResourceType.Patient)
+        );
         // Work the batch
         queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
