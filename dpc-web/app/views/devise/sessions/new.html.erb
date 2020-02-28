@@ -17,13 +17,6 @@
           <%= f.password_field :password, autocomplete: "current-password", class: "ds-c-field" %>
         </div>
 
-        <% if devise_mapping.rememberable? %>
-          <div class="field ds-u-margin-top--3">
-            <%= f.check_box :remember_me, class: "ds-c-choice" %>
-            <%= f.label :remember_me %>
-          </div>
-        <% end %>
-
         <div class="actions ds-u-margin-top--3">
           <%= f.submit "Log in", class: "ds-c-button ds-c-button--primary", data: { test: "submit" } %>
         </div>

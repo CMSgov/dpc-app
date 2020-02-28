@@ -33,7 +33,7 @@ public class SharedMethods {
         // Add some random values to the patient
         final Patient patient = new Patient();
         final Identifier patientIdentifier = new Identifier();
-        patientIdentifier.setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue(patientID);
+        patientIdentifier.setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(patientID);
         patient.addIdentifier(patientIdentifier);
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
