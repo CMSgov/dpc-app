@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.client.ConsentClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(BufferedLoggerHandler.class)
 class BatchAggregationEngineTest {
@@ -59,7 +61,8 @@ class BatchAggregationEngineTest {
     void setupEach() {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationsConfig);
+        final ConsentClient consentClient = mock(ConsentClient.class);
+        engine = new AggregationEngine(aggregatorID, bbclient, consentClient, queue, fhirContext, metricRegistry, operationsConfig);
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
         engine.setSubscribe(subscribe);
