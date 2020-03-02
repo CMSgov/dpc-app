@@ -11,7 +11,6 @@
 // about supported directives.
 //
 //= require svg4everybody
-//= require @okta/okta-signin-widget/dist/js/okta-sign-in
 //= require accordions
 //= require rails-ujs
 //= require activestorage
