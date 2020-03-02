@@ -339,7 +339,7 @@ public class GroupResource extends AbstractGroupResource {
                 .getEntry()
                 .stream()
                 .map(entry -> (Patient) entry.getResource())
-                .map(FHIRExtractors::getPatientMPI)
+                .map(FHIRExtractors::getPatientMBI)
                 .collect(Collectors.toList());
     }
 

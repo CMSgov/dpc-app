@@ -12,7 +12,8 @@ import java.sql.Date;
 public class AttributionTestHelpers {
 
     public static final String DEFAULT_ORG_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
-    public static final String DEFAULT_PATIENT_MBI = "19990000002901";
+    public static final String DEFAULT_PATIENT_BENE_ID = "-19990000002901";
+    public static final String DEFAULT_PATIENT_MBI = "3SQ0C00AA00";
 
     public static Practitioner createPractitionerResource(String NPI) {
         final Practitioner practitioner = new Practitioner();
@@ -31,7 +32,7 @@ public class AttributionTestHelpers {
     public static Patient createPatientResource(String MBI, String organizationID) {
         final Patient patient = new Patient();
         patient.addIdentifier()
-                .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
                 .setValue(MBI);
 
         patient.addName().setFamily("Patient").addGiven("Test");

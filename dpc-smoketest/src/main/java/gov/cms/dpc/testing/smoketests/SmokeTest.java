@@ -53,9 +53,9 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         arguments.addArgument("host", "http://localhost:3002/v1");
         arguments.addArgument("admin-url", "http://localhost:3002/tasks");
         arguments.addArgument("attribution-url", "http://localhost:3500/v1");
-        arguments.addArgument("seed-file", "src/main/resources/test_associations.csv");
+        arguments.addArgument("seed-file", "src/main/resources/test_associations-dpr.csv");
         arguments.addArgument("provider-bundle", "provider_bundle.json");
-        arguments.addArgument("patient-bundle", "patient_bundle.json");
+        arguments.addArgument("patient-bundle", "patient_bundle-dpr.json");
         arguments.addArgument("organization-id", "");
         arguments.addArgument("client-token", "");
         arguments.addArgument("private-key", "");
