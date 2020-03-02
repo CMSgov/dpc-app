@@ -4,11 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.client.ClientModule;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
+import gov.cms.dpc.aggregation.engine.suppression.SuppressionEngine;
+import gov.cms.dpc.aggregation.engine.suppression.SuppressionEngineImpl;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -31,6 +34,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         // Install the client module to abstract away the setup of the various client integrations
         binder.install(new ClientModule(getConfiguration(), this.ctx));
 
+        binder.bind(SuppressionEngine.class).to(SuppressionEngineImpl.class).in(Scopes.SINGLETON);
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
 

@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.client.consent;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 
@@ -22,7 +23,7 @@ public class ConsentClientImpl implements ConsentClient {
         final Bundle bundle = this.client
                 .search()
                 .forResource(Consent.class)
-                .where(Consent.PATIENT.hasId(patientID))
+                .where(Consent.PATIENT.hasId(String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientID)))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
