@@ -10,6 +10,7 @@ import javax.inject.Named;
 
 public class AttributionClientImpl implements AttributionClient {
 
+    public static final String EXCEPTION_FMT = "Cannot find patient with MBI: %s";
     private final IGenericClient client;
 
     @Inject
@@ -29,7 +30,7 @@ public class AttributionClientImpl implements AttributionClient {
                 .execute();
 
         if (patientBundle.isEmpty()) {
-            throw new IllegalArgumentException(String.format("Cannot find patient with MBI: %s", mbi));
+            throw new IllegalArgumentException(String.format(EXCEPTION_FMT, mbi));
         }
 
         return (Patient) patientBundle.getEntryFirstRep().getResource();
