@@ -1,7 +1,6 @@
 package gov.cms.dpc.aggregation.client.consent;
 
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
-import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import io.reactivex.Maybe;
 import org.hl7.fhir.dstu3.model.Consent;
@@ -13,10 +12,8 @@ public class MockConsentClient implements ConsentClient {
     public static final String PATIENT_OPT_OUT = "1SQ3F00AA00";
     public static final String PATIENT_OPT_IN = "4SP0P00AA00";
 
-    private final FHIREntityConverter converter;
-
     public MockConsentClient() {
-        this.converter = FHIREntityConverter.initialize();
+        // Not used
     }
 
     @Override
