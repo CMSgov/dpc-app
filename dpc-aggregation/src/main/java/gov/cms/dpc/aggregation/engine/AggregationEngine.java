@@ -20,6 +20,7 @@ import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.functions.Function;
 import io.reactivex.plugins.RxJavaPlugins;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -148,17 +149,17 @@ public class AggregationEngine implements Runnable {
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
 
             // Stop processing when no patients or early shutdown
-            boolean queueRunning = true;
+            boolean isQueueRunning = true;
             while (nextPatientID.isPresent()) {
                 this.processJobBatchPartial(job, nextPatientID.get());
 
                 // Check if the subscriber is still running before getting the next part of the batch
-                queueRunning = !this.subscribe.isDisposed();
-                nextPatientID = queueRunning ? job.fetchNextPatient(aggregatorID) : Optional.empty();
+                isQueueRunning = !this.subscribe.isDisposed();
+                nextPatientID = isQueueRunning ? job.fetchNextPatient(aggregatorID) : Optional.empty();
             }
 
             // Finish processing the batch
-            if (queueRunning) {
+            if (isQueueRunning) {
                 logger.info("COMPLETED job {} batch {}", job.getJobID(), job.getBatchID());
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
@@ -219,7 +220,9 @@ public class AggregationEngine implements Runnable {
             if (error instanceof SuppressionException) {
                 logger.debug("Patient record is suppressed:", error);
                 final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
+                // Generate the operation outcome
                 final OperationOutcome oo = new OperationOutcome();
+                oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.FATAL).setDetails(new CodeableConcept().setText(error.getMessage()));
                 final var errorResourceCount = new AtomicInteger();
                 final var errorSequenceCount = new AtomicInteger();
                 return bufferAndWrite(Flowable.just(oo), errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter);
