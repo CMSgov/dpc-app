@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.client.attribution;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import io.reactivex.Single;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 
@@ -20,7 +21,11 @@ public class AttributionClientImpl implements AttributionClient {
 
 
     @Override
-    public Patient fetchPatientByMBI(String mbi) {
+    public Single<Patient> fetchPatientByMBI(String mbi) {
+        return Single.fromCallable(() -> this.fetchPatient(mbi));
+    }
+
+    private Patient fetchPatient(String mbi) {
         final Bundle patientBundle = this.client
                 .search()
                 .forResource(Patient.class)
