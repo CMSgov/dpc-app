@@ -7,17 +7,21 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.aggregation.client.ConsentClient;
 import gov.cms.dpc.aggregation.exceptions.SuppressionException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
+import io.reactivex.functions.Function;
 import io.reactivex.plugins.RxJavaPlugins;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
+import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -193,31 +197,52 @@ public class AggregationEngine implements Runnable {
      */
     private List<JobQueueBatchFile> processJobBatchPartial(JobQueueBatch job, String patientID) {
         final var results = Flowable.fromCallable(() -> this.consentClient.fetchConsentByMBI(patientID))
-                .map(option -> {
-                    if (option.isPresent() && option.get().getPolicyRule().equals("http://hl7.org/fhir/ConsentPolicy/opt-out")) {
-                        throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, patientID, "Patient has opted-out");
-                    }
-                    return option;
-                })
+                .map(throwIfSuppressed(patientID))
                 .switchMap(consent -> Flowable.fromIterable(job.getResourceTypes()))
                 .flatMap(resourceType -> completeResource(job, patientID, resourceType))
-                .onErrorResumeNext(error -> {
-                    if (error instanceof SuppressionException) {
-                        logger.debug("Suppressed.", error);
-                        final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-                        final OperationOutcome oo = new OperationOutcome();
-                        final var errorResourceCount = new AtomicInteger();
-                        final var errorSequenceCount = new AtomicInteger();
-                        return bufferAndWrite(Flowable.just(oo), errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter);
-                    } else {
-                        logger.error("Whoops");
-                        throw new RuntimeException(error);
-                    }
-                })
+                .onErrorResumeNext(handleSuppressionException(job))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
         this.queue.completePartialBatch(job, aggregatorID);
         return results;
+    }
+
+    /**
+     * Process an {@link Optional} {@link Consent} resource from the {@link ConsentClient} and raise an exception if the bene as opted out
+     * This does not modify {@link Consent} resource and only throws if the resource is present and has an {@link ConsentEntity#OPT_OUT} policy rule
+     *
+     * @param beneID - {@link String} bene ID
+     * @return - {@link Optional} {@link Consent} resource from the {@link ConsentClient}
+     * @throws SuppressionException - if the patient has opted-out
+     */
+    private Function<Optional<Consent>, Optional<Consent>> throwIfSuppressed(String beneID) {
+        return option -> {
+            if (option.isPresent() && option.get().getPolicyRule().equals(ConsentEntity.OPT_OUT)) {
+                throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, beneID, "Patient has opted-out");
+            }
+            return option;
+        };
+    }
+
+    /**
+     * Handle a {@link SuppressionException} thrown due to opt-out or inactive patients.
+     *
+     * @param job - {@link JobQueueBatch} job batch in which the error occured
+     * @return - {@link Function} which takes a {@link Throwable} and returns a {@link Publisher of {@link JobQueueBatchFile}
+     */
+    private Function<Throwable, Publisher<? extends JobQueueBatchFile>> handleSuppressionException(JobQueueBatch job) {
+        return error -> {
+            if (error instanceof SuppressionException) {
+                logger.debug("Patient record is suppressed:", error);
+                final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
+                final OperationOutcome oo = new OperationOutcome();
+                final var errorResourceCount = new AtomicInteger();
+                final var errorSequenceCount = new AtomicInteger();
+                return bufferAndWrite(Flowable.just(oo), errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter);
+            } else {
+                throw new JobQueueFailure(job.getJobID(), job.getBatchID(), error);
+            }
+        };
     }
 
     /**
