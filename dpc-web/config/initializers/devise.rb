@@ -263,14 +263,14 @@ Devise.setup do |config|
   config.omniauth(:oktaoauth,
     ENV['OKTA_CLIENT_ID'],
     ENV['OKTA_CLIENT_SECRET'],
-    :scope => 'openid profile email',
-    :fields => ['profile', 'email'],
-    :client_options => {site: ENV['OKTA_ISSUER'], authorize_url: ENV['OKTA_ISSUER'] + "/v1/authorize", token_url: ENV['OKTA_ISSUER'] + "/v1/token"},
-    :redirect_uri => ENV["OKTA_REDIRECT_URI"],
-    :auth_server_id => ENV['OKTA_AUTH_SERVER_ID'],
-    :issuer => ENV['OKTA_ISSUER'],
-    :strategy_class => OmniAuth::Strategies::Oktaoauth)
-
+    scope: 'openid profile email',
+    fields: ['profile', 'email'],
+    client_options: {site: ENV.fetch('OKTA_ISSUER'), authorize_url: ENV.fetch('OKTA_ISSUER') + "/v1/authorize", token_url: ENV.fetch('OKTA_ISSUER') + "/v1/token"},
+    redirect_uri: ENV["OKTA_REDIRECT_URI"],
+    auth_server_id: ENV['OKTA_AUTH_SERVER_ID'],
+    issuer: ENV['OKTA_ISSUER'],
+    strategy_class: OmniAuth::Strategies::Oktaoauth
+  )
   # ==> Warden configuration
   # If you want to use other strategies, that are not supported by Devise, or
   # change the failure app, you can configure them inside the config.warden block.
