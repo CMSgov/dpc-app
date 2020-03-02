@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class SuppressionException extends RuntimeException {
 
+    public static final long serialVersionUID = 42L;
+
     public enum SuppressionReason {
         OPT_OUT,
         EXPIRED
@@ -29,7 +31,7 @@ public class SuppressionException extends RuntimeException {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SuppressionException)) return false;
         SuppressionException exception = (SuppressionException) o;
         return reason == exception.reason &&
                 Objects.equals(patientID, exception.patientID);
