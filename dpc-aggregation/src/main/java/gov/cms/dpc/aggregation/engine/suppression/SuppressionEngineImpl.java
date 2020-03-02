@@ -37,7 +37,7 @@ public class SuppressionEngineImpl implements SuppressionEngine {
         // First, get the patient from the attribution service
         final Flowable<Optional<Consent>> suppressionFlow = Flowable.fromCallable(() -> this.attributionClient.fetchPatientByMBI(mbi))
                 .map(Resource::getIdElement)
-                .map(id -> this.consentClient.fetchConsentByMBI(id.getIdPart()))
+                .map(id -> this.consentClient.fetchConsentByMBI(mbi))
                 .map(this.throwIfSuppressed(mbi));
 
         return Completable.fromPublisher(suppressionFlow);

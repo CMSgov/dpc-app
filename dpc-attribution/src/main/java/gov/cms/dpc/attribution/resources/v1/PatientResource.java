@@ -68,7 +68,13 @@ public class PatientResource extends AbstractPatientResource {
             idValue = null;
         }
 
-        final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
+        final UUID organizationID;
+        if (organizationReference != null) {
+            organizationID = FHIRExtractors.getEntityUUID(organizationReference);
+        } else {
+            organizationID = null;
+        }
+
         return this.dao.patientSearch(resourceID, idValue, organizationID)
                 .stream()
                 .map(p -> this.converter.toFHIR(Patient.class, p))
