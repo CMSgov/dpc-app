@@ -2,12 +2,12 @@ package gov.cms.dpc.aggregation.client.consent;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import io.reactivex.Maybe;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Optional;
 
 public class ConsentClientImpl implements ConsentClient {
 
@@ -19,19 +19,24 @@ public class ConsentClientImpl implements ConsentClient {
     }
 
     @Override
-    public Optional<Consent> fetchConsentByMBI(String patientID) {
-        final Bundle bundle = this.client
+    public Maybe<Consent> fetchConsentByMBI(String patientID) {
+        return Maybe.fromCallable(() -> this.fetchConsent(patientID))
+                .map(bundle -> {
+                    if (bundle.isEmpty()) {
+                        return null;
+                    } else {
+                        return (Consent) bundle.getEntryFirstRep().getResource();
+                    }
+                });
+    }
+
+    private Bundle fetchConsent(String patientID) {
+        return this.client
                 .search()
                 .forResource(Consent.class)
                 .where(Consent.PATIENT.hasId(String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientID)))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
-
-        if (bundle.getTotal() == 0) {
-            return Optional.empty();
-        }
-
-        return Optional.of((Consent) bundle.getEntryFirstRep().getResource());
     }
 }

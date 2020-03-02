@@ -7,10 +7,8 @@ import gov.cms.dpc.aggregation.exceptions.SuppressionException;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import io.reactivex.Completable;
-import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
 import org.hl7.fhir.dstu3.model.Consent;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +32,24 @@ public class SuppressionEngineImpl implements SuppressionEngine {
     @Override
     public Completable processSuppression(String mbi) {
         logger.debug("Processing suppression for MBI: {}", mbi);
-        // First, get the patient from the attribution service
-        final Flowable<Optional<Consent>> suppressionFlow = Flowable.fromCallable(() -> this.attributionClient.fetchPatientByMBI(mbi))
-                .map(Resource::getIdElement)
-                .map(id -> this.consentClient.fetchConsentByMBI(mbi))
-                .map(this.throwIfSuppressed(mbi));
 
-        return Completable.fromPublisher(suppressionFlow);
+        // Dispatch checks to both attribution and consent services
+        final Completable attributionCompletable = this.attributionClient.fetchPatientByMBI(mbi)
+                .flatMapCompletable(patient -> Completable.complete());
+
+        final Completable consentCompletable = this.consentClient.fetchConsentByMBI(mbi)
+                .map(this.throwIfSuppressed(mbi))
+                .flatMapCompletable(c -> Completable.complete());
+
+
+        // First, get the patient from the attribution service
+
+//        final Flowable<Optional<Consent>> suppressionFlow = Flowable.fromCallable(() -> this.attributionClient.fetchPatientByMBI(mbi))
+//                .map(Resource::getIdElement)
+//                .map(id -> this.consentClient.fetchConsentByMBI(mbi))
+//                .map();
+
+        return Completable.concatArray(attributionCompletable, consentCompletable);
     }
 
     /**
@@ -51,9 +60,9 @@ public class SuppressionEngineImpl implements SuppressionEngine {
      * @return - {@link Optional} {@link Consent} resource from the {@link ConsentClient}
      * @throws SuppressionException - if the patient has opted-out
      */
-    private Function<Optional<Consent>, Optional<Consent>> throwIfSuppressed(String beneID) {
+    private Function<Consent, Consent> throwIfSuppressed(String beneID) {
         return option -> {
-            if (option.isPresent() && option.get().getPolicyRule().equals(ConsentEntityConverter.OPT_OUT_MAGIC)) {
+            if (option.getPolicyRule().equals(ConsentEntityConverter.OPT_OUT_MAGIC)) {
                 throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, beneID, "Patient has opted-out");
             }
             return option;

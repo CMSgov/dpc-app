@@ -3,22 +3,19 @@ package gov.cms.dpc.aggregation.engine.suppression;
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.aggregation.client.attribution.AttributionClient;
 import gov.cms.dpc.aggregation.client.attribution.AttributionClientImpl;
+import gov.cms.dpc.aggregation.client.attribution.MockAttributionClient;
 import gov.cms.dpc.aggregation.client.consent.ConsentClient;
+import gov.cms.dpc.aggregation.client.consent.MockConsentClient;
 import gov.cms.dpc.aggregation.exceptions.SuppressionException;
-import gov.cms.dpc.common.consent.entities.ConsentEntity;
+import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.hl7.fhir.dstu3.model.IdType;
+import io.reactivex.Single;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @ExtendWith(BufferedLoggerHandler.class)
 public class SuppressionEngineTest {
@@ -29,110 +26,65 @@ public class SuppressionEngineTest {
 
     @BeforeAll
     static void setup() {
-        consentClient = Mockito.mock(ConsentClient.class);
-        attributionClient = Mockito.mock(AttributionClient.class);
+        consentClient = Mockito.spy(new MockConsentClient());
+        attributionClient = Mockito.spy(new MockAttributionClient());
         engine = new SuppressionEngineImpl(attributionClient, consentClient, FhirContext.forDstu3());
-    }
-
-    @AfterEach
-    void reset() {
-        Mockito.reset(consentClient);
-        Mockito.reset(attributionClient);
     }
 
     @Test
     void testNoAttribution() {
         final String testMBI = "12345F";
-        final Throwable throwable = new IllegalArgumentException(String.format(AttributionClientImpl.EXCEPTION_FMT, testMBI));
-
-        Mockito.when(attributionClient.fetchPatientByMBI(testMBI))
-                .thenThrow(throwable);
+        final IllegalArgumentException exception = new IllegalArgumentException(String.format(AttributionClientImpl.EXCEPTION_FMT, testMBI));
 
         engine.processSuppression(testMBI)
                 .test()
-                .assertError(throwable);
+                .assertError(error -> error.getMessage().equals(exception.getMessage()));
 
         // Verify mocks
-        Mockito.verifyNoInteractions(consentClient);
+        Mockito.verify(consentClient, Mockito.times(1)).fetchConsentByMBI(Mockito.eq(testMBI));
         Mockito.verify(attributionClient, Mockito.times(1)).fetchPatientByMBI(Mockito.eq(testMBI));
     }
 
     @Test
     void testOptIn() {
-        final String testMBI = "12345F";
-
-        Mockito.when(attributionClient.fetchPatientByMBI(testMBI))
-                .thenAnswer(answer -> {
-                    final Patient patient = new Patient();
-                    patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(testMBI);
-                    return patient;
-                });
-
-        Mockito.when(consentClient.fetchConsentByMBI(testMBI))
-                .thenAnswer(answer -> {
-                    final ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.of(testMBI));
-                    ce.setPolicyCode(ConsentEntity.OPT_IN);
-                    return Optional.of(ConsentEntityConverter.convert(ce, "http://fake.org", "http://fhir.starter"));
-                });
-
-        engine.processSuppression(testMBI)
+        engine.processSuppression(MockConsentClient.PATIENT_OPT_IN)
                 .test()
                 .assertComplete();
 
         // Verify mocks
-        Mockito.verify(consentClient, Mockito.times(1)).fetchConsentByMBI(Mockito.eq(testMBI));
-        Mockito.verify(attributionClient, Mockito.times(1)).fetchPatientByMBI(Mockito.eq(testMBI));
+        Mockito.verify(consentClient, Mockito.times(1)).fetchConsentByMBI(Mockito.eq(MockConsentClient.PATIENT_OPT_IN));
+        Mockito.verify(attributionClient, Mockito.times(1)).fetchPatientByMBI(Mockito.eq(MockConsentClient.PATIENT_OPT_IN));
     }
 
     @Test
     void testOptOut() {
-        final String testMBI = "12345F";
 
-        final SuppressionException exception = new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, testMBI, "Patient has opted-out");
+        final SuppressionException exception = new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, MockConsentClient.PATIENT_OPT_OUT, "Patient has opted-out");
 
-        Mockito.when(attributionClient.fetchPatientByMBI(testMBI))
+        Mockito.when(attributionClient.fetchPatientByMBI(MockConsentClient.PATIENT_OPT_OUT))
                 .thenAnswer(answer -> {
                     final Patient patient = new Patient();
-                    patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(testMBI);
-                    return patient;
+                    patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(MockConsentClient.PATIENT_OPT_OUT);
+                    return Single.just(patient);
                 });
 
-        Mockito.when(consentClient.fetchConsentByMBI(testMBI))
-                .thenAnswer(answer -> {
-                    final ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.empty(), Optional.of(testMBI));
-                    ce.setPolicyCode(ConsentEntity.OPT_OUT);
-                    return Optional.of(ConsentEntityConverter.convert(ce, "http://fake.org", "http://fhir.starter"));
-                });
-
-        engine.processSuppression(testMBI)
+        engine.processSuppression(MockConsentClient.PATIENT_OPT_OUT)
                 .test()
                 .assertError(exception);
 
         // Verify mocks
-        Mockito.verify(consentClient, Mockito.times(1)).fetchConsentByMBI(Mockito.eq(testMBI));
-        Mockito.verify(attributionClient, Mockito.times(1)).fetchPatientByMBI(Mockito.eq(testMBI));
+        Mockito.verify(consentClient, Mockito.times(1)).fetchConsentByMBI(Mockito.eq(MockConsentClient.PATIENT_OPT_OUT));
+        Mockito.verify(attributionClient, Mockito.times(1)).fetchPatientByMBI(Mockito.eq(MockConsentClient.PATIENT_OPT_OUT));
     }
 
     @Test
     void testNoConsent() {
-        final String testMBI = "12345F";
-
-        Mockito.when(attributionClient.fetchPatientByMBI(testMBI))
-                .thenAnswer(answer -> {
-                    final Patient patient = new Patient();
-                    patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(testMBI);
-                    return patient;
-                });
-
-        Mockito.when(consentClient.fetchConsentByMBI(testMBI))
-                .thenAnswer(answer -> Optional.empty());
-
-        engine.processSuppression(testMBI)
+        engine.processSuppression(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0))
                 .test()
                 .assertComplete();
 
         // Verify mocks
-        Mockito.verify(consentClient, Mockito.times(1)).fetchConsentByMBI(Mockito.eq(testMBI));
-        Mockito.verify(attributionClient, Mockito.times(1)).fetchPatientByMBI(Mockito.eq(testMBI));
+        Mockito.verify(consentClient, Mockito.times(1)).fetchConsentByMBI(Mockito.eq(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)));
+        Mockito.verify(attributionClient, Mockito.times(1)).fetchPatientByMBI(Mockito.eq(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)));
     }
 }
