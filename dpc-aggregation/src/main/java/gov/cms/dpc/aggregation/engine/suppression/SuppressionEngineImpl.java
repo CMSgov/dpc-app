@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.Optional;
 
 public class SuppressionEngineImpl implements SuppressionEngine {
 
@@ -32,40 +31,35 @@ public class SuppressionEngineImpl implements SuppressionEngine {
     @Override
     public Completable processSuppression(String mbi) {
         logger.debug("Processing suppression for MBI: {}", mbi);
+        // Dispatch checks to both attribution and consent services, we race them because they happen independently
 
-        // Dispatch checks to both attribution and consent services
+        // TODO: This is superfluous until DPC-651 is worked on, but I'm leaving it here as a placeholder.
+        // It mostly works to ensure the patient hasn't been deleted before we access data for it
         final Completable attributionCompletable = this.attributionClient.fetchPatientByMBI(mbi)
                 .flatMapCompletable(patient -> Completable.complete());
 
+        // Query the consent service to determine if the patient has opted-out
         final Completable consentCompletable = this.consentClient.fetchConsentByMBI(mbi)
                 .map(this.throwIfSuppressed(mbi))
                 .flatMapCompletable(c -> Completable.complete());
-
-
-        // First, get the patient from the attribution service
-
-//        final Flowable<Optional<Consent>> suppressionFlow = Flowable.fromCallable(() -> this.attributionClient.fetchPatientByMBI(mbi))
-//                .map(Resource::getIdElement)
-//                .map(id -> this.consentClient.fetchConsentByMBI(mbi))
-//                .map();
 
         return Completable.concatArray(attributionCompletable, consentCompletable);
     }
 
     /**
-     * Process an {@link Optional} {@link Consent} resource from the {@link ConsentClient} and raise an exception if the bene as opted out
+     * Process a {@link Consent} resource from the {@link ConsentClient} and raise an exception if the bene as opted out
      * This does not modify {@link Consent} resource and only throws if the resource is present and has an {@link ConsentEntity#OPT_OUT} policy rule
      *
      * @param beneID - {@link String} bene ID
-     * @return - {@link Optional} {@link Consent} resource from the {@link ConsentClient}
+     * @return - {@link Consent} resource from the {@link ConsentClient}
      * @throws SuppressionException - if the patient has opted-out
      */
     private Function<Consent, Consent> throwIfSuppressed(String beneID) {
-        return option -> {
-            if (option.getPolicyRule().equals(ConsentEntityConverter.OPT_OUT_MAGIC)) {
+        return consent -> {
+            if (consent.getPolicyRule().equals(ConsentEntityConverter.OPT_OUT_MAGIC)) {
                 throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, beneID, "Patient has opted-out");
             }
-            return option;
+            return consent;
         };
     }
 }
