@@ -25,10 +25,12 @@ services:
       - BFD_HASH_ITER=${BFD_HASH_ITER}
       - BFD_HASH_PEPPER=${BFD_HASH_PEPPER}
       - BFD_URL=${BFD_URL}
-      - CONSENT_URL=http://consent:3600
+      - CONSENT_URL=http://consent:3600/v1
+      - ATTRIBUTION_URL=http://attribution:8080/v1
     depends_on:
         - db
         - consent
+        - attribution
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report

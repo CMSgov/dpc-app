@@ -8,7 +8,7 @@ public class SuppressionException extends RuntimeException {
 
     public enum SuppressionReason {
         OPT_OUT,
-        EXPIRED
+        INACTIVE
     }
 
     private final SuppressionReason reason;
