@@ -2,11 +2,15 @@ package gov.cms.dpc.aggregation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.aggregation.client.ConsentClient;
+import gov.cms.dpc.aggregation.client.ConsentClientImpl;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.annotations.ExportPath;
@@ -26,6 +30,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     public void configure(Binder binder) {
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
+        binder.bind(ConsentClient.class).to(ConsentClientImpl.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -76,6 +81,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Named("consent")
     IGenericClient provideConsentClient(FhirContext ctx) {
-        return ctx.newRestfulGenericClient(getConfiguration().getConsentService());
+        final IRestfulClientFactory factory = ctx.getRestfulClientFactory();
+        factory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+        return factory.newGenericClient(getConfiguration().getConsentService());
     }
 }
