@@ -4,10 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.newrelic.api.agent.Trace;
-import gov.cms.dpc.aggregation.client.ConsentClient;
+import gov.cms.dpc.aggregation.engine.suppression.SuppressionEngine;
 import gov.cms.dpc.aggregation.exceptions.SuppressionException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
@@ -21,7 +20,6 @@ import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.functions.Function;
 import io.reactivex.plugins.RxJavaPlugins;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
-import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -56,7 +54,7 @@ public class AggregationEngine implements Runnable {
     private final UUID aggregatorID;
     private final IJobQueue queue;
     private final BlueButtonClient bbclient;
-    private final ConsentClient consentClient;
+    private final SuppressionEngine suppressionEngine;
     private final OperationsConfig operationsConfig;
     private final FhirContext fhirContext;
     private final Meter resourceMeter;
@@ -75,11 +73,11 @@ public class AggregationEngine implements Runnable {
      * @param operationsConfig - The {@link OperationsConfig} to use for writing the output files
      */
     @Inject
-    public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, ConsentClient consentClient, IJobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
+    public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, SuppressionEngine suppressionEngine, IJobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
         this.aggregatorID = aggregatorID;
         this.queue = queue;
         this.bbclient = bbclient;
-        this.consentClient = consentClient;
+        this.suppressionEngine = suppressionEngine;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
 
@@ -196,41 +194,27 @@ public class AggregationEngine implements Runnable {
      * @param patientID - The current patient id processing
      */
     private List<JobQueueBatchFile> processJobBatchPartial(JobQueueBatch job, String patientID) {
-        final var results = Flowable.fromCallable(() -> this.consentClient.fetchConsentByMBI(patientID))
-                .map(throwIfSuppressed(patientID))
-                .switchMap(consent -> Flowable.fromIterable(job.getResourceTypes()))
-                .flatMap(resourceType -> completeResource(job, patientID, resourceType))
-                .onErrorResumeNext(handleSuppressionException(job))
+
+        final var flow = Flowable.fromIterable(job.getResourceTypes())
+                .flatMap(resourceType -> completeResource(job, patientID, resourceType));
+
+        final var results = this.suppressionEngine.processSuppression(patientID)
+                .andThen(flow)
+                .onErrorResumeNext(this.handleSuppressionException(job))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
+
         this.queue.completePartialBatch(job, aggregatorID);
         return results;
-    }
-
-    /**
-     * Process an {@link Optional} {@link Consent} resource from the {@link ConsentClient} and raise an exception if the bene as opted out
-     * This does not modify {@link Consent} resource and only throws if the resource is present and has an {@link ConsentEntity#OPT_OUT} policy rule
-     *
-     * @param beneID - {@link String} bene ID
-     * @return - {@link Optional} {@link Consent} resource from the {@link ConsentClient}
-     * @throws SuppressionException - if the patient has opted-out
-     */
-    private Function<Optional<Consent>, Optional<Consent>> throwIfSuppressed(String beneID) {
-        return option -> {
-            if (option.isPresent() && option.get().getPolicyRule().equals(ConsentEntity.OPT_OUT)) {
-                throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, beneID, "Patient has opted-out");
-            }
-            return option;
-        };
     }
 
     /**
      * Handle a {@link SuppressionException} thrown due to opt-out or inactive patients.
      *
      * @param job - {@link JobQueueBatch} job batch in which the error occured
-     * @return - {@link Function} which takes a {@link Throwable} and returns a {@link Publisher of {@link JobQueueBatchFile}
+     * @return - {@link Function} which takes a {@link Throwable} and returns a {@link Publisher of {@link JobQueueBatchFile }
      */
-    private Function<Throwable, Publisher<? extends JobQueueBatchFile>> handleSuppressionException(JobQueueBatch job) {
+    private Function<Throwable, Publisher<JobQueueBatchFile>> handleSuppressionException(JobQueueBatch job) {
         return error -> {
             if (error instanceof SuppressionException) {
                 logger.debug("Patient record is suppressed:", error);

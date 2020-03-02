@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation.client;
+package gov.cms.dpc.aggregation.client.consent;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.dstu3.model.Bundle;

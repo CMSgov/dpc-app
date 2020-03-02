@@ -1,36 +1,38 @@
 package gov.cms.dpc.aggregation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
-import gov.cms.dpc.aggregation.client.ConsentClient;
-import gov.cms.dpc.aggregation.client.ConsentClientImpl;
+import gov.cms.dpc.aggregation.client.ClientModule;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
 
+    private final FhirContext ctx;
+
     AggregationAppModule() {
-        // Not used
+        this.ctx = FhirContext.forDstu3();
+
+        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
+        ContextUtils.prefetchResourceModels(ctx, JobQueueBatch.validResourceTypes);
     }
 
     @Override
     public void configure(Binder binder) {
+        // Install the client module to abstract away the setup of the various client integrations
+        binder.install(new ClientModule(getConfiguration(), this.ctx));
+
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
-        binder.bind(ConsentClient.class).to(ConsentClientImpl.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -42,11 +44,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Singleton
     public FhirContext provideSTU3Context() {
-        final var fhirContext = FhirContext.forDstu3();
-
-        // Setup the context with model scans (avoids doing this on the fetch threads and perhaps multithreaded bug)
-        ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
-        return fhirContext;
+        return this.ctx;
     }
 
     @Provides
@@ -76,13 +74,5 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
                 config.getRetryCount(),
                 config.getPollingFrequency()
         );
-    }
-
-    @Provides
-    @Named("consent")
-    IGenericClient provideConsentClient(FhirContext ctx) {
-        final IRestfulClientFactory factory = ctx.getRestfulClientFactory();
-        factory.setServerValidationMode(ServerValidationModeEnum.NEVER);
-        return factory.newGenericClient(getConfiguration().getConsentService());
     }
 }
