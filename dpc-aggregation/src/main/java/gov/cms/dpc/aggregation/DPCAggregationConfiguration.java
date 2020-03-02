@@ -40,6 +40,10 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @NotEmpty
     private String consentService;
 
+    // The address of the attribution service
+    @NotEmpty
+    private String attributionService;
+
     // The number of retries per request to Blue Button
     @Min(1)
     @Max(5)
@@ -90,6 +94,14 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     public void setConsentService(String consentService) {
         this.consentService = consentService;
+    }
+
+    public String getAttributionService() {
+        return attributionService;
+    }
+
+    public void setAttributionService(String attributionService) {
+        this.attributionService = attributionService;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation.client;
+package gov.cms.dpc.aggregation.client.consent;
 
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;

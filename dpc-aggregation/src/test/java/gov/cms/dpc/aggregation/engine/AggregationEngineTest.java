@@ -4,7 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.aggregation.client.ConsentClient;
+import gov.cms.dpc.aggregation.engine.suppression.MockSuppressionEngine;
+import gov.cms.dpc.aggregation.engine.suppression.SuppressionEngine;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -47,7 +48,7 @@ class AggregationEngineTest {
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private MetricRegistry metricRegistry = new MetricRegistry();
     static private String exportPath;
-    private ConsentClient consentClient;
+    private SuppressionEngine suppressionEngine;
 
     @BeforeAll
     static void setupAll() {
@@ -61,9 +62,9 @@ class AggregationEngineTest {
     void setupEach() {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        consentClient = mock(ConsentClient.class);
+        suppressionEngine = new MockSuppressionEngine();
         var operationalConfig = new OperationsConfig(1000, exportPath, 500);
-        engine = new AggregationEngine(aggregatorID, bbclient, consentClient, queue, fhirContext, metricRegistry, operationalConfig);
+        engine = new AggregationEngine(aggregatorID, bbclient, suppressionEngine, queue, fhirContext, metricRegistry, operationalConfig);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -96,7 +97,7 @@ class AggregationEngineTest {
         engine.pollQueue();
 
         // Wait for the queue to finish processing before finishing the test
-        while ( engine.isRunning() ) {
+        while (engine.isRunning()) {
             Thread.sleep(100);
         }
 
@@ -136,12 +137,7 @@ class AggregationEngineTest {
     void simpleOptOutJobTest() {
         final var orgID = UUID.randomUUID();
 
-        final String testMBI = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
-        Mockito.when(consentClient.fetchConsentByMBI(Mockito.eq(testMBI))).then(answer -> {
-            final Consent consent = new Consent();
-            consent.setPolicyRule("http://hl7.org/fhir/ConsentPolicy/opt-out");
-            return Optional.of(consent);
-        });
+        final String testMBI = MockSuppressionEngine.PATIENT_OPT_OUT;
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
@@ -169,11 +165,6 @@ class AggregationEngineTest {
         final var orgID = UUID.randomUUID();
 
         final String testMBI = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
-        Mockito.when(consentClient.fetchConsentByMBI(Mockito.eq(testMBI))).then(answer -> {
-            final Consent consent = new Consent();
-            consent.setPolicyRule("http://hl7.org/fhir/ConsentPolicy/opt-in");
-            return Optional.of(consent);
-        });
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
@@ -309,7 +300,7 @@ class AggregationEngineTest {
         try {
             final String fileContents = Files.readString(Path.of(outputFilePath));
             assertEquals(MockBlueButtonClient.TEST_PATIENT_MBIS.size(), Arrays.stream(fileContents.split("\n")).count(), "Contains multiple patients in file output");
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             Assert.fail("Failed to read output file");
         }
     }
