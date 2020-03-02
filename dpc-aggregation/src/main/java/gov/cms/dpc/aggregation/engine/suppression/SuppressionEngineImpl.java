@@ -5,6 +5,7 @@ import gov.cms.dpc.aggregation.client.attribution.AttributionClient;
 import gov.cms.dpc.aggregation.client.consent.ConsentClient;
 import gov.cms.dpc.aggregation.exceptions.SuppressionException;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
+import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
@@ -22,19 +23,17 @@ public class SuppressionEngineImpl implements SuppressionEngine {
 
     private final AttributionClient attributionClient;
     private final ConsentClient consentClient;
-    private final FhirContext ctx;
 
     @Inject
     SuppressionEngineImpl(AttributionClient attributionClient, ConsentClient consentClient, FhirContext ctx) {
         this.attributionClient = attributionClient;
         this.consentClient = consentClient;
-        this.ctx = ctx;
     }
 
 
     @Override
     public Completable processSuppression(String mbi) {
-
+        logger.debug("Processing suppression for MBI: {}", mbi);
         // First, get the patient from the attribution service
         final Flowable<Optional<Consent>> suppressionFlow = Flowable.fromCallable(() -> this.attributionClient.fetchPatientByMBI(mbi))
                 .map(Resource::getIdElement)
@@ -54,7 +53,7 @@ public class SuppressionEngineImpl implements SuppressionEngine {
      */
     private Function<Optional<Consent>, Optional<Consent>> throwIfSuppressed(String beneID) {
         return option -> {
-            if (option.isPresent() && option.get().getPolicyRule().equals(ConsentEntity.OPT_OUT)) {
+            if (option.isPresent() && option.get().getPolicyRule().equals(ConsentEntityConverter.OPT_OUT_MAGIC)) {
                 throw new SuppressionException(SuppressionException.SuppressionReason.OPT_OUT, beneID, "Patient has opted-out");
             }
             return option;
