@@ -235,10 +235,6 @@ public class APIAuthHelpers {
         return new CustomHttpBuilder();
     }
 
-    private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck) {
-        return createBaseFHIRClient(ctx, baseURL, disableSSLCheck, false);
-    }
-
     private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck, boolean enableRequestLog) {
         final HttpClientBuilder clientBuilder = HttpClients.custom();
         if (disableSSLCheck) {
