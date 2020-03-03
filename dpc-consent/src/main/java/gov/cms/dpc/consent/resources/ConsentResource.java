@@ -18,6 +18,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -51,7 +52,7 @@ public class ConsentResource {
             "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
     public List<Consent> search(
-            @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
+            @ApiParam(value = "Consent resource _id") @QueryParam(IAnyResource.SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
             @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
@@ -103,6 +104,21 @@ public class ConsentResource {
         );
 
         return ConsentEntityConverter.toFHIR(consentEntity, consentOrganizationURL, fhirReferenceURL);
+    }
+
+    @POST
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @UnitOfWork
+    @ApiOperation(value = "Create a Consent entry for the given patient reference")
+    public Response createConsent(Consent resource) {
+        final ConsentEntity consentEntity = this.dao.persistConsent(ConsentEntityConverter.fromFHIR(resource));
+
+        return Response
+                .status(Response.Status.CREATED)
+                .entity(ConsentEntityConverter.toFHIR(consentEntity, consentOrganizationURL, fhirReferenceURL))
+                .build();
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
