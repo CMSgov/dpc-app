@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -189,6 +190,30 @@ public class ConsentEntity implements Serializable {
 
     public void setSourceCode(String sourceCode) { this.sourceCode = sourceCode; }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConsentEntity that = (ConsentEntity) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(mbi, that.mbi) &&
+                Objects.equals(hicn, that.hicn) &&
+                Objects.equals(bfdPatientId, that.bfdPatientId) &&
+                Objects.equals(effectiveDate, that.effectiveDate) &&
+                Objects.equals(policyCode, that.policyCode) &&
+                Objects.equals(purposeCode, that.purposeCode) &&
+                Objects.equals(loincCode, that.loincCode) &&
+                Objects.equals(scopeCode, that.scopeCode) &&
+                Objects.equals(createdAt, that.createdAt) &&
+                Objects.equals(updatedAt, that.updatedAt) &&
+                Objects.equals(custodian, that.custodian) &&
+                Objects.equals(sourceCode, that.sourceCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, mbi, hicn, bfdPatientId, effectiveDate, policyCode, purposeCode, loincCode, scopeCode, createdAt, updatedAt, custodian, sourceCode);
+    }
 
     public static ConsentEntity defaultConsentEntity(Optional<UUID> id, Optional<String> hicn, Optional<String> mbi) {
         ConsentEntity ce = new ConsentEntity();

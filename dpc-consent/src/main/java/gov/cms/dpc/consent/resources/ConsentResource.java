@@ -84,7 +84,7 @@ public class ConsentResource {
 
         return entities
                 .stream()
-                .map(e -> ConsentEntityConverter.convert(e, consentOrganizationURL, fhirReferenceURL))
+                .map(e -> ConsentEntityConverter.toFHIR(e, consentOrganizationURL, fhirReferenceURL))
                 .collect(Collectors.toList());
     }
 
@@ -102,7 +102,7 @@ public class ConsentResource {
                 new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
         );
 
-        return ConsentEntityConverter.convert(consentEntity, consentOrganizationURL, fhirReferenceURL);
+        return ConsentEntityConverter.toFHIR(consentEntity, consentOrganizationURL, fhirReferenceURL);
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
