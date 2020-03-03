@@ -193,7 +193,7 @@ public class ConsentEntity implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ConsentEntity)) return false;
         ConsentEntity that = (ConsentEntity) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(mbi, that.mbi) &&

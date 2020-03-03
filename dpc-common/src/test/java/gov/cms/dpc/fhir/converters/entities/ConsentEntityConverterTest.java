@@ -77,12 +77,40 @@ public class ConsentEntityConverterTest {
     }
 
     @Test
-    void testRoundTrip() {
+    void testSimpleRoundTrip() {
         final ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
         final Consent consent = ConsentEntityConverter.toFHIR(ce, TEST_DPC_URL, TEST_FHIR_URL);
         final ConsentEntity ce2 = ConsentEntityConverter.fromFHIR(consent);
         assertAll(() -> assertEquals(ce.getId(), ce2.getId(), "Should have ID"),
                 () -> assertEquals(ce.getMbi(), ce2.getMbi(), "Should have MBI"),
-                () -> assertEquals(ce.getEffectiveDate(), ce2.getEffectiveDate(), "Should have correct date"));
+                () -> assertEquals(ce.getEffectiveDate(), ce2.getEffectiveDate(), "Should have correct date"),
+                () -> assertNull(ce2.getCustodian(), "Should not have organization"));
+    }
+
+    @Test
+    void testRoundTripWithId() {
+        final ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
+        final UUID orgID = UUID.randomUUID();
+        ce.setId(orgID);
+        final Consent consent = ConsentEntityConverter.toFHIR(ce, TEST_DPC_URL, TEST_FHIR_URL);
+        final ConsentEntity ce2 = ConsentEntityConverter.fromFHIR(consent);
+        assertAll(() -> assertEquals(ce.getId(), ce2.getId(), "Should have ID"),
+                () -> assertEquals(ce.getMbi(), ce2.getMbi(), "Should have MBI"),
+                () -> assertEquals(ce.getEffectiveDate(), ce2.getEffectiveDate(), "Should have correct date"),
+                () -> assertEquals(orgID, ce2.getId(), "Should have matching organization"),
+                () -> assertNull(ce2.getCustodian(), "Should not have organization"));
+    }
+
+    @Test
+    void testRoundTripWithOrganization() {
+        final ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
+        final UUID orgID = UUID.randomUUID();
+        ce.setCustodian(orgID);
+        final Consent consent = ConsentEntityConverter.toFHIR(ce, TEST_DPC_URL, TEST_FHIR_URL);
+        final ConsentEntity ce2 = ConsentEntityConverter.fromFHIR(consent);
+        assertAll(() -> assertEquals(ce.getId(), ce2.getId(), "Should have ID"),
+                () -> assertEquals(ce.getMbi(), ce2.getMbi(), "Should have MBI"),
+                () -> assertEquals(ce.getEffectiveDate(), ce2.getEffectiveDate(), "Should have correct date"),
+                () -> assertEquals(orgID, ce2.getCustodian(), "Should not have organization"));
     }
 }

@@ -133,7 +133,9 @@ public class ConsentEntityConverter {
         entity.setSourceCode(SourceCode.DPC.toString());
 
         // Organization
-        entity.setCustodian(FHIRExtractors.getEntityUUID(resource.getOrganizationFirstRep().getReference()));
+        if (!resource.getOrganization().isEmpty() && !resource.getOrganizationFirstRep().getReference().equals("https://dpc.cms.gov")) {
+            entity.setCustodian(FHIRExtractors.getEntityUUID(resource.getOrganizationFirstRep().getReference()));
+        }
 
         return entity;
     }
@@ -157,22 +159,26 @@ public class ConsentEntityConverter {
 
         final Matcher matcher = ID_PATTERN.matcher(patient.getReference());
         if (matcher.find()) {
-            final String idValue = matcher.group(2);
-            // If there's no identifier, then it's an MBI
-            if (matcher.group(1).isEmpty()) {
-                entity.setMbi(idValue);
-            } else {
-                final DPCIdentifierSystem system = DPCIdentifierSystem.fromString(matcher.group(1));
-                if (system == DPCIdentifierSystem.BENE_ID) {
-                    entity.setBfdPatientId(idValue);
-                } else if (system == DPCIdentifierSystem.HICN) {
-                    entity.setHicn(idValue);
-                } else {
-                    throw new IllegalArgumentException(String.format("Unsupported id system: `%s`", system.getSystem()));
-                }
-            }
+            handlePatientMatch(entity, matcher);
         } else {
             throw new IllegalArgumentException("Cannot extract identifier");
+        }
+    }
+
+    private static void handlePatientMatch(ConsentEntity entity, Matcher matcher) {
+        final String idValue = matcher.group(2);
+        // If there's no identifier, then it's an MBI
+        if (matcher.group(1).isEmpty()) {
+            entity.setMbi(idValue);
+        } else {
+            final DPCIdentifierSystem system = DPCIdentifierSystem.fromString(matcher.group(1));
+            if (system == DPCIdentifierSystem.BENE_ID) {
+                entity.setBfdPatientId(idValue);
+            } else if (system == DPCIdentifierSystem.HICN) {
+                entity.setHicn(idValue);
+            } else {
+                throw new IllegalArgumentException(String.format("Unsupported id system: `%s`", system.getSystem()));
+            }
         }
     }
 }
