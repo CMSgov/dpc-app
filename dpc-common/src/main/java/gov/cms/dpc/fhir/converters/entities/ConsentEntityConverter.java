@@ -2,6 +2,7 @@ package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -26,9 +27,10 @@ public class ConsentEntityConverter {
     public static final String OPT_IN_MAGIC = "http://hl7.org/fhir/ConsentPolicy/opt-in";
     public static final String OPT_OUT_MAGIC = "http://hl7.org/fhir/ConsentPolicy/opt-out";
 
-    private static final Pattern ID_PATTERN = Pattern.compile("\\?identity=(.*)?\\|([a-zA-Z_\\-]*)$");
+    private static final Pattern ID_PATTERN = Pattern.compile("\\?identity=([^|]*)?\\|([a-zA-Z0-9_\\-]*)$");
 
-    private ConsentEntityConverter() {}
+    private ConsentEntityConverter() {
+    }
 
     private static String patientIdentifier(DPCIdentifierSystem type, String value) {
         return String.format("%s|%s ", type.getSystem(), value);
@@ -113,14 +115,10 @@ public class ConsentEntityConverter {
     public static ConsentEntity fromFHIR(Consent resource) {
         final ConsentEntity entity = new ConsentEntity();
 
-        final UUID resourceID;
-        if (resource.getId() == null) {
-            resourceID = UUID.randomUUID();
-        } else {
-            resourceID = UUID.fromString(resource.getId());
+        // If we have a resource ID, use it
+        if (resource.getId() != null) {
+            entity.setId(UUID.fromString(resource.getId()));
         }
-
-        entity.setId(resourceID);
         // Add the patient Identifier
         addPatient(entity, resource);
 
@@ -133,6 +131,9 @@ public class ConsentEntityConverter {
         entity.setPurposeCode(TREATMENT);
         entity.setScopeCode(SCOPE_CODE);
         entity.setSourceCode(SourceCode.DPC.toString());
+
+        // Organization
+        entity.setCustodian(FHIRExtractors.getEntityUUID(resource.getOrganizationFirstRep().getReference()));
 
         return entity;
     }

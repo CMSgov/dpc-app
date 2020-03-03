@@ -1,22 +1,30 @@
 package gov.cms.dpc.consent.resources;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import edu.emory.mathcs.backport.java.util.Collections;
 import gov.cms.dpc.consent.AbstractConsentTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests ConsentResource using a live database. These tests will fail if the database is not running or
@@ -130,5 +138,35 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
+    }
+
+    @Test
+    void testConsentCreation() {
+        final Reference patientReference = new Reference("http://test-fhir-url?identity=|1234A");
+        final Consent consent = new Consent();
+        consent.setDateTime(Date.from(Instant.now()));
+        consent.setPolicyRule(ConsentEntityConverter.OPT_OUT_MAGIC);
+        consent.setPatient(patientReference);
+        consent.setOrganization(List.of(new Reference(new IdType("Organization", UUID.randomUUID().toString()))));
+
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        final MethodOutcome outcome = client
+                .create()
+                .resource(consent)
+                .encodedJson()
+                .execute();
+
+        final Consent created = (Consent) outcome.getResource();
+
+        // Fetch it back
+        final Consent fetched = client
+                .read()
+                .resource(Consent.class)
+                .withId(created.getId())
+                .encodedJson()
+                .execute();
+
+        assertTrue(fetched.equalsDeep(created), "Records should match");
     }
 }
