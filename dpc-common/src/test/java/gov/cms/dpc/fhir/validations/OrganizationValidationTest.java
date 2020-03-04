@@ -54,7 +54,7 @@ class OrganizationValidationTest {
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
 
-        organization.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mbi-value");
+        organization.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi-value");
 
         final ValidationResult r2 = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),

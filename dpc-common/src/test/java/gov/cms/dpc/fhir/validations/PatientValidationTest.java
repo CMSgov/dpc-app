@@ -60,7 +60,7 @@ class PatientValidationTest {
         patient.setBirthDate(Date.valueOf("1990-01-01"));
         patient.setMultipleBirth(new BooleanType(false));
         patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mpi");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
         patient.addAddress(generateFakeAddress());
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
@@ -82,7 +82,7 @@ class PatientValidationTest {
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setMultipleBirth(new BooleanType(false));
         patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mpi");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
         patient.addAddress(generateFakeAddress());
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
@@ -112,7 +112,7 @@ class PatientValidationTest {
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(2, r2.getMessages().size(), "Should have two failures for ID slice"));
 
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mpi");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
         final ValidationResult r3 = fhirValidator.validateWithResult(patient);
         assertTrue(r3.isSuccessful(), "Should have passed");
     }

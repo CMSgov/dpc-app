@@ -9,11 +9,15 @@
    </extension>
    <identifier>
       <system value="https://bluebutton.cms.gov/resources/variables/bene_id"/>
-      <value value="20140000009893"/>
+      <value value="-20140000009893"/>
    </identifier>
    <identifier>
       <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"/>
       <value value="fc463c4b2788ad575acf9194fc132c53cdad9b93d36955315d1af1ec7445d330"/>
+   </identifier>
+   <identifier>
+      <system value="https://bluebutton.cms.gov/resources/identifier/mbi-hash"/>
+      <value value="8930cab29ba5fe4311a5f5bcfd5b7384f3722b711402aacf796d2ae6fea54242"/>
    </identifier>
    <name>
       <use value="usual"/>

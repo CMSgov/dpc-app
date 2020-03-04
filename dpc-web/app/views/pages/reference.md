@@ -328,11 +328,13 @@ This endpoint requires one additional query param:
 
 * `label` sets a human readable label for the public key (this must be less than 26 characters long). 
 
-The submitted public key must meet the following requirements:
+The submitted public key must be unique to each environment and meet the following requirements:
 
-* Be an `RSA` key (ECC keys will be supported in a future release)
-* Have a key length of at least 4096 bits
-* Be unique to each environment
+* PEM encoded
+* Be an `RSA` key with a minimum length of at least 4096 bits.
+* Or, be an `ECC` key with one of the following curves:
+    - secp256r1
+    - secp384r1
 
 ~~~sh
 POST /api/v1/Key

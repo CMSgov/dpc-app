@@ -48,7 +48,7 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
                     try {
                         final DPCIdentifierSystem idSys = DPCIdentifierSystem.fromString(system);
                         // MBI does not work, so filter it out
-                        return idSys != DPCIdentifierSystem.BENE_ID;
+                        return idSys != DPCIdentifierSystem.MBI;
                     } catch (Exception e) {
                         return false;
                     }

@@ -102,7 +102,7 @@ public class SeedProcessor {
                 .forEach((value) -> {
                     // Add some random values to the patient
                     final Patient patient = new Patient();
-                    patient.addIdentifier().setValue(value.getRight()).setSystem(DPCIdentifierSystem.BENE_ID.getSystem());
+                    patient.addIdentifier().setValue(value.getRight()).setSystem(DPCIdentifierSystem.MBI.getSystem());
                     patient.addName().addGiven("Tester " + rand.nextInt()).setFamily("Patient");
                     patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
                     patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID.toString())));
