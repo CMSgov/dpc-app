@@ -10,7 +10,7 @@ import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import org.jooq.DSLContext;
-import org.jooq.conf.RenderNameStyle;
+import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class SeedCommand extends EnvironmentCommand<DPCConsentConfiguration> {
 
     public SeedCommand(Application<DPCConsentConfiguration> application) {
         super(application, "seed", "Seed the consent database");
-        this.settings = new Settings().withRenderNameStyle(RenderNameStyle.AS_IS);
+        this.settings = new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
     }
 
     @Override

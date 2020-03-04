@@ -23,7 +23,7 @@ public class FHIRBuilderTests {
     void testPatientBuilder() {
         final Patient patient = FHIRBuilders.buildPatientFromMBI("12345");
         assertAll(() -> assertEquals("12345", patient.getIdentifierFirstRep().getValue(), "Should have the correct value"),
-                () -> assertEquals(DPCIdentifierSystem.BENE_ID.getSystem(), patient.getIdentifierFirstRep().getSystem(), "Should have correct system"));
+                () -> assertEquals(DPCIdentifierSystem.MBI.getSystem(), patient.getIdentifierFirstRep().getSystem(), "Should have correct system"));
     }
 
     @Test

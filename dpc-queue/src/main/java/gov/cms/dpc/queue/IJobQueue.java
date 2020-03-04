@@ -19,11 +19,11 @@ public interface IJobQueue {
      *
      * @param orgID         - The organization submitting the job
      * @param providerID    - The provider submitting the job
-     * @param patients      - The list of patients to fetch data for
+     * @param mbis          - The list of MBIs of patients to fetch data for
      * @param resourceTypes - The resource types to fetch patient data for
      * @return The UUID of the created job
      */
-    UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes);
+    UUID createJob(UUID orgID, String providerID, List<String> mbis, List<ResourceType> resourceTypes);
 
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.

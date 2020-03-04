@@ -40,14 +40,22 @@ public class FHIRExtractors {
     }
 
     /**
-     * Extract the Medicare Beneficiary ID (MPI) from the given {@link org.hl7.fhir.dstu3.model.Patient} resource
-     * This currently assumes that the MPI is the first ID associated to the resource,
-     * but eventually we'll need to do a more thorough check
+     * Extract the Medicare Beneficiary ID (MBI) from the given {@link org.hl7.fhir.dstu3.model.Patient} resource
      *
-     * @param patient - {@link Patient} provider to get MPI from
+     * @param patient - {@link Patient} provider to get MBI from
      * @return - {@link String} patient MBI
      */
     public static String getPatientMBI(Patient patient) {
+        return findMatchingIdentifier(patient.getIdentifier(), DPCIdentifierSystem.MBI).getValue();
+    }
+
+    /**
+     * Extract the CCW Beneficiary ID (bene_id) from the given {@link org.hl7.fhir.dstu3.model.Patient} resource
+     *
+     * @param patient - {@link Patient} provider to get bene ID from
+     * @return - {@link String} patient bene ID
+     */
+    public static String getPatientBeneId(Patient patient) {
         return findMatchingIdentifier(patient.getIdentifier(), DPCIdentifierSystem.BENE_ID).getValue();
     }
 

@@ -21,7 +21,7 @@ ig/publish: ${IG_PUBLISHER}
 	@echo "Building Implementation Guide"
 	@java -jar ${IG_PUBLISHER} -ig ig/ig.json
 
-.PHONY: travis
+.PHONY: travis secure-envs
 travis:
 	@./dpc-test.sh
 
@@ -30,13 +30,13 @@ website:
 	@docker build -f dpc-web/Dockerfile . -t dpc-web
 
 .PHONY: start-app
-start-app:
+start-app: secure-envs
 	@docker-compose up start_core_dependencies
 	@docker-compose up start_api_dependencies
 	@docker-compose up start_api
 
 .PHONY: ci-app
-ci-app: docker-base
+ci-app: docker-base secure-envs
 	@./dpc-test.sh
 
 .PHONY: ci-web
@@ -70,3 +70,8 @@ smoke/prod-sbx: venv smoke
 .PHONY: docker-base
 docker-base:
 	@docker-compose -f ./docker-compose.base.yml build base
+
+.PHONY: secure-envs
+secure-envs:
+	@bash ops/scripts/secrets --decrypt ops/config/encrypted/bb.keystore | tail -n +2 > bbcerts/bb.keystore
+	@bash ops/scripts/secrets --decrypt ops/config/encrypted/local.env | tail -n +2 > ops/config/decrypted/local.env

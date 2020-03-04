@@ -7,7 +7,7 @@
     "node": ">=0.12"
   },
   "dependencies": {
-    "newman": "^4.5.7"
+    "newman": "^4.6.0"
   },
   "devDependencies": {},
   "scripts": {

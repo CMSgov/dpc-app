@@ -76,7 +76,7 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
         logger.trace("Validating dummy patient");
         final Patient patient = new Patient();
         patient.addName().addGiven("Dummy").setFamily("Patient");
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("test-mbi");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
         patient.setGender(Enumerations.AdministrativeGender.MALE);
         patient.setBirthDate(Date.valueOf("1990-01-01"));
 

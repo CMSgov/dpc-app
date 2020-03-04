@@ -40,7 +40,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.4.11.Final</version>
+            <version>5.4.12.Final</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -67,6 +67,10 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-hibernate</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-json-logging</artifactId>
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>

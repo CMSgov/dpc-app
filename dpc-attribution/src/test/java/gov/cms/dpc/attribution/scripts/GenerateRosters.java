@@ -46,7 +46,7 @@ class GenerateRosters {
         // Disable logging for tests
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         loggingInterceptor.setLogRequestSummary(false);
-        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
 
         // Create a Bundle to hold everything
@@ -77,7 +77,7 @@ class GenerateRosters {
 
             // Add the patient MBI to the resource
             patient.addIdentifier()
-                    .setSystem(DPCIdentifierSystem.BENE_ID.getSystem())
+                    .setSystem(DPCIdentifierSystem.MBI.getSystem())
                     .setValue(patientMBI);
 
             // Add to the Bundle

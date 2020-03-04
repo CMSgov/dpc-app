@@ -108,7 +108,10 @@ public class KeyResource extends AbstractKeyResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Register public key for Organization",
             notes = "This endpoint registers the provided public key with the organization." +
-                    "<p>The provided key MUST be PEM encoded.")
+                    "<p>The provided key MUST be PEM encoded." +
+                    "<p>RSA keys of 4096-bits or greater are supported, as well as ECC keys using one of the following curves:" +
+                    "- secp256r1" +
+                    "- secp384r1")
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork
     @Override
@@ -127,6 +130,11 @@ public class KeyResource extends AbstractKeyResource {
             keyLabel = this.buildDefaultKeyID();
         }
 
+        final SubjectPublicKeyInfo publicKey = parseAndValidateKey(key);
+        return savePublicKeyEntry(organizationPrincipal, keyLabel, publicKey);
+    }
+
+    private SubjectPublicKeyInfo parseAndValidateKey(String key) {
         final SubjectPublicKeyInfo publicKey;
         try {
             publicKey = PublicKeyHandler.parsePEMString(key);
@@ -135,6 +143,17 @@ public class KeyResource extends AbstractKeyResource {
             throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
         }
 
+        // Validate public key
+        try {
+            PublicKeyHandler.validatePublicKey(publicKey);
+        } catch (PublicKeyException e) {
+            logger.error("Cannot parse provided public key.", e);
+            throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
+        }
+        return publicKey;
+    }
+
+    private PublicKeyEntity savePublicKeyEntry(OrganizationPrincipal organizationPrincipal, String keyLabel, SubjectPublicKeyInfo publicKey) {
         final PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         final OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(organizationPrincipal.getID());

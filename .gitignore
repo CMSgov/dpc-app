@@ -12,7 +12,6 @@ dependency-reduced-*.xml
 *.classpath
 bbcerts/*
 !bbcerts/README.md
-!bbcerts/bb.keystore.enc
 .java-version
 
 # Ignore the IG outputs
@@ -43,3 +42,7 @@ venv.bak/
 # Ignore smoke tests
 jmeter.log
 smoke.out
+
+.vault_password
+ops/config/decrypted/*
+!ops/config/decrypted/README.md
