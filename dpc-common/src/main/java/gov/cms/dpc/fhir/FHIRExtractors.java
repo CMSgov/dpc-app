@@ -1,14 +1,12 @@
 package gov.cms.dpc.fhir;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.WebApplicationException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -23,6 +21,7 @@ public class FHIRExtractors {
     private static final Logger logger = LoggerFactory.getLogger(FHIRExtractors.class);
 
     private static final Pattern idExtractor = Pattern.compile("/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/?");
+    static final String ENTITY_ID_ERROR = "Cannot extract string from '%s'";
 
     private FHIRExtractors() {
         // Not used
@@ -79,13 +78,17 @@ public class FHIRExtractors {
         }
 
         final Matcher matcher = idExtractor.matcher(idString);
-        if (!matcher.find() && !(matcher.groupCount() == 1)) {
-            throw new IllegalArgumentException(String.format("Cannot extract string from '%s'", idString));
+        if (!matcher.find() || !(matcher.groupCount() == 1)) {
+            throw new IllegalArgumentException(String.format(ENTITY_ID_ERROR, idString));
         }
 
-        final String id = Objects.requireNonNull(matcher.group(1));
-
-        return UUID.fromString(id);
+        try {
+            final String id = Objects.requireNonNull(matcher.group(1));
+            return UUID.fromString(id);
+        } catch (Exception e) {
+            logger.error("Cannot extract ID from entity", e);
+            throw new IllegalArgumentException(String.format(ENTITY_ID_ERROR, idString));
+        }
     }
 
     public static Provenance.ProvenanceAgentComponent getProvenancePerformer(Provenance provenance) {
@@ -166,7 +169,11 @@ public class FHIRExtractors {
                 .stream()
                 .filter(concept -> concept.getCode().getCodingFirstRep().getCode().equals("attributed-to"))
                 .findFirst()
-                .orElseThrow(() -> new WebApplicationException("Must have 'attributed-to' concept", HttpStatus.UNPROCESSABLE_ENTITY_422));
+                .orElseThrow(() -> new IllegalArgumentException("Must have 'attributed-to' concept"));
+
+        if (component.getValue() == null) {
+            throw new IllegalArgumentException("Roster MUST have attributed Provider");
+        }
 
         return ((CodeableConcept) component.getValue()).getCoding()
                 .stream()
@@ -174,6 +181,6 @@ public class FHIRExtractors {
                 .map(Coding::getCode)
                 .filter(Objects::nonNull)
                 .findFirst()
-                .orElseThrow(() -> new WebApplicationException("Roster MUST have attributed Provider", HttpStatus.UNPROCESSABLE_ENTITY_422));
+                .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
     }
 }
