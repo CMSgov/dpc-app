@@ -28,7 +28,7 @@ class APIClient
   end
 
   def delete_organization(reg_org)
-    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org.api_id))
+    fhir_client.additional_headers = auth_header(golden_macaroon)
 
     response = fhir_client.destroy(FHIR::Organization, reg_org.api_id)
 
