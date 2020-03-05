@@ -16,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,6 +64,16 @@ public class DPCProfileSupport implements IValidationSupport {
     }
 
     @Override
+    public CodeValidationResult validateCode(FhirContext fhirContext, String s, String s1, String s2, String s3) {
+        return null;
+    }
+
+    @Override
+    public CodeValidationResult validateCodeInValueSet(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+        return null;
+    }
+
+    @Override
     public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
         if (theClass.equals(StructureDefinition.class)) {
             final StructureDefinition definition = this.structureMap.get(theUri);
@@ -83,11 +94,6 @@ public class DPCProfileSupport implements IValidationSupport {
     @Override
     public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
         return false;
-    }
-
-    @Override
-    public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-        return null;
     }
 
     @Override
