@@ -70,14 +70,14 @@ class AttestationValidationTest {
         final ValidationResult r2 = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should not have passed"),
-                () -> assertEquals(2, r2.getMessages().size(), "Should have errors for the given reason"));
+                () -> assertEquals(3, r2.getMessages().size(), "Should have errors for the given reason"));
 
         // Add a reason, but the wrong value
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("wrongz");
         final ValidationResult r3 = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(r3.isSuccessful(), "Should not have passed"),
-                () -> assertEquals(5, r3.getMessages().size(), "Should errors for both reasons"));
+                () -> assertEquals(6 , r3.getMessages().size(), "Should errors for both reasons"));
 
         // Add a correct reason (which should cause everything to pass)s
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
