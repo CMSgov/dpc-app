@@ -72,7 +72,7 @@ public class AddMBIToPatients {
                 .map(Bundle.BundleEntryComponent::getResource)
                 .map(resource -> (Patient) resource)
                 .forEach(patient -> {
-                    final String beneID = FHIRExtractors.getPatientBeneId(patient);
+                    final String beneID = FHIRExtractors.getPatientMBI(patient);
                     final PatientMBI mbi = patientMap.get(beneIDConverter.apply(beneID));
                     assert !(mbi == null);
                     patient.addIdentifier().setSystem("http://hl7.org/fhir/sid/us-mbi").setValue(mbi.mbi);
