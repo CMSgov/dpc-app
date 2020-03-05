@@ -111,20 +111,38 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine.
      */
     protected void pollQueue() {
-        subscribe = Observable.fromCallable(() -> this.queue.claimBatch(aggregatorID))
-                .doOnNext(job -> logger.trace("Polling queue for job"))
-                .doOnError(error -> logger.error("Unable to complete job.", error))
-                .onErrorResumeNext(Observable.empty()) // Keep the queue running on error
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        this.subscribe = this.createQueueObserver()
                 .repeatWhen(completed -> {
-                    logger.debug(String.format("No job, polling again in %d milliseconds", operationsConfig.getPollingFrequency()));
+                    logger.debug(String.format("Configuring queue to poll every %d milliseconds", operationsConfig.getPollingFrequency()));
                     return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
                 })
-                .subscribe(this::processJobBatch, error -> {
-                    logger.error("Fatal error processing the queue! Queue processing is stopping!", error);
-                    queueRunning.set(false);
-                });
+                .doOnEach(item -> logger.trace("Processing item: " + item.toString()))
+                .doOnError(error -> logger.error("Unable to complete job.", error))
+                .retry()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .subscribe(
+                        this::processJobBatch,
+                        error -> {
+                            logger.error("Error processing queue. Exiting...", error);
+                            queueRunning.set(false);
+                        },
+                        () -> {
+                            logger.info("Finished processing queue. Exiting...");
+                            queueRunning.set(false);
+                        }
+                );
+    }
+
+    /**
+     * Creates an observer to monitor the queue
+     */
+    private Observable<Optional<JobQueueBatch>> createQueueObserver() {
+        // Create using defer. This ensures that no events are omitted before a subscriber connects
+        return Observable.defer(() -> {
+            logger.trace("Polling queue for job...");
+            return Observable.just(this.queue.claimBatch(this.aggregatorID));
+        });
     }
 
     /**

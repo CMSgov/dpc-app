@@ -81,14 +81,33 @@ class AggregationEngineTest {
      */
     @Test
     void claimBatchException() throws InterruptedException {
+        final var orgID = UUID.randomUUID();
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
         // Throw a failure on the first poll, then be successful
         JobQueueFailure ex = new JobQueueFailure("Any failure");
-        when(queue.claimBatch(any(UUID.class)))
-                .thenThrow(ex)
-                .thenAnswer(invocationOnMock -> {
+
+        doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doThrow(ex)
+                .doReturn(Optional.empty())
+                .doCallRealMethod()
+                .doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doAnswer(invocationOnMock -> {
                     engine.stop();
                     return Optional.empty();
-                });
+                })
+                .when(queue)
+                .claimBatch(any(UUID.class));
 
         engine.pollQueue();
 
@@ -97,7 +116,16 @@ class AggregationEngineTest {
             Thread.sleep(100);
         }
 
-        verify(queue, Mockito.times(2)).claimBatch(any(UUID.class));
+        verify(queue, Mockito.times(9)).claimBatch(any(UUID.class));
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertEquals(1000, completeJob.getPriority());
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
     /**
