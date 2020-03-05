@@ -54,7 +54,7 @@ public class AggregationEngine implements Runnable {
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
-    private AtomicBoolean queueRunning = new AtomicBoolean(false);
+    protected AtomicBoolean queueRunning = new AtomicBoolean(false);
 
     /**
      * Create an engine.
@@ -90,6 +90,7 @@ public class AggregationEngine implements Runnable {
                 operationsConfig.getExportPath(),
                 operationsConfig.getResourcesPerFileCount());
         setGlobalErrorHandler();
+        queueRunning.set(true);
         this.pollQueue();
     }
 
@@ -98,8 +99,8 @@ public class AggregationEngine implements Runnable {
      */
     public void stop() {
         logger.info("Shutting down aggregation engine");
-        this.subscribe.dispose();
         queueRunning.set(false);
+        this.subscribe.dispose();
     }
 
     public Boolean isRunning() {
@@ -110,7 +111,6 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine.
      */
     protected void pollQueue() {
-        queueRunning.set(true);
         subscribe = Observable.fromCallable(() -> this.queue.claimBatch(aggregatorID))
                 .doOnNext(job -> logger.trace("Polling queue for job"))
                 .doOnError(error -> logger.error("Unable to complete job.", error))
@@ -141,17 +141,15 @@ public class AggregationEngine implements Runnable {
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
 
             // Stop processing when no patients or early shutdown
-            boolean queueRunning = true;
             while (nextPatientID.isPresent()) {
                 this.processJobBatchPartial(job, nextPatientID.get());
 
                 // Check if the subscriber is still running before getting the next part of the batch
-                queueRunning = !this.subscribe.isDisposed();
-                nextPatientID = queueRunning ? job.fetchNextPatient(aggregatorID) : Optional.empty();
+                nextPatientID = this.isRunning() ? job.fetchNextPatient(aggregatorID) : Optional.empty();
             }
 
             // Finish processing the batch
-            if (queueRunning) {
+            if (this.isRunning()) {
                 logger.info("COMPLETED job {} batch {}", job.getJobID(), job.getBatchID());
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);

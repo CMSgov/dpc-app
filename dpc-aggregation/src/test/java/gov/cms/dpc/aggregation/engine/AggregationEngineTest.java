@@ -60,6 +60,7 @@ class AggregationEngineTest {
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500);
         engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -193,11 +194,11 @@ class AggregationEngineTest {
 
         // Work the batch
         engine.stop();
-        doReturn(true).when(subscribe).isDisposed();
         queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
-        // Verify disposed call
+        // Verify the queue is stopped
+        assertFalse(engine.isRunning());
         Mockito.verify(subscribe).dispose();
 
         // Look at the result
