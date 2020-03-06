@@ -73,10 +73,13 @@ public class SmokeTest extends AbstractJavaSamplerClient {
     @Override
     public void teardownTest(JavaSamplerContext context) {
         final String hostParam = context.getParameter("host");
+        logger.info("Cleaning up tests against {}", hostParam);
+
         // Remove the organization, which should delete it all
-        System.out.println(String.format("Deleting organization %s", organizationID));
+        logger.info(String.format("Deleting organization %s", organizationID));
+
         // Build admin client for removing the organization
-        final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
+        final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true, true);
 
         try {
             client
@@ -85,8 +88,8 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                     .encodedJson()
                     .execute();
         } catch (Exception e) {
-            System.err.println(String.format("Cannot remove organization: %s", e.getMessage()));
-            System.exit(-1);
+            logger.error(String.format("Cannot remove organization: %s", e.getMessage()));
+            System.exit(1);
         }
 
         super.teardownTest(context);
@@ -120,7 +123,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         if (organizationID.equals("") || clientToken.equals("") || privateKeyPath.equals("") || keyID.equals("")) {
             this.organizationID = UUID.randomUUID().toString();
 
-            System.out.println(String.format("Creating organization %s", organizationID));
+            logger.info(String.format("Creating organization %s", organizationID));
 
             try {
                 this.goldenMacaroon = APIAuthHelpers.createGoldenMacaroon(adminURL);
@@ -128,7 +131,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                 throw new IllegalStateException("Failed creating Macaroon", e);
             }
             // Create admin client for registering organization
-            final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true);
+            final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, hostParam, goldenMacaroon, true, true);
 
             final SampleResult orgRegistrationResult = new SampleResult();
             smokeTestResult.addSubResult(orgRegistrationResult);
@@ -169,7 +172,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         // Create an authenticated and async client (the async part is ignored by other endpoints)
         final IGenericClient exportClient;
 
-        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true);
+        exportClient = APIAuthHelpers.buildAuthenticatedClient(ctx, hostParam, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true, true);
 
         // Upload a batch of patients and a batch of providers
         logger.debug("Submitting practitioners");

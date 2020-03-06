@@ -60,6 +60,7 @@ In order to use the Data APIs, upon registration and each time any software subm
 - Completed and holds an active ONC Health IT Certification
 - Active HITRUST self-validation assessment (valid for one year from implementation if currently pursuing the HITRUST validated assessment)
 - Active HITRUST Validated Assessment
+- HNAP Accreditation
 
 ### Other Responsibilities
 
