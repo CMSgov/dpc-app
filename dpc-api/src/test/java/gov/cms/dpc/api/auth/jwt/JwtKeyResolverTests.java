@@ -7,14 +7,17 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.KeyType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import javax.ws.rs.WebApplicationException;
@@ -29,14 +32,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
+@SuppressWarnings("rawtypes")
 @ExtendWith(BufferedLoggerHandler.class)
 class JwtKeyResolverTests {
 
     private static JwtKeyResolver resolver;
     private static KeyPair keyPair;
+    private static KeyPair eccKeyPair;
 
     private final static UUID badKeyID = UUID.randomUUID();
     private final static UUID correctKeyID = UUID.randomUUID();
+    private final static UUID eccKeyID = UUID.randomUUID();
     private final static UUID notRealKeyID = UUID.randomUUID();
     private final static UUID organization1 = UUID.randomUUID();
     private final static UUID organization2 = UUID.randomUUID();
@@ -45,32 +51,34 @@ class JwtKeyResolverTests {
     private static final String org2Macaroon = makeMacaroon(organization2);
 
 
-
     @BeforeAll
     static void setup() throws IOException, NoSuchAlgorithmException {
         keyPair = APIAuthHelpers.generateKeyPair();
+        eccKeyPair = APIAuthHelpers.generateKeyPair(KeyType.ECC);
         PublicKeyDAO dao = mock(PublicKeyDAO.class);
         // Bad entity with malformed key
         final PublicKeyEntity badEntity = mock(PublicKeyEntity.class);
         final SubjectPublicKeyInfo badInfo = mock(SubjectPublicKeyInfo.class);
         Mockito.when(badInfo.getEncoded()).thenReturn("This is not a public key".getBytes());
+        Mockito.when(badInfo.getAlgorithm()).thenAnswer(answer -> new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.113549.1.1"))); // PKCS 1 RSA OID
         Mockito.when(badEntity.getPublicKey()).thenReturn(badInfo);
 
         // Good entity with real key
         final PublicKeyEntity goodEntity = mock(PublicKeyEntity.class);
-        final SubjectPublicKeyInfo goodInfo = mock(SubjectPublicKeyInfo.class);
-        Mockito.when(goodInfo.getEncoded()).thenReturn(keyPair.getPublic().getEncoded());
-        Mockito.when(goodEntity.getPublicKey()).thenReturn(goodInfo);
+        final PublicKeyEntity goodECCEntity = mock(PublicKeyEntity.class);
+        Mockito.when(goodECCEntity.getPublicKey()).thenAnswer((answer) -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(eccKeyPair.getPublic().getEncoded())));
+        Mockito.when(goodEntity.getPublicKey()).thenAnswer((answer) -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded())));
 
         Mockito.when(dao.fetchPublicKey(organization1, badKeyID)).thenReturn(Optional.of(badEntity));
         Mockito.when(dao.fetchPublicKey(organization1, correctKeyID)).thenReturn(Optional.of(goodEntity));
+        Mockito.when(dao.fetchPublicKey(organization1, eccKeyID)).thenReturn(Optional.of(goodECCEntity));
         Mockito.when(dao.fetchPublicKey(organization1, notRealKeyID)).thenReturn(Optional.empty());
         Mockito.when(dao.fetchPublicKey(eq(organization2), Mockito.any())).thenReturn(Optional.empty());
         resolver = new JwtKeyResolver(dao);
     }
 
     @Test
-    void testSigningKeyResolver() {
+    void testRSASigningKeyResolver() {
         final JwsHeader headerMock = mock(JwsHeader.class);
         final Claims mockClaims = mock(Claims.class);
         Mockito.when(mockClaims.getIssuer()).thenReturn(org1Macaroon);
@@ -78,6 +86,17 @@ class JwtKeyResolverTests {
         final Key key = resolver.resolveSigningKey(headerMock, mockClaims);
 
         assertEquals(keyPair.getPublic(), key, "Keys should match");
+    }
+
+    @Test
+    void testECCSigningKeyResolver() {
+        final JwsHeader headerMock = mock(JwsHeader.class);
+        final Claims mockClaims = mock(Claims.class);
+        Mockito.when(mockClaims.getIssuer()).thenReturn(org1Macaroon);
+        Mockito.when(headerMock.getKeyId()).thenReturn(eccKeyID.toString());
+        final Key key = resolver.resolveSigningKey(headerMock, mockClaims);
+
+        assertEquals(eccKeyPair.getPublic(), key, "Keys should match");
     }
 
     @Test
