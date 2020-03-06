@@ -74,7 +74,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "<p>Each provider must have a metadata Tag with the responsible Organization ID included." +
             "If not, we'll reject it." +
             "<p> If a provider is already registered with the Organization, an error is thrown." +
-            "<p> If a provider has already registered providers past the provider limit, then an error is thrown")
+            "<p> If an organization has already reached the provider limit, then an error is thrown")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "New resource was created"),
             @ApiResponse(code = 422, message = "Unprocessable resource")
