@@ -137,7 +137,7 @@ class ResourceFetcher {
                 beneId = getBeneIdFromPatient(patient);
                 return blueButtonClient.requestCoverageFromServer(beneId);
             default:
-                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType.toString());
+                throw new ResourceNotFoundException(String.format("Job %s, batch %s: Unexpected resource type: %s", jobID, batchID, resourceType.toString()));
         }
     }
 
@@ -146,14 +146,14 @@ class ResourceFetcher {
         try {
             patients = blueButtonClient.requestPatientFromServerByMbi(mbi);
         } catch (GeneralSecurityException e) {
-            throw new JobQueueFailure(jobID, batchID, "Failed to retrieve Patient");
+            throw new ResourceNotFoundException(String.format("Job %s, batch %s: Failed to retrieve Patient", jobID, batchID));
         }
 
         if (patients.getTotal() == 1) {
             return (Patient) patients.getEntryFirstRep().getResource();
         }
 
-        throw new JobQueueFailure(jobID, batchID, String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
+        throw new ResourceNotFoundException(String.format("Job %s, batch %s: Expected 1 Patient to match MBI but found %d", jobID, batchID, patients.getTotal()));
     }
 
     private String getBeneIdFromPatient(Patient patient) {
@@ -161,7 +161,7 @@ class ResourceFetcher {
                 .filter(id -> DPCIdentifierSystem.BENE_ID.getSystem().equals(id.getSystem()))
                 .findFirst()
                 .map(Identifier::getValue)
-                .orElseThrow(() -> new JobQueueFailure(jobID, batchID, "No bene_id found in Patient resource"));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Job %s, batch %s: No bene_id found in Patient resource", jobID, batchID)));
     }
 
     /**
@@ -174,7 +174,7 @@ class ResourceFetcher {
         bundle.getEntry().forEach((entry) -> {
             final var resource = entry.getResource();
             if (resource.getResourceType() != resourceType) {
-                throw new DataFormatException(String.format("Unexepected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
+                throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
             }
             resources.add(resource);
         });
