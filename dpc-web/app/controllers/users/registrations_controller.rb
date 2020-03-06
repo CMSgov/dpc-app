@@ -8,7 +8,7 @@ module Users
     def destroy
       @user = User.find(current_user.id)
       if @user.destroy_with_password(user_params[:password_to_delete])
-          redirect_to root_url, notice: "User deleted."
+        redirect_to root_url, notice: 'User deleted.'
       else
         redirect_to edit_user_registration_url
         flash[:notice] = "Couldn't delete"
@@ -16,7 +16,7 @@ module Users
     end
 
     def user_params
-      params.require(:user).permit(:password_to_delete )
+      params.require(:user).permit(:password_to_delete)
     end
     # before_action :configure_sign_up_params, only: [:create]
     # before_action :configure_account_update_params, only: [:update]
