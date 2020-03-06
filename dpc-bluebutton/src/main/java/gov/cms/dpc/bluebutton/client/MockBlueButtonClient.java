@@ -146,7 +146,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * @return the stream associated with the resource
      */
     private InputStream loadResource(String pathPrefix, String beneId) throws ResourceNotFoundException {
-        if (!MBI_BENE_ID_MAP.values().contains(beneId)) {
+        // beneId can now be null due to MBI -> beneId lookup (using the MBI_HASH_MAP)
+        if (beneId == null || !MBI_BENE_ID_MAP.values().contains(beneId)) {
             throw formNoPatientException(beneId);
         }
         final var path = pathPrefix + beneId + ".xml";

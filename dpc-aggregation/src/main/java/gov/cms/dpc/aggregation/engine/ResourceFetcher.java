@@ -47,6 +47,7 @@ class ResourceFetcher {
         this.blueButtonClient = blueButtonClient;
         this.retryConfig = RetryConfig.custom()
                 .maxAttempts(config.getRetryCount())
+                .ignoreExceptions(ResourceNotFoundException.class)
                 .build();
         this.jobID = jobID;
         this.batchID = batchID;
