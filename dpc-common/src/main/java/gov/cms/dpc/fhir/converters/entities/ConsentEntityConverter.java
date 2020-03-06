@@ -148,7 +148,7 @@ public class ConsentEntityConverter {
         } else if (OPT_OUT_MAGIC.equals(value)) {
             code = OPT_OUT;
         } else {
-            throw new IllegalArgumentException(String.format("invalid value %s; should be %s or %s", value, OPT_IN, OPT_OUT));
+            throw new IllegalArgumentException(String.format("invalid value %s; should be %s or %s", value, OPT_IN_MAGIC, OPT_OUT_MAGIC));
         }
 
         entity.setPolicyCode(code);
@@ -167,7 +167,7 @@ public class ConsentEntityConverter {
 
     private static void handlePatientMatch(ConsentEntity entity, Matcher matcher) {
         final String idValue = matcher.group(2);
-        // If there's no identifier, then it's an MBI
+        // If there's no identifier, then it's the default identifier system (which is MBI).
         if (matcher.group(1).isEmpty()) {
             entity.setMbi(idValue);
         } else {
@@ -176,6 +176,8 @@ public class ConsentEntityConverter {
                 entity.setBfdPatientId(idValue);
             } else if (system == DPCIdentifierSystem.HICN) {
                 entity.setHicn(idValue);
+            } else if (system == DPCIdentifierSystem.MBI) {
+                entity.setMbi(idValue);
             } else {
                 throw new IllegalArgumentException(String.format("Unsupported id system: `%s`", system.getSystem()));
             }
