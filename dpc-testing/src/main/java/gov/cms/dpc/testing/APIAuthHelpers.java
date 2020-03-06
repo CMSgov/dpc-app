@@ -68,7 +68,11 @@ public class APIAuthHelpers {
     }
 
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck) {
-        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck);
+        return buildAuthenticatedClient(ctx, baseURL, macaroon, keyID, privateKey, disableSSLCheck, false);
+    }
+
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck, boolean enableRequestLog) {
+        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck, enableRequestLog);
         client.registerInterceptor(new HAPISmartInterceptor(baseURL, macaroon, keyID, privateKey));
 
         // Add the async header the hard way
@@ -90,7 +94,11 @@ public class APIAuthHelpers {
     }
 
     public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon, boolean disableSSLCheck) {
-        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck);
+        return buildAdminClient(ctx, baseURL, macaroon, disableSSLCheck, false);
+    }
+
+    public static IGenericClient buildAdminClient(FhirContext ctx, String baseURL, String macaroon, boolean disableSSLCheck, boolean enableRequestLog) {
+        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck, enableRequestLog);
         client.registerInterceptor(new MacaroonsInterceptor(macaroon));
         return client;
     }
@@ -227,7 +235,7 @@ public class APIAuthHelpers {
         return new CustomHttpBuilder();
     }
 
-    private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck) {
+    private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck, boolean enableRequestLog) {
         final HttpClientBuilder clientBuilder = HttpClients.custom();
         if (disableSSLCheck) {
             try {
@@ -244,8 +252,8 @@ public class APIAuthHelpers {
 
         // Disable logging for tests
         LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-        loggingInterceptor.setLogRequestSummary(false);
-        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogRequestSummary(enableRequestLog);
+        loggingInterceptor.setLogResponseSummary(enableRequestLog);
         client.registerInterceptor(loggingInterceptor);
 
         return client;
