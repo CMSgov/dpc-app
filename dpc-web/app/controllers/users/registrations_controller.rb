@@ -16,9 +16,7 @@ module Users
     end
 
     def user_params
-      params.require(:user).permit(:first_name, :last_name, :requested_organization, :requested_organization_type,
-        :address_1, :address_2, :city, :state, :zip, :agree_to_terms,
-        :email, :password, :password_confirmation, :current_password, :requested_num_providers, :password_to_delete )
+      params.require(:user).permit(:password_to_delete )
     end
     # before_action :configure_sign_up_params, only: [:create]
     # before_action :configure_account_update_params, only: [:update]

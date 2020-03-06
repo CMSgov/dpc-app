@@ -8,23 +8,37 @@ RSpec.feature 'user deletes account' do
     fill_in 'user_email', with: user.email
     fill_in 'user_password', with: '123456'
     find('[data-test="submit"]').click
+    visit edit_user_registration_path
   end
 
-  # when user puts in correct password and successfully deletes
   context 'when successful' do
     scenario 'user inputs correct password' do
-      visit edit_user_registration_path
+      user_sign_in
       fill_in 'user_password_to_delete', with: '123456'
-
-      # binding.pry
 
       find('[data-test="delete-user-account"]').click
 
-      expect(user).not_to be_present
+      expect(User.last).not_to be_present
     end
   end
 
-  # when user puts in wrong password and fails
+  context 'when unsuccessful' do
+    scenario 'user inputs incorrect password' do
+      user_sign_in
+      fill_in 'user_password_to_delete', with: '3v3ryDayPotato'
 
-  # when user puts in no password and fails
+      find('[data-test="delete-user-account"]').click
+
+      expect(User.last).to be_present
+    end
+
+    scenario 'user inputs no password' do
+      user_sign_in
+      fill_in 'user_password_to_delete', with: nil
+
+      find('[data-test="delete-user-account"]').click
+
+      expect(User.last).to be_present
+    end
+  end
 end
