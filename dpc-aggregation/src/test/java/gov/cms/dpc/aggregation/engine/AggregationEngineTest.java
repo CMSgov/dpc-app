@@ -95,6 +95,7 @@ class AggregationEngineTest {
         JobQueueFailure ex = new JobQueueFailure("Any failure");
 
         doReturn(Optional.empty())
+                .doThrow(ex)
                 .doReturn(Optional.empty())
                 .doReturn(Optional.empty())
                 .doThrow(ex)
@@ -116,7 +117,8 @@ class AggregationEngineTest {
             Thread.sleep(100);
         }
 
-        verify(queue, Mockito.times(9)).claimBatch(any(UUID.class));
+        // The last mock doesn't get called because the engine gets stopped during the last call
+        verify(queue, Mockito.times(10)).claimBatch(any(UUID.class));
 
         // Look at the result
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
