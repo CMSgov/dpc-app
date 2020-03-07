@@ -25,14 +25,20 @@ public abstract class JobQueueCommon implements IJobQueue {
     public UUID createJob(UUID orgID, String providerID, List<String> patients, List<ResourceType> resourceTypes, OffsetDateTime since, OffsetDateTime transactionTime) {
         final UUID jobID = UUID.randomUUID();
 
-        // Add a single empty job when no patients or since is less or equal to transactionTime
-        List<JobQueueBatch> jobBatches = patients.isEmpty() || (since != null && !transactionTime.isAfter(since)) ?
-            Collections.singletonList(createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes, since, transactionTime)) :
-            Observable.fromIterable(patients)
+        List<JobQueueBatch> jobBatches;
+        if (patients.isEmpty()) {
+            jobBatches = createEmptyBatch(jobID, orgID, providerID, resourceTypes, since, transactionTime);
+        } else if (since != null && !transactionTime.isAfter(since)) {
+            // If the since request is after the BFD transactionTime, then result will always be an empty result set
+            jobBatches = createEmptyBatch(jobID, orgID, providerID, resourceTypes, since, transactionTime);
+        } else {
+            jobBatches = Observable.fromIterable(patients)
                     .buffer(batchSize)
                     .map(patientBatch -> this.createJobBatch(jobID, orgID, providerID, patientBatch, resourceTypes, since, transactionTime))
                     .toList()
                     .blockingGet();
+        }
+
 
         // Set the priority of a job batch
         // Single patients will have first priority to support patient everything
@@ -51,6 +57,17 @@ public abstract class JobQueueCommon implements IJobQueue {
                                            OffsetDateTime since,
                                            OffsetDateTime transactionTime) {
         return new JobQueueBatch(jobID, orgID, providerID, patients, resourceTypes, since, transactionTime);
+    }
+
+    protected List<JobQueueBatch> createEmptyBatch(UUID jobID,
+                                                   UUID orgID,
+                                                   String providerID,
+                                                   List<ResourceType> resourceTypes,
+                                                   OffsetDateTime since,
+                                                   OffsetDateTime transactionTime) {
+        return Collections.singletonList(
+                createJobBatch(jobID, orgID, providerID, Collections.emptyList(), resourceTypes, since, transactionTime)
+        );
     }
 
     public int getBatchSize() {
