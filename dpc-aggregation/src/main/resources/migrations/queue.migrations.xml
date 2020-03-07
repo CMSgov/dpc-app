@@ -75,4 +75,15 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="since-support" author="rickhawesusds">
+        <addColumn tableName="JOB_QUEUE_BATCH">
+            <column name="since" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="transaction_time" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    
 </databaseChangeLog>
