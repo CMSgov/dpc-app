@@ -232,19 +232,21 @@ class ResourceFetcher {
     }
 
     /**
-     * Check the transaction time of the bundle against the transaction time of the export job
+     * Check the transaction time of the BFD against the transaction time of the export job
      *
      * @param bundle to check
      */
     private void checkBundleTransactionTime(Bundle bundle) {
         if (bundle.getMeta() == null || bundle.getMeta().getLastUpdated() == null) return;
-        final var bundleTransactionTime = bundle.getMeta().getLastUpdated().toInstant().atOffset(ZoneOffset.UTC);
-        if (bundleTransactionTime.isBefore(transactionTime)) {
-            logger.info("About to throw an BFD Runtime: bundle {}, job {}", bundleTransactionTime, transactionTime);
+        final var bfdTransactionTime = bundle.getMeta().getLastUpdated().toInstant().atOffset(ZoneOffset.UTC);
+        if (bfdTransactionTime.isBefore(transactionTime)) {
             /**
              * See BFD's RFC0004 for a discussion on why this type error may occur.
              * Note: Retrying the job after a delay may fix this problem.
              */
+            logger.error("Failing the job for a BFD transaction time regression: BFD time {}, Job time {}",
+                    bfdTransactionTime,
+                    transactionTime);
             throw new JobQueueFailure("BFD's transaction time regression");
         }
     }
