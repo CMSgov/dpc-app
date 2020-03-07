@@ -259,7 +259,7 @@ public class GroupResource extends AbstractGroupResource {
                            @QueryParam("_type") String resourceTypes,
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") String outputFormat,
-                           @ApiParam(value = "Resources updated after this period will be included in the response. Must be a FHIR date-time.")
+                           @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
                            @QueryParam("_since") String since) {
         logger.debug("Exporting data for provider: {}", rosterID);
 
@@ -322,7 +322,7 @@ public class GroupResource extends AbstractGroupResource {
     /**
      * Convert the '_since' {@link QueryParam} to a Date
      *
-     * @param since - {@link String} a
+     * @param since - {@link String} an instant
      * @return - A {@link OffsetDateTime} for this since.
      */
     private OffsetDateTime handleSinceQueryParam(String since) {
