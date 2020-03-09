@@ -60,6 +60,7 @@ class AggregationEngineTest {
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500);
         engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -80,14 +81,34 @@ class AggregationEngineTest {
      */
     @Test
     void claimBatchException() throws InterruptedException {
+        final var orgID = UUID.randomUUID();
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
         // Throw a failure on the first poll, then be successful
         JobQueueFailure ex = new JobQueueFailure("Any failure");
-        when(queue.claimBatch(any(UUID.class)))
-                .thenThrow(ex)
-                .thenAnswer(invocationOnMock -> {
+
+        doReturn(Optional.empty())
+                .doThrow(ex)
+                .doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doThrow(ex)
+                .doReturn(Optional.empty())
+                .doCallRealMethod()
+                .doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doAnswer(invocationOnMock -> {
                     engine.stop();
                     return Optional.empty();
-                });
+                })
+                .when(queue)
+                .claimBatch(any(UUID.class));
 
         engine.pollQueue();
 
@@ -96,7 +117,17 @@ class AggregationEngineTest {
             Thread.sleep(100);
         }
 
-        verify(queue, Mockito.times(2)).claimBatch(any(UUID.class));
+        // The last mock doesn't get called because the engine gets stopped during the last call
+        verify(queue, Mockito.times(10)).claimBatch(any(UUID.class));
+
+        // Look at the result
+        final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
+        assertEquals(1000, completeJob.getPriority());
+        final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.Patient, 0);
+        assertTrue(Files.exists(Path.of(outputFilePath)));
+        final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 
     /**
@@ -193,11 +224,11 @@ class AggregationEngineTest {
 
         // Work the batch
         engine.stop();
-        doReturn(true).when(subscribe).isDisposed();
         queue.claimBatch(engine.getAggregatorID())
                 .ifPresent(engine::processJobBatch);
 
-        // Verify disposed call
+        // Verify the queue is stopped
+        assertFalse(engine.isRunning());
         Mockito.verify(subscribe).dispose();
 
         // Look at the result
