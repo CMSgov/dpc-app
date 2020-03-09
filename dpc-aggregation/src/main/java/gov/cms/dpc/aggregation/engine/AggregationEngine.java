@@ -138,10 +138,10 @@ public class AggregationEngine implements Runnable {
      * Creates an observer to monitor the queue
      */
     private Observable<Optional<JobQueueBatch>> createQueueObserver() {
-        // Create using defer. This ensures that no events are omitted before a subscriber connects
-        return Observable.defer(() -> {
+        // Create using fromCallable. This ensures that no events are omitted before a subscriber connects
+        return Observable.fromCallable(() -> {
             logger.trace("Polling queue for job...");
-            return Observable.just(this.queue.claimBatch(this.aggregatorID));
+            return this.queue.claimBatch(this.aggregatorID);
         });
     }
 
