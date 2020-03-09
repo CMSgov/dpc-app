@@ -628,7 +628,7 @@
 									"    ",
 									"    // Should be a search set with one less entry",
 									"    console.debug(response.member);",
-									"    pm.expect(response.member.filter(member => member.inactive === false)).to.have.lengthOf(3);",
+									"    pm.expect(response.member.filter(member => member.inactive === false)).to.have.lengthOf(4);",
 									"    pm.expect(response.member.filter(member => member.inactive === true)).to.have.lengthOf(1);",
 									"});"
 								],

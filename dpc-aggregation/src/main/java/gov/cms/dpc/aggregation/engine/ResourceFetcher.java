@@ -146,7 +146,7 @@ class ResourceFetcher {
         try {
             patients = blueButtonClient.requestPatientFromServerByMbi(mbi);
         } catch (GeneralSecurityException e) {
-            logger.error("Job %s, batch %s: Failed to retrieve Patient", e);
+            logger.error("Job {}, batch {}: Failed to retrieve Patient", jobID, batchID, e);
             throw new ResourceNotFoundException("Failed to retrieve Patient");
         }
 
@@ -154,8 +154,8 @@ class ResourceFetcher {
             return (Patient) patients.getEntryFirstRep().getResource();
         }
 
-        logger.error(String.format("Job %s, batch %s: Expected 1 Patient to match MBI but found %d", jobID, batchID, patients.getTotal()));
-        throw new ResourceNotFoundException("Multiple Patients returned for one MBI");
+        logger.error("Job {}, batch {}: Expected 1 Patient to match MBI but found {}", jobID, batchID, patients.getTotal());
+        throw new ResourceNotFoundException(String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
     }
 
     private String getBeneIdFromPatient(Patient patient) {
@@ -164,7 +164,7 @@ class ResourceFetcher {
                 .findFirst()
                 .map(Identifier::getValue)
                 .orElseThrow(() -> {
-                    logger.error("Job %s, batch %s: No bene_id found in Patient resource");
+                    logger.error("Job {}, batch {}: No bene_id found in Patient resource", jobID, batchID);
                     return new ResourceNotFoundException("No bene_id found in Patient resource");
                 });
     }
