@@ -8,11 +8,7 @@ module Users
     def destroy
       @user = User.find(current_user.id)
       if @user.destroy_with_password(user_params[:password_to_delete])
-<<<<<<< HEAD
           redirect_to root_url, notice: 'User account deleted.'
-=======
-        redirect_to root_url, notice: 'User deleted.'
->>>>>>> af3cf596acdb186817d997afd38f801c18910ca7
       else
         redirect_to edit_user_registration_url
         flash[:notice] = 'Could not delete account. Please enter the correct password.'
