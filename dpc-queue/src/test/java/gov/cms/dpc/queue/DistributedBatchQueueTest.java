@@ -89,8 +89,12 @@ public class DistributedBatchQueueTest {
             }
         }
 
-        // Re-claim the batch in a stuck state
+        // Fix the stuck job during the claim process
         Optional<JobQueueBatch> stuckBatch = queue.claimBatch(aggregatorID);
+        assertFalse(stuckBatch.isPresent(), "Should have no job, but the stuck batch was released and is ready to be re-claimed");
+
+        // Re-claim the batch that was in a stuck state
+        stuckBatch = queue.claimBatch(aggregatorID);
         assertTrue(stuckBatch.isPresent(), "Should have a job to work");
         final UUID stuckBatchID = stuckBatch.orElseThrow().getBatchID();
         assertEquals(stuckBatchID, firstBatchID, "Stuck batch should be the same as the initial batch");
