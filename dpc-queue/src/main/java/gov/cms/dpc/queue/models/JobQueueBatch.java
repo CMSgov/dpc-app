@@ -135,7 +135,11 @@ public class JobQueueBatch implements Serializable {
      * We need to use {@link FetchType#EAGER}, otherwise the session will close before we actually read the job results and the call will fail.
      */
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "batch_id")
+    // @JoinColumn is essentially double-mapped since we don't have a @ManyToOne on the opposing side,
+    // and can't use mappedBy="". Therefore, we need to specify all the flags as false, to prevent Hibernate
+    // from running an UPDATE, setting the column to null, followed by a DELETE during a cascade
+    // https://stackoverflow.com/questions/25455280/hibernate-cascade-delete-for-one-to-many-call-sql-update-instead-of-delete
+    @JoinColumn(name = "batch_id", insertable = false, updatable = false, nullable = false)
     private List<JobQueueBatchFile> jobQueueBatchFiles;
 
     public JobQueueBatch() {
