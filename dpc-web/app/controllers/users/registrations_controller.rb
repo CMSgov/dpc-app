@@ -7,17 +7,23 @@ module Users
 
     def destroy
       @user = User.find(current_user.id)
-      if @user.destroy_with_password(user_params[:password_to_delete])
-        redirect_to root_url, notice: 'User account deleted.'
+      if resource.destroy_with_password(user_params[:password_to_delete])
+        Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
+        flash[:notice] = 'Bye! Your account has been successfully cancelled. We hope to see you again soon.'
+        yield resource if block_given?
+        respond_with_navigational(resource){ redirect_to after_sign_out_path_for(resource_name) }
       else
+        flash[:alert] = 'Account could not be deleted.'
         redirect_to edit_user_registration_url
-        flash[:notice] = 'Could not delete account. Please enter the correct password.'
       end
     end
+
+    protected
 
     def user_params
       params.require(:user).permit(:password_to_delete)
     end
+    
     # before_action :configure_sign_up_params, only: [:create]
     # before_action :configure_account_update_params, only: [:update]
 
