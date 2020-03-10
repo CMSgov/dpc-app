@@ -55,6 +55,7 @@ public class AggregationEngine implements Runnable {
     private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
     protected AtomicBoolean queueRunning = new AtomicBoolean(false);
+    protected AtomicBoolean inError = new AtomicBoolean(false);
 
     /**
      * Create an engine.
@@ -107,6 +108,10 @@ public class AggregationEngine implements Runnable {
         return queueRunning.get();
     }
 
+    public Boolean inError() {
+        return inError.get();
+    }
+
     /**
      * The main run-loop of the engine.
      */
@@ -126,6 +131,7 @@ public class AggregationEngine implements Runnable {
                         error -> {
                             logger.error("Error processing queue. Exiting...", error);
                             queueRunning.set(false);
+                            inError.set(true);
                         },
                         () -> {
                             logger.info("Finished processing queue. Exiting...");
@@ -179,6 +185,7 @@ public class AggregationEngine implements Runnable {
         } catch (Exception error) {
             logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
             this.queue.failBatch(job, aggregatorID);
+            inError.set(true);
         }
     }
 
@@ -327,7 +334,7 @@ public class AggregationEngine implements Runnable {
         logger.warn("Undeliverable exception received: ", e);
     }
 
-    protected UUID getAggregatorID() {
+    public UUID getAggregatorID() {
         return aggregatorID;
     }
 
