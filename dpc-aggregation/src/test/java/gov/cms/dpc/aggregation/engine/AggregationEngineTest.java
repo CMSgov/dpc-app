@@ -59,7 +59,7 @@ class AggregationEngineTest {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500);
-        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
@@ -128,6 +128,44 @@ class AggregationEngineTest {
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+    }
+
+    /**
+     * Verify that an exception in the processJobBatch method doesn't kill polling the queue
+     */
+    @Test
+    void processJobBatchException() throws InterruptedException {
+        final var orgID = UUID.randomUUID();
+
+        doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doAnswer(invocationOnMock -> {
+                    engine.stop();
+                    return Optional.empty();
+                })
+                .when(queue)
+                .claimBatch(any(UUID.class));
+
+        // Throw a failure on the third poll, then be successful
+        JobQueueFailure ex = new JobQueueFailure("Any failure");
+        doNothing()
+                .doNothing()
+                .doThrow(ex)
+                .doNothing()
+                .doNothing()
+                .when(engine)
+                .processJobBatch(any(JobQueueBatch.class));
+
+        engine.pollQueue();
+
+        // Wait for the queue to finish processing before finishing the test
+        while ( engine.isRunning() ) {
+            Thread.sleep(100);
+        }
+
+        verify(queue, Mockito.times(5)).claimBatch(any(UUID.class));
     }
 
     /**
