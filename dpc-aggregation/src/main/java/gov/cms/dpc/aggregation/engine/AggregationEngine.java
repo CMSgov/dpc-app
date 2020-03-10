@@ -304,6 +304,8 @@ public class AggregationEngine implements Runnable {
      * @param e is the exception thrown
      */
     private static void errorHandler(Throwable e) {
+        logger.error("Caught exception during RxJava processing flow: ", e);
+
         // Undeliverable Exceptions may happen because of parallel execution. One thread will
         // throw an exception which will cause the job to fail and (close its consumer).
         // Another thread will throw an exception as well which will be undeliverable
