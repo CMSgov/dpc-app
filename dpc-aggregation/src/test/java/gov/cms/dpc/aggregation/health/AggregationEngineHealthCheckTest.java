@@ -152,5 +152,8 @@ public class AggregationEngineHealthCheckTest {
 
         Assert.assertFalse(healthCheck.check().isHealthy());
 
+        engine.stop();
+
+        Assert.assertTrue(healthCheck.check().isHealthy());
     }
 }
