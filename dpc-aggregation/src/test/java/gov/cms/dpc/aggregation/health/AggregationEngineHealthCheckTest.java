@@ -106,6 +106,31 @@ public class AggregationEngineHealthCheckTest {
     }
 
     @Test
+    public void testHealthyEngineWhenClaimBatchErrors() throws InterruptedException {
+
+        final var orgID = UUID.randomUUID();
+
+        queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList("1"),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
+        Mockito.doThrow(new RuntimeException("Error")).when(queue).claimBatch(Mockito.any(UUID.class));
+
+        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(aggregatorID, engine);
+        Assert.assertTrue(healthCheck.check().isHealthy());
+
+        ExecutorService executor = Executors.newCachedThreadPool();
+        executor.execute(engine);
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        Assert.assertTrue(healthCheck.check().isHealthy());
+
+    }
+
+    @Test
     public void testUnhealthyEngineWhenQueueOperationsError() throws InterruptedException {
         Mockito.doThrow(new RuntimeException("Error")).when(queue).completePartialBatch(Mockito.any(JobQueueBatch.class), Mockito.any(UUID.class));
 
