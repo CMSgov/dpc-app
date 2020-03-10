@@ -55,7 +55,7 @@ class ResourceFetcher {
 
     /**
      * Fetch all the resources for a specific patient. If errors are encountered from BlueButton,
-     * a OperationalOutcome resource is used.
+     * a OperationOutcome resource is used.
      *
      * @param mbi to use
      * @return a flow with all the resources for specific patient
@@ -113,8 +113,8 @@ class ResourceFetcher {
             return Flowable.error(error);
         }
 
-        // Other errors should be turned into OperationalOutcome and just recorded.
-        logger.error("Turning error into OperationalOutcome. Error is: ", error);
+        // Other errors should be turned into OperationOutcome and just recorded.
+        logger.error("Turning error into OperationOutcome. Error is: " + error);
         final var operationOutcome = formOperationOutcome(mbi, error);
         return Flowable.just(List.of(operationOutcome));
     }
@@ -188,7 +188,7 @@ class ResourceFetcher {
     /**
      * Create a {@link OperationOutcome} resource from an exception with a patient
      *
-     * @param ex - the exception to turn into a Operational Outcome
+     * @param ex - the exception to turn into a Operation Outcome
      * @return an operation outcome
      */
     private OperationOutcome formOperationOutcome(String patientID, Throwable ex) {

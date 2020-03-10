@@ -56,10 +56,12 @@ public class MockBlueButtonClient implements BlueButtonClient {
             b.setTotal(2);
             b.addEntry().setResource(new Patient());
             b.addEntry().setResource(new Patient());
-        } else {
+        } else if (MBI_BENE_ID_MAP.containsKey(mbi)) {
             Patient p = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.get(mbi));
             b.setTotal(1);
             b.addEntry().setResource(p);
+        } else {
+            formNoPatientException(mbi);
         }
         return b;
     }
