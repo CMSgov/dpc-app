@@ -5,7 +5,6 @@
     "@cmsgov/design-system-core": "^3.5.0",
     "@cmsgov/design-system-layout": "^3.5.0",
     "normalize.css": "^8.0.1",
-    "package.json": "^2.0.1",
     "svg4everybody": "^2.1.9"
   }
 }
