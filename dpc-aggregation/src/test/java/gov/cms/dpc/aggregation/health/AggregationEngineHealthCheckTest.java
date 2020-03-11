@@ -53,7 +53,7 @@ public class AggregationEngineHealthCheckTest {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500);
-        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig));
         AggregationEngine.setGlobalErrorHandler();
     }
 
@@ -131,7 +131,7 @@ public class AggregationEngineHealthCheckTest {
     }
 
     @Test
-    public void testUnhealthyEngineWhenQueueOperationsError() throws InterruptedException {
+    public void testHealthyEngineWhenQueueOperationsError() throws InterruptedException {
         Mockito.doThrow(new RuntimeException("Error")).when(queue).completePartialBatch(Mockito.any(JobQueueBatch.class), Mockito.any(UUID.class));
 
         final var orgID = UUID.randomUUID();
@@ -149,10 +149,6 @@ public class AggregationEngineHealthCheckTest {
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
         executor.awaitTermination(5, TimeUnit.SECONDS);
-
-        Assert.assertFalse(healthCheck.check().isHealthy());
-
-        engine.stop();
 
         Assert.assertTrue(healthCheck.check().isHealthy());
     }

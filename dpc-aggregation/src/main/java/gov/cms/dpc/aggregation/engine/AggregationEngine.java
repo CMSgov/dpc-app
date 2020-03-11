@@ -129,16 +129,21 @@ public class AggregationEngine implements Runnable {
                 .map(Optional::get)
                 .subscribe(
                         this::processJobBatch,
-                        error -> {
-                            logger.error("Error processing queue. Exiting...", error);
-                            queueRunning.set(false);
-                            inError.set(true);
-                        },
-                        () -> {
-                            logger.info("Finished processing queue. Exiting...");
-                            queueRunning.set(false);
-                        }
+                        this::onError,
+                        this::onCompleted
                 );
+    }
+
+    public void onError(Throwable error) {
+        logger.error("Error processing queue. Exiting...", error);
+        queueRunning.set(false);
+        inError.set(true);
+    }
+
+    public void onCompleted() {
+        logger.info("Finished processing queue. Exiting...");
+        queueRunning.set(false);
+        inError.set(false);
     }
 
     /**
@@ -186,7 +191,6 @@ public class AggregationEngine implements Runnable {
         } catch (Exception error) {
             logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
             this.queue.failBatch(job, aggregatorID);
-            inError.set(true);
         }
     }
 

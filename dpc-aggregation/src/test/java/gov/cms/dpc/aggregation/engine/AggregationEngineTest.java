@@ -128,6 +128,7 @@ class AggregationEngineTest {
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertFalse(engine.inError());
     }
 
     /**
@@ -157,6 +158,26 @@ class AggregationEngineTest {
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertFalse(engine.inError());
+    }
+
+    @Test
+    void simpleJobExceptionTest() {
+        final var orgID = UUID.randomUUID();
+
+        // Make a simple job with one resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
+        // Work the batch
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(t -> engine.onError(new RuntimeException("error")));
+
+        assertTrue(engine.inError());
     }
 
     /**
@@ -424,5 +445,6 @@ class AggregationEngineTest {
                 () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
                 () -> assertEquals(1, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+        assertFalse(engine.inError());
     }
 }
