@@ -260,17 +260,21 @@ Devise.setup do |config|
   # Add a new OmniAuth provider. Check the wiki for more information on setting
   # up on your models and hooks.
 
-  config.omniauth(:oktaoauth,
-    ENV['OKTA_CLIENT_ID'],
-    ENV['OKTA_CLIENT_SECRET'],
-    scope: 'openid profile email',
-    fields: ['profile', 'email'],
-    client_options: {site: ENV.fetch('OKTA_ISSUER'), authorize_url: ENV.fetch('OKTA_ISSUER') + "/v1/authorize", token_url: ENV.fetch('OKTA_ISSUER') + "/v1/token"},
-    redirect_uri: ENV["OKTA_REDIRECT_URI"],
-    auth_server_id: ENV['OKTA_AUTH_SERVER_ID'],
-    issuer: ENV['OKTA_ISSUER'],
-    strategy_class: OmniAuth::Strategies::Oktaoauth
-  )
+  if ENV.fetch('INTERNAL_AUTH_PROVIDER') == 'okta'
+    config.omniauth(:oktaoauth,
+      ENV['OKTA_CLIENT_ID'],
+      ENV['OKTA_CLIENT_SECRET'],
+      scope: 'openid profile email',
+      fields: ['profile', 'email'],
+      client_options: {site: ENV.fetch('OKTA_ISSUER'), authorize_url: ENV.fetch('OKTA_ISSUER') + "/v1/authorize", token_url: ENV.fetch('OKTA_ISSUER') + "/v1/token"},
+      redirect_uri: ENV["OKTA_REDIRECT_URI"],
+      auth_server_id: ENV['OKTA_AUTH_SERVER_ID'],
+      issuer: ENV['OKTA_ISSUER'],
+      strategy_class: OmniAuth::Strategies::Oktaoauth
+    )
+  elsif ENV.fetch('INTERNAL_AUTH_PROVIDER') == 'github'
+    config.omniauth :github, ENV['GITHUB_APP_ID'], ENV['GITHUB_APP_SECRET'], scope: 'read:user, user:email, read:org'
+  end
   # ==> Warden configuration
   # If you want to use other strategies, that are not supported by Devise, or
   # change the failure app, you can configure them inside the config.warden block.

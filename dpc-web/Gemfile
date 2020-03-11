@@ -60,6 +60,8 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem 'delayed_job_active_record'
 gem 'daemons'
 gem 'omniauth-rails_csrf_protection', '~> 0.1'
+gem 'omniauth-github'
+gem 'octokit'
 gem 'omniauth-oktaoauth'
 gem 'kaminari'
 gem 'active_model_serializers'
