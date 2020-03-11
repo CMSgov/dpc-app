@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hibernate.Session;
@@ -9,6 +10,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,50 @@ public class DistributedBatchQueueTest {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();
 
+        final UUID firstBatchID = this.buildStuckBatchScenario(orgID);
+
+        // Fix the stuck job during the claim process
+        Optional<JobQueueBatch> stuckBatch = queue.claimBatch(aggregatorID);
+        assertFalse(stuckBatch.isPresent(), "Should have no job, but the stuck batch was released and is ready to be re-claimed");
+
+        // Re-claim the batch that was in a stuck state
+        stuckBatch = queue.claimBatch(aggregatorID);
+        assertTrue(stuckBatch.isPresent(), "Should have a job to work");
+        final UUID stuckBatchID = stuckBatch.orElseThrow().getBatchID();
+        assertEquals(stuckBatchID, firstBatchID, "Stuck batch should be the same as the initial batch");
+
+        // Check that the stuck job is RUNNING with previous files cleared
+        final Optional<JobQueueBatch> stuckJobOptional = queue.getBatch(stuckBatchID);
+        assertTrue(stuckJobOptional.isPresent(), "Should have a job");
+        stuckJobOptional.ifPresent(stuckJob -> {
+            assertEquals(JobStatus.RUNNING, stuckJob.getStatus(), "Should be in the RUNNING state");
+            assertEquals(0, stuckJob.getJobQueueBatchFiles().size(), "Should have no files on the stuck job (they should be cleared)");
+        });
+    }
+
+    @Test
+    void validateHealthyQueue() {
+        // This test is kind of crappy, since there is nothing to assert
+        // If the queue is not health, an exception is thrown
+        queue.assertHealthy(aggregatorID);
+    }
+
+    @Test
+    void validateUnhealthyQueueDueToJobFailure() {
+        // One organization id for both jobs
+        final UUID orgID = UUID.randomUUID();
+
+        this.buildStuckBatchScenario(orgID);
+
+        try {
+            queue.assertHealthy(aggregatorID);
+            Assert.fail("Expected JobQueueUnhealthy exception not throw");
+        } catch (JobQueueUnhealthy e) {
+            assertEquals("Aggregator is not making progress on the queue", e.getMessage());
+        }
+    }
+
+    private UUID buildStuckBatchScenario(UUID orgID) {
         // Add a job
         var jobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient));
 
@@ -89,22 +135,6 @@ public class DistributedBatchQueueTest {
             }
         }
 
-        // Fix the stuck job during the claim process
-        Optional<JobQueueBatch> stuckBatch = queue.claimBatch(aggregatorID);
-        assertFalse(stuckBatch.isPresent(), "Should have no job, but the stuck batch was released and is ready to be re-claimed");
-
-        // Re-claim the batch that was in a stuck state
-        stuckBatch = queue.claimBatch(aggregatorID);
-        assertTrue(stuckBatch.isPresent(), "Should have a job to work");
-        final UUID stuckBatchID = stuckBatch.orElseThrow().getBatchID();
-        assertEquals(stuckBatchID, firstBatchID, "Stuck batch should be the same as the initial batch");
-
-        // Check that the stuck job is RUNNING with previous files cleared
-        final Optional<JobQueueBatch> stuckJobOptional = queue.getBatch(stuckBatchID);
-        assertTrue(stuckJobOptional.isPresent(), "Should have a job");
-        stuckJobOptional.ifPresent(stuckJob -> {
-            assertEquals(JobStatus.RUNNING, stuckJob.getStatus(), "Should be in the RUNNING state");
-            assertEquals(0, stuckJob.getJobQueueBatchFiles().size(), "Should have no files on the stuck job (they should be cleared)");
-        });
+        return firstBatchID;
     }
 }
