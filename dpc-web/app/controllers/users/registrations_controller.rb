@@ -6,7 +6,6 @@ module Users
     skip_before_action :check_user, except: %i[new create]
 
     def destroy
-      @user = User.find(current_user.id)
       if resource.destroy_with_password(user_params[:password_to_delete])
         Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
         flash[:notice] = 'Bye! Your account has been successfully cancelled. We hope to see you again soon.'
