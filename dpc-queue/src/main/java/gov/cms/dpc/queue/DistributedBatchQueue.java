@@ -323,11 +323,17 @@ public class DistributedBatchQueue extends JobQueueCommon {
     public void assertHealthy(UUID aggregatorID) {
         try (final Session session = this.factory.openSession()) {
             try {
+                OffsetDateTime stuckSince = OffsetDateTime.now(ZoneId.systemDefault()).minusMinutes(3);
+
+                logger.debug(String.format("Checking aggregatorID(%s) for stuck jobs since (%s)...", aggregatorID, stuckSince.toString()));
                 Long stuckBatchCount = (Long) session
                         .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime")
                         .setParameter("aggregatorID", aggregatorID)
-                        .setParameter("updateTime", OffsetDateTime.now(ZoneId.systemDefault()).minusMinutes(3))
+                        .setParameter("updateTime", stuckSince)
                         .uniqueResult();
+
+                logger.debug(String.format("Found (%d) stuck jobs on aggregatorID(%s).", stuckBatchCount, aggregatorID));
+
                 if (stuckBatchCount > 0) {
                     throw new JobQueueUnhealthy(JOB_UNHEALTHY);
                 }
