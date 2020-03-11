@@ -22,6 +22,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -322,9 +323,12 @@ public class DistributedBatchQueue extends JobQueueCommon {
     public void assertHealthy(UUID aggregatorID) {
         try (final Session session = this.factory.openSession()) {
             try {
-                @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery("select count(*) from job_queue_batch where aggregatorID = '" + aggregatorID.toString() + "' and job_status == 1 and update_time < current_timestamp - interval '3 minutes'"); // lgtm [java/concatenated-sql-query] These values are sanitized and not susceptible to user tainting.
-                int stuckBatches = healthCheck.getFirstResult();
-                if (stuckBatches > 0) {
+                Long stuckBatchCount = (Long) session
+                        .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime")
+                        .setParameter("aggregatorID", aggregatorID)
+                        .setParameter("updateTime", OffsetDateTime.now(ZoneId.systemDefault()).minusMinutes(3))
+                        .uniqueResult();
+                if (stuckBatchCount > 0) {
                     throw new JobQueueUnhealthy(JOB_UNHEALTHY);
                 }
             } catch (JobQueueUnhealthy e) {

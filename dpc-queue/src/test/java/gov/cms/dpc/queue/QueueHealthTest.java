@@ -35,14 +35,17 @@ public class QueueHealthTest {
         when(factory.openSession())
                 .thenReturn(session);
 
-        when(session.createSQLQuery(Mockito.anyString()))
+        when(session.createQuery(Mockito.anyString()))
+                .thenReturn(query);
+
+        when(query.setParameter(Mockito.anyString(), Mockito.any()))
                 .thenReturn(query);
     }
 
     @Test
     void testHealthyQueue() {
-        when(query.getFirstResult())
-                .thenReturn(0);
+        when(query.uniqueResult())
+                .thenReturn(0L);
 
         final DistributedBatchQueue queue = new DistributedBatchQueue(managedSessionFactory, 100, metrics);
         assertDoesNotThrow(() -> queue.assertHealthy(UUID.randomUUID()), "Queue should be healthy");
@@ -54,8 +57,8 @@ public class QueueHealthTest {
 
     @Test
     void testUnhealthyQueue() {
-        when(query.getFirstResult())
-                .thenReturn(2);
+        when(query.uniqueResult())
+                .thenReturn(2L);
 
         final DistributedBatchQueue queue = new DistributedBatchQueue(managedSessionFactory, 100, metrics);
         assertThrows(JobQueueUnhealthy.class, () -> queue.assertHealthy(UUID.randomUUID()), "Queue should be unhealthy");
