@@ -77,14 +77,12 @@ class RegisteredOrganization < ApplicationRecord
     api_request = APIClient.new(api_env).delete_organization(self)
     api_response = api_request.response_body
 
-    if api_request.response_successful?
-      return
-    elsif api_response.include? "Cannot find organization"
-      return
-    else
-      errors.add(:base, "couldn't be deleted from #{api_env} API: #{api_response}")
-      throw(:abort)
-    end
+    return if api_request.response_successful?
+
+    return if api_response.include? 'Cannot find organization'
+
+    errors.add(:base, "couldn't be deleted from #{api_env} API: #{api_response}")
+    throw(:abort)
   end
 
   def build_default_fhir_endpoint
