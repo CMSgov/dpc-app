@@ -69,7 +69,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList(ResourceType.Patient)
         );
 
-        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(aggregatorID, engine);
+        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();
@@ -94,7 +94,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList(ResourceType.Patient)
         );
 
-        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(aggregatorID, engine);
+        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();
@@ -119,7 +119,7 @@ public class AggregationEngineHealthCheckTest {
 
         Mockito.doThrow(new RuntimeException("Error")).when(queue).claimBatch(Mockito.any(UUID.class));
 
-        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(aggregatorID, engine);
+        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();
@@ -143,7 +143,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList(ResourceType.Patient)
         );
 
-        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(aggregatorID, engine);
+        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
         Assert.assertTrue(healthCheck.check().isHealthy());
 
         ExecutorService executor = Executors.newCachedThreadPool();

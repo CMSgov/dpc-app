@@ -339,7 +339,7 @@ public class AggregationEngine implements Runnable {
         logger.warn("Undeliverable exception received: ", e);
     }
 
-    protected UUID getAggregatorID() {
+    public UUID getAggregatorID() {
         return aggregatorID;
     }
 
