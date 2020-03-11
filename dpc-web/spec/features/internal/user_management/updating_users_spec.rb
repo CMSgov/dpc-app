@@ -105,7 +105,7 @@ RSpec.feature 'updating users' do
     expect(name_field).to eq('Happy Health')
     type_field = find(:css, 'select#organization_organization_type').value
     expect(type_field).to eq('inpatient_facility')
-    num_field = find(:css, 'input#organization_num_providers').value
+    num_field = find(:css, 'input#organization_num_providers', visible: false).value
     expect(num_field).to eq('999')
     address_1_field = find(:css, 'input#organization_address_attributes_street').value
     expect(address_1_field).to have_content('55 Euphoria Dr')
