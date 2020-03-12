@@ -63,7 +63,7 @@ class AggregationEngineTest {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500);
-        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig);
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
@@ -414,7 +414,7 @@ class AggregationEngineTest {
         executor.execute(engine);
         executor.awaitTermination(5, TimeUnit.SECONDS);
 
-        Assert.assertTrue(healthCheck.check().isHealthy());
+        Assert.assertFalse(healthCheck.check().isHealthy());
     }
 
     private void testWithThrowable(Throwable throwable) throws GeneralSecurityException {
