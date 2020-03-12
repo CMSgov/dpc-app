@@ -1499,7 +1499,7 @@
 									"    var response = pm.response.json();",
 									"    ",
 									"    // Ensure that the Patient IDs is less than the original submission number",
-									"    pm.expect(response.member.length).to.equal(3);",
+									"    pm.expect(response.member.length).to.equal(4);",
 									"    var ids = new Set(JSON.parse(pm.globals.get(\"patient_ids\")));",
 									"    const matchingPatient = response.member.filter(member => {",
 									"        pm.expect(ids.has(member.entity.reference)).to.be.true;",
