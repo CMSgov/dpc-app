@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c9be4369-1669-4380-bdba-f61161f895a3",
+		"_postman_id": "4b1e96d7-5669-45a9-a10d-9c5a94234719",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -52,7 +52,7 @@
 							"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"resource\": {\n        \"resourceType\": \"Bundle\",\n        \"type\": \"collection\",\n        \"entry\": [\n          {\n            \"resource\": {\n              \"address\": [\n                {\n                  \"use\": \"work\",\n                  \"type\": \"both\",\n                  \"city\": \"PLYMOUTH\",\n                  \"country\": \"US\",\n                  \"line\": [\n                    \"275 SANDWICH STREET\"\n                  ],\n                  \"postalCode\": \"02360\",\n                  \"state\": \"MA\"\n                }\n              ],\n              \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n              \"identifier\": [\n                {\n                  \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n                  \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n                },\n                {\n                  \"system\": \"https://github.com/synthetichealth/synthea\",\n                  \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n                }\n              ],\n              \"meta\": {\n                \"lastUpdated\": \"2019-04-09T12:25:36.450512+00:00\",\n                \"versionId\": \"MTU1NDgxMjczNjQ1MDUxMjAwMA\"\n              },\n              \"name\": \"BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH\",\n              \"resourceType\": \"Organization\",\n              \"telecom\": [\n                {\n                  \"system\": \"phone\",\n                  \"value\": \"5087462000\"\n                }\n              ],\n              \"type\": [\n                {\n                  \"coding\": [\n                    {\n                      \"code\": \"prov\",\n                      \"display\": \"Healthcare Provider\",\n                      \"system\": \"http://hl7.org/fhir/organization-type\"\n                    }\n                  ],\n                  \"text\": \"Healthcare Provider\"\n                }\n              ],\n              \"endpoint\": [\n                {\n                  \"reference\": \"Endpoint/3e0f5519-c2e4-456a-b888-c4341594426f\"\n                }\n              ]\n            }\n          },\n          {\n            \"resource\": {\n              \"id\": \" \",\n              \"resourceType\": \"Endpoint\",\n              \"status\": \"test\",\n              \"connectionType\": {\n                \"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n                \"code\": \"hl7-fhir-rest\"\n              },\n              \"name\": \"BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH FHIR endpoint\",\n              \"address\": \"http://test-address.first-org/fhir\",\n              \"managingOrganization\": {\n                \"reference\": \"Organization/46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}"
 						},
 						"url": {
-							"raw": "http://{{hostname}}:{{attribution_port}}/v1/Organization/$submit?",
+							"raw": "http://{{hostname}}:{{attribution_port}}/v1/Organization/$submit",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -887,8 +887,8 @@
 									"    });",
 									"    ",
 									"    // If response code is 200, check the response and load the urls.",
-									"    pm.test(\"Patient, EOB, and Coverage in response but no errors\", function() {",
-									"        pm.expect(pm.response.json().error).to.have.lengthOf(0);",
+									"    pm.test(\"Patient, EOB, and Coverage resources; one error file\", function() {",
+									"        pm.expect(pm.response.json().error).to.have.lengthOf(1);",
 									"        pm.expect(pm.response.json().output).to.have.lengthOf(3);",
 									"        ",
 									"        // Order of the output types is not guarenteed",
@@ -1204,7 +1204,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{eob_url}}?",
+							"raw": "{{eob_url}}",
 							"host": [
 								"{{eob_url}}"
 							],
