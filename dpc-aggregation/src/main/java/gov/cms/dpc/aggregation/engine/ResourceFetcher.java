@@ -6,9 +6,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
-import io.github.resilience4j.retry.transformer.RetryTransformer;
 import io.reactivex.Flowable;
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
@@ -26,7 +23,6 @@ import java.util.UUID;
 class ResourceFetcher {
     private static final Logger logger = LoggerFactory.getLogger(ResourceFetcher.class);
     private BlueButtonClient blueButtonClient;
-    private RetryConfig retryConfig;
     private UUID jobID;
     private UUID batchID;
     private ResourceType resourceType;
@@ -45,9 +41,6 @@ class ResourceFetcher {
                            ResourceType resourceType,
                     OperationsConfig config) {
         this.blueButtonClient = blueButtonClient;
-        this.retryConfig = RetryConfig.custom()
-                .maxAttempts(config.getRetryCount())
-                .build();
         this.jobID = jobID;
         this.batchID = batchID;
         this.resourceType = resourceType;
@@ -61,7 +54,6 @@ class ResourceFetcher {
      * @return a flow with all the resources for specific patient
      */
     Flowable<Resource> fetchResources(String mbi) {
-        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
         return Flowable.fromCallable(() -> {
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
@@ -73,7 +65,6 @@ class ResourceFetcher {
                 return List.of(firstFetched);
             }
         })
-                .compose(RetryTransformer.of(retry))
                 .onErrorResumeNext((Throwable error) -> handleError(mbi, error))
                 .flatMap(Flowable::fromIterable);
     }
