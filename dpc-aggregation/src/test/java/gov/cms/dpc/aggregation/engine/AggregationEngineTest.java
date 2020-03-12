@@ -364,9 +364,9 @@ class AggregationEngineTest {
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
         Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture());
         var values = idCaptor.getAllValues();
-        assertEquals(6,
+        assertEquals(2,
                 values.stream().filter(value -> value.equals("-1")).count(),
-                "Should be 6 invalid ids, 3 retries per method x 2 method calls x 1 bad-id");
+                "Should be 2 invalid ids, 2 method calls x 1 bad-id");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
@@ -442,7 +442,7 @@ class AggregationEngineTest {
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
-        assertEquals(3, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called 3 times to get the patient, but with errors instead");
+        assertEquals(1, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called once to get the patient, but with errors instead");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
