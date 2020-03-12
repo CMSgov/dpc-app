@@ -26,6 +26,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * These tests are here to make sure the engine is still running/polling in situations where errors are recoverable.
+ * A test to check if the engine exits out of the loop correctly when an error occurs
+ * in AggregationEngineTest#testUnhealthyIfProcessJobBatchThrowsException
+ */
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationEngineHealthCheckTest {
     private static final String TEST_PROVIDER_ID = "1";

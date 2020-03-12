@@ -19,7 +19,7 @@ public class AggregationEngineHealthCheck extends HealthCheck {
     @Override
     public Result check() {
         Result result = Result.healthy();
-        if (aggregationEngine.isRunning() && aggregationEngine.inError()) {
+        if (!aggregationEngine.isRunning()) {
             result = Result.unhealthy("Aggregation Engine instance: " + aggregationEngine.getAggregatorID() + " in error state");
         }
         return result;

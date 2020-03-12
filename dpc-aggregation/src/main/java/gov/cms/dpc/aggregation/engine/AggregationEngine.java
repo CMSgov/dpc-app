@@ -54,8 +54,7 @@ public class AggregationEngine implements Runnable {
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
-    protected AtomicBoolean queueRunning = new AtomicBoolean(false);
-    protected AtomicBoolean inError = new AtomicBoolean(false);
+    protected AtomicBoolean queueRunning = new AtomicBoolean(true);
 
     /**
      * Create an engine.
@@ -101,16 +100,11 @@ public class AggregationEngine implements Runnable {
     public void stop() {
         logger.info("Shutting down aggregation engine");
         queueRunning.set(false);
-        inError.set(false);
         this.subscribe.dispose();
     }
 
     public Boolean isRunning() {
         return queueRunning.get();
-    }
-
-    public Boolean inError() {
-        return inError.get();
     }
 
     /**
@@ -134,16 +128,14 @@ public class AggregationEngine implements Runnable {
                 );
     }
 
-    public void onError(Throwable error) {
+    protected void onError(Throwable error) {
         logger.error("Error processing queue. Exiting...", error);
         queueRunning.set(false);
-        inError.set(true);
     }
 
-    public void onCompleted() {
+    protected void onCompleted() {
         logger.info("Finished processing queue. Exiting...");
         queueRunning.set(false);
-        inError.set(false);
     }
 
     /**

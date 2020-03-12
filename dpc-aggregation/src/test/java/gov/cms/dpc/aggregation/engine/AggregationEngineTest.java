@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -28,6 +29,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -128,7 +132,6 @@ class AggregationEngineTest {
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
-        assertFalse(engine.inError());
     }
 
     /**
@@ -158,26 +161,6 @@ class AggregationEngineTest {
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
-        assertFalse(engine.inError());
-    }
-
-    @Test
-    void simpleJobExceptionTest() {
-        final var orgID = UUID.randomUUID();
-
-        // Make a simple job with one resource type
-        final var jobID = queue.createJob(
-                orgID,
-                TEST_PROVIDER_ID,
-                Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient)
-        );
-
-        // Work the batch
-        queue.claimBatch(engine.getAggregatorID())
-                .ifPresent(t -> engine.onError(new RuntimeException("error")));
-
-        assertTrue(engine.inError());
     }
 
     /**
@@ -409,6 +392,31 @@ class AggregationEngineTest {
 
     }
 
+    @Test
+    public void testUnhealthyIfProcessJobBatchThrowsException() throws InterruptedException {
+        // This should never happen but if it does then this test is checking to make sure the look gets broken out
+        // and goes into the #onError callback to set the queue to not running
+        Mockito.doThrow(new RuntimeException("Error")).when(engine).processJobBatch(Mockito.any(JobQueueBatch.class));
+
+        final var orgID = UUID.randomUUID();
+
+        queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList("1"),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
+        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
+        Assert.assertTrue(healthCheck.check().isHealthy());
+
+        ExecutorService executor = Executors.newCachedThreadPool();
+        executor.execute(engine);
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        Assert.assertTrue(healthCheck.check().isHealthy());
+    }
+
     private void testWithThrowable(Throwable throwable) throws GeneralSecurityException {
         Mockito.reset(bbclient);
         // Override throwing an error on fetching a patient
@@ -445,6 +453,5 @@ class AggregationEngineTest {
                 () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
                 () -> assertEquals(1, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
-        assertFalse(engine.inError());
     }
 }
