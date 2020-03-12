@@ -150,7 +150,7 @@ RSpec.describe Organization, type: :model do
       organization.notify_users_of_sandbox_access
 
       expect(UserMailer).to have_received(:with)
-        .once.with(user: assignment.user, organization: organization)
+        .once.with(user: assignment.user, vendor: false)
       expect(mailer).to have_received(:organization_sandbox_email)
     end
   end

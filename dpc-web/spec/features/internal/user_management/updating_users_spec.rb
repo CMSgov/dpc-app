@@ -148,7 +148,7 @@ RSpec.feature 'updating users' do
     org = create(:organization, :sandbox_enabled)
 
     mailer = double(UserMailer)
-    allow(UserMailer).to receive(:with).with(user: crabby, organization: org).and_return(mailer)
+    allow(UserMailer).to receive(:with).with(user: crabby, vendor: false).and_return(mailer)
     allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
     allow(mailer).to receive(:deliver_later)
 
