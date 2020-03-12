@@ -190,11 +190,12 @@ RSpec.describe RegisteredOrganization, type: :model do
         end
 
         it 'cannot find organization in API and destroys object' do
-          # destroy in API
+          api_client = stub_api_client(message: :delete_organization, success: false, response:'Cannot find organization.')
 
-          # return response: { issues: [{"severity":"fatal","details":{"text":"Cannot find organization."}}] }
+          @reg_org.destroy
 
-          # still delete in app
+          expect(api_client).to have_received(:delete_organization).with(@reg_org)
+          expect{ @reg_org.reload }.to raise_error(ActiveRecord::RecordNotFound)
         end
 
         it 'adds to errors and does not destroy object' do
