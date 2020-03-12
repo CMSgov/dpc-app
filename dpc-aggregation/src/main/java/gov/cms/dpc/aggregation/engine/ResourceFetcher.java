@@ -6,9 +6,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
-import io.github.resilience4j.retry.transformer.RetryTransformer;
 import io.reactivex.Flowable;
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
@@ -26,7 +23,6 @@ import java.util.UUID;
 class ResourceFetcher {
     private static final Logger logger = LoggerFactory.getLogger(ResourceFetcher.class);
     private BlueButtonClient blueButtonClient;
-    private RetryConfig retryConfig;
     private UUID jobID;
     private UUID batchID;
     private ResourceType resourceType;
@@ -45,9 +41,6 @@ class ResourceFetcher {
                            ResourceType resourceType,
                     OperationsConfig config) {
         this.blueButtonClient = blueButtonClient;
-        this.retryConfig = RetryConfig.custom()
-                .maxAttempts(config.getRetryCount())
-                .build();
         this.jobID = jobID;
         this.batchID = batchID;
         this.resourceType = resourceType;
@@ -55,13 +48,12 @@ class ResourceFetcher {
 
     /**
      * Fetch all the resources for a specific patient. If errors are encountered from BlueButton,
-     * a OperationalOutcome resource is used.
+     * a OperationOutcome resource is used.
      *
      * @param mbi to use
      * @return a flow with all the resources for specific patient
      */
     Flowable<Resource> fetchResources(String mbi) {
-        Retry retry = Retry.of("bb-resource-fetcher", this.retryConfig);
         return Flowable.fromCallable(() -> {
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
@@ -73,7 +65,6 @@ class ResourceFetcher {
                 return List.of(firstFetched);
             }
         })
-                .compose(RetryTransformer.of(retry))
                 .onErrorResumeNext((Throwable error) -> handleError(mbi, error))
                 .flatMap(Flowable::fromIterable);
     }
@@ -113,8 +104,8 @@ class ResourceFetcher {
             return Flowable.error(error);
         }
 
-        // Other errors should be turned into OperationalOutcome and just recorded.
-        logger.error("Turning error into OperationalOutcome. Error is: ", error);
+        // Other errors should be turned into OperationOutcome and just recorded.
+        logger.error("Turning error into OperationOutcome. Error is: " + error);
         final var operationOutcome = formOperationOutcome(mbi, error);
         return Flowable.just(List.of(operationOutcome));
     }
@@ -146,14 +137,16 @@ class ResourceFetcher {
         try {
             patients = blueButtonClient.requestPatientFromServerByMbi(mbi);
         } catch (GeneralSecurityException e) {
-            throw new JobQueueFailure(jobID, batchID, "Failed to retrieve Patient");
+            logger.error("Job {}, batch {}: Failed to retrieve Patient", jobID, batchID, e);
+            throw new ResourceNotFoundException("Failed to retrieve Patient");
         }
 
         if (patients.getTotal() == 1) {
             return (Patient) patients.getEntryFirstRep().getResource();
         }
 
-        throw new JobQueueFailure(jobID, batchID, String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
+        logger.error("Job {}, batch {}: Expected 1 Patient to match MBI but found {}", jobID, batchID, patients.getTotal());
+        throw new ResourceNotFoundException(String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
     }
 
     private String getBeneIdFromPatient(Patient patient) {
@@ -161,7 +154,10 @@ class ResourceFetcher {
                 .filter(id -> DPCIdentifierSystem.BENE_ID.getSystem().equals(id.getSystem()))
                 .findFirst()
                 .map(Identifier::getValue)
-                .orElseThrow(() -> new JobQueueFailure(jobID, batchID, "No bene_id found in Patient resource"));
+                .orElseThrow(() -> {
+                    logger.error("Job {}, batch {}: No bene_id found in Patient resource", jobID, batchID);
+                    return new ResourceNotFoundException("No bene_id found in Patient resource");
+                });
     }
 
     /**
@@ -174,7 +170,7 @@ class ResourceFetcher {
         bundle.getEntry().forEach((entry) -> {
             final var resource = entry.getResource();
             if (resource.getResourceType() != resourceType) {
-                throw new DataFormatException(String.format("Unexepected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
+                throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
             }
             resources.add(resource);
         });
@@ -183,7 +179,7 @@ class ResourceFetcher {
     /**
      * Create a {@link OperationOutcome} resource from an exception with a patient
      *
-     * @param ex - the exception to turn into a Operational Outcome
+     * @param ex - the exception to turn into a Operation Outcome
      * @return an operation outcome
      */
     private OperationOutcome formOperationOutcome(String patientID, Throwable ex) {

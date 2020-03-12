@@ -364,9 +364,9 @@ class AggregationEngineTest {
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
         Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture());
         var values = idCaptor.getAllValues();
-        assertEquals(6,
+        assertEquals(2,
                 values.stream().filter(value -> value.equals("-1")).count(),
-                "Should be 6 invalid ids, 3 retries per method x 2 method calls x 1 bad-id");
+                "Should be 2 invalid ids, 2 method calls x 1 bad-id");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
@@ -376,6 +376,34 @@ class AggregationEngineTest {
                 () -> assertEquals(3, actual.getJobQueueBatchFiles().size(), "expected 3 (= 2 output + 1 error)"),
                 () -> assertEquals(2, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 2 for the one bad patient (eob + patient)"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+    }
+
+    @Test
+    void multiplePatientsMatchTest() throws GeneralSecurityException {
+        final List<String> mbis = Arrays.asList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
+
+        final var orgID = UUID.randomUUID();
+
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                mbis,
+                List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient)
+        );
+
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent()),
+                () -> assertEquals(JobStatus.COMPLETED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
+
+        assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
+        final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
+        var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
+        assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
+                () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "Should include one file (error)"),
+                () -> assertEquals(2, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "Should include two OperationOutcomes for the one bad Patient ID (EOB and Patient)"),
+                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "Error file should exist"));
     }
 
     @Test
@@ -414,7 +442,7 @@ class AggregationEngineTest {
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
-        assertEquals(3, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called 3 times to get the patient, but with errors instead");
+        assertEquals(1, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called once to get the patient, but with errors instead");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
