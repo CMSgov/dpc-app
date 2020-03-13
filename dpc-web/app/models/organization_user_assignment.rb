@@ -12,6 +12,9 @@ class OrganizationUserAssignment < ApplicationRecord
   def send_organization_sandbox_email
     return unless organization.sandbox_enabled?
 
-    UserMailer.with(user: user, organization: organization).organization_sandbox_email.deliver_later
+    UserMailer
+      .with(user: user, vendor: organization.health_it_vendor?)
+      .organization_sandbox_email
+      .deliver_later
   end
 end

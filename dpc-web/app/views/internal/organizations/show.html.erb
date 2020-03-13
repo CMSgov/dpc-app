@@ -46,23 +46,31 @@
         </svg>
         <%= @organization.organization_type.titleize %>
       </div>
-      <div class="ds-u-margin-bottom--1">
-        <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#users"></use>
-        </svg>
-        <%= @organization.num_providers %> providers
-      </div>
 
-      <div class="ds-u-margin-bottom--1">
-        <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
-        <%= @organization.npi %>
-      </div>
+      <% if @organization.health_it_vendor? %>
+        <br>
+        <div class="ds-u-margin-bottom--1">
+          <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor ID (System-generated):</label>
+          <div class="ds-u-color--muted"><%= @organization.vendor_id %></div>
+        </div>
+      <% else %>
+        <div class="ds-u-margin-bottom--1">
+          <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <use xlink:href="/assets/solid.svg#users"></use>
+          </svg>
+          <%= @organization.num_providers %> providers
+        </div>
 
-      <div class="ds-u-margin-bottom--1">
-        <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
-        <%= @organization.vendor %>
-      </div>
+        <div class="ds-u-margin-bottom--1">
+          <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
+          <%= @organization.npi %>
+        </div>
 
+        <div class="ds-u-margin-bottom--1">
+          <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
+          <%= @organization.vendor %>
+        </div>
+      <% end %>
     </div>
 
     <div class="box__content">
@@ -188,6 +196,6 @@
 
 <section class="ds-u-margin--2">
   <div class="ds-l-row ds-u-justify-content--center">
-    <%= link_to "Delete provider organization", internal_organization_url(@organization), method: :delete, class: "ds-u-color--error ds-u-text-align--center" %>
+    <%= link_to "Delete organization", internal_organization_url(@organization), method: :delete, class: "ds-u-color--error ds-u-text-align--center" %>
   </div>
 </section>
