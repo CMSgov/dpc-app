@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -28,6 +29,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -481,6 +485,31 @@ class AggregationEngineTest {
         // Test with FhirSpecificError
         testWithThrowable(BaseServerResponseException.newInstance(500, "Sorry, can't do it"));
 
+    }
+
+    @Test
+    public void testUnhealthyIfProcessJobBatchThrowsException() throws InterruptedException {
+        // This should never happen but if it does then this test is checking to make sure the look gets broken out
+        // and goes into the #onError callback to set the queue to not running
+        Mockito.doThrow(new RuntimeException("Error")).when(engine).processJobBatch(Mockito.any(JobQueueBatch.class));
+
+        final var orgID = UUID.randomUUID();
+
+        queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                Collections.singletonList("1"),
+                Collections.singletonList(ResourceType.Patient)
+        );
+
+        AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
+        Assert.assertTrue(healthCheck.check().isHealthy());
+
+        ExecutorService executor = Executors.newCachedThreadPool();
+        executor.execute(engine);
+        executor.awaitTermination(2, TimeUnit.SECONDS);
+
+        Assert.assertFalse(healthCheck.check().isHealthy());
     }
 
     private void testWithThrowable(Throwable throwable) throws GeneralSecurityException {
