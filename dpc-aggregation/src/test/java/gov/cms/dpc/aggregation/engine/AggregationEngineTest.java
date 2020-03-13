@@ -135,6 +135,44 @@ class AggregationEngineTest {
     }
 
     /**
+     * Verify that an exception in the processJobBatch method doesn't kill polling the queue
+     */
+    @Test
+    void processJobBatchException() throws InterruptedException {
+        final var orgID = UUID.randomUUID();
+
+        doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doReturn(Optional.empty())
+                .doAnswer(invocationOnMock -> {
+                    engine.stop();
+                    return Optional.empty();
+                })
+                .when(queue)
+                .claimBatch(any(UUID.class));
+
+        // Throw a failure on the third poll, then be successful
+        JobQueueFailure ex = new JobQueueFailure("Any failure");
+        doNothing()
+                .doNothing()
+                .doThrow(ex)
+                .doNothing()
+                .doNothing()
+                .when(engine)
+                .processJobBatch(any(JobQueueBatch.class));
+
+        engine.pollQueue();
+
+        // Wait for the queue to finish processing before finishing the test
+        while ( engine.isRunning() ) {
+            Thread.sleep(100);
+        }
+
+        verify(queue, Mockito.times(5)).claimBatch(any(UUID.class));
+    }
+
+    /**
      * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
@@ -333,6 +371,35 @@ class AggregationEngineTest {
         // Look at the result
         assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent(), "Unable to retrieve job from queue."),
                 () -> assertEquals(JobStatus.FAILED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
+    }
+
+    /**
+     * Test if the engine can handle a job with bad parameters, and then fail marking the batch as failed
+     */
+    @Test
+    void badJobTestWithFailBatchException() {
+        final var orgID = UUID.randomUUID();
+
+        // Job with a unsupported resource type
+        final var jobID = queue.createJob(
+                orgID,
+                TEST_PROVIDER_ID,
+                new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
+                Collections.singletonList(ResourceType.Schedule)
+        );
+
+        // Throw an exception when failing the batch
+        Exception e = new RuntimeException("Failed to mark batch as failed");
+        doThrow(e).when(queue).failBatch(any(JobQueueBatch.class), eq(aggregatorID));
+
+        // Work the batch
+        queue.claimBatch(engine.getAggregatorID())
+                .ifPresent(engine::processJobBatch);
+
+        // Look at the result
+        // Job will be left in a running state, but that's okay, as the stuck batch logic will take over and retry the job in 5 minutes
+        assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent(), "Unable to retrieve job from queue."),
+                () -> assertEquals(JobStatus.RUNNING, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
     }
 
     /**

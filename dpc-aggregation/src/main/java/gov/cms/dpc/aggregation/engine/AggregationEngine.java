@@ -186,8 +186,12 @@ public class AggregationEngine implements Runnable {
                 this.queue.pauseBatch(job, aggregatorID);
             }
         } catch (Exception error) {
-            logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
-            this.queue.failBatch(job, aggregatorID);
+            try {
+                logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
+                this.queue.failBatch(job, aggregatorID);
+            } catch (Exception failedBatchException) {
+                logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
+            }
         }
     }
 
@@ -309,6 +313,8 @@ public class AggregationEngine implements Runnable {
      * @param e is the exception thrown
      */
     private static void errorHandler(Throwable e) {
+        logger.error("Caught exception during RxJava processing flow: ", e);
+
         // Undeliverable Exceptions may happen because of parallel execution. One thread will
         // throw an exception which will cause the job to fail and (close its consumer).
         // Another thread will throw an exception as well which will be undeliverable
