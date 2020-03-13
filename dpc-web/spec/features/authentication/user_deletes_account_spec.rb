@@ -25,15 +25,15 @@ RSpec.feature 'user deletes account' do
 
       find('[data-test="delete-user-account"]').click
 
-      expect(page.body).to include('Your email or password is incorrect')
+      expect(page.body).to include('Current password is invalid')
     end
 
     scenario 'user inputs no password' do
-      fill_in 'user_password_to_delete', with: nil
+      fill_in 'user_password_to_delete', with: ''
 
       find('[data-test="delete-user-account"]').click
 
-      expect(page.body).to include('Your email or password is incorrect')
+      expect(page.body).to include('1 error prohibited this user from being saved')
     end
   end
 end
