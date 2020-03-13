@@ -54,7 +54,12 @@ public class AggregationEngine implements Runnable {
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
-    protected AtomicBoolean queueRunning = new AtomicBoolean(false);
+
+    /**
+     * The initial value is set to true so when the aggregation instance starts up,
+     * it's not in an unhealthy state (determined by the AggregationEngineHealthCheck)
+     */
+    protected AtomicBoolean queueRunning = new AtomicBoolean(true);
 
     /**
      * Create an engine.
@@ -123,15 +128,19 @@ public class AggregationEngine implements Runnable {
                 .map(Optional::get)
                 .subscribe(
                         this::processJobBatch,
-                        error -> {
-                            logger.error("Error processing queue. Exiting...", error);
-                            queueRunning.set(false);
-                        },
-                        () -> {
-                            logger.info("Finished processing queue. Exiting...");
-                            queueRunning.set(false);
-                        }
+                        this::onError,
+                        this::onCompleted
                 );
+    }
+
+    protected void onError(Throwable error) {
+        logger.error("Error processing queue. Exiting...", error);
+        queueRunning.set(false);
+    }
+
+    protected void onCompleted() {
+        logger.info("Finished processing queue. Exiting...");
+        queueRunning.set(false);
     }
 
     /**
@@ -333,7 +342,7 @@ public class AggregationEngine implements Runnable {
         logger.warn("Undeliverable exception received: ", e);
     }
 
-    protected UUID getAggregatorID() {
+    public UUID getAggregatorID() {
         return aggregatorID;
     }
 
