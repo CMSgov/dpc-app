@@ -2,20 +2,24 @@
 
 <div class="ds-l-row--12">
 
-
   <% @user.organizations.each do |organization| %>
-
     <div class="dashboard-section-header">
-      <div>
-        <h2 class="dashboard-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
+      <h2 class="dashboard-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
+
+      <% if organization.health_it_vendor? %>
         <div>
-        <strong>NPI:</strong> <%= npi_text(organization) %> | <strong>Vendor(s):</strong> <%= vendor_text(organization) %>
+          <label class="ds-u-color--muted">Vendor ID (System-generated):</label>
+          <div class="ds-u-color--muted"><%= organization.vendor_id %></div>
         </div>
-      </div>
-      <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
+      <% else %>
+        <div>
+          <div>
+          <strong>NPI:</strong> <%= npi_text(organization) %> | <strong>Vendor(s):</strong> <%= vendor_text(organization) %>
+          </div>
+        </div>
+        <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
+      <%end %>
     </div>
-
-
 
     <% if organization.api_credentialable? %>
       <section class="box">
@@ -112,7 +116,11 @@
           <h3 class="box__heading"><%= organization.name %> is almost ready!</h3>
         </div>
         <p class="ds-text--lead ds-u-measure--wide">
-         Before this organization can add credentials for sandbox testing, you need to designate an organizational NPI and vendor by <%= link_to "editing the organization", edit_organization_url(organization) %>.
+        <% if organization.health_it_vendor? %>
+          Before this organization can add credentials for sandbox testing, a CMS admin must enable sandbox access.
+        <% else %>
+          Before this organization can add credentials for sandbox testing, you need to designate an organizational NPI and vendor by <%= link_to "editing the organization", edit_organization_url(organization) %>.
+        <% end %>
         </p>
       </div>
     </section>
@@ -120,4 +128,3 @@
 
   <% end %>
 </div>
-
