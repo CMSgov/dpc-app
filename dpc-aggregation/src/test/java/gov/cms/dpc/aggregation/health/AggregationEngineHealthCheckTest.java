@@ -79,7 +79,7 @@ public class AggregationEngineHealthCheckTest {
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
-        executor.awaitTermination(5, TimeUnit.SECONDS);
+        executor.awaitTermination(2, TimeUnit.SECONDS);
 
         Assert.assertTrue(healthCheck.check().isHealthy());
 
@@ -104,7 +104,7 @@ public class AggregationEngineHealthCheckTest {
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
-        executor.awaitTermination(5, TimeUnit.SECONDS);
+        executor.awaitTermination(2, TimeUnit.SECONDS);
 
         Assert.assertTrue(healthCheck.check().isHealthy());
 
@@ -129,7 +129,7 @@ public class AggregationEngineHealthCheckTest {
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
-        executor.awaitTermination(5, TimeUnit.SECONDS);
+        executor.awaitTermination(2, TimeUnit.SECONDS);
 
         Assert.assertTrue(healthCheck.check().isHealthy());
 
@@ -153,7 +153,7 @@ public class AggregationEngineHealthCheckTest {
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
-        executor.awaitTermination(5, TimeUnit.SECONDS);
+        executor.awaitTermination(2, TimeUnit.SECONDS);
 
         Assert.assertTrue(healthCheck.check().isHealthy());
     }

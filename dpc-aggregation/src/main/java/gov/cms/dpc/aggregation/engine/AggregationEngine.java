@@ -54,6 +54,11 @@ public class AggregationEngine implements Runnable {
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
+
+    /**
+     * The initial value is set to true so when the aggregation instance starts up,
+     * it's not in an unhealthy state (determined by the AggregationEngineHealthCheck)
+     */
     protected AtomicBoolean queueRunning = new AtomicBoolean(true);
 
     /**
