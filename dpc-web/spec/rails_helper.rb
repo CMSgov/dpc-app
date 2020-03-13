@@ -15,6 +15,7 @@ require 'capybara/rails'
 require 'capybara/rspec'
 require 'support/chromedriver'
 require 'support/api_client_support'
+require 'support/oauth_support'
 require 'webmock/rspec'
 
 # Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
