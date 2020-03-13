@@ -3,17 +3,24 @@
 require 'rails_helper'
 
 RSpec.feature 'internal user signs in' do
-  around do |example|
-    OmniAuth.config.test_mode = true
-
-    ClimateControl.modify GITHUB_ORG_TEAM_ID: '111222333' do
-      example.run
-    end
-
-    OmniAuth.config.mock_auth[:github] = nil
-  end
+  include OauthSupport
 
   context 'with github oauth' do
+    around do |example|
+      OmniAuth.config.test_mode = true
+
+      ClimateControl.modify GITHUB_ORG_TEAM_ID: '111222333', INTERNAL_AUTH_PROVIDER: 'github' do
+        example.run
+      end
+
+      OmniAuth.config.mock_auth[:github] = nil
+    end
+
+    before(:each) do
+      stub_const('InternalUser::GITHUB_AUTH_ENABLED', true)
+      stub_const('InternalUser::OKTA_AUTH_ENABLED', false)
+    end
+
     context 'when user has valid github org and team' do
       before(:each) do
         github_client = double(Octokit::Client)
@@ -160,6 +167,74 @@ RSpec.feature 'internal user signs in' do
       context 'when github auth fails' do
         scenario 'user gets redirected to sign-in page' do
           OmniAuth.config.mock_auth[:github] = :invalid_credentials
+
+          visit new_internal_user_session_path
+
+          find('[data-test="internal-user-sign-in-form"]').click
+          expect(page).to have_css('[data-test="internal-user-sign-in-form"]')
+          expect(page).not_to have_css('[data-test="internal-user-signout"]')
+        end
+      end
+    end
+  end
+
+
+  context 'with Okta Oauth' do
+    around do |example|
+      OmniAuth.config.test_mode = true
+
+      ClimateControl.modify INTERNAL_AUTH_PROVIDER: 'oktaoauth', OKTA_ADMIN_ROLE: 'DPC_AppRole_Admin' do
+        example.run
+      end
+
+      OmniAuth.config.mock_auth[:oktaoauth] = nil
+    end
+
+    before(:each) do
+      stub_const('InternalUser::OKTA_AUTH_ENABLED', true)
+      stub_const('InternalUser::GITHUB_AUTH_ENABLED', false)
+    end
+
+    context 'successful auth' do
+      scenario 'creates new internal user' do
+        mock_oktaoauth(email: 'nemo@example.com')
+
+        visit new_internal_user_session_path
+        find('[data-test="internal-user-sign-in-form"]').click
+
+        expect(page).to have_css('[data-test="internal-user-signout"]')
+        expect(page).to have_content('nemo@example.com')
+      end
+
+      scenario 'logs in returning internal user' do
+        mock_oktaoauth(uid: '00u2ysph7s90zebsv333', name: 'Found Nemo')
+        internal_user = create(:internal_user, provider: 'oktaoauth', uid: '00u2ysph7s90zebsv333', name: 'Found Nemo')
+
+        visit new_internal_user_session_path
+        find('[data-test="internal-user-sign-in-form"]').click
+
+        expect(page).to have_css('[data-test="internal-user-signout"]')
+        expect(page).to have_content(internal_user.email)
+      end
+    end
+
+    context 'failed auth' do
+      context 'insufficient privileges' do
+        scenario 'user sees error and is not signed in' do
+          mock_oktaoauth(roles: ['BadRole'])
+
+          visit new_internal_user_session_path
+          find('[data-test="internal-user-sign-in-form"]').click
+
+          expect(page).to have_content('Must have admin role')
+          expect(page).to have_css('[data-test="internal-user-sign-in-form"]')
+          expect(page).not_to have_css('[data-test="internal-user-signout"]')
+        end
+      end
+
+      context 'oauth failure' do
+        scenario 'user gets redirected to sign-in page' do
+          OmniAuth.config.mock_auth[:oktaoauth] = :invalid_credentials
 
           visit new_internal_user_session_path
 

@@ -5,9 +5,11 @@
     <div class="card card--border-top card--shadow">
       <h1 class="ds-u-margin-top--0">Log in</h1>
       <p>
-        <% if ENV.fetch('INTERNAL_AUTH_PROVIDER') == 'okta' %>
+        <% if InternalUser::OKTA_AUTH_ENABLED %>
           <%= link_to "Sign in with Okta", internal_user_oktaoauth_omniauth_authorize_path, method: :post, data: { test: 'internal-user-sign-in-form' } %>
-        <% else %>
+        <% end %>
+
+        <% if InternalUser::GITHUB_AUTH_ENABLED %>
           <%= link_to "Sign in with Github", internal_user_github_omniauth_authorize_path, method: :post, data: { test: 'internal-user-sign-in-form' } %>
         <% end %>
       </p>
