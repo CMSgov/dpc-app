@@ -5,14 +5,15 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -24,8 +25,29 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PractitionerResourceTest extends AbstractAttributionTest {
 
+    final IGenericClient client;
+    final List<Practitioner> practitionersToCleanUp;
+
     private PractitionerResourceTest() {
-        // Not used
+        client = createFHIRClient(ctx, getServerURL());
+        practitionersToCleanUp = new ArrayList<>();
+    }
+
+    @AfterEach
+    public void cleanup() {
+        practitionersToCleanUp.forEach(practitioner -> {
+            try {
+                client
+                        .delete()
+                        .resourceById("Practitioner", practitioner.getIdElement().getIdPart())
+                        .encodedJson()
+                        .execute();
+            } catch (Exception e) {
+                //ignore
+            }
+
+        });
+        practitionersToCleanUp.clear();
     }
 
     @Test
@@ -33,7 +55,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-1");
 
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
         final ICreateTyped creation = client
                 .create()
                 .resource(practitioner)
@@ -42,7 +63,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .execute();
 
         final Practitioner pract2 = (Practitioner) mo.getResource();
-
+        practitionersToCleanUp.add(pract2);
         // Verify that it has the correct profile
         // Find the correct profile
         final boolean foundProfile = pract2
@@ -99,7 +120,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testPractitionerSearch() {
 
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-1");
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         final MethodOutcome outcome = client
                 .create()
@@ -108,6 +128,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .execute();
 
         final Practitioner pract2 = (Practitioner) outcome.getResource();
+        practitionersToCleanUp.add(pract2);
 
 
         // Try to fetch all the patients
@@ -140,7 +161,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerUpdate() {
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         final MethodOutcome outcome = client
                 .create()
@@ -149,6 +169,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .execute();
 
         final Practitioner pract2 = (Practitioner) outcome.getResource();
+        practitionersToCleanUp.add(pract2);
 
         // Get the updated time
         final Date createdAt = pract2.getMeta().getLastUpdated();
@@ -188,7 +209,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerRemoval() {
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         final MethodOutcome outcome = client
                 .create()
@@ -197,6 +217,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
                 .execute();
 
         final Practitioner pract2 = (Practitioner) outcome.getResource();
+        practitionersToCleanUp.add(pract2);
 
         // Add an attribution Group
         final Group group = createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -225,4 +246,27 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertThrows(ResourceNotFoundException.class, getRequest::execute, "Should not have resource");
     }
 
+    @Test
+    void testPractitionerSubmitWhenPastLimit() {
+
+        //Currently 4 providers are created in the seed for the test
+        APPLICATION.getConfiguration().setProviderLimit(5);
+
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
+
+        final ICreateTyped creation = client
+                .create()
+                .resource(practitioner)
+                .encodedJson();
+        final MethodOutcome mo = creation
+                .execute();
+
+        final Practitioner pract2 = (Practitioner) mo.getResource();
+        practitionersToCleanUp.add(pract2);
+
+        assertNotNull(pract2, "Should be created");
+
+        // Try again, should fail
+        assertThrows(UnprocessableEntityException.class, creation::execute, "Should not modify");
+    }
 }
