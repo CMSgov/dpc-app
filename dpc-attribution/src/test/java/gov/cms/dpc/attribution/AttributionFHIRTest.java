@@ -392,7 +392,7 @@ class AttributionFHIRTest {
 
     private static ICriterion<TokenClientParam> buildCharacteristicSearch(String providerID) {
         return Group.CHARACTERISTIC_VALUE
-                .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
+                .withLeft(Group.CHARACTERISTIC.exactly().code("attributed-to"))
                 .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), providerID));
     }
 }

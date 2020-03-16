@@ -131,7 +131,7 @@ public class FHIRExtractors {
     public static Pair<String, String> parseTag(String tag) {
         final int idx = tag.indexOf('|');
         if (idx < 0) {
-            throw new IllegalArgumentException(String.format("Malformed tag: %s", tag));
+            return Pair.of("", tag);
         }
 
         return Pair.of(tag.substring(0, idx), tag.substring(idx + 1));

@@ -1356,7 +1356,7 @@ Creating attribution groups is covered in an earlier [section](#attributing-pati
 >Searching for rosters associated to a given provider makes use of [composite search parameters](https://www.hl7.org/fhir/search.html#combining). 
 
 ~~~ sh
-GET /api/v1/Group?characteristic-value=|attributed-to$|{provider NPI}
+GET /api/v1/Group?characteristic-value=attributed-to${provider NPI}
 ~~~
 
 **cURL command**
