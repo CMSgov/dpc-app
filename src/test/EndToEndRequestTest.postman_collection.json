@@ -561,7 +561,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group?characteristic-value=|attributed-to$|3116145044854423862",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group?characteristic-value=attributed-to$3116145044854423862",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -574,7 +574,7 @@
 							"query": [
 								{
 									"key": "characteristic-value",
-									"value": "|attributed-to$|3116145044854423862"
+									"value": "attributed-to$3116145044854423862"
 								}
 							]
 						},
@@ -1594,7 +1594,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group?characteristic-value=|attributed-to$|3116145044854423862",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group?characteristic-value=attributed-to$3116145044854423862",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -1607,7 +1607,7 @@
 							"query": [
 								{
 									"key": "characteristic-value",
-									"value": "|attributed-to$|3116145044854423862"
+									"value": "attributed-to$3116145044854423862"
 								}
 							]
 						},
