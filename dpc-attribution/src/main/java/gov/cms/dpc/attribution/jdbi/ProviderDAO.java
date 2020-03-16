@@ -49,25 +49,7 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> {
 
         query.select(root);
 
-        List<Predicate> predicates = new ArrayList<>();
-        // Always restrict by Organization
-        predicates.add(builder
-                .equal(root.join(ProviderEntity_.organization).get(OrganizationEntity_.id),
-                        organizationID));
-
-        // If we're provided a resource ID, query for that
-        if (providerID != null) {
-            predicates.add(builder
-                    .equal(root.get(ProviderEntity_.id), providerID));
-        }
-
-        // If we've provided an NPI, use it as a query restriction.
-        // Otherwise, return everything
-        if (providerNPI != null && !providerNPI.isEmpty()) {
-            predicates.add(builder
-                    .equal(root.get(ProviderEntity_.providerNPI),
-                            providerNPI));
-        }
+        List<Predicate> predicates = whereSelectorForProviders(builder, root, providerID, providerNPI, organizationID);
 
         query.where(predicates.toArray(new Predicate[0]));
         return this.list(query);
@@ -90,5 +72,54 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> {
 
         currentSession().merge(fullyUpdated);
         return fullyUpdated;
+    }
+
+    /**
+     * Get a count for providers, matching the getProviders interface
+     * Organization ID is ALWAYS required. NPI or Resource ID are optional
+     *
+     * @param providerID     - {@link UUID} direct provider Resource ID
+     * @param providerNPI    - {@link String} Provider NPI
+     * @param organizationID - {@link UUID} REQUIRED organization resource ID
+     * @return - {@link Long} of count of providers
+     */
+    public Long getProvidersCount(UUID providerID, String providerNPI, UUID organizationID) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        final Root<ProviderEntity> root = query.from(ProviderEntity.class);
+
+        query.select(builder.count(root));
+
+        List<Predicate> predicates = whereSelectorForProviders(builder, root, providerID, providerNPI, organizationID);
+
+        query.where(predicates.toArray(new Predicate[0]));
+        return currentSession().createQuery(query).getSingleResult();
+    }
+
+    private List<Predicate> whereSelectorForProviders(CriteriaBuilder builder,
+                                                      Root<ProviderEntity> root,
+                                                      UUID providerID,
+                                                      String providerNPI,
+                                                      UUID organizationID) {
+        List<Predicate> predicates = new ArrayList<>();
+        // Always restrict by Organization
+        predicates.add(builder
+                .equal(root.join(ProviderEntity_.organization).get(OrganizationEntity_.id),
+                        organizationID));
+
+        // If we're provided a resource ID, query for that
+        if (providerID != null) {
+            predicates.add(builder
+                    .equal(root.get(ProviderEntity_.id), providerID));
+        }
+
+        // If we've provided an NPI, use it as a query restriction.
+        // Otherwise, return everything
+        if (providerNPI != null && !providerNPI.isEmpty()) {
+            predicates.add(builder
+                    .equal(root.get(ProviderEntity_.providerNPI),
+                            providerNPI));
+        }
+        return predicates;
     }
 }

@@ -43,6 +43,8 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @JsonProperty("swagger")
     private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
+    private Integer providerLimit;
+
     @Override
     public DataSourceFactory getDatabase() {
         return database;
@@ -92,5 +94,13 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
         this.swaggerBundleConfiguration = swaggerBundleConfiguration;
+    }
+
+    public Integer getProviderLimit() {
+        return providerLimit;
+    }
+
+    public void setProviderLimit(Integer providerLimit) {
+        this.providerLimit = providerLimit;
     }
 }
