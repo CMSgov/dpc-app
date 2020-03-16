@@ -261,24 +261,24 @@ Devise.setup do |config|
   # up on your models and hooks.
 
   config.omniauth(:oktaoauth,
-    ENV.fetch('OKTA_CLIENT_ID'),
-    ENV.fetch('OKTA_CLIENT_SECRET'),
+    ENV.fetch('OKTA_CLIENT_ID', ''),
+    ENV.fetch('OKTA_CLIENT_SECRET', ''),
     scope: 'openid profile email',
     fields: ['profile', 'email'],
     client_options: {
-      site: ENV.fetch('OKTA_ISSUER'),
-      authorize_url: ENV.fetch('OKTA_ISSUER') + '/v1/authorize',
-      token_url: ENV.fetch('OKTA_ISSUER') + '/v1/token'
+      site: ENV.fetch('OKTA_ISSUER', ''),
+      authorize_url: ENV.fetch('OKTA_ISSUER', '') + '/v1/authorize',
+      token_url: ENV.fetch('OKTA_ISSUER', '') + '/v1/token'
     },
-    redirect_uri: ENV.fetch('OKTA_REDIRECT_URI'),
-    auth_server_id: ENV.fetch('OKTA_AUTH_SERVER_ID'),
-    issuer: ENV.fetch('OKTA_ISSUER'),
+    redirect_uri: ENV.fetch('OKTA_REDIRECT_URI', ''),
+    auth_server_id: ENV.fetch('OKTA_AUTH_SERVER_ID', ''),
+    issuer: ENV.fetch('OKTA_ISSUER', ''),
     strategy_class: OmniAuth::Strategies::Oktaoauth
   )
 
   config.omniauth(:github,
-    ENV.fetch('GITHUB_APP_ID'),
-    ENV.fetch('GITHUB_APP_SECRET'),
+    ENV.fetch('GITHUB_APP_ID', ''),
+    ENV.fetch('GITHUB_APP_SECRET', ''),
     scope: 'read:user, user:email, read:org'
   )
     # ==> Warden configuration
