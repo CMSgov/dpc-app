@@ -35,6 +35,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
             TEST_PATIENT_MBIS.get(1), "8930cab29ba5fe4311a5f5bcfd5b7384f3722b711402aacf796d2ae6fea54242"
     );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
+    public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
 
     private final IParser parser;
 
@@ -50,10 +51,18 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     @Override
     public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException {
-        Patient p = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.get(mbi));
         Bundle b = new Bundle();
-        b.setTotal(1);
-        b.addEntry().setResource(p);
+        if (MULTIPLE_RESULTS_MBI.equals(mbi)) {
+            b.setTotal(2);
+            b.addEntry().setResource(new Patient());
+            b.addEntry().setResource(new Patient());
+        } else if (MBI_BENE_ID_MAP.containsKey(mbi)) {
+            Patient p = loadOne(Patient.class, SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.get(mbi));
+            b.setTotal(1);
+            b.addEntry().setResource(p);
+        } else {
+            formNoPatientException(mbi);
+        }
         return b;
     }
 

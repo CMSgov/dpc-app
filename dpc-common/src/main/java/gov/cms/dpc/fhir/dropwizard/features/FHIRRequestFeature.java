@@ -22,10 +22,11 @@ public class FHIRRequestFeature implements DynamicFeature {
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
         if (resourceInfo.getResourceMethod().getAnnotation(FHIR.class) != null || resourceInfo.getResourceClass().getAnnotation(FHIR.class) != null) {
-            context.register(FHIRRequestFilter.class);;
+            context.register(FHIRRequestFilter.class);
+            return;
         }
         if (resourceInfo.getResourceMethod().getAnnotation(FHIRAsync.class) != null || resourceInfo.getResourceClass().getAnnotation(FHIRAsync.class) != null) {
-            context.register(FHIRAsyncRequestFilter.class);;
+            context.register(FHIRAsyncRequestFilter.class);
         }
     }
 }

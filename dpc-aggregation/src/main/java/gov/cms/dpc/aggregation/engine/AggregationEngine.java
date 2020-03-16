@@ -54,7 +54,12 @@ public class AggregationEngine implements Runnable {
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
-    private AtomicBoolean queueRunning = new AtomicBoolean(false);
+
+    /**
+     * The initial value is set to true so when the aggregation instance starts up,
+     * it's not in an unhealthy state (determined by the AggregationEngineHealthCheck)
+     */
+    protected AtomicBoolean queueRunning = new AtomicBoolean(true);
 
     /**
      * Create an engine.
@@ -90,6 +95,7 @@ public class AggregationEngine implements Runnable {
                 operationsConfig.getExportPath(),
                 operationsConfig.getResourcesPerFileCount());
         setGlobalErrorHandler();
+        queueRunning.set(true);
         this.pollQueue();
     }
 
@@ -98,8 +104,8 @@ public class AggregationEngine implements Runnable {
      */
     public void stop() {
         logger.info("Shutting down aggregation engine");
-        this.subscribe.dispose();
         queueRunning.set(false);
+        this.subscribe.dispose();
     }
 
     public Boolean isRunning() {
@@ -110,21 +116,42 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine.
      */
     protected void pollQueue() {
-        queueRunning.set(true);
-        subscribe = Observable.fromCallable(() -> this.queue.claimBatch(aggregatorID))
-                .doOnNext(job -> logger.trace("Polling queue for job"))
-                .doOnError(error -> logger.error("Unable to complete job.", error))
-                .onErrorResumeNext(Observable.empty()) // Keep the queue running on error
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        this.subscribe = this.createQueueObserver()
                 .repeatWhen(completed -> {
-                    logger.debug(String.format("No job, polling again in %d milliseconds", operationsConfig.getPollingFrequency()));
+                    logger.debug(String.format("Configuring queue to poll every %d milliseconds", operationsConfig.getPollingFrequency()));
                     return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
                 })
-                .subscribe(this::processJobBatch, error -> {
-                    logger.error("Fatal error processing the queue! Queue processing is stopping!", error);
-                    queueRunning.set(false);
-                });
+                .doOnEach(item -> logger.trace("Processing item: " + item.toString()))
+                .doOnError(error -> logger.error("Unable to complete job.", error))
+                .retry()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .subscribe(
+                        this::processJobBatch,
+                        this::onError,
+                        this::onCompleted
+                );
+    }
+
+    protected void onError(Throwable error) {
+        logger.error("Error processing queue. Exiting...", error);
+        queueRunning.set(false);
+    }
+
+    protected void onCompleted() {
+        logger.info("Finished processing queue. Exiting...");
+        queueRunning.set(false);
+    }
+
+    /**
+     * Creates an observer to monitor the queue
+     */
+    private Observable<Optional<JobQueueBatch>> createQueueObserver() {
+        // Create using fromCallable. This ensures that no events are omitted before a subscriber connects
+        return Observable.fromCallable(() -> {
+            logger.trace("Polling queue for job...");
+            return this.queue.claimBatch(this.aggregatorID);
+        });
     }
 
     /**
@@ -141,17 +168,15 @@ public class AggregationEngine implements Runnable {
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
 
             // Stop processing when no patients or early shutdown
-            boolean queueRunning = true;
             while (nextPatientID.isPresent()) {
                 this.processJobBatchPartial(job, nextPatientID.get());
 
                 // Check if the subscriber is still running before getting the next part of the batch
-                queueRunning = !this.subscribe.isDisposed();
-                nextPatientID = queueRunning ? job.fetchNextPatient(aggregatorID) : Optional.empty();
+                nextPatientID = this.isRunning() ? job.fetchNextPatient(aggregatorID) : Optional.empty();
             }
 
             // Finish processing the batch
-            if (queueRunning) {
+            if (this.isRunning()) {
                 logger.info("COMPLETED job {} batch {}", job.getJobID(), job.getBatchID());
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
@@ -161,8 +186,12 @@ public class AggregationEngine implements Runnable {
                 this.queue.pauseBatch(job, aggregatorID);
             }
         } catch (Exception error) {
-            logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
-            this.queue.failBatch(job, aggregatorID);
+            try {
+                logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
+                this.queue.failBatch(job, aggregatorID);
+            } catch (Exception failedBatchException) {
+                logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
+            }
         }
     }
 
@@ -284,6 +313,8 @@ public class AggregationEngine implements Runnable {
      * @param e is the exception thrown
      */
     private static void errorHandler(Throwable e) {
+        logger.error("Caught exception during RxJava processing flow: ", e);
+
         // Undeliverable Exceptions may happen because of parallel execution. One thread will
         // throw an exception which will cause the job to fail and (close its consumer).
         // Another thread will throw an exception as well which will be undeliverable
@@ -311,7 +342,7 @@ public class AggregationEngine implements Runnable {
         logger.warn("Undeliverable exception received: ", e);
     }
 
-    protected UUID getAggregatorID() {
+    public UUID getAggregatorID() {
         return aggregatorID;
     }
 

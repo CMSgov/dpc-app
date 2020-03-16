@@ -38,7 +38,11 @@ class Organization < ApplicationRecord
   end
 
   def api_credentialable?
-    registered_organizations.count.positive? && npi.present?
+    if health_it_vendor?
+      registered_organizations.count.positive?
+    else
+      registered_organizations.count.positive? && npi.present?
+    end
   end
 
   def assign_vendor_id

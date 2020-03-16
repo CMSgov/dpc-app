@@ -15,10 +15,12 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
 
     private final boolean inMemory;
     private final int batchSize;
+    private final UUID aggregatorID;
 
     public JobQueueModule() {
         this.inMemory = false;
         this.batchSize = 100;
+        this.aggregatorID = UUID.randomUUID();
     }
 
     @Override
@@ -48,6 +50,6 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
     @Provides
     @AggregatorID
     UUID provideAggregatorID() {
-        return UUID.randomUUID();
+        return aggregatorID;
     }
 }
