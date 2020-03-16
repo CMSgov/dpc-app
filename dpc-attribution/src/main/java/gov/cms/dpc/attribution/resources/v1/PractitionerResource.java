@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.entities.ProviderEntity;
@@ -32,11 +33,13 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     private final ProviderDAO dao;
     private final FHIREntityConverter converter;
+    private final Integer providerLimit;
 
     @Inject
-    PractitionerResource(FHIREntityConverter converter, ProviderDAO dao) {
+    PractitionerResource(FHIREntityConverter converter, ProviderDAO dao, DPCAttributionConfiguration dpcAttributionConfiguration) {
         this.dao = dao;
         this.converter = converter;
+        this.providerLimit = dpcAttributionConfiguration.getProviderLimit();
     }
 
     @GET
@@ -70,20 +73,28 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ApiOperation(value = "Register provider", notes = "FHIR endpoint to register a provider with the system." +
             "<p>Each provider must have a metadata Tag with the responsible Organization ID included." +
             "If not, we'll reject it." +
-            "<p> If a provider is already registered with the Organization, an errorr is thrown.")
+            "<p> If a provider is already registered with the Organization, an error is thrown." +
+            "<p> If an organization has already reached the provider limit, then an error is thrown")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "New resource was created"),
+            @ApiResponse(code = 422, message = "Unprocessable resource")
     })
     public Response submitProvider(Practitioner provider) {
 
         final ProviderEntity entity = this.converter.fromFHIR(ProviderEntity.class, provider);
-        final List<ProviderEntity> existingProviders = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
-        if (existingProviders.isEmpty()) {
+        final Long totalExistingProviders = this.dao.getProvidersCount(null, null, entity.getOrganization().getId());
+        final List<ProviderEntity> existingProvidersByNPI = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
+
+        if (providerLimit != null && totalExistingProviders >= providerLimit) {
+            return Response.status(422).entity(this.converter.toFHIR(Practitioner.class, existingProvidersByNPI.get(0))).build();
+        }
+
+        if (existingProvidersByNPI.isEmpty()) {
             final ProviderEntity persisted = this.dao.persistProvider(entity);
             return Response.status(Response.Status.CREATED).entity(this.converter.toFHIR(Practitioner.class, persisted)).build();
         }
 
-        return Response.ok().entity(this.converter.toFHIR(Practitioner.class, existingProviders.get(0))).build();
+        return Response.ok().entity(this.converter.toFHIR(Practitioner.class, existingProvidersByNPI.get(0))).build();
     }
 
     @GET
