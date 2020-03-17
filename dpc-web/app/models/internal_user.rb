@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class InternalUser < ApplicationRecord
-  OKTA_AUTH_ENABLED = (ENV.fetch('INTERNAL_AUTH_PROVIDER', '') == 'oktaoauth')
-  GITHUB_AUTH_ENABLED = (ENV.fetch('INTERNAL_AUTH_PROVIDER', '') == 'github')
+  OKTA_AUTH_ENABLED = ENV.fetch('INTERNAL_AUTH_PROVIDER', '') == 'oktaoauth'
+  GITHUB_AUTH_ENABLED = ENV.fetch('INTERNAL_AUTH_PROVIDER', '') == 'github'
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable, :registerable
