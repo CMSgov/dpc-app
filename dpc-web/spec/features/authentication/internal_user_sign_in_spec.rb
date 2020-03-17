@@ -179,11 +179,11 @@ RSpec.feature 'internal user signs in' do
   end
 
 
-  context 'with Okta Oauth' do
+  xcontext 'with Okta Oauth' do
     around do |example|
       OmniAuth.config.test_mode = true
 
-      ClimateControl.modify INTERNAL_AUTH_PROVIDER: 'oktaoauth', OKTA_ADMIN_ROLE: 'DPC_AppRole_Admin' do
+      ClimateControl.modify INTERNAL_AUTH_PROVIDER: 'oktaoauth', OKTA_ADMIN_ROLE: 'DPC_Admin' do
         example.run
       end
 
