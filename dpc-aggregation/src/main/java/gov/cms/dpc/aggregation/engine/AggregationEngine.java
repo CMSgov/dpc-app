@@ -54,7 +54,12 @@ public class AggregationEngine implements Runnable {
     private final Meter resourceMeter;
     private final Meter operationalOutcomeMeter;
     private Disposable subscribe;
-    protected AtomicBoolean queueRunning = new AtomicBoolean(false);
+
+    /**
+     * The initial value is set to true so when the aggregation instance starts up,
+     * it's not in an unhealthy state (determined by the AggregationEngineHealthCheck)
+     */
+    protected AtomicBoolean queueRunning = new AtomicBoolean(true);
 
     /**
      * Create an engine.
@@ -123,15 +128,19 @@ public class AggregationEngine implements Runnable {
                 .map(Optional::get)
                 .subscribe(
                         this::processJobBatch,
-                        error -> {
-                            logger.error("Error processing queue. Exiting...", error);
-                            queueRunning.set(false);
-                        },
-                        () -> {
-                            logger.info("Finished processing queue. Exiting...");
-                            queueRunning.set(false);
-                        }
+                        this::onError,
+                        this::onCompleted
                 );
+    }
+
+    protected void onError(Throwable error) {
+        logger.error("Error processing queue. Exiting...", error);
+        queueRunning.set(false);
+    }
+
+    protected void onCompleted() {
+        logger.info("Finished processing queue. Exiting...");
+        queueRunning.set(false);
     }
 
     /**
@@ -177,8 +186,12 @@ public class AggregationEngine implements Runnable {
                 this.queue.pauseBatch(job, aggregatorID);
             }
         } catch (Exception error) {
-            logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
-            this.queue.failBatch(job, aggregatorID);
+            try {
+                logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
+                this.queue.failBatch(job, aggregatorID);
+            } catch (Exception failedBatchException) {
+                logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
+            }
         }
     }
 
@@ -300,6 +313,8 @@ public class AggregationEngine implements Runnable {
      * @param e is the exception thrown
      */
     private static void errorHandler(Throwable e) {
+        logger.error("Caught exception during RxJava processing flow: ", e);
+
         // Undeliverable Exceptions may happen because of parallel execution. One thread will
         // throw an exception which will cause the job to fail and (close its consumer).
         // Another thread will throw an exception as well which will be undeliverable
@@ -327,7 +342,7 @@ public class AggregationEngine implements Runnable {
         logger.warn("Undeliverable exception received: ", e);
     }
 
-    protected UUID getAggregatorID() {
+    public UUID getAggregatorID() {
         return aggregatorID;
     }
 

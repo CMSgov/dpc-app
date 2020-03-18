@@ -82,32 +82,47 @@ RSpec.describe Organization, type: :model do
   end
 
   describe '#api_credentialable?' do
-    it 'returns true if org has a registered org and an npi' do
-      stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-      org = create(:organization, npi: '1010101010')
-      create(:registered_organization, organization: org, api_env: 'sandbox')
+    context 'when organization is a provider' do
+      it 'returns true if org has a registered org and an npi' do
+        stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+        org = create(:organization, :sandbox_enabled, organization_type: 'primary_care_clinic', npi: '1010101010')
 
-      expect(org.api_credentialable?).to be true
+        expect(org.api_credentialable?).to be true
+      end
+
+      it 'returns false if npi present but no registered org' do
+        org = create(:organization, organization_type: 'primary_care_clinic', npi: SecureRandom.uuid)
+
+        expect(org.api_credentialable?).to be false
+      end
+
+      it 'returns false if registered org present but no npi' do
+        stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+        org = create(:organization, :sandbox_enabled, organization_type: 'primary_care_clinic', npi: nil)
+
+        expect(org.api_credentialable?).to be false
+      end
+
+      it 'returns false if no npi or registered org' do
+        org = create(:organization, organization_type: 'primary_care_clinic', npi: nil)
+
+        expect(org.api_credentialable?).to be false
+      end
     end
 
-    it 'returns false if npi present but no registered org' do
-      org = create(:organization, npi: SecureRandom.uuid)
+    context 'when organization is a vendor' do
+      it 'returns true if org has a registered org and an npi' do
+        stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+        org = create(:organization, :sandbox_enabled, organization_type: 'health_it_vendor')
 
-      expect(org.api_credentialable?).to be false
-    end
+        expect(org.api_credentialable?).to be true
+      end
 
-    it 'returns false if registered org present but no npi' do
-      stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-      org = create(:organization, :sandbox_enabled, npi: nil)
-      create(:registered_organization, organization: org)
+      it 'returns false if no registered org' do
+        org = create(:organization, organization_type: 'health_it_vendor')
 
-      expect(org.api_credentialable?).to be false
-    end
-
-    it 'returns false if no npi or registered org' do
-      org = create(:organization, npi: nil)
-
-      expect(org.api_credentialable?).to be false
+        expect(org.api_credentialable?).to be false
+      end
     end
   end
 
@@ -135,7 +150,7 @@ RSpec.describe Organization, type: :model do
       organization.notify_users_of_sandbox_access
 
       expect(UserMailer).to have_received(:with)
-        .once.with(user: assignment.user, organization: organization)
+        .once.with(user: assignment.user, vendor: false)
       expect(mailer).to have_received(:organization_sandbox_email)
     end
   end

@@ -22,6 +22,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -322,9 +323,18 @@ public class DistributedBatchQueue extends JobQueueCommon {
     public void assertHealthy(UUID aggregatorID) {
         try (final Session session = this.factory.openSession()) {
             try {
-                @SuppressWarnings("rawtypes") final Query healthCheck = session.createSQLQuery("select count(*) from job_queue_batch where aggregatorID = '" + aggregatorID.toString() + "' and job_status == 1 and update_time < current_timestamp - interval '3 minutes'"); // lgtm [java/concatenated-sql-query] These values are sanitized and not susceptible to user tainting.
-                int stuckBatches = healthCheck.getFirstResult();
-                if (stuckBatches > 0) {
+                OffsetDateTime stuckSince = OffsetDateTime.now(ZoneId.systemDefault()).minusMinutes(3);
+
+                logger.debug(String.format("Checking aggregatorID(%s) for stuck jobs since (%s)...", aggregatorID, stuckSince.toString()));
+                Long stuckBatchCount = (Long) session
+                        .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime")
+                        .setParameter("aggregatorID", aggregatorID)
+                        .setParameter("updateTime", stuckSince)
+                        .uniqueResult();
+
+                logger.debug(String.format("Found (%d) stuck jobs on aggregatorID(%s).", stuckBatchCount, aggregatorID));
+
+                if (stuckBatchCount > 0) {
                     throw new JobQueueUnhealthy(JOB_UNHEALTHY);
                 }
             } catch (JobQueueUnhealthy e) {

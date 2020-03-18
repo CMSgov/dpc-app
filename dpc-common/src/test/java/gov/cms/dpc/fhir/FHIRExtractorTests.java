@@ -92,11 +92,13 @@ public class FHIRExtractorTests {
 
     @Test
     void testTagParsing() {
-        assertThrows(IllegalArgumentException.class, () -> parseTag("notATag"), "Should fail with malformed tag");
+        final Pair<String, String> codeTag = parseTag("a tag");
+        assertAll(() -> assertEquals("", codeTag.getLeft()),
+                () -> assertEquals("a tag", codeTag.getRight()));
 
-        final Pair<String, String> tag = parseTag("This|is a tag");
-        assertAll(() -> assertEquals("This", tag.getLeft()),
-                () -> assertEquals("is a tag", tag.getRight()));
+        final Pair<String, String> systemCodeTag = parseTag("This|is a tag");
+        assertAll(() -> assertEquals("This", systemCodeTag.getLeft()),
+                () -> assertEquals("is a tag", systemCodeTag.getRight()));
 
         final Pair<String, String> danglingTag = parseTag("Dangling tag|");
         assertAll(() -> assertEquals("Dangling tag", danglingTag.getLeft()),
