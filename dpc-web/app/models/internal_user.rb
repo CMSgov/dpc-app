@@ -8,7 +8,7 @@ class InternalUser < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable, :registerable
   devise :database_authenticatable,
          :trackable, :timeoutable,
-         :omniauthable, omniauth_providers: [:oktaoauth, :github]
+         :omniauthable, omniauth_providers: %i[oktaoauth github]
 
   validates :uid, uniqueness: { scope: :provider }
 
@@ -18,7 +18,7 @@ class InternalUser < ApplicationRecord
       user.password = Devise.friendly_token[0, 20]
       user.name = auth.info.name
 
-      # TODO change this to username and store preferred_username from Okta
+      # TODO: Change this to username and store preferred_username from Okta
       user.github_nickname = auth.info.nickname if GITHUB_AUTH_ENABLED
     end
   end

@@ -14,7 +14,7 @@ module Internal
             redirect_to new_internal_user_session_path, alert: 'Failed request.'
           elsif authorized_internal_user?
             @internal_user = InternalUser.from_omniauth(request.env['omniauth.auth'])
-            flash[:notice] = "You have successfully signed in as #{@internal_user.email || @internal_user.name} with IDM Hub."
+            flash[:notice] = "You have signed in as #{@internal_user.email} with IDM Hub."
             sign_in_and_redirect @internal_user
           else
             redirect_to new_internal_user_session_path, alert: formatted_auth_errors
@@ -29,7 +29,7 @@ module Internal
 
         if valid_org_team?
           @internal_user = InternalUser.from_omniauth(request.env['omniauth.auth'])
-          flash[:notice] = "You have successfully signed in as #{@internal_user.email || @internal_user.name} with Github."
+          flash[:notice] = "You have signed in as #{@internal_user.email || @internal_user.name} with Github."
           sign_in_and_redirect @internal_user
         else
           redirect_to new_internal_user_session_path, error: formatted_auth_errors
