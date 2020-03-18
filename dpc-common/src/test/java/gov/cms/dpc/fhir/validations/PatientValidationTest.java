@@ -49,7 +49,7 @@ class PatientValidationTest {
         // This needs to stay until https://github.com/jamesagnew/hapi-fhir/pull/1375 lands in upstream.
         // Apparently, the patch was not sufficient, so this error remains.
         assertAll(() -> assertEquals(1, result.getMessages().size(), "Should have a single failure"),
-                () -> assertEquals("URI values cannot have whitespace", result.getMessages().get(0).getMessage(), "Should have URI failure"));
+                () -> assertTrue( result.getMessages().get(0).getMessage().startsWith("URI values cannot have whitespace"), "Should have URI failure"));
     }
 
     @Test
