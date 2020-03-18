@@ -79,7 +79,10 @@ class RegisteredOrganization < ApplicationRecord
 
     return if api_request.response_successful?
 
-    return if api_response.include? 'Cannot find organization'
+    if api_response.include? 'Cannot find organization'
+      Rails.logger.warn "Cannot delete API organization with id #{api_id}: Organization not found."
+      return
+    end
 
     errors.add(:base, "couldn't be deleted from #{api_env} API: #{api_response}")
     throw(:abort)
