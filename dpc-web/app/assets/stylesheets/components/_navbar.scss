@@ -24,6 +24,10 @@
   }
 }
 
+.site-logo-text:hover {
+  color: $color-primary;
+}
+
 .navbar {
   align-items: center;
   background-color: #fff;
@@ -145,6 +149,7 @@
 
 .topnav__link,
 .topnav__link:visited {
+  border-bottom: 2px solid $color-white;
   color: $color-primary-darkest;
   display: block;
   font-size: $h4-font-size;
@@ -154,9 +159,14 @@
 
   @media (min-width: $width-nav) {
     display: inline-block;
-    padding: $spacer-1 $spacer-2;
+    padding: $spacer-1 $spacer-1;
     margin-right: $spacer-2;
   }
+}
+
+.topnav__link:hover {
+  border-bottom: 2px solid $color-primary;
+  color: $color-primary;
 }
 
 .site-overlay {

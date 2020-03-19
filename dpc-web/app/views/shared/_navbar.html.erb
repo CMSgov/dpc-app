@@ -23,6 +23,12 @@ aria-controls="topnav-wrap" aria-label="Close menu">
     </button>
     <ul class="topnav">
       <li class="topnav__item">
+        <%= link_to root_path, :class => "topnav__link" do %>
+          Home
+        <% end %>
+      </li>
+
+      <li class="topnav__item">
         <%= link_to docs_path, :class => "topnav__link" do %>
           Documentation
         <% end %>
