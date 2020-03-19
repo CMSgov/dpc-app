@@ -24,9 +24,9 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 
 @Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "apiKey"))
@@ -36,12 +36,12 @@ public class KeyResource extends AbstractKeyResource {
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);
 
     private final PublicKeyDAO dao;
-    private final Random random;
+    private final SecureRandom random;
 
     @Inject
     public KeyResource(PublicKeyDAO dao) {
         this.dao = dao;
-        this.random = new Random();
+        this.random = new SecureRandom();
     }
 
     @GET
