@@ -1,3 +1,9 @@
+  @import 'normalize.css/normalize';
+  @import '@cmsgov/design-system-core/src/index';
+  @import '@cmsgov/design-system-layout/src/index';
+  @import "settings/font-faces";
+  @import "settings/variables";
+
 .sidenav {
   position: sticky;
   top: $spacer-5;
