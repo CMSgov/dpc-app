@@ -18,10 +18,9 @@
  @import 'normalize.css/normalize';
  @import '@cmsgov/design-system-core/src/index';
  @import '@cmsgov/design-system-layout/src/index';
- @import "rouge";
- @import "sidenav";
  @import "settings/font-faces";
  @import "settings/variables";
+ @import "rouge";
  @import "base/base";
  @import "base/typography";
  @import "components/accordions";
@@ -46,6 +45,7 @@
  @import "components/pagination";
  @import "components/pills";
  @import "components/process-list";
+ @import "components/sidenav";
  @import "components/site-blocks";
  @import "utilities/add-ons";
  
