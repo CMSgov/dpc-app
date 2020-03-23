@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution;
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
+import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import io.dropwizard.db.DataSourceFactory;
@@ -14,7 +15,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 
-public class DPCAttributionConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
+public class DPCAttributionConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCFHIRConfiguration, IDPCQueueDatabase {
 
     @Valid
     private Duration expirationThreshold;
@@ -25,6 +26,11 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @NotNull
     @JsonProperty("database")
     private DataSourceFactory database = new DataSourceFactory();
+
+    @Valid
+    @NotNull
+    @JsonProperty("queuedb")
+    private DataSourceFactory queueDatabase = new DataSourceFactory();
 
     @Valid
     @NotNull
@@ -44,6 +50,17 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     private Integer providerLimit;
+
+    @NotEmpty
+    private String exportPath;
+
+    public String getExportPath() {
+        return exportPath;
+    }
+
+    public void setExportPath(String exportPath) {
+        this.exportPath = exportPath;
+    }
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -102,5 +119,10 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setProviderLimit(Integer providerLimit) {
         this.providerLimit = providerLimit;
+    }
+
+    @Override
+    public DataSourceFactory getQueueDatabase() {
+        return queueDatabase;
     }
 }
