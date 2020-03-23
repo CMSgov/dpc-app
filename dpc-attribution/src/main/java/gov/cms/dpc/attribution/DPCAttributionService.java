@@ -7,9 +7,12 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
+import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import gov.cms.dpc.fhir.FHIRModule;
+import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.Application;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
@@ -27,6 +30,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     private static final Logger logger = LoggerFactory.getLogger(DPCAttributionService.class);
 
     private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>();
+    private final DPCQueueHibernateBundle<DPCAttributionConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
 
     private static Boolean swaggerEnabled = false;
 
@@ -66,13 +70,16 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(),
-                        new FHIRModule<>())
+                        new FHIRModule<>(),
+                        new DPCQueueHibernateModule<>(hibernateQueueBundle),
+                        new JobQueueModule<>())
                 .build();
 
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
         bootstrap.addBundle(hibernateBundle);
+        bootstrap.addBundle(hibernateQueueBundle);
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.attribution"));

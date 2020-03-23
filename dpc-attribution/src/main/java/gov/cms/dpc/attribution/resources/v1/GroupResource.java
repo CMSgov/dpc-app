@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.RosterDAO;
 import gov.cms.dpc.attribution.resources.AbstractGroupResource;
+import gov.cms.dpc.attribution.service.LookBackService;
 import gov.cms.dpc.attribution.utils.RESTUtils;
 import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.entities.PatientEntity;
@@ -51,15 +52,17 @@ public class GroupResource extends AbstractGroupResource {
     private final RelationshipDAO relationshipDAO;
     private final DPCAttributionConfiguration config;
     private final FHIREntityConverter converter;
+    private final LookBackService lookBackService;
 
     @Inject
-    GroupResource(FHIREntityConverter converter, ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO, RelationshipDAO relationshipDAO, DPCAttributionConfiguration config) {
+    GroupResource(FHIREntityConverter converter, ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO, RelationshipDAO relationshipDAO, DPCAttributionConfiguration config, LookBackService lookBackService) {
         this.rosterDAO = rosterDAO;
         this.providerDAO = providerDAO;
         this.patientDAO = patientDAO;
         this.relationshipDAO = relationshipDAO;
         this.config = config;
         this.converter = converter;
+        this.lookBackService = lookBackService;
     }
 
     @POST
@@ -86,6 +89,17 @@ public class GroupResource extends AbstractGroupResource {
         if (providers.isEmpty()) {
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
+
+        final List<Group.GroupMemberComponent> notRelatedGroupMembers = attributionRoster
+                .getMember()
+                .stream()
+                .filter(g -> {
+                    String patientID = g.getEntity().getReference();
+                    return !lookBackService.isValidProviderPatientRelation(organizationID, UUID.fromString(patientID), providers.get(0).getID(), 18);
+                })
+                .collect(Collectors.toList());
+
+        attributionRoster.getMember().removeAll(notRelatedGroupMembers);
 
         final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
 
@@ -224,6 +238,7 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .map(patient -> {
                     // Check to see if the attribution already exists, if so, re-extend the expiration time
+
                     final AttributionRelationship relationship = this.relationshipDAO.lookupAttributionRelationship(rosterID, patient.getID())
                             .orElse(new AttributionRelationship(rosterEntity, patient, now));
                     // If the relationship is inactive, then we need to update the period begin for the new membership span
