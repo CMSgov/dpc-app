@@ -29,6 +29,8 @@ import org.mockito.Mockito;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -93,7 +95,9 @@ class AggregationEngineTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.Patient)
+                Collections.singletonList(ResourceType.Patient),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Throw a failure on the first poll, then be successful
@@ -430,7 +434,9 @@ class AggregationEngineTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet()),
-                Collections.singletonList(ResourceType.Schedule)
+                Collections.singletonList(ResourceType.Schedule),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Throw an exception when failing the batch
@@ -507,7 +513,9 @@ class AggregationEngineTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 mbis,
-                List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient)
+                List.of(ResourceType.ExplanationOfBenefit, ResourceType.Patient),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         queue.claimBatch(engine.getAggregatorID())
@@ -547,7 +555,9 @@ class AggregationEngineTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient)
+                Collections.singletonList(ResourceType.Patient),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
