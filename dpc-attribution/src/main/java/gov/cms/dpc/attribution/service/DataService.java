@@ -18,10 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -53,7 +50,7 @@ public class DataService {
         if (files.size() == 1 && files.get(0).getResourceType() == ResourceType.OperationOutcome) {
             return assembleOperationOutcome(batches);
         } else {
-            return assembleBundleFromBatches(batches);
+            return assembleBundleFromBatches(batches, Arrays.asList(resourceTypes));
         }
     }
 
@@ -103,17 +100,18 @@ public class DataService {
         }
     }
 
-    private Bundle assembleBundleFromBatches(List<JobQueueBatch> batches) {
+    private Bundle assembleBundleFromBatches(List<JobQueueBatch> batches, List<ResourceType> resourceTypes) {
         final Bundle bundle = new Bundle().setType(Bundle.BundleType.SEARCHSET);
 
         batches.stream()
-                .map(b -> b.getJobQueueFileLatest(ResourceType.OperationOutcome))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(JobQueueBatch::getJobQueueBatchFiles)
+                .flatMap(List::stream)
+                .filter(bf -> resourceTypes.contains(bf.getResourceType()))
                 .forEach(batchFile -> {
                     java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
                     addResourceEntries(Resource.class, path, bundle);
                 });
+
 
         // set a bundle id here? anything else?
         bundle.setId(UUID.randomUUID().toString());
