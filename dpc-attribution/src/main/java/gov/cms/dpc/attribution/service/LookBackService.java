@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.service;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 
 import javax.inject.Inject;
@@ -25,8 +26,12 @@ public class LookBackService {
 
     public boolean isValidProviderPatientRelation(UUID organizationID, UUID patientID, UUID providerID, long withinMonth) {
         try {
-            Bundle bundle = dataService.retrieveData(organizationID, providerID, Collections.singletonList(patientID.toString()), ResourceType.ExplanationOfBenefit);
-            return hasClaimWithin(bundle, providerID, organizationID, withinMonth);
+            Resource resource = dataService.retrieveData(organizationID, providerID, Collections.singletonList(patientID.toString()), ResourceType.ExplanationOfBenefit);
+            if (resource instanceof Bundle) {
+                return hasClaimWithin((Bundle) resource, providerID, organizationID, withinMonth);
+            } else {
+                throw new WebApplicationException("Failed to look back", HttpStatus.INTERNAL_SERVER_ERROR_500);
+            }
         } catch (Exception e) {
             throw new WebApplicationException("Failed to look back", HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
