@@ -50,6 +50,6 @@ public class LookBackService {
     private long getMonthsDifference(Date date1, Date date2) {
         YearMonth m1 = YearMonth.from(date1.toInstant().atZone(ZoneOffset.UTC));
         YearMonth m2 = YearMonth.from(date2.toInstant().atZone(ZoneOffset.UTC));
-        return ChronoUnit.MONTHS.between(m1, m2);
+        return StrictMath.abs(ChronoUnit.MONTHS.between(m1, m2));
     }
 }
