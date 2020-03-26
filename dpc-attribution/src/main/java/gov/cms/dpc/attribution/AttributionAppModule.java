@@ -6,8 +6,6 @@ import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.resources.v1.*;
-import gov.cms.dpc.attribution.service.DataService;
-import gov.cms.dpc.attribution.service.LookBackService;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -44,10 +42,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
         // Tasks
         binder.bind(TruncateDatabase.class);
-
-        // Services
-        binder.bind(DataService.class);
-        binder.bind(LookBackService.class);
 
         // Healthchecks
         // Additional health-checks can be added here

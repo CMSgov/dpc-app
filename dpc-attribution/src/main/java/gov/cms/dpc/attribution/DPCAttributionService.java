@@ -2,6 +2,9 @@ package gov.cms.dpc.attribution;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
@@ -34,6 +37,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     private static Boolean swaggerEnabled = false;
 
+    private final Module serviceModule;
+
     public static void main(final String[] args) throws Exception {
         // Only enable Swagger when running as a server
         if (args != null && "server".equals(args[0])) {
@@ -41,6 +46,15 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         }
 
         new DPCAttributionService().run(args);
+    }
+
+    public DPCAttributionService() {
+        serviceModule = new AttributionServiceModule();
+    }
+
+    @VisibleForTesting
+    public DPCAttributionService(Module serviceModule) {
+        this.serviceModule = Modules.override(new AttributionServiceModule()).with(serviceModule);
     }
 
     @Override
@@ -68,8 +82,9 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
         GuiceBundle<DPCAttributionConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
                 .modules(
-                        new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(),
+                        serviceModule,
+                        new DPCHibernateModule<>(hibernateBundle),
                         new FHIRModule<>(),
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
                         new JobQueueModule<>())
