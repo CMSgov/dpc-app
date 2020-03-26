@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.attribution.service.DataService;
+import gov.cms.dpc.attribution.service.LookBackService;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRBuilders;
@@ -15,15 +17,12 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import io.dropwizard.testing.ConfigOverride;
-import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -41,8 +40,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class AttributionFHIRTest {
 
     private static final String KEY_PREFIX = "dpc.attribution";
-    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
+    protected static TestSupport APPLICATION = new TestSupport(DPCAttributionService.class,"ci.application.conf", ConfigOverride.config(KEY_PREFIX, "", ""),
+            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));;
+    protected static LookBackService lookBackService;
+    protected static DataService dataService;
+
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
@@ -51,6 +53,9 @@ class AttributionFHIRTest {
 
     @BeforeAll
     static void setup() throws Exception {
+        lookBackService = Mockito.mock(LookBackService.class);
+        dataService = Mockito.mock(DataService.class);
+        APPLICATION.setTestServiceModule(new TestServiceModule(lookBackService, dataService));
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
@@ -71,6 +76,16 @@ class AttributionFHIRTest {
     @AfterAll
     static void shutdown() {
         APPLICATION.after();
+    }
+
+    @BeforeEach
+    public void mockSetup() {
+        Mockito.when(lookBackService.isValidProviderPatientRelation(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong())).thenReturn(true);
+    }
+
+    @AfterEach
+    public void mockTearDown() {
+        Mockito.reset(lookBackService, dataService);
     }
 
     @TestFactory
