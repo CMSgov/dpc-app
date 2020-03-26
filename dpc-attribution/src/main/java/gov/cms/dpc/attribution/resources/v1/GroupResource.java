@@ -2,6 +2,8 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
@@ -90,16 +92,16 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
-        final List<Group.GroupMemberComponent> notRelatedGroupMembers = attributionRoster
+        final List<Group.GroupMemberComponent> notValidRelationMembers = attributionRoster
                 .getMember()
                 .stream()
                 .filter(g -> {
-                    String patientID = g.getEntity().getReference();
+                    String patientID = Iterables.get(Splitter.on('/').split(g.getEntity().getReference()), 1);
                     return !lookBackService.isValidProviderPatientRelation(organizationID, UUID.fromString(patientID), providers.get(0).getID(), 18);
                 })
                 .collect(Collectors.toList());
 
-        attributionRoster.getMember().removeAll(notRelatedGroupMembers);
+        attributionRoster.getMember().removeAll(notValidRelationMembers);
 
         final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
 
