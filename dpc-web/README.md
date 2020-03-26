@@ -90,14 +90,11 @@ export DATABASE_URL=postgresql://localhost/dpc-website_development
 If you are using Okta for internal admin authentication, you also need to set the Okta ENV variables to enable Okta OAuth login for internal users:
 
 ```
-export INTERNAL_AUTH_PROVIDER=okta
-export OKTA_CLIENT_ID=aaa
-export OKTA_CLIENT_SECRET=bbb
-export OKTA_ORG=
-export OKTA_DOMAIN=
-export OKTA_URL=
+export INTERNAL_AUTH_PROVIDER=oktaoauth
+export OKTA_CLIENT_ID=
+export OKTA_CLIENT_SECRET=
 export OKTA_ISSUER=
-export OKTA_AUTH_SERVER_ID="default"
+export OKTA_AUTH_SERVER_ID=
 export OKTA_REDIRECT_URI="http://localhost:3000/internal/auth/oktaoauth/callback"
 ```
 
