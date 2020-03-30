@@ -1,13 +1,10 @@
 # CLI Commands
-
 Dropwizard offers the ability to add cli commands to a project.  Currently we have three projects with custom cli commands; Attribution, API, and Consent. In addition to the custom CLI commands, Dropwizard has built in default commands for `server` (starts up app), `check` (validates configuration), `db` (various db tasks).
 
 ## API CLI Commands
----
 API has three custom commands: `organization`, `key`, and `token`.  Each of these commands have additional subcommands
 
 #### Organization Command
----
 The host url (`--host`) for the command requires the Attribution host url.  The three operations you can do on an organization are `delete`, `list`, and `register`.
 
 #### Description
@@ -20,8 +17,8 @@ The host url (`--host`) for the command requires the Attribution host url.  The 
 * `java -jar dpc-api/target/dpc-api.jar --host ${ATTRIBUTION_HOST} organization list`
 * `java -jar dpc-api/target/dpc-api.jar --host ${ATTRIBUTION_HOST} organization register --file ${org_file} --no-token ${true|false} --api ${API_HOST}`
 
-#### Token Command
 ---
+#### Token Command
 The host url (--host) for the command requires the api tasks endpoint. The three operations you can do on a token is `create`, `delete`, and `list`.
 
 #### Description
@@ -34,8 +31,8 @@ The host url (--host) for the command requires the api tasks endpoint. The three
 * `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} token delete --org ${org_id} ${token_id}`
 * `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} token list ${org_id}`
 
-#### Key Command
 ---
+#### Key Command
 The host url (--host) for the command requires the api tasks endpoint. The three operations you can do on a token is `upload`, `delete`, and `list`.
 
 #### Description
@@ -49,18 +46,16 @@ The host url (--host) for the command requires the api tasks endpoint. The three
 * `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} key upload ${org_id} --label ${label} ${file_path}`
 
 ## Consent CLI Commands
----
 Consent has two custom commands: `seed` and `consent`. The `consent` command has additional subcommands
 
 #### Seed Command
----
 Seeds the consent database with data from the `test_consent.csv` file
 
 #### Example
 * `java -jar dpc-consent/target/dpc-consent.jar seed`
 
-#### Consent Command
 ---
+#### Consent Command
 The host url (--host) for the command requires the attribution url. The only current operation available is creating a consent.
 
 #### Description
@@ -70,11 +65,9 @@ The host url (--host) for the command requires the attribution url. The only cur
 * `java -jar dpc-consent/target/dpc-consent.jar consent create --host ${ATTRIBUTION_HOST} --patient ${MBI} --in/--out --date ${effective_date} --org ${org_id}`
 
 ## Attribution CLI Commands
----
 Attribution has one custom command: `seed`
 
 #### Seed Command
----
 Seeds teh attribution database with data from the `test_associations.csv` file
 
 #### Description
@@ -82,3 +75,18 @@ Seeds teh attribution database with data from the `test_associations.csv` file
 
 #### Example
 * `java -jar dpc-attribution/target/dpc-attribution.jar seed --timestamp ${timestamp}`
+
+# Tasks
+A Task is a run-time action your application provides access to on the administrative port via HTTP
+To learn more about tasks, click [here](https://www.dropwizard.io/en/latest/manual/core.html#tasks)
+
+### API Tasks
+In addition to the `DeleteToken`, `GenerateClientTokens`, `ListClientTokens`, `DeletePublicKey`, `ListPublicKeys`, and
+ `UploadPublicKey` used by the above CLI API Commands, there is also a `GenerateKeyPair` task.
+
+The `GenerateKeyPair` task is an Admin task to create a new BakeryKeyPair for use by the 
+gov.cms.dpc.macaroons.MacaroonBakery component. This will generated an X25519 keypair that is used to encrypt the 
+third-party caveats.
+
+### Attribution Tasks
+The `TruncateDatabase` task is an Admin task is for truncating tables in the attribution database.
