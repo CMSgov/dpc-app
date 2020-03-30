@@ -17,9 +17,9 @@ The host URL (`--host`) for the command requires the Attribution host URL.  The 
 * `register` - requires an organization file; optional parameters are creating/not creating a token and the API host URL. It will print out the organization ID and token if set to create
 
 #### Examples
-* `java -jar dpc-api/target/dpc-api.jar --host ${ATTRIBUTION_HOST} organization delete ${org_id}`
-* `java -jar dpc-api/target/dpc-api.jar --host ${ATTRIBUTION_HOST} organization list`
-* `java -jar dpc-api/target/dpc-api.jar --host ${ATTRIBUTION_HOST} organization register --file ${org_file} --no-token ${true|false} --api ${API_HOST}`
+* `java -jar dpc-api/target/dpc-api.jar organization delete --host ${ATTRIBUTION_HOST}  ${org_id}`
+* `java -jar dpc-api/target/dpc-api.jar organization list --host ${ATTRIBUTION_HOST}`
+* `java -jar dpc-api/target/dpc-api.jar organization register --host ${ATTRIBUTION_HOST} --file ${org_file} --no-token ${true|false} --api ${API_HOST}`
 
 ---
 #### Token Command
@@ -31,9 +31,9 @@ The host URL (--host) for the command requires the API tasks endpoint. The three
 * `list` - requires the organization ID and prints table with the columns `token id`, `label`, `type`, `created at`, `expires at`
 
 #### Examples
-* `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} token create ${org_id} --label ${label} --expiration ${expiration_date}`
-* `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} token delete --org ${org_id} ${token_id}`
-* `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} token list ${org_id}`
+* `java -jar dpc-api/target/dpc-api.jar token create --host ${API_TASKS_URL} ${org_id} --label ${label} --expiration ${expiration_date}`
+* `java -jar dpc-api/target/dpc-api.jar token delete --host ${API_TASKS_URL} --org ${org_id} ${token_id}`
+* `java -jar dpc-api/target/dpc-api.jar token list --host ${API_TASKS_URL} ${org_id}`
 
 ---
 #### Key Command
@@ -45,9 +45,9 @@ The host URL (--host) for the command requires the API tasks endpoint. The three
 * `upload` - requires the organization ID and public key file; a label for the public key is optional. It prints out the organization token
 
 #### Example
-* `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} key delete --org ${org_id} ${public_key_id}`
-* `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} key list ${org_id}`
-* `java -jar dpc-api/target/dpc-api.jar --host ${API_TASKS_URL} key upload ${org_id} --label ${label} ${file_path}`
+* `java -jar dpc-api/target/dpc-api.jar key delete --host ${API_TASKS_URL} --org ${org_id} ${public_key_id}`
+* `java -jar dpc-api/target/dpc-api.jar key list --host ${API_TASKS_URL} ${org_id}`
+* `java -jar dpc-api/target/dpc-api.jar key upload --host ${API_TASKS_URL} ${org_id} --label ${label} ${file_path}`
 
 ## Consent CLI Commands
 Consent has two custom commands: `seed` and `consent`. The `consent` command has additional subcommands
