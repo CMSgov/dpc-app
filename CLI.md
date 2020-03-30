@@ -8,7 +8,7 @@ API has three custom commands: `organization`, `key`, and `token`.  Each of thes
 The host url (`--host`) for the command requires the Attribution host url.  The three operations you can do on an organization are `delete`, `list`, and `register`.
 
 #### Description
-* `delete` - requires the organization id and prints out a success message
+* `delete` - requires the organization ID and prints out a success message
 * `list` - prints out a table with the columns, organization id, npi, and name
 * `register` - requires an organization file and optional parameters are creating/not creating a token and the api host url. It will print out the organization id and token if set to create
 
