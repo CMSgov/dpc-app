@@ -1,5 +1,5 @@
 # CLI Commands
-Dropwizard offers the ability to add cli commands to a project.  Currently we have three projects with custom cli commands; Attribution, API, and Consent. In addition to the custom CLI commands, Dropwizard has built in default commands for `server` (starts up app), `check` (validates configuration), `db` (various db tasks).
+Dropwizard offers the ability to add CLI commands to a project.  Currently DPC has three projects with custom CLI commands; Attribution, API, and Consent. In addition to the custom CLI commands, Dropwizard has built-in default commands for `server` (starts up app), `check` (validates configuration), `db` (various db tasks).
 
 ## API CLI Commands
 API has three custom commands: `organization`, `key`, and `token`.  Each of these commands have additional subcommands
