@@ -5,7 +5,7 @@ Dropwizard offers the ability to add CLI commands to a project.  Currently DPC h
 API has three custom commands: `organization`, `key`, and `token`.  Each of these commands has additional subcommands.
 
 #### Organization Command
-The host url (`--host`) for the command requires the Attribution host url.  The three operations you can do on an organization are `delete`, `list`, and `register`.
+The host URL (`--host`) for the command requires the Attribution host URL.  The three operations you can do on an organization are `delete`, `list`, and `register`.
 
 #### Description
 * `delete` - requires the organization ID and prints out a success message
