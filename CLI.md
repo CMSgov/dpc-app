@@ -1,5 +1,9 @@
 # CLI Commands
-Dropwizard offers the ability to add CLI commands to a project.  Currently DPC has three projects with custom CLI commands; Attribution, API, and Consent. In addition to the custom CLI commands, Dropwizard has built-in default commands for `server` (starts up app), `check` (validates configuration), `db` (various db tasks).
+Dropwizard offers the ability to add CLI commands to a project.  Currently DPC has three projects with custom CLI 
+commands; Attribution, API, and Consent. In addition to the custom CLI commands, Dropwizard has built-in default commands 
+for `server` (starts up app), `check` (validates configuration), `db` (various db tasks). You can get more information on
+the commands by calling help with the `-h` flag after any command or subcommands. At the very least, the help will give 
+you an idea of what parameters are needed for the CLI command.
 
 ## API CLI Commands
 API has three custom commands: `organization`, `key`, and `token`.  Each of these commands has additional subcommands.
@@ -82,11 +86,16 @@ To learn more about tasks, click [here](https://www.dropwizard.io/en/latest/manu
 
 ### API Tasks
 In addition to the `DeleteToken`, `GenerateClientTokens`, `ListClientTokens`, `DeletePublicKey`, `ListPublicKeys`, and
- `UploadPublicKey` used by the above CLI API Commands, there is also a `GenerateKeyPair` task.
+ `UploadPublicKey` used by the above CLI API Commands, there is also a `GenerateKeyPair` task. All the tasks that related
+ to keys call the key resource and all the tasks that relate to tokens call to token resource.
 
 The `GenerateKeyPair` task is an Admin task to create a new BakeryKeyPair for use by the 
 gov.cms.dpc.macaroons.MacaroonBakery component. This will generated an X25519 keypair that is used to encrypt the 
 third-party caveats.
+
+The `GenerateClientTokens` task is an Admin task that is used by the `key upload` CLI command but in addition to providing 
+functionality for the CLI command, the task can be executed directly without passing the `organization` parameter to
+generate a golden macaroon. e.g. `curl -X POST http://localhost:8081/tasks/generate-token`
 
 ### Attribution Tasks
 The `TruncateDatabase` task is an Admin task for truncating tables in the attribution database.
