@@ -36,7 +36,7 @@ The host url (--host) for the command requires the api tasks endpoint. The three
 The host url (--host) for the command requires the api tasks endpoint. The three operations you can do on a token is `upload`, `delete`, and `list`.
 
 #### Description
-* `delete` - requires the organization id and the public key id. Prints a success message
+* `delete` - requires the organization ID and the public key ID. Prints a success message
 * `list` - requires the organization id. It prints out a table with the columns `key id`, `label`, `created at`
 * `upload` - requires the organization id and public key file and optionally the label for the public key. It prints out the organization token
 
