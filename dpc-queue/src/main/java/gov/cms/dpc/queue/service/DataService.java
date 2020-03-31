@@ -24,17 +24,17 @@ import java.util.stream.Collectors;
 
 public class DataService {
 
-    private static final int JOB_POLLING_TIMEOUT = 3 * 5;
-
     private IJobQueue queue;
     private String exportPath;
     private FhirContext fhirContext;
+    private int jobPollingTimeoutInSeconds;
 
     @Inject
-    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath) {
+    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, int jobPollingTimeoutInSeconds) {
         this.queue = queue;
         this.fhirContext = fhirContext;
         this.exportPath = exportPath;
+        this.jobPollingTimeoutInSeconds = jobPollingTimeoutInSeconds;
     }
 
     public Resource retrieveData(UUID organizationID, UUID providerID, List<String> patientIDs, ResourceType... resourceTypes) {
@@ -54,23 +54,23 @@ public class DataService {
         }
     }
 
-    Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {
-        CompletableFuture<Optional<List<JobQueueBatch>>> finalStatusFuture = new CompletableFuture<>();
+    private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {
+        CompletableFuture<Optional<List<JobQueueBatch>>> dataFuture = new CompletableFuture<>();
         final ScheduledExecutorService poller = Executors.newSingleThreadScheduledExecutor();
         final ScheduledFuture<?> task = poller.scheduleAtFixedRate(() -> {
             try {
                 List<JobQueueBatch> batches = getJobBatch(jobID, organizationID, queue);
-                finalStatusFuture.complete(Optional.of(batches));
+                dataFuture.complete(Optional.of(batches));
             } catch (DataRetrievalRetryException e) {
                 //retrying
             }
         }, 0, 250, TimeUnit.MILLISECONDS);
 
         // this timeout value should probably be adjusted according to the number of types being requested
-        finalStatusFuture.completeOnTimeout(Optional.empty(), JOB_POLLING_TIMEOUT, TimeUnit.SECONDS);
+        dataFuture.completeOnTimeout(Optional.empty(), jobPollingTimeoutInSeconds, TimeUnit.SECONDS);
 
         try {
-            return finalStatusFuture.get();
+            return dataFuture.get();
         } catch (InterruptedException | ExecutionException e) {
             return Optional.empty();
         } finally {
@@ -79,7 +79,7 @@ public class DataService {
         }
     }
 
-    List<JobQueueBatch> getJobBatch(UUID jobID, UUID organizationId, IJobQueue queue) throws DataRetrievalRetryException {
+    private List<JobQueueBatch> getJobBatch(UUID jobID, UUID organizationId, IJobQueue queue) throws DataRetrievalRetryException {
         final List<JobQueueBatch> batches = queue.getJobBatches(jobID);
         if (batches.isEmpty()) {
             throw new DataRetrievalRetryException();
@@ -129,7 +129,7 @@ public class DataService {
         }
     }
 
-    OperationOutcome assembleOperationOutcome(List<JobQueueBatch> batches) {
+    private OperationOutcome assembleOperationOutcome(List<JobQueueBatch> batches) {
         // There is only ever 1 OperationOutcome file
         final Optional<JobQueueBatchFile> batchFile = batches.stream()
                 .map(b -> b.getJobQueueFileLatest(ResourceType.OperationOutcome))
