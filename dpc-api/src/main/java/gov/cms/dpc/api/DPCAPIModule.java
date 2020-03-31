@@ -16,7 +16,7 @@ import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.*;
-import gov.cms.dpc.api.tasks.*;
+import gov.cms.dpc.api.tasks.GenerateKeyPair;
 import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
 import gov.cms.dpc.api.tasks.keys.ListPublicKeys;
 import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
@@ -25,6 +25,7 @@ import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
@@ -181,5 +182,11 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         logger.info("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
+    }
+
+    @Provides
+    @JobTimeout
+    public int provideJobTimeoutInSeconds() {
+        return getConfiguration().getJobTimeoutInSeconds();
     }
 }
