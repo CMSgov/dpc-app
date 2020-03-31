@@ -7,7 +7,6 @@ import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.FHIRFormatters;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
@@ -27,8 +26,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -145,20 +144,11 @@ public class JobResource extends AbstractJobResource {
                 .map(ResourceType::toString)
                 .collect(Collectors.joining(GroupResource.LIST_DELIMITER));
 
-        final String sinceQueryParam = firstBatch.getSince()
-                .map(since -> "&_since=" + since.format(FHIRFormatters.INSTANT_FORMATTER))
-                .orElse("");
-
         final JobCompletionModel completionModel = new JobCompletionModel(
-                firstBatch.getTransactionTime(),
-                String.format("%s/Group/%s/$export?_type=%s%s",
-                        baseURL,
-                        firstBatch.getProviderID(),
-                        resourceQueryParam,
-                        sinceQueryParam),
+                batches.stream().map(JobQueueBatch::getStartTime).map(Optional::get).min(OffsetDateTime::compareTo).orElseThrow(),
+                String.format("%s/Group/%s/$export?_type=%s", baseURL, firstBatch.getProviderID(), resourceQueryParam),
                 formOutputList(batches, false),
-                formOutputList(batches, true),
-                buildJobExtension(batches));
+                formOutputList(batches, true));
 
         return builder.status(HttpStatus.OK_200).entity(completionModel);
     }
@@ -180,13 +170,13 @@ public class JobResource extends AbstractJobResource {
                 .map(result -> new JobCompletionModel.OutputEntry(
                         result.getResourceType(),
                         String.format("%s/Data/%s.ndjson", this.baseURL, JobQueueBatchFile.formOutputFileName(result.getBatchID(), result.getResourceType(), result.getSequence())),
-                        result.getCount(), buildOutputEntryExtension(result)))
+                        result.getCount(), buildExtension(result)))
                 .filter(entry -> (entry.getType() == ResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)
                 .collect(Collectors.toList());
     }
 
-    List<JobCompletionModel.FhirExtension> buildOutputEntryExtension(JobQueueBatchFile batchFile) {
+    List<JobCompletionModel.OutputEntryExtension> buildExtension(JobQueueBatchFile batchFile) {
         final byte[] byteChecksum = batchFile.getChecksum();
         final String stringChecksum;
         if (byteChecksum == null) {
@@ -196,24 +186,7 @@ public class JobResource extends AbstractJobResource {
         }
         String formattedChecksum = String.format("%s:%s", "sha256", stringChecksum);
         long fileLength = batchFile.getFileLength();
-        return List.of(new JobCompletionModel.FhirExtension(JobCompletionModel.CHECKSUM_URL, formattedChecksum),
-                new JobCompletionModel.FhirExtension(JobCompletionModel.FILE_LENGTH_URL, fileLength));
-    }
-
-    List<JobCompletionModel.FhirExtension> buildJobExtension(List<JobQueueBatch> batches) {
-        final var submitTime = batches.stream()
-                .map(b -> b.getSubmitTime().orElse(OffsetDateTime.MIN))
-                .min(OffsetDateTime::compareTo)
-                .orElse(OffsetDateTime.MIN);
-        final var completeTime = batches.stream()
-                .map(b -> b.getCompleteTime().orElse(OffsetDateTime.MIN))
-                .max(OffsetDateTime::compareTo)
-                .orElse(OffsetDateTime.MIN);
-        if (submitTime.isEqual(OffsetDateTime.MIN) || completeTime.isEqual(OffsetDateTime.MIN)) {
-            return Collections.emptyList();
-        }
-        return List.of(
-                new JobCompletionModel.FhirExtension(JobCompletionModel.SUBMIT_TIME_URL, submitTime),
-                new JobCompletionModel.FhirExtension(JobCompletionModel.COMPLETE_TIME_URL, completeTime));
+        return List.of(new JobCompletionModel.OutputEntryExtension(JobCompletionModel.CHECKSUM_URL, formattedChecksum),
+                new JobCompletionModel.OutputEntryExtension(JobCompletionModel.FILE_LENGTH_URL, fileLength));
     }
 }
