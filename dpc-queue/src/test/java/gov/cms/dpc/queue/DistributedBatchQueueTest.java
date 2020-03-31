@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -103,12 +102,7 @@ public class DistributedBatchQueueTest {
 
     private UUID buildStuckBatchScenario(UUID orgID) {
         // Add a job
-        var jobID = queue.createJob(orgID,
-                "test-provider-1",
-                List.of("test-patient-1", "test-patient-2"),
-                Collections.singletonList(ResourceType.Patient),
-                null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+        var jobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient));
 
         // Work the job
         Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);

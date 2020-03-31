@@ -6,7 +6,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -45,8 +44,7 @@ public class AttestationUnitTests {
         // Do all the things
         final IJobQueue mockQueue = Mockito.mock(IJobQueue.class);
         final IGenericClient mockClient = Mockito.mock(IGenericClient.class);
-        final BlueButtonClient mockBfdClient = Mockito.mock(BlueButtonClient.class);
-        groupResource = new GroupResource(mockQueue, mockClient, "http://local.test", mockBfdClient);
+        groupResource = new GroupResource(mockQueue, mockClient, "http://local.test");
     }
 
     @BeforeEach
