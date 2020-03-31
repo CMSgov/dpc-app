@@ -13,9 +13,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="pde-7060841642"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <identifier>
                <system value="https://bluebutton.cms.gov/resources/variables/pde_id"/>
                <value value="7060841642"/>
@@ -405,9 +402,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="pde-930361669"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <identifier>
                <system value="https://bluebutton.cms.gov/resources/variables/pde_id"/>
                <value value="930361669"/>

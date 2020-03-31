@@ -17,9 +17,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-21870822912"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -1704,9 +1701,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-21932158205"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -2155,9 +2149,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-21957368585"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -5136,9 +5127,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22011027731"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -7298,9 +7286,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22011027732"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -9450,9 +9435,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22074654603"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -12431,9 +12413,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22100694165"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -15412,9 +15391,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22116335820"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -15863,9 +15839,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22273336765"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -18834,9 +18807,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22289703264"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>

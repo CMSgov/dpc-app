@@ -17,9 +17,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22299857407"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -983,9 +980,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22335338581"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -3387,9 +3381,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22354428064"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -3838,9 +3829,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22639159481"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -4282,9 +4270,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-22654221223"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -4980,9 +4965,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="pde-3269834580"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <identifier>
                <system value="https://bluebutton.cms.gov/resources/variables/pde_id"/>
                <value value="3269834580"/>
@@ -5341,9 +5323,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="inpatient-4436342082"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <extension url="https://bluebutton.cms.gov/resources/variables/clm_pass_thru_per_diem_amt">
                <valueMoney>
                   <value value="0.00"/>
@@ -6490,9 +6469,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="inpatient-4512116227"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <extension url="https://bluebutton.cms.gov/resources/variables/dsh_op_clm_val_amt">
                <valueMoney>
                   <value value="350.00"/>
@@ -7824,9 +7800,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="pde-4894712975"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <identifier>
                <system value="https://bluebutton.cms.gov/resources/variables/pde_id"/>
                <value value="4894712975"/>
@@ -8203,9 +8176,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="pde-5764339373"/>
-            <meta>
-                <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <identifier>
                <system value="https://bluebutton.cms.gov/resources/variables/pde_id"/>
                <value value="5764339373"/>

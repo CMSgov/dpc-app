@@ -2,8 +2,6 @@ package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
-import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
@@ -18,7 +16,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
+public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, IDPCAuthDatabase, IDPCFHIRConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -41,11 +39,6 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @NotNull
     @JsonProperty("authdb")
     private DataSourceFactory authDatabase = new DataSourceFactory();
-
-    @Valid
-    @NotNull
-    @JsonProperty("bbclient")
-    private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
     @NotEmpty
     @NotNull
@@ -156,11 +149,6 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration config) {
         this.fhirConfig = config;
-    }
-
-    @Override
-    public BBClientConfiguration getBlueButtonConfiguration() {
-        return this.clientConfiguration;
     }
 
     public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
