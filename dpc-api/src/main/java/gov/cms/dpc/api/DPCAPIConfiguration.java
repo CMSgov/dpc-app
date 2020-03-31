@@ -4,12 +4,12 @@ import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
-import gov.cms.dpc.macaroons.config.TokenPolicy;
-import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
+import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
@@ -68,6 +68,8 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     @NotEmpty
     private String keyPairLocation;
+
+    private int jobTimeoutInSeconds = 5;
 
     public TokenPolicy getTokenPolicy() {
         return tokenPolicy;
@@ -169,5 +171,9 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
 
     public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
         this.swaggerBundleConfiguration = swaggerBundleConfiguration;
+    }
+
+    public int getJobTimeoutInSeconds() {
+        return jobTimeoutInSeconds;
     }
 }

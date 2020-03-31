@@ -50,6 +50,9 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Min(50)
     private int pollingFrequency = 500;
 
+    @Min(1)
+    private int jobTimeoutInSeconds = 5;
+
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -88,5 +91,10 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Override
     public int getPollingFrequency() {
         return pollingFrequency;
+    }
+
+    @Override
+    public int getJobTimeoutInSeconds() {
+        return jobTimeoutInSeconds;
     }
 }

@@ -2,6 +2,7 @@ package gov.cms.dpc.queue.service;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
@@ -27,14 +28,14 @@ public class DataService {
     private IJobQueue queue;
     private String exportPath;
     private FhirContext fhirContext;
-    private int jobPollingTimeoutInSeconds;
+    private int jobTimeoutInSeconds;
 
     @Inject
-    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, int jobPollingTimeoutInSeconds) {
+    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout  int jobTimeoutInSeconds) {
         this.queue = queue;
         this.fhirContext = fhirContext;
         this.exportPath = exportPath;
-        this.jobPollingTimeoutInSeconds = jobPollingTimeoutInSeconds;
+        this.jobTimeoutInSeconds = jobTimeoutInSeconds;
     }
 
     public Resource retrieveData(UUID organizationID, UUID providerID, List<String> patientIDs, ResourceType... resourceTypes) {
@@ -67,7 +68,7 @@ public class DataService {
         }, 0, 250, TimeUnit.MILLISECONDS);
 
         // this timeout value should probably be adjusted according to the number of types being requested
-        dataFuture.completeOnTimeout(Optional.empty(), jobPollingTimeoutInSeconds, TimeUnit.SECONDS);
+        dataFuture.completeOnTimeout(Optional.empty(), jobTimeoutInSeconds, TimeUnit.SECONDS);
 
         try {
             return dataFuture.get();
