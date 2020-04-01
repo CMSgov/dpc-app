@@ -44,6 +44,17 @@ public class DataService {
         this.jobTimeoutInSeconds = jobTimeoutInSeconds;
     }
 
+    /**
+     * Retrieves data from BFD
+     * @param organizationID UUID of organization
+     * @param providerID UUID of provider
+     * @param patientIDs List of patient String UUIDs
+     * @param since
+     * @param transactionTime
+     * @param resourceTypes List of ResourceType data to retrieve
+     * @return Resource
+     */
+    // Code climate complains about 6 parameters (2 too many), not planning to fix this
     public Resource retrieveData(UUID organizationID,
                                  UUID providerID,
                                  List<String> patientIDs,
@@ -114,6 +125,7 @@ public class DataService {
         }
     }
 
+    // Codeclimate doesn't seem to see resourceType parameter being used
     private Bundle assembleBundleFromBatches(List<JobQueueBatch> batches, List<ResourceType> resourceTypes) {
         final Bundle bundle = new Bundle().setType(Bundle.BundleType.SEARCHSET);
 
@@ -132,7 +144,7 @@ public class DataService {
         return bundle.setTotal(bundle.getEntry().size());
     }
 
-    private void addResourceEntries(Class<? extends Resource> clazz, java.nio.file.Path path, Bundle bundle) {
+    private void addResourceEntries(Class<? extends Resource> clazz, Path path, Bundle bundle) {
         try (BufferedReader br = Files.newBufferedReader(path)) {
             br.lines().forEach(line -> {
                 Resource r = fhirContext.newJsonParser().parseResource(clazz, line);
