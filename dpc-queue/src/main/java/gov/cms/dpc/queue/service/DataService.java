@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -38,8 +39,13 @@ public class DataService {
         this.jobTimeoutInSeconds = jobTimeoutInSeconds;
     }
 
-    public Resource retrieveData(UUID organizationID, UUID providerID, List<String> patientIDs, ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), null, null);
+    public Resource retrieveData(UUID organizationID,
+                                 UUID providerID,
+                                 List<String> patientIDs,
+                                 OffsetDateTime since,
+                                 OffsetDateTime transactionTime,
+                                 ResourceType... resourceTypes) {
+        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), since, transactionTime);
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
         if (optionalBatches.isEmpty()) {

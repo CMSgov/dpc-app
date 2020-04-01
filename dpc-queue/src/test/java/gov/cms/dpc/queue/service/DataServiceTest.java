@@ -19,6 +19,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.io.File;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,7 +61,7 @@ public class DataServiceTest{
         Mockito.doThrow(new RuntimeException("error")).when(queue).getJobBatches(Mockito.any(UUID.class));
 
         Assertions.assertThrows(DataRetrievalException.class, () -> {
-            dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()), resourceType);
+            dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()), null, OffsetDateTime.now(ZoneOffset.UTC), resourceType);
         });
     }
 
@@ -72,7 +74,7 @@ public class DataServiceTest{
 
         workJob(true, resourceType);
         Assertions.assertThrows(DataRetrievalException.class, () -> {
-            dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()), resourceType);
+            dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()), null, OffsetDateTime.now(ZoneOffset.UTC), resourceType);
         });
     }
 
@@ -84,7 +86,7 @@ public class DataServiceTest{
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(false, resourceType);
-        Resource resource = dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()), resourceType);
+        Resource resource = dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()), null, OffsetDateTime.now(ZoneOffset.UTC), resourceType);
         Assertions.assertTrue(resource instanceof Bundle);
     }
 
@@ -96,7 +98,7 @@ public class DataServiceTest{
         ResourceType resourceType = ResourceType.ExplanationOfBenefit;
 
         workJob(false, ResourceType.OperationOutcome);
-        Resource resource = dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()), resourceType);
+        Resource resource = dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()), null, OffsetDateTime.now(ZoneOffset.UTC), resourceType);
         Assertions.assertTrue(resource instanceof OperationOutcome);
     }
 
