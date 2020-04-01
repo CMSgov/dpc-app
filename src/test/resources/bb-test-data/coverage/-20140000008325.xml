@@ -14,9 +14,6 @@
         <resource>
             <Coverage xmlns="http://hl7.org/fhir">
                 <id value="part-a-20140000008325"></id>
-                <meta>
-                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-                </meta>
                 <extension url="https://bluebutton.cms.gov/resources/variables/ms_cd">
                     <valueCoding>
                         <system value="https://bluebutton.cms.gov/resources/variables/ms_cd"></system>
@@ -74,9 +71,6 @@
         <resource>
             <Coverage xmlns="http://hl7.org/fhir">
                 <id value="part-b-20140000008325"></id>
-                <meta>
-                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-                </meta>
                 <extension url="https://bluebutton.cms.gov/resources/variables/ms_cd">
                     <valueCoding>
                         <system value="https://bluebutton.cms.gov/resources/variables/ms_cd"></system>
@@ -113,9 +107,6 @@
         <resource>
             <Coverage xmlns="http://hl7.org/fhir">
                 <id value="part-d-20140000008325"></id>
-                <meta>
-                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-                </meta>
                 <extension url="https://bluebutton.cms.gov/resources/variables/ms_cd">
                     <valueCoding>
                         <system value="https://bluebutton.cms.gov/resources/variables/ms_cd"></system>

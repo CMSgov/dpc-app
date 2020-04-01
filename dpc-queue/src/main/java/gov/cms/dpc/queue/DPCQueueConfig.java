@@ -4,6 +4,4 @@ public interface DPCQueueConfig {
 
     int getPollingFrequency();
 
-    int getJobTimeoutInSeconds();
-
 }

@@ -14,9 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.core.Response;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -57,12 +54,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a queued job
-        final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID),
-                JobQueueBatch.validResourceTypes,
-                null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -81,12 +73,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a running job
-        final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID, TEST_PATIENT_ID),
-                JobQueueBatch.validResourceTypes,
-                null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID, TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
         final var runningJob = queue.claimBatch(AGGREGATOR_ID);
         runningJob.get().fetchNextPatient(AGGREGATOR_ID);
         queue.completePartialBatch(runningJob.get(), AGGREGATOR_ID);
@@ -108,12 +95,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
-        final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID),
-                JobQueueBatch.validResourceTypes,
-                null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -149,12 +131,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job with one error
-        final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID),
-                JobQueueBatch.validResourceTypes,
-                null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -187,12 +164,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a failed job
-        final var jobID = queue.createJob(orgID,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID),
-                JobQueueBatch.validResourceTypes,
-                null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+        final var jobID = queue.createJob(orgID, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -216,12 +188,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
-        final var jobID = queue.createJob(orgIDCorrect,
-                TEST_PROVIDER_ID,
-                List.of(TEST_PATIENT_ID),
-                JobQueueBatch.validResourceTypes,
-                null,
-                OffsetDateTime.now(ZoneOffset.UTC));
+        final var jobID = queue.createJob(orgIDCorrect, TEST_PROVIDER_ID, List.of(TEST_PATIENT_ID), JobQueueBatch.validResourceTypes);
         queue.claimBatch(AGGREGATOR_ID);
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
@@ -254,37 +221,15 @@ public class JobResourceTest {
      * Test building extension for a file.
      */
     @Test
-    public void testBuildOutputEntryExtension() {
+    public void testBuildExtension() {
         final var resource = new JobResource(null, "");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), ResourceType.Patient, 0, 11);
         file.setChecksum(Hex.decode("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b"));
         file.setFileLength(7202L);
-        List<JobCompletionModel.FhirExtension> extension = resource.buildOutputEntryExtension(file);
+        List<JobCompletionModel.OutputEntryExtension> extension = resource.buildExtension(file);
         assertAll(() -> assertEquals(JobCompletionModel.CHECKSUM_URL, extension.get(0).getUrl()),
                 () -> assertEquals("sha256:9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b", extension.get(0).getValueString()),
                 () -> assertEquals(JobCompletionModel.FILE_LENGTH_URL, extension.get(1).getUrl()),
                 () -> assertEquals(7202L, extension.get(1).getValueDecimal()));
-    }
-
-    @Test
-    public void testBuildJobExtension() {
-        final var resource = new JobResource(null, "");
-        final var batch = new JobQueueBatch(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                "1",
-                Collections.emptyList(),
-                Collections.emptyList(),
-                null,
-                OffsetDateTime.now());
-        final var aggregatorId = UUID.randomUUID();
-        batch.setRunningStatus(aggregatorId);
-        batch.setCompletedStatus(aggregatorId);
-        List<JobCompletionModel.FhirExtension> extension = resource.buildJobExtension(Collections.singletonList(batch));
-        assertAll(
-                () -> assertEquals(JobCompletionModel.SUBMIT_TIME_URL, extension.get(0).getUrl()),
-                () -> assertEquals(batch.getSubmitTime().orElseThrow(), extension.get(0).getValueDateTime()),
-                () -> assertEquals(JobCompletionModel.COMPLETE_TIME_URL, extension.get(1).getUrl()),
-                () -> assertEquals(batch.getCompleteTime().orElseThrow(), extension.get(1).getValueDateTime()));
     }
 }
