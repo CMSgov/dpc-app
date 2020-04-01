@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implements the model for the JSON response for a complete job.
@@ -17,8 +18,6 @@ public class JobCompletionModel {
 
     public static final String CHECKSUM_URL = "https://dpc.cms.gov/checksum";
     public static final String FILE_LENGTH_URL = "https://dpc.cms.gov/file_length";
-    public static final String SUBMIT_TIME_URL = "https://dpc.cms.gov/submit_time";
-    public static final String COMPLETE_TIME_URL = "https://dpc.cms.gov/complete_time";
 
     /**
      * An entry in the {@link JobCompletionModel} output field.
@@ -42,13 +41,13 @@ public class JobCompletionModel {
         /**
          * Extension object to hold additional information.
          */
-        private List<FhirExtension> extension;
+        private List<OutputEntryExtension> extension;
 
         public OutputEntry() {
             // Jackson required
         }
 
-        public OutputEntry(ResourceType type, String url, Integer count, List<FhirExtension> extension) {
+        public OutputEntry(ResourceType type, String url, Integer count, List<OutputEntryExtension> extension) {
             this.type = type;
             this.url = url;
             this.count = count;
@@ -67,7 +66,7 @@ public class JobCompletionModel {
             return count;
         }
 
-        public List<FhirExtension> getExtension() {
+        public List<OutputEntryExtension> getExtension() {
             return extension;
         }
     }
@@ -76,30 +75,23 @@ public class JobCompletionModel {
      * An extension field for additional information in an {@link OutputEntry}.
      */
     @JsonInclude(Include.NON_EMPTY)
-    public static class FhirExtension {
+    public static class OutputEntryExtension {
         private String url;
         private String valueString;
         private Long valueDecimal;
-        @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
-        private OffsetDateTime valueDateTime;
 
-        public FhirExtension() {
+        public OutputEntryExtension() {
             // Jackson required
         }
 
-        public FhirExtension(String url, String valueString) {
+        public OutputEntryExtension(String url, String valueString) {
             this.url = url;
             this.valueString = valueString;
         }
 
-        public FhirExtension(String url, Long valueDecimal) {
+        public OutputEntryExtension(String url, Long valueDecimal) {
             this.url = url;
             this.valueDecimal = valueDecimal;
-        }
-
-        public FhirExtension(String url, OffsetDateTime date) {
-            this.url = url;
-            this.valueDateTime = date;
         }
 
         public String getUrl() {
@@ -113,10 +105,6 @@ public class JobCompletionModel {
         public Long getValueDecimal() {
             return valueDecimal;
         }
-
-        public OffsetDateTime getValueDateTime() {
-            return valueDateTime;
-        }
     }
 
     /**
@@ -129,37 +117,30 @@ public class JobCompletionModel {
      * The full request of the original request URL
      */
     private String request;
-
-    /**
-     * Do requests to NDJSON files require an access token. Part of the FHIR spec.
-     */
     private final boolean requiresAccessToken = true;
-
-    /**
-     * The output entries
-     */
     private List<OutputEntry> output;
-
-    /**
-     * The Operational Outcome entries
-     */
     private List<OutputEntry> error;
 
-    /**
-     * The FHIR extensions associated with this job
-     */
-    private List<FhirExtension> extension;
+    @JsonInclude(Include.NON_NULL)
+    private Map<String, Object> encryptionParameters;
 
     public JobCompletionModel() {
         // Jackson required
     }
 
-    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, List<OutputEntry> error, List<FhirExtension> extension) {
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, List<OutputEntry> error) {
         this.transactionTime = transactionTime;
         this.request = request;
         this.output = output;
         this.error = error;
-        this.extension = extension != null && extension.isEmpty() ? null : extension;
+    }
+
+    public JobCompletionModel(OffsetDateTime transactionTime, String request, List<OutputEntry> output, List<OutputEntry> error, Map<String, Object> encryptionParameters) {
+        this.transactionTime = transactionTime;
+        this.request = request;
+        this.output = output;
+        this.error = error;
+        this.encryptionParameters = encryptionParameters;
     }
 
     public OffsetDateTime getTransactionTime() {
@@ -198,11 +179,11 @@ public class JobCompletionModel {
         this.error = error;
     }
 
-    public List<FhirExtension> getExtension() {
-        return extension;
+    public Map<String, Object> getEncryptionParameters() {
+        return encryptionParameters;
     }
 
-    public void setExtension(List<FhirExtension> extension) {
-        this.extension = extension;
+    public void setEncryptionParameters(Map<String, Object> encryptionParameters) {
+        this.encryptionParameters = encryptionParameters;
     }
 }

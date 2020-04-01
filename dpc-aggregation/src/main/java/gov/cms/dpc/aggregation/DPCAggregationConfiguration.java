@@ -93,7 +93,6 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         return pollingFrequency;
     }
 
-    @Override
     public int getJobTimeoutInSeconds() {
         return jobTimeoutInSeconds;
     }

@@ -13,9 +13,6 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-20920812471"/>
-            <meta>
-               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
-            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>

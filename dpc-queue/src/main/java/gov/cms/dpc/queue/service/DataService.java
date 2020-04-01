@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -49,19 +48,14 @@ public class DataService {
      * @param organizationID UUID of organization
      * @param providerID UUID of provider
      * @param patientIDs List of patient String UUIDs
-     * @param since
-     * @param transactionTime
      * @param resourceTypes List of ResourceType data to retrieve
      * @return Resource
      */
-    // Code climate complains about 6 parameters (2 too many), not planning to fix this
     public Resource retrieveData(UUID organizationID,
                                  UUID providerID,
                                  List<String> patientIDs,
-                                 OffsetDateTime since,
-                                 OffsetDateTime transactionTime,
                                  ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), since, transactionTime);
+        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes));
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
         if (optionalBatches.isPresent()) {

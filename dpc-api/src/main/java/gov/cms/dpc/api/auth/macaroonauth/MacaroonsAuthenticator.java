@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.auth.macaroonauth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -26,7 +25,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
     private final IGenericClient client;
 
     @Inject
-    public MacaroonsAuthenticator(@Named("attribution") IGenericClient client) {
+    public MacaroonsAuthenticator(IGenericClient client) {
         this.client = client;
     }
 
