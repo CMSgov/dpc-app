@@ -13,11 +13,14 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -25,6 +28,8 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class DataService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataService.class);
 
     private IJobQueue queue;
     private String exportPath;
@@ -48,17 +53,18 @@ public class DataService {
         UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), since, transactionTime);
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
-        if (optionalBatches.isEmpty()) {
-            throw new DataRetrievalException("Failed to retrieve data");
+        if (optionalBatches.isPresent()) {
+            List<JobQueueBatch> batches = optionalBatches.get();
+            List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).collect(Collectors.toList());
+            if (files.size() == 1 && files.get(0).getResourceType() == ResourceType.OperationOutcome) {
+                return assembleOperationOutcome(batches);
+            } else {
+                return assembleBundleFromBatches(batches, Arrays.asList(resourceTypes));
+            }
         }
 
-        List<JobQueueBatch> batches = optionalBatches.get();
-        List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).collect(Collectors.toList());
-        if (files.size() == 1 && files.get(0).getResourceType() == ResourceType.OperationOutcome) {
-            return assembleOperationOutcome(batches);
-        } else {
-            return assembleBundleFromBatches(batches, Arrays.asList(resourceTypes));
-        }
+        LOGGER.error("No data returned from queue for job, jobID: {}; jobTimeout: {}", jobID, jobTimeoutInSeconds);
+        throw new DataRetrievalException("Failed to retrieve data");
     }
 
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {
@@ -101,6 +107,7 @@ public class DataService {
         if (jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED)) {
             return batches;
         } else if (jobStatusSet.contains(JobStatus.FAILED)) {
+            LOGGER.error("Job failed; jobID: {}, orgID: {}", jobID, organizationId);
             throw new DataRetrievalException("Failed to retrieve batches");
         } else {
             throw new DataRetrievalRetryException();
@@ -115,7 +122,7 @@ public class DataService {
                 .flatMap(List::stream)
                 .filter(bf -> resourceTypes.contains(bf.getResourceType()))
                 .forEach(batchFile -> {
-                    java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
+                    Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
                     addResourceEntries(Resource.class, path, bundle);
                 });
 
@@ -132,6 +139,7 @@ public class DataService {
                 bundle.addEntry().setResource(r);
             });
         } catch (IOException e) {
+            LOGGER.error("Unable to read resource", e);
             throw new DataRetrievalException(String.format("Unable to read resource because %s", e.getMessage()));
         }
     }
@@ -144,24 +152,25 @@ public class DataService {
                 .map(Optional::get)
                 .findFirst();
 
+        if (batchFile.isPresent()) {
+            OperationOutcome outcome = new OperationOutcome();
+            Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.get().getFileName()));
+            try (BufferedReader br = Files.newBufferedReader(path)) {
+                br.lines()
+                        .map(line -> fhirContext.newJsonParser().parseResource(OperationOutcome.class, line))
+                        .map(OperationOutcome::getIssue)
+                        .flatMap(List::stream)
+                        .forEach(outcome::addIssue);
+            } catch (IOException e) {
+                LOGGER.error("Unable to read OperationOutcome", e);
+                throw new DataRetrievalException(String.format("Unable to read OperationOutcome because %s", e.getMessage()));
+            }
 
-        if (batchFile.isEmpty()) {
-            throw new DataRetrievalException("Failed to retrieve operationOutcome");
+            return outcome;
         }
 
-        OperationOutcome outcome = new OperationOutcome();
-        java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.get().getFileName()));
-        try (BufferedReader br = Files.newBufferedReader(path)) {
-            br.lines()
-                    .map(line -> fhirContext.newJsonParser().parseResource(OperationOutcome.class, line))
-                    .map(OperationOutcome::getIssue)
-                    .flatMap(List::stream)
-                    .forEach(outcome::addIssue);
-        } catch (IOException e) {
-            throw new DataRetrievalException(String.format("Unable to read OperationOutcome because %s", e.getMessage()));
-        }
-
-        return outcome;
+        LOGGER.error("No batch files found");
+        throw new DataRetrievalException("Failed to retrieve operationOutcome");
     }
 
 }
