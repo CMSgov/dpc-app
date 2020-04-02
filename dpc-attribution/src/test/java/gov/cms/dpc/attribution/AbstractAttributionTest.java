@@ -3,7 +3,6 @@ package gov.cms.dpc.attribution;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.attribution.service.DataService;
 import gov.cms.dpc.attribution.service.LookBackService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.ConfigOverride;
@@ -29,7 +28,6 @@ public abstract class AbstractAttributionTest {
     protected static TestSupport APPLICATION = new TestSupport(DPCAttributionService.class,"ci.application.conf", ConfigOverride.config(KEY_PREFIX, "", ""),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));;
     protected static LookBackService lookBackService;
-    protected static DataService dataService;
 
     protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 
@@ -38,8 +36,7 @@ public abstract class AbstractAttributionTest {
     @BeforeAll
     public static void initDB() throws Exception {
         lookBackService = Mockito.mock(LookBackService.class);
-        dataService = Mockito.mock(DataService.class);
-        APPLICATION.setTestServiceModule(new TestServiceModule(lookBackService, dataService));
+        APPLICATION.setTestServiceModule(new TestServiceModule(lookBackService));
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate" , "ci.application.conf");
         APPLICATION.getApplication().run("seed", "ci.application.conf");
@@ -47,7 +44,7 @@ public abstract class AbstractAttributionTest {
 
     @AfterEach
     public void teardown() {
-        Mockito.reset(lookBackService, dataService);
+        Mockito.reset(lookBackService);
     }
 
     @AfterAll

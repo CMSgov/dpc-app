@@ -8,6 +8,7 @@ import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderQuotedNames;
@@ -76,5 +77,11 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Singleton
     public MetricRegistry provideMetricRegistry() {
         return getEnvironment().metrics();
+    }
+
+    @Provides
+    @JobTimeout
+    public int provideJobTimeoutInSeconds() {
+        return getConfiguration().getJobTimeoutInSeconds();
     }
 }

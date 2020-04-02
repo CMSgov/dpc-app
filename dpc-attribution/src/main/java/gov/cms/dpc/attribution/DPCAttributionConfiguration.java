@@ -54,6 +54,12 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @NotEmpty
     private String exportPath;
 
+    private int jobTimeoutInSeconds = 30;
+
+    public int getJobTimeoutInSeconds() {
+        return jobTimeoutInSeconds;
+    }
+
     public String getExportPath() {
         return exportPath;
     }

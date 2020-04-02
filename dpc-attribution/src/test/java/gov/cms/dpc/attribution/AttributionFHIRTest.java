@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.attribution.service.DataService;
 import gov.cms.dpc.attribution.service.LookBackService;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -43,7 +42,6 @@ class AttributionFHIRTest {
     protected static TestSupport APPLICATION = new TestSupport(DPCAttributionService.class,"ci.application.conf", ConfigOverride.config(KEY_PREFIX, "", ""),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));;
     protected static LookBackService lookBackService;
-    protected static DataService dataService;
 
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations.csv";
@@ -54,8 +52,7 @@ class AttributionFHIRTest {
     @BeforeAll
     static void setup() throws Exception {
         lookBackService = Mockito.mock(LookBackService.class);
-        dataService = Mockito.mock(DataService.class);
-        APPLICATION.setTestServiceModule(new TestServiceModule(lookBackService, dataService));
+        APPLICATION.setTestServiceModule(new TestServiceModule(lookBackService));
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
@@ -85,7 +82,7 @@ class AttributionFHIRTest {
 
     @AfterEach
     public void mockTearDown() {
-        Mockito.reset(lookBackService, dataService);
+        Mockito.reset(lookBackService);
     }
 
     @TestFactory
