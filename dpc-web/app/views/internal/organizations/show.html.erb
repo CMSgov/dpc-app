@@ -62,11 +62,12 @@
         </div>
 
         <div class="ds-u-margin-bottom--1">
-          <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
           <% if @organization.npi.present? %>
-            <%= @organization.npi %>
+            <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
+              <%= @organization.npi %>
           <% else %>
-            <span class="ds-u-color--muted"><%= @organization.provider_id %></span>
+            <label class="ds-u-margin-right--1 ds-u-color--muted">Provider ID (System-generated):</label>
+              <div class="ds-u-color--muted"><%= @organization.provider_id %></div>
           <% end %>
         </div>
 
