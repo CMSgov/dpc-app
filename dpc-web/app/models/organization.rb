@@ -41,7 +41,7 @@ class Organization < ApplicationRecord
     if health_it_vendor?
       registered_organizations.count.positive?
     else
-      registered_organizations.count.positive? && npi.present?
+      registered_organizations.count.positive?
     end
   end
 
@@ -58,7 +58,7 @@ class Organization < ApplicationRecord
   end
 
   def external_identifier
-    health_it_vendor? ? vendor_id : npi
+    health_it_vendor? ? vendor_id : provider_identifier
   end
 
   def registered_api_envs
@@ -116,4 +116,8 @@ def generate_vendor_id
     vendor_id = "V_#{SecureRandom.alphanumeric(10)}"
     break vendor_id unless Organization.where(vendor_id: vendor_id).exists?
   end
+end
+
+def provider_identifier
+  npi.present? ? npi : provider_id
 end
