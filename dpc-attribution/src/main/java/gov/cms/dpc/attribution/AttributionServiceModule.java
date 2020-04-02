@@ -11,6 +11,7 @@ public class AttributionServiceModule extends DropwizardAwareModule<DPCAttributi
 
     @Override
     public void configure(Binder binder) {
+        //Not used
     }
 
     @Provides
