@@ -54,13 +54,13 @@ RSpec.describe Organization, type: :model do
   describe '#assign_vendor_id' do
     it 'sets vendor_id if vendor_id is not present' do
       org = create(:organization, vendor_id: nil)
-      org.assign_vendor_id
+      org.assign_id
       expect(org.vendor_id).to be_present
     end
 
     it 'does not set vendor_id if vendor_id is present' do
       org = create(:organization, vendor_id: 'V_111111')
-      org.assign_vendor_id
+      org.assign_id
       expect(org.vendor_id).to eq('V_111111')
     end
   end
@@ -96,7 +96,7 @@ RSpec.describe Organization, type: :model do
         expect(org.api_credentialable?).to be false
       end
 
-      it 'returns false if registered org present but no npi' do
+      it 'returns true if registered org present but no npi' do
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
         org = create(:organization, :sandbox_enabled, organization_type: 'primary_care_clinic', npi: nil)
 
