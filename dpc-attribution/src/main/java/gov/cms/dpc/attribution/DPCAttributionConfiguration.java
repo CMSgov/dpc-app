@@ -56,6 +56,12 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     private int jobTimeoutInSeconds = 30;
 
+    private boolean mockLookback = false;
+
+    public boolean isMockLookback() {
+        return mockLookback;
+    }
+
     public int getJobTimeoutInSeconds() {
         return jobTimeoutInSeconds;
     }
