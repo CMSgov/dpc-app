@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.service;
 
+import gov.cms.dpc.queue.service.DataService;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
