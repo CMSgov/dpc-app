@@ -6,6 +6,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 public class LookBackServiceImpl implements  LookBackService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LookBackService.class);
     private DataService dataService;
 
     @Inject
@@ -32,9 +35,11 @@ public class LookBackServiceImpl implements  LookBackService {
             if (resource instanceof Bundle) {
                 return hasClaimWithin((Bundle) resource, providerID, organizationID, withinMonth);
             } else {
+                LOGGER.error("Data service returned something other than a bundle");
                 throw new WebApplicationException("Failed to look back", HttpStatus.INTERNAL_SERVER_ERROR_500);
             }
         } catch (Exception e) {
+            LOGGER.error("Look back failed because: {}", e.getMessage(), e);
             throw new WebApplicationException("Failed to look back", HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
     }
@@ -52,6 +57,6 @@ public class LookBackServiceImpl implements  LookBackService {
     private long getMonthsDifference(Date date1, Date date2) {
         YearMonth m1 = YearMonth.from(date1.toInstant().atZone(ZoneOffset.UTC));
         YearMonth m2 = YearMonth.from(date2.toInstant().atZone(ZoneOffset.UTC));
-        return StrictMath.abs(ChronoUnit.MONTHS.between(m1, m2));
+        return ChronoUnit.MONTHS.between(m1, m2);
     }
 }
