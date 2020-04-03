@@ -16,7 +16,7 @@ public class AttributionServiceModule extends DropwizardAwareModule<DPCAttributi
 
     @Provides
     LookBackService provideLookBackService(DataService dataService) {
-        return getConfiguration().isMockLookback() ? (orgId, patientID, providerID, withinMonth) -> true
+        return getConfiguration().isSkipLookBack() ? (orgId, patientID, providerID, withinMonth) -> true
                 : new LookBackServiceImpl(dataService);
     }
 }

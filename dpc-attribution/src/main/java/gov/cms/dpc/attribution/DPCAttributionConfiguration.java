@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 
@@ -54,12 +55,20 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @NotEmpty
     private String exportPath;
 
+    @Min(1)
     private int jobTimeoutInSeconds = 30;
 
-    private boolean mockLookback = false;
+    private boolean skipLookBack = false;
 
-    public boolean isMockLookback() {
-        return mockLookback;
+    @Min(1)
+    private int lookBackWithinMonths = 18;
+
+    public int getLookBackWithinMonths() {
+        return lookBackWithinMonths;
+    }
+
+    public boolean isSkipLookBack() {
+        return skipLookBack;
     }
 
     public int getJobTimeoutInSeconds() {
@@ -69,11 +78,7 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     public String getExportPath() {
         return exportPath;
     }
-
-    public void setExportPath(String exportPath) {
-        this.exportPath = exportPath;
-    }
-
+    
     @Override
     public DataSourceFactory getDatabase() {
         return database;

@@ -97,7 +97,7 @@ public class GroupResource extends AbstractGroupResource {
                 .stream()
                 .filter(g -> {
                     String patientID = Iterables.get(Splitter.on('/').split(g.getEntity().getReference()), 1);
-                    return !lookBackService.isValidProviderPatientRelation(organizationID, UUID.fromString(patientID), providers.get(0).getID(), 18);
+                    return !lookBackService.isValidProviderPatientRelation(organizationID, UUID.fromString(patientID), providers.get(0).getID(), config.getLookBackWithinMonths());
                 })
                 .collect(Collectors.toList());
 

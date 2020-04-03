@@ -3,18 +3,16 @@ package gov.cms.dpc.attribution;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.attribution.service.LookBackService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 
@@ -25,9 +23,10 @@ public abstract class AbstractAttributionTest {
     private static final String KEY_PREFIX = "dpc.attribution";
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    protected static TestSupport APPLICATION = new TestSupport(DPCAttributionService.class,"ci.application.conf", ConfigOverride.config(KEY_PREFIX, "", ""),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));;
-    protected static LookBackService lookBackService;
+    protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
+            ConfigOverride.config(KEY_PREFIX, "", ""),
+            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"),
+            ConfigOverride.config(KEY_PREFIX, "skipLookBack", "true"));
 
     protected static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
 
@@ -35,17 +34,11 @@ public abstract class AbstractAttributionTest {
 
     @BeforeAll
     public static void initDB() throws Exception {
-        lookBackService = Mockito.mock(LookBackService.class);
-        APPLICATION.setTestServiceModule(new TestServiceModule(lookBackService));
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate" , "ci.application.conf");
         APPLICATION.getApplication().run("seed", "ci.application.conf");
     }
 
-    @AfterEach
-    public void teardown() {
-        Mockito.reset(lookBackService);
-    }
 
     @AfterAll
     public static void shutdown() throws IOException {

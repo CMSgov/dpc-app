@@ -4,14 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
-import gov.cms.dpc.attribution.TestServiceModule;
-import gov.cms.dpc.attribution.TestSupport;
-import gov.cms.dpc.attribution.service.LookBackService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.JobTestUtils;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.DropwizardTestSupport;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import javax.ws.rs.client.Client;
 
@@ -36,18 +34,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 class ExpirationJobTest {
     private static final String KEY_PREFIX = "dpc.attribution";
-    private static final TestSupport APPLICATION = new TestSupport(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
-            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
+    protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf",
+            ConfigOverride.config(KEY_PREFIX, "", ""),
+            ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"),
+            ConfigOverride.config(KEY_PREFIX, "skipLookBack", "true"));
     private static final String PROVIDER_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
     private static final FhirContext ctx = FhirContext.forDstu3();
-    protected LookBackService lookBackService;
     private Client client;
 
     @BeforeEach
     void initDB() throws Exception {
         JobTestUtils.resetScheduler();
-        lookBackService = Mockito.mock(LookBackService.class);
-        APPLICATION.setTestServiceModule(new TestServiceModule(lookBackService));
         APPLICATION.before();
         APPLICATION.getApplication().run("db", "migrate", "ci.application.conf");
         // Seed the database, but use a really early time
@@ -64,7 +61,6 @@ class ExpirationJobTest {
 
     @Test
     void test() throws InterruptedException {
-        Mockito.when(lookBackService.isValidProviderPatientRelation(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong())).thenReturn(true);
 
         // Manually add a new relationship with a current creation timestamp
         final String newPatientID = "test-new-patient-id";
