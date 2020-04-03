@@ -64,7 +64,7 @@ public class DataService {
             if (files.size() == 1 && files.get(0).getResourceType() == ResourceType.OperationOutcome) {
                 return assembleOperationOutcome(batches);
             } else {
-                return assembleBundleFromBatches(batches, Arrays.asList(resourceTypes));
+                return assembleBundleFromBatches(batches, List.of(resourceTypes));
             }
         }
 
@@ -119,14 +119,13 @@ public class DataService {
         }
     }
 
-    // Codeclimate doesn't seem to see resourceType parameter being used
     private Bundle assembleBundleFromBatches(List<JobQueueBatch> batches, List<ResourceType> resourceTypes) {
         final Bundle bundle = new Bundle().setType(Bundle.BundleType.SEARCHSET);
-
+        List<ResourceType> nonEmptyResourceTypes = resourceTypes == null ? new ArrayList<>() : resourceTypes;
         batches.stream()
                 .map(JobQueueBatch::getJobQueueBatchFiles)
                 .flatMap(List::stream)
-                .filter(bf -> resourceTypes.contains(bf.getResourceType()))
+                .filter(bf -> nonEmptyResourceTypes.contains(bf.getResourceType()))
                 .forEach(batchFile -> {
                     Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
                     addResourceEntries(Resource.class, path, bundle);
