@@ -7,6 +7,7 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;
+import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.Configuration;
 
 import java.util.UUID;
@@ -39,6 +40,7 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
 
         // Bind the healthcheck
         binder.bind(JobQueueHealthCheck.class);
+        binder.bind(DataService.class);
     }
 
     @Provides
