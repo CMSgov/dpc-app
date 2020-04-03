@@ -22,7 +22,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -120,12 +123,16 @@ public class DataService {
     }
 
     private Bundle assembleBundleFromBatches(List<JobQueueBatch> batches, List<ResourceType> resourceTypes) {
+        if (resourceTypes == null || resourceTypes.isEmpty()) {
+            throw new DataRetrievalException("Need to pass in resource types");
+        }
+
         final Bundle bundle = new Bundle().setType(Bundle.BundleType.SEARCHSET);
-        List<ResourceType> nonEmptyResourceTypes = resourceTypes == null ? new ArrayList<>() : resourceTypes;
+
         batches.stream()
                 .map(JobQueueBatch::getJobQueueBatchFiles)
                 .flatMap(List::stream)
-                .filter(bf -> nonEmptyResourceTypes.contains(bf.getResourceType()))
+                .filter(bf -> resourceTypes.contains(bf.getResourceType()))
                 .forEach(batchFile -> {
                     Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
                     addResourceEntries(Resource.class, path, bundle);
@@ -177,5 +184,4 @@ public class DataService {
         LOGGER.error("No batch files found");
         throw new DataRetrievalException("Failed to retrieve operationOutcome");
     }
-
 }
