@@ -9,10 +9,7 @@ import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,13 +131,27 @@ public class DataService {
                 .filter(bf -> resourceTypes.contains(bf.getResourceType()))
                 .forEach(batchFile -> {
                     Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
-                    addResourceEntries(Resource.class, path, bundle);
+                    Class<? extends Resource> typeClass = getClassForResourceType(batchFile.getResourceType());
+                    addResourceEntries(typeClass, path, bundle);
                 });
 
 
         // set a bundle id here? anything else?
         bundle.setId(UUID.randomUUID().toString());
         return bundle.setTotal(bundle.getEntry().size());
+    }
+
+    private Class<? extends Resource> getClassForResourceType(ResourceType resourceType) {
+        switch(resourceType) {
+            case Coverage:
+                return Coverage.class;
+            case ExplanationOfBenefit:
+                return ExplanationOfBenefit.class;
+            case Patient:
+                return Patient.class;
+            default:
+                throw new DataRetrievalException("Unexpected resource type: " + resourceType);
+        }
     }
 
     private void addResourceEntries(Class<? extends Resource> clazz, Path path, Bundle bundle) {
