@@ -51,17 +51,54 @@ RSpec.describe Organization, type: :model do
     end
   end
 
+  describe '#assign_provider_id' do
+    it 'sets provider_id for provider organization if provider_id is not present' do
+      org = create(:organization, provider_id: nil)
+      org.assign_id
+      expect(org.provider_id).to be_present
+    end
+
+    it 'does not set provider_id for provider organization if provider_id is present' do
+      org = create(:organization, provider_id: 'P_111111')
+      org.assign_id
+      expect(org.provider_id).to eq('P_111111')
+    end
+  end
+
   describe '#assign_vendor_id' do
-    it 'sets vendor_id if vendor_id is not present' do
-      org = create(:organization, vendor_id: nil)
+    it 'sets vendor_id for health_it_vendor if vendor_id is not present' do
+      org = create(:organization, organization_type: 'health_it_vendor', vendor_id: nil)
       org.assign_id
       expect(org.vendor_id).to be_present
     end
 
-    it 'does not set vendor_id if vendor_id is present' do
-      org = create(:organization, vendor_id: 'V_111111')
+    it 'does not set vendor_id for health_it_vendor if vendor_id is present' do
+      org = create(:organization, organization_type: 'health_it_vendor', vendor_id: 'V_111111')
       org.assign_id
       expect(org.vendor_id).to eq('V_111111')
+    end
+  end
+
+  describe '#external_identifier' do
+    it 'returns npi if npi is present' do
+      org = create(:organization)
+      npi = org.npi
+
+      expect(org.external_identifier).to eq(npi)
+    end
+
+    it 'returns provider_id if npi is not present' do
+      org = create(:organization, npi: nil)
+      provider_id = org.provider_id
+
+      expect(org.external_identifier).to eq(provider_id)
+    end
+
+    it 'returns vendor_id if organization is health_it_vendor' do
+      org = create(:organization, organization_type: 'health_it_vendor')
+      vendor_id = org.vendor_id
+
+      expect(org.external_identifier).to eq(vendor_id)
     end
   end
 
@@ -90,15 +127,15 @@ RSpec.describe Organization, type: :model do
         expect(org.api_credentialable?).to be true
       end
 
-      it 'returns false if npi present but no registered org' do
-        org = create(:organization, organization_type: 'primary_care_clinic', npi: SecureRandom.uuid)
-
-        expect(org.api_credentialable?).to be false
-      end
-
       it 'returns true if registered org present but no npi' do
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
         org = create(:organization, :sandbox_enabled, organization_type: 'primary_care_clinic', npi: nil)
+
+        expect(org.api_credentialable?).to be true
+      end
+
+      it 'returns false if npi present but no registered org' do
+        org = create(:organization, organization_type: 'primary_care_clinic', npi: SecureRandom.uuid)
 
         expect(org.api_credentialable?).to be false
       end
