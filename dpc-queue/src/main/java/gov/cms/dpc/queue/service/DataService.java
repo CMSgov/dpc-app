@@ -64,7 +64,7 @@ public class DataService {
             if (files.size() == 1 && files.get(0).getResourceType() == ResourceType.OperationOutcome) {
                 return assembleOperationOutcome(batches);
             } else {
-                return assembleBundleFromBatches(batches, Arrays.asList(resourceTypes));
+                return assembleBundleFromBatches(batches, List.of(resourceTypes));
             }
         }
 
@@ -119,8 +119,11 @@ public class DataService {
         }
     }
 
-    // Codeclimate doesn't seem to see resourceType parameter being used
     private Bundle assembleBundleFromBatches(List<JobQueueBatch> batches, List<ResourceType> resourceTypes) {
+        if (resourceTypes == null || resourceTypes.isEmpty()) {
+            throw new DataRetrievalException("Need to pass in resource types");
+        }
+
         final Bundle bundle = new Bundle().setType(Bundle.BundleType.SEARCHSET);
 
         batches.stream()
@@ -178,5 +181,4 @@ public class DataService {
         LOGGER.error("No batch files found");
         throw new DataRetrievalException("Failed to retrieve operationOutcome");
     }
-
 }

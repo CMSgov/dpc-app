@@ -100,6 +100,18 @@ public class DataServiceTest{
         Assertions.assertTrue(resource instanceof OperationOutcome);
     }
 
+    @Test
+    public void whenPassingInNoResourceTypes() throws IllegalAccessException {
+        UUID orgID = UUID.randomUUID();
+        UUID providerID = UUID.randomUUID();
+        UUID patientID = UUID.randomUUID();
+
+        workJob(false, ResourceType.ExplanationOfBenefit);
+        Assertions.assertThrows(DataRetrievalException.class, () -> {
+            dataService.retrieveData(orgID, providerID, Collections.singletonList(patientID.toString()));
+        });
+    }
+
     private void workJob(boolean failBatch, ResourceType resourceType) throws IllegalAccessException {
         Mockito.doAnswer((mock) -> {
             Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
