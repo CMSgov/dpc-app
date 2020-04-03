@@ -15,10 +15,14 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
+import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.fhir.validations.ValidationHelpers;
+import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
@@ -29,9 +33,11 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
@@ -46,11 +52,13 @@ public class PatientResource extends AbstractPatientResource {
 
     private final IGenericClient client;
     private final FhirValidator validator;
+    private final DataService dataService;
 
     @Inject
-    PatientResource(@Named("attribution") IGenericClient client, FhirValidator validator) {
+    public PatientResource(@Named("attribution") IGenericClient client, FhirValidator validator, DataService dataService) {
         this.client = client;
         this.validator = validator;
+        this.dataService = dataService;
     }
 
     @GET
@@ -147,6 +155,56 @@ public class PatientResource extends AbstractPatientResource {
                 .execute();
     }
 
+    @GET
+    @FHIR
+    @Path("/{patientID}/$everything")
+    @PathAuthorizer(type = ResourceType.Patient, pathParam = "patientID")
+    @Timed
+    @ExceptionMetered
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
+    @ApiOperation(value = "Fetch entire Patient record", notes = "Fetch entire record for Patient with given ID synchronously. " +
+            "All resources available for the Patient are included in the result Bundle.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Cannot find Patient record with given ID"),
+            @ApiResponse(code = 504, message = "", response = OperationOutcome.class),
+            @ApiResponse(code = 500, message = "A system error occurred", response = OperationOutcome.class)
+    })
+    @Override
+    public Bundle everything(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
+                               @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance provenance,
+                               @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId) {
+
+        final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
+        final UUID providerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
+        Practitioner provider = this.client
+                .read()
+                .resource(Practitioner.class)
+                .withId(providerId.toString())
+                .encodedJson()
+                .execute();
+
+        if (provider == null) {
+            throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
+        }
+
+        final Patient patient = getPatient(patientId);
+        final String patientMbi = FHIRExtractors.getPatientMBI(patient);
+
+        if (!isPatientInRoster(patientId, FHIRExtractors.getProviderNPI(provider), organization.getID())) {
+            throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
+        }
+
+        final UUID orgId = organization.getID();
+        Resource result = dataService.retrieveData(orgId, providerId, List.of(patientMbi),
+                ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
+        if (ResourceType.Bundle.equals(result.getResourceType())) {
+            return (Bundle) result;
+        }
+
+        throw new WebApplicationException(HttpStatus.INTERNAL_SERVER_ERROR_500);
+    }
+
     @DELETE
     @FHIR
     @Path("/{patientID}")
@@ -173,7 +231,7 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Update Patient record", notes = "Update specific Patient record." +
-            "<p>Currently, this method only allows for updating of the Patient first/last name, and BirthDate.")
+            "<p>Currently, this method allows for updating of only the Patient first name, last name, and birthdate.")
     @ApiResponses(value = {
             @ApiResponse(code = 404, message = "Unable to find Patient to update"),
             @ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile")
@@ -200,7 +258,7 @@ public class PatientResource extends AbstractPatientResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Validate Patient resource", notes = "Validates the given resource against the " + PatientProfile.PROFILE_URI + " profile." +
-            "<p>This method always returns a 200 status, even in respond to a non-conformant resource.")
+            "<p>This method always returns a 200 status, even in response to a non-conformant resource.")
     @Override
     public IBaseOperationOutcome validatePatient(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, @ApiParam Parameters parameters) {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
@@ -218,5 +276,31 @@ public class PatientResource extends AbstractPatientResource {
                 }
             }
         }
+    }
+
+    private boolean isPatientInRoster(UUID patientId, String providerNpi, UUID organizationId) {
+        Bundle providerRosters = client.search()
+                .forResource(Group.class)
+                .where(Group.CHARACTERISTIC_VALUE
+                        .withLeft(Group.CHARACTERISTIC.exactly().code("attributed-to"))
+                        .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), providerNpi)))
+                .withTag("", organizationId.toString())
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        for (Bundle.BundleEntryComponent bec : providerRosters.getEntry()) {
+            Group roster = (Group) bec.getResource();
+            List<Group.GroupMemberComponent> members = roster.getMember();
+            List<UUID> rosterPatientIds = members.stream()
+                    .map(Group.GroupMemberComponent::getEntity)
+                    .map(ref -> FHIRExtractors.getEntityUUID(ref.getReference()))
+                    .collect(Collectors.toList());
+            if (rosterPatientIds.contains(patientId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

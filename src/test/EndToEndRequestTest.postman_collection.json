@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ef19bc1b-2082-4b65-b702-79c557084bc2",
+		"_postman_id": "a78786d4-5857-4424-b0cc-3dc336c4128f",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1423,6 +1423,457 @@
                     },
                     "description": "While the export request is being processed, the job url will return a 202 status. When it is completed, a 200 status will be returned, along with JSON containing Job status."
                   },
+					"response": []
+				},
+				{
+					"name": "Patient data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3e50ce2a-4322-4723-981b-31251393b449",
+								"exec": [
+									"require('crypto-js')",
+									"",
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"});",
+									"",
+									"// There should be 2 patients.",
+									"pm.test(\"Patient data correct\", function() {",
+									"    var responseOutput = pm.response.text();",
+									"    var responseLines = responseOutput.trim().split('\\n');",
+									"    pm.expect(responseLines).to.have.lengthOf(3);",
+									"    for (var line of responseLines) {",
+									"        var lineData = JSON.parse(line);",
+									"        pm.expect(lineData.resourceType).to.equal(\"Patient\");",
+									"    }",
+									"});",
+									"",
+									"// Verify sha256 checksums",
+									"pm.test(\"Checksums should match\", function() {",
+									"    var output = pm.environment.get(\"patient\")",
+									"    var responseOutput = pm.response.text();",
+									"    ",
+									"    var checksum  = CryptoJS.SHA256(responseOutput);",
+									"    pm.expect(\"sha256:\" + checksum).to.equal(output.extension[0].valueString)",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b848c339-0867-41c0-81e8-326e6da9e6d6",
+								"exec": [
+									"pm.environment.set(\"patient_url\", pm.environment.get(\"patient\").url)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{patient_url}}",
+							"host": [
+								"{{patient_url}}"
+							]
+						},
+						"description": "The patient data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one patient."
+					},
+					"response": []
+				},
+				{
+					"name": "Explanation of Benefit data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "64383543-afd0-4aed-8e62-533892909b98",
+								"exec": [
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"   pm.environment.set(\"file_timestamp\", pm.response.headers.get(\"Last-Modified\"))",
+									"});",
+									"",
+									"// There should be 86 Explanations of Benefits.",
+									"pm.test(\"Explanation of Benefits data correct\", function() {",
+									"    var responseOutput = pm.response.text();",
+									"    var responseLines = responseOutput.trim().split('\\n');",
+									"    pm.expect(responseLines.length).to.be.above(100);",
+									"    for (var line of responseLines) {",
+									"        var lineData = JSON.parse(line);",
+									"        pm.expect(lineData.resourceType).to.equal(\"ExplanationOfBenefit\");",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "61e1278d-0e11-4a4b-97b3-6118ac20a20f",
+								"exec": [
+									"pm.environment.set(\"eob_url\", pm.environment.get(\"eob\").url)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{eob_url}}",
+							"host": [
+								"{{eob_url}}"
+							]
+						},
+						"description": "The explanation of benefits data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one explanation of benefits."
+					},
+					"response": []
+				},
+				{
+					"name": "Coverage data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "756f4c51-bce2-4a77-b3b9-bd7e96d844e5",
+								"exec": [
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"});",
+									"",
+									"// There should be 8 coverage.",
+									"pm.test(\"Coverage data correct\", function() {",
+									"    var responseOutput = pm.response.text();",
+									"    var responseLines = responseOutput.trim().split('\\n');",
+									"    pm.expect(responseLines).to.have.lengthOf(12);",
+									"    for (var line of responseLines) {",
+									"        var lineData = JSON.parse(line);",
+									"        pm.expect(lineData.resourceType).to.equal(\"Coverage\");",
+									"    }",
+									"});",
+									"",
+									"// Verify sha256 checksum",
+									"pm.test(\"Checksum should match\", function() {",
+									"    var output = pm.environment.get(\"coverage\")",
+									"    var responseOutput = pm.response.text();",
+									"    ",
+									"    var checksum  = CryptoJS.SHA256(responseOutput);",
+									"    pm.expect(\"sha256:\" + checksum).to.equal(output.extension[0].valueString)",
+									"    ",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f30dd4c7-de1c-4d75-8119-24935c3e4959",
+								"exec": [
+									"pm.environment.set(\"coverage_url\", pm.environment.get(\"coverage\").url)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{coverage_url}}",
+							"host": [
+								"{{coverage_url}}"
+							]
+						},
+						"description": "The coverage data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one coverage."
+					},
+					"response": []
+				},
+				{
+					"name": "Request Partial Range",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9c3140af-4f5d-493a-85b7-ec73dec7b750",
+								"exec": [
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Range\");",
+									"});",
+									"",
+									"// Should be 10kb total",
+									"pm.test('Should have 10kb of data', function() {",
+									"    pm.expect(pm.response.text().length).to.be.above(10000);",
+									"})",
+									"",
+									"pm.test('Content should be gzipped', function() {",
+									"    pm.response.to.have.header(\"Content-Encoding\", \"gzip\");",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Range",
+								"value": "bytes=0-10240",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{eob_url}}",
+							"host": [
+								"{{eob_url}}"
+							]
+						},
+						"description": "Request a subset of the EOB data to ensure range requests work correctly."
+					},
+					"response": []
+				},
+				{
+					"name": "Request Modified Since",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9c3140af-4f5d-493a-85b7-ec73dec7b750",
+								"exec": [
+									"// Response should be 304",
+									"pm.test('Response should be not-modified', function() {",
+									"    pm.response.to.have.status(304);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "If-Modified-Since",
+								"type": "text",
+								"value": "{{file_timestamp}}"
+							}
+						],
+						"url": {
+							"raw": "{{eob_url}}",
+							"host": [
+								"{{eob_url}}"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Request a subset of the EOB data to ensure range requests work correctly."
+					},
+					"response": []
+				},
+				{
+					"name": "Try export with _since",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "5497fa12-aefd-44c2-9254-2beb51c52e31",
+								"exec": [
+									"// Status should be 202",
+									"pm.test(\"Status is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"// Url for job response should be in content-location header.",
+									"pm.test(\"Content-Location header is present\", function () {",
+									"    pm.response.to.have.header(\"Content-Location\");",
+									"});",
+									"",
+									"if (pm.response.headers.get(\"Content-Location\")) {",
+									"  pm.environment.set(\"since_content_location\", pm.response.headers.get(\"Content-Location\"));",
+									"} else {",
+									"  // Fail the test, no content location.",
+									"  postman.setNextRequest(null);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8b8d6363-b490-428a-bfee-663b184ae05d",
+								"exec": [
+									"console.log(\"Group:\", pm.environment.get(\"attribution_group\"));",
+									"pm.environment.set(\"since_timestamp\", new Date().toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/fhir+json"
+							},
+							{
+								"key": "Prefer",
+								"type": "text",
+								"value": "respond-async"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}/$export?_since={{since_timestamp}}",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Group",
+								"{{attribution_group_id}}",
+								"$export"
+							],
+							"query": [
+								{
+									"key": "_since",
+									"value": "{{since_timestamp}}"
+								}
+							]
+						},
+						"description": "Try the export request again with the _since parameter of the current time. The resultant job should be empty. The request should succeed with a 202 status and the location for the job response in the `content-location` header."
+					},
+					"response": []
+				},
+				{
+					"name": "_since job response",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "28fe7a36-50ab-4e7d-bf21-312b5f5777f3",
+								"exec": [
+									"// Wait between pings",
+									"setTimeout(function() {}, 1000);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "70688a82-d0cf-4802-b1e5-b6ad7357c926",
+								"exec": [
+									"if (pm.response.code == 200) {",
+									"    // Response should have FHIR Content-Type",
+									"    pm.test(\"Content-type is application/json\", function() {",
+									"       pm.response.to.have.header(\"Content-Type\", \"application/json\"); ",
+									"    });",
+									"    ",
+									"    // If response code is 200, check the response and load the urls.",
+									"    pm.test(\"Empty output and no errors\", function() {",
+									"        pm.expect(pm.response.json().error).to.have.lengthOf(0);",
+									"        pm.expect(pm.response.json().output).to.have.lengthOf(0);",
+									"    });",
+									"} else {",
+									"    // If response code is not 200, it should be 202. Assert that, and retry.",
+									"    pm.test(\"Status code is 202\", function () {",
+									"        pm.response.to.have.status(202);",
+									"    });",
+									"    postman.setNextRequest(\"_since job response\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{since_content_location}}",
+							"host": [
+								"{{since_content_location}}"
+							]
+						},
+						"description": "While the export request is being processed, the job url will return a 202 status. When it is completed, a 200 status will be returned, along with JSON containing Job status."
+					},
+					"response": []
+				},
+				{
+					"name": "All data for a patient",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e0daa691-6ba0-4eb8-a86f-d27b006f4749",
+								"exec": [
+									"pm.test(\"Status code should be 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should be a Bundle\", function() {",
+									"    var response = pm.response.json();",
+									"    pm.expect(response.resourceType).to.equal(\"Bundle\")",
+									"",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Provenance",
+								"value": "{{attestationHeader}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient/728b270d-d7de-4143-82fe-d3ccd92cebe4/$everything",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Patient",
+								"728b270d-d7de-4143-82fe-d3ccd92cebe4",
+								"$everything"
+							]
+						}
+					},
 					"response": []
 				}
 			],
