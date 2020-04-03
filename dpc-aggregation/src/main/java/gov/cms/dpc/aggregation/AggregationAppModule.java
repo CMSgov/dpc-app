@@ -9,6 +9,7 @@ import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 
@@ -69,5 +70,11 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
                 config.getRetryCount(),
                 config.getPollingFrequency()
         );
+    }
+
+    @Provides
+    @JobTimeout
+    public int provideJobTimeoutInSeconds() {
+        return getConfiguration().getJobTimeoutInSeconds();
     }
 }
