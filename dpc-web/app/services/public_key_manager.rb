@@ -19,10 +19,8 @@ class PublicKeyManager
     api_client = APIClient.new(api_env)
     api_client.create_public_key(registered_organization.api_id, params: { label: label, public_key: public_key })
 
-    pk_response = api_client.response_body
-
     { response: api_client.response_successful?,
-      message: pk_response }
+      message: api_client.response_body }
   end
 
   def invalid_encoding?(key_string)
