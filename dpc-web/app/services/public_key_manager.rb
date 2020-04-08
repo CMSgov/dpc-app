@@ -21,8 +21,8 @@ class PublicKeyManager
 
     pk_response = api_client.response_body
 
-    return { response: api_client.response_successful?, 
-             message: pk_response }
+    { response: api_client.response_successful?,
+      message: pk_response }
   end
 
   def invalid_encoding?(key_string)
