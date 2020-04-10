@@ -3,6 +3,7 @@ package gov.cms.dpc.common.hibernate.validator;
 import gov.cms.dpc.common.annotations.NoHtml;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
 
 import javax.validation.ConstraintValidator;
@@ -21,7 +22,7 @@ public class NoHtmlValidator implements ConstraintValidator<NoHtml, String> {
         if (StringUtils.isBlank(s)) {
             return true;
         }
-        String safe = Jsoup.clean(s, Whitelist.none());
+        String safe = Jsoup.clean(s, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
         return safe.equals(s);
     }
 }

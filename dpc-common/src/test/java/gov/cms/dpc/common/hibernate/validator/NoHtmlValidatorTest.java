@@ -41,7 +41,8 @@ public class NoHtmlValidatorTest {
                 Arguments.of("hello@gmail.com", true),
                 Arguments.of("<script/>", false),
                 Arguments.of(null, true),
-                Arguments.of("", true)
+                Arguments.of("", true),
+                Arguments.of("hello\n\rbob", true)
         );
     }
 
