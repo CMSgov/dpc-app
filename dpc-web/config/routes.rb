@@ -4,6 +4,7 @@ Rails.application.routes.draw do
     omniauth_callbacks: "internal/auth/omniauth_callbacks"
   }
   devise_for :users, path: 'users', controllers: {
+    confirmations: "confirmations",
     sessions: "users/sessions",
     registrations: "users/registrations",
     passwords: "users/passwords"
