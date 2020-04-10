@@ -9,7 +9,7 @@
         <%= devise_error_messages! %>
 
         <div class="field">
-          <%= f.label :email, class: "ds-c-label" %><br />
+          <%= f.label :email, class: "ds-c-label" %>
           <%= f.email_field :email, autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email), class: "ds-c-field" %>
         </div>
 
