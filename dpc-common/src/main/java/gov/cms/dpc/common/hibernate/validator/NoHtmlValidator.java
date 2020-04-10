@@ -15,6 +15,7 @@ public class NoHtmlValidator implements ConstraintValidator<NoHtml, String> {
 
     @Override
     public void initialize(NoHtml noHtml) {
+        //not used
     }
 
     @Override
