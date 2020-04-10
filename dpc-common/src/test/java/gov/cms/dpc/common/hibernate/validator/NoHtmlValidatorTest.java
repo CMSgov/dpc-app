@@ -39,7 +39,9 @@ public class NoHtmlValidatorTest {
                 Arguments.of("<img src=x onerror=prompt(1234)>", false),
                 Arguments.of("hello", true),
                 Arguments.of("hello@gmail.com", true),
-                Arguments.of("<script/>", false)
+                Arguments.of("<script/>", false),
+                Arguments.of(null, true),
+                Arguments.of("", true)
         );
     }
 
