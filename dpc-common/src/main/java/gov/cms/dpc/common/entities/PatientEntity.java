@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NoHtml;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -21,10 +22,12 @@ public class PatientEntity extends PersonEntity {
 
     public static final long serialVersionUID = 42L;
 
+    @NoHtml
     @NotEmpty
     @Column(name = "beneficiary_id", unique = true)
     private String beneficiaryID;
 
+    @NoHtml
     @Column(name = "mbi_hash")
     private String mbiHash;
 
