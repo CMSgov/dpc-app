@@ -12,6 +12,7 @@ import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
@@ -61,7 +62,7 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle patientSearch(@ApiParam(hidden = true)
                                 @Auth OrganizationPrincipal organization,
                                 @ApiParam(value = "Patient MBI")
-                                @QueryParam(value = Patient.SP_IDENTIFIER) String patientMBI) {
+                                @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI) {
 
         final var request = this.client
                 .search()

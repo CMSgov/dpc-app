@@ -5,6 +5,7 @@ import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.AbstractJobResource;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
@@ -66,7 +67,7 @@ public class JobResource extends AbstractJobResource {
             @ApiResponse(code = 500, message = "Export job has failed with no results"),
             @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class)
     })
-    public Response checkJobStatus(@Auth OrganizationPrincipal organizationPrincipal, @PathParam("jobID") String jobID) {
+    public Response checkJobStatus(@Auth OrganizationPrincipal organizationPrincipal, @PathParam("jobID") @NoHtml String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
         final UUID orgUUID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final List<JobQueueBatch> batches = this.queue.getJobBatches(jobUUID);

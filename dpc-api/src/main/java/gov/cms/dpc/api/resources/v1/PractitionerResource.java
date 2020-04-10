@@ -10,6 +10,7 @@ import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.ValidationHelpers;
@@ -58,7 +59,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     public Bundle practitionerSearch(@ApiParam(hidden = true)
                                      @Auth OrganizationPrincipal organization,
                                      @ApiParam(value = "Provider NPI")
-                                     @QueryParam(value = Practitioner.SP_IDENTIFIER) String providerNPI) {
+                                     @QueryParam(value = Practitioner.SP_IDENTIFIER) @NoHtml String providerNPI) {
 
         // Create search params
         Map<String, List<String>> searchParams = new HashMap<>();
