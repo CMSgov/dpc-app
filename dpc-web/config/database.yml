@@ -23,7 +23,7 @@ default: &default
 
   url: <%= ENV['DATABASE_URL'] %>
   username: <%= ENV['DB_USER'] %>
-  password: <%= ENV['DB_PASS'] %>
+  password: "<%= ENV['DB_PASS'] %>"
 
 
 development: &development
