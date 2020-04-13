@@ -34,10 +34,14 @@ RSpec.describe PublicKeyManager do
           allow(api_client).to receive(:create_public_key)
             .with(registered_org.api_id, params: { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read })
             .and_return(api_client)
+          allow(api_client).to receive(:response_body).and_return('id' => 'none')
           allow(api_client).to receive(:response_successful?).and_return(false)
 
           manager = PublicKeyManager.new(api_env: 'sandbox', registered_organization: registered_org)
-          expect(manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read)).to eq(false)
+
+          new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read)
+
+          expect(new_public_key[:response]).to eq(false)
         end
       end
     end
