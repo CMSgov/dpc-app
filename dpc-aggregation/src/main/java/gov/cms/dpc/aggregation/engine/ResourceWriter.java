@@ -44,9 +44,9 @@ class ResourceWriter {
     /**
      * Create a context for fetching FHIR resources
      * @param fhirContext - the single context for the engine
-     * @param config - config to use for the engine
      * @param job - the context for logging and reporting
      * @param resourceType - the resource type to fetch
+     * @param config - config to use for the engine
      */
     ResourceWriter(FhirContext fhirContext,
                     JobQueueBatch job,
