@@ -87,3 +87,6 @@ test:
 #
 production:
   <<: *default
+
+prod_sbx:
+  <<: *default
