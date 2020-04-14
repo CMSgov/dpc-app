@@ -50,15 +50,22 @@
       <% if prod_sbx? %>
         <%= render "prod_sbx/internal/organization_info_view" %>
       <% else %>
+        <% if @organization.npi.present? %>
           <div class="ds-u-margin-bottom--1">
             <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
               <%= @organization.npi %>
           </div>
-
+        <% else %>
           <div class="ds-u-margin-bottom--1">
-            <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
-            <%= @organization.vendor %>
+            <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
+              <span class="ds-u-color--error-dark">MISSING - necessary for enabling API</span>
           </div>
+        <% end %>
+
+        <div class="ds-u-margin-bottom--1">
+          <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
+          <%= @organization.vendor %>
+        </div>
       <% end %>
     </div>
 

@@ -23,6 +23,9 @@
 /public/assets
 .byebug_history
 
+# Ignore secrets.yml
+/config/secrets.yml
+
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 /public/ig/**/*
