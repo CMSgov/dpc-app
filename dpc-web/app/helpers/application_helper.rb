@@ -43,10 +43,4 @@ module ApplicationHelper
     datetime = DateTime.strptime(str, '%Y-%m-%dT%H:%M:%S')
     datetime.strftime('%m/%d/%Y at %l:%M%p UTC')
   end
-
-  # Environment dependencies
-
-  def prod_sbx?
-    Rails.env.prod_sbx?
-  end
 end

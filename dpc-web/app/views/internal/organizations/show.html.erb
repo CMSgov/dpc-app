@@ -47,7 +47,7 @@
         <%= @organization.organization_type.titleize %>
       </div>
 
-      <% if prod_sbx? %>
+      <% if PROD_SBX %>
         <%= render "prod_sbx/internal/organization_info_view" %>
       <% else %>
         <% if @organization.npi.present? %>

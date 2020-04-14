@@ -18,7 +18,7 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
-  before_save :assign_id
+  before_save :assign_id, if: -> { PROD_SBX }
 
   after_update :update_registered_organizations
 

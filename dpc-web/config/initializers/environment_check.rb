@@ -1,0 +1,1 @@
+PROD_SBX = Rails.env.prod_sbx? ? true : false
