@@ -4,3 +4,5 @@ common: &default_settings
 
   distributed_tracing:
     enabled: false
+
+prod_sbx: &default_settings
