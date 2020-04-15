@@ -798,7 +798,7 @@
 							"script": {
 								"id": "5497fa12-aefd-44c2-9254-2beb51c52e31",
 								"exec": [
-									"// Status should be 204",
+									"// Status should be 202",
 									"pm.test(\"Status is 202\", function () {",
 									"    pm.response.to.have.status(202);",
 									"});",
@@ -857,7 +857,7 @@
 								"$export"
 							]
 						},
-						"description": "After submitting the roster, the export request should succeed, with a 204 status and the location for the job response in the `content-location` header."
+						"description": "After submitting the roster, the export request should succeed, with a 202 status and the location for the job response in the `content-location` header."
 					},
 					"response": []
 				},
@@ -1228,7 +1228,7 @@
 							"script": {
 								"id": "5497fa12-aefd-44c2-9254-2beb51c52e31",
 								"exec": [
-									"// Status should be 204",
+									"// Status should be 202",
 									"pm.test(\"Status is 202\", function () {",
 									"    pm.response.to.have.status(202);",
 									"});",
@@ -1301,7 +1301,7 @@
 								}
 							]
 						},
-						"description": "Try the export request again with the _since parameter of the current time. The resultant job should be empty. The request should succeed with a 204 status and the location for the job response in the `content-location` header."
+						"description": "Try the export request again with the _since parameter of the current time. The resultant job should be empty. The request should succeed with a 202 status and the location for the job response in the `content-location` header."
 					},
 					"response": []
 				},
