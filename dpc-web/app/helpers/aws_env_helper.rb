@@ -2,6 +2,6 @@
 
 module AwsEnvHelper
   def prod_sbx?
-    ENV['AWS_ENV'] == 'prod-sbx' ? true : false
+    ENV['AWS_ENV'] == 'prod-sbx'
   end
 end
