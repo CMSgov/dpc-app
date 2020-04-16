@@ -24,16 +24,16 @@ public class LookBackService {
         this.operationsConfig = operationsConfig;
     }
 
-    public boolean associatedWithRoster(UUID orgID, String providerID, String patientID) {
-        return rosterDAO.withinRoster(orgID, providerID, patientID);
+    public boolean associatedWithRoster(UUID orgID, String providerID, String patientMBI) {
+        return rosterDAO.withinRoster(orgID, UUID.fromString(providerID), patientMBI);
     }
 
     public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationID, String providerID, long withinMonth) {
         Date billingPeriod = Optional.ofNullable(explanationOfBenefit).map(ExplanationOfBenefit::getBillablePeriod).map(Period::getEnd).orElse(null);
         return billingPeriod != null
                 && getMonthsDifference(billingPeriod, operationsConfig.getLookBackDate()) < withinMonth
-                && Optional.of(explanationOfBenefit).map(ExplanationOfBenefit::getProvider).map(Element::getId).orElse("").equals(providerID)
-                && Optional.of(explanationOfBenefit).map(ExplanationOfBenefit::getOrganization).map(Element::getId).orElse("").equals(organizationID.toString());
+                && providerID.equals(Optional.of(explanationOfBenefit).map(ExplanationOfBenefit::getProvider).map(Element::getId).orElse(""))
+                && organizationID.toString().equals(Optional.of(explanationOfBenefit).map(ExplanationOfBenefit::getOrganization).map(Element::getId).orElse(""));
     }
 
     private long getMonthsDifference(Date date1, Date date2) {

@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -174,17 +175,8 @@ public class AggregationEngine implements Runnable {
             // Stop processing when no patients or early shutdown
             while (nextPatientID.isPresent()) {
                 String patientId = nextPatientID.get();
-                if (lookBackService.associatedWithRoster(job.getOrgID(), job.getProviderID(), patientId)) {
-                    Pair<Flowable<List<Resource>>, ResourceType> pair = completeResource(job, patientId, ResourceType.ExplanationOfBenefit);
-                    Boolean hasClaims = pair.getLeft()
-                            .flatMap(Flowable::fromIterable)
-                            .filter(resource -> pair.getRight() == resource.getResourceType() || ResourceType.OperationOutcome == resource.getResourceType())
-                            .any(resource -> resource.getResourceType() == ResourceType.OperationOutcome || lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), job.getProviderID(), operationsConfig.getLookBackMonths()))
-                            .onErrorReturn((error) -> false)
-                            .blockingGet();
-                    if (Boolean.TRUE.equals(hasClaims)) {
-                        this.processJobBatchPartial(job, patientId);
-                    }
+                if (isValidLookBack(job, patientId)) {
+                    this.processJobBatchPartial(job, patientId);
                 }
 
                 // Check if the subscriber is still running before getting the next part of the batch
@@ -209,6 +201,21 @@ public class AggregationEngine implements Runnable {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
             }
         }
+    }
+
+    private boolean isValidLookBack(JobQueueBatch job, String patientId) throws GeneralSecurityException {
+        boolean result = false;
+        if (lookBackService.associatedWithRoster(job.getOrgID(), job.getProviderID(), bbclient.hashMbi(patientId))) {
+            Pair<Flowable<List<Resource>>, ResourceType> pair = completeResource(job, patientId, ResourceType.ExplanationOfBenefit);
+            Boolean hasClaims = pair.getLeft()
+                    .flatMap(Flowable::fromIterable)
+                    .filter(resource -> pair.getRight() == resource.getResourceType())
+                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), job.getProviderID(), operationsConfig.getLookBackMonths()))
+                    .onErrorReturn((error) -> false)
+                    .blockingGet();
+            result = Boolean.TRUE.equals(hasClaims);
+        }
+        return result;
     }
 
     private void calculateFileMetadata(JobQueueBatch job) {

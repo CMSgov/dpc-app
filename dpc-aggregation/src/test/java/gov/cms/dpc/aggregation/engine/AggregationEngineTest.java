@@ -432,7 +432,10 @@ class AggregationEngineTest {
      */
     @Test
     void badPatientIDTest() throws GeneralSecurityException {
+        final var orgID = UUID.randomUUID();
+
         Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(false).when(lookBackService).associatedWithRoster(orgID, TEST_PROVIDER_ID, null);
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
         final List<String> mbis = new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet());
@@ -440,7 +443,6 @@ class AggregationEngineTest {
         mbis.add("-1");
         assertEquals(3, mbis.size());
 
-        final var orgID = UUID.randomUUID();
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
@@ -463,23 +465,23 @@ class AggregationEngineTest {
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
         Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture());
         var values = idCaptor.getAllValues();
-        assertEquals(3,
+        assertEquals(0,
                 values.stream().filter(value -> value.equals("-1")).count(),
-                "Should be 2 invalid ids, 2 method calls x 1 bad-id");
+                "Should be 0 calls, never makes it past lookback");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(3, actual.getJobQueueBatchFiles().size(), "expected 3 (= 2 output + 1 error)"),
-                () -> assertEquals(2, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 2 for the one bad patient (eob + patient)"),
-                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+                () -> assertEquals(2, actual.getJobQueueBatchFiles().size(), "expected 2 (= 2 good patient ids and 1 bad patient id never made past lookback)"),
+                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "bad patient id never makes past lookback"),
+                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
     @Test
-    void multiplePatientsMatchTest() throws GeneralSecurityException {
-        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+    void multiplePatientsMatchTest() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.any());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
         final List<String> mbis = Collections.singletonList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
@@ -503,14 +505,14 @@ class AggregationEngineTest {
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "Should include one file (error)"),
-                () -> assertEquals(2, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "Should include two OperationOutcomes for the one bad Patient ID (EOB and Patient)"),
-                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "Error file should exist"));
+                () -> assertEquals(0, actual.getJobQueueBatchFiles().size(), "Should be no files because it never made it past lookback"),
+                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Should be no files because it never made it past lookback"),
+                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "Error file should not exist"));
     }
 
     @Test
     void testBlueButtonException() throws GeneralSecurityException {
-        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.any());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
         // Test generic runtime exception
@@ -572,15 +574,15 @@ class AggregationEngineTest {
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
-        assertEquals(2, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called once to get the patient, but with errors instead");
+        assertEquals(1, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called once to get the patient, but with errors instead");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
         final var actual = queue.getJobBatches(jobID).stream().findFirst().get();
         var expectedErrorPath = ResourceWriter.formOutputFilePath(exportPath, actual.getBatchID(), ResourceType.OperationOutcome, 0);
         assertAll(() -> assertEquals(JobStatus.COMPLETED, actual.getStatus()),
-                () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
-                () -> assertEquals(1, actual.getJobQueueFile(ResourceType.OperationOutcome).orElseThrow().getCount(), "expected 1 bad patient fetch"),
-                () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+                () -> assertEquals(0, actual.getJobQueueBatchFiles().size(), "expected just a operational outcome"),
+                () -> assertTrue(actual.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "expected 1 bad patient fetch"),
+                () -> assertFalse(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 }

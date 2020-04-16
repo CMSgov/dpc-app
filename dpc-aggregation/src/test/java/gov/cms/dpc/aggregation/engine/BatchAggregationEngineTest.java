@@ -112,6 +112,8 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTest() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
@@ -148,11 +150,13 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobWithBadPatientTest() {
+        final var orgID = UUID.randomUUID();
+
         Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(false).when(lookBackService).associatedWithRoster(orgID,TEST_PROVIDER_ID, null);
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
         // Make a simple job with one resource type
-        final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
@@ -168,14 +172,14 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(4, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
                 () -> assertTrue(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Expect an error"));
 
         // Look at the output files
         final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
-        assertTrue(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 }

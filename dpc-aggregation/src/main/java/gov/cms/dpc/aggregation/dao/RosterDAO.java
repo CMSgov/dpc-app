@@ -2,7 +2,6 @@ package gov.cms.dpc.aggregation.dao;
 
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import gov.cms.dpc.fhir.FHIRExtractors;
 import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.query.Query;
 
@@ -19,7 +18,7 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         super(factory.getSessionFactory());
     }
 
-    public boolean withinRoster(UUID organizationID, String providerID, String patientReference) {
+    public boolean withinRoster(UUID organizationID, UUID providerID, String patientMBIHash) {
 
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
@@ -35,13 +34,11 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
                                 .get(OrganizationEntity_.ID),
                         organizationID));
 
-        final UUID providerUUID = FHIRExtractors.getEntityUUID(providerID);
-        predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID), providerUUID));
+        predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID), providerID));
 
-        final UUID patientID = FHIRExtractors.getEntityUUID(patientReference);
         final Join<RosterEntity, AttributionRelationship> attrJoin = root.join(RosterEntity_.ATTRIBUTIONS);
         final Join<AttributionRelationship, PatientEntity> patientJoin = attrJoin.join(AttributionRelationship_.PATIENT);
-        predicates.add(builder.equal(patientJoin.get(PatientEntity_.id), patientID));
+        predicates.add(builder.equal(patientJoin.get(PatientEntity_.MBI_HASH), patientMBIHash));
 
         query.where(predicates.toArray(new Predicate[0]));
         final Query<Boolean> booleanQuery = this.currentSession().createQuery(query);
