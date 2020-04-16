@@ -53,7 +53,7 @@ class ResourceFetcher {
      * @param mbi to use
      * @return a flow with all the resources for specific patient
      */
-    Flowable<Resource> fetchResources(String mbi) {
+    Flowable<List<Resource>> fetchResources(String mbi) {
         return Flowable.fromCallable(() -> {
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
@@ -65,8 +65,7 @@ class ResourceFetcher {
                 return List.of(firstFetched);
             }
         })
-                .onErrorResumeNext((Throwable error) -> handleError(mbi, error))
-                .flatMap(Flowable::fromIterable);
+                .onErrorResumeNext((Throwable error) -> handleError(mbi, error));
     }
 
     /**

@@ -53,6 +53,9 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     @Min(1)
     private int jobTimeoutInSeconds = 5;
 
+    @Min(0)
+    private int lookBackMonths = 18;
+
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -95,5 +98,9 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     public int getJobTimeoutInSeconds() {
         return jobTimeoutInSeconds;
+    }
+
+    public int getLookBackMonths() {
+        return lookBackMonths;
     }
 }

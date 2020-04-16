@@ -6,7 +6,9 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.LookBackService;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
@@ -25,6 +27,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     public void configure(Binder binder) {
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
+        binder.bind(RosterDAO.class);
+        binder.bind(LookBackService.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -68,7 +72,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
                 config.getResourcesPerFileCount(),
                 config.getExportPath(),
                 config.getRetryCount(),
-                config.getPollingFrequency()
+                config.getPollingFrequency(),
+                config.getLookBackMonths()
         );
     }
 

@@ -15,7 +15,9 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
@@ -46,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AggregationEngine implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AggregationEngine.class);
 
+    private final LookBackService lookBackService;
     private final UUID aggregatorID;
     private final IJobQueue queue;
     private final BlueButtonClient bbclient;
@@ -72,12 +75,13 @@ public class AggregationEngine implements Runnable {
      * @param operationsConfig - The {@link OperationsConfig} to use for writing the output files
      */
     @Inject
-    public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, IJobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig) {
+    public AggregationEngine(@AggregatorID UUID aggregatorID, BlueButtonClient bbclient, IJobQueue queue, FhirContext fhirContext, MetricRegistry metricRegistry, OperationsConfig operationsConfig, LookBackService lookBackService) {
         this.aggregatorID = aggregatorID;
         this.queue = queue;
         this.bbclient = bbclient;
         this.fhirContext = fhirContext;
         this.operationsConfig = operationsConfig;
+        this.lookBackService = lookBackService;
 
         // Metrics
         final var metricFactory = new MetricMaker(metricRegistry, AggregationEngine.class);
@@ -169,7 +173,19 @@ public class AggregationEngine implements Runnable {
 
             // Stop processing when no patients or early shutdown
             while (nextPatientID.isPresent()) {
-                this.processJobBatchPartial(job, nextPatientID.get());
+                String patientId = nextPatientID.get();
+                if (lookBackService.associatedWithRoster(job.getOrgID(), job.getProviderID(), patientId)) {
+                    Pair<Flowable<List<Resource>>, ResourceType> pair = completeResource(job, patientId, ResourceType.ExplanationOfBenefit);
+                    Boolean hasClaims = pair.getLeft()
+                            .flatMap(Flowable::fromIterable)
+                            .filter(resource -> pair.getRight() == resource.getResourceType() || ResourceType.OperationOutcome == resource.getResourceType())
+                            .any(resource -> resource.getResourceType() == ResourceType.OperationOutcome || lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), job.getProviderID(), operationsConfig.getLookBackMonths()))
+                            .onErrorReturn((error) -> false)
+                            .blockingGet();
+                    if (Boolean.TRUE.equals(hasClaims)) {
+                        this.processJobBatchPartial(job, patientId);
+                    }
+                }
 
                 // Check if the subscriber is still running before getting the next part of the batch
                 nextPatientID = this.isRunning() ? job.fetchNextPatient(aggregatorID) : Optional.empty();
@@ -217,7 +233,8 @@ public class AggregationEngine implements Runnable {
      */
     private List<JobQueueBatchFile> processJobBatchPartial(JobQueueBatch job, String patientID) {
         final var results = Flowable.fromIterable(job.getResourceTypes())
-                .flatMap(resourceType -> completeResource(job, patientID, resourceType))
+                .map(resourceType -> completeResource(job, patientID, resourceType))
+                .flatMap(result -> writeResource(job, result.getRight(), result.getLeft().flatMap(Flowable::fromIterable)))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
         this.queue.completePartialBatch(job, aggregatorID);
@@ -230,12 +247,14 @@ public class AggregationEngine implements Runnable {
      * @param job          context
      * @param resourceType to process
      */
-    private Flowable<JobQueueBatchFile> completeResource(JobQueueBatch job, String patientID, ResourceType resourceType) {
+    private Pair<Flowable<List<Resource>>, ResourceType> completeResource(JobQueueBatch job, String patientID, ResourceType resourceType) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), job.getBatchID(), resourceType, operationsConfig);
-        final Flowable<Resource> mixedFlow = fetcher.fetchResources(patientID);
-        final var connectableMixedFlow = mixedFlow.publish().autoConnect(2);
+        return Pair.of(fetcher.fetchResources(patientID), resourceType);
+    }
 
+    private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, ResourceType resourceType, Flowable<Resource> flow) {
+        var mixedFlow = flow.publish().autoConnect(2);
         // Batch the non-error resources into files
         final var resourceCount = new AtomicInteger();
         final var sequenceCount = new AtomicInteger();
@@ -244,7 +263,7 @@ public class AggregationEngine implements Runnable {
             sequenceCount.set(file.getSequence());
         });
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount, resourceMeter));
+        final Flowable<JobQueueBatchFile> resourceFlow = mixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount, resourceMeter));
 
         // Batch the error resources into files
         final var errorResourceCount = new AtomicInteger();
@@ -254,7 +273,7 @@ public class AggregationEngine implements Runnable {
             errorSequenceCount.set(file.getSequence());
         });
         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter));
+        final Flowable<JobQueueBatchFile> outcomeFlow = mixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter));
 
         // Merge the resultant flows
         return resourceFlow.mergeWith(outcomeFlow);
