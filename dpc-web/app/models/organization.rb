@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Organization < ApplicationRecord
-  include AwsEnvHelper
   include OrganizationTypable
 
   has_one :address, as: :addressable, dependent: :destroy
