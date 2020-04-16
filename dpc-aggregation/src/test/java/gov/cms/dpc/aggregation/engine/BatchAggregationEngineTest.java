@@ -61,9 +61,6 @@ class BatchAggregationEngineTest {
 
     @BeforeEach
     void setupEach() {
-//        DPCManagedSessionFactory dpcManagedSessionFactory = Mockito.mock(DPCManagedSessionFactory.class);
-//        sessionFactory = Mockito.mock(SessionFactory.class);
-//        Mockito.when(dpcManagedSessionFactory.getSessionFactory()).thenReturn(sessionFactory);
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         lookBackService = Mockito.spy(new LookBackService(Mockito.mock(RosterDAO.class), operationsConfig));

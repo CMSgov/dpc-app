@@ -254,7 +254,7 @@ public class AggregationEngine implements Runnable {
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, ResourceType resourceType, Flowable<Resource> flow) {
-        var mixedFlow = flow.publish().autoConnect(2);
+        var connectableMixedFlow = flow.publish().autoConnect(2);
         // Batch the non-error resources into files
         final var resourceCount = new AtomicInteger();
         final var sequenceCount = new AtomicInteger();
@@ -263,7 +263,7 @@ public class AggregationEngine implements Runnable {
             sequenceCount.set(file.getSequence());
         });
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-        final Flowable<JobQueueBatchFile> resourceFlow = mixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount, resourceMeter));
+        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount, resourceMeter));
 
         // Batch the error resources into files
         final var errorResourceCount = new AtomicInteger();
@@ -273,7 +273,7 @@ public class AggregationEngine implements Runnable {
             errorSequenceCount.set(file.getSequence());
         });
         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-        final Flowable<JobQueueBatchFile> outcomeFlow = mixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter));
+        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter));
 
         // Merge the resultant flows
         return resourceFlow.mergeWith(outcomeFlow);

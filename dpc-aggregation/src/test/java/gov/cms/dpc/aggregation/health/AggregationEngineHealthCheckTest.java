@@ -60,9 +60,6 @@ public class AggregationEngineHealthCheckTest {
 
     @BeforeEach
     void setupEach() throws ParseException {
-//        DPCManagedSessionFactory dpcManagedSessionFactory = Mockito.mock(DPCManagedSessionFactory.class);
-//        sessionFactory = Mockito.mock(SessionFactory.class);
-//        Mockito.when(dpcManagedSessionFactory.getSessionFactory()).thenReturn(sessionFactory);
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500,new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
