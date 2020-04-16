@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
@@ -23,6 +24,8 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -39,6 +42,7 @@ class BatchAggregationEngineTest {
     private IJobQueue queue;
     private AggregationEngine engine;
     private Disposable subscribe;
+    private LookBackService lookBackService;
 
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private MetricRegistry metricRegistry = new MetricRegistry();
@@ -46,20 +50,24 @@ class BatchAggregationEngineTest {
     static private OperationsConfig operationsConfig;
 
     @BeforeAll
-    static void setupAll() {
+    static void setupAll() throws ParseException {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        operationsConfig = new OperationsConfig(10, exportPath, 3);
+        operationsConfig = new OperationsConfig(10, exportPath, 3, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
 
     @BeforeEach
     void setupEach() {
+//        DPCManagedSessionFactory dpcManagedSessionFactory = Mockito.mock(DPCManagedSessionFactory.class);
+//        sessionFactory = Mockito.mock(SessionFactory.class);
+//        Mockito.when(dpcManagedSessionFactory.getSessionFactory()).thenReturn(sessionFactory);
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationsConfig);
+        lookBackService = Mockito.spy(new LookBackService(Mockito.mock(RosterDAO.class), operationsConfig));
+        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationsConfig, lookBackService);
         engine.queueRunning.set(true);
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -71,6 +79,9 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTestSingleResource() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
@@ -140,6 +151,9 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobWithBadPatientTest() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(

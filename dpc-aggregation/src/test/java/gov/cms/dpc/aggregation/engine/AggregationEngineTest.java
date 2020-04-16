@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -28,6 +29,8 @@ import org.mockito.Mockito;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,6 +48,7 @@ class AggregationEngineTest {
     private IJobQueue queue;
     private AggregationEngine engine;
     private Disposable subscribe;
+    private LookBackService lookBackService;
 
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private MetricRegistry metricRegistry = new MetricRegistry();
@@ -59,11 +63,12 @@ class AggregationEngineTest {
     }
 
     @BeforeEach
-    void setupEach() {
+    void setupEach() throws ParseException {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(1000, exportPath, 500);
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig));
+        var operationalConfig = new OperationsConfig(1000, exportPath, 500, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2014"));
+        lookBackService = Mockito.spy(new LookBackService(Mockito.mock(RosterDAO.class), operationalConfig));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig, lookBackService));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);
@@ -85,6 +90,8 @@ class AggregationEngineTest {
      */
     @Test
     void claimBatchException() throws InterruptedException {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
         final var orgID = UUID.randomUUID();
 
         // Make a simple job with one resource type
@@ -177,6 +184,9 @@ class AggregationEngineTest {
      */
     @Test
     void simpleJobTest() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         final var orgID = UUID.randomUUID();
 
         // Make a simple job with one resource type
@@ -206,6 +216,9 @@ class AggregationEngineTest {
      */
     @Test
     void multipleFileJobTest() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         final var orgID = UUID.randomUUID();
 
         // build a job with multiple resource types
@@ -254,6 +267,9 @@ class AggregationEngineTest {
      */
     @Test
     void pauseJobTest() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         final var orgID = UUID.randomUUID();
 
         // build a job with multiple resource types
@@ -290,6 +306,9 @@ class AggregationEngineTest {
      */
     @Test
     void appendBatchFileTest() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         final var orgID = UUID.randomUUID();
 
         // build a job with multiple resource types
@@ -354,6 +373,9 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTest() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         final var orgID = UUID.randomUUID();
 
         // Job with a unsupported resource type
@@ -378,6 +400,9 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTestWithFailBatchException() {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         final var orgID = UUID.randomUUID();
 
         // Job with a unsupported resource type
@@ -407,6 +432,9 @@ class AggregationEngineTest {
      */
     @Test
     void badPatientIDTest() throws GeneralSecurityException {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         final List<String> mbis = new ArrayList<>(MockBlueButtonClient.MBI_BENE_ID_MAP.keySet());
         // Add bad patient ID
         mbis.add("-1");
@@ -435,7 +463,7 @@ class AggregationEngineTest {
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
         Mockito.verify(bbclient, atLeastOnce()).requestEOBFromServer(idCaptor.capture());
         var values = idCaptor.getAllValues();
-        assertEquals(2,
+        assertEquals(3,
                 values.stream().filter(value -> value.equals("-1")).count(),
                 "Should be 2 invalid ids, 2 method calls x 1 bad-id");
 
@@ -451,7 +479,10 @@ class AggregationEngineTest {
 
     @Test
     void multiplePatientsMatchTest() throws GeneralSecurityException {
-        final List<String> mbis = Arrays.asList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
+        final List<String> mbis = Collections.singletonList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
 
         final var orgID = UUID.randomUUID();
 
@@ -479,6 +510,9 @@ class AggregationEngineTest {
 
     @Test
     void testBlueButtonException() throws GeneralSecurityException {
+        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
         // Test generic runtime exception
         testWithThrowable(new RuntimeException("Error!!!!"));
 
@@ -538,7 +572,7 @@ class AggregationEngineTest {
         // Check that the bad ID was called 3 times
         ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
         Mockito.verify(bbclient, atLeastOnce()).requestPatientFromServerByMbi(idCaptor.capture());
-        assertEquals(1, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called once to get the patient, but with errors instead");
+        assertEquals(2, idCaptor.getAllValues().stream().filter(value -> value.equals("1")).count(), "Should have been called once to get the patient, but with errors instead");
 
         // Look at the result. It should have one error, but be successful otherwise.
         assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent());
