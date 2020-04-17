@@ -18,7 +18,7 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
-  before_save :assign_id
+  before_save :assign_id, if: -> { prod_sbx? }
 
   after_update :update_registered_organizations
 
@@ -65,6 +65,10 @@ class Organization < ApplicationRecord
     return unless sandbox_enabled?
 
     organization_user_assignments.each(&:send_organization_sandbox_email)
+  end
+
+  def prod_sbx?
+    ENV['AWS_ENV'] == 'prod-sbx'
   end
 
   def update_registered_organizations
