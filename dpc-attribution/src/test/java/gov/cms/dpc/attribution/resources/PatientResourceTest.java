@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -27,7 +28,7 @@ class PatientResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPatientReadWrite() {
-        final Patient patient = createPatientResource("1871", DEFAULT_ORG_ID);
+        final Patient patient = createPatientResource("0O00O00OO00", DEFAULT_ORG_ID);
 
         final Reference orgReference = new Reference(new IdType("Organization", DEFAULT_ORG_ID));
         patient.setManagingOrganization(orgReference);
@@ -66,6 +67,22 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         final MethodOutcome execute = secondCreation.execute();
         assertNull(execute.getCreated(), "Should not be able to create again");
+    }
+
+    @Test
+    void testCreatePatientWithInvalidMbi() {
+        final Patient patient = createPatientResource("not-an-mbi", DEFAULT_ORG_ID);
+
+        final Reference orgReference = new Reference(new IdType("Organization", DEFAULT_ORG_ID));
+        patient.setManagingOrganization(orgReference);
+
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        ICreateTyped create = client
+                .create()
+                .resource(patient);
+
+        assertThrows(InvalidRequestException.class, create::execute);
     }
 
     @Test

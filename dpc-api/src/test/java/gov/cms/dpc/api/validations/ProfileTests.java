@@ -55,8 +55,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
 
         // Try for a valid patient
         final Patient validPatient = invalidPatient.copy();
-        // TODO(nickrobison): This will need to be switched to the MBI system, once those changes are complete.
-        validPatient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi");
+        validPatient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0O00O00OO00");
         validPatient.setGender(Enumerations.AdministrativeGender.MALE);
         validPatient.setBirthDate(Date.valueOf("1990-01-01"));
         client

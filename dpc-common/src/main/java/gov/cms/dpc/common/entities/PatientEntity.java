@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -23,6 +24,7 @@ public class PatientEntity extends PersonEntity {
 
     @NotEmpty
     @Column(name = "beneficiary_id", unique = true)
+    @Pattern(regexp = "^\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}$")
     private String beneficiaryID;
 
     @Column(name = "mbi_hash")
