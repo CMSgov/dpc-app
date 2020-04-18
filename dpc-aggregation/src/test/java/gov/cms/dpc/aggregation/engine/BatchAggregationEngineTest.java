@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
-import gov.cms.dpc.aggregation.dao.RosterDAO;
+import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
@@ -63,7 +63,7 @@ class BatchAggregationEngineTest {
     void setupEach() {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        lookBackService = Mockito.spy(new LookBackService(Mockito.mock(RosterDAO.class), operationsConfig));
+        lookBackService = Mockito.spy(LookBackService.class);
         engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationsConfig, lookBackService);
         engine.queueRunning.set(true);
         subscribe = Mockito.mock(Disposable.class);
@@ -76,9 +76,8 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTestSingleResource() {
-        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
-
+        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
@@ -112,7 +111,7 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTest() {
-        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
 
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
@@ -152,9 +151,9 @@ class BatchAggregationEngineTest {
     void largeJobWithBadPatientTest() {
         final var orgID = UUID.randomUUID();
 
-        Mockito.doReturn(true).when(lookBackService).associatedWithRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(false).when(lookBackService).associatedWithRoster(orgID,TEST_PROVIDER_ID, null);
-        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(null).when(lookBackService).getProviderIDFromRoster(orgID,TEST_PROVIDER_ID, null);
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(

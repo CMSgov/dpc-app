@@ -18,13 +18,13 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         super(factory.getSessionFactory());
     }
 
-    public boolean withinRoster(UUID organizationID, UUID providerID, String patientMBIHash) {
+    public UUID withinRoster(UUID organizationID, UUID rosterID, String patientMBI) {
 
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<Boolean> query = builder.createQuery(Boolean.class);
+        final CriteriaQuery<UUID> query = builder.createQuery(UUID.class);
         final Root<RosterEntity> root = query.from(RosterEntity.class);
-        query.select(builder.literal(true));
+        query.select(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID));
 
 
         List<Predicate> predicates = new ArrayList<>();
@@ -34,16 +34,19 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
                                 .get(OrganizationEntity_.ID),
                         organizationID));
 
-        predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID), providerID));
+        predicates.add(builder.equal(root.get(RosterEntity_.ID), rosterID));
 
         final Join<RosterEntity, AttributionRelationship> attrJoin = root.join(RosterEntity_.ATTRIBUTIONS);
         final Join<AttributionRelationship, PatientEntity> patientJoin = attrJoin.join(AttributionRelationship_.PATIENT);
-        predicates.add(builder.equal(patientJoin.get(PatientEntity_.MBI_HASH), patientMBIHash));
+        //The database labels the column beneficiaryId but it's actually storing the MBI
+        predicates.add(builder.equal(patientJoin.get(PatientEntity_.BENEFICIARY_ID), patientMBI));
 
         query.where(predicates.toArray(new Predicate[0]));
-        final Query<Boolean> booleanQuery = this.currentSession().createQuery(query);
 
-        return booleanQuery.getSingleResult();
+
+        Query<UUID> q = currentSession().createQuery(query);
+        return q.getSingleResult();
     }
+
 
 }

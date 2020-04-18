@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.newrelic.api.agent.Trace;
+import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.IJobQueue;
@@ -28,7 +29,6 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -203,14 +203,17 @@ public class AggregationEngine implements Runnable {
         }
     }
 
-    private boolean isValidLookBack(JobQueueBatch job, String patientId) throws GeneralSecurityException {
+    private boolean isValidLookBack(JobQueueBatch job, String patientId) {
         boolean result = false;
-        if (lookBackService.associatedWithRoster(job.getOrgID(), job.getProviderID(), bbclient.hashMbi(patientId))) {
+        //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
+        //patientId here is the patient MBI
+        final UUID providerID = lookBackService.getProviderIDFromRoster(job.getOrgID(), job.getProviderID(), patientId);
+        if (providerID != null) {
             Pair<Flowable<List<Resource>>, ResourceType> pair = completeResource(job, patientId, ResourceType.ExplanationOfBenefit);
             Boolean hasClaims = pair.getLeft()
                     .flatMap(Flowable::fromIterable)
                     .filter(resource -> pair.getRight() == resource.getResourceType())
-                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), job.getProviderID(), operationsConfig.getLookBackMonths()))
+                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), providerID, operationsConfig.getLookBackMonths()))
                     .onErrorReturn((error) -> false)
                     .blockingGet();
             result = Boolean.TRUE.equals(hasClaims);
