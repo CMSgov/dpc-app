@@ -8,16 +8,20 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
-import gov.cms.dpc.aggregation.engine.LookBackService;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
+import gov.cms.dpc.aggregation.service.LookBackService;
+import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 
 import javax.inject.Singleton;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
+
 
     AggregationAppModule() {
         // Not used
@@ -28,7 +32,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(RosterDAO.class);
-        binder.bind(LookBackService.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -73,7 +76,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
                 config.getExportPath(),
                 config.getRetryCount(),
                 config.getPollingFrequency(),
-                config.getLookBackMonths()
+                config.getLookBackMonths(),
+                config.getLookBackDate()
         );
     }
 
@@ -81,5 +85,12 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @JobTimeout
     public int provideJobTimeoutInSeconds() {
         return getConfiguration().getJobTimeoutInSeconds();
+    }
+
+    @Provides
+    LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, RosterDAO rosterDAO, OperationsConfig operationsConfig) {
+        return new UnitOfWorkAwareProxyFactory("roster", sessionFactory.getSessionFactory()).create(LookBackServiceImpl.class,
+                new Class<?>[]{RosterDAO.class, OperationsConfig.class},
+                new Object[]{rosterDAO, operationsConfig});
     }
 }

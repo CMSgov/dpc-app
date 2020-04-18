@@ -19,14 +19,15 @@ public class OperationsConfig {
             String exportPath,
             int retryCount,
             int pollingFrequency,
-            int lookBackMonths
+            int lookBackMonths,
+            Date lookBackDate
     ) {
         this.retryCount = retryCount;
         this.resourcesPerFileCount = resourcesPerFileCount;
         this.exportPath = exportPath;
         this.pollingFrequency = pollingFrequency;
         this.lookBackMonths = lookBackMonths;
-        this.lookBackDate = new Date();
+        this.lookBackDate = lookBackDate;
     }
 
     public OperationsConfig(
