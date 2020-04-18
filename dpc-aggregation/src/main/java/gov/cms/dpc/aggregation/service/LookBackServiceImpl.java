@@ -29,8 +29,9 @@ public class LookBackServiceImpl implements LookBackService {
 
     @Override
     @UnitOfWork
-    public UUID getProviderIDFromRoster(UUID orgUUID, String rosterID, String patientMBI) {
-        return Try.of(() -> rosterDAO.withinRoster(orgUUID, UUID.fromString(rosterID), patientMBI)).getOrElse((UUID) null);
+    public UUID getProviderIDFromRoster(UUID orgUUID, String ambiguousID, String patientMBI) {
+        //Expect only one roster for the parameters, otherwise return null
+        return Try.of(() -> rosterDAO.retrieveProviderIDFromRoster(orgUUID, UUID.fromString(ambiguousID), patientMBI)).getOrElse((UUID) null);
     }
 
     @Override

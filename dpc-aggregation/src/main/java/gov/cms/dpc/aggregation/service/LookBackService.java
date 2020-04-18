@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public interface LookBackService {
 
-    UUID getProviderIDFromRoster(UUID orgID, String rosterID, String patientMBI);
+    UUID getProviderIDFromRoster(UUID orgID, String ambiguousID, String patientMBI);
 
     boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationID, UUID providerID, long withinMonth);
 }
