@@ -77,7 +77,7 @@ public class JobBatchProcessor {
             sequenceCount.set(file.getSequence());
         });
         final var writer = new ResourceWriter(fhirContext, job, resourceType, operationsConfig);
-        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount, resourceMeter));
+        final Flowable<JobQueueBatchFile> resourceFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
 
         // Batch the error resources into files
         final var errorResourceCount = new AtomicInteger();
@@ -87,7 +87,7 @@ public class JobBatchProcessor {
             errorSequenceCount.set(file.getSequence());
         });
         final var errorWriter = new ResourceWriter(fhirContext, job, ResourceType.OperationOutcome, operationsConfig);
-        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount, operationalOutcomeMeter));
+        final Flowable<JobQueueBatchFile> outcomeFlow = connectableMixedFlow.compose((upstream) -> bufferAndWrite(upstream, errorWriter, errorResourceCount, errorSequenceCount));
 
         // Merge the resultant flows
         return resourceFlow.mergeWith(outcomeFlow);
@@ -99,10 +99,9 @@ public class JobBatchProcessor {
      * @param writer        - the writer to use
      * @param resourceCount - the number of resources in the current file
      * @param sequenceCount - the sequence counter
-     * @param meter         - a meter on the number of resources
      * @return a transformed flow
      */
-    private Publisher<JobQueueBatchFile> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger resourceCount, AtomicInteger sequenceCount, Meter meter) {
+    private Publisher<JobQueueBatchFile> bufferAndWrite(Flowable<Resource> upstream, ResourceWriter writer, AtomicInteger resourceCount, AtomicInteger sequenceCount) {
         final Flowable<Resource> filteredUpstream = upstream.filter(r -> r.getResourceType() == writer.getResourceType());
         final var connectableMixedFlow = filteredUpstream.publish().autoConnect(2);
 
@@ -114,7 +113,7 @@ public class JobBatchProcessor {
             // Start a new file since the file has been filled up
             sequenceCount.incrementAndGet();
         }
-
+        Meter meter = getMeter(writer.getResourceType());
         // Handle the scenario where a previous file was already written by breaking up the flow into the first batch and the buffered batch
         final Flowable<JobQueueBatchFile> partialBatch = connectableMixedFlow
                 .compose(stream -> writeResources(stream.take(firstResourceBatchCount), writer, sequenceCount, meter));
@@ -129,5 +128,9 @@ public class JobBatchProcessor {
                 .buffer(operationsConfig.getResourcesPerFileCount())
                 .doOnNext(outcomes -> meter.mark(outcomes.size()))
                 .map(batch -> writer.writeBatch(sequenceCount, batch));
+    }
+
+    private Meter getMeter(ResourceType resourceType) {
+        return ResourceType.OperationOutcome == resourceType ? operationalOutcomeMeter : resourceMeter;
     }
 }
