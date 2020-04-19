@@ -47,6 +47,7 @@ class AggregationEngineTest {
     private BlueButtonClient bbclient;
     private IJobQueue queue;
     private AggregationEngine engine;
+    private JobBatchProcessor jobBatchProcessor;
     private Disposable subscribe;
     private LookBackService lookBackService;
 
@@ -68,7 +69,8 @@ class AggregationEngineTest {
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2014"));
         lookBackService = Mockito.spy(LookBackService.class);
-        engine = Mockito.spy(new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationalConfig, lookBackService));
+        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, lookBackService, jobBatchProcessor));
         engine.queueRunning.set(true);
         AggregationEngine.setGlobalErrorHandler();
         subscribe = Mockito.mock(Disposable.class);

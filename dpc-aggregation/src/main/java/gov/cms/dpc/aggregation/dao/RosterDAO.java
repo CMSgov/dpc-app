@@ -25,32 +25,39 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         final Root<RosterEntity> root = query.from(RosterEntity.class);
 
         query.select(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID));
-        query.where(ambiguousIDPredicates(builder, root, organizationID, ambiguousID, patientMBI).toArray(new Predicate[0]));
+        List<Predicate> predicates = new ArrayList<>();
+        // Restrict by Organization via ID
+        predicates.add(organizationPredicate(builder, root, organizationID));
+        // Restrict by Provider or Roster via ID
+        predicates.add(ambiguousIDPredicate(builder, root, ambiguousID));
+        // Restrict by Patient via MBI
+        predicates.add(mbiPredicate(builder, root, patientMBI));
+
+        query.where(predicates.toArray(new Predicate[0]));
 
 
         Query<UUID> q = currentSession().createQuery(query);
         return q.getSingleResult();
     }
 
-    private List<Predicate> ambiguousIDPredicates(CriteriaBuilder builder, Root<RosterEntity> root, UUID organizationID, UUID ambiguousID, String patientMBI) {
-        List<Predicate> predicates = new ArrayList<>();
+    private Predicate organizationPredicate(CriteriaBuilder builder, Root<RosterEntity> root, UUID organizationID) {
         // Always restrict by Organization
-        predicates.add(builder
-                .equal(root.join(RosterEntity_.MANAGING_ORGANIZATION)
-                                .get(OrganizationEntity_.ID),
-                        organizationID));
+        return builder.equal(root.join(RosterEntity_.MANAGING_ORGANIZATION).get(OrganizationEntity_.ID), organizationID);
+    }
 
+    private Predicate ambiguousIDPredicate(CriteriaBuilder builder, Root<RosterEntity> root, UUID ambiguousID) {
         //Group Export passes in the rosterID as the jobBatch providerID
-        Predicate rosterIDPredicate = builder.equal(root.get(RosterEntity_.ID), ambiguousID);
+        final Predicate rosterIDPredicate = builder.equal(root.get(RosterEntity_.ID), ambiguousID);
         //DataService passes in the providerID as the jobBatch providerID
-        Predicate providerIDPredicate = builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID), ambiguousID);
-        predicates.add(builder.or(rosterIDPredicate, providerIDPredicate));
+        final Predicate providerIDPredicate = builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID), ambiguousID);
+        return builder.or(rosterIDPredicate, providerIDPredicate);
+    }
 
+    private Predicate mbiPredicate(CriteriaBuilder builder, Root<RosterEntity> root, String patientMBI) {
         final Join<RosterEntity, AttributionRelationship> attrJoin = root.join(RosterEntity_.ATTRIBUTIONS);
         final Join<AttributionRelationship, PatientEntity> patientJoin = attrJoin.join(AttributionRelationship_.PATIENT);
         //The database labels the column beneficiaryId but it's actually storing the MBI
-        predicates.add(builder.equal(patientJoin.get(PatientEntity_.BENEFICIARY_ID), patientMBI));
-        return predicates;
+        return builder.equal(patientJoin.get(PatientEntity_.BENEFICIARY_ID), patientMBI);
     }
 
 

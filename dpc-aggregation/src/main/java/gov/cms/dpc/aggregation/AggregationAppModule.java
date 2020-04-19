@@ -8,6 +8,7 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
@@ -31,6 +32,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     public void configure(Binder binder) {
         binder.bind(AggregationEngine.class);
         binder.bind(AggregationManager.class).asEagerSingleton();
+        binder.bind(JobBatchProcessor.class);
         binder.bind(RosterDAO.class);
 
         // Healthchecks

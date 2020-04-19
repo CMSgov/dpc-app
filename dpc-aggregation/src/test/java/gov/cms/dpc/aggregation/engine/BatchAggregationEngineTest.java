@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.service.LookBackService;
+import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
@@ -41,6 +42,7 @@ class BatchAggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private IJobQueue queue;
     private AggregationEngine engine;
+    private JobBatchProcessor jobBatchProcessor;
     private Disposable subscribe;
     private LookBackService lookBackService;
 
@@ -64,7 +66,8 @@ class BatchAggregationEngineTest {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         lookBackService = Mockito.spy(LookBackService.class);
-        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationsConfig, lookBackService);
+        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, lookBackService, jobBatchProcessor));
         engine.queueRunning.set(true);
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -136,7 +139,7 @@ class BatchAggregationEngineTest {
                     final var outputFilePath = String.format("%s/%s.ndjson", exportPath, batchFile.getFileName());
                     final File file = new File(Path.of(outputFilePath).toString());
                     assertAll(() -> assertNotNull(file, "Should have input file"),
-                            () -> assertArrayEquals(AggregationEngine.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"),
+                            () -> assertArrayEquals(AggregationUtils.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"),
                             () -> assertEquals(file.length(), batchFile.getFileLength(), "Should have matching file length"));
                 });
 
