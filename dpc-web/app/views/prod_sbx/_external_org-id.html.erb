@@ -1,0 +1,10 @@
+<div>
+            <label class="ds-u-color--muted">Vendor ID (System-generated):</label>
+            <div class="ds-u-color--muted"><%= organization.vendor_id %></div>
+          </div>
+        <% elsif organization.prod_sbx? && organization.npi.nil? %>
+          <div>
+            <label class="ds-u-color--muted">Provider ID (System-generated):</label>
+            <span class="ds-u-color--muted"><%= organization.provider_id %></span> | <strong>Vendor(s):</strong> <%= vendor_text(organization) %>
+          </div>
+          <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
