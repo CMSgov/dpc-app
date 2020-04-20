@@ -54,7 +54,11 @@ class Organization < ApplicationRecord
   end
 
   def external_identifier
-    health_it_vendor? ? vendor_id : provider_identifier
+    if prod_sbx?
+      health_it_vendor? ? vendor_id : provider_identifier
+    else
+      return npi if npi.present?
+    end
   end
 
   def registered_api_envs
@@ -68,7 +72,7 @@ class Organization < ApplicationRecord
   end
 
   def prod_sbx?
-    ENV['AWS_ENV'] == 'prod-sbx'
+    ENV['DEPLOY_ENV'] == 'prod-sbx'
   end
 
   def update_registered_organizations
