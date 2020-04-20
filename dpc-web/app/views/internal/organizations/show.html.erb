@@ -47,30 +47,26 @@
         <%= @organization.organization_type.titleize %>
       </div>
 
-      <% if @organization.health_it_vendor? %>
-        <br>
-        <div class="ds-u-margin-bottom--1">
-          <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor ID (System-generated):</label>
-          <div class="ds-u-color--muted"><%= @organization.vendor_id %></div>
-        </div>
-      <% else %>
+      <% unless @organization.health_it_vendor? %>
         <div class="ds-u-margin-bottom--1">
           <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <use xlink:href="/assets/solid.svg#users"></use>
           </svg>
           <%= @organization.num_providers %> providers
         </div>
+      <% end %>
 
-        <div class="ds-u-margin-bottom--1">
-          <% if @organization.npi.present? %>
-            <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
-              <%= @organization.npi %>
-          <% else %>
-            <label class="ds-u-margin-right--1 ds-u-color--muted">Provider ID (System-generated):</label>
-              <div class="ds-u-color--muted"><%= @organization.provider_id %></div>
-          <% end %>
-        </div>
-
+      <% if @organization.prod_sbx? %>
+        <%= render "./prod_sbx/internal_org-id" %>
+      <% else %>
+        <% if @organization.npi.present? %>
+          <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
+            <%= @organization.npi %>
+        <% else %>
+          <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
+            <div class="ds-u-color--error-dark">NPI missing</div>
+        <% end %>
+        <br>
         <div class="ds-u-margin-bottom--1">
           <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
           <%= @organization.vendor %>
