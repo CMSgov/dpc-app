@@ -116,8 +116,8 @@
           <h3 class="box__heading"><%= organization.name %> is almost ready!</h3>
         </div>
         <p class="ds-text--lead ds-u-measure--wide">
-        <% if organization.health_it_vendor? %>
-          Before this organization can add credentials for sandbox testing, a CMS admin must enable sandbox access.
+        <% if organization.health_it_vendor? || organization.npi.present? %>
+          Before this organization can add credentials, a CMS admin must enable sandbox access.
         <% else %>
           Before this organization can add credentials for sandbox testing, you need to designate an organizational NPI and vendor by <%= link_to "editing the organization", edit_organization_url(organization) %>.
         <% end %>
