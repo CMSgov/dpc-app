@@ -1,10 +1,15 @@
 .dashboard-section-header {
   align-items: center;
   border-bottom: 1px solid $color-gray-light;
-  display: flex;
   justify-content: space-between;
   margin: $spacer-5 0 $spacer-2;
   padding-bottom: $spacer-1;
+}
+
+.dashboard-section-sub {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .dashboard-section-heading {

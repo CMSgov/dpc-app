@@ -4,30 +4,21 @@
 
   <% @user.organizations.each do |organization| %>
     <div class="dashboard-section-header">
-      <h2 class="dashboard-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
-
-      <% if organization.health_it_vendor? %>
-        <div>
-          <label class="ds-u-color--muted">Vendor ID (System-generated):</label>
-          <div class="ds-u-color--muted"><%= organization.vendor_id %></div>
-        </div>
-      <% elsif organization.npi.nil? %>
-        <div>
-          <label class="ds-u-color--muted">Provider ID (System-generated):</label>
-          <div class="ds-u-color--muted"><%= organization.provider_id %></div>
-        </div>
-        <div>
-          <strong>Vendor(s):</strong> <%= vendor_text(organization) %>
-        </div>
-        <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
-      <% else %>
-        <div>
+      <div>
+        <h2 class="dashboard-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
+      </div>
+      <div class ="dashboard-section-sub">
+        <% if organization.prod_sbx? && organization.health_it_vendor? %>
+          <% render "./prod_sbx/external_org-id" %>
+        <% else %>
           <div>
-          <strong>NPI:</strong> <%= npi_text(organization) %> | <strong>Vendor(s):</strong> <%= vendor_text(organization) %>
+            <div>
+            <strong>NPI:</strong> <%= npi_text(organization) %> | <strong>Vendor(s):</strong> <%= vendor_text(organization) %>
+            </div>
           </div>
-        </div>
-        <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
-      <% end %>
+          <%= link_to "Edit", edit_organization_url(organization), class: "ds-c-button ds-c-button--outline ds-c-button--small", data: { test: "edit-link" } %>
+        <% end %>
+      </div>
     </div>
 
     <% if organization.api_credentialable? %>
