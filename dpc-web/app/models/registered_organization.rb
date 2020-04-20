@@ -37,6 +37,10 @@ class RegisteredOrganization < ApplicationRecord
     PublicKeyManager.new(api_env: api_env, registered_organization: self).public_keys
   end
 
+  def api_error(msg)
+    errors.add(:base, "couldn't be registered with #{api_env} API: #{msg}")
+  end
+
   def create_api_organization
     api_request = APIClient.new(api_env).create_organization(
       organization,
@@ -49,8 +53,11 @@ class RegisteredOrganization < ApplicationRecord
       self[:api_id] = api_response['id']
       self[:api_endpoint_ref] = api_response['endpoint'][0]['reference']
       api_response
+    elsif organization.npi.nil?
+      api_error('NPI required') 
+      throw(:abort)
     else
-      errors.add(:base, "couldn't be registered with #{api_env} API: #{api_response}")
+      api_error(api_response) 
       throw(:abort)
     end
   end
@@ -84,7 +91,7 @@ class RegisteredOrganization < ApplicationRecord
       return
     end
 
-    errors.add(:base, "couldn't be deleted from #{api_env} API: #{api_response}")
+    api_error(api_response)
     throw(:abort)
   end
 
