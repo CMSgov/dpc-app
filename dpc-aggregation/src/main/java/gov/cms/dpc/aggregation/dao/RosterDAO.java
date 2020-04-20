@@ -18,6 +18,13 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         super(factory.getSessionFactory());
     }
 
+    /**
+     * Retrieves the ProviderID from the roster by orgID, patientMBI and either rosterID or providerID
+     * @param organizationID    The organizationID
+     * @param ambiguousID       Either a rosterID or the providerID
+     * @param patientMBI        The patient MBI
+     * @return the provider ID for that roster
+     */
     public UUID retrieveProviderIDFromRoster(UUID organizationID, UUID ambiguousID, String patientMBI) {
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();

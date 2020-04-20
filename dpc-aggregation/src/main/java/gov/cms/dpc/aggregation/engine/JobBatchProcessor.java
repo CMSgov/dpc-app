@@ -42,8 +42,11 @@ public class JobBatchProcessor {
     /**
      * Processes a partial of a job batch. Marks the partial as completed upon processing
      *
-     * @param job       - the job to process
-     * @param patientID - The current patient id processing
+     * @param aggregatorID  the current aggregatorID
+     * @param queue         the queue
+     * @param job           the job to process
+     * @param patientID     the current patient id to process
+     * @return A list of batch files {@see JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
         final var results = Flowable.fromIterable(job.getResourceTypes())
@@ -58,8 +61,9 @@ public class JobBatchProcessor {
     /**
      * Fetch and write a specific resource type
      *
-     * @param job          context
-     * @param resourceType to process
+     * @param job          the job to associate the fetch
+     * @param patientID    the patientID to fetch data
+     * @param resourceType the resourceType to fetch data
      */
     public Pair<Flowable<List<Resource>>, ResourceType> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
