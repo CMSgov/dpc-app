@@ -57,7 +57,7 @@
       <% end %>
 
       <% if @organization.prod_sbx? %>
-        <%= render "./prod_sbx/internal_org-id" %>
+        <%= render "prod_sbx/internal_org-id" %>
       <% else %>
         <% if @organization.npi.present? %>
           <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
