@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'pry'
 
 RSpec.describe APIClient do
   let!(:org) { create(:organization, npi: '1111111111') }
@@ -16,76 +17,159 @@ RSpec.describe APIClient do
 
   describe '#create_organization' do
     context 'successful API request' do
-      context 'when creating a vendor org' do
-        it 'sends vendor_id as identifier' do
-          stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
-            headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
-            body: {
-              resourceType: 'Parameters',
-              parameter: [{
-                name: 'resource',
-                resource: {
-                  resourceType: 'Bundle',
-                  type: 'collection',
-                  entry: [{
-                    resource: {
-                      address: [{
-                        use: vendor_org.address_use,
-                        type: vendor_org.address_type,
-                        city: vendor_org.address_city,
-                        country: 'US',
-                        line: [vendor_org.address_street, vendor_org.address_street_2],
-                        postalCode: vendor_org.address_zip,
-                        state: vendor_org.address_state
-                      }],
-                      identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: vendor_org.vendor_id}],
-                      name: vendor_org.name,
-                      resourceType: 'Organization',
-                      type: [{
-                        coding: [{
-                          code: 'prov', display: 'Healthcare Provider', system: 'http://hl7.org/fhir/organization-type'
+      context 'DEPLOY_ENV is prod-sbx' do
+        before(:each) do
+          allow(ENV).to receive(:[]).with('DEPLOY_ENV').and_return('prod-sbx')
+        end
+
+        context 'when creating a vendor org' do
+          it 'sends vendor_id as identifier' do
+            stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
+              headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
+              body: {
+                resourceType: 'Parameters',
+                parameter: [{
+                  name: 'resource',
+                  resource: {
+                    resourceType: 'Bundle',
+                    type: 'collection',
+                    entry: [{
+                      resource: {
+                        address: [{
+                          use: vendor_org.address_use,
+                          type: vendor_org.address_type,
+                          city: vendor_org.address_city,
+                          country: 'US',
+                          line: [vendor_org.address_street, vendor_org.address_street_2],
+                          postalCode: vendor_org.address_zip,
+                          state: vendor_org.address_state
                         }],
-                        text: 'Healthcare Provider'
-                      }]
-                    }
-                  }, {
-                    resource: {
-                      resourceType: 'Endpoint',
-                      status: fhir_endpoint.status,
-                      connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
-                      payloadType: [
-                        {
-                          "coding": [
-                            {
-                              "system": "http://hl7.org/fhir/endpoint-payload-type",
-                              "code": "any"
-                            }
-                          ]
-                        }
-                      ],
-                      name: fhir_endpoint.name, address: fhir_endpoint.uri
-                    }
-                  }]
-                }
-              }]
-            }.to_json
-          ).to_return(
-            status: 200,
-            body: "{\"id\":\"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d\",\"endpoint\":[{\"reference\":\"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}]}"
-          )
-  
-          api_client = APIClient.new('sandbox')
-  
-          # Reusing another organization's fhir endpoint for efficiency
-          api_client.create_organization(vendor_org, fhir_endpoint: fhir_endpoint.attributes)
-  
-          expect(api_client.response_status).to eq(200)
-          expect(api_client.response_body).to eq(
-            {
-              'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
-              'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
-            }
-          )
+                        identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: vendor_org.external_identifier}],
+                        name: vendor_org.name,
+                        resourceType: 'Organization',
+                        type: [{
+                          coding: [{
+                            code: 'prov', display: 'Healthcare Provider', system: 'http://hl7.org/fhir/organization-type'
+                          }],
+                          text: 'Healthcare Provider'
+                        }]
+                      }
+                    }, {
+                      resource: {
+                        resourceType: 'Endpoint',
+                        status: fhir_endpoint.status,
+                        connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
+                        payloadType: [
+                          {
+                            "coding": [
+                              {
+                                "system": "http://hl7.org/fhir/endpoint-payload-type",
+                                "code": "any"
+                              }
+                            ]
+                          }
+                        ],
+                        name: fhir_endpoint.name, address: fhir_endpoint.uri
+                      }
+                    }]
+                  }
+                }]
+              }.to_json
+            ).to_return(
+              status: 200,
+              body: "{\"id\":\"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d\",\"endpoint\":[{\"reference\":\"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}]}"
+            )
+
+            api_client = APIClient.new('sandbox')
+
+            # Reusing another organization's fhir endpoint for efficiency
+            api_client.create_organization(vendor_org, fhir_endpoint: fhir_endpoint.attributes)
+
+            expect(vendor_org.external_identifier).to eq(vendor_org.vendor_id)
+            expect(api_client.response_status).to eq(200)
+            expect(api_client.response_body).to eq(
+              {
+                'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
+                'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
+              }
+            )
+          end
+        end
+
+        context 'creating a provider org without an npi' do
+          it 'sends provider_id as identifier' do
+            prov_org = create(:organization, npi: nil)
+
+            stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
+              headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },
+              body: {
+                resourceType: 'Parameters',
+                parameter: [{
+                  name: 'resource',
+                  resource: {
+                    resourceType: 'Bundle',
+                    type: 'collection',
+                    entry: [{
+                      resource: {
+                        address: [{
+                          use: prov_org.address_use,
+                          type: prov_org.address_type,
+                          city: prov_org.address_city,
+                          country: 'US',
+                          line: [prov_org.address_street, prov_org.address_street_2],
+                          postalCode: prov_org.address_zip,
+                          state: prov_org.address_state
+                        }],
+                        identifier: [{system: 'http://hl7.org/fhir/sid/us-npi', value: prov_org.external_identifier}],
+                        name: prov_org.name,
+                        resourceType: 'Organization',
+                        type: [{
+                          coding: [{
+                            code: 'prov', display: 'Healthcare Provider', system: 'http://hl7.org/fhir/organization-type'
+                          }],
+                          text: 'Healthcare Provider'
+                        }]
+                      }
+                    }, {
+                      resource: {
+                        resourceType: 'Endpoint',
+                        status: fhir_endpoint.status,
+                        connectionType: {system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type', code: 'hl7-fhir-rest'},
+                        payloadType: [
+                          {
+                            "coding": [
+                              {
+                                "system": "http://hl7.org/fhir/endpoint-payload-type",
+                                "code": "any"
+                              }
+                            ]
+                          }
+                        ],
+                        name: fhir_endpoint.name, address: fhir_endpoint.uri
+                      }
+                    }]
+                  }
+                }]
+              }.to_json
+            ).to_return(
+              status: 200,
+              body: "{\"id\":\"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d\",\"endpoint\":[{\"reference\":\"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66\"}]}"
+            )
+            
+            api_client = APIClient.new('sandbox')
+    
+            # Reusing another organization's fhir endpoint for efficiency
+            api_client.create_organization(prov_org, fhir_endpoint: fhir_endpoint.attributes)
+    
+            expect(prov_org.external_identifier).to eq(prov_org.provider_id)
+            expect(api_client.response_status).to eq(200)
+            expect(api_client.response_body).to eq(
+              {
+                'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
+                'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
+              }
+            )
+          end
         end
       end
 
