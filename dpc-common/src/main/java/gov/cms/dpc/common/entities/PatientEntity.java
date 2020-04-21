@@ -21,10 +21,11 @@ import java.util.Objects;
 public class PatientEntity extends PersonEntity {
 
     public static final long serialVersionUID = 42L;
+    public static final String MBI_FORMAT = "^\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}$";
 
     @NotEmpty
     @Column(name = "beneficiary_id", unique = true)
-    @Pattern(regexp = "^\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}$")
+    @Pattern(regexp = MBI_FORMAT, message = "Must be a Medicare Beneficiary Identifier (MBI)")
     private String beneficiaryID;
 
     @Column(name = "mbi_hash")
