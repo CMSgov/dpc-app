@@ -54,11 +54,9 @@ class Organization < ApplicationRecord
   end
 
   def external_identifier
-    if prod_sbx?
-      health_it_vendor? ? vendor_id : provider_identifier
-    else
-      return npi
-    end
+    return health_it_vendor? ? vendor_id : provider_identifier if prod_sbx?
+
+    npi
   end
 
   def registered_api_envs
