@@ -57,7 +57,7 @@ class Organization < ApplicationRecord
     if prod_sbx?
       health_it_vendor? ? vendor_id : provider_identifier
     else
-      return npi if npi.present?
+      return npi
     end
   end
 
