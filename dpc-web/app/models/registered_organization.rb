@@ -54,10 +54,10 @@ class RegisteredOrganization < ApplicationRecord
       self[:api_endpoint_ref] = api_response['endpoint'][0]['reference']
       api_response
     elsif organization.npi.nil?
-      api_error('NPI required') 
+      api_error('NPI required')
       throw(:abort)
     else
-      api_error(api_response) 
+      api_error(api_response)
       throw(:abort)
     end
   end
