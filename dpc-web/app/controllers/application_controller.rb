@@ -25,4 +25,16 @@ class ApplicationController < ActionController::Base
   def model_error_string(resource)
     resource.errors.full_messages.join(', ')
   end
+
+  # For increased logging on errors
+  def append_info_to_payload(payload)
+    super
+    payload[:level] = if payload[:status] == 200
+                        'INFO'
+                      elsif payload[:status] == 302
+                        'WARN'
+                      else
+                        'ERROR'
+                      end
+  end
 end
