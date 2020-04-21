@@ -4,3 +4,6 @@ common: &default_settings
 
   distributed_tracing:
     enabled: false
+
+production:
+  <<: *default_settings
