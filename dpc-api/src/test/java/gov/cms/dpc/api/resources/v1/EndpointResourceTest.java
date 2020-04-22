@@ -41,6 +41,15 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    void testCreateEndpointNullStatus() {
+        Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
+        endpoint.setStatus(null);
+
+        ICreateTyped create = client.create().resource(endpoint);
+        assertThrows(UnprocessableEntityException.class, create::execute);
+    }
+
+    @Test
     void testCreateEndpointDifferentOrg() throws IOException {
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
