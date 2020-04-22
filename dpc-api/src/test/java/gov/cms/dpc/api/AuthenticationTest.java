@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -28,7 +29,7 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
     @Test
     void testBasicAuthentication() throws IOException, URISyntaxException {
         // Manually setup the required org functions
-        final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, getAdminURL());
+        final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
 
         // Now, try to read the organization, which should succeed
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, PUBLIC_KEY_ID, PRIVATE_KEY);

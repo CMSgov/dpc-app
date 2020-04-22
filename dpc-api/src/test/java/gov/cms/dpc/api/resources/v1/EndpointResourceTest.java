@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,7 +43,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
     void testCreateEndpointDifferentOrg() throws IOException {
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
-        final Organization organization = OrganizationHelpers.createOrganization(ctx, adminClient, "create-endpoint-different-org", true);
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, adminClient, "1234567893", true);
 
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
         endpoint.setManagingOrganization(new Reference("Organization/"+ organization.getId()));
@@ -106,7 +105,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
 
-        final Organization organization1 = OrganizationHelpers.createOrganization(ctx, adminClient, "update-endpoint-new-org1", true);
+        final Organization organization1 = OrganizationHelpers.createOrganization(ctx, adminClient, "2111111110", true);
         String endpointId = FHIRExtractors.getEntityUUID(organization1.getEndpointFirstRep().getReference()).toString();
 
         Endpoint endpoint = client
@@ -115,7 +114,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
                 .withId(endpointId)
                 .execute();
 
-        final Organization organization2 = OrganizationHelpers.createOrganization(ctx, adminClient, "update-endpoint-new-org2", true);
+        final Organization organization2 = OrganizationHelpers.createOrganization(ctx, adminClient, "1121111110", true);
         endpoint.setManagingOrganization(new Reference(new IdType("Organization", organization2.getId())));
 
         IUpdateExecutable updateExec = client
@@ -152,8 +151,8 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
 
-        final String newOrgID = UUID.randomUUID().toString();
-        final Organization organization = OrganizationHelpers.createOrganization(ctx, adminClient, newOrgID, true);
+        final String newOrgNPI = "1111211110";
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, adminClient, newOrgNPI, true);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
 
         IDeleteTyped delete = client

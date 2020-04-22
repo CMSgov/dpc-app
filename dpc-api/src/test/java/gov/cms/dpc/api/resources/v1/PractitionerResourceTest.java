@@ -81,7 +81,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         assertThrows(AuthenticationException.class, clientQuery::execute, "Should not have practitioner");
 
         // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
         // Submit a new public key to use for JWT flow
         final String keyLabel = "new-key";
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
