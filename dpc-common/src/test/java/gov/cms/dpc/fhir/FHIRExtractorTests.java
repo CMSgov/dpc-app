@@ -22,9 +22,9 @@ public class FHIRExtractorTests {
         final Patient patient = new Patient();
         // This double nesting verifies that the fromString method works correctly. Makes PiTest happy.
         patient.addIdentifier().setSystem(DPCIdentifierSystem.fromString(DPCIdentifierSystem.DPC.getSystem()).getSystem()).setValue("test-dpc-one");
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi-one");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
 
-        assertEquals("test-mbi-one", getPatientMBI(patient), "Should have MBI");
+        assertEquals("0A00A00AA01", getPatientMBI(patient), "Should have MBI");
     }
 
     @Test
