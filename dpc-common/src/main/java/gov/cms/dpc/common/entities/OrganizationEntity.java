@@ -20,6 +20,8 @@ public class OrganizationEntity implements Serializable {
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
+    @Valid
+    @OrganizationId
     @Embedded
     private OrganizationID organizationID;
 
@@ -154,7 +156,6 @@ public class OrganizationEntity implements Serializable {
         private DPCIdentifierSystem system;
 
         @NotEmpty
-        @OrganizationId
         @Column(name = "id_value")
         private String value;
 
