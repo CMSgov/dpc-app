@@ -197,7 +197,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     private Patient createFakePatient(Organization organization) {
         final Patient patient = new Patient();
         patient.addName().setFamily("Test").addGiven("Patient");
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-fake-mbi");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0ZZ0ZZ0ZZ00");
         patient.setBirthDate(Date.valueOf("1990-01-02"));
         patient.setGender(Enumerations.AdministrativeGender.MALE);
         patient.setManagingOrganization(new Reference(organization.getId()));
