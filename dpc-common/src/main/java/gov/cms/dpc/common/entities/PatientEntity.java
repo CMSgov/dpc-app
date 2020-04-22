@@ -21,6 +21,9 @@ import java.util.Objects;
 public class PatientEntity extends PersonEntity {
 
     public static final long serialVersionUID = 42L;
+    /* For details of the MBI format, see: https://www.cms.gov/Medicare/New-Medicare-Card/Understanding-the-MBI.pdf
+    This pattern is similar to that format, but is less restrictive to accommodate testing. Synthetic MBIs should
+    include letters and numbers not permitted in real MBIs. */
     public static final String MBI_FORMAT = "^\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}$";
 
     @NotEmpty
