@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -20,9 +21,14 @@ import java.util.Objects;
 public class PatientEntity extends PersonEntity {
 
     public static final long serialVersionUID = 42L;
+    /* For details of the MBI format, see: https://www.cms.gov/Medicare/New-Medicare-Card/Understanding-the-MBI.pdf
+    This pattern is similar to that format, but is less restrictive to accommodate testing. Synthetic MBIs should
+    include letters and numbers not permitted in real MBIs. */
+    public static final String MBI_FORMAT = "^\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}$";
 
     @NotEmpty
     @Column(name = "beneficiary_id", unique = true)
+    @Pattern(regexp = MBI_FORMAT, message = "Must be a Medicare Beneficiary Identifier (MBI)")
     private String beneficiaryID;
 
     @Column(name = "mbi_hash")

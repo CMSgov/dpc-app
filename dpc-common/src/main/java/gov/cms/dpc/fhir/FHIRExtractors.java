@@ -1,5 +1,6 @@
 package gov.cms.dpc.fhir;
 
+import gov.cms.dpc.common.entities.PatientEntity;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -46,7 +47,14 @@ public class FHIRExtractors {
      * @return - {@link String} patient MBI
      */
     public static String getPatientMBI(Patient patient) {
-        return findMatchingIdentifier(patient.getIdentifier(), DPCIdentifierSystem.MBI).getValue();
+        String identifier = findMatchingIdentifier(patient.getIdentifier(), DPCIdentifierSystem.MBI).getValue();
+        Pattern mbiPattern = Pattern.compile(PatientEntity.MBI_FORMAT);
+        if (mbiPattern.matcher(identifier).matches()) {
+            return identifier;
+        }
+
+        logger.error("Invalid MBI");
+        throw new IllegalArgumentException("Patient Identifier for system " + DPCIdentifierSystem.MBI.getSystem() + " must match MBI format");
     }
 
     /**
