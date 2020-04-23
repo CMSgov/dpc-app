@@ -30,8 +30,8 @@ RSpec.feature 'new user signs up for account' do
       click_on('Sign up')
     end
 
-    scenario 'user is sent a confirmation email with confirmation token' do
-      :confirmation_token.should_not be_nil
+    scenario 'user sent a confirmation email with confirmation token', :aggregate_failures do
+      expect(:confirmation_token).to be_present
 
       ctoken = last_email.body.match(/confirmation_token=\w*/)
 
