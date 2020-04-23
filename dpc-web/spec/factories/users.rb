@@ -19,6 +19,8 @@ FactoryBot.define do
     password { '123456' }
     password_confirmation { '123456' }
 
+    confirmed_at { DateTime.now }
+
     trait :zip_plus_4 do
       zip { '12345-6789' }
     end
