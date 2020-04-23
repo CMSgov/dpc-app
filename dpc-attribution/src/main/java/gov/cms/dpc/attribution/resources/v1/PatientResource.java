@@ -8,8 +8,10 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
+import gov.cms.dpc.fhir.converters.exceptions.FHIRConverterException;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -101,25 +103,28 @@ public class PatientResource extends AbstractPatientResource {
     })
     @Override
     public Response createPatient(Patient patient) {
+        try {
+            final UUID organizationID = FHIRExtractors.getEntityUUID(patient.getManagingOrganization().getReference());
+            final String patientMBI = FHIRExtractors.getPatientMBI(patient);
 
-        final UUID organizationID = FHIRExtractors.getEntityUUID(patient.getManagingOrganization().getReference());
-        final String patientMPI = FHIRExtractors.getPatientMBI(patient);
+            final Response.Status status;
+            final PatientEntity entity;
+            // Check to see if Patient already exists, if so, ignore it.
+            final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
+            if (!patientEntities.isEmpty()) {
+                status = Response.Status.OK;
+                entity = patientEntities.get(0);
+            } else {
+                status = Response.Status.CREATED;
+                entity = this.dao.persistPatient(this.converter.fromFHIR(PatientEntity.class, patient));
+            }
 
-        final Response.Status status;
-        final PatientEntity entity;
-        // Check to see if Patient already exists, if so, ignore it.
-        final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMPI, organizationID);
-        if (!patientEntities.isEmpty()) {
-            status = Response.Status.OK;
-            entity = patientEntities.get(0);
-        } else {
-            status = Response.Status.CREATED;
-            entity = this.dao.persistPatient(this.converter.fromFHIR(PatientEntity.class, patient));
+            return Response.status(status)
+                    .entity(this.converter.toFHIR(Patient.class, entity))
+                    .build();
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException("Invalid Patient resource", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
-
-        return Response.status(status)
-                .entity(this.converter.toFHIR(Patient.class, entity))
-                .build();
     }
 
     @POST
@@ -156,13 +161,20 @@ public class PatientResource extends AbstractPatientResource {
     @UnitOfWork
     @ApiOperation(value = "Update Patient record", notes = "Update specific Patient record." +
             "<p>Currently, this method only allows for updating of the Patient first/last name, and BirthDate.")
-    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find Patient to update"))
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Unable to find Patient to update"),
+            @ApiResponse(code = 422, message = "Submitted resource is not a valid Patient")
+    })
     @Override
     public Response updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
-        final PatientEntity patientEntity = this.dao.updatePatient(patientID, this.converter.fromFHIR(PatientEntity.class, patient));
+        try {
+            final PatientEntity patientEntity = this.dao.updatePatient(patientID, this.converter.fromFHIR(PatientEntity.class, patient));
 
-        return Response.ok()
-                .entity(this.converter.toFHIR(Patient.class, patientEntity))
-                .build();
+            return Response.ok()
+                    .entity(this.converter.toFHIR(Patient.class, patientEntity))
+                    .build();
+        } catch (FHIRConverterException e) {
+            throw new WebApplicationException("Invalid Patient resource", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
     }
 }
