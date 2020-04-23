@@ -1,9 +1,12 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -11,6 +14,8 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +23,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.sql.Date;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
@@ -175,18 +181,29 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(99, patients.getTotal(), "Should have correct number of patients");
 
         // Try to update one
-        // TODO: Removed until DPC-683 is merged
-//        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
-//        patient.setBirthDate(Date.valueOf("2000-01-01"));
-//        patient.setGender(Enumerations.AdministrativeGender.MALE);
-//
-//        final MethodOutcome outcome = client
-//                .update()
-//                .resource(patient)
-//                .withId(patient.getId())
-//                .encodedJson()
-//                .execute();
-//
-//        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
+        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
+        patient.setBirthDate(Date.valueOf("2000-01-01"));
+        patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+        final MethodOutcome outcome = client
+                .update()
+                .resource(patient)
+                .withId(patient.getId())
+                .encodedJson()
+                .execute();
+
+        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
+
+        // Try to update with invalid MBI
+        Identifier mbiIdentifier = patient.getIdentifier().stream()
+                .filter(i -> DPCIdentifierSystem.MBI.getSystem().equals(i.getSystem())).findFirst().get();
+        mbiIdentifier.setValue("not-a-valid-MBI");
+
+        IUpdateExecutable update = client
+                .update()
+                .resource(patient)
+                .withId(patient.getId());
+
+        assertThrows(UnprocessableEntityException.class, update::execute);
     }
 }
