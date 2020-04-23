@@ -56,9 +56,11 @@ public class AggregationEngine implements Runnable {
     /**
      * Create an engine.
      *
-     * @param aggregatorID     - The ID of the current working aggregator
-     * @param queue            - {@link IJobQueue} that will direct the work done
-     * @param operationsConfig - The {@link OperationsConfig} to use for writing the output files
+     * @param aggregatorID      - The ID of the current working aggregator
+     * @param queue             - {@link IJobQueue} that will direct the work done
+     * @param operationsConfig  - The {@link OperationsConfig} to use for writing the output files
+     * @param lookBackService   - {@link LookBackService} that will check if request is able to be processed
+     * @param jobBatchProcessor - {@link JobBatchProcessor} contains all the job processing logic
      */
     @Inject
     public AggregationEngine(@AggregatorID UUID aggregatorID, IJobQueue queue, OperationsConfig operationsConfig, LookBackService lookBackService, JobBatchProcessor jobBatchProcessor) {

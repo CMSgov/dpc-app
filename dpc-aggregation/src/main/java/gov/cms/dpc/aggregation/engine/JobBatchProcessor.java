@@ -46,7 +46,7 @@ public class JobBatchProcessor {
      * @param queue         the queue
      * @param job           the job to process
      * @param patientID     the current patient id to process
-     * @return A list of batch files {@see JobQueueBatchFile}
+     * @return A list of batch files {@link JobQueueBatchFile}
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
         final var results = Flowable.fromIterable(job.getResourceTypes())
@@ -64,10 +64,17 @@ public class JobBatchProcessor {
      * @param job          the job to associate the fetch
      * @param patientID    the patientID to fetch data
      * @param resourceType the resourceType to fetch data
+     * @return A flowable and resourceType the user requested
      */
     public Pair<Flowable<List<Resource>>, ResourceType> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
-        final var fetcher = new ResourceFetcher(bbclient, job.getJobID(), job.getBatchID(), resourceType, operationsConfig);
+        final var fetcher = new ResourceFetcher(bbclient,
+                job.getJobID(),
+                job.getBatchID(),
+                resourceType,
+                job.getSince().orElse(null),
+                job.getTransactionTime(),
+                operationsConfig);
         return Pair.of(fetcher.fetchResources(patientID), resourceType);
     }
 
