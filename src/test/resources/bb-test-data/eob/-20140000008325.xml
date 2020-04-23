@@ -17,6 +17,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-20587716665"/>
+            <meta>
+               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -1741,6 +1744,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-20707791705"/>
+                <meta>
+                    <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+                </meta>
             <extension url="https://bluebutton.cms.gov/resources/variables/prpayamt">
                <valueMoney>
                   <value value="0.00"/>
@@ -2647,6 +2653,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-20945302182"/>
+            <meta>
+               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -3778,6 +3787,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-20956105914"/>
+            <meta>
+               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+            </meta>
             <extension url="https://bluebutton.cms.gov/resources/variables/prpayamt">
                <valueMoney>
                   <value value="0.00"/>
@@ -4684,6 +4696,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-20989445930"/>
+            <meta>
+               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -5131,6 +5146,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-21126565981"/>
+            <meta>
+               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -5585,6 +5603,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-21366012370"/>
+            <meta>
+               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>
@@ -6294,6 +6315,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-21513766042"/>
+            <meta>
+               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+            </meta>
             <extension url="https://bluebutton.cms.gov/resources/variables/prpayamt">
                <valueMoney>
                   <value value="0.00"/>
@@ -6715,6 +6739,9 @@
       <resource>
          <ExplanationOfBenefit xmlns="http://hl7.org/fhir">
             <id value="carrier-21856079985"/>
+            <meta>
+               <lastUpdated value="2020-01-01T00:00:00-05:00"></lastUpdated>
+            </meta>
             <contained>
                <ReferralRequest xmlns="http://hl7.org/fhir">
                   <id value="1"/>

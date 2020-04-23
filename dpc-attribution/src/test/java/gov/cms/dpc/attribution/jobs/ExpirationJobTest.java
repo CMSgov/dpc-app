@@ -60,8 +60,7 @@ class ExpirationJobTest {
     void test() throws InterruptedException {
 
         // Manually add a new relationship with a current creation timestamp
-        final String newPatientID = "test-new-patient-id";
-        final Bundle updateBundle = createAttributionBundle(PROVIDER_ID, newPatientID, DEFAULT_ORG_ID);
+        final Bundle updateBundle = createAttributionBundle(PROVIDER_ID, "0L00L00LL00", DEFAULT_ORG_ID);
         // Submit the attribution bundle
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         final IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + APPLICATION.getLocalPort() + "/v1/");

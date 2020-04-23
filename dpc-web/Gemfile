@@ -24,6 +24,7 @@ gem 'health_check'
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
+  gem 'pry-nav'
 
   gem 'rspec-rails'
   gem 'database_cleaner'
@@ -67,3 +68,4 @@ gem 'active_model_serializers'
 gem 'macaroons'
 gem 'newrelic_rpm', '~> 6.10'
 gem 'fhir_client'
+gem 'lograge'

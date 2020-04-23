@@ -14,17 +14,20 @@ class PublicKeysController < ApplicationController
 
     reg_org = @organization.registered_organizations.find_by(api_env: params[:api_environment])
     manager = PublicKeyManager.new(api_env: params[:api_environment], registered_organization: reg_org)
-    if manager.create_public_key(public_key: params[:public_key], label: params[:label])
+
+    new_public_key = manager.create_public_key(public_key: params[:public_key], label: params[:label])
+
+    if new_public_key[:response]
       redirect_to dashboard_path
     else
-      render_error 'Public key could not be created.'
+      render_error new_public_key[:message]
     end
   end
 
   private
 
   def render_error(msg)
-    flash[:error] = msg
+    flash[:alert] = msg
     render :new
   end
 
