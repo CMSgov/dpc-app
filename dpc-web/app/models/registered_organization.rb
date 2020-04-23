@@ -49,6 +49,10 @@ class RegisteredOrganization < ApplicationRecord
 
     api_response = api_request.response_body
 
+    return_api_response(api_request, api_response)
+  end
+
+  def return_api_response(api_request, api_response)
     if api_request.response_successful?
       self[:api_id] = api_response['id']
       self[:api_endpoint_ref] = api_response['endpoint'][0]['reference']
