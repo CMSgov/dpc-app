@@ -184,7 +184,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     private Practitioner createFakePractitioner(Organization organization) {
         final Practitioner practitioner = new Practitioner();
         practitioner.addName().setFamily("Test").addGiven("Practitioner");
-        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("fake-prov-npi");
+        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("2222222228");
 
         final Meta meta = new Meta();
         meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organization.getIdElement().getIdPart(), "Organization ID");
