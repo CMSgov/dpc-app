@@ -44,7 +44,7 @@ class AttributionFHIRTest {
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
     private static final FhirContext ctx = FhirContext.forDstu3();
-    private static final String CSV = "test_associations.csv";
+    private static final String CSV = "test_associations-dpr.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
     private static final ObjectMapper mapper = new ObjectMapper();
     private static Organization organization;
@@ -184,7 +184,7 @@ class AttributionFHIRTest {
         // Create the new patient and submit them
         final Patient patient = new Patient();
         final Identifier patientIdentifier = new Identifier();
-        patientIdentifier.setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-new-patient-id");
+        patientIdentifier.setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0I00I00II00");
         patient.addIdentifier(patientIdentifier);
         patient.addName().addGiven("New Test Patient");
         patient.setBirthDate(new GregorianCalendar(2019, Calendar.MARCH, 1).getTime());
