@@ -10,6 +10,7 @@ import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
+import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
 import gov.cms.dpc.common.annotations.ExportPath;
@@ -91,6 +92,10 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
     @Provides
     LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, RosterDAO rosterDAO, OperationsConfig operationsConfig) {
+        //Configuring to skip look back when look back months is less than 0
+        if (operationsConfig.getLookBackMonths() < 0) {
+            return new EveryoneGetsDataLookBackServiceImpl();
+        }
         return new UnitOfWorkAwareProxyFactory("roster", sessionFactory.getSessionFactory()).create(LookBackServiceImpl.class,
                 new Class<?>[]{RosterDAO.class, OperationsConfig.class},
                 new Object[]{rosterDAO, operationsConfig});
