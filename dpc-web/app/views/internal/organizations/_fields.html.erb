@@ -28,6 +28,7 @@
           min: 0, class: "ds-c-field ds-c-field--small" %>
       </div>
 
+    <% unless @organization.prod_sbx? %>
       <div class="field">
         <%= f.label :npi, "NPI", class: "ds-c-label" %>
         <%= f.text_field :npi, class: "ds-c-field" %>
@@ -37,6 +38,7 @@
         <%= f.label :vendor, "Vendor", class: "ds-c-label" %>
         <%= f.text_field :vendor, class: "ds-c-field" %>
       </div>
+    <% end %>
     </div>
   </div>
 </fieldset>
