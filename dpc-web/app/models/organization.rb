@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'luhnacy'
+
 class Organization < ApplicationRecord
   include OrganizationTypable
 
@@ -102,7 +104,11 @@ private
 
 def generate_provider_id
   loop do
-    provider_id = "P_#{SecureRandom.alphanumeric(10)}"
+    provider_id = Luhnacy.doctor_npi(:prefix => '12345')
+
+    binding.pry
+
+    Luhnacy.doctor_npi?(provider_id)
     break provider_id unless Organization.where(provider_id: provider_id).exists?
   end
 end
