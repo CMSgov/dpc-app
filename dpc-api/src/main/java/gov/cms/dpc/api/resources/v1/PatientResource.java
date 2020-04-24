@@ -14,6 +14,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -53,12 +54,14 @@ public class PatientResource extends AbstractPatientResource {
     private final IGenericClient client;
     private final FhirValidator validator;
     private final DataService dataService;
+    private final BlueButtonClient bfdClient;
 
     @Inject
-    public PatientResource(@Named("attribution") IGenericClient client, FhirValidator validator, DataService dataService) {
+    public PatientResource(@Named("attribution") IGenericClient client, FhirValidator validator, DataService dataService, BlueButtonClient bfdClient) {
         this.client = client;
         this.validator = validator;
         this.dataService = dataService;
+        this.bfdClient = bfdClient;
     }
 
     @GET
@@ -189,13 +192,13 @@ public class PatientResource extends AbstractPatientResource {
 
         final Patient patient = getPatient(patientId);
         final String patientMbi = FHIRExtractors.getPatientMBI(patient);
+        final UUID orgId = organization.getID();
 
-        if (!isPatientInRoster(patientId, FHIRExtractors.getProviderNPI(provider), organization.getID())) {
+        if (!isPatientInRoster(patientId, FHIRExtractors.getProviderNPI(provider), orgId)) {
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
         }
 
-        final UUID orgId = organization.getID();
-        Resource result = dataService.retrieveData(orgId, providerId, List.of(patientMbi),
+        Resource result = dataService.retrieveData(orgId, providerId, List.of(patientMbi), APIHelpers.fetchTransactionTime(bfdClient),
                 ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
             return (Bundle) result;

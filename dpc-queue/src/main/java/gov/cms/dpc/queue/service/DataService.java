@@ -42,6 +42,10 @@ public class DataService {
         this.jobTimeoutInSeconds = jobTimeoutInSeconds;
     }
 
+    public Resource retrieveData(UUID organizationId, UUID providerId, List<String> patientIds, ResourceType... resourceTypes) {
+        return retrieveData(organizationId, providerId, patientIds, OffsetDateTime.now(ZoneOffset.UTC), resourceTypes);
+    }
+
     /**
      * Retrieves data from BFD
      * @param organizationID UUID of organization
@@ -53,8 +57,9 @@ public class DataService {
     public Resource retrieveData(UUID organizationID,
                                  UUID providerID,
                                  List<String> patientIDs,
+                                 OffsetDateTime transactionTime,
                                  ResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), null, OffsetDateTime.now(ZoneOffset.UTC));
+        UUID jobID = this.queue.createJob(organizationID, providerID.toString(), patientIDs, List.of(resourceTypes), null, transactionTime);
         Optional<List<JobQueueBatch>> optionalBatches = waitForJobToComplete(jobID, organizationID, this.queue);
 
         if (optionalBatches.isPresent()) {
