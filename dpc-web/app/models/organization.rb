@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'luhnacy'
-
 class Organization < ApplicationRecord
   include OrganizationTypable
 
