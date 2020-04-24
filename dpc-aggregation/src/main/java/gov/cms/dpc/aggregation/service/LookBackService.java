@@ -9,11 +9,11 @@ public interface LookBackService {
     /**
      * Retrieves the ProviderID from the roster by orgID, patientMBI and either rosterID or providerID
      * @param orgID         The organizationID
-     * @param ambiguousID   Either a rosterID or the providerID
+     * @param providerOrRosterID   Either a rosterID or the providerID
      * @param patientMBI    The patient MBI
      * @return the provider ID for that roster
      */
-    UUID getProviderIDFromRoster(UUID orgID, String ambiguousID, String patientMBI);
+    UUID getProviderIDFromRoster(UUID orgID, String providerOrRosterID, String patientMBI);
 
     /**
      * Checks to see if the explanation of benefits that is associated with the orgID and providerID has a claim
