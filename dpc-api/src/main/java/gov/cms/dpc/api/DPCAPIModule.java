@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
@@ -112,7 +113,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public OrganizationResource provideOrganizationResource(IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+    public OrganizationResource provideOrganizationResource(@Named("attribution") IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(OrganizationResource.class,
                         new Class<?>[]{IGenericClient.class,
@@ -176,6 +177,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @Singleton
+    @Named("attribution")
     public IGenericClient provideFHIRClient(FhirContext ctx) {
         logger.info("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
