@@ -101,7 +101,7 @@ private
 
 def generate_sandbox_id
   loop do
-    sandbox_id = Luhnacy.generate(15, :prefix => '808403')[-10..-1]
+    sandbox_id = Luhnacy.generate(15, prefix: '808403')[-10..-1]
     break sandbox_id unless Organization.where(sandbox_id: sandbox_id).exists?
   end
 end
