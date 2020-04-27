@@ -47,7 +47,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         final Bundle specificSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("8075963174210588464"))
+                .where(Practitioner.IDENTIFIER.exactly().code("1232131239"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();

@@ -53,7 +53,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerReadWrite() {
 
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-1");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2453425227");
 
         final ICreateTyped creation = client
                 .create()
@@ -119,7 +119,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerSearch() {
 
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-1");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2222222228");
 
         final MethodOutcome outcome = client
                 .create()
@@ -160,7 +160,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPractitionerUpdate() {
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("1234322224");
 
         final MethodOutcome outcome = client
                 .create()
@@ -208,7 +208,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPractitionerRemoval() {
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2322222227");
 
         final MethodOutcome outcome = client
                 .create()
@@ -252,7 +252,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         //Currently 4 providers are created in the seed for the test
         APPLICATION.getConfiguration().setProviderLimit(5);
 
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2189749122");
 
         final ICreateTyped creation = client
                 .create()
