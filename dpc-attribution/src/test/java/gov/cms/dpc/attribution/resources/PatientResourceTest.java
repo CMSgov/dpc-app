@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -197,6 +198,13 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .execute();
 
         final Patient updatedPatient = (Patient) updated.getResource();
+
+        foundPatient.getNameFirstRep().setFamily("<script>Family</script>");
+        assertThrows(InvalidRequestException.class, () -> client
+                .update()
+                .resource(foundPatient)
+                .encodedJson()
+                .execute(), "Should not have updated patient");
 
         // Try to pull the record, again, from the DB
 
