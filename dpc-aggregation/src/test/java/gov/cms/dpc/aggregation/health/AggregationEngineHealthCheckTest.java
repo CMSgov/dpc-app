@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.health;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
@@ -20,6 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -71,7 +74,9 @@ public class AggregationEngineHealthCheckTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient)
+                Collections.singletonList(ResourceType.Patient),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
@@ -88,7 +93,7 @@ public class AggregationEngineHealthCheckTest {
     @Test
     public void testHealthyEngineWhenJobBatchErrors() throws InterruptedException {
 
-        Mockito.doThrow(new RuntimeException("Error")).when(bbclient).requestPatientFromServer(Mockito.anyString());
+        Mockito.doThrow(new RuntimeException("Error")).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class));
 
         final var orgID = UUID.randomUUID();
 
@@ -96,7 +101,9 @@ public class AggregationEngineHealthCheckTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient)
+                Collections.singletonList(ResourceType.Patient),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
@@ -119,7 +126,9 @@ public class AggregationEngineHealthCheckTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient)
+                Collections.singletonList(ResourceType.Patient),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         Mockito.doThrow(new RuntimeException("Error")).when(queue).claimBatch(Mockito.any(UUID.class));
@@ -145,7 +154,9 @@ public class AggregationEngineHealthCheckTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 Collections.singletonList("1"),
-                Collections.singletonList(ResourceType.Patient)
+                Collections.singletonList(ResourceType.Patient),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);

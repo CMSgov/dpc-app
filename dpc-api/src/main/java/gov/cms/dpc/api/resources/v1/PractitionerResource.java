@@ -6,6 +6,7 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
@@ -42,7 +43,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     private final FhirValidator validator;
 
     @Inject
-    PractitionerResource(IGenericClient client, FhirValidator validator) {
+    PractitionerResource(@Named("attribution") IGenericClient client, FhirValidator validator) {
         this.client = client;
         this.validator = validator;
     }
