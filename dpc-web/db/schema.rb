@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_24_192202) do
+ActiveRecord::Schema.define(version: 2020_04_10_125053) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -89,7 +89,6 @@ ActiveRecord::Schema.define(version: 2020_04_24_192202) do
     t.string "vendor"
     t.string "vendor_id"
     t.string "provider_id"
-    t.string "sandbox_id"
   end
 
   create_table "registered_organizations", force: :cascade do |t|

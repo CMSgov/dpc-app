@@ -6,11 +6,7 @@
     <div class="dashboard-section-header">
       <h2 class="dashboard-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
 
-      <% if organization.health_it_vendor? %>
-        <div>
-          <label class="ds-u-color--muted">Vendor ID (System-generated):</label>
-          <div class="ds-u-color--muted"><%= organization.sandbox_id %></div>
-        </div>
+      <% if organization.prod_sbx? %>
       <% else %>
         <div>
           <div>
