@@ -4,6 +4,7 @@ require_relative 'boot'
 $stdout.sync = true
 
 require "rails"
+require "luhnacy"
 # Pick the frameworks you want:
 require "active_model/railtie"
 require "active_job/railtie"
