@@ -48,5 +48,7 @@ module DpcWebsite
     config.middleware.insert_before ActionDispatch::Static, DpcMiddleware::IgFix
 
     config.active_job.queue_adapter = :delayed_job
+
+    config.to_prepare { Devise::Mailer.layout "mailer" }
   end
 end

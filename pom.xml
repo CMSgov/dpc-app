@@ -104,6 +104,12 @@
             <email>will.huang@adhocteam.us</email>
             <organization>Ad Hoc LLC</organization>
         </developer>
+        <developer>
+            <id>silvio</id>
+            <name>Silvio Luthi</name>
+            <email>silvio@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
+        </developer>
     </developers>
 
     <dependencyManagement>
