@@ -7,6 +7,11 @@
       <h2 class="dashboard-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
 
       <% if organization.prod_sbx? %>
+        <div>
+          <div>
+          <span class="ds-u-color--muted"><strong>NPI:</strong> (auto-generated) <%= organization.sandbox_id %></span>
+          </div>
+        </div>
       <% else %>
         <div>
           <div>
