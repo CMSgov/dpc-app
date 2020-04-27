@@ -36,6 +36,14 @@ public class OrganizationIdValidatorTest {
 
     private static Stream<Arguments> stringSource() {
         return Stream.of(
+                Arguments.of(DPCIdentifierSystem.NPPES, "9111bb1115", false),
+                Arguments.of(DPCIdentifierSystem.NPPES, "9111111115", true),
+                Arguments.of(DPCIdentifierSystem.NPPES, "9111111116", false),
+                Arguments.of(DPCIdentifierSystem.NPPES, "8111111117", true),
+                Arguments.of(DPCIdentifierSystem.NPPES, "8111111118", false),
+                Arguments.of(DPCIdentifierSystem.NPPES, "7111111119", true),
+                Arguments.of(DPCIdentifierSystem.NPPES, "7111111110", false),
+                Arguments.of(DPCIdentifierSystem.NPPES, "6111111111", true),
                 Arguments.of(DPCIdentifierSystem.NPPES, "1111111112", true),
                 Arguments.of(DPCIdentifierSystem.NPPES, "1632101113", true),
                 Arguments.of(DPCIdentifierSystem.NPPES, "4579310721", true),
