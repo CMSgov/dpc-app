@@ -54,10 +54,11 @@
       </div>
 
       <div class="ds-u-margin-bottom--1">
-        <label class="ds-u-margin-right--1 ds-u-color--muted">NPI (auto-generated)</label>
         <% if @organization.prod_sbx? %>
+          <label class="ds-u-margin-right--1 ds-u-color--muted">NPI (auto-generated)</label>
           <span class="ds-u-color--muted"><%= @organization.sandbox_id %></span>
         <% elsif  %>
+          <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
           <%= @organization.npi %>
         <% end %>
       </div>
