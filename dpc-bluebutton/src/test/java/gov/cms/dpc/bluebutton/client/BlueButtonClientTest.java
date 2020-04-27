@@ -1,5 +1,6 @@
 package gov.cms.dpc.bluebutton.client;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -28,7 +29,6 @@ import org.mockserver.model.Parameter;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.sql.Date;
 import java.util.Collections;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -53,6 +53,10 @@ class BlueButtonClientTest {
     private static final String SAMPLE_PATIENT_PATH_PREFIX = "bb-test-data/patient/";
     private static final String[] TEST_PATIENT_IDS = {"-20140000008325", "-20140000009893"};
 
+    // lastUpdate date range to test
+    private static final DateRangeParam TEST_LAST_UPDATED = new DateRangeParam().setUpperBoundInclusive(new java.util.Date());
+    private static final String TEST_LAST_UPDATED_STRING = "le" + TEST_LAST_UPDATED.getUpperBound().getValueAsString();
+
     private static BlueButtonClient bbc;
     private static ClientAndServer mockServer;
     private static Config conf;
@@ -63,38 +67,64 @@ class BlueButtonClientTest {
         final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
 
-        mockServer = ClientAndServer.startClientAndServer(conf.getInt("test.mockServerPort"));
+        mockServer = ClientAndServer.startClientAndServer(8083);
         createMockServerExpectation("/v1/fhir/metadata", HttpStatus.OK_200, getRawXML(METADATA_PATH), List.of());
 
         for (String patientId : TEST_PATIENT_IDS) {
             createMockServerExpectation(
-                    "/v1/fhir/Patient/" + patientId,
+                    "/v1/fhir/Patient",
                     HttpStatus.OK_200,
                     getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
-                    List.of()
+                    List.of(
+                            Parameter.param("_id", patientId),
+                            Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
+            );
+
+            createMockServerExpectation(
+                    "/v1/fhir/Patient",
+                    HttpStatus.OK_200,
+                    getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
+                    Collections.singletonList(Parameter.param("_id", patientId))
             );
 
             createMockServerExpectation(
                     "/v1/fhir/ExplanationOfBenefit",
                     HttpStatus.OK_200,
                     getRawXML(SAMPLE_EOB_PATH_PREFIX + patientId + ".xml"),
-                    List.of(Parameter.param("patient", patientId),
-                        Parameter.param("excludeSAMHSA", "true"))
+                    List.of(
+                            Parameter.param("patient", patientId),
+                            Parameter.param("excludeSAMHSA", "true"),
+                            Parameter.param("_count", "10"),
+                            Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
 
             createMockServerExpectation(
                     "/v1/fhir/Coverage",
                     HttpStatus.OK_200,
                     getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
-                    Collections.singletonList(Parameter.param("beneficiary", "Patient/" + patientId))
+                    List.of(
+                            Parameter.param("beneficiary", "Patient/" + patientId),
+                            Parameter.param("_count", "10"),
+                            Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
         }
 
         createMockServerExpectation(
                 "/v1/fhir/Patient",
                 HttpStatus.OK_200,
-                getRawXML(SAMPLE_PATIENT_PATH_PREFIX + TEST_PATIENT_ID + "-bundle.xml"),
+                getRawXML(SAMPLE_PATIENT_PATH_PREFIX + TEST_PATIENT_ID + ".xml"),
                 Collections.singletonList(Parameter.param("identifier", DPCIdentifierSystem.MBI_HASH.getSystem() + "|" + TEST_PATIENT_MBI_HASH))
+        );
+
+        createMockServerExpectation(
+            "/v1/fhir/ExplainationOfBenefit", 
+            HttpStatus.OK_200, 
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"), 
+            List.of(
+                    Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
+                    Parameter.param("excludeSAMHSA", "true"),
+                    Parameter.param("_count", "10"),
+                    Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
         );
 
         // Create mocks for pages of the results
@@ -118,17 +148,40 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetFHIRFromPatientID() {
-        Patient ret = bbc.requestPatientFromServer(TEST_PATIENT_ID);
-
-        // Verify basic demo patient information
+        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
+        // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
+        assertEquals(ResourceType.Bundle, ret.getResourceType());
+        assertEquals(1, ret.getEntry().size());
+        assertEquals(ResourceType.Patient, ret.getEntry().get(0).getResource().getResourceType());
+        final var patient = (Patient) ret.getEntry().get(0).getResource();
 
         String patientDataCorrupted = "The demo Patient object data differs from what is expected";
-        assertEquals(ret.getBirthDate(), Date.valueOf("2014-06-01"), patientDataCorrupted);
-        assertEquals(ret.getGender().getDisplay(), "Unknown", patientDataCorrupted);
-        assertEquals(ret.getName().size(), 1, patientDataCorrupted);
-        assertEquals(ret.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
-        assertEquals(ret.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
+        assertEquals(patient.getBirthDate(), java.sql.Date.valueOf("2014-06-01"), patientDataCorrupted);
+        assertEquals(patient.getGender().getDisplay(), "Unknown", patientDataCorrupted);
+        assertEquals(patient.getName().size(), 1, patientDataCorrupted);
+        assertEquals(patient.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
+        assertEquals(patient.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
+    }
+
+    @Test
+    void shouldGetFHIRFromPatientIDWithoutLastUpdated() {
+        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, null);
+        // Verify that the bundle has one
+        assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
+        assertEquals(ResourceType.Bundle, ret.getResourceType());
+        assertEquals(1, ret.getEntry().size());
+        assertEquals(ResourceType.Patient, ret.getEntry().get(0).getResource().getResourceType());
+    }
+
+    @Test
+    void shouldGetFHIRFromPatientIDWithLastUpdated() {
+        Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
+        // Verify that the bundle has one
+        assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
+        assertEquals(ResourceType.Bundle, ret.getResourceType());
+        assertEquals(1, ret.getEntry().size());
+        assertEquals(ResourceType.Patient, ret.getEntry().get(0).getResource().getResourceType());
     }
 
     @Test
@@ -141,7 +194,7 @@ class BlueButtonClientTest {
         Patient pt = (Patient) ret.getEntryFirstRep().getResource();
 
         String patientDataCorrupted = "The demo Patient object data differs from what is expected";
-        assertEquals(pt.getBirthDate(), Date.valueOf("2014-06-01"), patientDataCorrupted);
+        assertEquals(pt.getBirthDate(), java.sql.Date.valueOf("2014-06-01"), patientDataCorrupted);
         assertEquals(pt.getGender().getDisplay(), "Unknown", patientDataCorrupted);
         assertEquals(pt.getName().size(), 1, patientDataCorrupted);
         assertEquals(pt.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
@@ -150,7 +203,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetEOBFromPatientID() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID);
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertEquals(32, response.getTotal(), "The demo patient should have exactly 32 EOBs");
@@ -158,7 +211,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldNotHaveNextBundle() {
-        Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID);
+        Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertEquals(1, response.getTotal(), "The demo patient should have exactly 1 EOBs");
@@ -167,7 +220,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldHaveNextBundle() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID);
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertNotNull(response.getLink(Bundle.LINK_NEXT), "Should have no next link since all the resources are in the bundle");
@@ -178,7 +231,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldReturnBundleContainingOnlyEOBs() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID);
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
 
         response.getEntry().forEach((entry) -> assertEquals(
                 entry.getResource().getResourceType(),
@@ -189,7 +242,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetCoverageFromPatientID() {
-        final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID);
+        final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED);
 
         assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
         assertEquals(3, response.getTotal(), "The demo patient should have exactly 3 Coverage");
@@ -206,7 +259,7 @@ class BlueButtonClientTest {
 
     @Test
     void shouldHandlePatientsWithOnlyOneEOB() {
-        final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID);
+        final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED);
         assertEquals(1, response.getTotal(), "This demo patient should have exactly 1 EOB");
     }
 
@@ -214,13 +267,13 @@ class BlueButtonClientTest {
     void shouldThrowExceptionWhenResourceNotFound() {
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID),
+                () -> bbc.requestPatientFromServer(TEST_NONEXISTENT_PATIENT_ID, null),
                 "BlueButton client should throw exceptions when asked to retrieve a non-existent patient"
         );
 
         assertThrows(
                 ResourceNotFoundException.class,
-                () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID),
+                () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID, null),
                 "BlueButton client should throw exceptions when asked to retrieve EOBs for a non-existent patient"
         );
     }
@@ -253,7 +306,7 @@ class BlueButtonClientTest {
      * @param qStringParams The query string parameters that must be present to generate this response
      */
     private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams) {
-        new MockServerClient("localhost", conf.getInt("test.mockServerPort"))
+        new MockServerClient("localhost", 8083)
                 .when(
                         HttpRequest.request()
                                 .withMethod("GET")

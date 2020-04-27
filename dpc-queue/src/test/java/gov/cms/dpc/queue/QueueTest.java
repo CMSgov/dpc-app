@@ -17,6 +17,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
@@ -56,7 +58,8 @@ class QueueTest {
                     final DynamicTest second = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Missing Job"), () -> testMissingJob(queue));
                     final DynamicTest third = DynamicTest.dynamicTest(nameGenerator.apply(queue, "EOB Submission"), () -> testPatientAndEOBSubmission(queue));
                     final DynamicTest fourth = DynamicTest.dynamicTest(nameGenerator.apply(queue, "Invalid batch on queue"), () -> testInvalidJobBatch(queue));
-                    return List.of(first, second, third, fourth);
+                    final DynamicTest fifth = DynamicTest.dynamicTest(nameGenerator.apply(queue, "since equal transaction time"), () -> testSinceEqualTransactionTime(queue));
+                    return List.of(first, second, third, fourth, fifth);
                 })
                 .flatMap(Collection::stream);
     }
@@ -86,9 +89,8 @@ class QueueTest {
         final UUID orgID = UUID.randomUUID();
 
         // Add a couple of jobs
-        var firstJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient));
-        var secondJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient));
-
+        var firstJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC));
+        var secondJobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Collections.singletonList(ResourceType.Patient), null, OffsetDateTime.now(ZoneOffset.UTC));
         assertEquals(2, queue.queueSize(), "Should have 2 jobs");
 
         // Check the status of the job
@@ -158,7 +160,12 @@ class QueueTest {
     void testPatientAndEOBSubmission(JobQueueCommon queue) {
         // Add a job with a EOB resource
         final var orgID = UUID.randomUUID();
-        final var jobID = queue.createJob(orgID, "test-provider-1", List.of("test-patient-1", "test-patient-2"), Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit));
+        final var jobID = queue.createJob(orgID,
+                "test-provider-1",
+                List.of("test-patient-1", "test-patient-2"),
+                Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC));
 
         // Retrieve the job with both resources
         final var workBatch = queue.claimBatch(aggregatorID).get();
@@ -192,6 +199,23 @@ class QueueTest {
         assertThrows(JobQueueFailure.class, () -> queue.completeBatch(null, aggregatorID), "Should error when completing a job which does not exist");
     }
 
+
+    void testSinceEqualTransactionTime(JobQueueCommon queue) {
+        final var transactionTime = OffsetDateTime.now(ZoneOffset.UTC);
+        final var jobId = queue.createJob(UUID.randomUUID(),
+                "test-provider-1",
+                List.of("test-patient-1", "test-patient-2"),
+                Arrays.asList(ResourceType.Patient, ResourceType.ExplanationOfBenefit),
+                transactionTime,
+                transactionTime);
+
+        // Check that the Job has a empty queue
+        final Optional<JobQueueBatch> job = queue.getJobBatches(jobId).stream().findFirst();
+        assertAll(() -> assertTrue(job.isPresent(), "Should be present in the queue."),
+                () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be in queue"),
+                () -> assertTrue(job.get().getPatients().isEmpty()));
+    }
+
     void testInvalidJobBatch(JobQueueCommon queue) {
         final UUID orgID = UUID.randomUUID();
         final UUID jobID = UUID.randomUUID();
@@ -201,7 +225,9 @@ class QueueTest {
                 orgID,
                 "test-provider-1",
                 Collections.singletonList("test-patient-1"),
-                Collections.singletonList(ResourceType.ExplanationOfBenefit)
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC)
         );
 
         // Set the aggregatorID to something random so it gets claimed incorrectly

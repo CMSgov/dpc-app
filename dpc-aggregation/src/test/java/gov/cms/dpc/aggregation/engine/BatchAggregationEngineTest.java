@@ -77,7 +77,9 @@ class BatchAggregationEngineTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.ExplanationOfBenefit)
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job
@@ -110,7 +112,9 @@ class BatchAggregationEngineTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
-                JobQueueBatch.validResourceTypes
+                JobQueueBatch.validResourceTypes,
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job
@@ -146,7 +150,9 @@ class BatchAggregationEngineTest {
                 orgID,
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
-                Collections.singletonList(ResourceType.ExplanationOfBenefit)
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job
