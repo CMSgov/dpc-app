@@ -53,13 +53,13 @@
         <%= @organization.num_providers %> providers
       </div>
 
-      <% if @organization.prod_sbx? %>
-      <% elsif  %>
-        <div class="ds-u-margin-bottom--1">
+      <div class="ds-u-margin-bottom--1">
+        <% if @organization.prod_sbx? %>
+        <% elsif  %>
           <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
           <%= @organization.npi %>
-        </div>
-      <% end %>
+        <% end %>
+      </div>
 
       <div class="ds-u-margin-bottom--1">
         <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
