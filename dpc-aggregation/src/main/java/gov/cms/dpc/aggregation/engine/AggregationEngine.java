@@ -191,7 +191,7 @@ public class AggregationEngine implements Runnable {
         //patientId here is the patient MBI
         final UUID providerID = lookBackService.getProviderIDFromRoster(job.getOrgID(), job.getProviderID(), patientId);
         if (providerID != null) {
-            Pair<Flowable<List<Resource>>, ResourceType> pair = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit);
+            Pair<Flowable<List<Resource>>, ResourceType> pair = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
             Boolean hasClaims = pair.getLeft()
                     .flatMap(Flowable::fromIterable)
                     .filter(resource -> pair.getRight() == resource.getResourceType())

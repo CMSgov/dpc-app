@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.model.ResourceType;
 import org.reactivestreams.Publisher;
 
 import javax.inject.Inject;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,7 +51,7 @@ public class JobBatchProcessor {
      */
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String patientID) {
         final var results = Flowable.fromIterable(job.getResourceTypes())
-                .map(resourceType -> fetchResource(job, patientID, resourceType))
+                .map(resourceType -> fetchResource(job, patientID, resourceType, job.getSince().orElse(null)))
                 .flatMap(result -> writeResource(job, result.getRight(), result.getLeft().flatMap(Flowable::fromIterable)))
                 .toList()
                 .blockingGet(); // Wait on the main thread until completion
@@ -64,17 +65,17 @@ public class JobBatchProcessor {
      * @param job          the job to associate the fetch
      * @param patientID    the patientID to fetch data
      * @param resourceType the resourceType to fetch data
+     * @param since        the since date
      * @return A flowable and resourceType the user requested
      */
-    public Pair<Flowable<List<Resource>>, ResourceType> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType) {
+    public Pair<Flowable<List<Resource>>, ResourceType> fetchResource(JobQueueBatch job, String patientID, ResourceType resourceType, OffsetDateTime since) {
         // Make this flow hot (ie. only called once) when multiple subscribers attach
         final var fetcher = new ResourceFetcher(bbclient,
                 job.getJobID(),
                 job.getBatchID(),
                 resourceType,
-                job.getSince().orElse(null),
-                job.getTransactionTime(),
-                operationsConfig);
+                since,
+                job.getTransactionTime());
         return Pair.of(fetcher.fetchResources(patientID), resourceType);
     }
 

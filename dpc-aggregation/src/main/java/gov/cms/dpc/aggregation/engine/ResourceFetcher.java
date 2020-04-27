@@ -8,7 +8,6 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.reactivex.Flowable;
-
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -42,15 +41,13 @@ class ResourceFetcher {
      * @param resourceType - the resource type to fetch
      * @param since - the since parameter for the job
      * @param transactionTime - the start time of this job
-     * @param config - the operations config
      */
     ResourceFetcher(BlueButtonClient blueButtonClient,
                     UUID jobID,
                     UUID batchID,
                     ResourceType resourceType,
                     OffsetDateTime since,
-                    OffsetDateTime transactionTime,
-                    OperationsConfig config) {
+                    OffsetDateTime transactionTime) {
         this.blueButtonClient = blueButtonClient;
         this.jobID = jobID;
         this.batchID = batchID;
