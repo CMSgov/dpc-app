@@ -38,12 +38,14 @@ module Internal
 
     def create
       @organization = Organization.new organization_params
+      id = @organization.id
+
       if @organization.save
         flash[:notice] = 'Organization created.'
         if params[:from_user].present?
-          redirect_to edit_internal_user_path(params[:from_user], user_organization_ids: @organization.id)
+          redirect_to edit_internal_user_path(params[:from_user], user_organization_ids: id)
         elsif prod_sbx?
-          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox')
+          redirect_to new_internal_organization_registered_organization_path(organization_id: id, api_env: 'sandbox')
         else
           redirect_to internal_organization_path(@organization)
         end
@@ -89,7 +91,7 @@ module Internal
     def prod_sbx?
       ENV['DEPLOY_ENV'] == 'prod-sbx'
     end
-  
+
     def organization_params
       params.fetch(:organization).permit(
         :name, :organization_type, :num_providers, :npi, :vendor,

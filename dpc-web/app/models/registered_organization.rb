@@ -91,7 +91,7 @@ class RegisteredOrganization < ApplicationRecord
     end
 
     action = 'deleted'
-    msg = api_repsponse.include? 'Cannot find organization' ? 'Cannot find organization' : api_response
+    msg = api_response
     api_error(action, msg)
     throw(:abort)
   end
