@@ -44,8 +44,8 @@ module Internal
         if params[:from_user].present?
           redirect_to edit_internal_user_path(params[:from_user], user_organization_ids: @organization.id)
         elsif prod_sbx?
-          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id, 
-            api_env: 'sandbox')
+          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id,
+                                                                             api_env: 'sandbox')
         else
           redirect_to internal_organization_path(@organization)
         end
@@ -89,6 +89,7 @@ module Internal
     def prod_sbx?
       ENV['DEPLOY_ENV'] == 'prod-sbx'
     end
+
     private
 
     def organization_params
