@@ -7,8 +7,8 @@
     "node": ">=0.12"
   },
   "dependencies": {
-    "newman": "^5.0.0",
-    "minimist": "1.2.5"
+    "newman": "^4.6.1",
+    "minimist": "1.2.3"
   },
   "devDependencies": {},
   "scripts": {
