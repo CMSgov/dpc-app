@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NoHtml;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -26,11 +27,13 @@ public class PatientEntity extends PersonEntity {
     include letters and numbers not permitted in real MBIs. */
     public static final String MBI_FORMAT = "^\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}$";
 
+    @NoHtml
     @NotEmpty
     @Column(name = "beneficiary_id", unique = true)
     @Pattern(regexp = MBI_FORMAT, message = "Must be a Medicare Beneficiary Identifier (MBI)")
     private String beneficiaryID;
 
+    @NoHtml
     @Column(name = "mbi_hash")
     private String mbiHash;
 

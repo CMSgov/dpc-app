@@ -4,6 +4,7 @@ require_relative 'boot'
 $stdout.sync = true
 
 require "rails"
+require "luhnacy"
 # Pick the frameworks you want:
 require "active_model/railtie"
 require "active_job/railtie"
@@ -47,5 +48,7 @@ module DpcWebsite
     config.middleware.insert_before ActionDispatch::Static, DpcMiddleware::IgFix
 
     config.active_job.queue_adapter = :delayed_job
+
+    config.to_prepare { Devise::Mailer.layout "mailer" }
   end
 end

@@ -164,6 +164,12 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         Organization orgResult = (Organization) outcome.getResource();
 
         assertTrue(organization.equalsDeep(orgResult));
+
+        organization.setName("<script>nope</script");
+        assertThrows(InvalidRequestException.class, () -> client
+                .update()
+                .resource(organization)
+                .execute(), "Should not have updated organization");
     }
 
     @Test
