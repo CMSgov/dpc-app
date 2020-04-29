@@ -43,7 +43,7 @@
       <div>
         <%= form_for Tagging.new, url: internal_taggings_path, html: { method: :post } do |f| %>
           <%= f.label :tag_id, "New tag", class: "ds-c-label ds-u-margin-top--0" %>
-          <%= f.collection_select :tag_id, available_tags(@user), :id, :name, { include_blank: true }, class: "ds-c-field" %>
+          <%= f.collection_select :tag_id, available_tags(@user), :id, :name, { include_blank: true }, class: "ds-c-field drop-down" %>
           <%= f.hidden_field :taggable_id, value: @user.id %>
           <%= f.hidden_field :taggable_type, value: 'User' %>
           <%= f.submit "Add tag", class: "ds-c-button ds-u-margin-top--1", data: { test: "add-tag-submit" } %>
@@ -156,4 +156,10 @@
       </div>
     </div>
   </section>
+
+  <div>
+    <%= form_for @user, url: internal_user_path(@user), html: { method: :delete } do |f| %>
+      <%= f.submit "Delete my account", class:"ds-c-button ds-c-button--danger", data: { test: "delete-user-account" } %>
+    <% end %>
+  </div>
 </div>
