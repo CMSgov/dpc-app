@@ -12,6 +12,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -108,10 +109,10 @@ public class GroupResource extends AbstractGroupResource {
                                @Auth OrganizationPrincipal organizationPrincipal,
                                @ApiParam(value = "Provider NPI")
                                @QueryParam(value = Group.SP_CHARACTERISTIC_VALUE)
-                                       String providerNPI,
+                               @NoHtml String providerNPI,
                                @ApiParam(value = "Patient ID")
                                @QueryParam(value = Group.SP_MEMBER)
-                                       String patientID) {
+                                   @NoHtml String patientID) {
 
         final Map<String, List<String>> queryParams = new HashMap<>();
 
@@ -254,13 +255,13 @@ public class GroupResource extends AbstractGroupResource {
     public Response export(@ApiParam(hidden = true)
                            @Auth OrganizationPrincipal organizationPrincipal,
                            @ApiParam(value = "Provider ID", required = true)
-                           @PathParam("rosterID") String rosterID,
+                           @PathParam("rosterID") @NoHtml String rosterID,
                            @ApiParam(value = "List of FHIR resources to export", allowableValues = "ExplanationOfBenefits, Coverage, Patient")
-                           @QueryParam("_type") String resourceTypes,
+                           @QueryParam("_type") @NoHtml String resourceTypes,
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
-                           @QueryParam("_outputFormat") String outputFormat,
+                           @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
-                           @QueryParam("_since") String since) {
+                           @QueryParam("_since") @NoHtml String since) {
         logger.debug("Exporting data for provider: {}", rosterID);
 
         // Check the parameters

@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources;
 
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
@@ -26,7 +27,7 @@ public abstract class AbstractGroupResource {
     public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group attributionRoster);
 
     @GET
-    public abstract Bundle rosterSearch(OrganizationPrincipal organizationPrincipal, String providerNPI, String patientID);
+    public abstract Bundle rosterSearch(OrganizationPrincipal organizationPrincipal, @NoHtml String providerNPI, @NoHtml String patientID);
 
     @GET
     @Path("/{rosterID}")
@@ -51,8 +52,8 @@ public abstract class AbstractGroupResource {
     @Path("/{rosterID}/$export")
     @GET
     public abstract Response export(OrganizationPrincipal organizationPrincipal,
-                                    @PathParam("rosterID") String rosterID,
-                                    @QueryParam("_type") String resourceTypes,
-                                    @QueryParam("_outputFormat") String outputFormat,
-                                    @QueryParam("_since") String since);
+                                    @PathParam("rosterID") @NoHtml String rosterID,
+                                    @QueryParam("_type") @NoHtml String resourceTypes,
+                                    @QueryParam("_outputFormat") @NoHtml String outputFormat,
+                                    @QueryParam("_since") @NoHtml String since);
 }

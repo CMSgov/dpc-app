@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.common.annotations.NoHtml;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -30,5 +31,5 @@ public abstract class AbstractKeyResource {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    public abstract PublicKeyEntity submitKey(OrganizationPrincipal organizationPrincipal, @NotEmpty String key, Optional<String> keyLabelOptional);
+    public abstract PublicKeyEntity submitKey(OrganizationPrincipal organizationPrincipal, @NoHtml @NotEmpty String key, Optional<String> keyLabelOptional);
 }
