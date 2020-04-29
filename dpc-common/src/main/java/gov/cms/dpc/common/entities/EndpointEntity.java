@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NoHtml;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
@@ -33,13 +34,16 @@ public class EndpointEntity implements Serializable {
     @Valid
     @Embedded
     private ConnectionType connectionType;
+    @NoHtml
     @NotEmpty
     private String name;
+    @NoHtml
     @NotEmpty
     private String address;
     @NotNull
     @Column(name = "validation_status")
     private ValidationStatus validationStatus;
+    @NoHtml
     @Column(name = "validation_message")
     private String validationMessage;
 
