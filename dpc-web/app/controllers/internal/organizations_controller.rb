@@ -38,9 +38,13 @@ module Internal
 
     def create
       @organization = Organization.new organization_params
+
       if @organization.save
         flash[:notice] = 'Organization created.'
-        if params[:from_user].present?
+        if prod_sbx?
+          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id,
+                                                                             api_env: 'sandbox')
+        elsif params[:from_user].present?
           redirect_to edit_internal_user_path(params[:from_user], user_organization_ids: @organization.id)
         else
           redirect_to internal_organization_path(@organization)
@@ -80,6 +84,10 @@ module Internal
         flash[:alert] = "Organization could not be deleted: #{model_error_string(@organization)}"
         redirect_to internal_organization_path(@organization)
       end
+    end
+
+    def prod_sbx?
+      ENV['DEPLOY_ENV'] == 'prod-sbx'
     end
 
     private
