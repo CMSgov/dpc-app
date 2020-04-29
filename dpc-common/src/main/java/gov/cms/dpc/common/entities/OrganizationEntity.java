@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -22,6 +23,7 @@ public class OrganizationEntity implements Serializable {
     @Embedded
     private OrganizationID organizationID;
 
+    @NoHtml
     @NotEmpty
     @Column(name = "organization_name")
     private String organizationName;

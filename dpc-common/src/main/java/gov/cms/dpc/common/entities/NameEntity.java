@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NoHtml;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -17,11 +18,15 @@ public class NameEntity implements Serializable {
     @NotNull
     @Column(name = "name_use")
     private HumanName.NameUse use;
+    @NoHtml
     @NotEmpty
     private String given;
+    @NoHtml
     @NotEmpty
     private String family;
+    @NoHtml
     private String prefix;
+    @NoHtml
     private String suffix;
 
     public NameEntity() {
