@@ -5,7 +5,7 @@ SMOKE_THREADS ?= 10
 
 ${IG_PUBLISHER}:
 	-mkdir ./.bin
-	curl https://fhir.github.io/latest-ig-publisher/org.hl7.fhir.publisher.jar -o ${IG_PUBLISHER}
+	curl https://storage.googleapis.com/ig-build/org.hl7.fhir.publisher.jar -o ${IG_PUBLISHER}
 
 venv: venv/bin/activate
 
