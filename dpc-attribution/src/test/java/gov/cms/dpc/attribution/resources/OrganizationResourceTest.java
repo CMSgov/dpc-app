@@ -3,7 +3,6 @@ package gov.cms.dpc.attribution.resources;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
@@ -165,6 +164,12 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         Organization orgResult = (Organization) outcome.getResource();
 
         assertTrue(organization.equalsDeep(orgResult));
+
+        organization.setName("<script>nope</script");
+        assertThrows(InvalidRequestException.class, () -> client
+                .update()
+                .resource(organization)
+                .execute(), "Should not have updated organization");
     }
 
     @Test

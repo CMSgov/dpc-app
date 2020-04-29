@@ -1,9 +1,10 @@
 package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
-import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.auth.Auth;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -25,7 +26,7 @@ public abstract class AbstractPatientResource {
     }
 
     @GET
-    public abstract Bundle patientSearch(OrganizationPrincipal organization, String patientMBI);
+    public abstract Bundle patientSearch(OrganizationPrincipal organization, @NoHtml String patientMBI);
 
     @POST
     public abstract Response submitPatient(OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient);
