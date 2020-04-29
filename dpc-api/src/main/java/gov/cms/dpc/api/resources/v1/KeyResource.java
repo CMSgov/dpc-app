@@ -10,6 +10,7 @@ import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -117,7 +118,7 @@ public class KeyResource extends AbstractKeyResource {
     @Override
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
-                                     @NotEmpty String key,
+                                     @NoHtml @NotEmpty String key,
                                      @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
                                      @QueryParam(value = "label") Optional<String> keyLabelOptional) {
         final String keyLabel;

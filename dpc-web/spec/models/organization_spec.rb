@@ -6,34 +6,27 @@ RSpec.describe Organization, type: :model do
   include APIClientSupport
 
   describe 'callbacks' do
-    describe '#assign_vendor_id' do
-      context 'when organization_type equals health_it_vendor on create' do
-        it 'sets vendor_id' do
-          org = create(:organization, organization_type: 'health_it_vendor')
-          expect(org.vendor_id).to be_present
-        end
+    describe '#DEPLOY_ENV=prod-sbx' do
+      before(:each) do
+        allow(ENV).to receive(:[]).with('DEPLOY_ENV').and_return('prod-sbx')
       end
 
-      context 'when organization_type does not equal health_it_vendor on create' do
-        it 'does not set vendor_id' do
-          org = create(:organization, organization_type: 'primary_care_clinic')
-          expect(org.vendor_id).to be_nil
+      describe '#assign_sandbox_id' do
+        it 'sets sandbox_id' do
+          org = create(:organization)
+          expect(org.sandbox_id).to be_present
         end
-      end
 
-      context 'when organization_type is updated to be health_it_vendor' do
-        it 'sets vendor_id' do
-          org = create(:organization, organization_type: 'primary_care_clinic')
-          org.update(organization_type: 'health_it_vendor')
-          expect(org.vendor_id).to be_present
+        it 'does sets sandbox_id if nil' do
+          org = create(:organization, sandbox_id: nil)
+          org.assign_id
+          expect(org.sandbox_id).to be_present
         end
-      end
 
-      context 'when organization type is updated to not be health_it_vendor' do
-        it 'keeps vendor_id' do
-          org = create(:organization, organization_type: 'health_it_vendor')
-          org.update(organization_type: 'primary_care_clinic')
-          expect(org.vendor_id).to be_present
+        it 'does not set sandbox_id if present' do
+          org = create(:organization, sandbox_id: '111111')
+          org.assign_id
+          expect(org.sandbox_id).to eq('111111')
         end
       end
     end
@@ -51,54 +44,22 @@ RSpec.describe Organization, type: :model do
     end
   end
 
-  describe '#assign_provider_id' do
-    it 'sets provider_id for provider organization if provider_id is not present' do
-      org = create(:organization, provider_id: nil)
-      org.assign_id
-      expect(org.provider_id).to be_present
-    end
-
-    it 'does not set provider_id for provider organization if provider_id is present' do
-      org = create(:organization, provider_id: 'P_111111')
-      org.assign_id
-      expect(org.provider_id).to eq('P_111111')
-    end
-  end
-
-  describe '#assign_vendor_id' do
-    it 'sets vendor_id for health_it_vendor if vendor_id is not present' do
-      org = create(:organization, organization_type: 'health_it_vendor', vendor_id: nil)
-      org.assign_id
-      expect(org.vendor_id).to be_present
-    end
-
-    it 'does not set vendor_id for health_it_vendor if vendor_id is present' do
-      org = create(:organization, organization_type: 'health_it_vendor', vendor_id: 'V_111111')
-      org.assign_id
-      expect(org.vendor_id).to eq('V_111111')
-    end
-  end
-
   describe '#external_identifier' do
-    it 'returns npi if npi is present' do
+    it 'returns npi if not in prod-sbx' do
       org = create(:organization)
       npi = org.npi
 
       expect(org.external_identifier).to eq(npi)
     end
 
-    it 'returns provider_id if npi is not present' do
-      org = create(:organization, npi: nil)
-      provider_id = org.provider_id
+    describe '#DEPLOY_ENV=prod-sbx' do
+      it 'returns sandbox_id' do
+        allow(ENV).to receive(:[]).with('DEPLOY_ENV').and_return('prod-sbx')
+        org = create(:organization)
+        sandbox_id = org.sandbox_id
 
-      expect(org.external_identifier).to eq(provider_id)
-    end
-
-    it 'returns vendor_id if organization is health_it_vendor' do
-      org = create(:organization, organization_type: 'health_it_vendor')
-      vendor_id = org.vendor_id
-
-      expect(org.external_identifier).to eq(vendor_id)
+        expect(org.external_identifier).to eq(sandbox_id)
+      end
     end
   end
 
