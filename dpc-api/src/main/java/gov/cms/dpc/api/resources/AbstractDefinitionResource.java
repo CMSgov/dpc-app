@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources;
 
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
@@ -19,5 +20,5 @@ public abstract class AbstractDefinitionResource {
     public abstract List<StructureDefinition> getStructureDefinitions();
 
     @GET
-    public abstract StructureDefinition getStructureDefinition(String definitionID);
+    public abstract StructureDefinition getStructureDefinition(@NoHtml String definitionID);
 }
