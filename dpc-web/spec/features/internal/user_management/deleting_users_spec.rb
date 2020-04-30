@@ -16,7 +16,6 @@ RSpec.feature 'deleting users' do
     visit internal_user_path(user)
 
     find('[data-test="delete-user-account"]').click
-    page.driver.browser.switch_to.alert.accept
 
     expect(page.body).to include('User successfully deleted.')
   end

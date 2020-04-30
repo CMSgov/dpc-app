@@ -69,7 +69,7 @@
             <%= org.organization_type.titleize %>
           </div>
 
-          <div>
+          <div class="">
             <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#map-marker-alt"></use>
             </svg>
@@ -157,9 +157,9 @@
     </div>
   </section>
 
-  <div>
-    <%= form_for @user, url: internal_user_path(@user), data: { confirm: 'Are you sure you want to delete this user account?' }, html: { method: :delete } do |f| %>
-      <%= f.submit "Delete my account", class:"ds-c-button ds-c-button--danger", data: { test: "delete-user-account" } %>
+  <div class="button__container">
+    <%= form_for @user, url: internal_user_path(@user), html: { method: :delete } do |f| %>
+      <%= f.submit "Delete user account", class:"ds-c-button ds-c-button--danger", data: { test: "delete-user-account" } %>
     <% end %>
   </div>
 </div>
