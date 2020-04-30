@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NoHtml;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -21,14 +22,21 @@ public class AddressEntity implements Serializable {
     @NotNull
     @Column(name = "address_type")
     private Address.AddressType type;
+    @NoHtml
     @NotEmpty
     private String line1;
+    @NoHtml
     private String line2;
+    @NoHtml
     private String city;
+    @NoHtml
     private String district;
+    @NoHtml
     private String state;
+    @NoHtml
     @Column(name = "postal_code")
     private String postalCode;
+    @NoHtml
     private String country;
 
     public AddressEntity() {

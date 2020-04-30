@@ -1,5 +1,7 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NoHtml;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -11,8 +13,10 @@ public abstract class PersonEntity implements Serializable {
 
     public static final long serialVersionUID = 42L;
 
+    @NoHtml
     @Column(name = "first_name")
     protected String firstName;
+    @NoHtml
     @Column(name = "last_name")
     protected String lastName;
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
