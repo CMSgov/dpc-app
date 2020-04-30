@@ -1,9 +1,9 @@
-package gov.cms.dpc.aggregation.engine;
+package gov.cms.dpc.aggregation.service;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
-import gov.cms.dpc.aggregation.service.LookBackServiceImpl;
+import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Period;
@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @ExtendWith(BufferedLoggerHandler.class)
-public class LookBackServiceTest {
+public class LookBackServiceImplTest {
 
     private UUID providerID = UUID.randomUUID();
     private UUID orgID = UUID.randomUUID();
