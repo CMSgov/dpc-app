@@ -8,7 +8,6 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.reactivex.Flowable;
-
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -42,15 +41,13 @@ class ResourceFetcher {
      * @param resourceType - the resource type to fetch
      * @param since - the since parameter for the job
      * @param transactionTime - the start time of this job
-     * @param config - the operations config
      */
     ResourceFetcher(BlueButtonClient blueButtonClient,
                     UUID jobID,
                     UUID batchID,
                     ResourceType resourceType,
                     OffsetDateTime since,
-                    OffsetDateTime transactionTime,
-                    OperationsConfig config) {
+                    OffsetDateTime transactionTime) {
         this.blueButtonClient = blueButtonClient;
         this.jobID = jobID;
         this.batchID = batchID;
@@ -66,15 +63,14 @@ class ResourceFetcher {
      * @param mbi to use
      * @return a flow with all the resources for specific patient
      */
-    Flowable<Resource> fetchResources(String mbi) {
+    Flowable<List<Resource>> fetchResources(String mbi) {
         return Flowable.fromCallable(() -> {
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
             final Bundle firstFetched = fetchFirst(mbi);
             return fetchAllBundles(firstFetched, fetchId);
         })
-                .onErrorResumeNext((Throwable error) -> handleError(mbi, error))
-                .flatMap(Flowable::fromIterable);
+                .onErrorResumeNext((Throwable error) -> handleError(mbi, error));
     }
 
     /**
