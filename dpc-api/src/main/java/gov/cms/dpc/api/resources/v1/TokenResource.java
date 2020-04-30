@@ -13,6 +13,7 @@ import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -125,7 +126,7 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     public TokenEntity createOrganizationToken(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-            @ApiParam(value = "Optional label for token") @QueryParam("label") String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
+            @ApiParam(value = "Optional label for token") @QueryParam("label") @NoHtml String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
 
         final UUID organizationID = organizationPrincipal.getID();
 
@@ -188,13 +189,13 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     public JWTAuthResponse authorizeJWT(
             @ApiParam(name = "scope", allowableValues = "system/*.*", value = "Requested access scope", required = true)
-            @FormParam(value = "scope") @NotEmpty(message = "Scope is required") String scope,
+            @FormParam(value = "scope") @NoHtml @NotEmpty(message = "Scope is required") String scope,
             @ApiParam(name = "grant_type", value = "Authorization grant type", required = true, allowableValues = "client_credentials")
-            @FormParam(value = "grant_type") @NotEmpty(message = "Grant type is required") String grantType,
+            @FormParam(value = "grant_type") @NoHtml @NotEmpty(message = "Grant type is required") String grantType,
             @ApiParam(name = "client_assertion_type", value = "Client Assertion Type", required = true, allowableValues = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-            @FormParam(value = "client_assertion_type") @NotEmpty(message = "Assertion type is required") String clientAssertionType,
+            @FormParam(value = "client_assertion_type") @NoHtml @NotEmpty(message = "Assertion type is required") String clientAssertionType,
             @ApiParam(name = "client_assertion", value = "Signed JWT", required = true)
-            @FormParam(value = "client_assertion") @NotEmpty(message = "Assertion is required") String jwtBody) {
+            @FormParam(value = "client_assertion") @NoHtml @NotEmpty(message = "Assertion is required") String jwtBody) {
         // Actual scope implementation will come as part of DPC-747
         validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
 
@@ -223,7 +224,7 @@ public class TokenResource extends AbstractTokenResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Public
     @Override
-    public Response validateJWT(@NotEmpty(message = "Must submit JWT") String jwt) {
+    public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
 
         try {
             Jwts.parserBuilder()

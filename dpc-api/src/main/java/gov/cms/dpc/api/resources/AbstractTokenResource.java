@@ -4,6 +4,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
+import gov.cms.dpc.common.annotations.NoHtml;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -46,7 +47,7 @@ public abstract class AbstractTokenResource {
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, String label, Optional<OffsetDateTimeParam> expiration);
+    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
 
     @GET
     @Path("/{tokenID}")
@@ -54,11 +55,11 @@ public abstract class AbstractTokenResource {
 
     @POST
     @Path("/auth")
-    public abstract JWTAuthResponse authorizeJWT(@NotEmpty(message = "Scope is required") String scope, @NotEmpty(message = "Grant type is required") String grantType, @NotEmpty(message = "Assertion type is required") String clientAssertionType, @NotEmpty(message = "Assertion is required") String jwtBody);
+    public abstract JWTAuthResponse authorizeJWT(@NoHtml @NotEmpty(message = "Scope is required") String scope, @NoHtml @NotEmpty(message = "Grant type is required") String grantType, @NoHtml @NotEmpty(message = "Assertion type is required") String clientAssertionType, @NoHtml @NotEmpty(message = "Assertion is required") String jwtBody);
 
     @GET
     @Path("/validate")
-    public abstract Response validateJWT(@NotEmpty(message = "Must submit JWT") String jwt);
+    public abstract Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt);
 
     @DELETE
     @Path("/{tokenID}")
