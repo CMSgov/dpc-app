@@ -26,29 +26,29 @@ RSpec.feature 'new user signs up for account' do
       select 'New York', from: :user_state
       fill_in :user_zip, with: '10033'
       check :user_agree_to_terms
-  
+
       click_on('Sign up')
     end
 
     scenario 'user sent a confirmation email with confirmation token' do
       expect(:confirmation_token).to be_present
 
-      ctoken = last_email.body.match(/confirmation_token=\w*/)
+      ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
       expect(ctoken).to be_present
     end
 
     scenario 'user clicks on confirmation link to navigate to dashboard' do
-      ctoken = last_email.body.match(/confirmation_token=\w*/)
+      ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
       visit "/users/confirmation?#{ctoken}"
-  
+
       expect(page).to have_http_status(200)
       expect(page).to have_css('[data-test="my-account-menu"]')
-  
+
       find('[data-test="my-account-menu"]').click
       find('[data-test="dpc-registrations-profile-link"]', visible: false).click
-  
+
       email_field = find('#user_email')
       expect(email_field.value).to eq('clarissa@example.com')
     end
@@ -145,11 +145,11 @@ RSpec.feature 'new user signs up for account' do
       select 'New York', from: :user_state
       fill_in :user_zip, with: '10033'
       check :user_agree_to_terms
-  
+
       click_on('Sign up')
 
       visit new_user_session_path
-      
+
       last_user = User.last
 
       fill_in 'user_email', with: last_user.email
