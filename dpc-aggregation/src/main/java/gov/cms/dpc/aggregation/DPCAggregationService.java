@@ -4,6 +4,8 @@ import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -16,7 +18,8 @@ import io.dropwizard.setup.Environment;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
-    private final DPCQueueHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCQueueHibernateBundle<>();
+    private final DPCQueueHibernateBundle<DPCAggregationConfiguration> queueHibernateBundle = new DPCQueueHibernateBundle<>();
+    private final DPCHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
     public static void main(final String[] args) throws Exception {
         new DPCAggregationService().run(args);
@@ -32,7 +35,8 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         JerseyGuiceUtils.reset();
         GuiceBundle<DPCAggregationConfiguration> guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
                 .modules(new AggregationAppModule(),
-                        new DPCQueueHibernateModule<>(hibernateBundle),
+                        new DPCQueueHibernateModule<>(queueHibernateBundle),
+                        new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<>(),
                         new BlueButtonClientModule<>())
                 .build();
@@ -40,6 +44,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
+        bootstrap.addBundle(queueHibernateBundle);
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
