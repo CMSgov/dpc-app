@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   }
 
   namespace 'internal' do
-    resources :users, only: [:index, :show, :edit, :update] do
+    resources :users, only: [:index, :show, :edit, :update, :destroy] do
       collection { get :download }
     end
     resources :taggings, only: [:create, :destroy]
