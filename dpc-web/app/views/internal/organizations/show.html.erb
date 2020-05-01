@@ -127,7 +127,7 @@
         <%= link_to "Disable Sandbox", internal_organization_registered_organization_path(
           organization_id: @organization.id,
           id: @organization.sandbox_registered_organization.id,
-          ), method: :delete, data: { test: 'disable-sandbox' } %>
+          ), method: :delete, data: { confirm: 'Disabling Sandbox will permanently delete all data connected to this organization in the API. Are you sure you would like to disable this organization?', test: 'disable-sandbox' } %>
       <% else %>
         <%= link_to 'Enable Sandbox',
                     new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox'),
@@ -162,7 +162,7 @@
           <%= link_to "Disable Production", internal_organization_registered_organization_path(
             organization_id: @organization.id,
             id: @organization.production_registered_organization.id,
-            ), method: :delete, data: { test: 'disable-production' } %>
+            ), method: :delete, data: { confirm: 'Are you sure?' } %>
         <% else %>
           <%= link_to 'Enable Production', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'production') %>
         <% end %>
@@ -192,6 +192,6 @@
 
 <section class="ds-u-margin--2">
   <div class="ds-l-row ds-u-justify-content--center">
-    <%= link_to "Delete organization", internal_organization_url(@organization), method: :delete, class: "ds-u-color--error ds-u-text-align--center" %>
+    <%= link_to "Delete organization", internal_organization_url(@organization), data: { confirm: 'If it is enabled in an API all data will be permanently deleted. Are you sure you want to delete this organization?' }, method: :delete, class: "ds-u-color--error ds-u-text-align--center" %>
   </div>
 </section>
