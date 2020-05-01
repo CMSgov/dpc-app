@@ -115,18 +115,8 @@ RSpec.describe User, type: :model do
   end
 
   describe '#email' do
-    it 'must be present' do
-      subject.email = ''
-      expect(subject).to_not be_valid
-    end
-
-    it 'must have domain' do
-      subject.email = 'fake_user@'
-      expect(subject).to_not be_valid
-    end
-
     it 'must use valid domain' do
-      subject.email = 'fake_user@baddomain.com'
+      subject.email = 'fake_user@baddomaincom'
       expect(subject).to_not be_valid
     end
   end
