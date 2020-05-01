@@ -114,6 +114,23 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe '#email' do
+    it 'must be present' do
+      subject.email = ''
+      expect(subject).to_not be_valid
+    end
+
+    it 'must have domain' do
+      subject.email = 'fake_user@'
+      expect(subject).to_not be_valid
+    end
+
+    it 'must use valid domain' do
+      subject.email = 'fake_user@baddomain.com'
+      expect(subject).to_not be_valid
+    end
+  end
+
   describe '#address' do
     it 'first line is required' do
       subject.address_1 = nil
