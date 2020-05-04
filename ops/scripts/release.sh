@@ -62,11 +62,11 @@ then
 fi
 
 # initialize git configuration if env vars are set
-if [ ! -z "$GITHUB_USER" ] && [ ! -z "$GITHUB_EMAIL" ] && [ ! -z "$GITHUB_GPG_KEY_FILE" ]
+if [ ! -z "$GITHUB_USER" ] && [ ! -z "$GITHUB_EMAIL" ] && [ ! -z "$GITHUB_GPG_KEY_FILE" ] && [ ! -z "$GITHUB_GPG_KEY_FILE_PASSWORD" ]
 then
   git config user.name "$GITHUB_USER"
   git config user.email "$GITHUB_EMAIL"
-  gpg --import $GITHUB_GPG_KEY_FILE
+  echo $GITHUB_GPG_KEY_FILE_PASSWORD | gpg --batch --yes --passphrase-fd 0 --import $GITHUB_GPG_KEY_FILE
 fi
 
 # fetch tags before any tag lookups so we have the most up-to-date list
