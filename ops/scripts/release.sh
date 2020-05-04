@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -eox pipefail
 
 PROJECT_NAME="Data @ the Point of Care (DPC)"
 
