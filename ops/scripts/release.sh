@@ -66,6 +66,7 @@ if [ ! -z "$GITHUB_USER" ] && [ ! -z "$GITHUB_EMAIL" ] && [ ! -z "$GITHUB_GPG_KE
 then
   git config user.name "$GITHUB_USER"
   git config user.email "$GITHUB_EMAIL"
+  git config user.signingkey 16BE7C6E9771D6D8
   echo $GITHUB_GPG_KEY_FILE_PASSWORD | gpg --batch --yes --passphrase-fd 0 --import $GITHUB_GPG_KEY_FILE
 fi
 
