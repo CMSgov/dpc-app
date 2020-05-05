@@ -16,8 +16,6 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'rouge-rails'
 gem 'kramdown', '~> 2.1'
 
-gem 'luhnacy', '~> 0.2.1'
-
 gem 'jquery-rails'
 gem 'devise'
 gem 'brakeman'
