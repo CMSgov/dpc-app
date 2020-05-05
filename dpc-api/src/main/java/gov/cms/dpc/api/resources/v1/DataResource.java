@@ -6,6 +6,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
+import gov.cms.dpc.common.annotations.NoHtml;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.io.IOUtils;
@@ -74,7 +75,7 @@ public class DataResource extends AbstractDataResource {
                                            Optional<String> modifiedHeader,
                                    @PathParam("fileID")
                                    @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson")
-                                           String fileID) {
+                                       @NoHtml String fileID) {
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
         if (returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
@@ -125,7 +126,7 @@ public class DataResource extends AbstractDataResource {
                                                Optional<String> modifiedHeader,
                                        @PathParam("fileID")
                                        @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson")
-                                               String fileID) {
+                                           @NoHtml String fileID) {
 
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
