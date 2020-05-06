@@ -68,11 +68,13 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'enabling sandbox access successfully' do
-    stub_api_client(
+    stub = stub_api_client(
       message: :create_organization,
       success: true,
       response: default_org_creation_response
     )
+    allow(stub).to receive(:get_public_keys).and_return(stub)
+    allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     org = create(:organization)
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
@@ -97,11 +99,13 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'updating an API enabled organization' do
-    stub_api_client(
+    stub = stub_api_client(
       message: :create_organization,
       success: true,
       response: default_org_creation_response
     )
+    allow(stub).to receive(:get_public_keys).and_return(stub)
+    allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     org = create(:organization, :sandbox_enabled)
     reg_org = org.sandbox_registered_organization
@@ -115,6 +119,8 @@ RSpec.feature 'creating and updating organizations' do
       success: true,
       response: default_org_creation_response
     )
+    allow(api_client).to receive(:get_public_keys).and_return(api_client)
+    allow(api_client).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     fill_in 'organization_name', with: new_name
     find('[data-test="form-submit"]').click
@@ -123,11 +129,13 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'disabling sandbox access successfully' do
-    stub_api_client(
+    stub = stub_api_client(
       message: :create_organization,
       success: true,
       response: default_org_creation_response
     )
+    allow(stub).to receive(:get_public_keys).and_return(stub)
+    allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     org = create(:organization, :sandbox_enabled)
     visit internal_organization_path(org)
