@@ -9,7 +9,7 @@ fi
 
 # Run the database migrations
 echo "Migrating the database..."
-# bundle exec rails db:migrate
+bundle exec rails db:migrate
 
 # Seed the database
 # This step is not needed, as there is no database seed data yet
