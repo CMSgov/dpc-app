@@ -32,6 +32,18 @@ module Internal
       end
     end
 
+    def destroy
+      @user = User.find(params[:id])
+      @user.destroy
+
+      if @user.destroy
+        flash[:notice] = 'User successfully deleted.'
+        redirect_to root_path
+      else
+        flash[:alert] = 'Unable to delete user.'
+      end
+    end
+
     def download
       respond_to do |format|
         filename = "users-#{Time.now.strftime('%Y%m%dT%H%M')}.csv"
