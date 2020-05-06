@@ -73,7 +73,7 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Response createRoster(Group attributionRoster) {
-        if (rosterSizeToBig( config.getPatientLimit(), attributionRoster )) {
+        if (rosterSizeTooBig( config.getPatientLimit(), attributionRoster )) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
@@ -170,7 +170,7 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
 
-        if (rosterSizeToBig(config.getPatientLimit(), groupUpdate)) {
+        if (rosterSizeTooBig(config.getPatientLimit(), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 
@@ -220,7 +220,7 @@ public class GroupResource extends AbstractGroupResource {
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
 
-        if (rosterSizeToBig(config.getPatientLimit(), converter.toFHIR(Group.class, rosterEntity), groupUpdate)) {
+        if (rosterSizeTooBig(config.getPatientLimit(), converter.toFHIR(Group.class, rosterEntity), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
 

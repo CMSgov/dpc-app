@@ -51,8 +51,8 @@ public abstract class AbstractGroupResource {
     @Path("/{rosterID}")
     public abstract Response deleteRoster(UUID rosterID);
 
-    public static boolean rosterSizeToBig(int limit, Group... groups) {
-        if (groups == null || groups.length == 0) {
+    public static boolean rosterSizeTooBig(Integer limit, Group... groups) {
+        if (groups == null || groups.length == 0 || limit == null) {
             return false;
         }
         long totalMembers = Arrays.stream(groups)

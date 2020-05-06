@@ -149,22 +149,23 @@ public class GroupResourceTest extends AbstractAttributionTest {
         final Practitioner practitioner1 = AttributionTestHelpers.createPractitionerResource("1111111112");
         final Group group1 = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner1), DEFAULT_ORG_ID);
 
-        assertFalse(GroupResource.rosterSizeToBig(1, (Group) null));
-        assertFalse(GroupResource.rosterSizeToBig(1, group1, null));
+        assertFalse(GroupResource.rosterSizeTooBig(null, group1));
+        assertFalse(GroupResource.rosterSizeTooBig(1, (Group) null));
+        assertFalse(GroupResource.rosterSizeTooBig(1, group1, null));
 
         group1.getMember().clear();
         group1.addMember().setEntity(new Reference("1"));
-        assertFalse(GroupResource.rosterSizeToBig(1, group1));
+        assertFalse(GroupResource.rosterSizeTooBig(1, group1));
 
         group1.getMember().clear();
         group1.addMember().setEntity(new Reference("1"));
         group1.addMember().setEntity(new Reference("1"));
-        assertFalse(GroupResource.rosterSizeToBig(1, group1));
+        assertFalse(GroupResource.rosterSizeTooBig(1, group1));
 
         group1.getMember().clear();
         group1.addMember().setEntity(new Reference("1"));
         group1.addMember().setEntity(new Reference("2"));
-        assertTrue(GroupResource.rosterSizeToBig(1, group1));
+        assertTrue(GroupResource.rosterSizeTooBig(1, group1));
 
         final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource("1211111111");
         final Group group2 = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner2), DEFAULT_ORG_ID);
@@ -174,19 +175,19 @@ public class GroupResourceTest extends AbstractAttributionTest {
         group2.getMember().clear();
         group2.addMember().setEntity(new Reference("1"));
         group2.addMember().setEntity(new Reference("2"));
-        assertTrue(GroupResource.rosterSizeToBig(1, group1, group2));
+        assertTrue(GroupResource.rosterSizeTooBig(1, group1, group2));
 
         group1.getMember().clear();
         group1.addMember().setEntity(new Reference("1"));
         group2.getMember().clear();
         group2.addMember().setEntity(new Reference("1"));
-        assertFalse(GroupResource.rosterSizeToBig(1, group1, group2));
+        assertFalse(GroupResource.rosterSizeTooBig(1, group1, group2));
 
         group1.getMember().clear();
         group1.addMember().setEntity(new Reference("1"));
         group2.getMember().clear();
         group2.addMember().setEntity(new Reference("2"));
-        assertTrue(GroupResource.rosterSizeToBig(1, group1, group2));
+        assertTrue(GroupResource.rosterSizeTooBig(1, group1, group2));
     }
 
     private Practitioner createPractitioner(String NPI) {
