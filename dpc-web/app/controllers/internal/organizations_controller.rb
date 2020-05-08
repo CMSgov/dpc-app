@@ -86,11 +86,11 @@ module Internal
       end
     end
 
-    def prod_sbx?
-      ENV['DEPLOY_ENV'] == 'prod-sbx'
-    end
-
     private
+
+    def prod_sbx?
+      ENV['ENV'] == 'prod-sbx'
+    end
 
     def organization_params
       params.fetch(:organization).permit(
