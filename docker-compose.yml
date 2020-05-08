@@ -22,9 +22,6 @@ services:
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE}
-      - BFD_HASH_ITER=${BFD_HASH_ITER}
-      - BFD_HASH_PEPPER=${BFD_HASH_PEPPER}
-      - BFD_URL=${BFD_URL}
     depends_on:
       - db
     volumes:
@@ -49,6 +46,8 @@ services:
     ports:
       - "3002:3002"
       - "9903:9900"
+    env_file:
+      - ./ops/config/decrypted/local.env
     environment:
       - attributionURL=http://attribution:8080/v1/
       - ENV=local

@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.service.LookBackService;
+import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.IJobQueue;
@@ -23,6 +25,8 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,7 +42,9 @@ class BatchAggregationEngineTest {
     private static final String TEST_PROVIDER_ID = "1";
     private IJobQueue queue;
     private AggregationEngine engine;
+    private JobBatchProcessor jobBatchProcessor;
     private Disposable subscribe;
+    private LookBackService lookBackService;
 
     static private FhirContext fhirContext = FhirContext.forDstu3();
     static private MetricRegistry metricRegistry = new MetricRegistry();
@@ -46,11 +52,11 @@ class BatchAggregationEngineTest {
     static private OperationsConfig operationsConfig;
 
     @BeforeAll
-    static void setupAll() {
+    static void setupAll() throws ParseException {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         final var config = ConfigFactory.load("testing.conf").getConfig("dpc.aggregation");
         exportPath = config.getString("exportPath");
-        operationsConfig = new OperationsConfig(10, exportPath, 3);
+        operationsConfig = new OperationsConfig(10, exportPath, 3, new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
     }
@@ -59,7 +65,9 @@ class BatchAggregationEngineTest {
     void setupEach() {
         queue = new MemoryBatchQueue(100);
         final var bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        engine = new AggregationEngine(aggregatorID, bbclient, queue, fhirContext, metricRegistry, operationsConfig);
+        lookBackService = Mockito.spy(LookBackService.class);
+        jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationsConfig));
+        engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationsConfig, lookBackService, jobBatchProcessor));
         engine.queueRunning.set(true);
         subscribe = Mockito.mock(Disposable.class);
         doReturn(false).when(subscribe).isDisposed();
@@ -71,13 +79,17 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTestSingleResource() {
+        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
-                Collections.singletonList(ResourceType.ExplanationOfBenefit)
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job
@@ -104,13 +116,17 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobTest() {
+        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
-                JobQueueBatch.validResourceTypes
+                JobQueueBatch.validResourceTypes,
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job
@@ -127,7 +143,7 @@ class BatchAggregationEngineTest {
                     final var outputFilePath = String.format("%s/%s.ndjson", exportPath, batchFile.getFileName());
                     final File file = new File(Path.of(outputFilePath).toString());
                     assertAll(() -> assertNotNull(file, "Should have input file"),
-                            () -> assertArrayEquals(AggregationEngine.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"),
+                            () -> assertArrayEquals(AggregationUtils.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"),
                             () -> assertEquals(file.length(), batchFile.getFileLength(), "Should have matching file length"));
                 });
 
@@ -140,13 +156,20 @@ class BatchAggregationEngineTest {
      */
     @Test
     void largeJobWithBadPatientTest() {
-        // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
+
+        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(null).when(lookBackService).getProviderIDFromRoster(orgID,TEST_PROVIDER_ID, null);
+        Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
+
+        // Make a simple job with one resource type
         final var jobID = queue.createJob(
                 orgID,
                 TEST_PROVIDER_ID,
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
-                Collections.singletonList(ResourceType.ExplanationOfBenefit)
+                Collections.singletonList(ResourceType.ExplanationOfBenefit),
+                MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
+                MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
         // Do the job
@@ -157,14 +180,14 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(4, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
                 () -> assertTrue(completeJob.getJobQueueFile(ResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isPresent(), "Expect an error"));
+                () -> assertTrue(completeJob.getJobQueueFile(ResourceType.OperationOutcome).isEmpty(), "Expect an error"));
 
         // Look at the output files
         final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), ResourceType.OperationOutcome, 0);
-        assertTrue(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
     }
 }

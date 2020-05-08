@@ -4,6 +4,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.gclient.IUpdateTyped;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -27,7 +30,7 @@ class PatientResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPatientReadWrite() {
-        final Patient patient = createPatientResource("1871", DEFAULT_ORG_ID);
+        final Patient patient = createPatientResource("0O00O00OO00", DEFAULT_ORG_ID);
 
         final Reference orgReference = new Reference(new IdType("Organization", DEFAULT_ORG_ID));
         patient.setManagingOrganization(orgReference);
@@ -66,6 +69,22 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         final MethodOutcome execute = secondCreation.execute();
         assertNull(execute.getCreated(), "Should not be able to create again");
+    }
+
+    @Test
+    void testCreatePatientWithInvalidMbi() {
+        final Patient patient = createPatientResource("not-an-mbi", DEFAULT_ORG_ID);
+
+        final Reference orgReference = new Reference(new IdType("Organization", DEFAULT_ORG_ID));
+        patient.setManagingOrganization(orgReference);
+
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        ICreateTyped create = client
+                .create()
+                .resource(patient);
+
+        assertThrows(UnprocessableEntityException.class, create::execute);
     }
 
     @Test
@@ -198,6 +217,13 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         final Patient updatedPatient = (Patient) updated.getResource();
 
+        foundPatient.getNameFirstRep().setFamily("<script>Family</script>");
+        assertThrows(InvalidRequestException.class, () -> client
+                .update()
+                .resource(foundPatient)
+                .encodedJson()
+                .execute(), "Should not have updated patient");
+
         // Try to pull the record, again, from the DB
 
         final Patient fetchedPatient = client
@@ -214,5 +240,28 @@ class PatientResourceTest extends AbstractAttributionTest {
         assertAll(() -> assertTrue(fetchedPatient.equalsDeep(updatedPatient), "Should match updated record"),
                 () -> assertEquals("Updated", fetchedPatient.getNameFirstRep().getFamily(), "Should have updated family name"),
                 () -> assertTrue(createdAt.before(lastUpdated), "Update timestamp should be later"));
+    }
+
+    @Test
+    void testPatientUpdateWithInvalidMbi() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        final String mbi = "4S41C00AA00";
+
+        final Bundle result = client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), mbi))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + DEFAULT_ORG_ID))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        final Patient foundPatient = (Patient) result.getEntryFirstRep().getResource();
+        foundPatient.getIdentifierFirstRep().setValue("not-a-valid-MBI");
+        IUpdateTyped update = client
+                .update()
+                .resource(foundPatient);
+
+        assertThrows(UnprocessableEntityException.class, update::execute);
     }
 }

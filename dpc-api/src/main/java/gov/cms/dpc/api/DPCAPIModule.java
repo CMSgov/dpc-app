@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
@@ -15,7 +16,7 @@ import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.*;
-import gov.cms.dpc.api.tasks.*;
+import gov.cms.dpc.api.tasks.GenerateKeyPair;
 import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
 import gov.cms.dpc.api.tasks.keys.ListPublicKeys;
 import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
@@ -24,6 +25,7 @@ import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
+import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
@@ -111,7 +113,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public OrganizationResource provideOrganizationResource(IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+    public OrganizationResource provideOrganizationResource(@Named("attribution") IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(OrganizationResource.class,
                         new Class<?>[]{IGenericClient.class,
@@ -175,9 +177,16 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @Singleton
+    @Named("attribution")
     public IGenericClient provideFHIRClient(FhirContext ctx) {
         logger.info("Connecting to attribution server at {}.", getConfiguration().getAttributionURL());
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         return ctx.newRestfulGenericClient(getConfiguration().getAttributionURL());
+    }
+
+    @Provides
+    @JobTimeout
+    public int provideJobTimeoutInSeconds() {
+        return getConfiguration().getJobTimeoutInSeconds();
     }
 }

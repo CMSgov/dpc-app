@@ -22,9 +22,9 @@ public class FHIRExtractorTests {
         final Patient patient = new Patient();
         // This double nesting verifies that the fromString method works correctly. Makes PiTest happy.
         patient.addIdentifier().setSystem(DPCIdentifierSystem.fromString(DPCIdentifierSystem.DPC.getSystem()).getSystem()).setValue("test-dpc-one");
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi-one");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
 
-        assertEquals("test-mbi-one", getPatientMBI(patient), "Should have MBI");
+        assertEquals("0A00A00AA01", getPatientMBI(patient), "Should have MBI");
     }
 
     @Test
@@ -92,11 +92,13 @@ public class FHIRExtractorTests {
 
     @Test
     void testTagParsing() {
-        assertThrows(IllegalArgumentException.class, () -> parseTag("notATag"), "Should fail with malformed tag");
+        final Pair<String, String> codeTag = parseTag("a tag");
+        assertAll(() -> assertEquals("", codeTag.getLeft()),
+                () -> assertEquals("a tag", codeTag.getRight()));
 
-        final Pair<String, String> tag = parseTag("This|is a tag");
-        assertAll(() -> assertEquals("This", tag.getLeft()),
-                () -> assertEquals("is a tag", tag.getRight()));
+        final Pair<String, String> systemCodeTag = parseTag("This|is a tag");
+        assertAll(() -> assertEquals("This", systemCodeTag.getLeft()),
+                () -> assertEquals("is a tag", systemCodeTag.getRight()));
 
         final Pair<String, String> danglingTag = parseTag("Dangling tag|");
         assertAll(() -> assertEquals("Dangling tag", danglingTag.getLeft()),

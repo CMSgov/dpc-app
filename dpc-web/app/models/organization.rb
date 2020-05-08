@@ -18,7 +18,7 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
-  before_save :assign_vendor_id, if: -> { health_it_vendor? }
+  before_save :assign_id
 
   after_update :update_registered_organizations
 
@@ -38,17 +38,23 @@ class Organization < ApplicationRecord
   end
 
   def api_credentialable?
-    registered_organizations.count.positive? && npi.present?
+    registered_organizations.count.positive?
   end
 
-  def assign_vendor_id
-    return true if vendor_id.present?
+  def assign_id
+    if health_it_vendor?
+      return true if vendor_id.present?
 
-    self.vendor_id = generate_vendor_id
+      self.vendor_id = generate_vendor_id
+    else
+      return true if provider_id.present?
+
+      self.provider_id = generate_provider_id
+    end
   end
 
   def external_identifier
-    health_it_vendor? ? vendor_id : npi
+    health_it_vendor? ? vendor_id : provider_identifier
   end
 
   def registered_api_envs
@@ -94,9 +100,20 @@ end
 
 private
 
+def generate_provider_id
+  loop do
+    provider_id = "P_#{SecureRandom.alphanumeric(10)}"
+    break provider_id unless Organization.where(provider_id: provider_id).exists?
+  end
+end
+
 def generate_vendor_id
   loop do
     vendor_id = "V_#{SecureRandom.alphanumeric(10)}"
     break vendor_id unless Organization.where(vendor_id: vendor_id).exists?
   end
+end
+
+def provider_identifier
+  npi.present? ? npi : provider_id
 end

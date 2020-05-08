@@ -11,12 +11,16 @@ class PublicKeyManager
 
   def create_public_key(public_key:, label:)
     public_key = strip_carriage_returns(public_key)
-    return false if invalid_encoding?(public_key)
+    if invalid_encoding?(public_key)
+      return { response: false,
+               message: @errors[0] }
+    end
 
     api_client = APIClient.new(api_env)
     api_client.create_public_key(registered_organization.api_id, params: { label: label, public_key: public_key })
 
-    api_client.response_successful?
+    { response: api_client.response_successful?,
+      message: api_client.response_body }
   end
 
   def invalid_encoding?(key_string)

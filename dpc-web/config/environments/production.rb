@@ -50,9 +50,28 @@ Rails.application.configure do
   config.force_ssl = true
   config.ssl_options = { redirect: { exclude: -> request { request.path =~ /health_check/ } } }
 
+  # Lograge config
+  config.lograge.enabled = true
+
+  # This specifies to log in JSON format
+  config.lograge.formatter = Lograge::Formatters::Json.new
+
+  ## Disables log coloration
+  config.colorize_logging = false
+
+  # Log to a dedicated file
+  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
+
+  # This is useful if you want to log query parameters
+  config.lograge.custom_options = lambda do |event|
+    { :ddsource => 'ruby',
+      :params => event.payload[:params].reject { |k| %w(controller action).include? k }
+    }
+  end
+
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
-  config.log_level = ENV["LOG_LEVEL"] || :warn
+  config.log_level = ENV["LOG_LEVEL"] || :info
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
@@ -90,17 +109,6 @@ Rails.application.configure do
 
   # Send deprecation notices to registered listeners.
   config.active_support.deprecation = :notify
-
-  # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
-
-  # Use a different logger for distributed setups.
-  # require 'syslog/logger'
-  # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
-
-  logger           = ActiveSupport::Logger.new(STDOUT)
-  logger.formatter = config.log_formatter
-  config.logger    = ActiveSupport::TaggedLogging.new(logger)
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false

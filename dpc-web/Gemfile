@@ -5,7 +5,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.6.5'
 
-gem 'rails', '~> 5.2.3'
+gem 'rails', '~> 5.2.4'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 4.3'
 gem 'sassc-rails', '>= 2.1.2'
@@ -18,12 +18,14 @@ gem 'kramdown', '~> 2.1'
 
 gem 'jquery-rails'
 gem 'devise'
+gem 'truemail'
 gem 'brakeman'
 gem 'health_check'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
-  gem 'pry-byebug'
+  gem 'pry'
+  gem 'pry-nav'
 
   gem 'rspec-rails'
   gem 'database_cleaner'
@@ -66,5 +68,6 @@ gem 'omniauth-oktaoauth'
 gem 'kaminari'
 gem 'active_model_serializers'
 gem 'macaroons'
-gem 'newrelic_rpm', '~> 6.9'
+gem 'newrelic_rpm', '~> 6.10'
 gem 'fhir_client'
+gem 'lograge'

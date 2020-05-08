@@ -50,7 +50,9 @@ class RegisteredOrganization < ApplicationRecord
       self[:api_endpoint_ref] = api_response['endpoint'][0]['reference']
       api_response
     else
-      errors.add(:base, "couldn't be registered with #{api_env} API: #{api_response}")
+      action = 'registered'
+      msg = organization.npi.present? ? api_response : 'NPI Required'
+      api_error(action, msg)
       throw(:abort)
     end
   end
@@ -60,7 +62,9 @@ class RegisteredOrganization < ApplicationRecord
     api_response = api_request.response_body
     return if api_request.response_successful?
 
-    errors.add(:base, "couldn't be updated with #{api_env} API (organization update): #{api_response}")
+    action = 'updated (organization)'
+    msg = api_response
+    api_error(action, msg)
     throw(:abort)
   end
 
@@ -69,16 +73,26 @@ class RegisteredOrganization < ApplicationRecord
     api_response = api_request.response_body
     return if api_request.response_successful?
 
-    errors.add(:base, "couldn't be updated with #{api_env} API (endpoint update): #{api_response}")
+    action = 'updated (endpoint)'
+    msg = api_response
+    api_error(action, msg)
     throw(:abort)
   end
 
   def delete_api_organization
     api_request = APIClient.new(api_env).delete_organization(self)
     api_response = api_request.response_body
+
     return if api_request.response_successful?
 
-    errors.add(:base, "couldn't be deleted from #{api_env} API: #{api_response}")
+    if api_response.include? 'Cannot find organization'
+      Rails.logger.warn "Cannot delete API organization with id #{api_id}: Organization not found."
+      return
+    end
+
+    action = 'deleted'
+    msg = api_response
+    api_error(action, msg)
     throw(:abort)
   end
 
@@ -92,5 +106,11 @@ class RegisteredOrganization < ApplicationRecord
 
   def notify_users_of_sandbox_access
     organization.notify_users_of_sandbox_access
+  end
+
+  private
+
+  def api_error(action, msg)
+    errors.add(:base, "couldn't be #{action} with #{api_env} API: #{msg}")
   end
 end

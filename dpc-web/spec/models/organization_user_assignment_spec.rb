@@ -11,7 +11,7 @@ RSpec.describe OrganizationUserAssignment, type: :model do
 
         allow(org).to receive(:sandbox_enabled?).and_return(true)
         mailer = double(UserMailer)
-        allow(UserMailer).to receive(:with).with(user: user, organization: org).and_return(mailer)
+        allow(UserMailer).to receive(:with).with(user: user, vendor: false).and_return(mailer)
         allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
         allow(mailer).to receive(:deliver_later)
 

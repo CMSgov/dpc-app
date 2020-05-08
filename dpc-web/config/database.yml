@@ -23,7 +23,7 @@ default: &default
 
   url: <%= ENV['DATABASE_URL'] %>
   username: <%= ENV['DB_USER'] %>
-  password: <%= ENV['DB_PASS'] %>
+  password: '<%= ENV['DB_PASS'] %>'
 
 
 development: &development
@@ -36,7 +36,7 @@ development: &development
   username: <%= ENV.fetch("DB_USER", nil) %>
 
   # The password associated with the postgres role (username).
-  password: <%= ENV.fetch("DB_PASS", nil) %>
+  password: '<%= ENV.fetch("DB_PASS", nil) %>'
 
   url: <%= ENV.fetch("DATABASE_URL", "postgresql://localhost/dpc-website_development") %>
 
@@ -62,7 +62,7 @@ test:
   username: <%= ENV.fetch("DB_USER", nil) %>
 
   # The password associated with the postgres role (username).
-  password: <%= ENV.fetch("DB_PASS", nil) %>
+  password: '<%= ENV.fetch("DB_PASS", nil) %>'
 
   url: <%= ENV.fetch("TEST_DATABASE_URL", "postgresql://localhost/dpc-website_test") %>
 

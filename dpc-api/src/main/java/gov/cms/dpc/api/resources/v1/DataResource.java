@@ -6,6 +6,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.core.FileManager;
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
+import gov.cms.dpc.common.annotations.NoHtml;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.io.IOUtils;
@@ -74,7 +75,7 @@ public class DataResource extends AbstractDataResource {
                                            Optional<String> modifiedHeader,
                                    @PathParam("fileID")
                                    @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson")
-                                           String fileID) {
+                                       @NoHtml String fileID) {
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
         if (returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
@@ -125,7 +126,7 @@ public class DataResource extends AbstractDataResource {
                                                Optional<String> modifiedHeader,
                                        @PathParam("fileID")
                                        @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson")
-                                               String fileID) {
+                                           @NoHtml String fileID) {
 
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
@@ -187,24 +188,34 @@ public class DataResource extends AbstractDataResource {
             throw new WebApplicationException("Range end cannot be before begin", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
 
+        RandomAccessFile randomAccessFile = null;
         try {
-            final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-            randomAccessFile.seek(rangeStart);
-
-            final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);
-
-            final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, file.length());
-            return Response
-                    .status(Response.Status.PARTIAL_CONTENT)
-                    .entity(fileStreamer)
-                    .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
-                    .header(HttpHeaders.CONTENT_RANGE, responseRange)
-                    // Set the X-Content-Length header, so we can manually override what Jersey does
-                    .header(X_CONTENT_LENGTH, fileStreamer.getLength())
-                    .build();
+            randomAccessFile = new RandomAccessFile(file, "r");
         } catch (IOException e) {
             throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
         }
+        try {
+            randomAccessFile.seek(rangeStart);
+        } catch (IOException e) {
+            try {
+                randomAccessFile.close();
+            } catch (IOException e1) {
+                logger.error("Failed to close file after exception", e1);
+            }
+            throw new WebApplicationException(String.format("Unable to read file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);
+
+        final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, file.length());
+        return Response
+                .status(Response.Status.PARTIAL_CONTENT)
+                .entity(fileStreamer)
+                .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
+                .header(HttpHeaders.CONTENT_RANGE, responseRange)
+                // Set the X-Content-Length header, so we can manually override what Jersey does
+                .header(X_CONTENT_LENGTH, fileStreamer.getLength())
+                .build();
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

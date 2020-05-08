@@ -212,7 +212,7 @@ public class ClientUtils {
                 .search()
                 .forResource(Group.class)
                 .where(Group.CHARACTERISTIC_VALUE
-                        .withLeft(Group.CHARACTERISTIC.exactly().systemAndCode("", "attributed-to"))
+                        .withLeft(Group.CHARACTERISTIC.exactly().code("attributed-to"))
                         .withRight(Group.VALUE.exactly().systemAndCode(DPCIdentifierSystem.NPPES.getSystem(), npi)))
                 .returnBundle(Bundle.class)
                 .encodedJson()

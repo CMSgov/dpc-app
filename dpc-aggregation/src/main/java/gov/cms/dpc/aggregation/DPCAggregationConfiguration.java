@@ -14,6 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 public class DPCAggregationConfiguration extends TypesafeConfiguration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
@@ -49,6 +50,15 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     // How often in milliseconds to check the queue for new batches
     @Min(50)
     private int pollingFrequency = 500;
+
+    @Min(1)
+    private int jobTimeoutInSeconds = 5;
+
+    @Min(-1)
+    private int lookBackMonths = 18;
+
+    @NotNull
+    private Date lookBackDate = new Date();
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -89,4 +99,18 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     public int getPollingFrequency() {
         return pollingFrequency;
     }
+
+    public int getJobTimeoutInSeconds() {
+        return jobTimeoutInSeconds;
+    }
+
+    public int getLookBackMonths() {
+        return lookBackMonths;
+    }
+
+    public Date getLookBackDate() {
+        return lookBackDate;
+    }
+
+
 }
