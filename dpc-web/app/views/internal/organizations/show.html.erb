@@ -30,7 +30,7 @@
     </div>
   </section>
 
-  <section class="box">
+  <section class="box box--flex">
     <div class="box__content">
       <h2 class="box__heading">Organization info</h2>
 
@@ -46,27 +46,36 @@
         </svg>
         <%= @organization.organization_type.titleize %>
       </div>
-      <div class="ds-u-margin-bottom--1">
-        <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <use xlink:href="/assets/solid.svg#users"></use>
-        </svg>
-        <%= @organization.num_providers %> providers
-      </div>
 
-      <div class="ds-u-margin-bottom--1">
-        <% if @organization.prod_sbx? %>
-          <label class="ds-u-margin-right--1 ds-u-color--muted">NPI (auto-generated)</label>
-          <span class="ds-u-color--muted"><%= @organization.sandbox_id %></span>
-        <% elsif  %>
-          <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
-          <%= @organization.npi %>
-        <% end %>
-      </div>
+      <% if @organization.health_it_vendor? %>
+        <br>
+        <div class="ds-u-margin-bottom--1">
+          <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor ID (System-generated):</label>
+          <div class="ds-u-color--muted"><%= @organization.vendor_id %></div>
+        </div>
+      <% else %>
+        <div class="ds-u-margin-bottom--1">
+          <svg class="icon ds-u-margin-right--1 ds-u-color--muted" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <use xlink:href="/assets/solid.svg#users"></use>
+          </svg>
+          <%= @organization.num_providers %> providers
+        </div>
 
-      <div class="ds-u-margin-bottom--1">
-        <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
-        <%= @organization.vendor %>
-      </div>
+        <div class="ds-u-margin-bottom--1">
+          <% if @organization.npi.present? %>
+            <label class="ds-u-margin-right--1 ds-u-color--muted">NPI</label>
+              <%= @organization.npi %>
+          <% else %>
+            <label class="ds-u-margin-right--1 ds-u-color--muted">Provider ID (System-generated):</label>
+              <div class="ds-u-color--muted"><%= @organization.provider_id %></div>
+          <% end %>
+        </div>
+
+        <div class="ds-u-margin-bottom--1">
+          <label class="ds-u-margin-right--1 ds-u-color--muted">Vendor</label>
+          <%= @organization.vendor %>
+        </div>
+      <% end %>
     </div>
 
     <div class="box__content">
@@ -133,6 +142,38 @@
                     new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox'),
                     data: { test: 'enable-sandbox' } %>
       <% end %>
+
+      <div>
+        <% @organization.registered_organizations.each do |reg_org| %>
+          <% if reg_org.public_keys.count == 0 %>
+            <h4>There are no Public Keys currently associated with this organization.</h4>
+          <% else %>
+          <div class="usa-accordion usa-accordion--bordered ds-u-margin-top--2">
+            <h2 class="usa-accordion__heading">
+              <button class="usa-accordion__button" aria-expanded="false" aria-controls="a1">
+                Public Keys
+              </button>
+            </h2>
+            <div id="a1" class="usa-accordion__content">
+              <ul class="credentials">
+                <% reg_org.public_keys.each do |key| %>
+                  <li class="credential">
+                    <div class="credential__body">
+                      <h3 class="credential__name">
+                        <%= key['label'] %>
+                      </h3>
+                      <div class="credential__meta ds-u-color--base">
+                        ID: <%= key['id'] %>
+                      </div>
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
 
       <h3>Production</h3>
       <% if production_api_access_enabled? %>
