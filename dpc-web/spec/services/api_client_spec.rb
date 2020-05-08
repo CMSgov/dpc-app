@@ -17,7 +17,7 @@ RSpec.describe APIClient do
     context 'successful API request' do
       context 'when in prod-sbx' do
         it 'sends sandbox_id as identifier' do
-          allow(ENV).to receive(:[]).with('DEPLOY_ENV').and_return('prod-sbx')
+          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
 
           stub_request(:post, 'http://dpc.example.com/Organization/$submit').with(
             headers: { 'Content-Type' => 'application/fhir+json', 'Authorization' => 'Bearer MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo' },

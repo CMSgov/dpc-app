@@ -6,9 +6,9 @@ RSpec.describe Organization, type: :model do
   include APIClientSupport
 
   describe 'callbacks' do
-    describe '#DEPLOY_ENV=prod-sbx' do
+    describe '#ENV=prod-sbx' do
       before(:each) do
-        allow(ENV).to receive(:[]).with('DEPLOY_ENV').and_return('prod-sbx')
+        allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
       end
 
       describe '#assign_sandbox_id' do
@@ -52,9 +52,9 @@ RSpec.describe Organization, type: :model do
       expect(org.external_identifier).to eq(npi)
     end
 
-    describe '#DEPLOY_ENV=prod-sbx' do
+    describe '#ENV=prod-sbx' do
       it 'returns sandbox_id' do
-        allow(ENV).to receive(:[]).with('DEPLOY_ENV').and_return('prod-sbx')
+        allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
         org = create(:organization)
         sandbox_id = org.sandbox_id
 

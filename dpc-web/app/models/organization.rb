@@ -63,7 +63,7 @@ class Organization < ApplicationRecord
   end
 
   def prod_sbx?
-    ENV['DEPLOY_ENV'] == 'prod-sbx'
+    ENV['ENV'] == 'prod-sbx'
   end
 
   def update_registered_organizations
