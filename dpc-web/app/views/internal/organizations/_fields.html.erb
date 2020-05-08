@@ -10,28 +10,33 @@
       <%= f.text_field :name, class: "ds-c-field" %>
     </div>
 
-    <div class="field">
       <%= f.label :organization_type, class: "ds-c-label" %>
-      <%= f.select :organization_type, organization_types_for_select, { include_blank: 'Please select an organization type' }, class: "ds-c-field" %>
-    </div>
+      <%= f.select :organization_type,
+        organization_types_for_select,
+        { include_blank: 'Please select an organization type' },
+        class: "ds-c-field",
+        data: { hide_follow_up: 'health_it_vendor' }
+      %>
 
-    <div class="field">
-      <%= f.label :num_providers, class: "ds-c-label" do %>
-      Number of Providers
-      <span class="ds-c-field__hint">You may use an approximate number.<br/>If organization is a vendor, leave blank.</span>
-      <% end %>
-      <%= f.number_field :num_providers,
-        min: 0, class: "ds-c-field ds-c-field--small" %>
-    </div>
+    <div class="field--follow-up" hidden>
+      <div class="field">
+        <%= f.label :num_providers, class: "ds-c-label" do %>
+        Number of Providers
+        <span class="ds-c-field__hint">You may use an approximate number.<br/>If organization is a vendor, leave blank.</span>
+        <% end %>
+        <%= f.number_field :num_providers,
+          min: 0, class: "ds-c-field ds-c-field--small" %>
+      </div>
 
-    <div class="field">
-      <%= f.label :npi, "NPI", class: "ds-c-label" %>
-      <%= f.text_field :npi, class: "ds-c-field" %>
-    </div>
+      <div class="field">
+        <%= f.label :npi, "NPI", class: "ds-c-label" %>
+        <%= f.text_field :npi, class: "ds-c-field" %>
+      </div>
 
-    <div class="field">
-      <%= f.label :vendor, "Vendor", class: "ds-c-label" %>
-      <%= f.text_field :vendor, class: "ds-c-field" %>
+      <div class="field">
+        <%= f.label :vendor, "Vendor", class: "ds-c-label" %>
+        <%= f.text_field :vendor, class: "ds-c-field" %>
+      </div>
     </div>
   </div>
 </fieldset>
@@ -76,6 +81,6 @@
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
     <%= hidden_field_tag :from_user, params[:from_user] %>
     <%= f.submit locals[:button_label], class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
-    <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
+    <%= link_to "Cancel", internal_organizations_path, class: "ds-c-button ds-c-button--transparent" %>
   </div>
 </div>

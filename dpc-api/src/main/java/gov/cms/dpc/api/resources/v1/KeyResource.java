@@ -10,6 +10,7 @@ import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
+import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -24,9 +25,9 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 
 @Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "apiKey"))
@@ -36,12 +37,12 @@ public class KeyResource extends AbstractKeyResource {
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);
 
     private final PublicKeyDAO dao;
-    private final Random random;
+    private final SecureRandom random;
 
     @Inject
     public KeyResource(PublicKeyDAO dao) {
         this.dao = dao;
-        this.random = new Random();
+        this.random = new SecureRandom();
     }
 
     @GET
@@ -117,7 +118,7 @@ public class KeyResource extends AbstractKeyResource {
     @Override
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
-                                     @NotEmpty String key,
+                                     @NoHtml @NotEmpty String key,
                                      @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
                                      @QueryParam(value = "label") Optional<String> keyLabelOptional) {
         final String keyLabel;

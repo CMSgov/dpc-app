@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
@@ -35,7 +36,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     private final PublicKeyDAO keyDAO;
 
     @Inject
-    public OrganizationResource(IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+    public OrganizationResource(@Named("attribution") IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         this.client = client;
         this.tokenDAO = tokenDAO;
         this.keyDAO = keyDAO;

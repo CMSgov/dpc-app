@@ -16,7 +16,7 @@ RSpec.feature 'creating and updating organizations' do
 
     fill_in 'organization_name', with: 'Good Health'
     select 'Primary Care Clinic', from: 'organization_organization_type'
-    fill_in 'organization_num_providers', with: '2200'
+    fill_in 'organization_num_providers', visible: false, with: '2200'
 
     select 'Temp', from: 'organization_address_attributes_address_use'
     select 'Both', from: 'organization_address_attributes_address_type'
@@ -26,8 +26,8 @@ RSpec.feature 'creating and updating organizations' do
     select 'South Carolina', from: 'organization_address_attributes_state'
     fill_in 'organization_address_attributes_zip', with: '29601'
 
-    fill_in 'organization_vendor', with: 'Cool EMR Vendor'
-    fill_in 'organization_npi', with: '555ttt444'
+    fill_in 'organization_vendor', visible: false, with: 'Cool EMR Vendor'
+    fill_in 'organization_npi', visible: false, with: '555ttt444'
 
     find('[data-test="form-submit"]').click
 
@@ -42,7 +42,7 @@ RSpec.feature 'creating and updating organizations' do
     find('[data-test="edit-link"]').click
 
     fill_in 'organization_name', with: 'Health Revisited'
-    fill_in 'organization_npi', with: '9987966711'
+    fill_in 'organization_npi', visible: false, with: '9987966711'
     select 'Multispecialty Clinic', from: 'organization_organization_type'
     fill_in 'organization_address_attributes_street', with: '50 River St'
     find('[data-test="form-submit"]').click
@@ -68,11 +68,13 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'enabling sandbox access successfully' do
-    stub_api_client(
+    stub = stub_api_client(
       message: :create_organization,
       success: true,
       response: default_org_creation_response
     )
+    allow(stub).to receive(:get_public_keys).and_return(stub)
+    allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     org = create(:organization)
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
@@ -97,11 +99,13 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'updating an API enabled organization' do
-    stub_api_client(
+    stub = stub_api_client(
       message: :create_organization,
       success: true,
       response: default_org_creation_response
     )
+    allow(stub).to receive(:get_public_keys).and_return(stub)
+    allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     org = create(:organization, :sandbox_enabled)
     reg_org = org.sandbox_registered_organization
@@ -115,6 +119,8 @@ RSpec.feature 'creating and updating organizations' do
       success: true,
       response: default_org_creation_response
     )
+    allow(api_client).to receive(:get_public_keys).and_return(api_client)
+    allow(api_client).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     fill_in 'organization_name', with: new_name
     find('[data-test="form-submit"]').click
@@ -123,11 +129,13 @@ RSpec.feature 'creating and updating organizations' do
   end
 
   scenario 'disabling sandbox access successfully' do
-    stub_api_client(
+    stub = stub_api_client(
       message: :create_organization,
       success: true,
       response: default_org_creation_response
     )
+    allow(stub).to receive(:get_public_keys).and_return(stub)
+    allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     org = create(:organization, :sandbox_enabled)
     visit internal_organization_path(org)
@@ -146,7 +154,7 @@ RSpec.feature 'creating and updating organizations' do
   def stub_sandbox_notification_mailer(org, users=[])
     mailer = double(UserMailer)
     users.each do |user|
-      allow(UserMailer).to receive(:with).with(user: user, organization: org).and_return(mailer)
+      allow(UserMailer).to receive(:with).with(user: user, vendor: org.health_it_vendor?).and_return(mailer)
     end
 
     allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)

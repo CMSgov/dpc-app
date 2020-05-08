@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class SeedProcessor {
 
-    private static final Random rand = new Random();
+    private static final SecureRandom rand = new SecureRandom();
 
     private SeedProcessor() {
         // Not used

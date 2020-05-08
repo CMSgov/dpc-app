@@ -4,13 +4,14 @@ Rails.application.routes.draw do
     omniauth_callbacks: "internal/auth/omniauth_callbacks"
   }
   devise_for :users, path: 'users', controllers: {
+    confirmations: "confirmations",
     sessions: "users/sessions",
     registrations: "users/registrations",
     passwords: "users/passwords"
   }
 
   namespace 'internal' do
-    resources :users, only: [:index, :show, :edit, :update] do
+    resources :users, only: [:index, :show, :edit, :update, :destroy] do
       collection { get :download }
     end
     resources :taggings, only: [:create, :destroy]

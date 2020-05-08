@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_02_26_152127) do
+ActiveRecord::Schema.define(version: 2020_04_10_125053) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -88,6 +88,7 @@ ActiveRecord::Schema.define(version: 2020_02_26_152127) do
     t.string "npi"
     t.string "vendor"
     t.string "vendor_id"
+    t.string "provider_id"
   end
 
   create_table "registered_organizations", force: :cascade do |t|
@@ -138,6 +139,10 @@ ActiveRecord::Schema.define(version: 2020_02_26_152127) do
     t.integer "requested_num_providers", default: 0
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["created_at"], name: "index_users_on_created_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["last_name", "first_name"], name: "index_users_on_last_name_and_first_name"
