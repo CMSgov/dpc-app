@@ -86,7 +86,6 @@ module Internal
       end
     end
 
-
     private
 
     def prod_sbx?
