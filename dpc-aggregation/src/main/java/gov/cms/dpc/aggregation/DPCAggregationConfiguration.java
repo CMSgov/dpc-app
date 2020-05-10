@@ -55,7 +55,7 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     private int jobTimeoutInSeconds = 5;
 
     @Min(-1)
-    private int lookBackMonths = 18;
+    private int lookBackMonths;
 
     @NotNull
     private Date lookBackDate = new Date();
