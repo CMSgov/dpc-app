@@ -42,7 +42,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource for an Organization")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Endpoint created"),
-            @ApiResponse(code = 422, message = "Endpoint could not be created")
+            @ApiResponse(code = 422, message = "Invalid Endpoint resource")
     })
     @Override
     public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
