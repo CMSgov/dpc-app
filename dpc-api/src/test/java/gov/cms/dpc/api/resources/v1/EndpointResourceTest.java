@@ -60,7 +60,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         String reqBody = "{\"test\": \"test\"}";
         conn.getOutputStream().write(reqBody.getBytes());
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, conn.getResponseCode());
+        assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
             StringBuilder respBuilder = new StringBuilder();
@@ -72,6 +72,8 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
             assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""));
             assertTrue(resp.contains("Invalid JSON content"));
         }
+
+        conn.disconnect();
     }
 
     @Test
