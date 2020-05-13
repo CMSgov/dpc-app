@@ -158,7 +158,7 @@
   </section>
 
   <div class="button__container">
-    <%= form_for @user, url: internal_user_path(@user), html: { method: :delete } do |f| %>
+    <%= form_for @user, url: internal_user_path(@user), data: { confirm: 'Are you sure you want to delete the user\'s account?' }, html: { method: :delete } do |f| %>
       <%= f.submit "Delete user account", class:"ds-c-button ds-c-button--danger", data: { test: "delete-user-account" } %>
     <% end %>
   </div>
