@@ -93,6 +93,19 @@ module Internal
       end
     end
 
+    def add
+      @organization = Organization.find(params[:organization_id])
+      @user = User.find(params[:organization][:id])
+      add_user = @organization.users << @user
+
+      if add_user
+        flash[:notice] = 'User has been successfully added to organization.'
+        redirect_to internal_organization_path(@organization)
+      else
+        flash[:alert] = 'User could not be added to organization.'
+      end
+    end
+
     private
 
     def prod_sbx?
