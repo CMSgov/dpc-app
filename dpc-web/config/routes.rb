@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     resources :tags, only: [:index, :create, :destroy]
     resources :organizations do
       resources :registered_organizations, only: [:new, :create, :edit, :update, :destroy]
+      match :add, via: [:get, :post]
     end
   end
 
