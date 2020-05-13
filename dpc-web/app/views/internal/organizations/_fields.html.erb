@@ -28,15 +28,17 @@
           min: 0, class: "ds-c-field ds-c-field--small" %>
       </div>
 
+    <% unless @organization.prod_sbx? %>
       <div class="field">
         <%= f.label :npi, "NPI", class: "ds-c-label" %>
         <%= f.text_field :npi, class: "ds-c-field" %>
       </div>
+    <% end %>
 
-      <div class="field">
-        <%= f.label :vendor, "Vendor", class: "ds-c-label" %>
-        <%= f.text_field :vendor, class: "ds-c-field" %>
-      </div>
+    <div class="field">
+      <%= f.label :vendor, "Vendor", class: "ds-c-label" %>
+      <%= f.text_field :vendor, class: "ds-c-field" %>
+    </div>
     </div>
   </div>
 </fieldset>
@@ -81,6 +83,6 @@
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
     <%= hidden_field_tag :from_user, params[:from_user] %>
     <%= f.submit locals[:button_label], class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
-    <%= link_to "Cancel", :back, class: "ds-c-button ds-c-button--transparent" %>
+    <%= link_to "Cancel", internal_organizations_path, class: "ds-c-button ds-c-button--transparent" %>
   </div>
 </div>
