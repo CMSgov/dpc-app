@@ -51,7 +51,7 @@
         <jooq.version>3.13.1</jooq.version>
         <bouncey.version>1.65</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
-        <newrelic.agent.version>5.11.0</newrelic.agent.version>
+        <newrelic.agent.version>5.12.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
     </properties>
 
