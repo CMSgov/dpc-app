@@ -16,6 +16,9 @@ jdk:
 python:
   - 3.8.1
 
+node_js:
+  - node
+
 cache:
   directories:
     - $HOME/.m2
