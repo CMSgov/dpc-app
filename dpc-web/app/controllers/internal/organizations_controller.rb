@@ -106,6 +106,19 @@ module Internal
       end
     end
 
+    def delete
+      @organization = Organization.find(params[:organization_id])
+      @user = User.find(params[:organization][:id])
+      delete_user = @organization.users.delete(@user)
+
+      if delete_user
+        flash[:notice] = 'User has been successfully deleted from organization.'
+        redirect_to internal_organization_path(@organization)
+      else
+        flash[:alert] = 'User could not be deleted to organization.'
+      end
+    end
+
     private
 
     def prod_sbx?
