@@ -33,6 +33,10 @@
   flex-direction: column;
 }
 
+.module-container__button {
+  padding: $spacer-1 $spacer-2;
+}
+
 .module-container__heading {
   font-size: $h4-font-size;
   font-weight: $font-bold;
