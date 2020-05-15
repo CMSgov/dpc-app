@@ -229,7 +229,10 @@
             </h2>
           </div>
           <div>
-            <button>Remove</button>
+            <%= form_for @organization, url: internal_organization_delete_path(@organization, user), method: :delete do |f| %>
+              <%= f.hidden_field :id, value: user.id %>
+              <%= f.submit "Remove", class: "ds-c-button ds-c-button--danger" %>
+            <% end %>
           </div>
         </div>
       <% end %>
