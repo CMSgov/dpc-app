@@ -35,6 +35,12 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
         // Disable default error messages, as we want to generate our own
         context.disableDefaultConstraintViolation();
 
+        if (value == null || !value.isResource()) {
+            context.buildConstraintViolationWithTemplate("No resource provided")
+                    .addConstraintViolation();
+            return false;
+        }
+
         // Create a validation option object which forces validation against the given profile.
         final ValidationOptions options = new ValidationOptions();
         options.addProfile(profileURI);
