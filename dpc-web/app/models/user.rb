@@ -16,11 +16,12 @@ class User < ApplicationRecord
   # :trackable, and :omniauthable, :recoverable,
   devise :database_authenticatable,
          :validatable, :trackable, :registerable,
-         :timeoutable, :recoverable
+         :timeoutable, :recoverable, :confirmable
 
   enum requested_organization_type: ORGANIZATION_TYPES
 
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
+  validates :email, presence: true, domain_exists: true
   validates :last_name, :first_name, presence: true
   validates :requested_organization, presence: true
   validates :requested_num_providers, numericality: { only_integer: true, greater_than_or_equal_to: 0,

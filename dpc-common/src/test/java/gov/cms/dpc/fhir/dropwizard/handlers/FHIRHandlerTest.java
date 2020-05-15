@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 import ca.uhn.fhir.context.FhirContext;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.BaseResource;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -56,7 +57,7 @@ public class FHIRHandlerTest {
         void testNonFHIRRead() {
             final InputStream is = IOUtils.toInputStream("this is not fhir", StandardCharsets.UTF_8);
             final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> handler.readFrom(BaseResource.class, null, null, MediaType.TEXT_HTML_TYPE, null, is), "Should throw exception");
-            assertAll(() -> assertEquals(400, exception.getResponse().getStatus(), "Should have correct error status"),
+            assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should have correct error status"),
                     () -> assertEquals("Content does not appear to be FHIR JSON, first non-whitespace character was: 't' (must be '{')", exception.getMessage(), "Should have correct message"));
         }
     }

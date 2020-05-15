@@ -5,6 +5,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.BaseResource;
 
 import javax.inject.Inject;
@@ -13,7 +14,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
@@ -47,7 +47,10 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
             return (BaseResource) parser.parseResource(new InputStreamReader(entityStream, StandardCharsets.UTF_8));
             // We need to manually handle the DataFormatException because our custom exception handlers aren't loaded yet.
         } catch (DataFormatException e) {
-            throw new WebApplicationException(e.getCause().getMessage(), Response.Status.BAD_REQUEST);
+            String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            // Bad request if not parsable; unprocessable if parsable but in violation of profile or business rules
+            int status = message.contains("Invalid attribute value") ? HttpStatus.UNPROCESSABLE_ENTITY_422 : HttpStatus.BAD_REQUEST_400;
+            throw new WebApplicationException(message, status);
         }
     }
 

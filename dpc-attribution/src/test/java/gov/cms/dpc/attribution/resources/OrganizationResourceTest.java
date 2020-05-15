@@ -3,7 +3,6 @@ package gov.cms.dpc.attribution.resources;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
@@ -165,6 +164,12 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         Organization orgResult = (Organization) outcome.getResource();
 
         assertTrue(organization.equalsDeep(orgResult));
+
+        organization.setName("<script>nope</script");
+        assertThrows(InvalidRequestException.class, () -> client
+                .update()
+                .resource(organization)
+                .execute(), "Should not have updated organization");
     }
 
     @Test
@@ -197,7 +202,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     private Patient createFakePatient(Organization organization) {
         final Patient patient = new Patient();
         patient.addName().setFamily("Test").addGiven("Patient");
-        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-fake-mbi");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0ZZ0ZZ0ZZ00");
         patient.setBirthDate(Date.valueOf("1990-01-02"));
         patient.setGender(Enumerations.AdministrativeGender.MALE);
         patient.setManagingOrganization(new Reference(organization.getId()));

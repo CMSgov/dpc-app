@@ -27,8 +27,20 @@ module Internal
         flash[:notice] = 'User successfully updated.'
         redirect_to internal_user_url(@user)
       else
-        flash[:alert] = "Please correct errrors: #{model_error_string(@user)}"
+        flash[:alert] = "Please correct errors: #{model_error_string(@user)}"
         render :edit
+      end
+    end
+
+    def destroy
+      @user = User.find(params[:id])
+      @user.destroy
+
+      if @user.destroy
+        flash[:notice] = 'User successfully deleted.'
+        redirect_to root_path
+      else
+        flash[:alert] = 'Unable to delete user.'
       end
     end
 

@@ -15,6 +15,7 @@ RSpec.describe 'User Registers for Access', type: :request do
 
     user.delete(:password)
     user.delete(:password_confirmation)
+    user.delete(:confirmed_at)
 
     user.each_pair do |key, value|
       expect(value).to eq(stored_user[key])

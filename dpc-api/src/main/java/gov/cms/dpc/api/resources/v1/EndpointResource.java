@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractEndpointResource;
@@ -30,7 +31,7 @@ public class EndpointResource extends AbstractEndpointResource {
     private final IGenericClient client;
 
     @Inject
-    EndpointResource(IGenericClient client) {
+    EndpointResource(@Named("attribution") IGenericClient client) {
         this.client = client;
     }
 
@@ -41,7 +42,8 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource for an Organization")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Endpoint created"),
-            @ApiResponse(code = 422, message = "Endpoint could not be created")
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
     public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
@@ -104,7 +106,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Endpoint updated"),
             @ApiResponse(code = 404, message = "Endpoint not found"),
-            @ApiResponse(code = 422, message = "Endpoint is not valid")
+            @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
     public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {

@@ -16,14 +16,18 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'rouge-rails'
 gem 'kramdown', '~> 2.1'
 
+gem 'luhnacy', '~> 0.2.1'
+
 gem 'jquery-rails'
 gem 'devise'
+gem 'truemail'
 gem 'brakeman'
 gem 'health_check'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
+  gem 'pry-nav'
 
   gem 'rspec-rails'
   gem 'database_cleaner'

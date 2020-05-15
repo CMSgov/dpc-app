@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NoHtml;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 
@@ -25,6 +26,7 @@ public class ContactPointEntity implements Serializable {
     private ContactPoint.ContactPointSystem system;
     @NotNull
     private ContactPoint.ContactPointUse use;
+    @NoHtml
     @NotEmpty
     private String value;
     private Integer rank;

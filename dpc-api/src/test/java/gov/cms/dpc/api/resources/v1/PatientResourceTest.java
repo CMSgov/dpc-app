@@ -1,23 +1,36 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
+import javax.ws.rs.HttpMethod;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.sql.Date;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
@@ -175,18 +188,59 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(99, patients.getTotal(), "Should have correct number of patients");
 
         // Try to update one
-        // TODO: Removed until DPC-683 is merged
-//        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
-//        patient.setBirthDate(Date.valueOf("2000-01-01"));
-//        patient.setGender(Enumerations.AdministrativeGender.MALE);
-//
-//        final MethodOutcome outcome = client
-//                .update()
-//                .resource(patient)
-//                .withId(patient.getId())
-//                .encodedJson()
-//                .execute();
-//
-//        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
+        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
+        patient.setBirthDate(Date.valueOf("2000-01-01"));
+        patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+        final MethodOutcome outcome = client
+                .update()
+                .resource(patient)
+                .withId(patient.getId())
+                .encodedJson()
+                .execute();
+
+        assertTrue(((Patient) outcome.getResource()).equalsDeep(patient), "Should have been updated correctly");
+
+        // Try to update with invalid MBI
+        Identifier mbiIdentifier = patient.getIdentifier().stream()
+                .filter(i -> DPCIdentifierSystem.MBI.getSystem().equals(i.getSystem())).findFirst().get();
+        mbiIdentifier.setValue("not-a-valid-MBI");
+
+        IUpdateExecutable update = client
+                .update()
+                .resource(patient)
+                .withId(patient.getId());
+
+        assertThrows(UnprocessableEntityException.class, update::execute);
+    }
+
+    @Test
+    void testCreateInvalidPatient() throws IOException, URISyntaxException {
+        URL url = new URL(getBaseURL() + "/Patient");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HttpMethod.POST);
+        conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
+
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
+
+        conn.setDoOutput(true);
+        String reqBody = "{\"test\": \"test\"}";
+        conn.getOutputStream().write(reqBody.getBytes());
+
+        assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+            StringBuilder respBuilder = new StringBuilder();
+            String respLine = null;
+            while ((respLine = reader.readLine()) != null) {
+                respBuilder.append(respLine.trim());
+            }
+            String resp = respBuilder.toString();
+            assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""));
+            assertTrue(resp.contains("Invalid JSON content"));
+        }
+
+        conn.disconnect();
     }
 }
