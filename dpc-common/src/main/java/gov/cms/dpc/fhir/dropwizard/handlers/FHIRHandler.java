@@ -48,7 +48,9 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
             // We need to manually handle the DataFormatException because our custom exception handlers aren't loaded yet.
         } catch (DataFormatException e) {
             String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-            throw new WebApplicationException(message, HttpStatus.UNPROCESSABLE_ENTITY_422);
+            // Bad request if not parsable; unprocessable if parsable but in violation of profile or business rules
+            int status = message.contains("Invalid attribute value") ? HttpStatus.UNPROCESSABLE_ENTITY_422 : HttpStatus.BAD_REQUEST_400;
+            throw new WebApplicationException(message, status);
         }
     }
 
