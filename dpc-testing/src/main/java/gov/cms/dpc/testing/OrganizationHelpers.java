@@ -2,7 +2,9 @@ package gov.cms.dpc.testing;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
 
 import java.io.InputStream;
 
@@ -23,7 +25,7 @@ public class OrganizationHelpers {
      * @return - newly minted {@link Organization}
      */
     public static Organization createOrganization(FhirContext ctx, IGenericClient client) {
-        return createOrganization(ctx, client, "test-org-npi", false);
+        return createOrganization(ctx, client, "1334567892", false);
     }
 
     /**

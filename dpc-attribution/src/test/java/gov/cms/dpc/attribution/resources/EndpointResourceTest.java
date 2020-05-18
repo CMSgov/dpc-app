@@ -3,16 +3,15 @@ package gov.cms.dpc.attribution.resources;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
-import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import gov.cms.dpc.testing.factories.OrganizationFactory;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +22,7 @@ public class EndpointResourceTest extends AbstractAttributionTest {
 
     @Test
     void testCreateEndpoint() {
-        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-create-endpoint", false);
+        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111112", false);
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint(organization.getId());
 
         MethodOutcome outcome = client
@@ -37,7 +36,7 @@ public class EndpointResourceTest extends AbstractAttributionTest {
 
     @Test
     void testSearchEndpoints() {
-        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-search-endpoints", false);
+        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111211", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
 
         final Bundle bundle = client
@@ -53,7 +52,7 @@ public class EndpointResourceTest extends AbstractAttributionTest {
 
     @Test
     void testFetchEndpoint() {
-        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-fetch-endpoint", false);
+        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111310", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
 
         Endpoint result = client
@@ -67,7 +66,7 @@ public class EndpointResourceTest extends AbstractAttributionTest {
 
     @Test
     void testUpdateEndpoint() {
-        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-update-endpoint", false);
+        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1211111111", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
 
         Endpoint endpoint = client
@@ -90,7 +89,7 @@ public class EndpointResourceTest extends AbstractAttributionTest {
 
     @Test
     void testDeleteEndpoint() {
-        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "test-delete-endpoint", false);
+        Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1112111111", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
 
         // Add another endpoint to organization
