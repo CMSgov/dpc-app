@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.IOException;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -62,6 +63,7 @@ public class AbstractApplicationTest {
         FHIRHelpers.registerOrganization(attrClient,
                 ctx.newJsonParser(),
                 ORGANIZATION_ID,
+                ORGANIZATION_NPI,
                 TASK_URL);
 
         // Check health
