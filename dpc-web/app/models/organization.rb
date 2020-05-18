@@ -63,11 +63,11 @@ class Organization < ApplicationRecord
   end
 
   def prod_sbx?
-    ENV['DEPLOY_ENV'] == 'prod-sbx'
+    ENV['ENV'] == 'prod-sbx'
   end
 
   def update_registered_organizations
-    return unless npi.present?
+    return unless npi.present? || sandbox_id.present?
 
     registered_organizations.each(&:update_api_organization)
   end
