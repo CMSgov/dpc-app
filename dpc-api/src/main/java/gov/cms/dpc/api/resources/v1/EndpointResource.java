@@ -42,7 +42,8 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Create an Endpoint", notes = "Create an Endpoint resource for an Organization")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Endpoint created"),
-            @ApiResponse(code = 422, message = "Endpoint could not be created")
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
     public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
@@ -105,7 +106,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Endpoint updated"),
             @ApiResponse(code = 404, message = "Endpoint not found"),
-            @ApiResponse(code = 422, message = "Endpoint is not valid")
+            @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
     public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
