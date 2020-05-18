@@ -16,7 +16,6 @@ import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -149,7 +148,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final Bundle practSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("8075963174210588464"))
+                .where(Practitioner.IDENTIFIER.exactly().code("1234329724"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
