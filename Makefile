@@ -67,6 +67,11 @@ smoke/prod-sbx: venv smoke
 	@echo "Running Smoke Tests against Sandbox env"
 	. venv/bin/activate; bzt src/test/prod-sbx.smoke_test.yml
 
+.PHONY: smoke/prod
+smoke/prod: venv smoke
+	@echo "Running Smoke Tests against Prod env"
+	. venv/bin/activate; bzt src/test/prod.smoke_test.yml
+
 .PHONY: docker-base
 docker-base:
 	@docker-compose -f ./docker-compose.base.yml build base
