@@ -138,7 +138,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
             orgRegistrationResult.sampleStart();
             try {
-                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
+                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, "1121111110",adminURL);
                 orgRegistrationResult.setSuccessful(true);
             } catch (Exception e) {
                 orgRegistrationResult.setSuccessful(false);
