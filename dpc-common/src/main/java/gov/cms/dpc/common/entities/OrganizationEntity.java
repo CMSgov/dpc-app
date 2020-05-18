@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.annotations.OrganizationId;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -20,6 +21,8 @@ public class OrganizationEntity implements Serializable {
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     private UUID id;
 
+    @Valid
+    @OrganizationId
     @Embedded
     private OrganizationID organizationID;
 
