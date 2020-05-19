@@ -95,20 +95,6 @@ export GITHUB_APP_SECRET=yyy
 export GITHUB_ORG_TEAM_ID=123
 ```
 
-
-#### Background job processing
-In order to process background jobs such as sending email, you need to make sure [DelayedJob](https://github.com/collectiveidea/delayed_job) is running:
-
-```
-bin/delayed_job start
-```
-
-This command starts DelayedJob in the background. To stop DelayedJob:
-
-```
-bin/delayed_job stop
-```
-
 # Running via Docker
 
 The DPC website can also be run via docker. Follow the below steps to build and run the website into a Docker container.
