@@ -93,8 +93,9 @@ If you are using Okta for internal admin authentication, you also need to set th
 export INTERNAL_AUTH_PROVIDER=oktaoauth
 export OKTA_CLIENT_ID=
 export OKTA_CLIENT_SECRET=
-export OKTA_ISSUER=
+export OKTA_ISSUER=<Okta issuer base auth url>
 export OKTA_AUTH_SERVER_ID=
+export OKTA_ADMIN_ROLE=<Role Users must be apart of within Okta>
 export OKTA_REDIRECT_URI="http://localhost:3000/internal/auth/oktaoauth/callback"
 ```
 
