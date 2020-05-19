@@ -65,6 +65,7 @@ class APIClient
       uri_string,
       params[:public_key],
       { label: params[:label] },
+      { snippet_signature: params[:snippet_signature] },
       delegated_macaroon(reg_org_api_id)
     )
 
