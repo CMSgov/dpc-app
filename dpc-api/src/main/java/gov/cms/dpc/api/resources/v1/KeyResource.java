@@ -119,6 +119,7 @@ public class KeyResource extends AbstractKeyResource {
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
                                      @NoHtml @NotEmpty String key,
+                                     @ApiParam(name = "snippetSignature") String snippetSignature,
                                      @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
                                      @QueryParam(value = "label") Optional<String> keyLabelOptional) {
         final String keyLabel;
@@ -131,14 +132,14 @@ public class KeyResource extends AbstractKeyResource {
             keyLabel = this.buildDefaultKeyID();
         }
 
-        final SubjectPublicKeyInfo publicKey = parseAndValidateKey(key);
+        final SubjectPublicKeyInfo publicKey = parseAndValidateKey(key, snippetSignature);
         return savePublicKeyEntry(organizationPrincipal, keyLabel, publicKey);
     }
 
-    private SubjectPublicKeyInfo parseAndValidateKey(String key) {
-        final SubjectPublicKeyInfo publicKey;
+    private SubjectPublicKeyInfo parseAndValidateKey(String key, String snippetSignature) {
+        final SubjectPublicKeyInfo publicKeyInfo;
         try {
-            publicKey = PublicKeyHandler.parsePEMString(key);
+            publicKeyInfo = PublicKeyHandler.parsePEMString(key);
         } catch (PublicKeyException e) {
             logger.error("Cannot parse provided public key.", e);
             throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
@@ -146,12 +147,20 @@ public class KeyResource extends AbstractKeyResource {
 
         // Validate public key
         try {
-            PublicKeyHandler.validatePublicKey(publicKey);
+            PublicKeyHandler.validatePublicKey(publicKeyInfo);
         } catch (PublicKeyException e) {
             logger.error("Cannot parse provided public key.", e);
             throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
         }
-        return publicKey;
+
+        try {
+            PublicKeyHandler.verifySignature(key, "This is a snippet used to test a key pair.", snippetSignature);
+        } catch (PublicKeyException e) {
+            logger.error("Public key could not be verified with signature.", e);
+            throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
+        }
+
+        return publicKeyInfo;
     }
 
     private PublicKeyEntity savePublicKeyEntry(OrganizationPrincipal organizationPrincipal, String keyLabel, SubjectPublicKeyInfo publicKey) {
