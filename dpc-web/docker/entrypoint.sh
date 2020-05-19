@@ -14,9 +14,6 @@ bundle exec rails db:migrate
 # Seed the database
 # This step is not needed, as there is no database seed data yet
 
-# Start background job processing
-bin/delayed_job start
-
 # Start the database service (and make accessible outside the Docker container)
 echo "Starting Rails server..."
 if [ -n "$JACOCO" ]; then
