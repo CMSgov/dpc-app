@@ -95,6 +95,18 @@ export GITHUB_APP_SECRET=yyy
 export GITHUB_ORG_TEAM_ID=123
 ```
 
+
+#### Background job processing
+In order to process background jobs such as sending email, you need to make sure [Sidekiq](https://github.com/mperham/sidekiq) is running:
+
+Open a new terminal window and execute the following in the root `/dpc-web` folder.
+
+```
+bundle exec sidekiq
+```
+
+This command starts Sidkeiq in the current terminal. To stop Sidekiq: `ctrl-c`, and it will shutdown the worker.
+
 # Running via Docker
 
 The DPC website can also be run via docker. Follow the below steps to build and run the website into a Docker container.
