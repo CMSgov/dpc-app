@@ -15,7 +15,7 @@ class PublicKeysController < ApplicationController
     reg_org = @organization.registered_organizations.find_by(api_env: params[:api_environment])
     manager = PublicKeyManager.new(api_env: params[:api_environment], registered_organization: reg_org)
 
-    new_public_key = manager.create_public_key(public_key: params[:public_key], label: params[:label])
+    new_public_key = manager.create_public_key(public_key: params[:public_key], label: params[:label], snippet_signature: params[:snippet_signature])
 
     if new_public_key[:response]
       redirect_to dashboard_path
