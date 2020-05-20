@@ -138,8 +138,8 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
             orgRegistrationResult.sampleStart();
             try {
-                String NPI = FHIRHelpers.generateNPI();
-                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, NPI ,adminURL);
+                String npi = FHIRHelpers.generateNPI();
+                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, npi ,adminURL);
                 orgRegistrationResult.setSuccessful(true);
             } catch (Exception e) {
                 orgRegistrationResult.setSuccessful(false);

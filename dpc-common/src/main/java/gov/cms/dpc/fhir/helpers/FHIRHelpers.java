@@ -20,6 +20,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -30,7 +32,7 @@ import java.net.URISyntaxException;
 
 public class FHIRHelpers {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(FHIRHelpers.class);
     /**
      * Register an organization with the Attribution Service
      * Organizations are pulled from the `organization_bundle.json` file and filtered based on the provided resource ID
@@ -135,7 +137,7 @@ public class FHIRHelpers {
             try {
                 checkDigit = LuhnCheckDigit.LUHN_CHECK_DIGIT.calculate(String.valueOf(randomNumber));
             } catch (Exception e) {
-                //do nothing
+                logger.debug("Failed to generate check digit for: {}, trying again", randomNumber);
             }
         } while (checkDigit == null);
         return randomNumber + checkDigit;
