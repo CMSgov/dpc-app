@@ -207,11 +207,19 @@
 <section class="box">
   <div class="box__content">
     <h2 class="box__heading">Add User</h2>
-    <%= form_for @organization, url: internal_organization_add_path(@organization), html: { method: :add } do |f| %>
-      <%= f.select :id, User.order('first_name ASC').map{|u| [u.name, u.id]}, 
-          { include_blank: '-Users-' }, class: "ds-c-field drop-down" %>
-      <%= f.submit "Add user", class: "ds-c-button ds-c-button--primary" %>
-    <% end %>
+
+    <input type="text" class="ds-c-field" id="orgUserSearch" onkeyup="orgUserSearch()" placeholder="Search for names...">
+
+    <ul id="orgUserList">
+      <% User.all.order('id ASC').each do |user| %>
+        <li>
+          <div>
+            <%= user.id %>
+            <%= user.name %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
   </div>
 </section>
 
