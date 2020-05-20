@@ -11,6 +11,7 @@
 // about supported directives.
 //
 //= require svg4everybody
+//= require add-user-search
 //= require accordions
 //= require rails-ujs
 //= require activestorage
