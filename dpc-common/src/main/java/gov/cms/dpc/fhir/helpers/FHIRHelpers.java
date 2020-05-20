@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import org.apache.commons.validator.routines.checkdigit.LuhnCheckDigit;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -125,6 +126,19 @@ public class FHIRHelpers {
                 return EntityUtils.toString(execute.getEntity());
             }
         }
+    }
+
+    public static String generateNPI() {
+        int randomNumber = (int) Math.floor(Math.random()*(999999999-100000000+1)+100000000);
+        String checkDigit = null;
+        do {
+            try {
+                checkDigit = LuhnCheckDigit.LUHN_CHECK_DIGIT.calculate(String.valueOf(randomNumber));
+            } catch (Exception e) {
+                //do nothing
+            }
+        } while (checkDigit == null);
+        return randomNumber + checkDigit;
     }
 
     public static class MacaroonsInterceptor implements IClientInterceptor {
