@@ -6,16 +6,23 @@ function orgUserSearch() {
   ul = document.getElementById("orgUserList");
   li = ul.getElementsByTagName('li');
 
-  if (filter.length < 3) return;
+  var liCount = 0;
 
-  for (let i = 0; i < li.length; i++) {
+  for (i = 0; i < li.length; i++) {
     div = li[i].getElementsByTagName("div")[0];
 
     txtValue = div.textContent || div.innerText;
     if (txtValue.toUpperCase().indexOf(filter) > -1) {
       li[i].style.display = "";
+      liCount++
     } else {
       li[i].style.display = "none";
     }
   }
+
+  // if (liCount > 5) {
+  //   ul.style.display = "none";
+  // } else {
+  //   ul.style.display = "";
+  // }
 }
