@@ -25,6 +25,9 @@ cache:
 # Skip build in Maven install, which we run ourselves
 install: true
 
+service:
+  - redis-server
+
 jobs:
   include:
     - script: make ci-app
