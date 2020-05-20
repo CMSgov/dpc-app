@@ -208,15 +208,19 @@
   <div class="box__content">
     <h2 class="box__heading">Add User</h2>
 
-    <input type="text" class="ds-c-field" id="orgUserSearch" onkeyup="orgUserSearch()" placeholder="Search for names...">
+    <input type="text" class="ds-c-field" id="orgUserSearch" onkeyup="orgUserSearch()" placeholder="Search for user.">
 
-    <ul id="orgUserList">
+    <ul class="module-list-container" id="orgUserList">
       <% User.all.order('id ASC').each do |user| %>
         <li>
-          <div>
-            <%= user.id %>
-            <%= user.name %>
-          </div>
+            <div class="module-container">
+              <div class="module-container__id">
+                <%= user.id %>
+              </div>
+              <div class="module-container__heading">
+                <%= user.name %>
+              </div>
+            </div>
         </li>
       <% end %>
     </ul>

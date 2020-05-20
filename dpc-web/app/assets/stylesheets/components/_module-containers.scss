@@ -91,3 +91,8 @@
   color: $color-success;
   font-weight: $font-bold;
 }
+
+.module-list-container {
+  list-style: none;
+  max-width: 700px;
+}
