@@ -20,6 +20,14 @@ function orgUserSearch() {
     }
   }
 
+  var sendMessage = document.getElementById('orgUserSearchMessage');
+
+  if (liCount == 0) {
+    sendMessage.innerHTML = "Cannot find users."
+  } else {
+    sendMessage.innerHTML = ""
+  }
+
   // if (liCount > 5) {
   //   ul.style.display = "none";
   // } else {
