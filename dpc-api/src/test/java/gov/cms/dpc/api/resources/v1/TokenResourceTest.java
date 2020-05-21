@@ -171,7 +171,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
 
         // Create a new JWT
         final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);

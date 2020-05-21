@@ -9,7 +9,7 @@
         "identifier": [
           {
             "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "test-org-npi"
+            "value": "1111112110"
           }
         ],
         "name": "Template Provider Organization",

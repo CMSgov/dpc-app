@@ -27,7 +27,7 @@ module Internal
         flash[:notice] = 'User successfully updated.'
         redirect_to internal_user_url(@user)
       else
-        flash[:alert] = "Please correct errrors: #{model_error_string(@user)}"
+        flash[:alert] = "Please correct errors: #{model_error_string(@user)}"
         render :edit
       end
     end

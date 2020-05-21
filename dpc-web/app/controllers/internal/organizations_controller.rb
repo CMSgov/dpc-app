@@ -25,15 +25,22 @@ module Internal
     end
 
     def new
-      @organization = Organization.new name: params[:organization_name],
-                                       organization_type: params[:organization_organization_type],
-                                       num_providers: params[:organization_num_providers]
+      user_id = params.fetch(:from_user, nil)
+      if user_id
+        user = User.find user_id
+        @organization = Organization.new name: user.requested_organization,
+                                         organization_type: user.requested_organization_type,
+                                         num_providers: user.requested_num_providers
 
-      @organization.build_address street: params[:organization_address_attributes_street],
-                                  street_2: params[:organization_address_attributes_street_2],
-                                  city: params[:organization_address_attributes_city],
-                                  state: params[:organization_address_attributes_state],
-                                  zip: params[:organization_address_attributes_zip]
+        @organization.build_address street: user.address_1,
+                                    street_2: user.address_2,
+                                    city: user.city,
+                                    state: user.state,
+                                    zip: user.zip
+      else
+        @organization = Organization.new
+        @organization.build_address
+      end
     end
 
     def create
@@ -86,11 +93,11 @@ module Internal
       end
     end
 
-    def prod_sbx?
-      ENV['DEPLOY_ENV'] == 'prod-sbx'
-    end
-
     private
+
+    def prod_sbx?
+      ENV['ENV'] == 'prod-sbx'
+    end
 
     def organization_params
       params.fetch(:organization).permit(

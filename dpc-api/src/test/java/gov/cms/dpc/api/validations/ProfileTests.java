@@ -113,7 +113,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
         assertEquals(1, outcome.getIssue().size(), "Should have validation failures");
 
         final Practitioner validPractitioner = invalidPractitioner.copy();
-        validPractitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-npi");
+        validPractitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("1232312110");
 
         final MethodOutcome created = client
                 .create()
