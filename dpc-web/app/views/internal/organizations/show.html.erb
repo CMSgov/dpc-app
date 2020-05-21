@@ -211,6 +211,7 @@
     <input type="text" class="ds-c-field" id="orgUserSearch" onkeyup="orgUserSearch()" placeholder="Search for user.">
 
     <ul class="module-list-container" id="orgUserList">
+      <div id="orgUserSearchMessage"></div>
       <% User.left_joins(:organization_user_assignments)
               .where('organization_user_assignments.id IS NULL').order('id ASC').each do |user| %>
         <li>
