@@ -26,6 +26,7 @@ import java.security.PrivateKey;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -69,7 +70,7 @@ public class AbstractSecureApplicationTest {
         // First, create a Golden macaroon for admin uses
         GOLDEN_MACAROON = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, TASK_URL);
+        ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, TASK_URL);
 
         // Register Public key
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
