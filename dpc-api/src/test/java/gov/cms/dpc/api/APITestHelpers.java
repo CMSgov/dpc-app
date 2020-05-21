@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
@@ -135,7 +136,8 @@ public class APITestHelpers {
                 .addProvider(JerseyExceptionHandler.class)
                 .addProvider(PersistenceExceptionHandler.class)
                 .addProvider(HAPIExceptionHandler.class)
-                .addProvider(DefaultFHIRExceptionHandler.class);
+                .addProvider(DefaultFHIRExceptionHandler.class)
+                .addProvider(JsonParseExceptionMapper.class);
 
         // Optionally enable validation
         if (validation) {
