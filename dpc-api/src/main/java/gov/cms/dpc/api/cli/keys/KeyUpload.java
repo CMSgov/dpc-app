@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.cli.keys;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
+import gov.cms.dpc.api.resources.v1.KeyResource;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -50,6 +52,14 @@ public class KeyUpload extends AbstractAdminCommand {
                 .type(String.class)
                 .required(true)
                 .help("PEM encoded public key to upload");
+
+        subparser
+                .addArgument("signature")
+                .dest("signature")
+                .type(String.class)
+                .required(true)
+                .help("Signature for snippet, produced with corresponding private key");
+
     }
 
     @Override
@@ -62,22 +72,27 @@ public class KeyUpload extends AbstractAdminCommand {
         final Path filePath = FileSystems.getDefault().getPath(namespace.getString(KEY_FILE));
         final String pemFile = Files.readString(filePath);
 
+        final String signature = namespace.getString("signature");
+
         final Optional<String> label = Optional.ofNullable(namespace.getString("key-label"));
-        uploadKey(apiService, orgID.getIdPart(), label, pemFile);
+        uploadKey(apiService, orgID.getIdPart(), label, pemFile, signature);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void uploadKey(String apiService, String orgID, Optional<String> label, String pem) throws IOException, URISyntaxException {
+    private void uploadKey(String apiService, String orgID, Optional<String> label, String pem, String signature) throws IOException, URISyntaxException {
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/upload-key", apiService));
 
             builder.addParameter("organization", orgID);
             label.ifPresent(l -> builder.addParameter("label", l));
 
+            KeyResource.KeySignature keySignature = new KeyResource.KeySignature(pem, signature);
+            String keySigJson = new ObjectMapper().writeValueAsString(keySignature);
+
             final HttpPost post = new HttpPost(builder.build());
             post.addHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
             post.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-            post.setEntity(new StringEntity(pem));
+            post.setEntity(new StringEntity(keySigJson));
 
             try (CloseableHttpResponse response = httpClient.execute(post)) {
                 if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
