@@ -90,8 +90,13 @@ public class PublicKeyHandler {
 
     }
 
-    public static boolean verifySignature(String keyStr, String snippet, String sigStr) {
+    public static boolean verifySignature(String publicKeyPem, String snippet, String sigStr) {
         try {
+            String keyStr = publicKeyPem
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("[\n\r]+", "");
+
             byte[] keyBytes = Base64.getDecoder().decode(keyStr);
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -99,7 +104,7 @@ public class PublicKeyHandler {
 
             Signature signature = Signature.getInstance("SHA256withRSA");
             signature.initVerify(publicKey);
-            signature.update(snippet.getBytes());
+            signature.update(snippet.getBytes(StandardCharsets.UTF_8));
             return signature.verify(Base64.getDecoder().decode(sigStr));
         } catch (NoSuchAlgorithmException e) {
             throw new PublicKeyException("Invalid algorithm", e);
