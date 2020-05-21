@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import org.apache.commons.validator.routines.checkdigit.LuhnCheckDigit;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -20,8 +19,6 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -32,7 +29,6 @@ import java.net.URISyntaxException;
 
 public class FHIRHelpers {
 
-    private static final Logger logger = LoggerFactory.getLogger(FHIRHelpers.class);
     /**
      * Register an organization with the Attribution Service
      * Organizations are pulled from the `organization_bundle.json` file and filtered based on the provided resource ID
@@ -128,19 +124,6 @@ public class FHIRHelpers {
                 return EntityUtils.toString(execute.getEntity());
             }
         }
-    }
-
-    public static String generateNPI() {
-        int randomNumber = (int) Math.floor(Math.random()*(999999999-100000000+1)+100000000);
-        String checkDigit = null;
-        do {
-            try {
-                checkDigit = LuhnCheckDigit.LUHN_CHECK_DIGIT.calculate("80840" + randomNumber);
-            } catch (Exception e) {
-                logger.debug("Failed to generate check digit for: {}, trying again", randomNumber);
-            }
-        } while (checkDigit == null);
-        return randomNumber + checkDigit;
     }
 
     public static class MacaroonsInterceptor implements IClientInterceptor {
