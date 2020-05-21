@@ -61,9 +61,13 @@ public class PublicKeyTaskTests {
         final UUID id = UUID.randomUUID();
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString());
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            upk.execute(map, "this is a key", new PrintWriter(new OutputStreamWriter(bos)));
-            Mockito.verify(this.keyResource, Mockito.times(1)).submitKey(principalCaptor.capture(), Mockito.eq("this is a key"), Mockito.eq(Optional.empty()));
+            upk.execute(map, "{\"key\":\"this is a key\",\"signature\":\"this is a signature\"}", new PrintWriter(new OutputStreamWriter(bos)));
+            ArgumentCaptor<KeyResource.KeySignature> keySigArg = ArgumentCaptor.forClass(KeyResource.KeySignature.class);
+            Mockito.verify(this.keyResource, Mockito.times(1)).submitKey(principalCaptor.capture(),
+                    keySigArg.capture(), Mockito.eq(Optional.empty()));
             assertEquals(id, principalCaptor.getValue().getID(), "Should have correct ID");
+            assertEquals("this is a key", keySigArg.getValue().getKey());
+            assertEquals("this is a signature", keySigArg.getValue().getSignature());
         }
     }
 
@@ -72,9 +76,14 @@ public class PublicKeyTaskTests {
         final UUID id = UUID.randomUUID();
         final ImmutableMultimap<String, String> map = ImmutableMultimap.of("organization", id.toString(), "label", "this is a label");
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            upk.execute(map, "this is a key", new PrintWriter(new OutputStreamWriter(bos)));
-            Mockito.verify(this.keyResource, Mockito.times(1)).submitKey(principalCaptor.capture(), Mockito.eq("this is a key"), Mockito.eq(Optional.of("this is a label")));
+            upk.execute(map, "{\"key\":\"this is a key\",\"signature\":\"this is a signature\"}", new PrintWriter(new OutputStreamWriter(bos)));
+            ArgumentCaptor<KeyResource.KeySignature> keySigArg = ArgumentCaptor.forClass(KeyResource.KeySignature.class);
+            Mockito.verify(this.keyResource, Mockito.times(1)).submitKey(principalCaptor.capture(),
+                    keySigArg.capture(),
+                    Mockito.eq(Optional.of("this is a label")));
             assertEquals(id, principalCaptor.getValue().getID(), "Should have correct ID");
+            assertEquals("this is a key", keySigArg.getValue().getKey());
+            assertEquals("this is a signature", keySigArg.getValue().getSignature());
         }
     }
 

@@ -29,8 +29,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Public Key Handler Tests")
@@ -138,6 +137,26 @@ class PublicKeyHandlerTest {
             Mockito.when(publicKeyInfo.getAlgorithm()).thenAnswer((answer) -> new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.10045.5")));
             final PublicKeyException exception = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.validatePublicKey(publicKeyInfo));
             assertEquals("Unsupported key type `1.2.840.10045.5`.", exception.getMessage(), "Should have correct error message");
+        }
+
+        @Test
+        void testVerifySignature() throws Exception {
+            KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());//Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+            String snippet = "Verify signature test";
+            String sigStr = APIAuthHelpers.signString(keyPair.getPrivate(), snippet);
+
+            assertTrue(PublicKeyHandler.verifySignature(publicKeyStr, snippet, sigStr));
+        }
+
+        @Test
+        void testVerifySignatureInvalid() throws Exception {
+            KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+           String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());//Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+            String snippet = "Verify signature test";
+            String sigStr = APIAuthHelpers.signString(keyPair.getPrivate(), snippet);
+
+            assertFalse(PublicKeyHandler.verifySignature(publicKeyStr, "Not the same snippet that was signed", sigStr));
         }
     }
 
