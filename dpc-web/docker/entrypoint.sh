@@ -17,7 +17,7 @@ bundle exec rails db:migrate
 # Start background job processing
 # TODO: We should avoid using the dameonize flag in production and, instead, pursue a deployment
 # like provided here https://github.com/mperham/sidekiq/wiki/Deployment
-bundle exec sidekiq -d
+bundle exec sidekiq --daemon -L /var/log/dpc-web-$(hostname)-sidekiq.log
 
 # Start the database service (and make accessible outside the Docker container)
 echo "Starting Rails server..."
