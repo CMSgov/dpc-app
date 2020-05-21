@@ -135,7 +135,7 @@ public class FHIRHelpers {
         String checkDigit = null;
         do {
             try {
-                checkDigit = LuhnCheckDigit.LUHN_CHECK_DIGIT.calculate(String.valueOf(randomNumber));
+                checkDigit = LuhnCheckDigit.LUHN_CHECK_DIGIT.calculate("80840" + randomNumber);
             } catch (Exception e) {
                 logger.debug("Failed to generate check digit for: {}, trying again", randomNumber);
             }
