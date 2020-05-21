@@ -46,7 +46,9 @@ public class UploadPublicKey extends PostBodyTask {
             label = Optional.ofNullable(labelParams.asList().get(0));
         }
 
-        final PublicKeyEntity publicKeyEntity = this.resource.submitKey(new OrganizationPrincipal(organization), body, label);
+        KeyResource.KeySignature keySignature = new ObjectMapper().readValue(body, KeyResource.KeySignature.class);
+
+        final PublicKeyEntity publicKeyEntity = this.resource.submitKey(new OrganizationPrincipal(organization), keySignature, label);
         this.mapper.writeValue(output, publicKeyEntity);
     }
 }

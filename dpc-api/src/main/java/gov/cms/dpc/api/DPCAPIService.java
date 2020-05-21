@@ -10,6 +10,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
 import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
+import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
@@ -80,6 +81,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().getResourceConfig().register(listener);
 
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
+
+        environment.jersey().register(new JsonParseExceptionMapper());
     }
 
     private GuiceBundle<DPCAPIConfiguration> setupGuiceBundle() {

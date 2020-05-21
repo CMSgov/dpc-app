@@ -38,6 +38,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
@@ -233,6 +234,14 @@ public class APIAuthHelpers {
 
     public static CustomHttpBuilder createCustomHttpClient() {
         return new CustomHttpBuilder();
+    }
+
+    public static String signString(PrivateKey privateKey, String str) throws NoSuchAlgorithmException, GeneralSecurityException {
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(str.getBytes(StandardCharsets.UTF_8));
+        byte[] sigBytes = signature.sign();
+        return Base64.getEncoder().encodeToString(sigBytes);
     }
 
     private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck, boolean enableRequestLog) {
