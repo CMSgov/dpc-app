@@ -44,7 +44,7 @@ public class OrganizationHelpers {
             final Bundle searchBundle = client
                     .search()
                     .forResource(Organization.class)
-                    .where(Organization.IDENTIFIER.exactly().systemAndCode("http://hl7.org/fhir/sid/us-npi", "test-org-npi"))
+                    .where(Organization.IDENTIFIER.exactly().systemAndCode("http://hl7.org/fhir/sid/us-npi", "1111111211"))
                     .returnBundle(Bundle.class)
                     .encodedJson()
                     .execute();

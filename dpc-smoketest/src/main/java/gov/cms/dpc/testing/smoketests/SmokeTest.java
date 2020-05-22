@@ -2,6 +2,7 @@ package gov.cms.dpc.testing.smoketests;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
@@ -138,7 +139,8 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
             orgRegistrationResult.sampleStart();
             try {
-                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, "1121111110",adminURL);
+                String npi = NPIUtil.generateNPI();
+                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, npi ,adminURL);
                 orgRegistrationResult.setSuccessful(true);
             } catch (Exception e) {
                 orgRegistrationResult.setSuccessful(false);
