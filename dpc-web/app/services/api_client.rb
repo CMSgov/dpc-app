@@ -61,11 +61,16 @@ class APIClient
   def create_public_key(reg_org_api_id, params: {})
     uri_string = base_url + '/Key'
 
-    json = params.to_json
+    json = ({
+      public_key: params[:public_key],
+      snippet_signature: params[:snippet_signature]
+    }).to_json
+    binding.pry
 
     post_text_request(
       uri_string,
       json,
+      { label: params[:label] },
       delegated_macaroon(reg_org_api_id)
     )
 
@@ -128,13 +133,13 @@ class APIClient
     http_request(request, uri)
   end
 
-  def post_text_request(uri_string, text, query_params, token)
+  def post_text_request(uri_string, json, query_params, token)
     uri = URI.parse uri_string
     uri.query = URI.encode_www_form(query_params)
     text_headers = { 'Content-Type': 'text/plain', 'Accept': 'application/json' }.merge(auth_header(token))
 
     request = Net::HTTP::Post.new(uri.request_uri, text_headers)
-    request.body = text
+    request.body = json
 
     http_request(request, uri)
   end
