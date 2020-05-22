@@ -91,12 +91,13 @@ public class PublicKeyHandler {
     }
 
     public static boolean verifySignature(String publicKeyPem, String snippet, String sigStr) {
-        try {
-            String keyStr = publicKeyPem
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("[\n\r]+", "");
+        String keyStr = publicKeyPem
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("[\n\r]+", "");
+        sigStr = sigStr.replaceAll("[\n\r]+", "");
 
+        try {
             byte[] keyBytes = Base64.getDecoder().decode(keyStr);
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");

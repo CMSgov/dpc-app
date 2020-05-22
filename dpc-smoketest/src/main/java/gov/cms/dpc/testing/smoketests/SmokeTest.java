@@ -26,10 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Security;
+import java.security.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -150,7 +147,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             // Create a new public key
             try {
                 keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
-            } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
+            } catch (IOException | URISyntaxException | GeneralSecurityException e) {
                 throw new IllegalStateException("Failed uploading public key", e);
             }
         } else {
