@@ -142,7 +142,7 @@ class PublicKeyHandlerTest {
         @Test
         void testVerifySignature() throws Exception {
             KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
-            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());//Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
             String snippet = "Verify signature test";
             String sigStr = APIAuthHelpers.signString(keyPair.getPrivate(), snippet);
 
@@ -152,7 +152,7 @@ class PublicKeyHandlerTest {
         @Test
         void testVerifySignatureInvalid() throws Exception {
             KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
-           String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());//Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+           String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
             String snippet = "Verify signature test";
             String sigStr = APIAuthHelpers.signString(keyPair.getPrivate(), snippet);
 
