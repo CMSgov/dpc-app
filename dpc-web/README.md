@@ -105,7 +105,7 @@ Open a new terminal window and execute the following in the root `/dpc-web` fold
 bundle exec sidekiq
 ```
 
-This command starts Sidkeiq in the current terminal. To stop Sidekiq: `ctrl-c`, and it will shutdown the worker.
+This command starts Sidekiq in the current terminal. To stop Sidekiq: `ctrl-c`, and it will shutdown the worker.
 
 # Running via Docker
 
