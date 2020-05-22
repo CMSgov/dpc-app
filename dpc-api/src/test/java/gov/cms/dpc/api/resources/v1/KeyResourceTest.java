@@ -22,9 +22,7 @@ import org.junit.jupiter.api.Test;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,15 +43,16 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testInvalidKeySubmission() throws NoSuchAlgorithmException, IOException, URISyntaxException {
-        final String key = generatePublicKey();
+    void testInvalidKeySubmission() throws GeneralSecurityException, IOException, URISyntaxException {
+        KeyResource.KeySignature keySig = generateKeyAndSignature();
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-
             final URIBuilder builder = new URIBuilder(String.format("%s/Key", getBaseURL()));
             builder.addParameter("label", "this is a test");
             final HttpPost post = new HttpPost(builder.build());
-            post.setEntity(new StringEntity(key));
+            String json = new ObjectMapper().writeValueAsString(keySig);
+            post.setEntity(new StringEntity(json));
+            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
             try (CloseableHttpResponse response = client.execute(post)) {
@@ -66,8 +65,10 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
                         () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
             }
 
+            KeyResource.KeySignature keySig2 = generateKeyAndSignature();
             // Try again with same label
-            post.setEntity(new StringEntity(generatePublicKey()));
+            String json2 = new ObjectMapper().writeValueAsString(keySig2);
+            post.setEntity(new StringEntity(json2));
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
                         () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
@@ -77,7 +78,8 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             final URIBuilder b2 = new URIBuilder(String.format("%s/Key", getBaseURL()));
             b2.addParameter("label", "This is way too long to be used for a key id field. Never should pass");
             final HttpPost labelViolationPost = new HttpPost(b2.build());
-            labelViolationPost.setEntity(new StringEntity(key));
+            labelViolationPost.setEntity(new StringEntity(json));
+            labelViolationPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
             labelViolationPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             labelViolationPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
             try (CloseableHttpResponse response = client.execute(labelViolationPost)) {
@@ -88,13 +90,15 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testRoundTrip() throws NoSuchAlgorithmException, IOException {
-        final String key = generatePublicKey();
+    void testRoundTrip() throws GeneralSecurityException, IOException {
+        KeyResource.KeySignature keySig = generateKeyAndSignature();
 
         KeyView entity;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("%s/Key", getBaseURL()));
-            post.setEntity(new StringEntity(key));
+            String json = new ObjectMapper().writeValueAsString(keySig);
+            post.setEntity(new StringEntity(json));
+            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
             try (CloseableHttpResponse response = client.execute(post)) {
@@ -109,7 +113,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
                 final KeyView fetched = this.mapper.readValue(response.getEntity().getContent(), KeyView.class);
                 // Verify the keys are equal, aside from different new line characters
-                assertEquals(key.replaceAll("\\n", "").replaceAll("\\r", ""),
+                assertEquals(keySig.getKey().replaceAll("\\n", "").replaceAll("\\r", ""),
                         fetched.publicKey.replaceAll("\\n", "").replaceAll("\\r", ""), "Fetch should be equal");
             }
 
@@ -140,13 +144,17 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
-    private String generatePublicKey() throws NoSuchAlgorithmException {
+    private KeyResource.KeySignature generateKeyAndSignature() throws GeneralSecurityException {
         final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(4096);
         final KeyPair keyPair = kpg.generateKeyPair();
+        final String publicKey = publicKeyToString(keyPair.getPublic());
+        final String signature = APIAuthHelpers.signString(keyPair.getPrivate(), KeyResource.SNIPPET);
+        return new KeyResource.KeySignature(publicKey, signature);
+    }
 
-        final String encoded = Base64.getMimeEncoder().encodeToString(keyPair.getPublic().getEncoded());
-
+    private String publicKeyToString(PublicKey key) throws NoSuchAlgorithmException {
+        final String encoded = Base64.getMimeEncoder().encodeToString(key.getEncoded());
         return String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
     }
 

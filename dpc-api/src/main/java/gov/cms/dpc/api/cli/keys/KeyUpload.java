@@ -28,6 +28,7 @@ import java.util.Optional;
 public class KeyUpload extends AbstractAdminCommand {
 
     private static final String KEY_FILE = "key-file";
+    private static final String SIGNATURE_FILE = "signature-file";
 
     public KeyUpload() {
         super("upload", "Upload organization public key");
@@ -47,15 +48,15 @@ public class KeyUpload extends AbstractAdminCommand {
                 .help("Label for public key");
 
         subparser
-                .addArgument("file")
+                .addArgument("key-file")
                 .dest(KEY_FILE)
                 .type(String.class)
                 .required(true)
                 .help("PEM encoded public key to upload");
 
         subparser
-                .addArgument("signature")
-                .dest("signature")
+                .addArgument("signature-file")
+                .dest(SIGNATURE_FILE)
                 .type(String.class)
                 .required(true)
                 .help("Signature for snippet, produced with corresponding private key");
@@ -69,13 +70,14 @@ public class KeyUpload extends AbstractAdminCommand {
         System.out.println(String.format("Connecting to API service at: %s", apiService));
 
         // Read the file and parse it
-        final Path filePath = FileSystems.getDefault().getPath(namespace.getString(KEY_FILE));
-        final String pemFile = Files.readString(filePath);
+        final Path keyFilePath = FileSystems.getDefault().getPath(namespace.getString(KEY_FILE));
+        final String publicKey = Files.readString(keyFilePath);
 
-        final String signature = namespace.getString("signature");
+        final Path signaturePath = FileSystems.getDefault().getPath(namespace.getString(SIGNATURE_FILE));
+        final String signature = Files.readString(signaturePath);
 
         final Optional<String> label = Optional.ofNullable(namespace.getString("key-label"));
-        uploadKey(apiService, orgID.getIdPart(), label, pemFile, signature);
+        uploadKey(apiService, orgID.getIdPart(), label, publicKey, signature);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
