@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.KeyType;
 import gov.cms.dpc.testing.models.KeyView;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -22,8 +23,10 @@ import org.junit.jupiter.api.Test;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.*;
-import java.util.Base64;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -144,18 +147,31 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
+    // TODO: Remove this test when ECC support is re-enabled.
+    @Test
+    public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
+        KeyPair eccKeyPair = APIAuthHelpers.generateKeyPair(KeyType.ECC);
+        String publicKeyStr = APIAuthHelpers.generatePublicKey(eccKeyPair.getPublic());
+        KeyResource.KeySignature keySig = new KeyResource.KeySignature(publicKeyStr, "");
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost post = new HttpPost(String.format("%s/Key", getBaseURL()));
+            String json = new ObjectMapper().writeValueAsString(keySig);
+            post.setEntity(new StringEntity(json));
+            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
+
+            try (CloseableHttpResponse response = client.execute(post)) {
+                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatusLine().getStatusCode(), "ECC key should be rejected");
+                Map<String, String> respBody = new ObjectMapper().readValue(response.getEntity().getContent(), Map.class);
+                assertEquals(respBody.get("message"), "ECC keys are not currently supported", "Should return helpful error message");
+            }
+        }
+    }
+
     private KeyResource.KeySignature generateKeyAndSignature() throws GeneralSecurityException {
-        final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-        kpg.initialize(4096);
-        final KeyPair keyPair = kpg.generateKeyPair();
-        final String publicKey = publicKeyToString(keyPair.getPublic());
+        final KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+        final String publicKey = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
         final String signature = APIAuthHelpers.signString(keyPair.getPrivate(), KeyResource.SNIPPET);
         return new KeyResource.KeySignature(publicKey, signature);
     }
-
-    private String publicKeyToString(PublicKey key) throws NoSuchAlgorithmException {
-        final String encoded = Base64.getMimeEncoder().encodeToString(key.getEncoded());
-        return String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
-    }
-
 }

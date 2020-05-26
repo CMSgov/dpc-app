@@ -22,8 +22,8 @@ public class PublicKeyHandler {
 
     // ECC Curve names are defined here: https://tools.ietf.org/search/rfc4492#section-5.1.1
     // They're in two separate namespaces, certicom and ansi-x962
-    static final ASN1ObjectIdentifier RSA_PARENT = new ASN1ObjectIdentifier("1.2.840.113549");
-    static final ASN1ObjectIdentifier ECC_KEY = new ASN1ObjectIdentifier("1.2.840.10045.2.1");
+    public static final ASN1ObjectIdentifier RSA_PARENT = new ASN1ObjectIdentifier("1.2.840.113549");
+    public static final ASN1ObjectIdentifier ECC_KEY = new ASN1ObjectIdentifier("1.2.840.10045.2.1");
 
     private PublicKeyHandler() {
         // Not used
