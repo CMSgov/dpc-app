@@ -65,7 +65,6 @@ class APIClient
       public_key: params[:public_key],
       snippet_signature: params[:snippet_signature]
     }).to_json
-    binding.pry
 
     post_text_request(
       uri_string,

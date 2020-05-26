@@ -521,7 +521,10 @@ RSpec.describe APIClient do
     context 'unsuccessful API request' do
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, "http://dpc.example.com/Key?label=Sandbox+Key+1").with(
-          body: stubbed_key
+          body: {
+            public_key: stubbed_key,
+            snippet_signature: 'stubbed_sign_txt_signature'
+          }
         ).to_return(
           status: 500,
           body: '{}'
@@ -529,7 +532,7 @@ RSpec.describe APIClient do
 
         api_client = APIClient.new('sandbox')
 
-        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', public_key: stubbed_key })
+        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', public_key: stubbed_key, snippet_signature: 'stubbed_sign_txt_signature' })
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq('{}')
