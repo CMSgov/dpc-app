@@ -54,7 +54,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         final Bundle specificSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("8075963174210588464"))
+                .where(Practitioner.IDENTIFIER.exactly().code("1232131239"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -88,7 +88,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         assertThrows(AuthenticationException.class, clientQuery::execute, "Should not have practitioner");
 
         // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
         // Submit a new public key to use for JWT flow
         final String keyLabel = "new-key";
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
