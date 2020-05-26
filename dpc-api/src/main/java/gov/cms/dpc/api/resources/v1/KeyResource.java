@@ -144,22 +144,22 @@ public class KeyResource extends AbstractKeyResource {
             publicKeyInfo = PublicKeyHandler.parsePEMString(publicKeyPem);
         } catch (PublicKeyException e) {
             logger.error("Cannot parse provided public key.", e);
-            throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException("Public key could not be parsed", Response.Status.BAD_REQUEST);
         }
 
         // Validate public key
         try {
             PublicKeyHandler.validatePublicKey(publicKeyInfo);
         } catch (PublicKeyException e) {
-            logger.error("Cannot parse provided public key.", e);
+            logger.error("Cannot validate provided public key.", e);
             throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
         }
 
         try {
             PublicKeyHandler.verifySignature(publicKeyPem, SNIPPET, sigStr);
         } catch (PublicKeyException e) {
-            logger.error("Public key could not be verified with signature.", e);
-            throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
+            logger.error("Cannot verify public key with signature.", e);
+            throw new WebApplicationException("Public key could not be verified", Response.Status.BAD_REQUEST);
         }
 
         return publicKeyInfo;
