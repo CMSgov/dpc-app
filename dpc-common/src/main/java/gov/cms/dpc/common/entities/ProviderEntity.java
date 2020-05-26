@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.entities;
 
+import gov.cms.dpc.common.annotations.NPI;
 import gov.cms.dpc.common.annotations.NoHtml;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ public class ProviderEntity extends PersonEntity {
     public static final long serialVersionUID = 42L;
 
     @NoHtml
+    @NPI
     @Column(name = "provider_id", unique = true)
     private String providerNPI;
 
