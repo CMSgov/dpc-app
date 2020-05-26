@@ -34,6 +34,7 @@ import java.util.UUID;
 @Path("/v1/Key")
 public class KeyResource extends AbstractKeyResource {
 
+    public static final String SNIPPET = "This is a snippet used to verify a key pair.";
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);
 
     private final PublicKeyDAO dao;
@@ -105,7 +106,7 @@ public class KeyResource extends AbstractKeyResource {
     @POST
     @Timed
     @ExceptionMetered
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Register public key for Organization",
             notes = "This endpoint registers the provided public key with the organization." +
@@ -117,8 +118,7 @@ public class KeyResource extends AbstractKeyResource {
     @UnitOfWork
     @Override
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                     @ApiParam(example = "---PUBLIC KEY---......---END PUBLIC KEY---")
-                                     @NoHtml @NotEmpty String key,
+                                     @ApiParam KeySignature keySignature,
                                      @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
                                      @QueryParam(value = "label") Optional<String> keyLabelOptional) {
         final String keyLabel;
@@ -131,14 +131,17 @@ public class KeyResource extends AbstractKeyResource {
             keyLabel = this.buildDefaultKeyID();
         }
 
-        final SubjectPublicKeyInfo publicKey = parseAndValidateKey(key);
+        final String key = keySignature.getKey();
+        final String signature = keySignature.getSignature();
+
+        final SubjectPublicKeyInfo publicKey = parseAndValidateKey(key, signature);
         return savePublicKeyEntry(organizationPrincipal, keyLabel, publicKey);
     }
 
-    private SubjectPublicKeyInfo parseAndValidateKey(String key) {
-        final SubjectPublicKeyInfo publicKey;
+    private SubjectPublicKeyInfo parseAndValidateKey(String publicKeyPem, String sigStr) {
+        final SubjectPublicKeyInfo publicKeyInfo;
         try {
-            publicKey = PublicKeyHandler.parsePEMString(key);
+            publicKeyInfo = PublicKeyHandler.parsePEMString(publicKeyPem);
         } catch (PublicKeyException e) {
             logger.error("Cannot parse provided public key.", e);
             throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
@@ -146,12 +149,20 @@ public class KeyResource extends AbstractKeyResource {
 
         // Validate public key
         try {
-            PublicKeyHandler.validatePublicKey(publicKey);
+            PublicKeyHandler.validatePublicKey(publicKeyInfo);
         } catch (PublicKeyException e) {
             logger.error("Cannot parse provided public key.", e);
             throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
         }
-        return publicKey;
+
+        try {
+            PublicKeyHandler.verifySignature(publicKeyPem, SNIPPET, sigStr);
+        } catch (PublicKeyException e) {
+            logger.error("Public key could not be verified with signature.", e);
+            throw new WebApplicationException("Public key is not valid", Response.Status.BAD_REQUEST);
+        }
+
+        return publicKeyInfo;
     }
 
     private PublicKeyEntity savePublicKeyEntry(OrganizationPrincipal organizationPrincipal, String keyLabel, SubjectPublicKeyInfo publicKey) {
@@ -170,5 +181,29 @@ public class KeyResource extends AbstractKeyResource {
     private String buildDefaultKeyID() {
         final int newKeyID = this.random.nextInt();
         return String.format("key:%d", newKeyID);
+    }
+
+    public static class KeySignature {
+        @NoHtml
+        @NotEmpty
+        private String key;
+        @NoHtml
+        @NotEmpty
+        private String signature;
+
+        public KeySignature() {}
+
+        public KeySignature(String key, String signature) {
+            this.key = key;
+            this.signature = signature;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getSignature() {
+            return signature;
+        }
     }
 }

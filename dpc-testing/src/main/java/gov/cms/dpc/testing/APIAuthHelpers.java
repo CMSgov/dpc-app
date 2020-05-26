@@ -38,6 +38,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
@@ -46,16 +47,14 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class APIAuthHelpers {
     public static final String TASK_URL = "http://localhost:9900/tasks/";
+    public static final String KEY_VERIFICATION_SNIPPET = "This is a snippet used to verify a key pair.";
     private static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -104,6 +103,7 @@ public class APIAuthHelpers {
     }
 
     public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
+        // TODO: Revert .signWith() to type ECC?
         final String jwt = Jwts.builder()
                 .setHeaderParam("kid", keyID)
                 .setAudience(String.format("%s/Token/auth", baseURL))
@@ -111,7 +111,7 @@ public class APIAuthHelpers {
                 .setSubject(macaroon)
                 .setId(UUID.randomUUID().toString())
                 .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
-                .signWith(privateKey, getSigningAlgorithm(KeyType.ECC))
+                .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
                 .compact();
 
         // Verify JWT with /validate endpoint
@@ -168,7 +168,8 @@ public class APIAuthHelpers {
     }
 
     public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
-        return generateKeyPair(KeyType.ECC);
+        // TODO: Possibly revert to ECC type.
+        return generateKeyPair(KeyType.RSA);
     }
 
     public static KeyPair generateKeyPair(KeyType keyType) throws NoSuchAlgorithmException {
@@ -203,9 +204,10 @@ public class APIAuthHelpers {
      * @throws URISyntaxException       - throws if the URI is no good
      * @throws NoSuchAlgorithmException - throws if security breaks
      */
-    public static Pair<UUID, PrivateKey> generateAndUploadKey(String keyLabel, String organizationID, String goldenMacaroon, String baseURL) throws IOException, URISyntaxException, NoSuchAlgorithmException {
+    public static Pair<UUID, PrivateKey> generateAndUploadKey(String keyLabel, String organizationID, String goldenMacaroon, String baseURL) throws IOException, URISyntaxException, GeneralSecurityException {
         final KeyPair keyPair = generateKeyPair();
         final String key = generatePublicKey(keyPair.getPublic());
+        final String signature = signString(keyPair.getPrivate(), KEY_VERIFICATION_SNIPPET);
 
         // Create org specific macaroon from Golden Macaroon
         final String macaroon = MacaroonsBuilder
@@ -217,9 +219,11 @@ public class APIAuthHelpers {
         final URIBuilder builder = new URIBuilder(String.format("%s/Key", baseURL));
         builder.addParameter("label", keyLabel);
         final HttpPost post = new HttpPost(builder.build());
-        post.setEntity(new StringEntity(key));
+        Map<String, String> body = Map.of("key", key, "signature", signature);
+        post.setEntity(new StringEntity(new ObjectMapper().writeValueAsString(body)));
         post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + macaroon);
         post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+        post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         try (CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             try (CloseableHttpResponse response = client.execute(post)) {
@@ -233,6 +237,14 @@ public class APIAuthHelpers {
 
     public static CustomHttpBuilder createCustomHttpClient() {
         return new CustomHttpBuilder();
+    }
+
+    public static String signString(PrivateKey privateKey, String str) throws NoSuchAlgorithmException, GeneralSecurityException {
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(str.getBytes(StandardCharsets.UTF_8));
+        byte[] sigBytes = signature.sign();
+        return Base64.getEncoder().encodeToString(sigBytes);
     }
 
     private static IGenericClient createBaseFHIRClient(FhirContext ctx, String baseURL, boolean disableSSLCheck, boolean enableRequestLog) {
