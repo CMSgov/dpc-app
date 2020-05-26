@@ -2,6 +2,7 @@ package gov.cms.dpc.common.hibernate.validator;
 
 import gov.cms.dpc.common.annotations.OrganizationId;
 import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 
 import javax.validation.ConstraintValidator;
@@ -22,7 +23,7 @@ public class OrganizationIdValidator implements ConstraintValidator<Organization
             return true;
         }
 
-        return NPIValidationUtil.isValidNPI(id.getValue());
+        return NPIUtil.isValidNPI(id.getValue());
     }
 
 }

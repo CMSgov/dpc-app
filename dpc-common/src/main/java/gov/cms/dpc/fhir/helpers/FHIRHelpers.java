@@ -29,7 +29,6 @@ import java.net.URISyntaxException;
 
 public class FHIRHelpers {
 
-
     /**
      * Register an organization with the Attribution Service
      * Organizations are pulled from the `organization_bundle.json` file and filtered based on the provided resource ID
