@@ -6,8 +6,8 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-wash = FactoryBot.create(:user, email: 'washirv@example.com', first_name: 'Washington', last_name: 'Irving')
-jane = FactoryBot.create(:user, email: 'janeaus@example.com', first_name: 'Jane', last_name: 'Austen')
+wash = FactoryBot.create(:user, email: 'washirv@gmail.com', first_name: 'Washington', last_name: 'Irving')
+jane = FactoryBot.create(:user, email: 'janeaus@gmail.com', first_name: 'Jane', last_name: 'Austen')
 
 org = FactoryBot.create(:organization, name: 'Hollow Health')
 wash.organizations << org
