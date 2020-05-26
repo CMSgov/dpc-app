@@ -16,6 +16,7 @@ import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ import java.util.UUID;
 @Path("/v1/Key")
 public class KeyResource extends AbstractKeyResource {
 
-    public static final String SNIPPET = "This is a snippet used to verify a key pair.";
+    public static final String SNIPPET = "This is the snippet used to verify a key pair in DPC.";
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);
 
     private final PublicKeyDAO dao;
@@ -145,6 +146,10 @@ public class KeyResource extends AbstractKeyResource {
         } catch (PublicKeyException e) {
             logger.error("Cannot parse provided public key.", e);
             throw new WebApplicationException("Public key could not be parsed", Response.Status.BAD_REQUEST);
+        }
+
+        if (PublicKeyHandler.ECC_KEY.equals(publicKeyInfo.getAlgorithm().getAlgorithm())) {
+            throw new WebApplicationException("ECC keys are not currently supported", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
 
         // Validate public key
