@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 Sidekiq.configure_server do |config|
-  config.redis = { url: "redis://#{ENV.fetch('REDIS_URL', 'localhost')}:6379/1" }
-
   # Logs are consumed by Splunk via STDOUT. To easily differentiate between rails logs
   # and sidekiq logs, we append `process -> sidekiq-server` to every sidekiq log message
   # NOTE: This can be removed if/when sidekiq server is moved to its own container
@@ -15,6 +13,8 @@ Sidekiq.configure_server do |config|
   end
 
   config.log_formatter = DPCJSON.new
+
+  config.redis = { url: "redis://#{ENV.fetch('REDIS_URL', 'localhost')}:6379/1" }
 end
 
 Sidekiq.configure_client do |config|
