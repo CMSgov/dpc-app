@@ -44,6 +44,7 @@ public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find Roster resource", Response.Status.NOT_FOUND);
+    private static final WebApplicationException TOO_MANY_MEMBERS_EXCEPTION = new WebApplicationException("Roster limit reached", Response.Status.BAD_REQUEST);
 
     private final ProviderDAO providerDAO;
     private final PatientDAO patientDAO;
@@ -72,6 +73,10 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Response createRoster(Group attributionRoster) {
+        if (rosterSizeTooBig( config.getPatientLimit(), attributionRoster )) {
+            throw TOO_MANY_MEMBERS_EXCEPTION;
+        }
+
         // Lookup the Provider by NPI
         final String providerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
@@ -165,6 +170,10 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
 
+        if (rosterSizeTooBig(config.getPatientLimit(), groupUpdate)) {
+            throw TOO_MANY_MEMBERS_EXCEPTION;
+        }
+
         final RosterEntity rosterEntity = new RosterEntity();
         rosterEntity.setId(rosterID);
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
@@ -207,8 +216,14 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
 
-        final RosterEntity rosterEntity = new RosterEntity();
-        rosterEntity.setId(rosterID);
+        final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
+                .orElseThrow(() -> NOT_FOUND_EXCEPTION);
+
+
+        if (rosterSizeTooBig(config.getPatientLimit(), converter.toFHIR(Group.class, rosterEntity), groupUpdate)) {
+            throw TOO_MANY_MEMBERS_EXCEPTION;
+        }
+
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         // For each group member, check to see if the patient exists, if not, throw an exception
         // Check to see if they're already rostered, if so, ignore
@@ -236,6 +251,7 @@ public class GroupResource extends AbstractGroupResource {
                 })
                 .forEach(this.relationshipDAO::addAttributionRelationship);
 
+        //Getting it again to access the latest updates from above code
         final RosterEntity rosterEntity1 = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
