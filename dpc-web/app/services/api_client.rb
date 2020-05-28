@@ -61,10 +61,10 @@ class APIClient
   def create_public_key(reg_org_api_id, params: {})
     uri_string = base_url + '/Key'
 
-    json = ({
+    json = {
       key: params[:public_key],
       signature: params[:snippet_signature]
-    }).to_json
+    }.to_json
 
     post_text_request(
       uri_string,
