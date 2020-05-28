@@ -37,6 +37,8 @@ public class AuthRelatedLoggingFilterTest {
         return Stream.of(
                 Arguments.of("client_assertions=secret_token", FilterReply.DENY),
                 Arguments.of("someotherstuff=stuff&client_assertions=secret_token", FilterReply.DENY),
+                Arguments.of("client_assertion=secret_token", FilterReply.DENY),
+                Arguments.of("someotherstuff=stuff&client_assertion=secret_token", FilterReply.DENY),
                 Arguments.of("someotherstuff=stuff", FilterReply.NEUTRAL)
         );
     }
