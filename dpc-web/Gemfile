@@ -61,10 +61,8 @@ group :development do
 end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
-gem 'delayed_job_active_record'
-gem 'daemons'
-gem 'omniauth-rails_csrf_protection', '~> 0.1'
 gem 'omniauth-github'
+gem 'omniauth-rails_csrf_protection', '~> 0.1'
 gem 'octokit'
 gem 'omniauth-oktaoauth'
 gem 'kaminari'
@@ -73,3 +71,4 @@ gem 'macaroons'
 gem 'newrelic_rpm', '~> 6.10'
 gem 'fhir_client'
 gem 'lograge'
+gem 'sidekiq'
