@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.hibernate.validator;
 
 import gov.cms.dpc.common.annotations.NPI;
+import gov.cms.dpc.common.utils.NPIUtil;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -16,6 +17,6 @@ public class NPIValidator implements ConstraintValidator<NPI, String> {
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        return NPIValidationUtil.isValidNPI(s);
+        return NPIUtil.isValidNPI(s);
     }
 }
