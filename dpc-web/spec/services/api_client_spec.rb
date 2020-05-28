@@ -501,7 +501,10 @@ RSpec.describe APIClient do
     context 'successful API request' do
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, "http://dpc.example.com/Key?label=Sandbox+Key+1").with(
-          body: stubbed_key
+          body: {
+            key: stubbed_key,
+            signature: 'signature_snippet'
+          }
         ).to_return(
           status: 200,
           body: "{\"label\":\"Sandbox Key 1\",\"createdAt\":\"2019-11-07T19:38:44.205Z\",\"id\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}"
@@ -509,7 +512,7 @@ RSpec.describe APIClient do
 
         api_client = APIClient.new('sandbox')
 
-        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', public_key: stubbed_key })
+        api_client.create_public_key(registered_org.api_id, params: { label: 'Sandbox Key 1', public_key: stubbed_key, snippet_signature: 'signature_snippet' })
 
         expect(api_client.response_status).to eq(200)
         expect(api_client.response_body).to eq(
@@ -522,8 +525,8 @@ RSpec.describe APIClient do
       it 'sends data to API and sets response instance variables' do
         stub_request(:post, "http://dpc.example.com/Key?label=Sandbox+Key+1").with(
           body: {
-            public_key: stubbed_key,
-            snippet_signature: 'stubbed_sign_txt_signature'
+            key: stubbed_key,
+            signature: 'stubbed_sign_txt_signature'
           }
         ).to_return(
           status: 500,
