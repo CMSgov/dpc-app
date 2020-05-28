@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class APIAuthHelpers {
     public static final String TASK_URL = "http://localhost:9900/tasks/";
-    public static final String KEY_VERIFICATION_SNIPPET = "This is a snippet used to verify a key pair.";
+    public static final String KEY_VERIFICATION_SNIPPET = "This is the snippet used to verify a key pair in DPC.";
     private static final String CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -224,7 +224,6 @@ public class APIAuthHelpers {
         post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + macaroon);
         post.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
         post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-
         try (CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             try (CloseableHttpResponse response = client.execute(post)) {
                 keyEntity = mapper.readValue(response.getEntity().getContent(), KeyView.class);
@@ -239,7 +238,7 @@ public class APIAuthHelpers {
         return new CustomHttpBuilder();
     }
 
-    public static String signString(PrivateKey privateKey, String str) throws NoSuchAlgorithmException, GeneralSecurityException {
+    public static String signString(PrivateKey privateKey, String str) throws GeneralSecurityException {
         Signature signature = Signature.getInstance("SHA256withRSA");
         signature.initSign(privateKey);
         signature.update(str.getBytes(StandardCharsets.UTF_8));
