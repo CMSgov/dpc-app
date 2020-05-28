@@ -84,17 +84,12 @@ GEM
       execjs
     coffee-script-source (1.12.2)
     concurrent-ruby (1.1.6)
+    connection_pool (2.2.2)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     crass (1.0.6)
-    daemons (1.3.1)
     database_cleaner (1.8.5)
     date_time_precision (0.8.1)
-    delayed_job (4.1.8)
-      activesupport (>= 3.0, < 6.1)
-    delayed_job_active_record (4.1.4)
-      activerecord (>= 3.0, < 6.1)
-      delayed_job (>= 3.0, < 5)
     devise (4.7.1)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -241,7 +236,7 @@ GEM
       omniauth (>= 1.3.1)
     orm_adapter (0.5.0)
     parallel (1.19.1)
-    parser (2.7.1.2)
+    parser (2.7.1.3)
       ast (~> 2.4.0)
     pg (1.2.3)
     pry (0.12.2)
@@ -250,9 +245,11 @@ GEM
     pry-nav (0.3.0)
       pry (>= 0.9.10, < 0.13.0)
     public_suffix (4.0.5)
-    puma (4.3.3)
+    puma (4.3.5)
       nio4r (~> 2.0)
     rack (2.2.2)
+    rack-protection (2.0.8.1)
+      rack
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rails (5.2.4.3)
@@ -292,6 +289,7 @@ GEM
       ffi
     rbnacl-libsodium (1.0.16)
       rbnacl (>= 3.0.1)
+    redis (3.3.5)
     regexp_parser (1.7.0)
     request_store (1.5.0)
       rack (>= 1.4)
@@ -336,7 +334,7 @@ GEM
       unicode-display_width (>= 1.4.0, < 2.0)
     rubocop-ast (0.0.3)
       parser (>= 2.7.0.1)
-    rubocop-performance (1.5.2)
+    rubocop-performance (1.6.0)
       rubocop (>= 0.71.0)
     ruby-progressbar (1.10.1)
     rubyzip (2.3.0)
@@ -355,6 +353,11 @@ GEM
     selenium-webdriver (3.142.7)
       childprocess (>= 0.5, < 4.0)
       rubyzip (>= 1.2.2)
+    sidekiq (4.2.10)
+      concurrent-ruby (~> 1.0)
+      connection_pool (~> 2.2, >= 2.2.0)
+      rack-protection (>= 1.5.0)
+      redis (~> 3.2, >= 3.2.1)
     simplecov (0.18.5)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -415,9 +418,7 @@ DEPENDENCIES
   capybara
   climate_control
   coffee-rails (~> 5.0)
-  daemons
   database_cleaner
-  delayed_job_active_record
   devise
   factory_bot_rails
   fakefs
@@ -449,6 +450,7 @@ DEPENDENCIES
   rubocop-performance
   sassc-rails (>= 2.1.2)
   selenium-webdriver
+  sidekiq
   simplecov
   spring
   spring-watcher-listen (~> 2.0.0)
