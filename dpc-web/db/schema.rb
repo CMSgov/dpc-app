@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_10_125053) do
+ActiveRecord::Schema.define(version: 2020_05_19_213700) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,21 +28,6 @@ ActiveRecord::Schema.define(version: 2020_04_10_125053) do
     t.integer "address_use", default: 0, null: false
     t.integer "address_type", default: 0, null: false
     t.index ["addressable_type", "addressable_id"], name: "index_addresses_on_addressable_type_and_addressable_id"
-  end
-
-  create_table "delayed_jobs", force: :cascade do |t|
-    t.integer "priority", default: 0, null: false
-    t.integer "attempts", default: 0, null: false
-    t.text "handler", null: false
-    t.text "last_error"
-    t.datetime "run_at"
-    t.datetime "locked_at"
-    t.datetime "failed_at"
-    t.string "locked_by"
-    t.string "queue"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
   create_table "fhir_endpoints", force: :cascade do |t|
@@ -87,8 +72,7 @@ ActiveRecord::Schema.define(version: 2020_04_10_125053) do
     t.datetime "updated_at", null: false
     t.string "npi"
     t.string "vendor"
-    t.string "vendor_id"
-    t.string "provider_id"
+    t.string "sandbox_id"
   end
 
   create_table "registered_organizations", force: :cascade do |t|
@@ -142,6 +126,7 @@ ActiveRecord::Schema.define(version: 2020_04_10_125053) do
     t.string "confirmation_token"
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
+    t.string "session_token"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["created_at"], name: "index_users_on_created_at"
     t.index ["email"], name: "index_users_on_email", unique: true

@@ -134,7 +134,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         assertEquals(1, firstSearch.getTotal(), "Should have a single patient");
 
         // Create a practitioner and an attribution resource
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("test-npi-2");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2222222228");
 
         final MethodOutcome outcome = client
                 .create()

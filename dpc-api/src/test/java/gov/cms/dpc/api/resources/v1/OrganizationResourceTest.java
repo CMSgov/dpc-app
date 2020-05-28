@@ -30,14 +30,20 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.assertj.core.util.Lists;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.junit.jupiter.api.Test;
 
+import javax.ws.rs.HttpMethod;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.UUID;
@@ -61,7 +67,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
 
 
-        final String newOrgID = UUID.randomUUID().toString();
+        final String newOrgID = "1111111211";
         final Organization organization = OrganizationHelpers.createOrganization(ctx, client, newOrgID, true);
         assertNotNull(organization);
 
@@ -70,7 +76,35 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         assertThrows(InvalidRequestException.class, () -> OrganizationHelpers.createOrganization(ctx, client, newOrgID, true));
 
         // Now, try to create one again, but using an actual org token
-        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY), UUID.randomUUID().toString(), true));
+        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY), "1111111112", true));
+    }
+
+    @Test
+    void testCreateInvalidOrganization() throws IOException, URISyntaxException {
+        URL url = new URL(getBaseURL() + "/Organization/$submit");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HttpMethod.POST);
+        conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
+        conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + GOLDEN_MACAROON);
+
+        conn.setDoOutput(true);
+        String reqBody = "{\"test\": \"test\"}";
+        conn.getOutputStream().write(reqBody.getBytes());
+
+        assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+            StringBuilder respBuilder = new StringBuilder();
+            String respLine = null;
+            while ((respLine = reader.readLine()) != null) {
+                respBuilder.append(respLine.trim());
+            }
+            String resp = respBuilder.toString();
+            assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""));
+            assertTrue(resp.contains("Resource type must be `Parameters`"));
+        }
+
+        conn.disconnect();
     }
 
     @Test
@@ -163,7 +197,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         final String orgID = UUID.randomUUID().toString();
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, orgID, getAdminURL());
+        final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, orgID, "1111121111", getAdminURL());
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org-update-key", orgID, GOLDEN_MACAROON, getBaseURL());
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
@@ -185,14 +219,14 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         Organization result = (Organization) outcome.getResource();
-        assertEquals(orgID, result.getIdentifierFirstRep().getValue());
+        assertEquals("1111121111", result.getIdentifierFirstRep().getValue());
         assertEquals(organization.getName(), result.getName(), "Name should be updated");
         assertTrue(organization.getContact().isEmpty(), "Contact list should be updated");
         assertEquals(1, result.getEndpoint().size(), "Endpoint list should be unchanged");
 
         // Try to update when authenticated as different organization
         final String org2ID = UUID.randomUUID().toString();
-        final String org2Macaroon = FHIRHelpers.registerOrganization(attrClient, parser, org2ID, getAdminURL());
+        final String org2Macaroon = FHIRHelpers.registerOrganization(attrClient, parser, org2ID, "4321234211", getAdminURL());
         final Pair<UUID, PrivateKey> org2UUIDPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org2-update-key", org2ID, GOLDEN_MACAROON, getBaseURL());
         final IGenericClient org2Client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), org2Macaroon, org2UUIDPrivateKeyPair.getLeft(), org2UUIDPrivateKeyPair.getRight());
 
@@ -205,7 +239,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 //        // Generate a golden macaroon
         final UUID orgDeletionID = UUID.randomUUID();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), orgDeletionID.toString(), TASK_URL);
+        FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), orgDeletionID.toString(), "1111121111", TASK_URL);
 
         // Register Public key
         APIAuthHelpers.generateAndUploadKey("org-deletion-key", orgDeletionID.toString(), GOLDEN_MACAROON, "http://localhost:3002/v1/");

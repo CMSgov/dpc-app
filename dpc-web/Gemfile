@@ -16,6 +16,8 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'rouge-rails'
 gem 'kramdown', '~> 2.1'
 
+gem 'luhnacy', '~> 0.2.1'
+
 gem 'jquery-rails'
 gem 'devise'
 gem 'truemail'
@@ -59,8 +61,6 @@ group :development do
 end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
-gem 'delayed_job_active_record'
-gem 'daemons'
 gem 'omniauth-github'
 gem 'omniauth-rails_csrf_protection', '~> 0.1'
 gem 'octokit'
@@ -70,3 +70,4 @@ gem 'macaroons'
 gem 'newrelic_rpm', '~> 6.10'
 gem 'fhir_client'
 gem 'lograge'
+gem 'sidekiq'

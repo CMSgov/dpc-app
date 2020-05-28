@@ -4,6 +4,7 @@ require_relative 'boot'
 $stdout.sync = true
 
 require "rails"
+require "luhnacy"
 # Pick the frameworks you want:
 require "active_model/railtie"
 require "active_job/railtie"
@@ -46,7 +47,7 @@ module DpcWebsite
     # Add middleware to fix issue with /ig links breaking
     config.middleware.insert_before ActionDispatch::Static, DpcMiddleware::IgFix
 
-    config.active_job.queue_adapter = :delayed_job
+    config.active_job.queue_adapter = :sidekiq
 
     config.to_prepare { Devise::Mailer.layout "mailer" }
   end

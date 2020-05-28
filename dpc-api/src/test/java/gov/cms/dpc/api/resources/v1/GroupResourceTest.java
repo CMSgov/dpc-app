@@ -12,17 +12,26 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import javax.ws.rs.HttpMethod;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.List;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,7 +67,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final Bundle practSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("8075963174210588464"))
+                .where(Practitioner.IDENTIFIER.exactly().code("1232131239"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -139,7 +148,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final Bundle practSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("8075963174210588464"))
+                .where(Practitioner.IDENTIFIER.exactly().code("1234329724"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -197,5 +206,41 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .encodedJson()
                 .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
                 .execute());
+    }
+
+    @Test
+    void testCreateInvalidGroup() throws IOException, URISyntaxException {
+        Provenance provenance = new Provenance();
+        provenance.setRecorded(Date.valueOf(LocalDate.now()));
+        provenance.setReason(List.of(new Coding("http://hl7.org/fhir/v3/ActReason", "TREAT", null)));
+        String provString = ctx.newJsonParser().encodeResourceToString(provenance);
+
+        URL url = new URL(getBaseURL() + "/Group");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HttpMethod.POST);
+        conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
+        conn.setRequestProperty("X-Provenance", provString);
+
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
+
+        conn.setDoOutput(true);
+        String reqBody = "{\"test\": \"test\"}";
+        conn.getOutputStream().write(reqBody.getBytes());
+
+        assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+            StringBuilder respBuilder = new StringBuilder();
+            String respLine = null;
+            while ((respLine = reader.readLine()) != null) {
+                respBuilder.append(respLine.trim());
+            }
+            String resp = respBuilder.toString();
+            assertAll(() -> assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\"")),
+                    () -> assertTrue(resp.contains("Invalid JSON content")));
+        }
+
+        conn.disconnect();
     }
 }
