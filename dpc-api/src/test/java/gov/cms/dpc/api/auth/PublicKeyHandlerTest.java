@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.auth;
 
+import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -146,17 +147,30 @@ class PublicKeyHandlerTest {
             String snippet = "Verify signature test";
             String sigStr = APIAuthHelpers.signString(keyPair.getPrivate(), snippet);
 
-            assertTrue(PublicKeyHandler.verifySignature(publicKeyStr, snippet, sigStr));
+            assertDoesNotThrow(() -> PublicKeyHandler.verifySignature(publicKeyStr, snippet, sigStr));
         }
 
         @Test
-        void testVerifySignatureInvalid() throws Exception {
+        void testVerifySignatureWrongSnippet() throws Exception {
             KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
-           String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
             String snippet = "Verify signature test";
             String sigStr = APIAuthHelpers.signString(keyPair.getPrivate(), snippet);
 
-            assertFalse(PublicKeyHandler.verifySignature(publicKeyStr, "Not the same snippet that was signed", sigStr));
+            PublicKeyException pke = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.verifySignature(publicKeyStr, "Not the same snippet that was signed", sigStr));
+            assertEquals("Key and signature do not match", pke.getMessage());
+        }
+
+        @Test
+        void testVerifySignatureMismatch() throws Exception {
+            KeyPair keyPair1 = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            KeyPair keyPair2 = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair1.getPublic());
+            String snippet = "Verify signature test";
+            String sigStr = APIAuthHelpers.signString(keyPair2.getPrivate(), snippet);
+
+            PublicKeyException pke = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.verifySignature(publicKeyStr, snippet, sigStr));
+            assertEquals("Key and signature do not match", pke.getMessage());
         }
     }
 
