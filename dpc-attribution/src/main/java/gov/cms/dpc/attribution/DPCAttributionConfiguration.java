@@ -11,6 +11,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 
@@ -43,7 +44,11 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @JsonProperty("swagger")
     private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
+    @Min(0)
     private Integer providerLimit;
+
+    @Min(0)
+    private Integer patientLimit;
 
     @Override
     public DataSourceFactory getDatabase() {
@@ -102,5 +107,13 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setProviderLimit(Integer providerLimit) {
         this.providerLimit = providerLimit;
+    }
+
+    public Integer getPatientLimit() {
+        return patientLimit;
+    }
+
+    public void setPatientLimit(Integer patientLimit) {
+        this.patientLimit = patientLimit;
     }
 }
