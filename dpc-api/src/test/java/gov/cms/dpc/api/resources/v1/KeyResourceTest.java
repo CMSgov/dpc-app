@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -88,6 +90,26 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             try (CloseableHttpResponse response = client.execute(labelViolationPost)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key label cannot be too long");
                 assertEquals("{\"code\":400,\"message\":\"Key label cannot be more than 25 characters\"}", EntityUtils.toString(response.getEntity()), "Key label should have correct error message");
+            }
+        }
+    }
+
+    @Test
+    void testMismatchedKeyAndSignature() throws GeneralSecurityException, IOException, URISyntaxException {
+        KeyResource.KeySignature keySig1 = generateKeyAndSignature();
+        KeyResource.KeySignature keySig2 = generateKeyAndSignature();
+        KeyResource.KeySignature mismatched = new KeyResource.KeySignature(keySig1.getKey(), keySig2.getSignature());
+        String json3 = new ObjectMapper().writeValueAsString(mismatched);
+        URIBuilder builder = new URIBuilder(String.format("%s/Key", getBaseURL()));
+        builder.addParameter("label", "Key/sig mismatch");
+        HttpPost post = new HttpPost(builder.build());
+        post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
+        post.setEntity(new StringEntity(json3));
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            try (CloseableHttpResponse response = client.execute(post)) {
+                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should not accept mismatched public key and signature"),
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("Public key could not be verified"), "Should have informative error message"));
             }
         }
     }

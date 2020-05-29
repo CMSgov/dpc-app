@@ -90,7 +90,7 @@ public class PublicKeyHandler {
 
     }
 
-    public static boolean verifySignature(String publicKeyPem, String snippet, String sigStr) {
+    public static void verifySignature(String publicKeyPem, String snippet, String sigStr) {
         String keyStr = publicKeyPem
                 .replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "")
@@ -106,7 +106,9 @@ public class PublicKeyHandler {
             Signature signature = Signature.getInstance("SHA256withRSA");
             signature.initVerify(publicKey);
             signature.update(snippet.getBytes(StandardCharsets.UTF_8));
-            return signature.verify(Base64.getDecoder().decode(sigStr));
+            if (!signature.verify(Base64.getDecoder().decode(sigStr))) {
+                throw new PublicKeyException("Key and signature do not match");
+            }
         } catch (NoSuchAlgorithmException e) {
             throw new PublicKeyException("Invalid algorithm", e);
         } catch (GeneralSecurityException e) {
