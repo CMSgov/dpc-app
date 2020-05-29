@@ -11,6 +11,7 @@ class PublicKeyManager
 
   def create_public_key(public_key:, label:, snippet_signature:)
     public_key = strip_carriage_returns(public_key)
+    snippet_signature = strip_carriage_returns(snippet_signature)
 
     if invalid_encoding?(public_key)
       return { response: false,

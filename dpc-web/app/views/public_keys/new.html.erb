@@ -35,7 +35,7 @@
 
         <div class="field ds-u-margin-y--5">
           <%= label_tag :snippet_signature, "Signature Snippet", class: "ds-c-label" %>
-          <%= text_field_tag :snippet_signature, params[:label], class: "ds-c-field" %>
+          <%= text_area_tag :snippet_signature, params[:label], class: "ds-c-field" %>
         </div>
 
         <%= submit_tag "Add key", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
