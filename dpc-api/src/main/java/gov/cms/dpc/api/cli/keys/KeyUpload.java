@@ -76,20 +76,21 @@ public class KeyUpload extends AbstractAdminCommand {
         final Path signaturePath = FileSystems.getDefault().getPath(namespace.getString(SIGNATURE_FILE));
         final String signature = Files.readString(signaturePath);
 
+        KeyResource.KeySignature keySignature = new KeyResource.KeySignature(publicKey, signature);
+
         final Optional<String> label = Optional.ofNullable(namespace.getString("key-label"));
-        uploadKey(apiService, orgID.getIdPart(), label, publicKey, signature);
+        uploadKey(apiService, orgID.getIdPart(), label, keySignature);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void uploadKey(String apiService, String orgID, Optional<String> label, String pem, String signature) throws IOException, URISyntaxException {
+    private void uploadKey(String apiService, String orgID, Optional<String> label, KeyResource.KeySignature keySig) throws IOException, URISyntaxException {
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/upload-key", apiService));
 
             builder.addParameter("organization", orgID);
             label.ifPresent(l -> builder.addParameter("label", l));
 
-            KeyResource.KeySignature keySignature = new KeyResource.KeySignature(pem, signature);
-            String keySigJson = new ObjectMapper().writeValueAsString(keySignature);
+            String keySigJson = new ObjectMapper().writeValueAsString(keySig);
 
             final HttpPost post = new HttpPost(builder.build());
             post.addHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
