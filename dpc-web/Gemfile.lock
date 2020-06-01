@@ -358,11 +358,6 @@ GEM
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
     rexml (3.2.4)
-    rouge (3.18.0)
-    rouge-rails (0.2.1)
-      actionview
-      railties
-      rouge
     rspec-core (3.9.2)
       rspec-support (~> 3.9.3)
     rspec-expectations (3.9.2)
@@ -517,7 +512,6 @@ DEPENDENCIES
   puma (~> 4.3)
   rails (~> 6.0.3)
   rails-controller-testing
-  rouge-rails
   rspec-rails
   rubocop
   rubocop-performance
