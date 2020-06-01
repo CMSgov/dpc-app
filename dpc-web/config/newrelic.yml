@@ -8,5 +8,8 @@ common: &default_settings
 test:
   <<: *default_settings
 
+development:
+  <<: *default_settings
+
 production:
   <<: *default_settings
