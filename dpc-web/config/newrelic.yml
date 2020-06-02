@@ -5,5 +5,11 @@ common: &default_settings
   distributed_tracing:
     enabled: false
 
+test:
+  <<: *default_settings
+
+development:
+  <<: *default_settings
+
 production:
   <<: *default_settings
