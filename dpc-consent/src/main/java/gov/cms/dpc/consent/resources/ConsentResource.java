@@ -41,6 +41,18 @@ public class ConsentResource {
         this.consentOrganizationURL = consentOrganizationURL;
     }
 
+    @POST
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Create a Consent resource")
+    @ApiResponses(value = { @ApiResponse(code = 400, message = ""), @ApiResponse(code = 422, message = "") })
+    public Consent create(@ApiParam(value = "Consent resource") Consent consent) {
+        ConsentEntity entity = ConsentEntityConverter.fromFhir(consent);
+        entity = dao.persistConsent(entity);
+        Consent result = ConsentEntityConverter.toFhir(entity, consentOrganizationURL, fhirReferenceURL);
+        return result;
+    }
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @GET
     @FHIR
@@ -84,7 +96,7 @@ public class ConsentResource {
 
         return entities
                 .stream()
-                .map(e -> ConsentEntityConverter.convert(e, consentOrganizationURL, fhirReferenceURL))
+                .map(e -> ConsentEntityConverter.toFhir(e, consentOrganizationURL, fhirReferenceURL))
                 .collect(Collectors.toList());
     }
 
@@ -102,7 +114,20 @@ public class ConsentResource {
                 new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
         );
 
-        return ConsentEntityConverter.convert(consentEntity, consentOrganizationURL, fhirReferenceURL);
+        return ConsentEntityConverter.toFhir(consentEntity, consentOrganizationURL, fhirReferenceURL);
+    }
+
+    @PUT
+    @Path("/{consentId}")
+    @FHIR
+    @ApiOperation(value = "Update a Consent resource")
+    @ApiResponses(value = {})
+    public Consent update(@ApiParam(value = "Consent resource ID", required = true) @PathParam("consentId") UUID consentId,
+                          @ApiParam(value = "Consent resource", required = true) Consent consent) {
+        consent.setId(consentId.toString());
+        ConsentEntity entity = ConsentEntityConverter.fromFhir(consent);
+        entity = this.dao.persistConsent(entity);
+        return ConsentEntityConverter.toFhir(entity, consentOrganizationURL, fhirReferenceURL);
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {

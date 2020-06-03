@@ -1,6 +1,8 @@
 package gov.cms.dpc.consent.resources;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
@@ -11,12 +13,12 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests ConsentResource using a live database. These tests will fail if the database is not running or
@@ -28,6 +30,46 @@ class ConsentResourceTest extends AbstractConsentTest {
     private static final String TEST_CONSENT_REF = String.format("Consent/%s", TEST_CONSENT_UUID);
 
     private ConsentResourceTest() {
+    }
+
+    @Test
+    final void createConsent() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        Consent consent = new Consent();
+
+        String patientRefPath = "/Patient?identity=|0OO0OO0OO00";
+        consent.setPatient(new Reference("http://api.url" + patientRefPath));
+
+        String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
+        consent.setPolicyRule(policyUrl);
+
+        MethodOutcome outcome = client
+                .create()
+                .resource(consent)
+                .encodedJson()
+                .execute();
+
+        Consent result = (Consent) outcome.getResource();
+        assertTrue(result.getPatient().getReference().endsWith(patientRefPath));
+        assertEquals(policyUrl, result.getPolicyRule());
+    }
+
+    @Test
+    final void createConsent_fails_withInvalidMbi() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        Consent consent = new Consent();
+
+        String patientRefPath = "/Patient?identity=|ABCDEFG";
+        consent.setPatient(new Reference("http://api.url" + patientRefPath));
+
+        String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
+        consent.setPolicyRule(policyUrl);
+
+        ICreateTyped createOp = client
+                .create()
+                .resource(consent);
+
+        assertThrows(InvalidRequestException.class, createOp::execute);
     }
 
     @Test
@@ -130,5 +172,17 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
+    }
+
+    @Test
+    final void updateConsent() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        Consent consent = new Consent();
+        MethodOutcome result = client
+                .create()
+                .resource(consent)
+                .execute();
+        assertTrue(result.getCreated());
+        assertNotNull(result.getResource().getIdElement().getValue());
     }
 }

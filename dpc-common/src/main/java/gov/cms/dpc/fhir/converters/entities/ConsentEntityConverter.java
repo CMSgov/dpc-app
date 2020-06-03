@@ -2,13 +2,20 @@ package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static gov.cms.dpc.common.consent.entities.ConsentEntity.OPT_IN;
 import static gov.cms.dpc.common.consent.entities.ConsentEntity.OPT_OUT;
@@ -70,6 +77,15 @@ public class ConsentEntityConverter {
         return code;
     }
 
+    private static String policyUriToCode(String uri) {
+        if (OPT_IN_MAGIC.equals(uri)) {
+            return OPT_IN;
+        } else if (OPT_OUT_MAGIC.equals(uri)) {
+            return OPT_OUT;
+        }
+        throw new WebApplicationException(String.format("Policy must be %s or %s.", OPT_IN_MAGIC, OPT_OUT_MAGIC), Response.Status.BAD_REQUEST);
+    }
+
     private static List<CodeableConcept> category(String loincCode) {
         // there must code to look up the code systems used in these CodeableConcept values. What is it?
         CodeableConcept category = new CodeableConcept();
@@ -77,7 +93,34 @@ public class ConsentEntityConverter {
         return List.of(category);
     }
 
-    public static Consent convert(ConsentEntity consentEntity, String orgURL, String fhirURL) {
+    public static ConsentEntity fromFhir(Consent consent) {
+        ConsentEntity entity = new ConsentEntity();
+
+        String consentId = consent.getId();
+        if (consentId != null) {
+            entity.setId(FHIRExtractors.getEntityUUID(consentId));
+        }
+
+        String patientRef = consent.getPatient().getReference();
+        Pattern patientIdPattern = Pattern.compile("/Patient\\?identity=\\|(?<mbi>\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2})");
+        Matcher matcher = patientIdPattern.matcher(patientRef);
+        if (matcher.find()) {
+            String mbi = matcher.group("mbi");
+            entity.setMbi(mbi);
+        } else {
+            throw new WebApplicationException("Could not find MBI in patient reference", Response.Status.BAD_REQUEST);
+        }
+
+        entity.setEffectiveDate(consent.getDateTime() != null ? consent.getDateTime().toInstant().atOffset(ZoneOffset.UTC).toLocalDate() : LocalDate.now());
+        // TODO
+        entity.setPolicyCode(policyUriToCode(consent.getPolicyRule()));
+        entity.setLoincCode("TODO");
+        entity.setCustodian(UUID.randomUUID());
+
+        return entity;
+    }
+
+    public static Consent toFhir(ConsentEntity consentEntity, String orgURL, String fhirURL) {
         Consent c = new Consent();
 
         c.setId(consentEntity.getId().toString());
