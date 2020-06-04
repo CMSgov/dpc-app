@@ -13,6 +13,21 @@
       <p class="ds-text--lead">Copy the whole public key including the <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">BEGIN PUBLIC KEY</code> and <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">END PUBLIC KEY</code> tags before and after.</p>
       <p><strong>Example:</strong></p>
       <%= image_tag("public_key.svg", class: "img--outline", alt: "") %>
+
+      <h3>Creating a Signature Snippet</h3>
+      <p class="ds-text--lead">Create a <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">snippet.txt</code> file with the line <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">This is the snippet used to verify a key pair in DPC.</code> in the first line of the file.</p>
+
+      <p class="ds-text--lead">In your command line, create your signature key with:</p>
+      
+      <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">openssl dgst -sign private.pem -sha256 -out snippet.txt.sig snippet.txt</code>
+      
+      <p class="ds-text--lead">To verify the signature with the public key:</p>
+
+      <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">openssl dgst -verify public.pem -sha256 -signature snippet.txt.sig snippet.txt</code>
+
+      <p class="ds-text--lead">To create your signature snippet:</p>
+
+      <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">openssl base64 -in snippet.txt.sig -out snippet.txt.sigb64</code>
     </div>
     <div class="box__content">
       <p class="ds-text--lead">This key will be added for <strong><%= @organization.name %></strong>.</p>
