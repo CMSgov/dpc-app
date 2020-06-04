@@ -111,7 +111,13 @@ public class ConsentEntityConverter {
             throw new WebApplicationException("Could not find MBI in patient reference", Response.Status.BAD_REQUEST);
         }
 
-        entity.setEffectiveDate(consent.getDateTime() != null ? consent.getDateTime().toInstant().atOffset(ZoneOffset.UTC).toLocalDate() : LocalDate.now());
+        Date dateTime = consent.getDateTime();
+        if (dateTime != null) {
+           LocalDate date = dateTime.toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
+            entity.setEffectiveDate(date);
+        } else {
+            entity.setEffectiveDate(LocalDate.now());
+        }
         // TODO
         entity.setPolicyCode(policyUriToCode(consent.getPolicyRule()));
         entity.setLoincCode("TODO");
