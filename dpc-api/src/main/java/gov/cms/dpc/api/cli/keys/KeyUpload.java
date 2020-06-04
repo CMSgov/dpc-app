@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.cli.keys;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
+import gov.cms.dpc.api.resources.v1.KeyResource;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -26,6 +28,7 @@ import java.util.Optional;
 public class KeyUpload extends AbstractAdminCommand {
 
     private static final String KEY_FILE = "key-file";
+    private static final String SIGNATURE_FILE = "signature-file";
 
     public KeyUpload() {
         super("upload", "Upload organization public key");
@@ -45,11 +48,19 @@ public class KeyUpload extends AbstractAdminCommand {
                 .help("Label for public key");
 
         subparser
-                .addArgument("file")
+                .addArgument("key-file")
                 .dest(KEY_FILE)
                 .type(String.class)
                 .required(true)
                 .help("PEM encoded public key to upload");
+
+        subparser
+                .addArgument("signature-file")
+                .dest(SIGNATURE_FILE)
+                .type(String.class)
+                .required(true)
+                .help("Signature for snippet, produced with corresponding private key");
+
     }
 
     @Override
@@ -59,25 +70,32 @@ public class KeyUpload extends AbstractAdminCommand {
         System.out.println(String.format("Connecting to API service at: %s", apiService));
 
         // Read the file and parse it
-        final Path filePath = FileSystems.getDefault().getPath(namespace.getString(KEY_FILE));
-        final String pemFile = Files.readString(filePath);
+        final Path keyFilePath = FileSystems.getDefault().getPath(namespace.getString(KEY_FILE));
+        final String publicKey = Files.readString(keyFilePath);
+
+        final Path signaturePath = FileSystems.getDefault().getPath(namespace.getString(SIGNATURE_FILE));
+        final String signature = Files.readString(signaturePath);
+
+        KeyResource.KeySignature keySignature = new KeyResource.KeySignature(publicKey, signature);
 
         final Optional<String> label = Optional.ofNullable(namespace.getString("key-label"));
-        uploadKey(apiService, orgID.getIdPart(), label, pemFile);
+        uploadKey(apiService, orgID.getIdPart(), label, keySignature);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void uploadKey(String apiService, String orgID, Optional<String> label, String pem) throws IOException, URISyntaxException {
+    private void uploadKey(String apiService, String orgID, Optional<String> label, KeyResource.KeySignature keySig) throws IOException, URISyntaxException {
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/upload-key", apiService));
 
             builder.addParameter("organization", orgID);
             label.ifPresent(l -> builder.addParameter("label", l));
 
+            String keySigJson = new ObjectMapper().writeValueAsString(keySig);
+
             final HttpPost post = new HttpPost(builder.build());
             post.addHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
             post.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-            post.setEntity(new StringEntity(pem));
+            post.setEntity(new StringEntity(keySigJson));
 
             try (CloseableHttpResponse response = httpClient.execute(post)) {
                 if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {

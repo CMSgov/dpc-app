@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.auth;
 
+import gov.cms.dpc.api.auth.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -29,8 +30,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Public Key Handler Tests")
@@ -138,6 +138,39 @@ class PublicKeyHandlerTest {
             Mockito.when(publicKeyInfo.getAlgorithm()).thenAnswer((answer) -> new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.10045.5")));
             final PublicKeyException exception = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.validatePublicKey(publicKeyInfo));
             assertEquals("Unsupported key type `1.2.840.10045.5`.", exception.getMessage(), "Should have correct error message");
+        }
+
+        @Test
+        void testVerifySignature() throws Exception {
+            KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
+            String snippet = "Verify signature test";
+            String sigStr = APIAuthHelpers.signString(keyPair.getPrivate(), snippet);
+
+            assertDoesNotThrow(() -> PublicKeyHandler.verifySignature(publicKeyStr, snippet, sigStr));
+        }
+
+        @Test
+        void testVerifySignatureWrongSnippet() throws Exception {
+            KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
+            String snippet = "Verify signature test";
+            String sigStr = APIAuthHelpers.signString(keyPair.getPrivate(), snippet);
+
+            PublicKeyException pke = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.verifySignature(publicKeyStr, "Not the same snippet that was signed", sigStr));
+            assertEquals("Key and signature do not match", pke.getMessage());
+        }
+
+        @Test
+        void testVerifySignatureMismatch() throws Exception {
+            KeyPair keyPair1 = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            KeyPair keyPair2 = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair1.getPublic());
+            String snippet = "Verify signature test";
+            String sigStr = APIAuthHelpers.signString(keyPair2.getPrivate(), snippet);
+
+            PublicKeyException pke = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.verifySignature(publicKeyStr, snippet, sigStr));
+            assertEquals("Key and signature do not match", pke.getMessage());
         }
     }
 
