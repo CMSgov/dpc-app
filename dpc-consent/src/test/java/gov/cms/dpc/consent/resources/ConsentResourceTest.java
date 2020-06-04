@@ -18,6 +18,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.Date;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -43,6 +47,9 @@ class ConsentResourceTest extends AbstractConsentTest {
         String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
         consent.setPolicyRule(policyUrl);
 
+        Date date = Date.from(Instant.now());
+        consent.setDateTime(date);
+
         MethodOutcome outcome = client
                 .create()
                 .resource(consent)
@@ -52,6 +59,7 @@ class ConsentResourceTest extends AbstractConsentTest {
         Consent result = (Consent) outcome.getResource();
         assertTrue(result.getPatient().getReference().endsWith(patientRefPath));
         assertEquals(policyUrl, result.getPolicyRule());
+        assertEquals(Date.from(date.toInstant().atOffset(ZoneOffset.UTC).toLocalDate().atStartOfDay().toInstant(ZoneOffset.UTC)), result.getDateTime());
     }
 
     @Test
@@ -178,11 +186,25 @@ class ConsentResourceTest extends AbstractConsentTest {
     final void updateConsent() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
         Consent consent = new Consent();
-        MethodOutcome result = client
+        consent.setPatient(new Reference("http://api.url/Patient?identity=|0OO0OO0OO00"));
+        consent.setPolicyRule("http://hl7.org/fhir/ConsentPolicy/opt-in");
+
+        MethodOutcome outcome = client
                 .create()
                 .resource(consent)
+                .encodedJson()
                 .execute();
-        assertTrue(result.getCreated());
-        assertNotNull(result.getResource().getIdElement().getValue());
+
+        consent = (Consent) outcome.getResource();
+        consent.setPolicyRule("http://hl7.org/fhir/ConsentPolicy/opt-out");
+
+        outcome = client
+                .update()
+                .resource(consent)
+                .withId(consent.getId())
+                .execute();
+
+        Consent updatedConsent = (Consent) outcome.getResource();
+        assertEquals("http://hl7.org/fhir/ConsentPolicy/opt-out", updatedConsent.getPolicyRule());
     }
 }
