@@ -44,6 +44,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.UUID;
@@ -193,7 +194,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testUpdateOrganization() throws IOException, URISyntaxException, NoSuchAlgorithmException {
+    void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSecurityException {
         final String orgID = UUID.randomUUID().toString();
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
@@ -235,7 +236,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testOrganizationDeletion() throws IOException, URISyntaxException, NoSuchAlgorithmException {
+    void testOrganizationDeletion() throws IOException, URISyntaxException, GeneralSecurityException {
 //        // Generate a golden macaroon
         final UUID orgDeletionID = UUID.randomUUID();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);

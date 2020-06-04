@@ -7,6 +7,8 @@ import gov.cms.dpc.api.cli.keys.KeyDelete;
 import gov.cms.dpc.api.cli.keys.KeyList;
 import gov.cms.dpc.api.cli.keys.KeyUpload;
 import gov.cms.dpc.api.cli.organizations.OrganizationRegistration;
+import gov.cms.dpc.api.resources.v1.KeyResource;
+import gov.cms.dpc.testing.KeyType;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -27,8 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static gov.cms.dpc.testing.APIAuthHelpers.generateKeyPair;
-import static gov.cms.dpc.testing.APIAuthHelpers.generatePublicKey;
+import static gov.cms.dpc.testing.APIAuthHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -92,11 +93,17 @@ public class PublicKeyTests extends AbstractApplicationTest {
         stdOut.reset();
         stdErr.reset();
 
-        // New Public Key
         final String organizationID = matcher.group(0);
-        final Path filePath = createPublicKey();
 
-        final boolean s2 = cli.run("upload", organizationID, filePath.toString());
+        final KeyPair keyPair = generateKeyPair();
+
+        final String keyStr = generatePublicKey(keyPair.getPublic());
+        final Path keyFilePath = writeToTempFile(keyStr);
+
+        final String sigStr = signString(keyPair.getPrivate(), KeyResource.SNIPPET);
+        final Path sigFilePath = writeToTempFile(sigStr);
+
+        final boolean s2 = cli.run("upload", organizationID, keyFilePath.toString(), sigFilePath.toString());
 
         assertAll(() -> assertTrue(s2, "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have any errors"));
@@ -138,15 +145,12 @@ public class PublicKeyTests extends AbstractApplicationTest {
         return matchedKeyIDs;
     }
 
-    private Path createPublicKey() throws NoSuchAlgorithmException, IOException {
+    private Path writeToTempFile(String str) throws NoSuchAlgorithmException, IOException {
         final File file = Files.newTemporaryFile();
-
-        final KeyPair keyPair = generateKeyPair();
-        final String key = generatePublicKey(keyPair.getPublic());
 
         // Write the public key to the file
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
-            bufferedWriter.write(key);
+            bufferedWriter.write(str);
         }
 
         return file.toPath();
