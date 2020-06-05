@@ -3,8 +3,7 @@ package gov.cms.dpc.fhir.converters.entities;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.annotations.FHIR;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.utilities.xhtml.NodeType;
@@ -14,7 +13,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -87,7 +85,7 @@ public class ConsentEntityConverter {
         } else if (OPT_OUT_MAGIC.equals(uri)) {
             return OPT_OUT;
         }
-        throw new WebApplicationException(String.format("Policy must be %s or %s.", OPT_IN_MAGIC, OPT_OUT_MAGIC), Response.Status.BAD_REQUEST);
+        throw new WebApplicationException(String.format("Policy rule must be %s or %s.", OPT_IN_MAGIC, OPT_OUT_MAGIC), Response.Status.BAD_REQUEST);
     }
 
     private static List<CodeableConcept> category(String loincCode) {
@@ -122,6 +120,9 @@ public class ConsentEntityConverter {
         }
 
         Reference orgRef = orgRefs.get(0);
+        if (StringUtils.isBlank(orgRef.getReference())) {
+            throw new WebApplicationException("Organization must include reference", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
         return FHIRExtractors.getEntityUUID(orgRef.getReference());
     }
 
@@ -141,9 +142,16 @@ public class ConsentEntityConverter {
             throw new WebApplicationException("Only active consent records are accepted", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
 
-        String patientRef = consent.getPatient().getReference();
+        entity.setLoincCode(categoriesToLoincCode(consent.getCategory()));
+
+        Reference patientRef = consent.getPatient();
+        if (patientRef == null || StringUtils.isBlank(patientRef.getReference())) {
+            throw new WebApplicationException("Consent resource must contain patient reference", Response.Status.BAD_REQUEST);
+        }
+
+        String patientRefStr = patientRef.getReference();
         Pattern patientIdPattern = Pattern.compile("/Patient\\?identity=\\|(?<mbi>\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2})");
-        Matcher matcher = patientIdPattern.matcher(patientRef);
+        Matcher matcher = patientIdPattern.matcher(patientRefStr);
         if (matcher.find()) {
             String mbi = matcher.group("mbi");
             entity.setMbi(mbi);
@@ -159,9 +167,8 @@ public class ConsentEntityConverter {
             entity.setEffectiveDate(LocalDate.now());
         }
 
-        entity.setPolicyCode(policyUriToCode(consent.getPolicyRule()));
-        entity.setLoincCode(categoriesToLoincCode(consent.getCategory()));
         entity.setCustodian(organizationsToCustodianUUID(consent.getOrganization()));
+        entity.setPolicyCode(policyUriToCode(consent.getPolicyRule()));
 
         return entity;
     }
