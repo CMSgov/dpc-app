@@ -126,6 +126,16 @@ public class ConsentEntityConverter {
         return FHIRExtractors.getEntityUUID(orgRef.getReference());
     }
 
+    private static String mbiFromPatientReference(String patientRefStr) {
+        String mbi = "";
+        Pattern patientIdPattern = Pattern.compile("/Patient\\?identity=\\|(?<mbi>\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2})");
+        Matcher matcher = patientIdPattern.matcher(patientRefStr);
+        if (matcher.find()) {
+            mbi = matcher.group("mbi");
+        }
+        return mbi;
+    }
+
     public static ConsentEntity fromFhir(Consent consent) {
         if (consent == null) {
             throw new WebApplicationException("No consent resource provided", Response.Status.BAD_REQUEST);
@@ -134,7 +144,7 @@ public class ConsentEntityConverter {
         ConsentEntity entity = new ConsentEntity();
 
         String consentId = consent.getId();
-        if (consentId != null) {
+        if (!StringUtils.isBlank(consentId)) {
             entity.setId(FHIRExtractors.getEntityUUID(consentId));
         }
 
@@ -148,24 +158,15 @@ public class ConsentEntityConverter {
         if (patientRef == null || StringUtils.isBlank(patientRef.getReference())) {
             throw new WebApplicationException("Consent resource must contain patient reference", Response.Status.BAD_REQUEST);
         }
-
-        String patientRefStr = patientRef.getReference();
-        Pattern patientIdPattern = Pattern.compile("/Patient\\?identity=\\|(?<mbi>\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2})");
-        Matcher matcher = patientIdPattern.matcher(patientRefStr);
-        if (matcher.find()) {
-            String mbi = matcher.group("mbi");
-            entity.setMbi(mbi);
-        } else {
+        String mbi = mbiFromPatientReference(patientRef.getReference());
+        if (StringUtils.isBlank(mbi)) {
             throw new WebApplicationException("Could not find MBI in patient reference", Response.Status.BAD_REQUEST);
         }
+        entity.setMbi(mbi);
 
         Date dateTime = consent.getDateTime();
-        if (dateTime != null) {
-           LocalDate date = dateTime.toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
-            entity.setEffectiveDate(date);
-        } else {
-            entity.setEffectiveDate(LocalDate.now(ZoneOffset.UTC));
-        }
+        LocalDate date = dateTime != null ? dateTime.toInstant().atOffset(ZoneOffset.UTC).toLocalDate() : LocalDate.now(ZoneOffset.UTC);
+        entity.setEffectiveDate(date);
 
         entity.setCustodian(organizationsToCustodianUUID(consent.getOrganization()));
         entity.setPolicyCode(policyUriToCode(consent.getPolicyRule()));
