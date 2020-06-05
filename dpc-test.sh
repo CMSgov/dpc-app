@@ -63,7 +63,7 @@ docker-compose up start_api_dependencies
 mvn test -Pintegration-tests -pl dpc-api -am
 
 # Start the API server
-AUTH_DISABLED=true docker-compose up start_api consent
+AUTH_DISABLED=true docker-compose up start_api start_consent
 
 # Run the Postman tests
 npm install
