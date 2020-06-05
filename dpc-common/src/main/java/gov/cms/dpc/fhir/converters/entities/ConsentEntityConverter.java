@@ -164,7 +164,7 @@ public class ConsentEntityConverter {
            LocalDate date = dateTime.toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
             entity.setEffectiveDate(date);
         } else {
-            entity.setEffectiveDate(LocalDate.now());
+            entity.setEffectiveDate(LocalDate.now(ZoneOffset.UTC));
         }
 
         entity.setCustodian(organizationsToCustodianUUID(consent.getOrganization()));
