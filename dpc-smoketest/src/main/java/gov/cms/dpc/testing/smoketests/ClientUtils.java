@@ -241,7 +241,9 @@ public class ClientUtils {
     private static <T extends BaseResource> Bundle bundleSubmitter(Class<?> baseClass, Class<T> clazz, String filename, IParser parser, IGenericClient client) throws IOException {
 
         try (InputStream resource = baseClass.getClassLoader().getResourceAsStream(filename)) {
-            final Bundle bundle = parser.parseResource(Bundle.class, resource);
+            final Parameters parameters = parser.parseResource(Parameters.class, resource);
+
+            final Bundle bundle = (Bundle) parameters.getParameterFirstRep().getResource();
 
             bundle
                     .getEntry()

@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.scripts;
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -56,8 +57,8 @@ public class AddMBIToPatients {
     void updateDPRPatients() throws IOException {
         final String bundleName = "patient_bundle-dpr.json";
         try (InputStream stream = AddMBIToPatients.class.getClassLoader().getResourceAsStream(bundleName)) {
-            final Bundle bundle = (Bundle) ctx.newJsonParser().parseResource(stream);
-            final Bundle updatedBundle = updateBundle(bundle, (id) -> id);
+            final Parameters parameters = (Parameters) ctx.newJsonParser().parseResource(stream);
+            final Bundle updatedBundle = updateBundle((Bundle) parameters.getParameterFirstRep().getResource(), (id) -> id);
 
             try (FileWriter fileWriter = new FileWriter(String.format("../src/main/resources/%s", bundleName), StandardCharsets.UTF_8)) {
                 ctx.newJsonParser().encodeResourceToWriter(updatedBundle, fileWriter);
