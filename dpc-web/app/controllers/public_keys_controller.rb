@@ -10,7 +10,7 @@ class PublicKeysController < ApplicationController
 
   def create
     @organization = current_user.organizations.find(params[:organization_id])
-    return render_error('Must have both a label and an API environment.') if missing_invalid_params
+    return render_error('Must have both a label and an API environment.') if missing_params
 
     reg_org = @organization.registered_organizations.find_by(api_env: params[:api_environment])
     manager = PublicKeyManager.new(api_env: params[:api_environment], registered_organization: reg_org)
@@ -31,7 +31,7 @@ class PublicKeysController < ApplicationController
     render :new
   end
 
-  def missing_invalid_params
+  def missing_params
     params[:api_environment].blank? || params[:public_key].blank?
   end
 
