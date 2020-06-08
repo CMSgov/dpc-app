@@ -1,3 +1,8 @@
+.public-key__container {
+  margin: 0 auto;
+  max-width: $layout-l-breakpoint;
+}
+
 .public-key__intro-container {
   display: flex;
   flex-direction: column;

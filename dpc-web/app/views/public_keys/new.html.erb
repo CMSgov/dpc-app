@@ -1,7 +1,7 @@
 <% title "New Public Key" %>
 
-<div class="ds-u-padding-x--0 ds-u-fill--white">
-  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-margin-top--4 ds-u-align-items--center public-key__intro-container">
+<div class="ds-u-padding-y--0 ds-u-fill--white public-key__container">
+  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center public-key__intro-container">
     <div class="public-key__intro">
       <div class="ds-u-padding-left--7 ds-u-padding-top--2 ds-u-padding-right--4 ds-u-padding-bottom--2 ds-h1 public-key__intro-header">
         How to Generate a Public Key
@@ -20,7 +20,7 @@
   <section class="ds-l-container preview__grid">
     <div class="ds-l-row">
       <div class="ds-l-col step_1">
-        <%= image_tag("private_key_image.svg", alt: "") %>
+        <%= image_tag("private-key-image.svg", alt: "") %>
         <h4>1. Generate a private key</h4>
         <div>
         Use the command invocation:
@@ -28,12 +28,15 @@
         <p class="ds-u-font-weight--bold"><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information. Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
       </div>
       <div class="ds-l-col step_2">
+        <%= image_tag("public-key-image.svg", alt: "") %>
         <h4>2. Generate a public key</h4>
       </div>
       <div class="ds-l-col step_3">
+        <%= image_tag("create-sig-image.svg", alt: "") %>
         <h4>3. Create public key signature</h4>
       </div>
       <div class="ds-l-col step_4">
+        <%= image_tag("verify-sig-image.svg", alt: "") %>
         <h4>4. Verify public key signature</h4>
       </div>
     </div>
