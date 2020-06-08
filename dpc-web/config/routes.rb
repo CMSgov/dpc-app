@@ -41,6 +41,7 @@ Rails.application.routes.draw do
   match '/home', to: 'public#home', via: :get
 
   match '/docs', to: 'pages#reference', via: :get
+  match '/download_snippet', to: 'dashboard#download_snippet', as: 'download_snippet', via: :get
   # match '/docs/guide', to: 'pages#guide', via: :get
   match '/faq', to: 'pages#faq', via: :get
   match '/support', to: 'pages#support', via: :get
