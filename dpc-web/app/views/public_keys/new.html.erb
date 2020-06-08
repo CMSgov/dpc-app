@@ -1,35 +1,62 @@
 <% title "New Public Key" %>
 
-<div class="ds-l-container ds-u-padding-x--0">
-
-  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center">
-
-    <h1 class="ds-u-font-size--title ds-u-font-weight--normal ds-u-margin--0">Add a public key</h1>
-
+<div class="ds-u-padding-x--0 ds-u-fill--white">
+  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-margin-top--4 ds-u-align-items--center public-key__intro-container">
+    <div class="public-key__intro">
+      <div class="ds-u-padding-left--7 ds-u-padding-top--2 ds-u-padding-right--4 ds-u-padding-bottom--2 ds-h1 public-key__intro-header">
+        How to Generate a Public Key
+      </div>
+      <div class="ds-u-font-style--italic public-key__intro-windows">
+        <b>Window users</b><br />
+        If you are using Windows, you can use this link for downloading openSSL: <%= link_to 'https://wiki.openssl.org/index.php/Binaries' %>
+      </div>
+    </div>
+    <div class="public-key__files">
+      Please ensure all files created from this page are stored in ONE folder.<br />
+      (These include: private.pem, public.pem, snippet.txt, snippet.txt.sig, signature.sig)
+    </div>
   </section>
 
-  <section class="box box--flex">
-    <div class="box__content box--flex">
-      <p class="ds-text--lead">Copy the whole public key including the <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">BEGIN PUBLIC KEY</code> and <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">END PUBLIC KEY</code> tags before and after.</p>
-      <p><strong>Example:</strong></p>
-      <%= image_tag("public_key.svg", class: "img--outline", alt: "") %>
-
-      <h3>Creating a Signature Snippet</h3>
-      <p class="ds-text--lead">Create a <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">snippet.txt</code> file with the line <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">This is the snippet used to verify a key pair in DPC.</code> in the first line of the file.</p>
-
-      <p class="ds-text--lead">In your command line, create your signature key with:</p>
-      
-      <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">openssl dgst -sign private.pem -sha256 -out snippet.txt.sig snippet.txt</code>
-      
-      <p class="ds-text--lead">To verify the signature with the public key:</p>
-
-      <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">openssl dgst -verify public.pem -sha256 -signature snippet.txt.sig snippet.txt</code>
-
-      <p class="ds-text--lead">To create your signature snippet:</p>
-
-      <code class="ds-u-fill--warn-lightest ds-u-color--primary-darkest">openssl base64 -in snippet.txt.sig -out snippet.txt.sigb64</code>
+  <section class="ds-l-container preview__grid">
+    <div class="ds-l-row">
+      <div class="ds-l-col step_1">
+        <%= image_tag("private_key_image.svg", alt: "") %>
+        <h4>1. Generate a private key</h4>
+        <div>
+        Use the command invocation:
+        </div>
+        <p class="ds-u-font-weight--bold"><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information. Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
+      </div>
+      <div class="ds-l-col step_2">
+        <h4>2. Generate a public key</h4>
+      </div>
+      <div class="ds-l-col step_3">
+        <h4>3. Create public key signature</h4>
+      </div>
+      <div class="ds-l-col step_4">
+        <h4>4. Verify public key signature</h4>
+      </div>
     </div>
-    <div class="box__content">
+  </section>
+
+  <section class="ds-u-fill--warn-lightest ds-u-padding-top--3 ds-u-color--primary-darkest ds-u-text-align--center ds-u-font-weight--bold">
+    <div class="ds-h2">
+      Upload Your Public Key
+    </div>
+    <div class="ds-u-font-style--italic ds-h4">
+      Please complete the following instructions to upload your public key.
+    </div>
+  </section>
+
+  <section class="public-key__form-container">
+    <div class="ds-u-fill--primary-darkest ds-u-padding--7 ds-u-color--white public-key__form-instruction">
+      <ol>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ol>
+    </div>
+    <div class="public-key__form-fields">
       <p class="ds-text--lead">This key will be added for <strong><%= @organization.name %></strong>.</p>
 
       <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
@@ -58,4 +85,3 @@
     </div>
   </section>
 </div>
-

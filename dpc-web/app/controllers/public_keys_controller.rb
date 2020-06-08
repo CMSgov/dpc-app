@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class PublicKeysController < ApplicationController
+  layout 'public-key-new'
   before_action :authenticate_user!
   rescue_from ActiveRecord::RecordNotFound, with: :unauthorized
 

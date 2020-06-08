@@ -1,0 +1,42 @@
+.public-key__intro-container {
+  display: flex;
+  flex-direction: column;
+
+  .public-key__intro {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      margin: auto;
+    
+      .public-key__intro-header {
+        background-color: $color-warn-lightest;
+        color: $color-gray-dark;
+        font-weight: 700;
+        position: relative;
+      }
+    
+      .public-key__intro-windows {
+        max-width: 33%;
+      }
+    }
+    
+    .public-key__files {
+      float: left;
+    }
+}
+
+.public-key__form-container {
+  display: flex;
+  flex-direction: row;
+  
+  div {
+    width: 50%;
+  }
+}
+
+.public-key__form-instruction {
+  li {
+    font-size: $h1-font-size;
+    font-weight: 700;
+  }
+}
