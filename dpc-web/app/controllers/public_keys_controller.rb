@@ -29,6 +29,10 @@ class PublicKeysController < ApplicationController
     end
   end
 
+  def download_snippet
+    send_file 'public/snippet.txt', type: 'application/zip', status: 202
+  end
+
   private
 
   def render_error(msg)
