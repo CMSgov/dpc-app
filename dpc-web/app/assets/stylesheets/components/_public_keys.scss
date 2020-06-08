@@ -26,7 +26,7 @@
     }
     
     .public-key__files {
-      float: left;
+      width: 100%;
     }
 }
 
@@ -37,11 +37,9 @@
   div {
     width: 50%;
   }
-}
 
-.public-key__form-instruction {
-  li {
-    font-size: $h1-font-size;
-    font-weight: 700;
+  .field_input {
+    margin: 0 auto;
+    width: 100%
   }
 }

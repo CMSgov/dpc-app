@@ -1,18 +1,18 @@
 <% title "New Public Key" %>
 
 <div class="ds-u-padding-y--0 ds-u-fill--white public-key__container">
-  <section class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center public-key__intro-container">
+  <section class="ds-u-display--flex ds-u-padding-top--4 ds-u-justify-content--between ds-u-align-items--center public-key__intro-container">
     <div class="public-key__intro">
       <div class="ds-u-padding-left--7 ds-u-padding-top--2 ds-u-padding-right--4 ds-u-padding-bottom--2 ds-h1 public-key__intro-header">
         How to Generate a Public Key
       </div>
-      <div class="ds-u-font-style--italic public-key__intro-windows">
+      <div class="public-key__intro-windows">
         <b>Window users</b><br />
         If you are using Windows, you can use this link for downloading openSSL: <%= link_to 'https://wiki.openssl.org/index.php/Binaries' %>
       </div>
     </div>
-    <div class="public-key__files">
-      Please ensure all files created from this page are stored in ONE folder.<br />
+    <div class="ds-u-padding-left--7 ds-u-padding-bottom--7 ds-u-font-style--italic public-key__files">
+      <b>Please ensure all files created from this page are stored in ONE folder.</b><br />
       (These include: private.pem, public.pem, snippet.txt, snippet.txt.sig, signature.sig)
     </div>
   </section>
@@ -30,14 +30,28 @@
       <div class="ds-l-col step_2">
         <%= image_tag("public-key-image.svg", alt: "") %>
         <h4>2. Generate a public key</h4>
+        <p>Paste the contents of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
       </div>
       <div class="ds-l-col step_3">
         <%= image_tag("create-sig-image.svg", alt: "") %>
         <h4>3. Create public key signature</h4>
+
+        <div>
+          <div>
+            <%= submit_tag "Add key", class: "ds-c-button--primary", data: { test: "form-submit" } %>
+          </div>
+          <div>
+            snippet.txt file to create signature
+          </div>
+        </div>
       </div>
       <div class="ds-l-col step_4">
         <%= image_tag("verify-sig-image.svg", alt: "") %>
         <h4>4. Verify public key signature</h4>
+
+        <p>Results must confirm Verified Ok</p>
+
+        <p>Paste the contents of this signature.sig file into the ‘Public Key Signature’ field below.</p>
       </div>
     </div>
   </section>
@@ -52,38 +66,33 @@
   </section>
 
   <section class="public-key__form-container">
-    <div class="ds-u-fill--primary-darkest ds-u-padding--7 ds-u-color--white public-key__form-instruction">
-      <ol>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ol>
+    <div class="ds-u-fill--primary-darkest ds-u-color--white public-key__form-instruction">
     </div>
     <div class="public-key__form-fields">
       <p class="ds-text--lead">This key will be added for <strong><%= @organization.name %></strong>.</p>
 
       <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
-        <div class="field ds-u-margin-y--5">
+        <div class="ds-u-padding-left--5 field_input">
           <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
           <%= select_tag :api_environment, options_for_select(@organization.registered_api_envs, params[:api_environment]), include_blank: true, class: "ds-c-field drop-down" %>
         </div>
 
-        <div class="field ds-u-margin-y--5">
+        <div class="ds-u-padding-left--5 field_input">
           <%= label_tag :label, "Label", class: "ds-c-label" %>
           <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
         </div>
 
-        <div class="field ds-u-margin-y--5">
+        <div class="ds-u-padding-left--5 field_input">
           <%= label_tag :public_key, "Public Key", class: "ds-c-label" %>
           <%= text_area_tag :public_key, params[:label], class: "ds-c-field" %>
         </div>
 
-        <div class="field ds-u-margin-y--5">
+        <div class="ds-u-padding-left--5 field_input">
           <%= label_tag :snippet_signature, "Signature Snippet", class: "ds-c-label" %>
           <%= text_area_tag :snippet_signature, params[:label], class: "ds-c-field" %>
         </div>
 
-        <%= submit_tag "Add key", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+        <%= submit_tag "Add key", class: "ds-u-margin--5 ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
       <% end %>
     </div>
   </section>
