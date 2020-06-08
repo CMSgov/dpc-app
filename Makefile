@@ -54,7 +54,7 @@ smoke/local: venv smoke
 	. venv/bin/activate; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
-smoke/dev: venv smoke
+smoke/remote: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; bzt src/test/remote.smoke_test.yml
 
