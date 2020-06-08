@@ -53,24 +53,10 @@ smoke/local: venv smoke
 	@read -p "`echo '\n=====\nThe Smoke Tests require an authenticated environment!\nVerify your local API environment has \"authenticationDisabled = false\" or these tests will fail.\n=====\n\nPress ENTER to run the tests...'`"
 	. venv/bin/activate; bzt src/test/local.smoke_test.yml
 
-.PHONY: smoke/dev
+.PHONY: smoke/remote
 smoke/dev: venv smoke
-	@echo "Running Smoke Tests against Development env"
-	. venv/bin/activate; bzt src/test/dev.smoke_test.yml
-
-.PHONY: smoke/test
-smoke/test: venv smoke
-	. venv/bin/activate; bzt src/test/test.smoke_test.yml
-
-.PHONY: smoke/prod-sbx
-smoke/prod-sbx: venv smoke
-	@echo "Running Smoke Tests against Sandbox env"
-	. venv/bin/activate; bzt src/test/prod-sbx.smoke_test.yml
-
-.PHONY: smoke/prod
-smoke/prod: venv smoke
-	@echo "Running Smoke Tests against Prod env"
-	. venv/bin/activate; bzt src/test/prod.smoke_test.yml
+	@echo "Running Smoke Tests against ${HOST_URL}"
+	. venv/bin/activate; bzt src/test/remote.smoke_test.yml
 
 .PHONY: docker-base
 docker-base:
