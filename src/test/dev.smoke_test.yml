@@ -1,6 +1,6 @@
 settings:
   env:
-    HOST: https://dev.dpc.cms.gov/api/v1
+    HOST: ${HOST_URL}
     ADMIN_URL: ${ELB_URL}
     SEED_FILE: src/main/resources/test_associations-dpr.csv
     PROVIDER_BUNDLE: provider_bundle.json
