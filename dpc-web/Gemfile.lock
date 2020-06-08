@@ -164,6 +164,7 @@ GEM
     hashie (4.1.0)
     health_check (3.0.0)
       railties (>= 5.0)
+    hiredis (0.6.3)
     http-accept (1.7.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
@@ -494,6 +495,7 @@ DEPENDENCIES
   faker
   fhir_client
   health_check
+  hiredis
   jbuilder (~> 2.10)
   jquery-rails
   kaminari
@@ -513,6 +515,7 @@ DEPENDENCIES
   puma (~> 4.3)
   rails (~> 6.0.3)
   rails-controller-testing
+  redis (~> 4.0)
   rspec-rails
   rubocop
   rubocop-performance
