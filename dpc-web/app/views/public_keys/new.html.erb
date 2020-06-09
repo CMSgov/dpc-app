@@ -17,21 +17,32 @@
     </div>
   </section>
 
-  <section class="ds-l-container preview__grid">
+  <section class="ds-l-container ds-u-font-size--small">
     <div class="ds-l-row">
       <div class="ds-l-col step step_1">
         <%= image_tag("private-key-image.svg", alt: "") %>
         <h4>1. Generate a private key</h4>
         <div>
           Use the command invocation:<br />
-          <code class="code-box">
-          </code>
+          <div class="code-block">
+            <code>
+              openssl genrsa -out private.pem 4096
+            </code>
+          </div>
         </div>
         <p class="ds-u-font-weight--bold"><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information. Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
       </div>
       <div class="ds-l-col step_2">
         <%= image_tag("public-key-image.svg", alt: "") %>
         <h4>2. Generate a public key</h4>
+        <div>
+          Use the command invocation:<br />
+          <div class="code-block">
+            <code>
+              openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+            </code>
+          </div>
+        </div>
         <p>Paste the contents of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
       </div>
       <div class="ds-l-col step_3">
@@ -46,12 +57,31 @@
             snippet.txt file to create signature
           </div>
         </div>
+
+
+        <div>
+          Use the command invocation:<br />
+          <div class="code-block">
+            <code>
+              openssl dgst -sign private.pem -sha256 -out snippet.txt.sig snippet.txt
+            </code>
+          </div>
+        </div>
       </div>
       <div class="ds-l-col step_4">
         <%= image_tag("verify-sig-image.svg", alt: "") %>
         <h4>4. Verify public key signature</h4>
 
-        <p>Results must confirm Verified Ok</p>
+        <div>
+          Use the command invocation:<br />
+          <div class="code-block">
+            <code>
+              openssl dgst -verify public.pem -sha256 -signature snippet.txt.sig snippet.txt
+            </code>
+          </div>
+        </div>
+
+        <p class="ds-u-font-weight--bold">Results <u>must</u> confirm <span class="ds-u-color--success">Verified Ok</span></p>
 
         <p>Paste the contents of this signature.sig file into the ‘Public Key Signature’ field below.</p>
       </div>
@@ -67,34 +97,52 @@
     </div>
   </section>
 
-  <section class="public-key__form-container">
-    <div class="ds-u-fill--primary-darkest ds-u-color--white public-key__form-instruction">
+  <section class="box box--flex ds-u-margin-y--0">
+    <div class="box__content box--flex ds-u-fill--primary-darkest ds-u-color--white public-key__form-instruction">
+      <ol>
+        <li>
+          Select the sandbox <b>ENVIRONMENT</b>.
+        </li>
+        <li>
+          Add a <b>LABEL</b> for your public key that can be easily recognized in the future.
+        </li>
+        <li>
+          The <b>PUBLIC KEY</b> field <u>must include</u> the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags from your public.pem file.
+        </li>
+        <li>
+          The public key signature (snippet.txt.sig file) <u>must yield</u> “Verified Ok” results in order to successfully generate the signature.sig file and paste its contents in the <b>PUBLIC KEY SIGNATURE</b> field.
+        </li>
+      </ol>
+
+      <div class="ds-u-font-style--italic ds-u-text-align--center">
+        <span class="ds-u-color--error"><b>Need Help?</b></span> See <b>DPC’s User Guide</b> for more information.
+      </div>
     </div>
-    <div class="public-key__form-fields">
+    <div class="box__content">
       <p class="ds-text--lead">This key will be added for <strong><%= @organization.name %></strong>.</p>
 
       <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
-        <div class="ds-u-padding-left--5 field_input">
-          <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
+        <div class="field ds-u-margin-y--5">
+          <%= label_tag :api_environment, "1. Environment", class: "ds-c-label" %>
           <%= select_tag :api_environment, options_for_select(@organization.registered_api_envs, params[:api_environment]), include_blank: true, class: "ds-c-field drop-down" %>
         </div>
 
-        <div class="ds-u-padding-left--5 field_input">
-          <%= label_tag :label, "Label", class: "ds-c-label" %>
+        <div class="field ds-u-margin-y--5">
+          <%= label_tag :label, "2. Label", class: "ds-c-label" %>
           <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
         </div>
 
-        <div class="ds-u-padding-left--5 field_input">
-          <%= label_tag :public_key, "Public Key", class: "ds-c-label" %>
+        <div class="field ds-u-margin-y--5">
+          <%= label_tag :public_key, "3. Public Key", class: "ds-c-label" %>
           <%= text_area_tag :public_key, params[:label], class: "ds-c-field" %>
         </div>
 
-        <div class="ds-u-padding-left--5 field_input">
-          <%= label_tag :snippet_signature, "Signature Snippet", class: "ds-c-label" %>
+        <div class="field ds-u-margin-y--5">
+          <%= label_tag :snippet_signature, "4. Signature Snippet", class: "ds-c-label" %>
           <%= text_area_tag :snippet_signature, params[:label], class: "ds-c-field" %>
         </div>
 
-        <%= submit_tag "Add key", class: "ds-u-margin--5 ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+        <%= submit_tag "Add key", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
       <% end %>
     </div>
   </section>
