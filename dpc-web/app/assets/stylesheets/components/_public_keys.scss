@@ -44,6 +44,22 @@
   }
 }
 
+ol {
+  list-style: none;
+  counter-reset: my-awesome-counter;
+  padding: 0 0 0 15px;
+}
+ol li {
+  counter-increment: my-awesome-counter;
+  text-indent: -20px;
+  margin: 50px 0 50px 20px;
+}
+ol li::before {
+  content: counter(my-awesome-counter) ". ";
+  color: $color-white;
+  font-weight: bold;
+}
+
 .code-block {
   background-color: $color-gray-lighter;
   border: 1px solid $color-gray;

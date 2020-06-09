@@ -36,13 +36,13 @@ Rails.application.routes.draw do
     resources :public_keys, only: [:new, :create]
   end
 
-  match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :get
-
+  
   root to: 'public#home'
-
+  
   match '/home', to: 'public#home', via: :get
-
+  
   match '/docs', to: 'pages#reference', via: :get
+  match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
   # match '/docs/guide', to: 'pages#guide', via: :get
   match '/faq', to: 'pages#faq', via: :get
   match '/support', to: 'pages#support', via: :get
