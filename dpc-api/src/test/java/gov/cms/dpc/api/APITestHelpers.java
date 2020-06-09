@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
@@ -46,6 +47,7 @@ public class APITestHelpers {
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
+    public static String ORGANIZATION_NPI = "1111111112";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -134,7 +136,8 @@ public class APITestHelpers {
                 .addProvider(JerseyExceptionHandler.class)
                 .addProvider(PersistenceExceptionHandler.class)
                 .addProvider(HAPIExceptionHandler.class)
-                .addProvider(DefaultFHIRExceptionHandler.class);
+                .addProvider(DefaultFHIRExceptionHandler.class)
+                .addProvider(JsonParseExceptionMapper.class);
 
         // Optionally enable validation
         if (validation) {

@@ -29,7 +29,6 @@ import java.net.URISyntaxException;
 
 public class FHIRHelpers {
 
-
     /**
      * Register an organization with the Attribution Service
      * Organizations are pulled from the `organization_bundle.json` file and filtered based on the provided resource ID
@@ -41,7 +40,7 @@ public class FHIRHelpers {
      * @return - {@link String} Access token generated for the {@link Organization}
      * @throws IOException - Throws if HTTP client fails
      */
-    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String adminURL) throws IOException {
+    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String organizationNPI, String adminURL) throws IOException {
         // Random number generator for Org NPI
         // Register an organization, and a token
         // Read in the test file
@@ -54,7 +53,7 @@ public class FHIRHelpers {
             // Update the Organization resource and set a random NPI
             final Organization origOrg = (Organization) orgBundle
                     .getEntryFirstRep().getResource();
-            origOrg.getIdentifierFirstRep().setValue(organizationID);
+            origOrg.getIdentifierFirstRep().setValue(organizationNPI);
             origOrg.setId(organizationID);
 
             final Parameters parameters = new Parameters();

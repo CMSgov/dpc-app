@@ -80,7 +80,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testOrgDeletion() {
-        final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()));
+        final Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1234567992", false);
         // Add a fake provider and practitioner
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 
@@ -152,11 +152,11 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testUpdateOrganization() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "test-update-organization", false);
+        Organization organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1632101113", false);
 
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
-        identifier.setValue("UPDATED012345");
+        identifier.setValue("1234567893");
         organization.setIdentifier(Collections.singletonList(identifier));
         organization.setName("An Updated Organization");
 
@@ -175,12 +175,12 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testUpdateOrganizationWithDuplicateNPI() {
         final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
-        OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "org-update-npi-duplicate1", false);
-        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "org-update-npi-duplicate2", false);
+        OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1633101112", false);
+        Organization organization2 = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, getServerURL()), "1235567892", false);
 
         Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
-        identifier.setValue("org-update-npi-duplicate1");
+        identifier.setValue("1633101112");
 
         organization2.setIdentifier(Collections.singletonList(identifier));
         IUpdateTyped update = client.update().resource(organization2);
@@ -190,7 +190,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     private Practitioner createFakePractitioner(Organization organization) {
         final Practitioner practitioner = new Practitioner();
         practitioner.addName().setFamily("Test").addGiven("Practitioner");
-        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("fake-prov-npi");
+        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("2222222228");
 
         final Meta meta = new Meta();
         meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organization.getIdElement().getIdPart(), "Organization ID");

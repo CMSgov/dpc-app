@@ -2,6 +2,7 @@ package gov.cms.dpc.testing.smoketests;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,10 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Security;
+import java.security.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -138,7 +136,8 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
             orgRegistrationResult.sampleStart();
             try {
-                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, adminURL);
+                String npi = NPIUtil.generateNPI();
+                clientToken = FHIRHelpers.registerOrganization(adminClient, ctx.newJsonParser(), organizationID, npi ,adminURL);
                 orgRegistrationResult.setSuccessful(true);
             } catch (Exception e) {
                 orgRegistrationResult.setSuccessful(false);
@@ -150,7 +149,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
             // Create a new public key
             try {
                 keyTuple = APIAuthHelpers.generateAndUploadKey(KEY_ID, organizationID, goldenMacaroon, hostParam);
-            } catch (IOException | NoSuchAlgorithmException | URISyntaxException e) {
+            } catch (IOException | URISyntaxException | GeneralSecurityException e) {
                 throw new IllegalStateException("Failed uploading public key", e);
             }
         } else {

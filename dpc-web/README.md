@@ -97,17 +97,15 @@ export GITHUB_ORG_TEAM_ID=123
 
 
 #### Background job processing
-In order to process background jobs such as sending email, you need to make sure [DelayedJob](https://github.com/collectiveidea/delayed_job) is running:
+In order to process background jobs such as sending email, you need to make sure [Sidekiq](https://github.com/mperham/sidekiq) is running:
+
+Open a new terminal window and execute the following in the root `/dpc-web` folder.
 
 ```
-bin/delayed_job start
+bundle exec sidekiq
 ```
 
-This command starts DelayedJob in the background. To stop DelayedJob:
-
-```
-bin/delayed_job stop
-```
+This command starts Sidekiq in the current terminal. To stop Sidekiq: `ctrl-c`, and it will shutdown the worker.
 
 # Running via Docker
 
