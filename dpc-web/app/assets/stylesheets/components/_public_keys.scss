@@ -50,3 +50,9 @@
   max-width: 100%;
   padding: 2px;
 }
+
+@for $i from 1 through 3 {
+  .step_#{$i} {
+    border-right: 1px solid $color-gray-lighter;
+  }
+}
