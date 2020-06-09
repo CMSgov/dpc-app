@@ -44,11 +44,23 @@
   }
 }
 
+.copy-btn__container {
+  width: 100%
+}
+
+.copy-btn {
+  align-items: right;
+  border-radius: 15px;
+  font-weight: 700;
+  margin: 5px 5px 5px 75%;
+  padding: 5px 10px;
+}
+
 .download_btn_container {
   border: 1px solid $color-gray;
   margin: 0 auto 15px;
   text-align: center;
-  width: 81%;
+  width: 190px;
 
   .download_btn_description {
     border-top: 1px solid $color-gray;
@@ -65,7 +77,7 @@ ol {
 ol li {
   counter-increment: my-awesome-counter;
   text-indent: -20px;
-  margin: 55px 0 0 20px;
+  margin: 30px 0 0 20px;
 }
 
 ol li::before {

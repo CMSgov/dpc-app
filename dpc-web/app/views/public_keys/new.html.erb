@@ -117,6 +117,8 @@
         </li>
         <li>
           The <b>PUBLIC KEY</b> field <u>must include</u> the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags from your public.pem file.
+
+          <%= image_tag("public-key-example.svg", alt: "") %>
         </li>
         <li>
           The public key signature (snippet.txt.sig file) <u>must yield</u> “Verified Ok” results in order to successfully generate the signature.sig file and paste its contents in the <b>PUBLIC KEY SIGNATURE</b> field.
