@@ -13,6 +13,8 @@
 !/log/.keep
 !/tmp/.keep
 
+dump.rdb
+
 # Ignore uploaded files in development
 /storage/*
 !/storage/.keep
