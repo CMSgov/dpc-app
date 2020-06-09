@@ -44,6 +44,18 @@
   }
 }
 
+.download_btn_container {
+  border: 1px solid $color-gray;
+  margin: 0 auto 15px;
+  text-align: center;
+  width: 80%;
+
+  .download_btn_description {
+    border-top: 1px solid $color-gray;
+    font-size: 12px;
+  }
+}
+
 ol {
   list-style: none;
   counter-reset: my-awesome-counter;
@@ -61,7 +73,7 @@ ol li::before {
 }
 
 .code-block {
-  background-color: $color-gray-lighter;
+  background-color: $color-gray-lightest;
   border: 1px solid $color-gray;
   max-width: 100%;
   padding: 2px;

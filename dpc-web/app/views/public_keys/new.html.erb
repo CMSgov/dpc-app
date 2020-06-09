@@ -49,11 +49,11 @@
         <%= image_tag("create-sig-image.svg", alt: "") %>
         <h4>3. Create public key signature</h4>
 
-        <div>
-          <div>
-            <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-c-button--primary ds-u-padding-x--2 ds-u-padding-y--1 ds-u-font-weight--bold" %>
+        <div class="download_btn_container">
+          <div class="download_btn">
+            <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-c-button--primary ds-u-padding-x--7 ds-u-padding-y--1 ds-u-font-weight--bold" %>
           </div>
-          <div>
+          <div class="download_btn_description">
             snippet.txt file to create signature
           </div>
         </div>
