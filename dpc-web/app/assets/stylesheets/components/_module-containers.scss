@@ -98,6 +98,14 @@
 }
 
 .module-list-container {
+  border: 1px solid $color-gray-light;
   list-style: none;
-  max-width: 700px;
+  max-height: 400px;
+  max-width: 850px;
+  overflow: auto;
+  padding: 0 10px;
+
+  ul {
+    padding: 0;
+  }
 }
