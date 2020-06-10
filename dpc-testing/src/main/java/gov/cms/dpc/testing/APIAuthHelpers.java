@@ -104,9 +104,13 @@ public class APIAuthHelpers {
 
     public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
         // TODO: Revert .signWith() to type ECC?
+        String audience = baseURL;
+        if (baseURL.startsWith("http://internal-dpc-prod-")) {
+            audience = "https://prod.dpc.cms.gov/api/v1";
+        }
         final String jwt = Jwts.builder()
                 .setHeaderParam("kid", keyID)
-                .setAudience(String.format("%s/Token/auth", baseURL))
+                .setAudience(String.format("%s/Token/auth", audience))
                 .setIssuer(macaroon)
                 .setSubject(macaroon)
                 .setId(UUID.randomUUID().toString())

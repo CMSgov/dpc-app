@@ -43,17 +43,17 @@ public class ClientUtils {
 
     /**
      * Helper method for initiating and Export job and monitoring its success.
-     *
      * @param exportClient - {@link IGenericClient} to use for export request. Ensure this contains the necessary authentication and HttpHeaders
      * @param providerNPIs - {@link List} of {@link String} of provider NPIs to use for exporting
      * @param httpClient   - {@link CloseableHttpClient} to use for executing non-FHIR HTTP requests
+     * @param overrideURL  - overrides the url used for checking jobs; only useful when DNS is not active in an environment
      */
-    static void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, CloseableHttpClient httpClient) {
+    static void handleExportJob(IGenericClient exportClient, List<String> providerNPIs, CloseableHttpClient httpClient, String overrideURL) {
         providerNPIs
                 .stream()
                 .map(npi -> exportRequestDispatcher(exportClient, npi))
                 .map(search -> (Group) search.getEntryFirstRep().getResource())
-                .map(group -> jobCompletionLambda(exportClient, httpClient, group))
+                .map(group -> jobCompletionLambda(exportClient, httpClient, group, overrideURL))
                 .peek(jobResponse -> {
                     if (jobResponse.getError().size() > 0)
                         throw new IllegalStateException("Export job completed, but with errors");
@@ -123,10 +123,15 @@ public class ClientUtils {
      * @throws IOException          - throws if the HTTP request fails
      * @throws InterruptedException - throws if the thread is interrupted
      */
-    private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, CloseableHttpClient client) throws IOException, InterruptedException {
+    private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, CloseableHttpClient client, String overrideURL) throws IOException, InterruptedException {
         // Use the traditional HTTP Client to check the job status
         JobCompletionModel jobResponse = null;
-        final HttpGet jobGet = new HttpGet(jobLocation);
+        String jobLocationURL = jobLocation;
+        if (jobLocation.startsWith("https://prod.dpc.cms.gov/api/v1")) {
+            jobLocationURL = overrideURL.substring(0, overrideURL.indexOf("/api/v1")) + jobLocation.substring("https://prod.dpc.cms.gov".length());
+            logger.info("patched job url " + jobLocationURL);
+        }
+        final HttpGet jobGet = new HttpGet(jobLocationURL);
         boolean done = false;
 
         while (!done) {
@@ -149,7 +154,6 @@ public class ClientUtils {
                         logger.error(String.format("Failed to parse job status response: %s", responseBody));
                         throw e;
                     }
-
                 }
             }
         }
@@ -190,7 +194,7 @@ public class ClientUtils {
      * @throws IOException          - throws if something bad happens
      * @throws InterruptedException - throws if someone cuts in line
      */
-    private static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, CloseableHttpClient client) throws IOException, InterruptedException {
+    private static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, CloseableHttpClient client, String overrideURL) throws IOException, InterruptedException {
         System.out.println("Retrying export request");
 
         // Return a MethodOutcome in order to get the response headers.
@@ -200,11 +204,10 @@ public class ClientUtils {
 
         // Get the headers and check the status
         final String exportURL = headers.get("content-location").get(0);
-        System.out.printf("Export job started. Progress URL: %s%n", exportURL);
-
+        logger.info(String.format("Export job started. Progress URL: %s%n", exportURL));
 
         // Poll the job until it's done
-        return awaitExportResponse(exportURL, "Checking job status", client);
+        return awaitExportResponse(exportURL, "Checking job status", client, overrideURL);
     }
 
     private static Bundle exportRequestDispatcher(IGenericClient exportClient, String npi) {
@@ -229,10 +232,10 @@ public class ClientUtils {
         }
     }
 
-    private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, CloseableHttpClient client, Group group) {
+    private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, CloseableHttpClient client, Group group, String overrideURL) {
         final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
         try {
-            return monitorExportRequest(exportOperation, client);
+            return monitorExportRequest(exportOperation, client, overrideURL);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(String.format("Error monitoring export groupID: %s", group.getId()), e);
         }
