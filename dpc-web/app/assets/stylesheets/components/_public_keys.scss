@@ -51,6 +51,37 @@
   }
 }
 
+.public_key_form_grid {
+  display: grid;
+  margin: 0;
+  padding: 0;
+
+  #need-help {
+    grid-area: 10 / 1 / 10 / 1;
+  }
+
+  #submit-btn {
+    grid-area: 9 / 1 / 9 / 1;
+  }
+
+  @media (min-width: $width-med) {
+    grid-template-columns: repeat(2, 50%);
+
+    #need-help {
+      grid-area: 5 / 1 / 5 / 1;
+    }
+
+    #submit-btn {
+      grid-area: 5 / 2 / 5 / 2;
+    }
+  }
+
+  .pk-instruction {
+    background-color: $color-primary-darkest;
+    color: $color-white;
+  }
+}
+
 .copy-btn__container {
   display: flex;
   flex-direction: row;
