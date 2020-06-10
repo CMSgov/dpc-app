@@ -26,11 +26,12 @@
           Use the command invocation:<br />
           <div class="code-block">
             <code>
-              openssl genrsa -out private.pem 4096
+              <span id="private-key">openssl genrsa -out private.pem 4096</span>
             </code>
           </div>
           <div class="copy-btn__container">
-            <button class="copy-btn ds-c-button--primary">Copy</button>
+            <button onclick="copyText('private-key')" class="copy-btn ds-c-button--primary">Copy</button>
+            <span id="confirm-private-key"></span>
           </div>
         </div>
         <p><b><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information.</b> Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
@@ -40,13 +41,14 @@
         <h4>2. Generate a public key</h4>
         <div>
           Use the command invocation:<br />
-          <div class="code-block">
+          <div class="code-block" id="public-key">
             <code>
-              openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+              <span id="public-key">openssl rsa -in private.pem -outform PEM -pubout -out public.pem</span>
             </code>
           </div>
           <div class="copy-btn__container">
-            <button class="copy-btn ds-c-button--primary">Copy</button>
+            <button onclick="copyText('public-key')" class="copy-btn ds-c-button--primary">Copy</button>
+            <span id="confirm-public-key"></span>
           </div>
         </div>
         <p>Paste the contents of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
