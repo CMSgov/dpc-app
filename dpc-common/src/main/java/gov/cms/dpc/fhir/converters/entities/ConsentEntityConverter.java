@@ -2,16 +2,24 @@ package gov.cms.dpc.fhir.converters.entities;
 
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static gov.cms.dpc.common.consent.entities.ConsentEntity.OPT_IN;
-import static gov.cms.dpc.common.consent.entities.ConsentEntity.OPT_OUT;
+import static gov.cms.dpc.common.consent.entities.ConsentEntity.*;
 
 /**
  * A utility class for converting a ConsentEntity into a FHIR Consent Resource.
@@ -23,6 +31,7 @@ public class ConsentEntityConverter {
      */
     public static final String OPT_IN_MAGIC = "http://hl7.org/fhir/ConsentPolicy/opt-in";
     public static final String OPT_OUT_MAGIC = "http://hl7.org/fhir/ConsentPolicy/opt-out";
+    public static final String SYSTEM_LOINC = "http://loinc.org";
 
     private ConsentEntityConverter() {}
 
@@ -70,14 +79,102 @@ public class ConsentEntityConverter {
         return code;
     }
 
+    private static String policyUriToCode(String uri) {
+        if (OPT_IN_MAGIC.equals(uri)) {
+            return OPT_IN;
+        } else if (OPT_OUT_MAGIC.equals(uri)) {
+            return OPT_OUT;
+        }
+        throw new WebApplicationException(String.format("Policy rule must be %s or %s.", OPT_IN_MAGIC, OPT_OUT_MAGIC), Response.Status.BAD_REQUEST);
+    }
+
     private static List<CodeableConcept> category(String loincCode) {
         // there must code to look up the code systems used in these CodeableConcept values. What is it?
         CodeableConcept category = new CodeableConcept();
-        category.addCoding().setSystem("http://loinc.org").setCode(loincCode).setDisplay(ConsentEntity.CATEGORY_DISPLAY);
+        category.addCoding().setSystem(SYSTEM_LOINC).setCode(loincCode).setDisplay(ConsentEntity.CATEGORY_DISPLAY);
         return List.of(category);
     }
 
-    public static Consent convert(ConsentEntity consentEntity, String orgURL, String fhirURL) {
+    private static String categoriesToLoincCode(List<CodeableConcept> categories) {
+        if (categories == null || categories.size() != 1) {
+            throw new WebApplicationException("Must include one category", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+
+        CodeableConcept category = categories.get(0);
+        List<Coding> codings = category.getCoding();
+        if (codings == null || codings.size() != 1) {
+            throw new WebApplicationException("Category must have one coding", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+
+        Coding coding = category.getCodingFirstRep();
+        if (!SYSTEM_LOINC.equals(coding.getSystem()) || !CATEGORY_LOINC_CODE.equals(coding.getCode())) {
+            throw new WebApplicationException(String.format("Category coding must have system %s and code %s", SYSTEM_LOINC, CATEGORY_LOINC_CODE), HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+
+        return coding.getCode();
+    }
+
+    private static UUID organizationsToCustodianUUID(List<Reference> orgRefs) {
+        if (orgRefs == null || orgRefs.size() != 1) {
+            throw new WebApplicationException("Must include one organization", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+
+        Reference orgRef = orgRefs.get(0);
+        if (StringUtils.isBlank(orgRef.getReference())) {
+            throw new WebApplicationException("Organization must include reference", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+        return FHIRExtractors.getEntityUUID(orgRef.getReference());
+    }
+
+    private static String mbiFromPatientReference(String patientRefStr) {
+        String mbi = "";
+        Pattern patientIdPattern = Pattern.compile("/Patient\\?identity=\\|(?<mbi>\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2})");
+        Matcher matcher = patientIdPattern.matcher(patientRefStr);
+        if (matcher.find()) {
+            mbi = matcher.group("mbi");
+        }
+        return mbi;
+    }
+
+    public static ConsentEntity fromFhir(Consent consent) {
+        if (consent == null) {
+            throw new WebApplicationException("No consent resource provided", Response.Status.BAD_REQUEST);
+        }
+
+        ConsentEntity entity = new ConsentEntity();
+
+        String consentId = consent.getId();
+        if (!StringUtils.isBlank(consentId)) {
+            entity.setId(FHIRExtractors.getEntityUUID(consentId));
+        }
+
+        if (!Consent.ConsentState.ACTIVE.equals(consent.getStatus())) {
+            throw new WebApplicationException("Only active consent records are accepted", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+
+        entity.setLoincCode(categoriesToLoincCode(consent.getCategory()));
+
+        Reference patientRef = consent.getPatient();
+        if (patientRef == null || StringUtils.isBlank(patientRef.getReference())) {
+            throw new WebApplicationException("Consent resource must contain patient reference", Response.Status.BAD_REQUEST);
+        }
+        String mbi = mbiFromPatientReference(patientRef.getReference());
+        if (StringUtils.isBlank(mbi)) {
+            throw new WebApplicationException("Could not find MBI in patient reference", Response.Status.BAD_REQUEST);
+        }
+        entity.setMbi(mbi);
+
+        Date dateTime = consent.getDateTime();
+        LocalDate date = dateTime != null ? dateTime.toInstant().atOffset(ZoneOffset.UTC).toLocalDate() : LocalDate.now(ZoneOffset.UTC);
+        entity.setEffectiveDate(date);
+
+        entity.setCustodian(organizationsToCustodianUUID(consent.getOrganization()));
+        entity.setPolicyCode(policyUriToCode(consent.getPolicyRule()));
+
+        return entity;
+    }
+
+    public static Consent toFhir(ConsentEntity consentEntity, String orgURL, String fhirURL) {
         Consent c = new Consent();
 
         c.setId(consentEntity.getId().toString());
