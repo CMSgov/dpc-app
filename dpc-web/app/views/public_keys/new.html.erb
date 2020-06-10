@@ -24,7 +24,7 @@
         <h4>1. Generate a private key</h4>
         <div>
           Use the command invocation:<br />
-          <div class="code-block">
+          <div class="code-block ds-u-truncate">
             <code>
               <span id="private-key">openssl genrsa -out private.pem 4096</span>
             </code>
@@ -41,7 +41,7 @@
         <h4>2. Generate a public key</h4>
         <div>
           Use the command invocation:<br />
-          <div class="code-block" id="public-key">
+          <div class="code-block ds-u-truncate">
             <code>
               <span id="public-key">openssl rsa -in private.pem -outform PEM -pubout -out public.pem</span>
             </code>
@@ -69,14 +69,15 @@
 
         <div>
           Use the command invocation:<br />
-          <div class="code-block">
+          <div class="code-block ds-u-truncate">
             <code>
-              openssl dgst -sign private.pem -sha256 -out snippet.txt.sig snippet.txt
+              <span id="sig-snippet">openssl dgst -sign private.pem -sha256 -out snippet.txt.sig snippet.txt</span>
             </code>
           </div>
         </div>
         <div class="copy-btn__container">
-          <button class="copy-btn ds-c-button--primary">Copy</button>
+          <button onclick="copyText('sig-snippet')"  class="copy-btn ds-c-button--primary">Copy</button>
+          <span id="confirm-sig-snippet"></span>
         </div>
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_4">
@@ -85,13 +86,14 @@
 
         <div>
           Use the command invocation:<br />
-          <div class="code-block">
+          <div class="code-block ds-u-truncate">
             <code>
-              openssl dgst -verify public.pem -sha256 -signature snippet.txt.sig snippet.txt
+              <span id="verify-sig">openssl dgst -verify public.pem -sha256 -signature snippet.txt.sig snippet.txt</span>
             </code>
           </div>
           <div class="copy-btn__container">
-            <button class="copy-btn ds-c-button--primary">Copy</button>
+            <button onclick="copyText('verify-sig')" class="copy-btn ds-c-button--primary">Copy</button>
+            <span id="confirm-verify-sig"></span>
           </div>
         </div>
 
@@ -99,13 +101,14 @@
 
         <div>
           Use the command invocation:<br />
-          <div class="code-block">
+          <div class="code-block ds-u-truncate">
             <code>
-              openssl base64 -in snippet.txt.sig -out signature.sig
+              <span id="b64">openssl base64 -in snippet.txt.sig -out signature.sig</span>
             </code>
           </div>
           <div class="copy-btn__container">
-            <button class="copy-btn ds-c-button--primary">Copy</button>
+            <button onclick="copyText('b64')" class="copy-btn ds-c-button--primary">Copy</button>
+            <span id="confirm-b64"></span>
           </div>
         </div>
 

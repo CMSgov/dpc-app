@@ -1,6 +1,8 @@
 function copyText(text) {
   /* Get the text field */
-  const copyText = document.getElementById(text).textContent;
+  var copyText = document.getElementById(text).textContent;
+
+  copyText = copyText.trim();
 
   /* Create text field & select text */
   var textArea = document.createElement("textarea");
@@ -20,7 +22,6 @@ function copyText(text) {
       document.body.removeChild(textArea);
     }
     var msg = successful ? 'successful' : 'unsuccessful';
-
     confirmMsg.innerHTML = 'Command copy ' + msg;
   } 
   catch (err) 
