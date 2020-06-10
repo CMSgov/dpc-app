@@ -6,7 +6,7 @@ module Internal
 
     def new
       @api_env = params[:api_env]
-      @organization = Organization.find(params[:organization_id])
+      @organization = Organization.find(org_id_param)
       @registered_organization = @organization.registered_organizations.build(api_env: @api_env)
       if @api_env == 'sandbox'
         @registered_organization.build_default_fhir_endpoint
@@ -16,7 +16,7 @@ module Internal
     end
 
     def create
-      @organization = Organization.find(params[:organization_id])
+      @organization = Organization.find(org_id_param)
       @registered_organization = @organization.registered_organizations
                                               .build(registered_organization_params)
       @api_env = params[:api_env] || @registered_organization.api_env
@@ -33,12 +33,12 @@ module Internal
 
     def edit
       @api_env = params[:api_env]
-      @organization = Organization.find(params[:organization_id])
+      @organization = Organization.find(org_id_param)
       @registered_organization = @organization.registered_organizations.find(params[:id])
     end
 
     def update
-      @organization = Organization.find(params[:organization_id])
+      @organization = Organization.find(org_id_param)
       @registered_organization = @organization.registered_organizations.find(params[:id])
       @api_env = @registered_organization.api_env
 
@@ -53,7 +53,7 @@ module Internal
     end
 
     def destroy
-      @organization = Organization.find(params[:organization_id])
+      @organization = Organization.find(org_id_param)
       @registered_organization = @organization.registered_organizations.find(params[:id])
 
       if @registered_organization.destroy
@@ -66,6 +66,10 @@ module Internal
     end
 
     private
+
+    def org_id_param
+      params.require(:organization_id)
+    end
 
     def registered_organization_params
       params.fetch(:registered_organization).permit(

@@ -55,7 +55,11 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
         // Add the patient metadata
         final Meta meta = new Meta();
         meta.addProfile(PatientProfile.PROFILE_URI);
-        meta.setLastUpdatedElement(new InstantType(entity.getUpdatedAt().format(INSTANT_FORMATTER)));
+        
+        if (entity.getUpdatedAt() != null) {
+            meta.setLastUpdatedElement(new InstantType(entity.getUpdatedAt().format(INSTANT_FORMATTER)));
+        }
+        
         patient.setMeta(meta);
 
         patient.setId(entity.getID().toString());

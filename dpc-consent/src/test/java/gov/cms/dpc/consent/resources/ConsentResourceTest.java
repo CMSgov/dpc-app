@@ -1,22 +1,29 @@
 package gov.cms.dpc.consent.resources;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.consent.AbstractConsentTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Consent;
+import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests ConsentResource using a live database. These tests will fail if the database is not running or
@@ -28,6 +35,75 @@ class ConsentResourceTest extends AbstractConsentTest {
     private static final String TEST_CONSENT_REF = String.format("Consent/%s", TEST_CONSENT_UUID);
 
     private ConsentResourceTest() {
+    }
+
+    @Test
+    final void createConsent() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        Consent consent = new Consent();
+
+        consent.setStatus(Consent.ConsentState.ACTIVE);
+
+        Coding categoryCoding = new Coding("http://loinc.org","64292-6", null);
+        CodeableConcept category = new CodeableConcept();
+        category.setCoding(List.of(categoryCoding));
+        consent.setCategory(List.of(category));
+
+        String patientRefPath = "/Patient?identity=|0OO0OO0OO00";
+        consent.setPatient(new Reference("http://api.url" + patientRefPath));
+
+        Date date = Date.from(Instant.now());
+        consent.setDateTime(date);
+
+        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
+        consent.setOrganization(List.of(orgRef));
+
+        String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
+        consent.setPolicyRule(policyUrl);
+
+        MethodOutcome outcome = client
+                .create()
+                .resource(consent)
+                .encodedJson()
+                .execute();
+
+        assertTrue(outcome.getCreated());
+
+        Consent result = (Consent) outcome.getResource();
+        assertTrue(result.getPatient().getReference().endsWith(patientRefPath));
+        assertEquals(policyUrl, result.getPolicyRule());
+        assertEquals(Date.from(date.toInstant().atOffset(ZoneOffset.UTC).toLocalDate().atStartOfDay().toInstant(ZoneOffset.UTC)), result.getDateTime());
+    }
+
+    @Test
+    final void createConsent_fails_withInvalidMbi() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        Consent consent = new Consent();
+
+        consent.setStatus(Consent.ConsentState.ACTIVE);
+
+        Coding categoryCoding = new Coding();
+        CodeableConcept category = new CodeableConcept();
+        category.setCoding(List.of(categoryCoding));
+        consent.setCategory(List.of(category));
+
+        String patientRefPath = "/Patient?identity=|ABCDEFG";
+        consent.setPatient(new Reference("http://api.url" + patientRefPath));
+
+        Date date = Date.from(Instant.now());
+        consent.setDateTime(date);
+
+        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
+        consent.setOrganization(List.of(orgRef));
+
+        String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";
+        consent.setPolicyRule(policyUrl);
+
+        ICreateTyped createOp = client
+                .create()
+                .resource(consent);
+
+        assertThrows(UnprocessableEntityException.class, createOp::execute);
     }
 
     @Test
@@ -130,5 +206,48 @@ class ConsentResourceTest extends AbstractConsentTest {
 
         assertEquals(ConsentEntityConverter.OPT_IN_MAGIC, found.getPolicyRule());
         assertEquals(TEST_CONSENT_REF, found.getId());
+    }
+
+    @Test
+    final void updateConsent() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        Consent consent = new Consent();
+
+        consent.setStatus(Consent.ConsentState.ACTIVE);
+
+        Coding categoryCoding = new Coding("http://loinc.org","64292-6", null);
+        CodeableConcept category = new CodeableConcept();
+        category.setCoding(List.of(categoryCoding));
+        consent.setCategory(List.of(category));
+
+        String patientRefPath = "/Patient?identity=|0OO0OO0OO00";
+        consent.setPatient(new Reference("http://api.url" + patientRefPath));
+
+        Date date = Date.from(Instant.now());
+        consent.setDateTime(date);
+
+        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
+        consent.setOrganization(List.of(orgRef));
+
+        String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-in";
+        consent.setPolicyRule(policyUrl);
+
+        MethodOutcome outcome = client
+                .create()
+                .resource(consent)
+                .encodedJson()
+                .execute();
+
+        consent = (Consent) outcome.getResource();
+        consent.setPolicyRule("http://hl7.org/fhir/ConsentPolicy/opt-out");
+
+        outcome = client
+                .update()
+                .resource(consent)
+                .withId(consent.getId())
+                .execute();
+
+        Consent updatedConsent = (Consent) outcome.getResource();
+        assertEquals("http://hl7.org/fhir/ConsentPolicy/opt-out", updatedConsent.getPolicyRule());
     }
 }
