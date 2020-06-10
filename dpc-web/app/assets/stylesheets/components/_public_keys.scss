@@ -117,6 +117,10 @@ ol li::before {
 
 @for $i from 1 through 4 {
   .step_#{$i} {
+    h4 {
+      font-size: 18px;
+    }
+
     @if $i > 2 {
       border-top: 1px solid $color-gray-lighter;
     }
@@ -124,9 +128,13 @@ ol li::before {
     @if $i % 2 != 0 {
       border-right: 1px solid $color-gray-lighter;
     }
+    
+    @media (min-width: $width-med) {
+      border-top: 0;
 
-    @media (min-width: $width-sm) {
-      border-top: 0px;
+      h4 {
+        font-size: 16px;
+      }
 
       @if $i < 4 {
         border-right: 1px solid $color-gray-lighter;
