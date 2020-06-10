@@ -55,7 +55,7 @@
             <span class="align-confirm" id="confirm-public-key"></span>
           </div>
         </div>
-        <p>Paste the contents of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
+        <p><b>Paste the contents</b> of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_3">
         <%= image_tag("create-sig-image.svg", alt: "") %>
@@ -80,8 +80,9 @@
           </div>
         </div>
         <div class="copy-btn__container">
-          <div>
-            <%= image_tag("information.svg", alt: "") %>
+          <div class="tooltip">
+            <%= image_tag("information.svg", alt: "") %><br />
+            <span class="tooltiptext">This command signs the downloaded snippet.txt file with your private key to create a signed public key signature in binary format. (snippet.txt.sig)</span>
           </div>
           <div>
             <button onclick="copyText('sig-snippet')"  class="copy-btn ds-c-button--primary">Copy</button>
@@ -103,8 +104,9 @@
             </code>
           </div>
           <div class="copy-btn__container">
-            <div>
-              <%= image_tag("information.svg", alt: "") %>
+            <div class="tooltip">
+              <%= image_tag("information.svg", alt: "") %><br />
+              <span class="tooltiptext">This command verifies the snippet.txt.sig file.</span>
             </div>
             <div>
               <button onclick="copyText('verify-sig')" class="copy-btn ds-c-button--primary">Copy</button>
@@ -125,8 +127,9 @@
             </code>
           </div>
           <div class="copy-btn__container">
-            <div>
-              <%= image_tag("information.svg", alt: "") %>
+            <div class="tooltip">
+              <%= image_tag("information.svg", alt: "") %><br />
+              <span class="tooltiptext">This command creates your verified public key signature into a human-readable format that can be pasted below. (signature.txt)</span>
             </div>
             <div>
               <button onclick="copyText('b64')" class="copy-btn ds-c-button--primary">Copy</button>
@@ -137,7 +140,7 @@
           </div>
         </div>
 
-        <p>Paste the contents of this signature.sig file into the ‘Public Key Signature’ field below.</p>
+        <p><b>Paste the contents</b> of this signature.sig file into the ‘Public Key Signature’ field below.</p>
       </div>
     </div>
   </section>

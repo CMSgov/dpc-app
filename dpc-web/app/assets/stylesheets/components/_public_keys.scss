@@ -85,6 +85,29 @@
   color: $color-error-dark;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: $color-gray-lightest;
+  border: 1px solid $color-black;
+  color: $color-black;
+  padding: 5px;
+
+  position: absolute;
+  visibility: hidden;
+  width: 150px;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
 .download_btn_container {
   border: 1px solid $color-gray;
   margin: 0 auto 15px;
@@ -131,8 +154,9 @@ ol li::before {
 }
 
 .code-block {
-  background-color: $color-gray-lightest;
-  border: 1px solid $color-gray;
+  background-color: $color-white;
+  border: 1px solid $color-gray-dark;
+  color: $color-gray-dark;
   max-width: 100%;
   padding: 2px;
 }
