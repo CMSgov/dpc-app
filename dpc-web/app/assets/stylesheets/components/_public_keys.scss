@@ -10,6 +10,7 @@
   .public-key__intro {
       align-items: center;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       margin: auto;
     
@@ -18,10 +19,16 @@
         color: $color-gray-dark;
         font-weight: 700;
         position: relative;
+        width: 477px;
       }
     
       .public-key__intro-windows {
-        max-width: 33%;
+        max-width: 45%;
+        padding: 15px;
+
+        @media (max-width: $width-md) {
+          max-width: 100%;
+        }
       }
     }
     
@@ -59,12 +66,27 @@
 .download_btn_container {
   border: 1px solid $color-gray;
   margin: 0 auto 15px;
+  max-width: 190px;
+  position: relative;
   text-align: center;
-  width: 190px;
 
   .download_btn_description {
     border-top: 1px solid $color-gray;
     font-size: 12px;
+  }
+
+  .download_btn_form {
+
+    .button_to {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+    }
+
+    .download_btn {
+      display: block;
+      flex-grow: 1;
+    }
   }
 }
 
@@ -93,8 +115,22 @@ ol li::before {
   padding: 2px;
 }
 
-@for $i from 1 through 3 {
+@for $i from 1 through 4 {
   .step_#{$i} {
-    border-right: 1px solid $color-gray-lighter;
+    @if $i > 2 {
+      border-top: 1px solid $color-gray-lighter;
+    }
+
+    @if $i % 2 != 0 {
+      border-right: 1px solid $color-gray-lighter;
+    }
+
+    @media (min-width: $width-sm) {
+      border-top: 0px;
+
+      @if $i < 4 {
+        border-right: 1px solid $color-gray-lighter;
+      }
+    }
   }
 }

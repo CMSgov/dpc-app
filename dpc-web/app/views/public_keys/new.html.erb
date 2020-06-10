@@ -6,7 +6,7 @@
       <div class="ds-u-padding-left--7 ds-u-padding-top--2 ds-u-padding-right--4 ds-u-padding-bottom--2 ds-h1 public-key__intro-header">
         How to Generate a Public Key
       </div>
-      <div class="public-key__intro-windows">
+      <div class="ds-u-padding-left--3 public-key__intro-windows">
         <b>Window users</b><br />
         If you are using Windows, you can use this link for downloading openSSL: <%= link_to 'https://wiki.openssl.org/index.php/Binaries' %>
       </div>
@@ -19,7 +19,7 @@
 
   <section class="ds-l-container ds-u-font-size--small">
     <div class="ds-l-row">
-      <div class="ds-l-col--6 ds-l-md-col--3 step step_1">
+      <div class="ds-l-col--6 ds-l-sm-col--3 step step_1">
         <%= image_tag("private-key-image.svg", alt: "") %>
         <h4>1. Generate a private key</h4>
         <div>
@@ -29,10 +29,13 @@
               openssl genrsa -out private.pem 4096
             </code>
           </div>
+          <div class="copy-btn__container">
+            <button class="copy-btn ds-c-button--primary">Copy</button>
+          </div>
         </div>
-        <p class="ds-u-font-weight--bold"><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information. Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
+        <p><b><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information.</b> Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
       </div>
-      <div class="ds-l-col--6 ds-l-md-col--3 step_2">
+      <div class="ds-l-col--6 ds-l-sm-col--3 step_2">
         <%= image_tag("public-key-image.svg", alt: "") %>
         <h4>2. Generate a public key</h4>
         <div>
@@ -42,16 +45,19 @@
               openssl rsa -in private.pem -outform PEM -pubout -out public.pem
             </code>
           </div>
+          <div class="copy-btn__container">
+            <button class="copy-btn ds-c-button--primary">Copy</button>
+          </div>
         </div>
         <p>Paste the contents of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
       </div>
-      <div class="ds-l-col--6 ds-l-md-col--3 step_3">
+      <div class="ds-l-col--6 ds-l-sm-col--3 step_3">
         <%= image_tag("create-sig-image.svg", alt: "") %>
         <h4>3. Create public key signature</h4>
 
         <div class="download_btn_container">
-          <div class="download_btn">
-            <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-c-button--primary ds-u-padding-x--7 ds-u-padding-y--1 ds-u-font-weight--bold" %>
+          <div class="download_btn_form">
+            <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-c-button--primary ds-u-font-weight--bold download_btn" %>
           </div>
           <div class="download_btn_description">
             snippet.txt file to create signature
@@ -67,8 +73,11 @@
             </code>
           </div>
         </div>
+        <div class="copy-btn__container">
+          <button class="copy-btn ds-c-button--primary">Copy</button>
+        </div>
       </div>
-      <div class="ds-l-col--6 ds-l-md-col--3 step_4">
+      <div class="ds-l-col--6 ds-l-sm-col--3 step_4">
         <%= image_tag("verify-sig-image.svg", alt: "") %>
         <h4>4. Verify public key signature</h4>
 
@@ -78,6 +87,9 @@
             <code>
               openssl dgst -verify public.pem -sha256 -signature snippet.txt.sig snippet.txt
             </code>
+          </div>
+          <div class="copy-btn__container">
+            <button class="copy-btn ds-c-button--primary">Copy</button>
           </div>
         </div>
 
@@ -89,6 +101,9 @@
             <code>
               openssl base64 -in snippet.txt.sig -out signature.sig
             </code>
+          </div>
+          <div class="copy-btn__container">
+            <button class="copy-btn ds-c-button--primary">Copy</button>
           </div>
         </div>
 
