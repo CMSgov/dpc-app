@@ -155,37 +155,63 @@
   </section>
 
   <section>
-    <ol class="public_key_form_grid">
-      <div class="pk-grid-cell pk-instruction" id="env-inst">
-        <li></li>
-      </div>
-      <div class="pk-grid-cell pk-form-field" id="env-form">
-        1B
-      </div>
-      <div class="pk-grid-cell pk-instruction" id="label-inst">
-        <li></li>
-      </div>
-      <div class="pk-grid-cell pk-form-field" id="label-form">
-        2B
-      </div>
-      <div class="pk-grid-cell pk-instruction" id="key-inst">
-        <li></li>
-      </div>
-      <div class="pk-grid-cell pk-form-field" id="key-form">
-        3B
-      </div>
-      <div class="pk-grid-cell pk-instruction" id="sig-inst">
-        <li></li>
-      </div>
-      <div class="pk-grid-cell pk-form-field" id="sig-form">
-        4B
-      </div>
-      <div class="ds-u-font-style--italic ds-u-text-align--center pk-grid-cell pk-instruction" id="need-help">
-        <span class="ds-u-color--error"><b>Need Help?</b></span> See <b>DPC’s User Guide</b> for more information.
-      </div>
-      <div class="pk-grid-cell pk-form-field" id="submit-btn">
-        5B
-      </div>
-    </ol>
+    <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
+      <ol class="public_key_form_grid">
+        <div class="pk-grid-cell pk-instruction" id="env-inst">
+          <li>
+            Select the sandbox <b>ENVIRONMENT</b>.
+          </li>
+        </div>
+        <div class="pk-grid-cell pk-triangle">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="env-form">
+          <div class="field ds-u-margin-y--5">
+            <%= label_tag :api_environment, "1. Environment", class: "ds-c-label" %>
+            <%= select_tag :api_environment, options_for_select(@organization.registered_api_envs, params[:api_environment]), include_blank: true, class: "ds-c-field drop-down" %>
+          </div>
+        </div>
+        <div class="pk-grid-cell pk-instruction" id="label-inst">
+          <li></li>
+        </div>
+        <div class="pk-grid-cell pk-triangle">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="label-form">
+          <div class="field ds-u-margin-y--5">
+            <%= label_tag :label, "2. Label", class: "ds-c-label" %>
+            <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
+          </div>
+        </div>
+        <div class="pk-grid-cell pk-instruction" id="key-inst">
+          <li></li>
+        </div>
+        <div class="pk-grid-cell pk-triangle">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="key-form">
+          <div class="field ds-u-margin-y--5">
+            <%= label_tag :public_key, "3. Public Key", class: "ds-c-label" %>
+            <%= text_area_tag :public_key, params[:label], class: "ds-c-field" %>
+          </div>
+        </div>
+        <div class="pk-grid-cell pk-instruction" id="sig-inst">
+          <li></li>
+        </div>
+        <div class="pk-grid-cell pk-triangle">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="sig-form">
+          <div class="field ds-u-margin-y--5">
+            <%= label_tag :snippet_signature, "4. Signature Snippet", class: "ds-c-label" %>
+            <%= text_area_tag :snippet_signature, params[:label], class: "ds-c-field" %>
+          </div>
+        </div>
+        <div class="ds-u-font-style--italic ds-u-text-align--center ds-u-fill--primary-darkest ds-u-color--white pk-grid-cell" id="need-help">
+          <span class="ds-u-color--error"><b>Need Help?</b></span> See <b>DPC’s User Guide</b> for more information.
+        </div>
+        <div class="pk-grid-cell pk-space">
+        </div>
+        <div class="pk-grid-cell pk-form-field" id="submit-btn">
+          <%= submit_tag "Add key", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
+        </div>
+      </ol>
+    <% end %>
   </section>
 </div>

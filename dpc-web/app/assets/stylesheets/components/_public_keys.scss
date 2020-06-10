@@ -56,6 +56,10 @@
   margin: 0;
   padding: 0;
 
+  .pk-triangle {
+    display: none;
+  }
+
   #need-help {
     grid-area: 10 / 1 / 10 / 1;
   }
@@ -65,14 +69,25 @@
   }
 
   @media (min-width: $width-med) {
-    grid-template-columns: repeat(2, 50%);
+    grid-template-columns: 45% 5% 50%;
+
+    .pk-triangle {
+      display: inline;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 20px 0 20px 30px;
+      border-color: transparent transparent transparent $color-primary-darkest;
+
+      margin: 32px 0 0 0;
+    }
 
     #need-help {
       grid-area: 5 / 1 / 5 / 1;
     }
 
     #submit-btn {
-      grid-area: 5 / 2 / 5 / 2;
+      grid-area: 5 / 3 / 5 / 3;
     }
   }
 
