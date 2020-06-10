@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
@@ -37,6 +38,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -202,4 +204,33 @@ public class APITestHelpers {
                 .configure().constraintValidatorFactory(factory)
                 .buildValidatorFactory().getValidator();
     }
+
+    public static Practitioner createPractitionerResource(String NPI, String orgID) {
+        final Practitioner practitioner = new Practitioner();
+        practitioner.addIdentifier().setValue(NPI).setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        practitioner.addName()
+                .setFamily("Practitioner").addGiven("Test");
+
+        // Meta data which includes the Org we're using
+        final Meta meta = new Meta();
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), orgID, "OrganizationID");
+        practitioner.setMeta(meta);
+
+        return practitioner;
+    }
+
+    public static Patient createPatientResource(String MBI, String organizationID) {
+        final Patient patient = new Patient();
+        patient.addIdentifier()
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setValue(MBI);
+
+        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.setBirthDate(Date.valueOf("1990-01-01"));
+        patient.setGender(Enumerations.AdministrativeGender.OTHER);
+        patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
+
+        return patient;
+    }
+
 }
