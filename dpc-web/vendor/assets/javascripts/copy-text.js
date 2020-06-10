@@ -9,6 +9,7 @@ function copyText(text) {
     textArea.value = copyText;
     document.body.appendChild(textArea);
     textArea.select();
+    textArea.setSelectionRange(0, 99999); /*For mobile devices*/
 
   let confirm = 'confirm-' + text
 
@@ -20,6 +21,7 @@ function copyText(text) {
     if(successful)
     {
       document.body.removeChild(textArea);
+      confirmMsg.classList.add("confirm-success");
     }
     var msg = successful ? 'successful' : 'unsuccessful';
     confirmMsg.innerHTML = 'Command copy ' + msg;

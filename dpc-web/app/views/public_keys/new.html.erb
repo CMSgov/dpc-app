@@ -31,6 +31,8 @@
           </div>
           <div class="copy-btn__container">
             <button onclick="copyText('private-key')" class="copy-btn ds-c-button--primary">Copy</button>
+          </div>
+          <div class="confirm-msg">
             <span id="confirm-private-key"></span>
           </div>
         </div>
@@ -48,7 +50,9 @@
           </div>
           <div class="copy-btn__container">
             <button onclick="copyText('public-key')" class="copy-btn ds-c-button--primary">Copy</button>
-            <span id="confirm-public-key"></span>
+          </div>
+          <div class="confirm-msg">
+            <span class="align-confirm" id="confirm-public-key"></span>
           </div>
         </div>
         <p>Paste the contents of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
@@ -61,7 +65,7 @@
           <div class="download_btn_form">
             <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
           </div>
-          <div class="ds-u-padding--1 download_btn_description">
+          <div class="align-confirm" class="ds-u-padding--1 download_btn_description">
             snippet.txt file to create signature
           </div>
         </div>
@@ -76,8 +80,15 @@
           </div>
         </div>
         <div class="copy-btn__container">
-          <button onclick="copyText('sig-snippet')"  class="copy-btn ds-c-button--primary">Copy</button>
-          <span id="confirm-sig-snippet"></span>
+          <div>
+            <%= image_tag("information.svg", alt: "") %>
+          </div>
+          <div>
+            <button onclick="copyText('sig-snippet')"  class="copy-btn ds-c-button--primary">Copy</button>
+          </div>
+        </div>
+        <div class="confirm-msg">
+          <span class="align-confirm" id="confirm-sig-snippet"></span>
         </div>
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_4">
@@ -92,7 +103,14 @@
             </code>
           </div>
           <div class="copy-btn__container">
-            <button onclick="copyText('verify-sig')" class="copy-btn ds-c-button--primary">Copy</button>
+            <div>
+              <%= image_tag("information.svg", alt: "") %>
+            </div>
+            <div>
+              <button onclick="copyText('verify-sig')" class="copy-btn ds-c-button--primary">Copy</button>
+            </div>
+          </div>
+          <div class="confirm-msg">
             <span id="confirm-verify-sig"></span>
           </div>
         </div>
@@ -107,7 +125,14 @@
             </code>
           </div>
           <div class="copy-btn__container">
-            <button onclick="copyText('b64')" class="copy-btn ds-c-button--primary">Copy</button>
+            <div>
+              <%= image_tag("information.svg", alt: "") %>
+            </div>
+            <div>
+              <button onclick="copyText('b64')" class="copy-btn ds-c-button--primary">Copy</button>
+            </div>
+          </div>
+          <div class="confirm-msg">
             <span id="confirm-b64"></span>
           </div>
         </div>
