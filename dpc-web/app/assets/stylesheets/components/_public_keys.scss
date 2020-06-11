@@ -106,6 +106,8 @@
   .pk-instruction {
     background-color: $color-primary-darkest;
     color: $color-white;
+    display: flex;
+    flex-direction: row;
   }
 }
 
