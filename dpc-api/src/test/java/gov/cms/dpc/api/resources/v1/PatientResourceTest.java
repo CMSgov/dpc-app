@@ -318,7 +318,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         Bundle practSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("8075963174210588464"))
+                .where(Practitioner.IDENTIFIER.exactly().code("1232125215"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
