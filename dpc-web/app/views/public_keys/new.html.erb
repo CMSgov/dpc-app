@@ -166,40 +166,48 @@
         </div>
         <div class="pk-grid-cell pk-form-field" id="env-form">
           <div class="field ds-u-margin-y--5">
-            <%= label_tag :api_environment, "1. Environment", class: "ds-c-label" %>
+            <%= label_tag :api_environment, "Environment", class: "ds-c-label" %>
             <%= select_tag :api_environment, options_for_select(@organization.registered_api_envs, params[:api_environment]), include_blank: true, class: "ds-c-field drop-down" %>
           </div>
         </div>
         <div class="pk-grid-cell pk-instruction" id="label-inst">
-          <li></li>
+          <li>
+            Add a <b>LABEL</b> for your public key that can be easily recognized in the future.
+          </li>
         </div>
         <div class="pk-grid-cell pk-triangle">
         </div>
         <div class="pk-grid-cell pk-form-field" id="label-form">
           <div class="field ds-u-margin-y--5">
-            <%= label_tag :label, "2. Label", class: "ds-c-label" %>
+            <%= label_tag :label, "Label", class: "ds-c-label" %>
             <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
           </div>
         </div>
         <div class="pk-grid-cell pk-instruction" id="key-inst">
-          <li></li>
+          <li>
+            The <b>PUBLIC KEY</b> field <u>must include</u> the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags from your public.pem file.
+
+            <%= image_tag("public-key-example.svg", alt: "") %>
+          </li>
         </div>
         <div class="pk-grid-cell pk-triangle">
         </div>
         <div class="pk-grid-cell pk-form-field" id="key-form">
           <div class="field ds-u-margin-y--5">
-            <%= label_tag :public_key, "3. Public Key", class: "ds-c-label" %>
+            <%= label_tag :public_key, "Public Key", class: "ds-c-label" %>
             <%= text_area_tag :public_key, params[:label], class: "ds-c-field" %>
           </div>
         </div>
         <div class="pk-grid-cell pk-instruction" id="sig-inst">
-          <li></li>
+          <li>
+            The public key signature (snippet.txt.sig file) <u>must yield</u> “Verified Ok” results in order to successfully generate the signature.sig file and paste its contents in the <b>PUBLIC KEY SIGNATURE</b> field.
+          </li>
         </div>
         <div class="pk-grid-cell pk-triangle">
         </div>
         <div class="pk-grid-cell pk-form-field" id="sig-form">
           <div class="field ds-u-margin-y--5">
-            <%= label_tag :snippet_signature, "4. Signature Snippet", class: "ds-c-label" %>
+            <%= label_tag :snippet_signature, "Signature Snippet", class: "ds-c-label" %>
             <%= text_area_tag :snippet_signature, params[:label], class: "ds-c-field" %>
           </div>
         </div>

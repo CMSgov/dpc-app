@@ -56,6 +56,10 @@
   margin: 0;
   padding: 0;
 
+  .pk-grid-cell {
+    padding: 0 25px;
+  }
+
   .pk-triangle {
     display: none;
   }
@@ -79,7 +83,7 @@
       border-width: 20px 0 20px 30px;
       border-color: transparent transparent transparent $color-primary-darkest;
 
-      margin: 32px 0 0 0;
+      margin: auto 0;
     }
 
     #need-help {
