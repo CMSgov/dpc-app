@@ -31,7 +31,10 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -82,16 +85,13 @@ public class APITestHelpers {
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
         try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("provider_bundle.json")) {
-            final Bundle providerBundle = (Bundle) parser.parseResource(inputStream);
-
-            final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(providerBundle).setName("resource");
+            final Parameters providerParameters = (Parameters) parser.parseResource(inputStream);
 
             client
                     .operation()
                     .onType(Practitioner.class)
                     .named("submit")
-                    .withParameters(parameters)
+                    .withParameters(providerParameters)
                     .encodedJson()
                     .execute();
         }
@@ -99,16 +99,13 @@ public class APITestHelpers {
 
     public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
         try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
-            final Bundle patientBundle = (Bundle) parser.parseResource(inputStream);
-
-            final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(patientBundle).setName("resource");
+            final Parameters patientParameters = (Parameters) parser.parseResource(inputStream);
 
             client
                     .operation()
                     .onType(Patient.class)
                     .named("submit")
-                    .withParameters(parameters)
+                    .withParameters(patientParameters)
                     .encodedJson()
                     .execute();
         }

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b12a7f7e-020f-47a2-b38d-203dedaa00d3",
+		"_postman_id": "ef19bc1b-2082-4b65-b702-79c557084bc2",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -161,6 +161,69 @@
 								"v1",
 								"Endpoint",
 								"{{endpoint_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create consent record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "58421265-29f7-407c-a5cc-289820e44ef7",
+								"exec": [
+									"pm.test(\"Status is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response should contain submitted values\", function() {",
+									"    var respJson = pm.response.json();",
+									"    pm.expect(respJson.resourceType).to.equal(\"Consent\")",
+									"    pm.expect(respJson.text.div).contains(\"OPTOUT\");",
+									"    pm.expect(respJson.policyRule).to.equal(\"http://hl7.org/fhir/ConsentPolicy/opt-out\");",
+									"})",
+									"",
+									"pm.globals.set(\"consent_id\", pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"resourceType\": \"Consent\",\n\t\"status\": \"active\",\n\t\"category\": [{\n\t\t\"coding\": [{\n\t\t\t\"system\": \"http://loinc.org\",\n\t\t\t\"code\": \"64292-6\"\n\t\t}]\n\t}],\n\t\"patient\": {\n\t\t\"reference\": \"http://api.url/Patient?identity=|0OO0OO0OO00\"\n\t},\n\t\"organization\": {\n\t\t\"reference\": \"{{organization_id}}\"\n\t},\n\t\"policyRule\": \"http://hl7.org/fhir/ConsentPolicy/opt-out\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:{{consent_port}}/v1/Consent",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{consent_port}}",
+							"path": [
+								"v1",
+								"Consent"
 							]
 						}
 					},
@@ -1138,6 +1201,68 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Update consent record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "afc8f4d8-cc70-4aeb-8119-786551e1ada9",
+								"exec": [
+									"pm.test(\"Status is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should contain submitted values\", function() {",
+									"    var respJson = pm.response.json();",
+									"    pm.expect(respJson.resourceType).to.equal(\"Consent\")",
+									"    pm.expect(respJson.text.div).contains(\"OPTIN\");",
+									"    pm.expect(respJson.policyRule).to.equal(\"http://hl7.org/fhir/ConsentPolicy/opt-in\");",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"resourceType\": \"Consent\",\n\t\"status\": \"active\",\n\t\"category\": [{\n\t\t\"coding\": [{\n\t\t\t\"system\": \"http://loinc.org\",\n\t\t\t\"code\": \"64292-6\"\n\t\t}]\n\t}],\n\t\"patient\": {\n\t\t\"reference\": \"http://api.url/Patient?identity=|0OO0OO0OO00\"\n\t},\n\t\"organization\": {\n\t\t\"reference\": \"{{organization_id}}\"\n\t},\n\t\"policyRule\": \"http://hl7.org/fhir/ConsentPolicy/opt-in\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:{{consent_port}}/v1/Consent/{{consent_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{consent_port}}",
+							"path": [
+								"v1",
+								"Consent",
+								"{{consent_id}}"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -1455,6 +1580,12 @@
 			"id": "770b174b-c2c4-439b-babf-d9ec7155dbdb",
 			"key": "attribution_port",
 			"value": "3500",
+			"type": "string"
+		},
+		{
+			"id": "6ef027ab-07ee-4c2a-8c8a-45d4ff6540d3",
+			"key": "consent_port",
+			"value": "3600",
 			"type": "string"
 		}
 	],
