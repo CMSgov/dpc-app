@@ -158,10 +158,10 @@
     <%= form_tag organization_public_keys_path(organization_id: params[:organization_id]), method: :post do %>
       <div class="public_key_form_grid">
         <div class="pk-grid-cell pk-instruction" id="env-inst">
-          <div>
+          <div class="ds-display pk-inst-num">
             1.
           </div>
-          <div>
+          <div class="pk-inst">
             Select the sandbox <b>ENVIRONMENT</b>.
           </div>
         </div>
@@ -174,10 +174,10 @@
           </div>
         </div>
         <div class="pk-grid-cell pk-instruction" id="label-inst">
-          <div>
+          <div class="ds-display pk-inst-num">
             2.
           </div>
-          <div>
+          <div class="pk-inst">
             Add a <b>LABEL</b> for your public key that can be easily recognized in the future.
           </div>
         </div>
@@ -190,10 +190,10 @@
           </div>
         </div>
         <div class="pk-grid-cell pk-instruction" id="key-inst">
-          <div>
+          <div class="ds-display pk-inst-num">
             3.
           </div>
-          <div>
+          <div class="pk-inst">
             The <b>PUBLIC KEY</b> field <u>must include</u> the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags from your public.pem file.
 
             <%= image_tag("public-key-example.svg", alt: "") %>
@@ -208,10 +208,10 @@
           </div>
         </div>
         <div class="pk-grid-cell pk-instruction" id="sig-inst">
-          <div>
+          <div class="ds-display pk-inst-num">
             4.
           </div>
-          <div>
+          <div class="pk-inst">
             The public key signature (snippet.txt.sig file) <u>must yield</u> “Verified Ok” results in order to successfully generate the signature.sig file and paste its contents in the <b>PUBLIC KEY SIGNATURE</b> field.
           </div>
         </div>
