@@ -1,0 +1,100 @@
+.public-key__container {
+  margin: 0 auto;
+  max-width: $layout-l-breakpoint;
+}
+
+.public-key__intro-container {
+  display: flex;
+  flex-direction: column;
+
+  .public-key__intro {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      margin: auto;
+    
+      .public-key__intro-header {
+        background-color: $color-warn-lightest;
+        color: $color-gray-dark;
+        font-weight: 700;
+        position: relative;
+      }
+    
+      .public-key__intro-windows {
+        max-width: 33%;
+      }
+    }
+    
+    .public-key__files {
+      width: 100%;
+    }
+}
+
+.public-key__form-container {
+  display: flex;
+  flex-direction: row;
+  
+  div {
+    width: 50%;
+  }
+
+  .field_input {
+    margin: 0 auto;
+    width: 100%
+  }
+}
+
+.copy-btn__container {
+  width: 100%
+}
+
+.copy-btn {
+  align-items: right;
+  border-radius: 15px;
+  font-weight: 700;
+  margin: 5px 5px 5px 75%;
+  padding: 5px 10px;
+}
+
+.download_btn_container {
+  border: 1px solid $color-gray;
+  margin: 0 auto 15px;
+  text-align: center;
+  width: 190px;
+
+  .download_btn_description {
+    border-top: 1px solid $color-gray;
+    font-size: 12px;
+  }
+}
+
+ol {
+  list-style: none;
+  counter-reset: my-awesome-counter;
+  padding: 30px 0 25px 15px;
+}
+
+ol li {
+  counter-increment: my-awesome-counter;
+  text-indent: -20px;
+  margin: 30px 0 0 20px;
+}
+
+ol li::before {
+  content: counter(my-awesome-counter) ". ";
+  color: $color-white;
+  font-weight: bold;
+}
+
+.code-block {
+  background-color: $color-gray-lightest;
+  border: 1px solid $color-gray;
+  max-width: 100%;
+  padding: 2px;
+}
+
+@for $i from 1 through 3 {
+  .step_#{$i} {
+    border-right: 1px solid $color-gray-lighter;
+  }
+}

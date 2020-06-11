@@ -4,6 +4,10 @@ require 'rails_helper'
 
 RSpec.describe PublicKeyManager do
   describe '#create_public_key' do
+    before(:each) do
+      @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature' }
+    end
+
     context 'with valid key' do
       context 'successful API request' do
         it 'responds true' do
@@ -12,14 +16,14 @@ RSpec.describe PublicKeyManager do
           api_client = instance_double(APIClient)
           allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
           allow(api_client).to receive(:create_public_key)
-            .with(registered_org.api_id, params: { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read })
+            .with(registered_org.api_id, params: @public_key_params)
             .and_return(api_client)
           allow(api_client).to receive(:response_successful?).and_return(true)
           allow(api_client).to receive(:response_body).and_return('id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
 
           manager = PublicKeyManager.new(api_env: 'sandbox', registered_organization: registered_org)
 
-          new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read)
+          new_public_key = manager.create_public_key(@public_key_params)
 
           expect(new_public_key[:response]).to eq(true)
         end
@@ -32,14 +36,14 @@ RSpec.describe PublicKeyManager do
           api_client = instance_double(APIClient)
           allow(APIClient).to receive(:new).with('sandbox').and_return(api_client)
           allow(api_client).to receive(:create_public_key)
-            .with(registered_org.api_id, params: { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read })
+            .with(registered_org.api_id, params: @public_key_params)
             .and_return(api_client)
           allow(api_client).to receive(:response_body).and_return('id' => 'none')
           allow(api_client).to receive(:response_successful?).and_return(false)
 
           manager = PublicKeyManager.new(api_env: 'sandbox', registered_organization: registered_org)
 
-          new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read)
+          new_public_key = manager.create_public_key(@public_key_params)
 
           expect(new_public_key[:response]).to eq(false)
         end
@@ -51,7 +55,7 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization, api_env: 'sandbox')
         manager = PublicKeyManager.new(api_env: 'sandbox', registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read)
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
@@ -60,7 +64,7 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization, api_env: 'sandbox')
         manager = PublicKeyManager.new(api_env: 'sandbox', registered_organization: registered_org)
 
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read)
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read, snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end

@@ -92,6 +92,12 @@ services:
       - api
     command: api:3002
 
+  start_consent:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - consent
+    command: consent:3600
+
 volumes:
   export-volume:
     driver: local
