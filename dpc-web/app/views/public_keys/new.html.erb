@@ -33,7 +33,7 @@
             <button onclick="copyText('private-key')" class="copy-btn ds-c-button--primary">Copy</button>
           </div>
           <div class="confirm-msg">
-            <span class="confirm-span" id="confirm-private-key" style="display: none;"></span>
+            <span id="confirm-private-key"></span>
           </div>
         </div>
         <p><b><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information.</b> Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
@@ -52,7 +52,7 @@
             <button onclick="copyText('public-key')" class="copy-btn ds-c-button--primary">Copy</button>
           </div>
           <div class="confirm-msg">
-            <span class="confirm-span" id="confirm-public-key" style="display: hidden;"></span>
+            <span id="confirm-public-key"></span>
           </div>
         </div>
         <p><b>Paste the contents</b> of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
@@ -89,7 +89,7 @@
           </div>
         </div>
         <div class="confirm-msg">
-          <span class="confirm-span" id="confirm-sig-snippet" style="display: hidden;"></span>
+          <span id="confirm-sig-snippet" style="display: hidden;"></span>
         </div>
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_4">
@@ -113,7 +113,7 @@
             </div>
           </div>
           <div class="confirm-msg">
-            <span class="confirm-span" id="confirm-verify-sig" style="display: hidden;"></span>
+            <span id="confirm-verify-sig" style="display: hidden;"></span>
           </div>
         </div>
 

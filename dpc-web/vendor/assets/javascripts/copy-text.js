@@ -1,8 +1,5 @@
 function copyText(text) {
   /* Get the text field */
-  var clearText = document.getElementsByClassName('confirm-span');
-
-  clearText.style.
 
   var copyText = document.getElementById(text).textContent;
 
@@ -28,6 +25,7 @@ function copyText(text) {
       confirmMsg.classList.add("confirm-success");
     }
     var msg = successful ? 'successful' : 'unsuccessful';
+
     confirmMsg.innerHTML = 'Command copy ' + msg;
   } 
   catch (err) 
