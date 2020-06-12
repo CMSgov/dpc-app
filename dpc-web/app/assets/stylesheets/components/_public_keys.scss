@@ -61,11 +61,11 @@
   }
 
   .pk-inst {
-    margin: 45px 15px 45px 0;
+    margin: 30px 0;
   }
 
   .pk-inst-num {
-    margin: auto 45px auto 0;
+    margin: auto 35px auto 0;
   }
 
   .pk-triangle {
@@ -84,6 +84,12 @@
     flex-direction: row;
   }
 
+  .pub-key-ex {
+    border: 1px solid $color-primary;
+    margin: 15px auto;
+    max-width: 300px;
+  }
+
   #need-help {
     grid-area: 10 / 1 / 10 / 1;
     padding: 30px 10px;
@@ -98,8 +104,12 @@
   @media (min-width: $width-med) {
     grid-template-columns: 45% 5% 50%;
 
+    .pk-inst {
+      margin: 45px 15px 0 0;
+    }
+
     .pk-inst-num {
-      margin: 45px 45px auto 0;
+      margin: 45px 45px 15px 0;
     }
 
     .pk-triangle {
@@ -110,7 +120,7 @@
       border-width: 20px 0 20px 30px;
       border-color: transparent transparent transparent $color-primary-darkest;
 
-      margin: auto 0;
+      margin: 60px 0;
     }
 
     #need-help {
