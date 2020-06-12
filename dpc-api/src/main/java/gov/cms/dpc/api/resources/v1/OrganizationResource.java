@@ -76,7 +76,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @PathAuthorizer(type = ResourceType.Organization, pathParam = "organizationID")
     @ApiOperation(value = "Get organization details",
             notes = "FHIR endpoint which returns the Organization resource that is currently registered with the application.",
-            authorizations = @Authorization(value = "apiKey"))
+            authorizations = @Authorization(value = "access_token"))
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "An organization is only allowed to see their own Organization resource")})
     public Organization getOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
@@ -98,7 +98,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ApiOperation(value = "Delete Organization",
             notes = "FHIR endpoint which removes the organization currently registered with the application.\n" +
                     "This also removes all associated resources",
-            authorizations = @Authorization(value = "apiKey"))
+            authorizations = @Authorization(value = "access_token"))
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "Cannot find organization to remove")})
     @Override
@@ -131,7 +131,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @ExceptionMetered
     @ApiOperation(value = "Update organization record",
             notes = "Update specific Organization record.",
-            authorizations = @Authorization(value = "apiKey"))
+            authorizations = @Authorization(value = "access_token"))
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "An organization may update only their own Organization resource"),
             @ApiResponse(code = 404, message = "Unable to find Organization to update"),
