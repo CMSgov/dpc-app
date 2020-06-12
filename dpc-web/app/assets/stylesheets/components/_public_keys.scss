@@ -61,11 +61,11 @@
   }
 
   .pk-inst {
-    margin: auto 0;
+    margin: 45px 15px 45px 0;
   }
 
   .pk-inst-num {
-    margin: auto 0;
+    margin: auto 45px auto 0;
   }
 
   .pk-triangle {
@@ -77,6 +77,13 @@
     margin: 0 0 20px 0;
   }
 
+  .pk-instruction {
+    background-color: $color-primary-darkest;
+    color: $color-white;
+    display: flex;
+    flex-direction: row;
+  }
+
   #need-help {
     grid-area: 10 / 1 / 10 / 1;
     padding: 30px 10px;
@@ -84,11 +91,16 @@
 
   #submit-btn {
     grid-area: 9 / 1 / 9 / 1;
-    padding: 0 180px 5px 0;
+    padding: 0 180px 25px 25px;
   }
+
 
   @media (min-width: $width-med) {
     grid-template-columns: 45% 5% 50%;
+
+    .pk-inst-num {
+      margin: 45px 45px auto 0;
+    }
 
     .pk-triangle {
       display: inline;
@@ -107,15 +119,8 @@
 
     #submit-btn {
       grid-area: 5 / 3 / 5 / 3;
-      padding: 0 140px 5px 0;
+      padding: 0 140px 5px 25px;
     }
-  }
-
-  .pk-instruction {
-    background-color: $color-primary-darkest;
-    color: $color-white;
-    display: flex;
-    flex-direction: row;
   }
 }
 
@@ -147,6 +152,7 @@
   color: $color-success;
   font-weight: 700;
   padding: 2px 10px;
+  text-align: center;
 }
 
 .confirm-unsuccess {
