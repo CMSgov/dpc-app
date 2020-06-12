@@ -136,7 +136,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
     @Override
-    public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, Parameters params) {
+    public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, @ApiParam Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
                 organization.getOrganization().getId(),

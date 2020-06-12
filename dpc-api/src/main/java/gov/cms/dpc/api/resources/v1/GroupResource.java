@@ -161,13 +161,16 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Update Attribution Roster", notes = "Update specific Attribution roster." +
             "<p>Updates allow for adding or removing patients from the roster.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
+            @ApiImplicitParam(name = "X-Provenance", value = "Provenance Resource attesting to Group attribution",  required = true, paramType = "header", dataTypeClass = Provenance.class)//,
+     )
+
+
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
     public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
                               @Valid @Profiled(profile = AttestationProfile.PROFILE_URI)
                               @ProvenanceHeader Provenance rosterAttestation,
-                              Group rosterUpdate) {
+                              @ApiParam Group rosterUpdate) {
         logAttestation(rosterAttestation, rosterID, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
@@ -190,7 +193,7 @@ public class GroupResource extends AbstractGroupResource {
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
+    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, @ApiParam Group groupUpdate) {
         logAttestation(rosterAttestation, rosterID, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
@@ -204,7 +207,7 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Remove roster members", notes = "Update specific Attribution roster by removing members given in the provided resource.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group removeRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+    public Group removeRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @ApiParam Group groupUpdate) {
         return this.executeGroupOperation(rosterID, groupUpdate, "remove");
     }
 

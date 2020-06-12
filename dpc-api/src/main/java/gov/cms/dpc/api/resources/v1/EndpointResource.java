@@ -109,7 +109,7 @@ public class EndpointResource extends AbstractEndpointResource {
             @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
-    public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
+    public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) @ApiParam Endpoint endpoint) {
         Endpoint currEndpoint = fetchEndpoint(endpointID);
         if (!endpoint.getManagingOrganization().getReference().equals(currEndpoint.getManagingOrganization().getReference())) {
             throw new WebApplicationException("An Endpoint's Organization cannot be changed", HttpStatus.UNPROCESSABLE_ENTITY_422);
