@@ -12,7 +12,7 @@ function copyText(text) {
     textArea.select();
     textArea.setSelectionRange(0, 99999); /*For mobile devices*/
 
-  let confirm = 'confirm-' + text
+  var confirm = 'confirm-' + text
 
   const confirmMsg = document.getElementById(confirm);
 
