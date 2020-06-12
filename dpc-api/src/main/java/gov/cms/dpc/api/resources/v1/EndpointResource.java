@@ -24,7 +24,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
-@Api(value = "Endpoint", authorizations = @Authorization(value = "apiKey"))
+@Api(value = "Endpoint", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Endpoint")
 public class EndpointResource extends AbstractEndpointResource {
 

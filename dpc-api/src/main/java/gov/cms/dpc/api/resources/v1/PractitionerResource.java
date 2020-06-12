@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
-@Api(value = "Practitioner", authorizations = @Authorization(value = "apiKey"))
+@Api(value = "Practitioner", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Practitioner")
 public class PractitionerResource extends AbstractPractitionerResource {
 

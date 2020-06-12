@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "apiKey"))
+@Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Key")
 public class KeyResource extends AbstractKeyResource {
 

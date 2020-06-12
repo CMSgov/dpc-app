@@ -44,7 +44,7 @@ import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
-@Api(value = "Group", authorizations = @Authorization(value = "apiKey"))
+@Api(value = "Group", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Group")
 public class GroupResource extends AbstractGroupResource {
 

@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
-@Api(value = "Patient", authorizations = @Authorization(value = "apiKey"))
+@Api(value = "Patient", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Patient")
 public class PatientResource extends AbstractPatientResource {
 
