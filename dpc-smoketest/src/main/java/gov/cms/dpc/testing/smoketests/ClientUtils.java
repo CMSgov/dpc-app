@@ -41,6 +41,13 @@ public class ClientUtils {
         // Not used
     }
 
+    /* TODO When prod environment has DNS entries for prod.dpc.cms.gov, revert the workarounds in this file
+     * - revert adding the overrideURL argument to all methods that have it
+     * - remove workaround code in awaitExportResponse()
+     * - git diff f2d3abe1f23e4d1ad2f2a01 5d799c57712418de674 <<< green is good
+     * see also https://github.com/CMSgov/dpc-app/pull/849
+     */
+
     /**
      * Helper method for initiating and Export job and monitoring its success.
      * @param exportClient - {@link IGenericClient} to use for export request. Ensure this contains the necessary authentication and HttpHeaders
@@ -126,6 +133,7 @@ public class ClientUtils {
     private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, CloseableHttpClient client, String overrideURL) throws IOException, InterruptedException {
         // Use the traditional HTTP Client to check the job status
         JobCompletionModel jobResponse = null;
+        // TODO When DNS is set for prod, revert this workaround code; see TODO at the top of this class
         String jobLocationURL = jobLocation;
         if (jobLocation.startsWith("https://prod.dpc.cms.gov/api/v1")) {
             jobLocationURL = overrideURL.substring(0, overrideURL.indexOf("/api/v1")) + jobLocation.substring("https://prod.dpc.cms.gov".length());

@@ -103,7 +103,10 @@ public class APIAuthHelpers {
     }
 
     public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
-        // TODO: Revert .signWith() to type ECC?
+        /* TODO revert this workaround to previous version of code
+         * - git diff f2d3abe1f23e4d1ad2f2a01 5d799c57712418de674 <<< green is good
+         * see also https://github.com/CMSgov/dpc-app/pull/849
+         */
         String audience = baseURL;
         if (baseURL.startsWith("http://internal-dpc-prod-")) {
             audience = "https://prod.dpc.cms.gov/api/v1";
