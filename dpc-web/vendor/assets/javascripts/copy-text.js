@@ -14,7 +14,7 @@ function copyText(text) {
 
   var confirm = 'confirm-' + text
 
-  const confirmMsg = document.getElementById(confirm);
+  var confirmMsg = document.getElementById(confirm);
 
   /* Copy text inside of textfield */
   try {
