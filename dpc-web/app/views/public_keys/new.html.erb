@@ -33,7 +33,7 @@
             <button onclick="copyText('private-key')" class="copy-btn ds-c-button--primary">Copy</button>
           </div>
           <div class="confirm-msg">
-            <span id="confirm-private-key"></span>
+            <span class="confirm-span" id="confirm-private-key" style="display: none;"></span>
           </div>
         </div>
         <p><b><span class="ds-u-color--error">IMPORTANT!</span> The contents of your private key (private.pem file) should be treated as sensitive/secret information.</b> Take care in the handling and storage of this information as it is essential to the security of your connection with DPC.</p>
@@ -52,7 +52,7 @@
             <button onclick="copyText('public-key')" class="copy-btn ds-c-button--primary">Copy</button>
           </div>
           <div class="confirm-msg">
-            <span class="align-confirm" id="confirm-public-key"></span>
+            <span class="confirm-span" id="confirm-public-key" style="display: hidden;"></span>
           </div>
         </div>
         <p><b>Paste the contents</b> of this public.pem file into the ‘Public Key’ field below and proceed to creating your public key signature.</p>
@@ -65,7 +65,7 @@
           <div class="download_btn_form">
             <%= button_to 'DOWNLOAD', download_snippet_path, class: "ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
           </div>
-          <div class="align-confirm" class="ds-u-padding--1 download_btn_description">
+          <div class="ds-u-padding--1 download_btn_description">
             snippet.txt file to create signature
           </div>
         </div>
@@ -89,7 +89,7 @@
           </div>
         </div>
         <div class="confirm-msg">
-          <span class="align-confirm" id="confirm-sig-snippet"></span>
+          <span class="confirm-span" id="confirm-sig-snippet" style="display: hidden;"></span>
         </div>
       </div>
       <div class="ds-l-col--6 ds-l-md-col--3 step_4">
@@ -113,7 +113,7 @@
             </div>
           </div>
           <div class="confirm-msg">
-            <span id="confirm-verify-sig"></span>
+            <span class="confirm-span" id="confirm-verify-sig" style="display: hidden;"></span>
           </div>
         </div>
 

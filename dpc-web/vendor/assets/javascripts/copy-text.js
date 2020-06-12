@@ -1,5 +1,9 @@
 function copyText(text) {
   /* Get the text field */
+  var clearText = document.getElementsByClassName('confirm-span');
+
+  clearText.style.
+
   var copyText = document.getElementById(text).textContent;
 
   copyText = copyText.trim();
