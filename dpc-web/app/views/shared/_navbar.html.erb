@@ -31,7 +31,7 @@ aria-controls="topnav-wrap" aria-label="Close menu">
       </li>
 
       <li class="topnav__item">
-        <%= link_to "Support", support_path, class: "topnav__link" %>
+        <li><%= link_to "Frequently Asked Questions", faq_path, class: "topnav__link" %></li>
       </li>
 
       <% if user_signed_in? %>

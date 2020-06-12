@@ -55,8 +55,8 @@
     <div id="a5" class="usa-accordion__content">
       <ul>
         <li>Blue Button 2.0 provides FHIR-formatted data for one individual Medicare beneficiary at a time, to registered applications with beneficiary authorization. See <a href="https://bluebutton.cms.gov/">https://bluebutton.cms.gov/</a>.</li>
-        <li>BCDA provides FHIR-formatted bulk data files to an Accountable Care Organization (ACO) for all of the beneficiaries assigned to a given ACO. BCDA follows the ACO data sharing process where patients can choose to opt out of data sharing.</li>
-        <li>Data at the Point of Care Pilot provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. Data is shared between covered entities for treatment purposes as defined under HIPAA. Patients can choose to opt out of data sharing.</li>
+        <li>BCDA provides FHIR-formatted bulk data files to Medicare Shared Savings Program Accountable Care Organizations (MSSP ACOs) for all of the beneficiaries assigned to a given ACO. See <a href="https://bcda.cms.gov/">https://bcda.cms.gov/</a>.</li>
+        <li>Data at the Point of Care provides FHIR-formatted bulk data files to fee-for-service providers for their active patients as needed for treatment purposes under HIPAA. With DPC, providers identify their own rosters of patients to track, and no action is required from the beneficiary to authorize sharing of data. Data is shared between covered entities for treatment purposes as defined under HIPAA.</li>
       </ul>
     </div>
 
@@ -79,10 +79,9 @@
         <li>Usefulness of the data to evaluate how helpful CMS claims data is for impacting treatment, provider burden, and quality of care for Fee-for-Service (FFS) providers at the point of care</li>
         <li>Ease of implementation for vendors and providers to evaluate how easy it is to configure and get started with requesting and receiving claims data</li>
         <li>Practicality and effectiveness of attribution logic that determines which providers can request and receive claims data for which patients and for how long</li>
-        <li>Ease and effectiveness of ways that providers can share their access with vendors without breaking trust in the chain</li>
-        <li>Level of satisfaction and other feedback from patients regarding how they would like to be informed of data being shared for treatment purposes and of their right to opt out of data sharing</li>
+        <li>Ease and effectiveness of ways that vendors and providers can collaborate to access the data</li>
         <li>Measure of the frequency of use and an evaluation of performance in different use cases to determine infrastructure decisions</li>
-        <li>Learn about other feedback, additions, or changes that might be needed if this were to go beyond a pilot</li>
+        <li>Any other feedback, additions, or changes</li>
       </ul>
     </div>
 
@@ -94,103 +93,6 @@
     <div id="a8" class="usa-accordion__content">
       <ul>
         <li>Data at the Point of Care secures Protected Health Information (PHI) and Personally Identifiable Information (PII) and has multiple layers of protection, such as encryption in transit and at rest, security certification requirements of connecting vendors, auditing and analytics to look for suspicious activity, terms of service restrictions, public and private security keys, and IP address restriction.</li>
-        <li>Data at the Point of Care is built based on privacy requirements defined by HIPAA and outlined in the Notice of Privacy Practices for Original Medicare. As per the Notice of Privacy Practices, patients are allowed to opt out of data sharing.</li>
-        <li>CMS will be using the pilot to test notification and consent messages and processes that are easy to understand by beneficiaries without adding additional complexity to the sharing of data.</li>
+        <li>Data at the Point of Care is built based on privacy requirements defined by HIPAA.</li>
       </ul>
     </div>
-
-    <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a9">
-        Can a patient opt out of data sharing?
-      </button>
-    </h2>
-    <div id="a9" class="usa-accordion__content">
-      <ul>
-        <li>Yes, Data at the Point of Care is built based on privacy requirements defined by HIPAA and outlined in the Notice of Privacy Practices for Original Medicare. As per the Notice of Privacy Practices, patients are allowed to opt out of data sharing.</li>
-        <li>Patients can opt out of data sharing by calling 1800 Medicare (<a href="tel:1-800-633-4227">1-800-633-4227</a>) to request that their data not be shared by CMS to their providers.</li>
-      </ul>
-    </div>
-
-
-    <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a10">
-        As a healthcare provider, are there any other requirements for me to join?
-      </button>
-    </h2>
-    <div id="a10" class="usa-accordion__content">
-      <ul>
-        <li>Review the <%= link_to "Terms of Service", terms_of_service_path %>. You will be attesting that you follow those with each roster addition and renewal.</li>
-        <li>Make sure your vendor can support the APIs as described in the <%= link_to "Documentation", docs_path %>.</li>
-        <li>Enter your FHIR endpoints in the <a href="https://nppes.cms.hhs.gov">National Provider and Plan Enumeration System (NPPES)</a>. No production access is provided until this step is completed for each provider.</li>
-      </ul>
-    </div>
-
-    <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a11">
-        As a healthcare vendor, are there any other requirements for me to join?
-      </button>
-    </h2>
-    <div id="a11" class="usa-accordion__content">
-      <ul>
-        <li>Review the <%= link_to "Terms of Service", terms_of_service_path %>. You will be attesting that you follow those with each roster addition and renewal. </li>
-        <li>Make sure you have at least one of security certifications
-          <ul>
-            <li>HHS ONC Health IT Certification (2015)</li>
-            <li>HITRUST Validated Assessment (or an audited self-assessment if you are working toward HITRUST Validated Assessment within a calendar year)</li>
-          </ul>
-        </li>
-        <li>Develop to the <%= link_to "Documentation", docs_path %> and test with the synthetic data</li>
-        <li>Prepare to demo your functionality to show us how the claims data is made available to the provider at the point of care</li>
-      </ul>
-    </div>
-
-    <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a12">
-        As a healthcare vendor, what are the steps I should be following in preparation of supporting a provider?
-      </button>
-    </h2>
-    <div id="a12" class="usa-accordion__content">
-      <ol>
-        <li>Develop a working implementation of a Bulk Data Client</li>
-        <li>Ask the provider to submit their FHIR endpoint to NPPES by logging in and updating their NPI record</li>
-        <li>Be prepared to submit required patient/provider data that fulfills the specified FHIR profiles.</li>
-        <li>Implement the required components of the SMART Backend Services Authentication (e.g. host public key and sign JWTs for token requests)</li>
-        <li>Be prepared to demo your solution to our team to show us the workflows and screens that enable providers to use the information at the point of care in their workflow.</li>
-      </ol>
-    </div>
-
-    <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a13">
-        I am an Emergency Room provider. Can I participate?
-      </button>
-    </h2>
-    <div id="a13" class="usa-accordion__content">
-      <p>Yes! The emergency room scenario is a great use of claims data. You can add patients to your roster as they are admitted to the emergency room.</p>
-    </div>
-
-    <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a14">
-        I have questions about whether I would be a good provider for the pilot. How can I learn more?
-      </button>
-    </h2>
-    <div id="a14" class="usa-accordion__content">
-      <p>Join our <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a>! The Google Group is a great place to ask questions and read what the rest of the community is asking as well.</p>
-    </div>
-
-
-    <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a15">
-        I requested access to the pilot. When will CMS get back to me?
-      </button>
-    </h2>
-    <div id="a15" class="usa-accordion__content">
-      <ul>
-        <li>Within 1 - 2 business days of your request, you will receive an email with instructions on how to access the synthetic (or test data) sandbox.</li>
-        <li>Once you have a working solution that has been well tested, email <a href="mailto:DPCInfo@cms.hhs.gov">DPCInfo@cms.hhs.gov</a> to request a demo.</li>
-        <li>The DPC team will schedule a demo session.  Remember, this is a pilot project and scheduling will move slowly.</li>
-        <li>The provider and their vendor will demonstrate the functionality and review the implementation decisions with the DPC team. </li>
-        <li>The DPC team will provide production access and get feedback from the provider as the solution is implemented.</li>
-        <li>Updates will be posted to the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a> as CMS progresses through the pilot process.</li>
-      </ul>
-    </div>
-  </div>
