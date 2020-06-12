@@ -3,64 +3,35 @@
 <% banner_title "Frequently asked questions" %>
 
   <div class="ds-text--lead ds-u-measure--wide">
-    <p>As CMS continues to gather feedback from users on the Data at the Point of Care (DPC) pilot, it will likekly add more FAQs to this page. If you have a question that is not listed below, please use the <a href="https://groups.google.com/d/forum/dpc-api">DPC Google Group</a>.</p>
+    <p>As CMS continues to gather feedback from users on the Data at the Point of Care (DPC) pilot, we will likely add more FAQs to this page. If you have a question that is not listed below, please reach out through the <a href="https://groups.google.com/d/forum/dpc-api">DPC Google Group</a>.</p>
   </div>
 
   <div class="usa-accordion usa-accordion--bordered ds-u-margin-top--7">
 
     <!-- Use the accurate heading level to maintain the document outline -->
     <h2 class="usa-accordion__heading">
-      <button class="usa-accordion__button" aria-expanded="false" aria-controls="a1">
-        I'm a provider. How can I get my Electronic Medical Record provider or other software vendors to use to the DPC API?
-      </button>
-    </h2>
-    <div id="a1" class="usa-accordion__content">
-      <ul>
-        <li>First, <% unless user_signed_in? %><%= link_to "Request access page", new_registration_path(User) %><% else %> request access <% end %> to the pilot. This puts you on the list of providers who are interested, regardless of whether your vendors are ready to participate.</li>
-        <li>Ask your software provider if they have implemented the Bulk FHIR specification.</li>
-        <li>Direct them to this website and encourage them to use the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a>.</li>
-        <li>Ask them if they can commit to working with you on this project and if so, when will they be ready.</li>
-      </ul>
-    </div>
-
-    <!-- Use the accurate heading level to maintain the document outline -->
-    <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="a2">
-        What type of providers is CMS looking for to join the pilot?
+        What types of providers is CMS looking for to join the synthetic sandbox?
       </button>
     </h2>
     <div id="a2" class="usa-accordion__content">
       <ul>
         <li>Fee-for-Service (FFS) providers who treat Medicare patients</li>
-        <li>Already receive claims from other payers and who have successfully integrated the information into provider's existing workflow</li>
-        <li>Have experience using Blue Button 2.0 or the Beneficiary Claims Data API pilot project</li>
-        <li>Already use or test with FHIR, especially Bulk FHIR</li>
+        <li>Providers who already receive claims from other payers and who have successfully integrated the information into existing clinical workflows</li>
+        <li>Providers who have experience using Blue Button 2.0 or the Beneficiary Claims Data API project</li>
+        <li>Providers who already use or test with FHIR, especially Bulk FHIR</li>
       </ul>
     </div>
 
     <!-- Use the accurate heading level to maintain the document outline -->
     <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="a3">
-        How will the pilot work? How many providers can join and how long does it last?
+        How can I access the synthetic sandbox and begin testing workflows?
       </button>
     </h2>
     <div id="a3" class="usa-accordion__content">
       <ul>
-        <li>Any FFS provider can request access to synthetic data</li>
-        <li>Providers will receive an email with instructions on how to access the synthetic (test data) sandbox. This usually happens in 1 - 2 business days after the request.</li>
-        <li>The provider and/or their vendor will develop and test the functionality in the synthetic sandbox.</li>
-        <li>When the provider/vendor feel that they are ready to request production access, they can email <a href="mailto:DPCInfo@cms.hhs.gov">DPCInfo@cms.hhs.gov</a> and include the following:
-          <ul>
-            <li>Written summary of the rostering process: logic of how patients are added and removed from rosters, and when physician intervention is required to renew an expired roster</li>
-            <li>HITRUST validation or certification (or be prepared to share the HHS ONC HIT Technology certification information for the version you are using, including the CHPL ID and version)</li>
-            <li>Confirmation of understanding the Terms of Service</li>
-            <li>The initial providers NPIs for production use</li>
-          </ul>
-        </li>
-        <li>The DPC team will schedule a demo session.  Remember, this is a pilot project and scheduling will move slowly.</li>
-        <li>The provider and their vendor will demonstrate the functionality and review the implementation decisions with the DPC team. </li>
-        <li>The DPC team will provide production access and get feedback from the provider as the solution is implemented.</li>
-        <li>There is not a limit to the number of providers who can test in the sandbox or who can go into production. However, the production access will move very slowly and may discontinue if the pilot is not successful.</li>
+        <li>Any Fee-for-Service provider or Health IT vendor can request access to synthetic data via <%= link_to "Request access", new_user_registration_path %></li>
       </ul>
     </div>
 
@@ -72,13 +43,13 @@
     <div id="a4" class="usa-accordion__content">
       <ul>
         <li>Technical documentation is available in the <%= link_to "API Documentation", docs_path %>.</li>
-        <li>A Google Group has been created to provide answers to questions and to support providers and developers who are implementing Data at the Point of Care. Sign up at https://dpc.cms.gov and join the <a href="https://groups.google.com/d/forum/dpc-api">Google Group</a>.</li>
+        <li>A DPC Google Group has been created to provide answers to questions and to support providers and developers who are implementing Data at the Point of Care.</li>
       </ul>
     </div>
 
     <h2 class="usa-accordion__heading">
       <button class="usa-accordion__button" aria-expanded="false" aria-controls="a5">
-        How is the Data at the Point of Care pilot different from Blue Button 2.0 and Beneficiary Claims Data API (BCDA)?
+        How is the Data at the Point of Care pilot program different from Blue Button 2.0 and Beneficiary Claims Data API (BCDA)?
       </button>
     </h2>
     <div id="a5" class="usa-accordion__content">
