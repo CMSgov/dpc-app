@@ -82,10 +82,21 @@ class User < ApplicationRecord
     attrs = %w[id first_name last_name email requested_organization requested_organization_type
                address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at]
 
+    # html escape these fields for XSS protection
+    escape_attrs = %w[first_name last_name requested_organization address_1 address_2 city]
+
     CSV.generate(headers: true) do |csv|
       csv << attrs
       all.each do |user|
-        csv << user.attributes.values_at(*attrs)
+        attributes = user.attributes
+        escaped_attributes = attributes.map do |k, v|
+          if escape_attrs.include? k
+            v = ERB::Util.html_escape(v)
+          end
+
+          [k, v]
+        end.to_h
+        csv << escaped_attributes.values_at(*attrs)
       end
     end
   end
