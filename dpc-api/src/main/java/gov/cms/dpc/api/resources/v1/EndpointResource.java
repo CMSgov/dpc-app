@@ -46,7 +46,8 @@ public class EndpointResource extends AbstractEndpointResource {
             @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
-    public Response createEndpoint(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
+    public Response createEndpoint(@ApiParam(hidden=true) @Auth OrganizationPrincipal organizationPrincipal,
+                                   @ApiParam @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
         Reference organizationPrincipalRef = new Reference(new IdType("Organization", organizationPrincipal.getID().toString()));
         if (endpoint.hasManagingOrganization() && !endpoint.getManagingOrganization().getReference().equals(organizationPrincipalRef.getReference())) {
             throw new WebApplicationException("An Endpoint cannot be created for a different Organization", HttpStatus.UNPROCESSABLE_ENTITY_422);
@@ -68,7 +69,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ExceptionMetered
     @ApiOperation(value = "Search for Endpoints", notes = "Search for public Endpoint resources associated to the given Organization.")
     @Override
-    public Bundle getEndpoints(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization) {
+    public Bundle getEndpoints(@ApiParam(hidden=true) @Auth OrganizationPrincipal organization) {
         return this.client
                 .search()
                 .forResource(Endpoint.class)
@@ -87,7 +88,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Fetch Endpoint resource", notes = "Fetch a specific Endpoint associated to an Organization.")
     @ApiResponses(@ApiResponse(code = 404, message = "Endpoint not found"))
     @Override
-    public Endpoint fetchEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
+    public Endpoint fetchEndpoint(@ApiParam @PathParam("endpointID") @NotNull UUID endpointID) {
         return this.client
                 .read()
                 .resource(Endpoint.class)
@@ -102,14 +103,15 @@ public class EndpointResource extends AbstractEndpointResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Update an Endpoint", notes = "Update an Endpoint resource")
+    @ApiOperation(value = "Update an Organization's FHIR Server Endpoint", notes = "Update an Endpoint resource")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Endpoint updated"),
             @ApiResponse(code = 404, message = "Endpoint not found"),
             @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
-    public Endpoint updateEndpoint(@NotNull @PathParam("endpointID") UUID endpointID, @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) @ApiParam Endpoint endpoint) {
+    public Endpoint updateEndpoint(@ApiParam(value = "Your Organization's FHIR Endpoint ID") @PathParam("endpointID") UUID endpointID,
+                                   @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
         Endpoint currEndpoint = fetchEndpoint(endpointID);
         if (!endpoint.getManagingOrganization().getReference().equals(currEndpoint.getManagingOrganization().getReference())) {
             throw new WebApplicationException("An Endpoint's Organization cannot be changed", HttpStatus.UNPROCESSABLE_ENTITY_422);

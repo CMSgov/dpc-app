@@ -116,7 +116,8 @@ public class PractitionerResource extends AbstractPractitionerResource {
             @ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile")
     })
     @Override
-    public Response submitProvider(@Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
+    public Response submitProvider(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
+                                   @Valid @Profiled(profile = PractitionerProfile.PROFILE_URI) Practitioner provider) {
 
         APIHelpers.addOrganizationTag(provider, organization.getOrganization().getIdElement().getIdPart());
         final var providerCreate = this.client
@@ -136,7 +137,8 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "<p> Each Practitioner MUST implement the " + PRACTITIONER_PROFILE + " profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Provider does not satisfy the required FHIR profile"))
     @Override
-    public Bundle bulkSubmitProviders(@Auth OrganizationPrincipal organization, @ApiParam Parameters params) {
+    public Bundle bulkSubmitProviders(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
+                                      @ApiParam Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
                 organization.getOrganization().getId(),
