@@ -127,7 +127,8 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
     private void seedProviderBundle(FHIREntityConverter converter, DSLContext context, IParser parser, UUID organizationID) throws IOException {
         try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
-            final Bundle providerBundle = parser.parseResource(Bundle.class, providerBundleStream);
+            final Parameters parameters = parser.parseResource(Parameters.class, providerBundleStream);
+            final Bundle providerBundle = (Bundle) parameters.getParameterFirstRep().getResource();
             final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, (provider) -> converter.fromFHIR(ProviderEntity.class, provider), organizationID);
 
             providers
@@ -153,7 +154,8 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
     private Map<String, Reference> seedPatientBundle(FHIREntityConverter converter, DSLContext context, IParser parser, UUID organizationID) throws IOException {
         try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PATIENT_BUNDLE)) {
-            final Bundle patientBundle = parser.parseResource(Bundle.class, providerBundleStream);
+            final Parameters parameters = parser.parseResource(Parameters.class, providerBundleStream);
+            final Bundle patientBundle = (Bundle) parameters.getParameterFirstRep().getResource();
             final List<PatientEntity> patients = BundleParser.parse(Patient.class, patientBundle, (patient) -> converter.fromFHIR(PatientEntity.class, patient), organizationID);
 
             Map<String, Reference> patientReferences = new HashMap<>();
