@@ -110,6 +110,12 @@
             <email>silvio@adhocteam.us</email>
             <organization>Ad Hoc LLC</organization>
         </developer>
+        <developer>
+            <id>rich</id>
+            <name>Richard Braman</name>
+            <email>richard.braman@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
+        </developer>
     </developers>
 
     <dependencyManagement>
@@ -265,6 +271,7 @@
                 <version>4.5.12</version>
                 <scope>test</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -423,6 +430,7 @@
     <build>
         <pluginManagement>
             <plugins>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
@@ -645,6 +653,76 @@
                         <version>0.12</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <dependencies>
+                    <!-- API, java.xml.bind module -->
+                    <dependency>
+                        <groupId>jakarta.xml.bind</groupId>
+                        <artifactId>jakarta.xml.bind-api</artifactId>
+                        <version>2.3.2</version>
+                    </dependency>
+
+                    <!-- Runtime, com.sun.xml.bind module -->
+                    <dependency>
+                        <groupId>org.glassfish.jaxb</groupId>
+                        <artifactId>jaxb-runtime</artifactId>
+                        <version>2.3.2</version>
+                    </dependency>
+                </dependencies>
+                <version>3.1.8</version>
+                <configuration>
+                    <apiSources>
+                        <apiSource>
+                            <springmvc>false</springmvc>
+                            <locations>
+                                <location>gov.cms.dpc.api.resources.v1.*</location>
+                            </locations>
+                            <schemes>https</schemes>
+                            <outputFormats>json</outputFormats>
+                            <basePath>/</basePath>
+                            <securityDefinitions><securityDefinition>
+                                <name>access_token</name>
+                                <type>apiKey</type>
+                                <in>header</in>
+                            </securityDefinition>
+                            </securityDefinitions>
+                            <info>
+                                <title>CMS Data at the Point of Care</title>
+                                <version>v1</version>
+                                <!-- use markdown here because I'm using markdown for output,
+                                if you need to use html or other markup language, you need to use your target language,
+                                 and note escape your description for xml -->
+                                <description>
+                                </description>
+                                <termsOfService>
+                                </termsOfService>
+                                <contact>
+                                    <email></email>
+                                    <name></name>
+                                    <url></url>
+                                </contact>
+                                <license>
+                                    <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+                                    <name>Apache 2.0</name>
+                                </license>
+                            </info>
+                            <host>sandbox.dpc.cms.gov</host>
+                            <swaggerDirectory>swagger</swaggerDirectory>
+                            <swaggerFileName>swagger</swaggerFileName>
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
