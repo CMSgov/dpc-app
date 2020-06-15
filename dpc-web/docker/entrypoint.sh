@@ -26,7 +26,5 @@ fi
 
 if [ "$1" == "sidekiq" ]; then
   # Start Sidekiq job processing
-  # TODO: We should avoid using the dameonize flag in production and, instead, pursue a deployment
-  # like provided here https://github.com/mperham/sidekiq/wiki/Deployment
   bundle exec sidekiq -q default -q mailers 2>&1 | tee -a /var/log/dpc-web-$(hostname)-sidekiq.log
 fi
