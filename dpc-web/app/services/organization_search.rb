@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 class OrganizationSearch
-  ALLOWED_SCOPES = %w[all provider vendor].freeze
-
   attr_reader :params, :initial_scope
 
   def initialize(params: {}, scope: 'all')
-    scope = 'all' unless ALLOWED_SCOPES.include? scope
+    scope = 'all'
 
     @params = params
     @initial_scope = scope
@@ -22,8 +20,8 @@ class OrganizationSearch
     scope = Organization
 
     scope = apply_org_queries(scope)
-    # scope = apply_date_queries(scope)
-    # scope = apply_keyword_search(scope)
+    scope = apply_date_queries(scope)
+    scope = apply_keyword_search(scope)
 
     scope
   end
@@ -38,12 +36,9 @@ class OrganizationSearch
     end
 
     # Check if registered org
-    # if params[:]
-    #   scope
-    # elsif
-    # end
 
-    # Check if keyword is registered org
+    # Check org type
+
 
     # Check on org type
     if params[:requested_org_type].present?
@@ -53,12 +48,24 @@ class OrganizationSearch
     scope
   end
 
-  # def apply_keyword_search(scope)
-  #   if keyword_param[:keyword].present?
-  #     keyword = "%#{keyword_param[:keyword].downcase}%"
-  #     scope = scope.where('LOWER(name) LIKE :keyword', keyword: keyword)
-  #   end
+  def apply_date_queries(scope)
+    if params[:created_after].present?
+      scope = scope.where('organizations.created_at > :created_after', created_after: params[:created_after])
+    end
 
-  #   scope
-  # end
+    if params[:created_before].present?
+      scope = scope.where('organizations.created_at < :created_before', created_before: params[:created_before])
+    end
+
+    scope
+  end
+
+  def apply_keyword_search(scope)
+    if params[:keyword].present?
+      keyword = "%#{params[:keyword].downcase}%"
+      scope = scope.where('LOWER(name) LIKE :keyword', keyword: keyword)
+    end
+
+    scope
+  end
 end
