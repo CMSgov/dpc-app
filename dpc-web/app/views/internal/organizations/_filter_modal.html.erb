@@ -9,6 +9,23 @@
       <main role="main ds-text">
 
         <fieldset class="ds-l-row field-group">
+          <div class="ds-l-col--9 field-group__fields radio_buttons__container">
+            <label class="container">Not registered in API
+              <%= radio_button_tag :registered_org, 'unregistered', class: 'ds-c-choice' %>
+              <span class="checkmark"></span>
+            </label>
+            <label class="container">Registered in API
+              <%= radio_button_tag :registered_org, 'registered', class: 'ds-c-choice' %>
+              <span class="checkmark"></span>
+            </label>
+            <label class="container">All
+              <%= radio_button_tag :registered_org, 'all', class: 'ds-c-choice', checked: true %>
+              <span class="checkmark"></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="ds-l-row field-group">
           <div class="ds-l-col--9 field-group__fields">
             <div class="ds-u-display--flex ds-u-align-items--center">
             <%= label_tag :created_after, 'Joined', class: "ds-c-label ds-u-margin-y--2 ds-u-margin-right--2" %>
@@ -27,14 +44,6 @@
             <%= text_field_tag :keyword, params[:keyword], placeholder: "Name", class: "ds-c-field ds-u-margin--0" %>
             <%= label_tag :organization_type, 'Organization type', class: "ds-c-label" %>
             <%= select_tag(:organization_type, options_for_select(organization_types_for_select, params[:organization_type]), :class => 'ds-c-field drop-down', include_blank: 'All organization types') %>
-          </div>
-        </fieldset>
-
-        <fieldset class="ds-l-row field-group ds-c-fieldset">
-          <div class="ds-l-col--9 field-group__fields">
-            <%= radio_button_tag :registered_org, 'registered', class: "ds-c-choice" %> Registered
-            <%= radio_button_tag :registered_org, 'unregistered', class: "ds-c-choice" %> Not registered
-            <%= radio_button_tag :registered_org, 'all', class: "ds-c-choice" %> All
           </div>
         </fieldset>
 
