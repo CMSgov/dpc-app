@@ -6,8 +6,6 @@ class OrganizationSearch
   attr_reader :params, :initial_scope
 
   def initialize(params: {}, scope: 'all')
-    scope = 'all'
-
     @params = params
     @initial_scope = scope
   end
@@ -22,6 +20,7 @@ class OrganizationSearch
     scope = Organization
 
     scope = apply_org_queries(scope)
+    scope = apply_registered_query(scope)
     scope = apply_date_queries(scope)
     scope = apply_keyword_search(scope)
     scope = apply_search_word(scope)
@@ -30,19 +29,6 @@ class OrganizationSearch
   end
 
   def apply_org_queries(scope)
-    # Check if registered org
-    if params[:registered_org]
-      radio = params[:registered_org]
-
-      if radio == 'registered'
-        scope = scope.where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
-      elsif radio == 'unregistered'
-        scope = scope.where('id NOT IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
-      else
-        scope = Organization
-      end
-    end
-
     # Check if provider or vender
     if params[:org_type] == 'vendor'
       scope = scope.vendor
@@ -57,6 +43,19 @@ class OrganizationSearch
 
     scope
   end
+
+  def apply_registered_query(scope)
+    if params[:registered_org]
+      if params[:registered_org] == 'registered'
+        scope = scope.where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
+      elsif params[:registered_org] == 'unregistered'
+        scope = scope.where('id NOT IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
+      else
+        scope = Organization
+      end
+    end
+  end
+
 
   def apply_date_queries(scope)
     if params[:created_after].present?
