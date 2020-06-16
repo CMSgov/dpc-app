@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class OrganizationSearch
+  ALLOWED_SCOPES = %w[all provider vendor].freeze
+
   attr_reader :params, :initial_scope
 
   def initialize(params: {}, scope: 'all')
@@ -38,7 +40,9 @@ class OrganizationSearch
     # Check if registered org
 
     # Check org type
-
+    if params[:organization_type].present?
+      scope = scope.where(organization_type: params[:organization_type])
+    end
 
     # Check on org type
     if params[:requested_org_type].present?

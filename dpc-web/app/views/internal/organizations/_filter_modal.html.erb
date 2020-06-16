@@ -1,27 +1,32 @@
 <div class="ds-c-dialog-wrap" aria-labelledby="dialog-title" aria-hidden="true" role="dialog" id="filter-modal">
   <div class="ds-c-dialog ds-c-dialog--full" role="document">
     <header class="ds-c-dialog__header" role="banner">
-      <h1 class="ds-h2" id="dialog-title">Filter provider users</h1>
+      <h1 class="ds-h2" id="dialog-title">Filter organizations</h1>
       <button class="ds-c-button ds-c-button--transparent ds-c-dialog__close" aria-label="Close modal dialog">Close</button>
     </header>
 
     <%= form_tag internal_organizations_path, method: "get" do %>
       <main role="main ds-text">
 
-
         <fieldset class="ds-l-row field-group">
-          <div class="ds-l-col--3">
-            <legend class="field-group__heading">Dates joined</legend>
-          </div>
-
           <div class="ds-l-col--9 field-group__fields">
             <div class="ds-u-display--flex ds-u-align-items--center">
-            <%= date_field_tag :created_after, params[:created_after], class: "ds-c-field ds-c-field--medium " %>
-            <span class="ds-u-display--inline-block ds-u-padding-x--1">thru</span>
+            <%= label_tag :created_after, 'Joined', class: "ds-c-label ds-u-margin-y--2 ds-u-margin-right--2" %>
+            <%= date_field_tag :created_after, params[:created_after], class: "ds-c-field ds-c-field--medium" %>
+            <span class="ds-u-display--inline-block ds-c-label ds-u-margin--2">thru</span>
             <%= date_field_tag :created_before, params[:created_before], class: "ds-c-field ds-c-field--medium" %>
 
             </div>
             <p class="field-group__hint">Leave the second field blank to filter a single day</p>
+          </div>
+        </fieldset>
+
+        <fieldset class="ds-l-row field-group">
+          <div class="ds-l-col--9 field-group__fields">
+            <%= label_tag :keyword, 'Organization name', class: "ds-c-label ds-u-margin-top--0" %>
+            <%= text_field_tag :keyword, params[:keyword], placeholder: "Name", class: "ds-c-field ds-u-margin--0" %>
+            <%= label_tag :organization_type, 'Organization type', class: "ds-c-label" %>
+            <%= select_tag(:organization_type, options_for_select(organization_types_for_select, params[:organization_type]), :class => 'ds-c-field drop-down', include_blank: 'All organization types') %>
           </div>
         </fieldset>
 
