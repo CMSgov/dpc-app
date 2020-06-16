@@ -30,6 +30,14 @@
           </div>
         </fieldset>
 
+        <fieldset class="ds-l-row field-group ds-c-fieldset">
+          <div class="ds-l-col--9 field-group__fields">
+            <%= radio_button_tag :registered_org, 'registered', class: "ds-c-choice" %> Registered
+            <%= radio_button_tag :registered_org, 'unregistered', class: "ds-c-choice" %> Not registered
+            <%= radio_button_tag :registered_org, 'all', class: "ds-c-choice" %> All
+          </div>
+        </fieldset>
+
       </main>
       <aside class="ds-l-row ds-c-dialog__actions" role="complementary">
         <div class="ds-l-col--3">

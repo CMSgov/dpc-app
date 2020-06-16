@@ -29,6 +29,18 @@ class OrganizationSearch
   end
 
   def apply_org_queries(scope)
+    # Check if registered org
+    if params[:registered_org]
+      radio = params[:registered_org]
+
+      if radio == 'registered'
+        scope = scope.where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
+      elsif radio == 'unregistered'
+        scope = scope.where('id NOT IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
+      else
+        scope = Organization
+      end
+    end
 
     # Check if provider or vender
     if params[:org_type] == 'vendor'
@@ -37,16 +49,9 @@ class OrganizationSearch
       scope = scope.provider
     end
 
-    # Check if registered org
-
     # Check org type
     if params[:organization_type].present?
       scope = scope.where(organization_type: params[:organization_type])
-    end
-
-    # Check on org type
-    if params[:requested_org_type].present?
-      scope = scope.where(organization_type: params[:requested_org_type])
     end
 
     scope
