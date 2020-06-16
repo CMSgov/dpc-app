@@ -7,7 +7,7 @@ module Internal
     def index
       results = OrganizationSearch.new(params: params, scope: params[:org_type]).results
 
-      @organizations = results.order('organizations.created_at DESC').page params[:page]
+      @organizations = results.page params[:page]
       render layout: 'table_index'
     end
 
