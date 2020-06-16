@@ -28,8 +28,6 @@ class OrganizationSearch
     scope
   end
 
-  private
-
   def apply_org_queries(scope)
     if params[:registered_org]
       if params[:registered_org] == 'registered'
