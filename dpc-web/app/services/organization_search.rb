@@ -24,6 +24,7 @@ class OrganizationSearch
     scope = apply_org_queries(scope)
     scope = apply_date_queries(scope)
     scope = apply_keyword_search(scope)
+    scope = apply_search_word(scope)
 
     scope
   end
@@ -73,6 +74,15 @@ class OrganizationSearch
     if params[:keyword].present?
       keyword = "%#{params[:keyword].downcase}%"
       scope = scope.where('LOWER(name) LIKE :keyword', keyword: keyword)
+    end
+
+    scope
+  end
+
+  def apply_search_word(scope)
+    if params[:search_word].present?
+      search_word = "%#{params[:search_word].downcase}%"
+      scope = scope.where('LOWER(name) LIKE :search_word', search_word: search_word)
     end
 
     scope
