@@ -40,8 +40,6 @@
 
         <fieldset class="ds-l-row field-group">
           <div class="ds-l-col--9 field-group__fields">
-            <%= label_tag :search_word, 'Organization name', class: "ds-c-label ds-u-margin-top--0" %>
-            <%= text_field_tag :search_word, params[:search_word], placeholder: "Name", class: "ds-c-field ds-u-margin--0" %>
             <%= label_tag :organization_type, 'Organization type', class: "ds-c-label" %>
             <%= select_tag(:organization_type, options_for_select(organization_types_for_select, params[:organization_type]), :class => 'ds-c-field drop-down', include_blank: 'All organization types') %>
           </div>

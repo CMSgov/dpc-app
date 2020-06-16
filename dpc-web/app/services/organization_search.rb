@@ -20,15 +20,27 @@ class OrganizationSearch
     scope = Organization
 
     scope = apply_org_queries(scope)
-    scope = apply_registered_query(scope)
     scope = apply_date_queries(scope)
     scope = apply_keyword_search(scope)
-    scope = apply_search_word(scope)
 
     scope
   end
 
+  private
+
   def apply_org_queries(scope)
+    if params[:registered_org]
+      radio = params[:registered_org]
+
+      if radio == 'registered'
+        scope = scope.where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
+      elsif radio == 'unregistered'
+        scope = scope.where('id NOT IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
+      else
+        scope = Organization
+      end
+    end
+
     # Check if provider or vender
     if params[:org_type] == 'vendor'
       scope = scope.vendor
@@ -43,19 +55,6 @@ class OrganizationSearch
 
     scope
   end
-
-  def apply_registered_query(scope)
-    if params[:registered_org]
-      if params[:registered_org] == 'registered'
-        scope = scope.where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
-      elsif params[:registered_org] == 'unregistered'
-        scope = scope.where('id NOT IN(SELECT DISTINCT(organization_id) FROM registered_organizations)')
-      else
-        scope = Organization
-      end
-    end
-  end
-
 
   def apply_date_queries(scope)
     if params[:created_after].present?
@@ -73,15 +72,6 @@ class OrganizationSearch
     if params[:keyword].present?
       keyword = "%#{params[:keyword].downcase}%"
       scope = scope.where('LOWER(name) LIKE :keyword', keyword: keyword)
-    end
-
-    scope
-  end
-
-  def apply_search_word(scope)
-    if params[:search_word].present?
-      search_word = "%#{params[:search_word].downcase}%"
-      scope = scope.where('LOWER(name) LIKE :search_word', search_word: search_word)
     end
 
     scope
