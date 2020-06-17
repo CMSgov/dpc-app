@@ -21,7 +21,6 @@ class BaseSearch
   def query
     scope = apply_controller(scope)
 
-    scope = apply_date_queries(scope)
     scope = apply_org_queries(scope)
 
     scope
@@ -32,11 +31,13 @@ class BaseSearch
     if params[:controller] == 'internal/organizations'
       scope = Organization.send(initial_scope)
 
+      scope = apply_date_queries(scope, 'organizations')
       scope = apply_org_status(scope)
       scope = apply_org_keyword_search(scope)
     elsif params[:controller] == 'internal/users'
       scope = User.includes(organization_user_assignments: :organization).send(initial_scope)
 
+      scope = apply_date_queries(scope, 'users')
       scope = apply_user_keyword_search(scope)
       scope = apply_user_queries(scope)
     end
@@ -44,17 +45,13 @@ class BaseSearch
     scope
   end
 
-  def apply_date_queries(scope)
-    if params[:created_after].present? and params[:controller] == 'internal/users'
-      scope = scope.where('users.created_at > :created_after', created_after: params[:created_after])
-    elsif params[:created_after].present? and params[:controller] == 'internal/organizations'
-      scope = scope.where('organizations.created_at > :created_after', created_after: params[:created_after])
+  def apply_date_queries(scope, table)
+    if params[:created_after].present?
+      scope = scope.where(table + '.created_at > :created_after', created_after: params[:created_after])
     end
 
-    if params[:created_before].present? and params[:controller] == 'internal/users'
-      scope = scope.where('users.created_at < :created_before', created_before: params[:created_before])
-    elsif params[:created_after].present? and params[:controller] == 'internal/organizations'
-      scope = scope.where('organizations.created_at > :created_before', created_before: params[:created_before])
+    if params[:created_before].present?
+      scope = scope.where(table + '.created_at < :created_before', created_before: params[:created_before])
     end
 
     scope
