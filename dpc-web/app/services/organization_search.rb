@@ -30,12 +30,6 @@ class OrganizationSearch
   end
 
   def apply_org_queries(scope)
-    if params[:registered_org] == 'registered'
-      scope = scope.is_registered
-    elsif params[:registered_org] == 'unregistered'
-      scope = scope.is_not_registered
-    end
-
     if params[:org_type] == 'vendor'
       scope = scope.vendor
     elsif params[:org_type] == 'provider'
@@ -45,30 +39,9 @@ class OrganizationSearch
     scope
   end
 
-  def apply_date_queries(scope)
-    if params[:created_after].present?
-      scope = scope.where('organizations.created_at > :created_after', created_after: params[:created_after])
-    end
-
-    if params[:created_before].present?
-      scope = scope.where('organizations.created_at < :created_before', created_before: params[:created_before])
-    end
-
-    scope
-  end
-
   def apply_org_type(scope)
     if params[:organization_type].present?
       scope = scope.where(organization_type: params[:organization_type])
-    end
-
-    scope
-  end
-
-  def apply_keyword_search(scope)
-    if params[:keyword].present?
-      keyword = "%#{params[:keyword].downcase}%"
-      scope = scope.where('LOWER(name) LIKE :keyword', keyword: keyword)
     end
 
     scope

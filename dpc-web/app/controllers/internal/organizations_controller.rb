@@ -5,7 +5,7 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      results = OrganizationSearch.new(params: params, scope: params[:org_type]).results
+      results = BaseSearch.new(params: params, scope: params[:org_type]).results
 
       @organizations = results.page params[:page]
       render layout: 'table_index'
