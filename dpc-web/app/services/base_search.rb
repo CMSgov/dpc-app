@@ -118,5 +118,4 @@ class BaseSearch
 
     scope
   end
-
 end
