@@ -2,14 +2,14 @@
 
 require 'rails_helper'
 
-RSpec.describe UserSearch do
+RSpec.describe BaseSearch do
   describe '#initial_scope' do
     it 'sets initial scope to all no scope provided' do
-      expect(UserSearch.new(params: {}).initial_scope).to eq('all')
+      expect(BaseSearch.new(params: {}).initial_scope).to eq('all')
     end
 
     it 'sets initial scope to scope passed' do
-      expect(UserSearch.new(params: {}, scope: 'vendor').initial_scope).to eq('vendor')
+      expect(BaseSearch.new(params: {}, scope: 'vendor').initial_scope).to eq('vendor')
     end
   end
 
@@ -30,7 +30,7 @@ RSpec.describe UserSearch do
           created_before: 1.day.ago
         }
 
-        expect(UserSearch.new(params: params).results).to match_array([user, vendor_user])
+        expect(BaseSearch.new(params: params).results).to match_array([user, vendor_user])
       end
     end
 
@@ -42,7 +42,7 @@ RSpec.describe UserSearch do
             created_after: 7.days.ago,
           }
 
-          expect(UserSearch.new(params: params, scope: 'provider').results).to match_array([user, new_user])
+          expect(BaseSearch.new(params: params, scope: 'provider').results).to match_array([user, new_user])
         end
       end
 
@@ -53,7 +53,7 @@ RSpec.describe UserSearch do
             created_before: 7.days.ago,
           }
 
-          expect(UserSearch.new(params: params, scope: 'provider').results).to match_array([old_unassigned_user])
+          expect(BaseSearch.new(params: params, scope: 'provider').results).to match_array([old_unassigned_user])
         end
       end
     end
@@ -66,7 +66,7 @@ RSpec.describe UserSearch do
             created_before: 7.days.ago,
           }
 
-          expect(UserSearch.new(params: params, scope: 'vendor').results).to match_array([old_vendor_user])
+          expect(BaseSearch.new(params: params, scope: 'vendor').results).to match_array([old_vendor_user])
         end
       end
 
@@ -77,7 +77,7 @@ RSpec.describe UserSearch do
             created_after: 7.days.ago,
           }
 
-          expect(UserSearch.new(params: params, scope: 'vendor').results).to match_array([unassigned_vendor_user])
+          expect(BaseSearch.new(params: params, scope: 'vendor').results).to match_array([unassigned_vendor_user])
         end
       end
     end
