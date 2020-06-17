@@ -23,6 +23,7 @@ class OrganizationSearch
 
     scope = apply_org_queries(scope)
     scope = apply_date_queries(scope)
+    scope = apply_org_type(scope)
     scope = apply_keyword_search(scope)
 
     scope
@@ -43,10 +44,6 @@ class OrganizationSearch
       scope = scope.provider
     end
 
-    if params[:organization_type].present?
-      scope = scope.where(organization_type: params[:organization_type])
-    end
-
     scope
   end
 
@@ -57,6 +54,14 @@ class OrganizationSearch
 
     if params[:created_before].present?
       scope = scope.where('organizations.created_at < :created_before', created_before: params[:created_before])
+    end
+
+    scope
+  end
+
+  def apply_org_type(scope)
+    if params[:organization_type].present?
+      scope = scope.where(organization_type: params[:organization_type])
     end
 
     scope
