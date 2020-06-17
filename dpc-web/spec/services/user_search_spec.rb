@@ -25,6 +25,7 @@ RSpec.describe BaseSearch do
     context 'no scope' do
       it 'returns all users matching params' do
         params = {
+          controller: 'internal/users',
           org_status: 'assigned',
           created_after: 7.days.ago,
           created_before: 1.day.ago
@@ -38,6 +39,7 @@ RSpec.describe BaseSearch do
       context 'assigned with created_after' do
         it 'returns assigned users created after a date' do
           params = {
+            controller: 'internal/users',
             org_status: 'assigned',
             created_after: 7.days.ago,
           }
@@ -49,6 +51,7 @@ RSpec.describe BaseSearch do
       context 'unassigned with created_before' do
         it 'returns unassigned users created before a date' do
           params = {
+            controller: 'internal/users',
             org_status: 'unassigned',
             created_before: 7.days.ago,
           }
@@ -62,6 +65,7 @@ RSpec.describe BaseSearch do
       context 'assigned with created_before' do
         it 'returns assigned users created before a date' do
           params = {
+            controller: 'internal/users',
             org_status: 'assigned',
             created_before: 7.days.ago,
           }
@@ -73,6 +77,7 @@ RSpec.describe BaseSearch do
       context 'unassigned with created_after' do
         it 'returns unassigned users created after a date' do
           params = {
+            controller: 'internal/users',
             org_status: 'unassigned',
             created_after: 7.days.ago,
           }
