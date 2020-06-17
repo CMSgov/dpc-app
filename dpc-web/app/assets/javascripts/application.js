@@ -12,6 +12,7 @@
 //
 //= require svg4everybody
 //= require accordions
+//= require copy-text
 //= require rails-ujs
 //= require activestorage
 //= require_tree ./utils
