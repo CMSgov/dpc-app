@@ -30,12 +30,10 @@ class OrganizationSearch
   end
 
   def apply_org_queries(scope)
-    if params[:registered_org]
-      if params[:registered_org] == 'registered'
-        scope = scope.is_registered
-      elsif params[:registered_org] == 'unregistered'
-        scope = scope.is_not_registered
-      end
+    if params[:registered_org] == 'registered'
+      scope = scope.is_registered
+    elsif params[:registered_org] == 'unregistered'
+      scope = scope.is_not_registered
     end
 
     if params[:org_type] == 'vendor'
