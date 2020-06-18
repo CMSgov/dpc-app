@@ -5,22 +5,9 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      scope = if params[:org_type] == 'vendor'
-                Organization.vendor
-              elsif params[:org_type] == 'provider'
-                Organization.provider
-              else
-                Organization.all
-              end
+      results = BaseSearch.new(params: params, scope: params[:org_type]).results
 
-      if keyword_param[:keyword].present?
-        keyword = "%#{keyword_param[:keyword].downcase}%"
-        scope = scope.where(
-          'LOWER(name) LIKE :keyword', keyword: keyword
-        )
-      end
-
-      @organizations = scope.page params[:page]
+      @organizations = org_page_params(results)
       render layout: 'table_index'
     end
 
@@ -104,6 +91,10 @@ module Internal
 
     def org_account_params
       params.require(:id)
+    end
+
+    def org_page_params(results)
+      results.page params[:page]
     end
 
     def from_user_params
