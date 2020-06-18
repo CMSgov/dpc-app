@@ -7,7 +7,7 @@ module Internal
     def index
       results = BaseSearch.new(params: params, scope: params[:org_type]).results
 
-      @organizations = results.page params[:page]
+      @organizations = org_page_params(results)
       render layout: 'table_index'
     end
 
@@ -91,6 +91,10 @@ module Internal
 
     def org_account_params
       params.require(:id)
+    end
+
+    def org_page_params(results)
+      results.page params[:page]
     end
 
     def from_user_params
