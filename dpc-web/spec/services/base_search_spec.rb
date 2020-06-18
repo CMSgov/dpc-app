@@ -3,8 +3,22 @@
 require 'rails_helper'
 
 RSpec.describe BaseSearch do
+  include APIClientSupport
+
   describe '#initial_scope' do
-    it 'sets initial scope to all no scope provided' do
+    it 'sets initial organization scope to all no scope' do
+      params = {
+        controller: 'internal/organizations',
+      }
+
+      expect(BaseSearch.new(params: {}).initial_scope).to eq('all')
+    end
+
+    it 'sets initial user scope to all no scope' do
+      params = {
+        controller: 'internal/users',
+      }
+
       expect(BaseSearch.new(params: {}).initial_scope).to eq('all')
     end
 
@@ -13,7 +27,49 @@ RSpec.describe BaseSearch do
     end
   end
 
-  describe '#results' do
+  describe '#organization-results' do
+    let!(:organization) { create(:organization, created_at: 5.days.ago) }
+    let!(:old_organization) { create(:organization, created_at: 10.days.ago) }
+    let!(:new_organization) { create(:organization, created_at: Time.now) }
+
+    context 'no scope' do
+      it 'returns all organization matching params' do
+        params = {
+          controller: 'internal/organizations',
+        }
+
+        expect(BaseSearch.new(params: params).results).to match_array([organization, old_organization, new_organization])
+      end
+    end
+
+    context 'organization date filter' do
+      context 'organization with created after' do
+        it 'returns organization created after a date' do
+          params = {
+            controller: 'internal/organizations',
+            created_after: 7.days.ago
+          }
+  
+  
+          expect(BaseSearch.new(params: params).results).to match_array([organization, new_organization])
+        end
+      end
+
+      context 'organization with created before' do
+        it 'returns organization created before a date' do
+          params = {
+            controller: 'internal/organizations',
+            created_before: 7.days.ago
+          }
+  
+  
+          expect(BaseSearch.new(params: params).results).to match_array([old_organization])
+        end
+      end
+    end
+  end
+
+  describe '#user-results' do
     let!(:user) { create(:user, :assigned, created_at: 5.days.ago) }
     let!(:unassigned_user) { create(:user, created_at: 5.days.ago) }
     let!(:old_unassigned_user) { create(:user, created_at: 10.days.ago) }
