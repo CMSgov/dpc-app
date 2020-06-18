@@ -10,6 +10,7 @@
   .public-key__intro {
       align-items: center;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       margin: auto;
     
@@ -18,10 +19,16 @@
         color: $color-gray-dark;
         font-weight: 700;
         position: relative;
+        width: 477px;
       }
     
       .public-key__intro-windows {
-        max-width: 33%;
+        max-width: 45%;
+        padding: 15px;
+
+        @media (max-width: $width-md) {
+          max-width: 100%;
+        }
       }
     }
     
@@ -44,57 +51,212 @@
   }
 }
 
-.copy-btn__container {
-  width: 100%
+.public_key_form_grid {
+  display: grid;
+  margin: 0;
+  padding: 0;
+
+  .pk-grid-cell {
+    padding: 0 25px;
+  }
+
+  .pk-inst {
+    margin: 30px 0;
+  }
+
+  .pk-inst-num {
+    margin: auto 35px auto 0;
+  }
+
+  .pk-triangle {
+    display: none;
+  }
+
+  .key-submit-btn {
+    float: right;
+    margin: 0 0 20px 0;
+  }
+
+  .pk-instruction {
+    background-color: $color-primary-darkest;
+    color: $color-white;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .pub-key-ex-container {
+    display: block;
+
+    .pub-key-ex {
+      border: 1px solid $color-primary;
+      display: block;
+      margin: 15px auto 0 auto;
+      max-width: 300px;
+    }
+  }
+
+  #need-help {
+    grid-area: 10 / 1 / 10 / 1;
+    padding: 30px 10px;
+  }
+
+  #submit-btn {
+    grid-area: 9 / 1 / 9 / 1;
+    padding: 0 180px 25px 25px;
+  }
+
+
+  @media (min-width: $width-med) {
+    grid-template-columns: 45% 5% 50%;
+
+    .pk-inst {
+      margin: auto 15px auto 0;
+    }
+
+    .pk-inst-num {
+      margin: 45px 45px 15px 0;
+    }
+
+    .pk-triangle {
+      display: inline;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 20px 0 20px 30px;
+      border-color: transparent transparent transparent $color-primary-darkest;
+
+      margin: 60px 0;
+    }
+
+    #need-help {
+      grid-area: 5 / 1 / 5 / 1;
+    }
+
+    #submit-btn {
+      grid-area: 5 / 3 / 5 / 3;
+      padding: 0 140px 5px 25px;
+    }
+  }
 }
 
-.copy-btn {
-  align-items: right;
-  border-radius: 15px;
+.copy-btn__container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 3px;
+
+  img {
+    margin: 1px 0;
+    max-height: 22px;
+  }
+
+  .copy-btn {
+    border-radius: 15px;
+    font-weight: 700;
+    margin: 2px 0;
+  }
+}
+
+.confirm-msg {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.confirm-success {
+  background-color: $color-success-lightest;
+  color: $color-success;
   font-weight: 700;
-  margin: 5px 5px 5px 75%;
-  padding: 5px 10px;
+  padding: 2px 10px;
+  text-align: center;
+}
+
+.confirm-unsuccess {
+  color: $color-error-dark;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: $color-gray-lightest;
+  border: 1px solid $color-black;
+  color: $color-black;
+  padding: 5px;
+
+  position: absolute;
+  visibility: hidden;
+  width: 150px;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
 
 .download_btn_container {
   border: 1px solid $color-gray;
   margin: 0 auto 15px;
+  max-width: 190px;
+  position: relative;
   text-align: center;
-  width: 190px;
 
   .download_btn_description {
     border-top: 1px solid $color-gray;
     font-size: 12px;
   }
-}
 
-ol {
-  list-style: none;
-  counter-reset: my-awesome-counter;
-  padding: 30px 0 25px 15px;
-}
+  .download_btn_form {
 
-ol li {
-  counter-increment: my-awesome-counter;
-  text-indent: -20px;
-  margin: 30px 0 0 20px;
-}
+    .button_to {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+    }
 
-ol li::before {
-  content: counter(my-awesome-counter) ". ";
-  color: $color-white;
-  font-weight: bold;
+    .download_btn {
+      display: block;
+      flex-grow: 1;
+    }
+  }
 }
 
 .code-block {
-  background-color: $color-gray-lightest;
-  border: 1px solid $color-gray;
+  background-color: $color-white;
+  border: 1px solid $color-gray-dark;
+  color: $color-gray-dark;
   max-width: 100%;
   padding: 2px;
 }
 
-@for $i from 1 through 3 {
+@for $i from 1 through 4 {
   .step_#{$i} {
-    border-right: 1px solid $color-gray-lighter;
+    h4 {
+      font-size: 18px;
+    }
+
+    @if $i > 2 {
+      border-top: 1px solid $color-gray-lighter;
+    }
+
+    @if $i % 2 != 0 {
+      border-right: 1px solid $color-gray-lighter;
+    }
+    
+    @media (min-width: $width-med) {
+      border-top: 0;
+
+      h4 {
+        font-size: 16px;
+      }
+
+      @if $i < 4 {
+        border-right: 1px solid $color-gray-lighter;
+      }
+    }
   }
 }
