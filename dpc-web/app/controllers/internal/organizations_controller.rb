@@ -5,29 +5,15 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      scope = if params[:org_type] == 'vendor'
-                Organization.vendor
-              elsif params[:org_type] == 'provider'
-                Organization.provider
-              else
-                Organization.all
-              end
+      results = BaseSearch.new(params: params, scope: params[:org_type]).results
 
-      if params[:keyword].present?
-        keyword = "%#{params[:keyword].downcase}%"
-        scope = scope.where(
-          'LOWER(name) LIKE :keyword', keyword: keyword
-        )
-      end
-
-      @organizations = scope.page params[:page]
+      @organizations = org_page_params(results)
       render layout: 'table_index'
     end
 
     def new
-      user_id = params.fetch(:from_user, nil)
-      if user_id
-        user = User.find user_id
+      if from_user_params[:from_user].present?
+        user = User.find from_user_params[:from_user]
         @organization = Organization.new name: user.requested_organization,
                                          organization_type: user.requested_organization_type,
                                          num_providers: user.requested_num_providers
@@ -51,8 +37,8 @@ module Internal
         if prod_sbx?
           redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id,
                                                                              api_env: 'sandbox')
-        elsif params[:from_user].present?
-          redirect_to edit_internal_user_path(params[:from_user], user_organization_ids: @organization.id)
+        elsif from_user_params[:from_user].present?
+          redirect_to edit_internal_user_path(from_user_params[:from_user], user_organization_ids: @organization.id)
         else
           redirect_to internal_organization_path(@organization)
         end
@@ -63,15 +49,15 @@ module Internal
     end
 
     def show
-      @organization = Organization.find params[:id]
+      @organization = Organization.find org_account_params
     end
 
     def edit
-      @organization = Organization.find params[:id]
+      @organization = Organization.find org_account_params
     end
 
     def update
-      @organization = Organization.find params[:id]
+      @organization = Organization.find org_account_params
 
       if @organization.update organization_params
         flash[:notice] = 'Organization updated.'
@@ -83,7 +69,7 @@ module Internal
     end
 
     def destroy
-      @organization = Organization.find params[:id]
+      @organization = Organization.find org_account_params
       if @organization.destroy
         flash[:notice] = 'Organization deleted.'
         redirect_to internal_organizations_path
@@ -125,8 +111,24 @@ module Internal
       ENV['ENV'] == 'prod-sbx'
     end
 
+    def keyword_param
+      params.permit(:keyword)
+    end
+
+    def org_account_params
+      params.require(:id)
+    end
+
+    def org_page_params(results)
+      results.page params[:page]
+    end
+
+    def from_user_params
+      params.permit(:from_user)
+    end
+
     def organization_params
-      params.fetch(:organization).permit(
+      params.require(:organization).permit(
         :name, :organization_type, :num_providers, :npi, :vendor,
         address_attributes: %i[id street street_2 city state zip address_use address_type]
       )

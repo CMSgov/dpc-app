@@ -41,6 +41,19 @@ public class ConsentResource {
         this.consentOrganizationURL = consentOrganizationURL;
     }
 
+    @POST
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Create a Consent resource")
+    @ApiResponses(value = { @ApiResponse(code = 201, message = "Consent resource was created"),
+            @ApiResponse(code = 400, message = "Consent resource was not created due to bad request") })
+    public Response create(@ApiParam(value = "Consent resource") Consent consent) {
+        ConsentEntity entity = ConsentEntityConverter.fromFhir(consent);
+        entity = dao.persistConsent(entity);
+        Consent result = ConsentEntityConverter.toFhir(entity, consentOrganizationURL, fhirReferenceURL);
+        return Response.status(Response.Status.CREATED).entity(result).build();
+    }
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @GET
     @FHIR
@@ -84,7 +97,7 @@ public class ConsentResource {
 
         return entities
                 .stream()
-                .map(e -> ConsentEntityConverter.convert(e, consentOrganizationURL, fhirReferenceURL))
+                .map(e -> ConsentEntityConverter.toFhir(e, consentOrganizationURL, fhirReferenceURL))
                 .collect(Collectors.toList());
     }
 
@@ -102,7 +115,22 @@ public class ConsentResource {
                 new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
         );
 
-        return ConsentEntityConverter.convert(consentEntity, consentOrganizationURL, fhirReferenceURL);
+        return ConsentEntityConverter.toFhir(consentEntity, consentOrganizationURL, fhirReferenceURL);
+    }
+
+    @PUT
+    @Path("/{consentId}")
+    @FHIR
+    @UnitOfWork
+    @ApiOperation(value = "Update a Consent resource")
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Consent resource was updated"),
+            @ApiResponse(code = 400, message = "Consent resource was not updated due to bad request") })
+    public Consent update(@ApiParam(value = "Consent resource ID", required = true) @PathParam("consentId") UUID consentId,
+                          @ApiParam(value = "Consent resource", required = true) Consent consent) {
+        consent.setId(consentId.toString());
+        ConsentEntity entity = ConsentEntityConverter.fromFhir(consent);
+        entity = this.dao.persistConsent(entity);
+        return ConsentEntityConverter.toFhir(entity, consentOrganizationURL, fhirReferenceURL);
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {

@@ -4,11 +4,11 @@ class OrganizationsController < ApplicationController
   before_action :authenticate_user!
 
   def edit
-    @organization = current_user.organizations.find(params[:id])
+    @organization = current_user.organizations.find(org_id_param)
   end
 
   def update
-    @organization = current_user.organizations.find(params[:id])
+    @organization = current_user.organizations.find(org_id_param)
     if @organization.update organization_params
       flash[:notice] = 'Organization updated.'
       redirect_to dashboard_path
@@ -19,6 +19,10 @@ class OrganizationsController < ApplicationController
   end
 
   private
+
+  def org_id_param
+    params.require(:id)
+  end
 
   def organization_params
     params.fetch(:organization).permit(:npi, :vendor)

@@ -145,7 +145,7 @@ public class FHIRExtractors {
         return Pair.of(tag.substring(0, idx), tag.substring(idx + 1));
     }
 
-    private static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) {
+    public static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) {
         return identifiers
                 .stream()
                 .filter(id -> id.getSystem().equals(system.getSystem()))
