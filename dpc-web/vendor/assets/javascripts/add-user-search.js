@@ -36,9 +36,9 @@ function orgUserSearch() {
     sendMessage.innerHTML = ""
   }
 
-  if (liCount > 12) {
-    ul.style.display = "none";
-  } else {
+  if (filter.length > 1) {
     ul.style.display = "";
+  } else {
+    ul.style.display = "none";
   }
 }

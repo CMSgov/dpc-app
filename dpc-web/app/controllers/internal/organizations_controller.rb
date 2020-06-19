@@ -51,7 +51,7 @@ module Internal
     def show
       @organization = Organization.find org_account_params
 
-      @users = User.all params[:page]
+      @users = user_filter
     end
 
     def edit
@@ -127,6 +127,11 @@ module Internal
 
     def from_user_params
       params.permit(:from_user)
+    end
+
+    def user_filter
+      User.left_joins(:organization_user_assignments)
+          .where('organization_user_assignments.id IS NULL')
     end
 
     def organization_params
