@@ -50,6 +50,8 @@ module Internal
 
     def show
       @organization = Organization.find org_account_params
+
+      @users = User.all params[:page]
     end
 
     def edit

@@ -98,12 +98,9 @@
 }
 
 .module-list-container {
-  border: 1px solid $color-gray-light;
   list-style: none;
-  max-height: 400px;
   max-width: 850px;
-  overflow: auto;
-  padding: 0 10px;
+  padding: 0;
 
   ul {
     padding: 0;

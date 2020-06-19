@@ -6,7 +6,8 @@
   <ul class="module-list-container" id="orgUserList">
     <div id="orgUserUnassignedCount"></div>
     <div id="orgUserSearchMessage"></div>
-    <% @users.each do |user| %>
+    <% User.left_joins(:organization_user_assignments)
+            .where('organization_user_assignments.id IS NULL').order('id ASC').each do |user| %>
       <li>
         <div class="module-container">
           <div class="module-container__id">
