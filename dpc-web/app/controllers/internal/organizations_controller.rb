@@ -82,29 +82,11 @@ module Internal
     end
 
     def add
-      @organization = Organization.find(params[:organization_id])
-      @user = User.find(params[:organization][:id])
-      add_user = @organization.users << @user
-
-      if add_user
-        flash[:notice] = 'User has been successfully added to organization.'
-        redirect_to internal_organization_path(@organization)
-      else
-        flash[:alert] = 'User could not be added to organization.'
-      end
+      add_or_delete('added')
     end
 
     def delete
-      @organization = Organization.find(params[:organization_id])
-      @user = User.find(params[:organization][:id])
-      delete_user = @organization.users.delete(@user)
-
-      if delete_user
-        flash[:notice] = 'User has been successfully deleted from organization.'
-        redirect_to internal_organization_path(@organization)
-      else
-        flash[:alert] = 'User could not be deleted to organization.'
-      end
+      add_or_delete('deleted')
     end
 
     private
@@ -113,8 +95,22 @@ module Internal
       ENV['ENV'] == 'prod-sbx'
     end
 
-    def keyword_param
-      params.permit(:keyword)
+    def add_or_delete(action)
+      @organization = Organization.find(params[:organization_id])
+      @user = User.find(params[:organization][:id])
+
+      if action == 'added'
+        add_user = @organization.users << @user
+      else action == 'deleted'
+        delete_user = @organization.users.delete(@user)
+      end
+
+      if delete_user or add_user
+        flash[:notice] = "User has been successfully #{action} from organization."
+        redirect_to internal_organization_path(@organization)
+      else
+        flash[:alert] = "User could not be #{action} to organization."
+      end
     end
 
     def org_account_params
