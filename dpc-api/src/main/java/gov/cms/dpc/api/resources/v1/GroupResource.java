@@ -160,7 +160,7 @@ public class GroupResource extends AbstractGroupResource {
     @ApiOperation(value = "Update Attribution Group", notes = "Update specific Attribution Group." +
             "<p>Updates allow for adding or removing patients as members of an Attribution Group.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", value = "Provenance Resource attesting to Group attribution",  required = true, paramType = "header", type="string", dataTypeClass = Provenance.class)//,
+            @ApiImplicitParam(name = "X-Provenance", value = "Provenance Resource attesting to Group attribution",  required = true, paramType = "header", type="string", dataTypeClass = Provenance.class)
      )
 
 
