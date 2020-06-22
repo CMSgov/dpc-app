@@ -1,0 +1,82 @@
+{
+    "resourceType": "Group",
+    "type": "person",
+    "actual": true,
+    "characteristic": [
+        {
+            "code": {
+                "coding": [
+                    {
+                        "code": "attributed-to"
+                    }
+                ]
+            },
+            "valueCodeableConcept": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/sid/us-npi",
+                        "code": "1234329724"
+                    }
+                ]
+            },
+            "exclude": false
+        }
+    ],
+    "member": [
+        {
+            "entity": {
+                "reference": "Patient/d59c197a-0115-47c0-ad90-01799d32e01e"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/22b0e94a-c395-4c38-ab65-7b34084e15dc"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/a28cfad3-f1da-421e-91e2-0f16f1d7253d"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/a29211ce-0014-43f5-a103-6368fa664749"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/5294faca-cba1-4606-a079-23539a3e26e2"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/78226741-3095-42a9-87e2-9a18604edb7d"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/47fc4fcb-2862-406c-9931-929fc1892ca2"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/c3e58176-8e84-4721-a6b9-0d7eea88d109"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/326c4936-086b-4967-9970-4db1d7a169c9"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/fd71330e-ebd7-4e86-a43c-39ea210caf5c"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/fde02360-8b61-40c1-b5c9-e686627d8207"
+            }
+        }
+    ]
+}

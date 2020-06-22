@@ -1,0 +1,62 @@
+{
+    "resourceType": "Group",
+    "type": "person",
+    "actual": true,
+    "characteristic": [
+        {
+            "code": {
+                "coding": [
+                    {
+                        "code": "attributed-to"
+                    }
+                ]
+            },
+            "valueCodeableConcept": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/sid/us-npi",
+                        "code": "1232131239"
+                    }
+                ]
+            },
+            "exclude": false
+        }
+    ],
+    "member": [
+        {
+            "entity": {
+                "reference": "Patient/9b84f3aa-1ac8-4a74-b07b-f5853a365494"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/81fdf5bf-e03f-4662-a727-6804a7870021"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/41d0b3e0-264a-41d7-9370-84a1521ec505"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/9958eb49-ff3b-4797-b720-52a32d0fc7d0"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/772fe3d7-c13c-4f24-bf0f-fc714cbf98b1"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/4dafccb6-7548-43f4-b394-39170367f1ef"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/fc0b3924-0ca8-424f-81b0-08f7f37b6e9b"
+            }
+        }
+    ]
+}

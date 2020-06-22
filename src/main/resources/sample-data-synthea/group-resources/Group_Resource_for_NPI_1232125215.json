@@ -1,0 +1,272 @@
+{
+    "resourceType": "Group",
+    "type": "person",
+    "actual": true,
+    "characteristic": [
+        {
+            "code": {
+                "coding": [
+                    {
+                        "code": "attributed-to"
+                    }
+                ]
+            },
+            "valueCodeableConcept": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/sid/us-npi",
+                        "code": "1232125215"
+                    }
+                ]
+            },
+            "exclude": false
+        }
+    ],
+    "member": [
+        {
+            "entity": {
+                "reference": "Patient/326299d1-23d8-46bf-8266-e58efe60c0ea"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/dbef14f5-f48e-458e-9a2a-5479db87db38"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/6a49d9e8-6c8b-4326-80dc-bb54856b07f2"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/6f526a1e-eae2-4583-bb15-856d7b2d9289"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/088828a0-7ef6-43a5-aa4e-0c6292e59389"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/9e87ed0a-d759-4407-a0dc-c629fc102c89"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/e7190189-9c85-497d-a7b5-3972ca3c0ecb"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/673c9383-9b88-4a28-a4d0-4c6df1190690"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/4323f5df-289a-4aa5-8795-b048f8c8fdf8"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/46f99b9f-ab88-40d6-a3a2-24adec933bb3"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/ea39dc3c-1e38-484f-b6db-c03d5e96347a"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/142149fa-b73b-4466-9eb8-d88af9eb5448"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/474a5860-bbac-4101-8890-10ad29351845"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/615c67c5-5ac0-4538-84ae-bd8d4e19dc5d"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/155835fd-7f1d-414b-94d2-41d44adcf250"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/52e68ec6-3662-4d7a-b612-dff264d7f071"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/0e0d36f4-6653-4ae0-b83d-2530f90deff5"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/a490a01b-4d69-4498-8ef3-caa8ed5ea3ba"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/3ee3e7f0-bfeb-476b-abc2-eb6517d2d0b2"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/9bcf15aa-c5cc-4d5d-b16b-325eef407f9f"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/d82dd97f-b76e-4d49-bae7-38f3d3bef190"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/818cf547-5821-46eb-b2f2-14e2a46fccbb"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/67cf4015-f9fc-4e22-bc90-b40e17442039"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/9ee5abef-b073-4926-8cf1-6b0c7caf31ac"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/67fc74cc-7e9b-4eb8-9ad6-47dfe73121e1"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/f7b6050c-2986-4175-8026-688ca4062543"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/6064dd35-f93a-4fba-902b-2f92191554c3"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/fda8df83-a8d9-4c5c-bc5b-e7b294889414"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/7da4a2c2-144f-46a6-bba0-78c384efae03"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/a91c0655-0f40-4253-864e-2f9a77d37667"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/07605caa-9b62-4c90-a939-5fb630cab028"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/b6e5a598-87a8-43f7-9677-dc51ca76b72a"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/ffdaff70-25f4-419b-a55e-f718a8c3efc3"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/b93f0e35-b955-49f2-807d-187788137edf"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/80c54830-4add-48fd-b9f6-a76020b0570a"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/69639ae1-8cf3-4112-9097-6ad93a5997dc"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/03a27898-d209-48aa-a2ec-a03f6fdaf1fe"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/d02546e8-aa0a-4b24-97a4-b6147a599478"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/c784b280-c6e9-4205-975e-b89057e23a2e"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/57091303-30fb-4bcc-a4e6-1f76dc7993a7"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/770a1931-b6d8-485e-8da8-9256f3208c27"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/fe8a77cd-facf-471d-97ad-6a7a7cf6561d"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/4fdb156f-e87a-4f69-bca2-d8d61e595ce9"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/ef59d34d-e132-4bca-9246-d2efc1df73da"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/aaae7cd0-c632-4b28-8aa7-c5ae41e4753d"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/7e866b75-a36d-4531-b1e3-57aae634ae04"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/8e43e552-17d9-406d-9a5b-250c3c33ce83"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/46b6a07a-2e13-4460-85a5-cc9c63747c73"
+            }
+        },
+        {
+            "entity": {
+                "reference": "Patient/bbb2ec77-c5cf-408f-aab8-3f1496334617"
+            }
+        }
+    ]
+}
