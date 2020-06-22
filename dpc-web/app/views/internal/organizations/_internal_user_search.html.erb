@@ -18,7 +18,7 @@
               <%= link_to user.name, internal_user_url(user) %>
             </div>
             <div class="module-container__button">
-              <%= form_for @organization, url: internal_organization_add_path(@organization), html: { method: :add } do |f| %>
+              <%= form_for @organization, url: internal_organization_add_or_delete_url(@organization), html: { method: :add } do |f| %>
                 <%= f.hidden_field :id, value: user.id %>
                 <%= f.submit "Add user", class: "ds-c-button ds-c-button--primary" %>
               <% end %>

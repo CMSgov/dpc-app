@@ -222,7 +222,7 @@
             </h2>
           </div>
           <div class="module-container__button">
-            <%= form_for @organization, url: internal_organization_delete_path(@organization, user), method: :delete do |f| %>
+            <%= form_for @organization, url: internal_organization_add_or_delete_url(@organization, user), method: :delete do |f| %>
               <%= f.hidden_field :id, value: user.id %>
               <%= f.submit "Remove", class: "ds-c-button ds-c-button--danger" %>
             <% end %>

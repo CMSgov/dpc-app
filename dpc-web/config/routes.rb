@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       resources :registered_organizations, only: [:new, :create, :edit, :update, :destroy]
       match :add, via: [:get, :post]
       match :delete, via: [:delete]
+      match :add_or_delete, via: [:get, :post, :delete]
     end
   end
 

@@ -81,33 +81,27 @@ module Internal
       end
     end
 
-    def add
-      add_or_delete('added')
-    end
-
-    def delete
-      add_or_delete('deleted')
-    end
-
-    private
-
-    def add_or_delete(action)
+    def add_or_delete
       @organization = Organization.find(params[:organization_id])
       @user = User.find(params[:organization][:id])
 
-      if action == 'added'
+      if params[:_method] == 'add'
         add_user = @organization.users << @user
-      elsif action == 'deleted'
+        action = 'added to'
+      elsif params[:_method] == 'delete'
         delete_user = @organization.users.delete(@user)
+        action = 'deleted from'
       end
 
       if delete_user || add_user
-        flash[:notice] = "User has been successfully #{action} from organization."
+        flash[:notice] = "User has been successfully #{action} the organization."
         redirect_to internal_organization_path(@organization)
       else
-        flash[:alert] = "User could not be #{action} to organization."
+        flash[:alert] = "User could not be #{action}."
       end
     end
+
+    private
 
     def org_account_params
       params.require(:id)
