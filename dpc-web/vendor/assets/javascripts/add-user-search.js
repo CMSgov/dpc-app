@@ -6,37 +6,32 @@ function orgUserSearch() {
   ul = document.getElementById("orgUserList");
   li = ul.getElementsByTagName('li');
 
-  var liTotalCount = 0;
   var liDisplayCount = 0;
-  var liInvisibleCount = 0;
 
   for (i = 0; i < li.length; i++) {
     div = li[i].getElementsByTagName("div")[0];
 
     txtValue = div.textContent || div.innerText;
 
-    liTotalCount++;
-
-
-
     if (txtValue.toUpperCase().indexOf(filter) > -1) {
       li[i].style.display = "";
       liDisplayCount++;
     } else {
       li[i].style.display = "none";
-      liInvisibleCount++;
     }
   }
 
   var sendMessage = document.getElementById('orgUserSearchMessage');
 
   if (liDisplayCount == 0) {
-    sendMessage.innerHTML = "There are no users or ids that match your search."
+    sendMessage.innerHTML = "There are no users or ids that match your search query."
+  } else if (liDisplayCount > 1) {
+    sendMessage.innerHTML = "There are " + liDisplayCount + " users that match your search query."
   } else {
-    sendMessage.innerHTML = ""
+    sendMessage.innerHTML = "There is " + liDisplayCount + " user that matches your search query."
   }
 
-  if (filter.length > 1) {
+  if (filter.length > 0) {
     ul.style.display = "";
   } else {
     ul.style.display = "none";

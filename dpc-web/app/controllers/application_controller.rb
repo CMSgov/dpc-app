@@ -37,4 +37,10 @@ class ApplicationController < ActionController::Base
                         'ERROR'
                       end
   end
+
+  private
+
+  def prod_sbx?
+    ENV['ENV'] == 'prod-sbx'
+  end
 end

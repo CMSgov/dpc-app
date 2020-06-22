@@ -91,10 +91,6 @@ module Internal
 
     private
 
-    def prod_sbx?
-      ENV['ENV'] == 'prod-sbx'
-    end
-
     def add_or_delete(action)
       @organization = Organization.find(params[:organization_id])
       @user = User.find(params[:organization][:id])

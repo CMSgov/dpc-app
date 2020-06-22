@@ -100,6 +100,8 @@
 .module-list-container {
   list-style: none;
   max-width: 850px;
+  max-height: 850px;
+  overflow: auto;
   padding: 0;
 
   ul {
