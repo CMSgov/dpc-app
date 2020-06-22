@@ -101,11 +101,11 @@ module Internal
 
       if action == 'added'
         add_user = @organization.users << @user
-      else action == 'deleted'
+      elsif action == 'deleted'
         delete_user = @organization.users.delete(@user)
       end
 
-      if delete_user or add_user
+      if delete_user || add_user
         flash[:notice] = "User has been successfully #{action} from organization."
         redirect_to internal_organization_path(@organization)
       else
