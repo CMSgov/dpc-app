@@ -40,6 +40,10 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def account_params_id
+    params.require(:id)
+  end
+
   def prod_sbx?
     ENV['ENV'] == 'prod-sbx'
   end

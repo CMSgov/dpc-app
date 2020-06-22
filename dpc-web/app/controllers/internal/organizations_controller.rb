@@ -6,6 +6,7 @@ module Internal
 
     def index
       results = BaseSearch.new(params: params, scope: params[:org_type]).results
+
       @organizations = org_page_params(results)
       render layout: 'table_index'
     end
@@ -48,16 +49,17 @@ module Internal
     end
 
     def show
-      @organization = Organization.find org_account_params
+      @organization = Organization.find account_params_id
+
       @users = user_filter
     end
 
     def edit
-      @organization = Organization.find org_account_params
+      @organization = Organization.find account_params_id
     end
 
     def update
-      @organization = Organization.find org_account_params
+      @organization = Organization.find account_params_id
 
       if @organization.update organization_params
         flash[:notice] = 'Organization updated.'
@@ -69,7 +71,7 @@ module Internal
     end
 
     def destroy
-      @organization = Organization.find org_account_params
+      @organization = Organization.find account_params_id
       if @organization.destroy
         flash[:notice] = 'Organization deleted.'
         redirect_to internal_organizations_path
@@ -88,7 +90,7 @@ module Internal
         action = 'added to'
       elsif params[:_method] == 'delete'
         delete_user = @organization.users.delete(@user)
-        action = 'deleted from'
+        action = 'deleted from the organization'
       end
 
       if delete_user || add_user
@@ -100,10 +102,6 @@ module Internal
     end
 
     private
-
-    def org_account_params
-      params.require(:id)
-    end
 
     def org_page_params(results)
       results.page params[:page]
