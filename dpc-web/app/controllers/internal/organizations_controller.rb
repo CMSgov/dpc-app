@@ -6,7 +6,6 @@ module Internal
 
     def index
       results = BaseSearch.new(params: params, scope: params[:org_type]).results
-
       @organizations = org_page_params(results)
       render layout: 'table_index'
     end
@@ -50,7 +49,6 @@ module Internal
 
     def show
       @organization = Organization.find org_account_params
-
       @users = user_filter
     end
 
