@@ -110,7 +110,7 @@ public class EndpointResource extends AbstractEndpointResource {
             @ApiResponse(code = 422, message = "Endpoint not valid")
     })
     @Override
-    public Endpoint updateEndpoint(@ApiParam(value = "Your Organization's FHIR Endpoint ID") @PathParam("endpointID") UUID endpointID,
+    public Endpoint updateEndpoint(@ApiParam(value = "Your Organization's FHIR Endpoint ID") @NotNull @PathParam("endpointID") UUID endpointID,
                                    @Valid @Profiled(profile = EndpointProfile.PROFILE_URI) Endpoint endpoint) {
         Endpoint currEndpoint = fetchEndpoint(endpointID);
         if (!endpoint.getManagingOrganization().getReference().equals(currEndpoint.getManagingOrganization().getReference())) {
