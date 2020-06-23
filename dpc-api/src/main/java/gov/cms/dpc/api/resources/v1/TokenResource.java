@@ -49,7 +49,7 @@ import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
-@Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
+@Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Token")
 public class TokenResource extends AbstractTokenResource {
 
