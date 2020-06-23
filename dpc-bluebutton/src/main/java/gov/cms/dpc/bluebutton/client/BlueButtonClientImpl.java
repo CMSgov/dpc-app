@@ -1,11 +1,7 @@
 package gov.cms.dpc.bluebutton.client;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.ICriterion;
-import ca.uhn.fhir.rest.gclient.IParam;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
-import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
+import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
@@ -29,7 +25,10 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.KeySpec;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 
@@ -109,6 +108,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI_HASH.getSystem(), mbiHash))
+                .withAdditionalHeader("IncludeIdentifiers", "mbi")
                 .returnBundle(Bundle.class)
                 .execute());
     }
@@ -238,6 +238,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                 .count(config.getResourcesCount())
                 .lastUpdated(lastUpdated)
                 .returnBundle(Bundle.class)
+                .withAdditionalHeader("IncludeIdentifiers", "mbi")
                 .execute();
 
         // Case where patientID does not exist at all
