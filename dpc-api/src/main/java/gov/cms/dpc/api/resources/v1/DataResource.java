@@ -34,7 +34,7 @@ import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_C
 /**
  * Streaming and range logic was taken from here: https://github.com/aruld/jersey-streaming
  */
-@Api(tags = {"Bulk Data", "Data"}, authorizations = @Authorization(value = "apiKey"))
+@Api(tags = {"Bulk Data", "Data"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Data")
 public class DataResource extends AbstractDataResource {
 
