@@ -116,6 +116,12 @@
             <email>richard.braman@adhocteam.us</email>
             <organization>Ad Hoc LLC</organization>
         </developer>
+        <developer>
+            <id>sal</id>
+            <name>Salvador Gutierrez</name>
+            <email>sal.gutierrez@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
+        </developer>
     </developers>
 
     <dependencyManagement>
