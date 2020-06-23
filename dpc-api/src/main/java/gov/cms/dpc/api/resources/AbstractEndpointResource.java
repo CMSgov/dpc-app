@@ -4,7 +4,6 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.EndpointProfile;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -16,7 +15,6 @@ import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("/Endpoint")
-@Api(value = "Endpoint")
 public abstract class AbstractEndpointResource {
 
     protected AbstractEndpointResource() {
