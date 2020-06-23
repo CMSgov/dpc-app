@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * See https://github.com/smart-on-fhir/fhir-bulk-data-docs/blob/master/export.md for details.
  */
-@Api(tags = {"Bulk Data", "Job"}, authorizations = @Authorization(value = "apiKey"))
+@Api(tags = {"Bulk Data", "Job"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Jobs")
 public class JobResource extends AbstractJobResource {
 

@@ -110,6 +110,12 @@
             <email>silvio@adhocteam.us</email>
             <organization>Ad Hoc LLC</organization>
         </developer>
+        <developer>
+            <id>rich</id>
+            <name>Richard Braman</name>
+            <email>richard.braman@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
+        </developer>
     </developers>
 
     <dependencyManagement>
@@ -264,6 +270,7 @@
                 <version>4.5.12</version>
                 <scope>test</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -422,6 +429,7 @@
     <build>
         <pluginManagement>
             <plugins>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
