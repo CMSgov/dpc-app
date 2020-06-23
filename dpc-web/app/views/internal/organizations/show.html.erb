@@ -205,6 +205,10 @@
 </section>
 
 <section class="box">
+  <%= render 'internal_user_search' %>
+</section>
+
+<section class="box">
     <div class="box__content">
       <h2 class="box__heading">Users</h2>
       <% @organization.users.each do |user| %>
@@ -216,6 +220,12 @@
             <h2 class="module-container__heading">
               <%= link_to user.name, internal_user_url(user) %>
             </h2>
+          </div>
+          <div class="module-container__button">
+            <%= form_for @organization, url: internal_organization_add_or_delete_url(@organization, user), method: :delete do |f| %>
+              <%= f.hidden_field :id, value: user.id %>
+              <%= f.submit "Remove", class: "ds-c-button ds-c-button--danger" %>
+            <% end %>
           </div>
         </div>
       <% end %>

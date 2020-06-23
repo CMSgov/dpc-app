@@ -20,7 +20,7 @@ module Internal
     end
 
     def destroy
-      @tag = Tag.find(tag_id_param)
+      @tag = Tag.find(id_param)
       if @tag.destroy
         flash[:notice] = 'Tag deleted.'
       else
@@ -30,10 +30,6 @@ module Internal
     end
 
     private
-
-    def tag_id_param
-      params.require(:id)
-    end
 
     def tag_params
       params.require(:tag).permit(:name)
