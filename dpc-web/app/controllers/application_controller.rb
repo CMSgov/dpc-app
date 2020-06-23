@@ -40,7 +40,7 @@ class ApplicationController < ActionController::Base
 
   private
 
-  def account_params_id
+  def id_param
     params.require(:id)
   end
 

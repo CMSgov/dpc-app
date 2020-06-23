@@ -20,7 +20,7 @@ module Internal
     end
 
     def destroy
-      @tag = Tag.find(account_params_id)
+      @tag = Tag.find(id_param)
       if @tag.destroy
         flash[:notice] = 'Tag deleted.'
       else

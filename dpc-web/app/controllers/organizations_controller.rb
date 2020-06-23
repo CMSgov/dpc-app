@@ -4,11 +4,11 @@ class OrganizationsController < ApplicationController
   before_action :authenticate_user!
 
   def edit
-    @organization = current_user.organizations.find(account_params_id)
+    @organization = current_user.organizations.find(id_param)
   end
 
   def update
-    @organization = current_user.organizations.find(account_params_id)
+    @organization = current_user.organizations.find(id_param)
     if @organization.update organization_params
       flash[:notice] = 'Organization updated.'
       redirect_to dashboard_path

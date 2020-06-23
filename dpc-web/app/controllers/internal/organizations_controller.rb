@@ -49,17 +49,17 @@ module Internal
     end
 
     def show
-      @organization = Organization.find account_params_id
+      @organization = Organization.find id_param
 
       @users = user_filter
     end
 
     def edit
-      @organization = Organization.find account_params_id
+      @organization = Organization.find id_param
     end
 
     def update
-      @organization = Organization.find account_params_id
+      @organization = Organization.find id_param
 
       if @organization.update organization_params
         flash[:notice] = 'Organization updated.'
@@ -71,7 +71,7 @@ module Internal
     end
 
     def destroy
-      @organization = Organization.find account_params_id
+      @organization = Organization.find id_param
       if @organization.destroy
         flash[:notice] = 'Organization deleted.'
         redirect_to internal_organizations_path

@@ -14,15 +14,15 @@ module Internal
     end
 
     def show
-      @user = User.find(account_params_id)
+      @user = User.find(id_param)
     end
 
     def edit
-      @user = User.find(account_params_id)
+      @user = User.find(id_param)
     end
 
     def update
-      @user = User.find(account_params_id)
+      @user = User.find(id_param)
       if @user.update user_params
         flash[:notice] = 'User successfully updated.'
         redirect_to internal_user_url(@user)
@@ -33,7 +33,7 @@ module Internal
     end
 
     def destroy
-      @user = User.find(account_params_id)
+      @user = User.find(id_param)
       @user.destroy
 
       if @user.destroy
