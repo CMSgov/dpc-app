@@ -4,17 +4,17 @@ import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.vavr.control.Try;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Element;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.inject.Inject;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class LookBackServiceImpl implements LookBackService {
 
@@ -29,36 +29,49 @@ public class LookBackServiceImpl implements LookBackService {
 
     @Override
     @UnitOfWork
-    public UUID getProviderIDFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
+    public String getProviderNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
         //Expect only one roster for the parameters, otherwise return null
-        return Try.of(() -> rosterDAO.retrieveProviderIDFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI)).getOrElse((UUID) null);
+        return Try.of(() -> rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI)).getOrNull();
     }
 
     @Override
-    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, UUID providerUUID, long withinMonth) {
+    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String providerUUID, long withinMonth) {
         Optional<Date> billingPeriod = Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)
                 .map(Period::getEnd);
 
-        Optional<String> providerID = Optional.ofNullable(providerUUID)
-                .map(UUID::toString);
+        Optional<String> providerID = Optional.ofNullable(providerUUID);
 
         Optional<String> organizationID = Optional.ofNullable(organizationUUID)
                 .map(UUID::toString);
 
-        Optional<String> eobProviderID = Optional.ofNullable(explanationOfBenefit)
+        List<String> eobProviderNPIs = new ArrayList<>();
+        Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getProvider)
-                .map(Element::getId);
+                .map(Element::getId)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(eobProviderNPIs::add);
+
+        Optional.ofNullable(explanationOfBenefit)
+                .map(ExplanationOfBenefit::getCareTeam)
+                .ifPresent(careTeamComponents -> {
+                    careTeamComponents.stream()
+                            .filter(ExplanationOfBenefit.CareTeamComponent::hasProvider)
+                            .map(ExplanationOfBenefit.CareTeamComponent::getProvider)
+                            .map(Reference::getId)
+                            .filter(StringUtils::isNotBlank)
+                            .forEach(eobProviderNPIs::add);
+                });
 
         Optional<String> eobOrganizationID = Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getOrganization)
                 .map(Element::getId);
 
         return billingPeriod.isPresent()
-                && providerID.isPresent() && eobProviderID.isPresent()
+                && providerID.isPresent()
                 && organizationID.isPresent() && eobOrganizationID.isPresent()
                 && getMonthsDifference(billingPeriod.get(), operationsConfig.getLookBackDate()) < withinMonth
-                && providerID.get().equals(eobProviderID.get())
+                && eobProviderNPIs.contains(providerID.get())
                 && organizationID.get().equals(eobOrganizationID.get());
     }
 

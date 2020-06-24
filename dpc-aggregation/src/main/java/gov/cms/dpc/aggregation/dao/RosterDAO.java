@@ -25,13 +25,13 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
      * @param patientMBI            The patient MBI
      * @return the provider ID for that roster
      */
-    public UUID retrieveProviderIDFromRoster(UUID organizationID, UUID providerOrRosterID, String patientMBI) {
+    public String retrieveProviderNPIFromRoster(UUID organizationID, UUID providerOrRosterID, String patientMBI) {
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<UUID> query = builder.createQuery(UUID.class);
+        final CriteriaQuery<String> query = builder.createQuery(String.class);
         final Root<RosterEntity> root = query.from(RosterEntity.class);
 
-        query.select(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.ID));
+        query.select(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_NP_I));
         List<Predicate> predicates = new ArrayList<>();
         // Restrict by Organization via ID
         predicates.add(organizationPredicate(builder, root, organizationID));
@@ -43,7 +43,7 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
         query.where(predicates.toArray(new Predicate[0]));
 
 
-        Query<UUID> q = currentSession().createQuery(query);
+        Query<String> q = currentSession().createQuery(query);
         return q.getSingleResult();
     }
 

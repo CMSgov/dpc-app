@@ -23,7 +23,7 @@ import java.util.UUID;
 @ExtendWith(BufferedLoggerHandler.class)
 public class LookBackServiceImplTest {
 
-    private UUID providerID = UUID.randomUUID();
+    private String providerID = UUID.randomUUID().toString();
     private UUID orgID = UUID.randomUUID();
 
     private LookBackServiceImpl lookBackService;
@@ -42,7 +42,7 @@ public class LookBackServiceImplTest {
         eob = new ExplanationOfBenefit();
         eob.setBillablePeriod(new Period());
         eob.setProvider(new Reference());
-        eob.getProvider().setId(providerID.toString());
+        eob.getProvider().setId(providerID);
         eob.setOrganization(new Reference());
         eob.getOrganization().setId(orgID.toString());
     }
@@ -82,7 +82,7 @@ public class LookBackServiceImplTest {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        boolean result = lookBackService.hasClaimWithin(eob, orgID, UUID.randomUUID(), 1);
+        boolean result = lookBackService.hasClaimWithin(eob, orgID, UUID.randomUUID().toString(), 1);
         Assertions.assertFalse(result);
     }
 }
