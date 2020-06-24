@@ -101,7 +101,7 @@
       <h2 class="box__heading">Enabled Environments</h2>
 
       <h3>Sandbox</h3>
-      <% if @organization.sandbox_enabled? %>
+      <% if @organization.prod_sbx? %>
         <div class="ds-u-margin-bottom--1">
           API ID: <%= @organization.sandbox_registered_organization.api_id %>
         </div>
