@@ -35,8 +35,7 @@ module Internal
       if @organization.save
         flash[:notice] = 'Organization created.'
         if prod_sbx?
-          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id,
-                                                                             api_env: 'sandbox')
+          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id)
         elsif from_user_params[:from_user].present?
           redirect_to edit_internal_user_path(from_user_params[:from_user], user_organization_ids: @organization.id)
         else
