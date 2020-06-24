@@ -6,7 +6,7 @@ class Organization < ApplicationRecord
   has_one :address, as: :addressable, dependent: :destroy
   has_many :organization_user_assignments, dependent: :destroy
   has_many :users, through: :organization_user_assignments
-  has_many :registered_organizations, dependent: :destroy
+  has_one :registered_organization, dependent: :destroy
 
   enum organization_type: ORGANIZATION_TYPES
 
@@ -19,7 +19,7 @@ class Organization < ApplicationRecord
 
   before_save :assign_id, if: -> { prod_sbx? }
 
-  after_update :update_registered_organizations
+  after_update :update_registered_organization
 
   scope :vendor, -> { where(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
 
@@ -41,8 +41,9 @@ class Organization < ApplicationRecord
     super(input.blank? ? nil : input)
   end
 
+  # TODO: Needs to be rewritten
   def api_credentialable?
-    registered_organizations.count.positive?
+    registered_organization.present?
   end
 
   def assign_id
@@ -57,12 +58,13 @@ class Organization < ApplicationRecord
     npi
   end
 
+  # TODO: Needs to be removed
   def registered_api_envs
     registered_organizations.pluck(:api_env)
   end
 
   def notify_users_of_sandbox_access
-    return unless sandbox_enabled?
+    return unless prod_sbx?
 
     organization_user_assignments.each(&:send_organization_sandbox_email)
   end
@@ -71,34 +73,14 @@ class Organization < ApplicationRecord
     ENV['ENV'] == 'prod-sbx'
   end
 
-  def update_registered_organizations
+  def update_registered_organization
     return unless npi.present? || sandbox_id.present?
 
-    registered_organizations.each(&:update_api_organization)
+    registered_organization.update_api_organization
   end
 
-  def sandbox_enabled?
-    sandbox_registered_organization.present?
-  end
-
-  def sandbox_registered_organization
-    registered_organizations.find_by(api_env: 'sandbox')
-  end
-
-  def sandbox_fhir_endpoint
-    sandbox_registered_organization.fhir_endpoint
-  end
-
-  def production_enabled?
-    production_registered_organization.present?
-  end
-
-  def production_registered_organization
-    registered_organizations.find_by(api_env: 'production')
-  end
-
-  def production_fhir_endpoint
-    production_registered_organization.fhir_endpoint
+  def fhir_endpoint
+    registered_organization.fhir_endpoint
   end
 end
 
