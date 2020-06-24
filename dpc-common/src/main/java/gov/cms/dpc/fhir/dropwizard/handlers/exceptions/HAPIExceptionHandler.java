@@ -2,7 +2,6 @@ package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 import javax.inject.Inject;
@@ -36,7 +35,7 @@ public class HAPIExceptionHandler extends AbstractFHIRExceptionHandler<BaseServe
             operationOutcome.addIssue()
                     .setCode(OperationOutcome.IssueType.EXCEPTION)
                     .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                    .setDetails(new CodeableConcept().setText(exception.getMessage()));
+                    .setDiagnostics(exception.getMessage());
             operationOutcome.setId(exceptionIDtoHex(exceptionID));
         }
 
