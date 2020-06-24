@@ -36,8 +36,8 @@ public class HAPIExceptionHandler extends AbstractFHIRExceptionHandler<BaseServe
                     .setCode(OperationOutcome.IssueType.EXCEPTION)
                     .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                     .setDiagnostics(exception.getMessage());
-            operationOutcome.setId(exceptionIDtoHex(exceptionID));
         }
+        operationOutcome.setId(exceptionIDtoHex(exceptionID));
 
         return Response
                 .status(exception.getStatusCode())
