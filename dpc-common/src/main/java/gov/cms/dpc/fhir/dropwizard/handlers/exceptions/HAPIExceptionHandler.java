@@ -29,8 +29,11 @@ public class HAPIExceptionHandler extends AbstractFHIRExceptionHandler<BaseServe
     @Override
     Response handleFHIRException(BaseServerResponseException exception) {
         final long exceptionID = super.logException(exception);
-        final OperationOutcome operationOutcome = (OperationOutcome) exception.getOperationOutcome();
-        operationOutcome.setId(exceptionIDtoHex(exceptionID));
+        OperationOutcome operationOutcome = (OperationOutcome) exception.getOperationOutcome();
+        if (operationOutcome == null) {
+            operationOutcome = new OperationOutcome();
+            operationOutcome.setId(exceptionIDtoHex(exceptionID));
+        }
 
         return Response
                 .status(exception.getStatusCode())
