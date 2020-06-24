@@ -41,11 +41,6 @@ class Organization < ApplicationRecord
     super(input.blank? ? nil : input)
   end
 
-  # TODO: Needs to be rewritten
-  def api_credentialable?
-    registered_organization.present?
-  end
-
   def assign_id
     return true if sandbox_id.present?
 
@@ -77,6 +72,12 @@ class Organization < ApplicationRecord
     return unless npi.present? || sandbox_id.present?
 
     registered_organization.update_api_organization
+  end
+
+  def reg_org
+    if registered_organization.present?
+      return reg_org = registered_organization
+    end
   end
 
   def fhir_endpoint
