@@ -15,7 +15,7 @@ module Internal
     end
 
     def destroy
-      @tagging = Tagging.find(tag_id_param)
+      @tagging = Tagging.find(id_param)
       if @tagging.destroy
         flash[:notice] = 'Tag removed.'
       else
@@ -29,10 +29,6 @@ module Internal
     # Right now only users are taggable
     def taggable_path
       internal_user_path(id: @tagging.taggable_id)
-    end
-
-    def tag_id_param
-      params.require(:id)
     end
 
     def tagging_params
