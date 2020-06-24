@@ -6,7 +6,6 @@
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
     <span class="ds-c-field__hint">To enable API Access, you must provide a FHIR endpoint.</span>
 
-    <%= f.hidden_field :api_env, value: @api_env %>
     <%= f.fields_for :fhir_endpoint do |ff| %>
       <div class="ds-l-col--12 ds-l-md-col--9">
         <% if @organization.prod_sbx? %>

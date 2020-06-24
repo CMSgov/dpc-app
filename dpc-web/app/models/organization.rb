@@ -53,11 +53,6 @@ class Organization < ApplicationRecord
     npi
   end
 
-  # TODO: Needs to be removed
-  def registered_api_envs
-    registered_organizations.pluck(:api_env)
-  end
-
   def notify_users_of_sandbox_access
     return unless prod_sbx?
 

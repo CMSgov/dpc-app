@@ -97,10 +97,8 @@
 
 <section class="box">
     <div class="box__content">
-      <h2 class="box__heading">Enabled Environments</h2>
-
-      <h3>Sandbox</h3>
       <% if @organization.reg_org %>
+        <h2 class="box__heading">API Information</h2>
         <div class="ds-u-margin-bottom--1">
           API ID: <%= @organization.registered_organization.api_id %>
         </div>
@@ -120,16 +118,17 @@
 
         <%= link_to "Edit", edit_internal_organization_registered_organization_path(
           organization_id: @organization.id,
-          id: @organization.registered_organization.id,
-          api_env: 'sandbox'
+          id: @organization.registered_organization.id
           ) %>
-        <%= link_to "Disable Sandbox", internal_organization_registered_organization_path(
+        <%= link_to "Disable Organization", internal_organization_registered_organization_path(
           organization_id: @organization.id,
           id: @organization.registered_organization.id,
-          ), method: :delete, data: { confirm: 'Disabling Sandbox will permanently delete all data connected to this organization in the API. Are you sure you would like to disable this organization?', test: 'disable-sandbox' } %>
+          ), method: :delete, data: { confirm: 'Disabling the organization will permanently delete all data connected to this organization in the API. Are you sure you would like to disable this organization?', test: 'disable-org' } %>
       <% else %>
-        <%= link_to 'Enable Sandbox',
-                    new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'sandbox'),
+        <h2 class="box__heading"><%= @organization.name %> is not enabled in the API</h2>
+        <p class="ds-text--lead ds-u-measure--wide ds-u-margin-top--2">Users cannot create client tokens or add public keys until the organization is enabled in the API.</p>
+        <%= link_to 'Enable Organization',
+                    new_internal_organization_registered_organization_path(organization_id: @organization.id),
                     data: { test: 'enable-sandbox' } %>
       <% end %>
 
