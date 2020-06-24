@@ -21,11 +21,10 @@
 
   <section>
     <div class="ds-u-color--success">
-      <% @organization.registered_api_envs.each do |api_env| %>
+      <% if @organization.reg_org %>
         <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <use xlink:href="/assets/solid.svg#database"></use>
         </svg>
-        <%= api_env.titleize %>
       <% end %>
     </div>
   </section>
@@ -101,32 +100,32 @@
       <h2 class="box__heading">Enabled Environments</h2>
 
       <h3>Sandbox</h3>
-      <% if @organization.prod_sbx? %>
+      <% if @organization.reg_org %>
         <div class="ds-u-margin-bottom--1">
-          API ID: <%= @organization.sandbox_registered_organization.api_id %>
+          API ID: <%= @organization.registered_organization.api_id %>
         </div>
         <h4>FHIR Endpoint</h4>
         <div class="ds-u-margin-bottom--1">
-          API Reference: <%= @organization.sandbox_registered_organization.api_endpoint_ref %>
+          API Reference: <%= @organization.registered_organization.api_endpoint_ref %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          Name: <%= @organization.sandbox_fhir_endpoint.name %>
+          Name: <%= @organization.registered_organization.fhir_endpoint.name %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          URI: <%= @organization.sandbox_fhir_endpoint.uri %>
+          URI: <%= @organization.registered_organization.fhir_endpoint.uri %>
         </div>
         <div class="ds-u-margin-bottom--1">
-          Status: <%= @organization.sandbox_fhir_endpoint.status.titleize %>
+          Status: <%= @organization.registered_organization.fhir_endpoint.status.titleize %>
         </div>
 
         <%= link_to "Edit", edit_internal_organization_registered_organization_path(
           organization_id: @organization.id,
-          id: @organization.sandbox_registered_organization.id,
+          id: @organization.registered_organization.id,
           api_env: 'sandbox'
           ) %>
         <%= link_to "Disable Sandbox", internal_organization_registered_organization_path(
           organization_id: @organization.id,
-          id: @organization.sandbox_registered_organization.id,
+          id: @organization.registered_organization.id,
           ), method: :delete, data: { confirm: 'Disabling Sandbox will permanently delete all data connected to this organization in the API. Are you sure you would like to disable this organization?', test: 'disable-sandbox' } %>
       <% else %>
         <%= link_to 'Enable Sandbox',
@@ -135,8 +134,8 @@
       <% end %>
 
       <div>
-        <% @organization.registered_organizations.each do |reg_org| %>
-          <% if reg_org.public_keys.count == 0 %>
+        <% if @organization.reg_org %>
+          <% if @organization.registered_organization.public_keys.count == 0 %>
             <h4>There are no Public Keys currently associated with this organization.</h4>
           <% else %>
           <div class="usa-accordion usa-accordion--bordered ds-u-margin-top--2">
@@ -147,7 +146,7 @@
             </h2>
             <div id="a1" class="usa-accordion__content">
               <ul class="credentials">
-                <% reg_org.public_keys.each do |key| %>
+                <% @organization.registered_organization.public_keys.each do |key| %>
                   <li class="credential">
                     <div class="credential__body">
                       <h3 class="credential__name">
@@ -165,42 +164,6 @@
           <% end %>
         <% end %>
       </div>
-
-      <h3>Production</h3>
-      <% if production_api_access_enabled? %>
-        <% if @organization.production_enabled? %>
-          <div class="ds-u-margin-bottom--1">
-            API ID: <%= @organization.production_registered_organization.api_id %>
-          </div>
-          <div class="ds-u-margin-bottom--1">
-            API Reference: <%= @organization.production_registered_organization.api_endpoint_ref %>
-          </div>
-          <h4>FHIR Endpoint</h4>
-          <div class="ds-u-margin-bottom--1">
-            Name: <%= @organization.production_fhir_endpoint.name %>
-          </div>
-          <div class="ds-u-margin-bottom--1">
-            URI: <%= @organization.production_fhir_endpoint.uri %>
-          </div>
-          <div class="ds-u-margin-bottom--1">
-            Status: <%= @organization.production_fhir_endpoint.status.titleize %>
-          </div>
-
-          <%= link_to "Edit", edit_internal_organization_registered_organization_path(
-            organization_id: @organization.id,
-            id: @organization.production_registered_organization.id,
-            api_env: 'production'
-            ) %>
-          <%= link_to "Disable Production", internal_organization_registered_organization_path(
-            organization_id: @organization.id,
-            id: @organization.production_registered_organization.id,
-            ), method: :delete, data: { confirm: 'Are you sure?' } %>
-        <% else %>
-          <%= link_to 'Enable Production', new_internal_organization_registered_organization_path(organization_id: @organization.id, api_env: 'production') %>
-        <% end %>
-      <% else %>
-        Production API access not yet available.
-      <% end %>
     </div>
 </section>
 
