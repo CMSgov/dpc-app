@@ -22,7 +22,12 @@ class Organization < ApplicationRecord
   after_update :update_registered_organizations
 
   scope :vendor, -> { where(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
+
   scope :provider, -> { where.not(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
+
+  scope :is_registered, -> { where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations)') }
+
+  scope :is_not_registered, -> { where('id NOT IN(SELECT DISTINCT(organization_id) FROM registered_organizations)') }
 
   def address_type
     address&.address_type

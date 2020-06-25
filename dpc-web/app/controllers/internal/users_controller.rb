@@ -7,22 +7,22 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      results = UserSearch.new(params: params, scope: params[:org_type]).results
+      results = BaseSearch.new(params: params, scope: params[:org_type]).results
 
       @users = results.order('users.created_at DESC').page params[:page]
       render layout: 'table_index'
     end
 
     def show
-      @user = User.find(user_id_param)
+      @user = User.find(id_param)
     end
 
     def edit
-      @user = User.find(user_id_param)
+      @user = User.find(id_param)
     end
 
     def update
-      @user = User.find(user_id_param)
+      @user = User.find(id_param)
       if @user.update user_params
         flash[:notice] = 'User successfully updated.'
         redirect_to internal_user_url(@user)
@@ -33,7 +33,7 @@ module Internal
     end
 
     def destroy
-      @user = User.find(user_id_param)
+      @user = User.find(id_param)
       @user.destroy
 
       if @user.destroy
@@ -52,10 +52,6 @@ module Internal
     end
 
     private
-
-    def user_id_param
-      params.require(:id)
-    end
 
     def user_params
       params.require(:user).permit(:first_name, :last_name, :email, :organization_ids)

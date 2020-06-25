@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
-@Api(value = "Patient", authorizations = @Authorization(value = "apiKey"))
+@Api(value = "Patient", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Patient")
 public class PatientResource extends AbstractPatientResource {
 
@@ -97,7 +97,7 @@ public class PatientResource extends AbstractPatientResource {
     @ApiOperation(value = "Create Patient", notes = "Create a Patient record associated to the Organization.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
-    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient) {
+    public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) @ApiParam Patient patient) {
 
         // Set the Managing Organization on the Patient
         final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getId()));
@@ -120,7 +120,8 @@ public class PatientResource extends AbstractPatientResource {
             "<p> Each Patient resource MUST implement the " + PatientProfile.PROFILE_URI + "profile.")
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
-    public Bundle bulkSubmitPatients(@Auth OrganizationPrincipal organization, Parameters params) {
+    public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
+                                     @ApiParam Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator, PatientProfile.PROFILE_URI);
 
@@ -178,7 +179,7 @@ public class PatientResource extends AbstractPatientResource {
             @ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile")
     })
     @Override
-    public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) Patient patient) {
+    public Patient updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, @Valid @Profiled(profile = PatientProfile.PROFILE_URI) @ApiParam Patient patient) {
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(patient)
@@ -201,7 +202,7 @@ public class PatientResource extends AbstractPatientResource {
     @ApiOperation(value = "Validate Patient resource", notes = "Validates the given resource against the " + PatientProfile.PROFILE_URI + " profile." +
             "<p>This method always returns a 200 status, even in respond to a non-conformant resource.")
     @Override
-    public IBaseOperationOutcome validatePatient(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, Parameters parameters) {
+    public IBaseOperationOutcome validatePatient(@Auth @ApiParam(hidden = true) OrganizationPrincipal organization, @ApiParam Parameters parameters) {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
     }
 
