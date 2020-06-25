@@ -91,7 +91,9 @@ public class AggregationEngine implements Runnable {
     public void stop() {
         logger.info("Shutting down aggregation engine");
         queueRunning.set(false);
-        this.subscribe.dispose();
+        if (this.subscribe != null) {
+            this.subscribe.dispose();
+        }
     }
 
     public Boolean isRunning() {

@@ -53,6 +53,7 @@
         <pitest.version>1.5.1</pitest.version>
         <newrelic.agent.version>5.11.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
+        <h2.version>1.4.200</h2.version>
     </properties>
 
     <developers>
@@ -270,7 +271,12 @@
                 <version>4.5.12</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
