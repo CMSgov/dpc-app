@@ -19,7 +19,7 @@ module Internal
       @registered_organization = @organization.build_registered_organization(registered_organization_params)
 
       if @registered_organization.save
-        flash[:notice] = "Organization has been enabled."
+        flash[:notice] = 'Organization has been enabled.'
         redirect_to internal_organization_path(@organization)
       else
         flash[:alert] = "Organization could not be enabled:
@@ -38,7 +38,7 @@ module Internal
       @registered_organization = @organization.registered_organization
 
       if @registered_organization.update(registered_organization_params)
-        flash[:notice] = "Organization access updated."
+        flash[:notice] = 'Organization access updated.'
         redirect_to internal_organization_path(@organization)
       else
         flash[:alert] = "Organization access could not be
@@ -52,7 +52,7 @@ module Internal
       @registered_organization = @organization.registered_organization
 
       if @registered_organization.destroy
-        flash[:notice] = "Organization access disabled."
+        flash[:notice] = 'Organization access disabled.'
       else
         flash[:alert] = "Organization access could not be
                         disabled: #{model_error_string(@registered_organization)}."
