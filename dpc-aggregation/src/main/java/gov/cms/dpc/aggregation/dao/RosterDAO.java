@@ -6,6 +6,7 @@ import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.query.Query;
 
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,11 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
 
 
         Query<String> q = currentSession().createQuery(query);
-        return q.getSingleResult();
+        try {
+            return q.getSingleResult();
+        } catch(NoResultException e) {
+            return null;
+        }
     }
 
     private Predicate organizationPredicate(CriteriaBuilder builder, Root<RosterEntity> root, UUID organizationID) {

@@ -83,6 +83,9 @@ public class RosterDAOTest {
 
         npi = rosterDAO.retrieveProviderNPIFromRoster(organizationEntity.getId(), rosterEntity.getId(), patientEntity.getBeneficiaryID());
         Assertions.assertEquals(providerEntity.getProviderNPI(), npi);
+
+        npi = rosterDAO.retrieveProviderNPIFromRoster(organizationEntity.getId(), UUID.randomUUID(), patientEntity.getBeneficiaryID());
+        Assertions.assertNull(npi);
     }
 
     private OrganizationEntity organizationEntity(Session session) {
