@@ -103,7 +103,7 @@ class APIClient
   end
 
   def golden_macaroon
-    @golden_macaroon ||= ENV.fetch("GOLDEN_MACAROON_SANDBOX")
+    @golden_macaroon ||= ENV.fetch('GOLDEN_MACAROON_SANDBOX')
   end
 
   def parsed_response(response)

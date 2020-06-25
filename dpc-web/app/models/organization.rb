@@ -68,9 +68,7 @@ class Organization < ApplicationRecord
   end
 
   def reg_org
-    if registered_organization.present?
-      return reg_org = registered_organization
-    end
+    return registered_organization if registered_organization.present?
   end
 
   def fhir_endpoint
