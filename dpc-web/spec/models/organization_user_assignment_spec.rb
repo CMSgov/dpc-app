@@ -3,13 +3,18 @@
 require 'rails_helper'
 
 RSpec.describe OrganizationUserAssignment, type: :model do
+  include APIClientSupport
+
   describe 'callbacks' do
     describe '#send_organization_sandbox_email' do
-      it 'sends email if org is api_enabled' do
+      it 'sends email if org is sandbox_enabled' do
+        allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+        stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+
         org = create(:organization)
+        create(:registered_organization, organization: org)  
         user = create(:user)
 
-        allow(org).to receive(:api_enabled?).and_return(true)
         mailer = double(UserMailer)
         allow(UserMailer).to receive(:with).with(user: user, vendor: false).and_return(mailer)
         allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
@@ -22,10 +27,9 @@ RSpec.describe OrganizationUserAssignment, type: :model do
         expect(mailer).to have_received(:deliver_later)
       end
 
-      it 'does not send email if org is not api_enabled' do
+      it 'does not send email if org is not sandbox_enabled' do
         org = create(:organization)
 
-        allow(org).to receive(:api_enabled?).and_return(false)
         allow(UserMailer).to receive(:with)
 
         create(:organization_user_assignment, organization: org)
