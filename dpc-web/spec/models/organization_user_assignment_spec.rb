@@ -12,7 +12,7 @@ RSpec.describe OrganizationUserAssignment, type: :model do
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
 
         org = create(:organization)
-        create(:registered_organization, organization: org)  
+        create(:registered_organization, organization: org)
         user = create(:user)
 
         mailer = double(UserMailer)

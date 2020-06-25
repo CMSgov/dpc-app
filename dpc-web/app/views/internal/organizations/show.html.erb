@@ -130,7 +130,7 @@
         <p class="ds-text--lead ds-u-measure--wide ds-u-margin-top--2">Users cannot create client tokens or add public keys until the organization is enabled in the API.</p>
         <%= link_to 'Enable Organization',
                     new_internal_organization_registered_organization_path(organization_id: @organization.id),
-                    data: { test: 'enable-sandbox' } %>
+                    data: { test: 'enable-org' } %>
       <% end %>
 
       <div>
