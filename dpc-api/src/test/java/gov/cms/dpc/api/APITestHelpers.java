@@ -199,9 +199,9 @@ public class APITestHelpers {
                 .buildValidatorFactory().getValidator();
     }
 
-    public static Practitioner createPractitionerResource(String NPI, String orgID) {
+    public static Practitioner createPractitionerResource(String npi, String orgID) {
         final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(NPI).setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        practitioner.addIdentifier().setValue(npi).setSystem(DPCIdentifierSystem.NPPES.getSystem());
         practitioner.addName()
                 .setFamily("Practitioner").addGiven("Test");
 
@@ -213,11 +213,11 @@ public class APITestHelpers {
         return practitioner;
     }
 
-    public static Patient createPatientResource(String MBI, String organizationID) {
+    public static Patient createPatientResource(String mbi, String organizationID) {
         final Patient patient = new Patient();
         patient.addIdentifier()
                 .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                .setValue(MBI);
+                .setValue(mbi);
 
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
