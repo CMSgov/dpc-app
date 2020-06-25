@@ -54,7 +54,7 @@ class Organization < ApplicationRecord
   end
 
   def notify_users_of_sandbox_access
-    return unless prod_sbx?
+    return unless prod_sbx? && registered_organization.present?
 
     organization_user_assignments.each(&:send_organization_sandbox_email)
   end

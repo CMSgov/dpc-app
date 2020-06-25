@@ -13,7 +13,7 @@ FactoryBot.define do
 
     trait :sandbox_enabled do
       after(:create) do |org|
-        create(:registered_organization, organization: org, api_env: 'sandbox')
+        create(:registered_organization, organization: org)
       end
     end
   end
