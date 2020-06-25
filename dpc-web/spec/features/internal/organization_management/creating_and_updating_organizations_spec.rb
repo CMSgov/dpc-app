@@ -107,7 +107,7 @@ RSpec.feature 'creating and updating organizations' do
     allow(stub).to receive(:get_public_keys).and_return(stub)
     allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
-    org = create(:organization, :sandbox_enabled)
+    org = create(:organization, :api_enabled)
     reg_org = org.sandbox_registered_organization
 
     visit internal_organization_path(org)
@@ -137,7 +137,7 @@ RSpec.feature 'creating and updating organizations' do
     allow(stub).to receive(:get_public_keys).and_return(stub)
     allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
-    org = create(:organization, :sandbox_enabled)
+    org = create(:organization, :api_enabled)
     visit internal_organization_path(org)
 
     api_client = stub_api_client(

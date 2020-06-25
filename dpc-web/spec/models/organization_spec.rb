@@ -67,7 +67,7 @@ RSpec.describe Organization, type: :model do
     context 'when organization is a provider' do
       it 'returns true if org has a registered org and an npi' do
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-        org = create(:organization, :sandbox_enabled, organization_type: 'primary_care_clinic', npi: '1010101010')
+        org = create(:organization, :api_enabled, organization_type: 'primary_care_clinic', npi: '1010101010')
 
         expect(org.registered_organization).to be_present
       end
@@ -75,7 +75,7 @@ RSpec.describe Organization, type: :model do
       # This should return false -- NPIs need to be required to be enabled in the api
       it 'returns true if registered org present but no npi' do
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-        org = create(:organization, :sandbox_enabled, organization_type: 'primary_care_clinic', npi: nil)
+        org = create(:organization, :api_enabled, organization_type: 'primary_care_clinic', npi: nil)
 
         expect(org.registered_organization).to be_present
       end
@@ -84,7 +84,7 @@ RSpec.describe Organization, type: :model do
     context 'when organization is a vendor' do
       it 'returns true if org has a registered org and an npi' do
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-        org = create(:organization, :sandbox_enabled, organization_type: 'health_it_vendor')
+        org = create(:organization, :api_enabled, organization_type: 'health_it_vendor')
 
         expect(org.registered_organization).to be_present
       end

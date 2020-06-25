@@ -11,7 +11,7 @@ FactoryBot.define do
       create(:address, addressable: org)
     end
 
-    trait :sandbox_enabled do
+    trait :api_enabled do
       after(:create) do |org|
         create(:registered_organization, organization: org)
       end

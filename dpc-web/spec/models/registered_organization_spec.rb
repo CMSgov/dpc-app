@@ -6,11 +6,11 @@ RSpec.describe RegisteredOrganization, type: :model do
   describe '#client_tokens' do
     it 'gets array from ClientTokenManager' do
       org = create(:organization)
-      registered_org = build(:registered_organization, organization: org, api_env: 0)
+      registered_org = build(:registered_organization, organization: org)
       tokens = [{ 'token' => 'abcdef' }, { 'token' => 'ftguiol' }]
 
       manager = instance_double(ClientTokenManager)
-      allow(ClientTokenManager).to receive(:new).with(api_env: 'sandbox', registered_organization: registered_org)
+      allow(ClientTokenManager).to receive(:new).with(registered_organization: registered_org)
                                                 .and_return(manager)
       allow(manager).to receive(:client_tokens).and_return(tokens)
 
@@ -21,11 +21,11 @@ RSpec.describe RegisteredOrganization, type: :model do
   describe '#public_keys' do
     it 'gets array from PublicKeyManager' do
       org = create(:organization)
-      registered_org = build(:registered_organization, organization: org, api_env: 0)
+      registered_org = build(:registered_organization, organization: org)
       keys = [{'id' => 'abcdef'}, {'id' => 'ftguiol'}]
 
       manager = instance_double(PublicKeyManager)
-      allow(PublicKeyManager).to receive(:new).with(api_env: 'sandbox', registered_organization: registered_org)
+      allow(PublicKeyManager).to receive(:new).with(registered_organization: registered_org)
                                                 .and_return(manager)
       allow(manager).to receive(:public_keys).and_return(keys)
 
