@@ -45,6 +45,21 @@ public class LookBackServiceImpl implements LookBackService {
         Optional<String> organizationID = Optional.ofNullable(organizationUUID)
                 .map(UUID::toString);
 
+        Optional<String> eobOrganizationID = Optional.ofNullable(explanationOfBenefit)
+                .map(ExplanationOfBenefit::getOrganization)
+                .map(Element::getId);
+
+        List<String> eobProviderNPIs = extractPractionerNPIs(explanationOfBenefit);
+
+        return billingPeriod.isPresent()
+                && providerID.isPresent()
+                && organizationID.isPresent() && eobOrganizationID.isPresent()
+                && getMonthsDifference(billingPeriod.get(), operationsConfig.getLookBackDate()) < withinMonth
+                && eobProviderNPIs.contains(providerID.get())
+                && organizationID.get().equals(eobOrganizationID.get());
+    }
+
+    private List<String> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
         List<String> eobProviderNPIs = new ArrayList<>();
         Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getProvider)
@@ -62,17 +77,7 @@ public class LookBackServiceImpl implements LookBackService {
                             .filter(StringUtils::isNotBlank)
                             .forEach(eobProviderNPIs::add);
                 });
-
-        Optional<String> eobOrganizationID = Optional.ofNullable(explanationOfBenefit)
-                .map(ExplanationOfBenefit::getOrganization)
-                .map(Element::getId);
-
-        return billingPeriod.isPresent()
-                && providerID.isPresent()
-                && organizationID.isPresent() && eobOrganizationID.isPresent()
-                && getMonthsDifference(billingPeriod.get(), operationsConfig.getLookBackDate()) < withinMonth
-                && eobProviderNPIs.contains(providerID.get())
-                && organizationID.get().equals(eobOrganizationID.get());
+        return eobProviderNPIs;
     }
 
     private long getMonthsDifference(Date date1, Date date2) {
