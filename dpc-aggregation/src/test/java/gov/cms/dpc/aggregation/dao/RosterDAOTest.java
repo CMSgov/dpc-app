@@ -4,6 +4,7 @@ import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
 import gov.cms.dpc.aggregation.DPCAggregationService;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
@@ -74,8 +75,6 @@ public class RosterDAOTest {
         rosterDAO = new RosterDAO(new DPCManagedSessionFactory(database.getSessionFactory()));
     }
 
-
-
     @Test
     public void testGettingProviderNPI() {
         String npi = rosterDAO.retrieveProviderNPIFromRoster(organizationEntity.getId(), providerEntity.getID(), patientEntity.getBeneficiaryID());
@@ -99,7 +98,7 @@ public class RosterDAOTest {
         addressEntity.setCountry("US");
         OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(UUID.randomUUID());
-        organizationEntity.setOrganizationID(new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES, "1111111112"));
+        organizationEntity.setOrganizationID(new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES, NPIUtil.generateNPI()));
         organizationEntity.setOrganizationName("orgname");
         organizationEntity.setOrganizationAddress(addressEntity);
         session.save(organizationEntity);
@@ -122,7 +121,7 @@ public class RosterDAOTest {
     private ProviderEntity providerEntity(OrganizationEntity organizationEntity, PatientEntity patientEntity, Session session) {
         ProviderEntity providerEntity = new ProviderEntity();
         providerEntity.setOrganization(organizationEntity);
-        providerEntity.setProviderNPI("2479379895");
+        providerEntity.setProviderNPI(NPIUtil.generateNPI());
         providerEntity.setLastName("Smith");
         providerEntity.setFirstName("Greg");
         providerEntity.setID(UUID.randomUUID());

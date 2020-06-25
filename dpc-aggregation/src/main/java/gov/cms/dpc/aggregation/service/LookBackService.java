@@ -11,7 +11,7 @@ public interface LookBackService {
      * @param orgID         The organizationID
      * @param providerOrRosterID   Either a rosterID or the providerID
      * @param patientMBI    The patient MBI
-     * @return the provider ID for that roster
+     * @return the providerNPI for that roster
      */
     String getProviderNPIFromRoster(UUID orgID, String providerOrRosterID, String patientMBI);
 
@@ -20,7 +20,7 @@ public interface LookBackService {
      * within the last withinMonths
      * @param explanationOfBenefit  The EoB
      * @param organizationID        The organizationID
-     * @param providerNPI            The providerID
+     * @param providerNPI           The providerNPI
      * @param withinMonth           The limit of months to qualify for having a claim
      * @return true or false if the EoB matches the organizationID and providerID and has a claim within certain months
      */
