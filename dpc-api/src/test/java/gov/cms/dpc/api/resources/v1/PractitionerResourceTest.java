@@ -1,11 +1,13 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
@@ -147,5 +149,34 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         }
 
         conn.disconnect();
+    }
+
+    @Test
+    public void testCreatePractitionerReturnsAppropriateHeaders() {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), APITestHelpers.ORGANIZATION_ID);
+
+        MethodOutcome methodOutcome = client.create()
+                .resource(practitioner)
+                .encodedJson()
+                .execute();
+
+        String location = methodOutcome.getResponseHeaders().get("location").get(0);
+        String date = methodOutcome.getResponseHeaders().get("last-modified").get(0);
+        assertNotNull(location);
+        assertNotNull(date);
+
+        Practitioner foundPractitioner = client.read()
+                .resource(Practitioner.class)
+                .withUrl(location)
+                .encodedJson()
+                .execute();
+
+        assertEquals(practitioner.getIdentifierFirstRep().getValue(), foundPractitioner.getIdentifierFirstRep().getValue());
+
+        client.delete()
+                .resource(foundPractitioner)
+                .encodedJson()
+                .execute();
     }
 }
