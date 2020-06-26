@@ -99,10 +99,7 @@
 <section class="box">
     <div class="box__content">
       <% if @organization.reg_org %>
-        <h2 class="box__heading">API Information</h2>
-        <div class="ds-u-margin-bottom--1">
-          API ID: <%= @organization.registered_organization.api_id %>
-        </div>
+        <h2 class="box__heading">API ID: <%= @organization.registered_organization.api_id %></h2>
         <h4>FHIR Endpoint</h4>
         <div class="ds-u-margin-bottom--1">
           API Reference: <%= @organization.registered_organization.api_endpoint_ref %>
