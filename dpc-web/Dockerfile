@@ -54,8 +54,5 @@ WORKDIR /dpc-web
 COPY --from=ruby_builder /usr/local/bundle/ /usr/local/bundle/
 COPY --from=ruby_builder /dpc-web /dpc-web
 
-# Declare the entrypoint shell script
-ENTRYPOINT ["./docker/entrypoint.sh"]
-
-# Default to running the rails server
-CMD ["web"]
+# Start the rails server
+CMD ["./docker/entrypoint.sh"]
