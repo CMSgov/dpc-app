@@ -9,6 +9,7 @@ import com.google.inject.name.Named;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
+import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
@@ -64,7 +65,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
 
     @Provides
     public BlueButtonClient provideBlueButtonClient(@Named("bbclient") IGenericClient fhirRestClient, MetricRegistry registry) {
-        return new BlueButtonClientImpl(fhirRestClient, this.bbClientConfiguration, registry);
+        return bbClientConfiguration.isUseBfdMock() ? new MockBlueButtonClient(fhirRestClient.getFhirContext()) : new BlueButtonClientImpl(fhirRestClient, this.bbClientConfiguration, registry);
     }
 
     @Provides
