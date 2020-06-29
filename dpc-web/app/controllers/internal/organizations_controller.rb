@@ -34,10 +34,8 @@ module Internal
 
       if @organization.save
         flash[:notice] = 'Organization created.'
-
         if from_user_params[:from_user].present?
           @user = User.find(from_user_params[:from_user])
-
           @organization.users << @user
         end
 
