@@ -34,10 +34,8 @@ module Internal
 
       if @organization.save
         flash[:notice] = 'Organization created.'
-        if from_user_params[:from_user].present?
-          @user = User.find(from_user_params[:from_user])
-          @organization.users << @user
-        end
+
+        add_user(from_user_params[:from_user]) if from_user_params[:from_user].present?
 
         if prod_sbx?
           redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id,
@@ -89,7 +87,7 @@ module Internal
       @user = User.find(params[:organization][:id])
 
       if params[:_method] == 'add'
-        add_user = @organization.users << @user
+        add_user = add_user(params[:organization][:id])
         action = 'added to'
       elsif params[:_method] == 'delete'
         delete_user = @organization.users.delete(@user)
@@ -105,6 +103,11 @@ module Internal
     end
 
     private
+
+    def add_user(user_id)
+      @user = User.find(user_id)
+      @organization.users << @user
+    end
 
     def org_page_params(results)
       results.page params[:page]
