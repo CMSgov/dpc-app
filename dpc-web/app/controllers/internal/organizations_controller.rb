@@ -35,6 +35,12 @@ module Internal
       if @organization.save
         flash[:notice] = 'Organization created.'
         if prod_sbx?
+          if from_user_params[:from_user].present?
+            @user = User.find(from_user_params[:from_user])
+
+            @organization.users << @user
+          end
+
           redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id,
                                                                              api_env: 'sandbox')
         elsif from_user_params[:from_user].present?
