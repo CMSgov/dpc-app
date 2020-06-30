@@ -12,8 +12,8 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.security.GeneralSecurityException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -30,15 +30,25 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_METADATA_PATH_PREFIX = "bb-test-data/";
     private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty.xml";
 
-    public static final List<String> TEST_PATIENT_MBIS = List.of("2SW4N00AA00", "4SP0P00AA00");
+    public static final List<String> TEST_PATIENT_MBIS = List.of("2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00");
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
             TEST_PATIENT_MBIS.get(0), "-20140000008325",
-            TEST_PATIENT_MBIS.get(1), "-20140000009893"
+            TEST_PATIENT_MBIS.get(1), "-20140000009893",
+            TEST_PATIENT_MBIS.get(2), "-19990000002208",
+            TEST_PATIENT_MBIS.get(3), "-19990000002209",
+            TEST_PATIENT_MBIS.get(4), "-19990000002210"
+
+
+
     );
     public static final Map<String, String> MBI_HASH_MAP = Map.of(
             TEST_PATIENT_MBIS.get(0), "abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6",
-            TEST_PATIENT_MBIS.get(1), "8930cab29ba5fe4311a5f5bcfd5b7384f3722b711402aacf796d2ae6fea54242"
-    );
+            TEST_PATIENT_MBIS.get(1), "8930cab29ba5fe4311a5f5bcfd5b7384f3722b711402aacf796d2ae6fea54242",
+            TEST_PATIENT_MBIS.get(2), "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756",
+            TEST_PATIENT_MBIS.get(3), "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419",
+            TEST_PATIENT_MBIS.get(4), "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90"
+
+            );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
     public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);

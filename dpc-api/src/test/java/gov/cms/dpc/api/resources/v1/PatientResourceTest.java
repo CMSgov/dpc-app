@@ -29,7 +29,6 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.sql.Date;
 import java.util.UUID;
@@ -244,5 +243,34 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         }
 
         conn.disconnect();
+    }
+
+    @Test
+    public void testCreatePatientReturnsAppropriateHeaders() {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        Patient patient = APITestHelpers.createPatientResource("4S41C00AA00", APITestHelpers.ORGANIZATION_ID);
+
+        MethodOutcome methodOutcome = client.create()
+                .resource(patient)
+                .encodedJson()
+                .execute();
+
+        String location = methodOutcome.getResponseHeaders().get("location").get(0);
+        String date = methodOutcome.getResponseHeaders().get("last-modified").get(0);
+        assertNotNull(location);
+        assertNotNull(date);
+
+        Patient foundPatient = client.read()
+                .resource(Patient.class)
+                .withUrl(location)
+                .encodedJson()
+                .execute();
+
+        assertEquals(patient.getIdentifierFirstRep().getValue(), foundPatient.getIdentifierFirstRep().getValue());
+
+        client.delete()
+                .resource(foundPatient)
+                .encodedJson()
+                .execute();
     }
 }
