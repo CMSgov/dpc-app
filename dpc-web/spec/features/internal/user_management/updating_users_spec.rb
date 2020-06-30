@@ -119,16 +119,6 @@ RSpec.feature 'updating users' do
     expect(zip_field).to have_content('80313')
     find('[data-test="form-submit"]').click
 
-    # Back on user edit page
-    expect(page).to have_select('user_organization_ids', selected: 'Happy Health')
-    find('[data-test="user-form-submit"]').click
-
-    expect(page).not_to have_css('[data-test="user-form-submit"]')
-    expect(page).not_to have_css('[data-test="assign-org-link"]')
-    expect(page.body).to have_content('Happy Health')
-
-    click_link 'Happy Health'
-
     expect(page).to have_content('Inpatient Facility')
     expect(page).to have_content('55 Euphoria Dr')
     expect(page).to have_content('#1')
@@ -136,6 +126,7 @@ RSpec.feature 'updating users' do
     expect(page).to have_content('CO')
     expect(page).to have_content('80313')
     expect(page).to have_content('999')
+    expect(page).to have_content('Crab Olsen')
   end
 
   scenario 'sending sandbox email to user added to a sandbox org' do
