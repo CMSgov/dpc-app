@@ -1,7 +1,6 @@
 FactoryBot.define do
   factory :registered_organization do
     api_id { SecureRandom.uuid }
-    api_env { 'sandbox' }
     api_endpoint_ref { "Endpoint/#{SecureRandom.uuid}" }
 
     organization
