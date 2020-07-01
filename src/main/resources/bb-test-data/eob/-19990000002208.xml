@@ -502,6 +502,28 @@
                     <start value='2000-07-01'/>
                     <end value='2000-07-01'/>
                 </billablePeriod>
+                <organization>
+                    <identifier>
+                        <system value='http://hl7.org/fhir/sid/us-npi'/>
+                        <value value='2111111110'/>
+                    </identifier>
+                </organization>
+                <careTeam>
+                    <sequence value='2'/>
+                    <provider>
+                        <identifier>
+                            <system value='http://hl7.org/fhir/sid/us-npi'/>
+                            <value value='2459425221'/>
+                        </identifier>
+                    </provider>
+                    <role>
+                        <coding>
+                            <system value='http://hl7.org/fhir/claimcareteamrole'/>
+                            <code value='primary'/>
+                            <display value='Primary provider'/>
+                        </coding>
+                    </role>
+                </careTeam>
                 <diagnosis>
                     <sequence value='1'/>
                     <diagnosisCodeableConcept>
