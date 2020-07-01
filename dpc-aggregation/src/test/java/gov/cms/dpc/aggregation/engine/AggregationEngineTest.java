@@ -93,7 +93,7 @@ class AggregationEngineTest {
      */
     @Test
     void claimBatchException() throws InterruptedException {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
@@ -190,7 +190,7 @@ class AggregationEngineTest {
      */
     @Test
     void simpleJobTest() {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
@@ -254,7 +254,7 @@ class AggregationEngineTest {
      */
     @Test
     void multipleFileJobTest() {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
@@ -310,7 +310,7 @@ class AggregationEngineTest {
      */
     @Test
     void pauseJobTest() {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
@@ -352,7 +352,7 @@ class AggregationEngineTest {
      */
     @Test
     void appendBatchFileTest() {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
@@ -424,7 +424,7 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTest() {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
@@ -454,7 +454,7 @@ class AggregationEngineTest {
      */
     @Test
     void badJobTestWithFailBatchException() {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final var orgID = UUID.randomUUID();
@@ -491,8 +491,8 @@ class AggregationEngineTest {
     void badPatientIDTest() throws GeneralSecurityException {
         final var orgID = UUID.randomUUID();
 
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
-        Mockito.doReturn(null).when(lookBackService).getProviderIDFromRoster(orgID, TEST_PROVIDER_ID, "-1");
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(null).when(lookBackService).getProviderNPIFromRoster(orgID, TEST_PROVIDER_ID, "-1");
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1), "-1");
@@ -539,7 +539,7 @@ class AggregationEngineTest {
 
     @Test
     void multiplePatientsMatchTest() {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         final List<String> mbis = Collections.singletonList(MockBlueButtonClient.MULTIPLE_RESULTS_MBI);
@@ -572,7 +572,7 @@ class AggregationEngineTest {
 
     @Test
     void testBlueButtonException() throws GeneralSecurityException {
-        Mockito.doReturn(UUID.randomUUID()).when(lookBackService).getProviderIDFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doReturn(UUID.randomUUID().toString()).when(lookBackService).getProviderNPIFromRoster(Mockito.any(), Mockito.anyString(), Mockito.anyString());
         Mockito.doReturn(true).when(lookBackService).hasClaimWithin(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyLong());
 
         // Test generic runtime exception
