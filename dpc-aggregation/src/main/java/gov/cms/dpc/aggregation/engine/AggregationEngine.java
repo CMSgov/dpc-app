@@ -91,7 +91,9 @@ public class AggregationEngine implements Runnable {
     public void stop() {
         logger.info("Shutting down aggregation engine");
         queueRunning.set(false);
-        this.subscribe.dispose();
+        if (this.subscribe != null) {
+            this.subscribe.dispose();
+        }
     }
 
     public Boolean isRunning() {
@@ -189,13 +191,13 @@ public class AggregationEngine implements Runnable {
         boolean result = false;
         //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
         //patientId here is the patient MBI
-        final UUID providerID = lookBackService.getProviderIDFromRoster(job.getOrgID(), job.getProviderID(), patientId);
-        if (providerID != null) {
+        final String providerNPI = lookBackService.getProviderNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
+        if (providerNPI != null) {
             Pair<Flowable<List<Resource>>, ResourceType> pair = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
             Boolean hasClaims = pair.getLeft()
                     .flatMap(Flowable::fromIterable)
                     .filter(resource -> pair.getRight() == resource.getResourceType())
-                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), providerID, operationsConfig.getLookBackMonths()))
+                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), providerNPI, operationsConfig.getLookBackMonths()))
                     .onErrorReturn((error) -> false)
                     .blockingGet();
             result = Boolean.TRUE.equals(hasClaims);
