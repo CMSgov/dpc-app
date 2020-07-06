@@ -50,7 +50,7 @@ RSpec.describe ClientTokensController, type: :controller do
         it 'redirects to portal if invalid org' do
           other_org = create(:organization)
           post :create, params: { organization_id: other_org.id, label: 'Test', api_environment: 'sandbox' }
-          expect(response.location).to include(portal)
+          expect(response.location).to include(portal_path)
         end
       end
 

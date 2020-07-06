@@ -12,7 +12,7 @@ RSpec.feature 'managing api credentials' do
     end
 
     it 'cannot manage api credentials' do
-      visit dashboard_path
+      visit portal_path
       expect(page).not_to have_css('[data-test="new-client-token"]')
       expect(page).not_to have_css('[data-test="new-public-key"]')
     end
@@ -29,7 +29,7 @@ RSpec.feature 'managing api credentials' do
     end
 
     it 'cannot manage api credentials' do
-      visit dashboard_path
+      visit portal_path
       expect(page).not_to have_css('[data-test="new-client-token"]')
       expect(page).not_to have_css('[data-test="new-public-key"]')
     end
@@ -55,7 +55,7 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_empty_key_request
       api_client = stub_empty_token_request(api_client)
 
-      visit dashboard_path
+      visit portal_path
 
       api_client = stub_token_creation_request(api_client)
       find('[data-test="new-client-token"]').click
@@ -70,7 +70,7 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_key_get_request(api_client)
       stub_token_get_request(api_client)
 
-      find('[data-test="dashboard-link"]').click
+      find('[data-test="portal-link"]').click
 
       expect(page).to have_content('Sandbox Token 1')
       expect(page).to have_content('11/07/2019 at 5:15PM UTC')
@@ -81,7 +81,7 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_empty_key_request
       api_client = stub_empty_token_request(api_client)
 
-      visit dashboard_path
+      visit portal_path
       find('[data-test="new-public-key"]').click
 
       select 'sandbox', from: 'api_environment'
