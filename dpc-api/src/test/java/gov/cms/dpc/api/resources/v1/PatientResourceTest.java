@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -18,11 +19,6 @@ import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -60,8 +56,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(1)
-        void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
+    @Order(2)
+    void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
@@ -138,7 +134,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
@@ -189,7 +185,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
@@ -235,7 +231,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void testCreateInvalidPatient() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Patient");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -266,7 +262,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(5)
+    @Order(1)
     public void testCreatePatientReturnsAppropriateHeaders() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Patient patient = APITestHelpers.createPatientResource("4S41C00AA00", APITestHelpers.ORGANIZATION_ID);
@@ -306,29 +302,33 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true);
         APITestHelpers.setupPractitionerTest(client, parser);
 
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         final Bundle patients = client
                 .search()
                 .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), mbi))
                 .encodedJson()
                 .returnBundle(Bundle.class)
                 .execute();
-        final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 17).getResource();
+
+        final Patient patient = (Patient) patients.getEntry().get(0).getResource();
         final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
 
+        final String practitionerNpi = "1234329724";
         Bundle practSearch = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("1232125215"))
+                .where(Practitioner.IDENTIFIER.exactly().code(practitionerNpi))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
-        Practitioner foundProvider = (Practitioner) practSearch.getEntryFirstRep().getResource();
+        Practitioner foundPractitioner = (Practitioner) practSearch.getEntryFirstRep().getResource();
 
-        Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(foundProvider), ORGANIZATION_ID);
+        Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(foundPractitioner), ORGANIZATION_ID);
         final Reference patientRef = new Reference("Patient/" + patientId);
         group.addMember().setEntity(patientRef);
 
-        String provenance = PROVENANCE_FMT.replaceAll("ORGANIZATION_ID", ORGANIZATION_ID).replace("PRACTITIONER_ID", foundProvider.getId());
+        String provenance = PROVENANCE_FMT.replaceAll("ORGANIZATION_ID", ORGANIZATION_ID).replace("PRACTITIONER_ID", foundPractitioner.getId());
         client
                 .create()
                 .resource(group)
@@ -346,14 +346,14 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", provenance)
                 .execute();
 
-        assertEquals(31, result.getTotal(), "Should have 31 entries in Bundle");
+        assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
         for (Bundle.BundleEntryComponent bec : result.getEntry()) {
             List<ResourceType> resourceTypes = List.of(ResourceType.Coverage, ResourceType.ExplanationOfBenefit, ResourceType.Patient);
             assertTrue(resourceTypes.contains(bec.getResource().getResourceType()), "Resource type should be Coverage, EOB, or Patient");
         }
 
-        // With unattributed provider in X-Provenance
-        macaroon = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, ORGANIZATION_NPI, getAdminURL());
+        // Unattributed organization (unauthorized)
+        macaroon = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
         keyLabel = "patient-everything-key-2";
         uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
         client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
@@ -362,17 +362,12 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         Bundle practitioners = client
                 .search()
                 .forResource(Practitioner.class)
-                .where(Practitioner.IDENTIFIER.exactly().code("164333597980511237"))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
-        Practitioner provider = (Practitioner) practitioners.getEntryFirstRep().getResource();
+        Practitioner practitioner = (Practitioner) practitioners.getEntryFirstRep().getResource();
 
-        group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(provider), OTHER_ORG_ID);
-        final Patient otherPatient = (Patient) patients.getEntry().get(patients.getTotal() - 18).getResource();
-        Reference otherPatientRef = new Reference("Patient/" + otherPatient.getId());
-        group.addMember().setEntity(otherPatientRef);
-        provenance = PROVENANCE_FMT.replaceAll("ORGANIZATION_ID", OTHER_ORG_ID).replace("PRACTITIONER_ID", provider.getId());
+        provenance = PROVENANCE_FMT.replaceAll("ORGANIZATION_ID", OTHER_ORG_ID).replace("PRACTITIONER_ID", practitioner.getId());
         client
                 .create()
                 .resource(group)

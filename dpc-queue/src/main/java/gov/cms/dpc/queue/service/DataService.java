@@ -35,7 +35,7 @@ public class DataService {
     private int jobTimeoutInSeconds;
 
     @Inject
-    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout  int jobTimeoutInSeconds) {
+    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout int jobTimeoutInSeconds) {
         this.queue = queue;
         this.fhirContext = fhirContext;
         this.exportPath = exportPath;
