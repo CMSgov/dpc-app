@@ -5,7 +5,7 @@ class RegisteredOrganization < ApplicationRecord
   has_one :fhir_endpoint, dependent: :destroy
 
   before_create :create_api_organization
-  after_create :notify_users_of_sandbox_access, if: :sandbox?
+  after_create :notify_users_of_sandbox_access, if: -> { prod_sbx? }
   before_update :update_api_organization
   before_update :update_api_endpoint
   before_destroy :delete_api_organization
@@ -15,12 +15,7 @@ class RegisteredOrganization < ApplicationRecord
 
   accepts_nested_attributes_for :fhir_endpoint
 
-  enum api_env: {
-    'sandbox' => 0,
-    'production' => 1
-  }
-
-  validates :api_env, :organization, presence: true
+  validates :organization, presence: true
 
   # TODO: refactor how this is saved
   def fhir_endpoint_id
@@ -30,15 +25,15 @@ class RegisteredOrganization < ApplicationRecord
   end
 
   def client_tokens
-    ClientTokenManager.new(api_env: api_env, registered_organization: self).client_tokens
+    ClientTokenManager.new(registered_organization: self).client_tokens
   end
 
   def public_keys
-    PublicKeyManager.new(api_env: api_env, registered_organization: self).public_keys
+    PublicKeyManager.new(registered_organization: self).public_keys
   end
 
   def create_api_organization
-    api_request = APIClient.new(api_env).create_organization(
+    api_request = api_service.create_organization(
       organization,
       fhir_endpoint: fhir_endpoint.attributes.slice('name', 'status', 'uri')
     )
@@ -58,7 +53,7 @@ class RegisteredOrganization < ApplicationRecord
   end
 
   def update_api_organization
-    api_request = APIClient.new(api_env).update_organization(self)
+    api_request = api_service.update_organization(self)
     api_response = api_request.response_body
     return if api_request.response_successful?
 
@@ -69,7 +64,7 @@ class RegisteredOrganization < ApplicationRecord
   end
 
   def update_api_endpoint
-    api_request = APIClient.new(api_env).update_endpoint(self)
+    api_request = api_service.update_endpoint(self)
     api_response = api_request.response_body
     return if api_request.response_successful?
 
@@ -80,7 +75,7 @@ class RegisteredOrganization < ApplicationRecord
   end
 
   def delete_api_organization
-    api_request = APIClient.new(api_env).delete_organization(self)
+    api_request = api_service.delete_organization(self)
     api_response = api_request.response_body
 
     return if api_request.response_successful?
@@ -108,9 +103,17 @@ class RegisteredOrganization < ApplicationRecord
     organization.notify_users_of_sandbox_access
   end
 
+  def prod_sbx?
+    ENV['ENV'] == 'prod-sbx'
+  end
+
   private
 
+  def api_service
+    @api_service ||= APIClient.new
+  end
+
   def api_error(action, msg)
-    errors.add(:base, "couldn't be #{action} with #{api_env} API: #{msg}")
+    errors.add(:base, "couldn't be #{action} with API: #{msg}")
   end
 end

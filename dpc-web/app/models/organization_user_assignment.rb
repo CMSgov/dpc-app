@@ -10,7 +10,7 @@ class OrganizationUserAssignment < ApplicationRecord
   after_create :send_organization_sandbox_email
 
   def send_organization_sandbox_email
-    return unless organization.sandbox_enabled?
+    return unless organization.prod_sbx? && organization.registered_organization.present?
 
     UserMailer
       .with(user: user, vendor: organization.health_it_vendor?)

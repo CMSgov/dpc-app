@@ -119,16 +119,6 @@ RSpec.feature 'updating users' do
     expect(zip_field).to have_content('80313')
     find('[data-test="form-submit"]').click
 
-    # Back on user edit page
-    expect(page).to have_select('user_organization_ids', selected: 'Happy Health')
-    find('[data-test="user-form-submit"]').click
-
-    expect(page).not_to have_css('[data-test="user-form-submit"]')
-    expect(page).not_to have_css('[data-test="assign-org-link"]')
-    expect(page.body).to have_content('Happy Health')
-
-    click_link 'Happy Health'
-
     expect(page).to have_content('Inpatient Facility')
     expect(page).to have_content('55 Euphoria Dr')
     expect(page).to have_content('#1')
@@ -136,16 +126,19 @@ RSpec.feature 'updating users' do
     expect(page).to have_content('CO')
     expect(page).to have_content('80313')
     expect(page).to have_content('999')
+    expect(page).to have_content('Crab Olsen')
   end
 
   scenario 'sending sandbox email to user added to a sandbox org' do
+    allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+
     stub_api_client(
       message: :create_organization,
       success: true,
       response: default_org_creation_response
     )
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
-    org = create(:organization, :sandbox_enabled)
+    org = create(:organization, :api_enabled)
 
     mailer = double(UserMailer)
     allow(UserMailer).to receive(:with).with(user: crabby, vendor: false).and_return(mailer)
