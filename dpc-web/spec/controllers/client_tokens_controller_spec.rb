@@ -20,10 +20,10 @@ RSpec.describe ClientTokensController, type: :controller do
       end
 
       context 'with invalid organization id' do
-        it 'redirects to dashboard' do
+        it 'redirects to portal' do
           other_org = create(:organization)
           get :new, params: { organization_id: other_org.id }
-          expect(response.location).to include(dashboard_path)
+          expect(response.location).to include(portal_path)
         end
       end
     end
@@ -44,10 +44,10 @@ RSpec.describe ClientTokensController, type: :controller do
           expect(response).to render_template(:new)
         end
 
-        it 'redirects to dashboard if invalid org' do
+        it 'redirects to portal if invalid org' do
           other_org = create(:organization)
-          post :create, params: { organization_id: other_org.id, label: 'Test' }
-          expect(response.location).to include(dashboard_path)
+          post :create, params: { organization_id: other_org.id, label: 'Test', api_environment: 'sandbox' }
+          expect(response.location).to include(portal_path)
         end
       end
 
