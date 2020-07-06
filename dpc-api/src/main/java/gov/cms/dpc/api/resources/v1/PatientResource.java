@@ -179,15 +179,15 @@ public class PatientResource extends AbstractPatientResource {
                                @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId) {
 
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
-        final UUID providerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
-        Practitioner provider = this.client
+        final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
+        Practitioner practitioner = this.client
                 .read()
                 .resource(Practitioner.class)
-                .withId(providerId.toString())
+                .withId(practitionerId.toString())
                 .encodedJson()
                 .execute();
 
-        if (provider == null) {
+        if (practitioner == null) {
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
         }
 
@@ -195,11 +195,11 @@ public class PatientResource extends AbstractPatientResource {
         final String patientMbi = FHIRExtractors.getPatientMBI(patient);
         final UUID orgId = organization.getID();
 
-        if (!isPatientInRoster(patientId, FHIRExtractors.getProviderNPI(provider), orgId)) {
+        if (!isPatientInRoster(patientId, FHIRExtractors.getProviderNPI(practitioner), orgId)) {
             throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
         }
 
-        Resource result = dataService.retrieveData(orgId, providerId, List.of(patientMbi), APIHelpers.fetchTransactionTime(bfdClient),
+        Resource result = dataService.retrieveData(orgId, practitionerId, List.of(patientMbi), APIHelpers.fetchTransactionTime(bfdClient),
                 ResourceType.Patient, ResourceType.ExplanationOfBenefit, ResourceType.Coverage);
         if (ResourceType.Bundle.equals(result.getResourceType())) {
             return (Bundle) result;
