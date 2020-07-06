@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 class APIClient
-  attr_reader :api_env, :base_url, :response_body, :response_status
+  attr_reader :base_url, :response_body, :response_status
 
-  def initialize(api_env)
-    @api_env = api_env
-    @base_url = base_urls[api_env]
+  def initialize
+    @base_url = ENV.fetch('API_METADATA_URL_SANDBOX')
   end
 
   def create_organization(org, fhir_endpoint: {})
@@ -91,12 +90,6 @@ class APIClient
 
   private
 
-  def base_urls
-    {
-      'sandbox' => ENV.fetch('API_METADATA_URL_SANDBOX')
-    }
-  end
-
   def auth_header(token)
     { 'Authorization': "Bearer #{token}" }
   end
@@ -110,7 +103,7 @@ class APIClient
   end
 
   def golden_macaroon
-    @golden_macaroon ||= ENV.fetch("GOLDEN_MACAROON_#{api_env.upcase}")
+    @golden_macaroon ||= ENV.fetch('GOLDEN_MACAROON_SANDBOX')
   end
 
   def parsed_response(response)
