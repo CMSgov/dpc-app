@@ -5,8 +5,8 @@
 <div class="ds-l-row--12">
 
   <% @user.organizations.each do |organization| %>
-    <div class="dashboard-section-header">
-      <h2 class="dashboard-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
+    <div class="portal-section-header">
+      <h2 class="portal-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
 
       <% if organization.prod_sbx? %>
         <div>

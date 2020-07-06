@@ -38,7 +38,7 @@ RSpec.feature 'new user signs up for account' do
       expect(ctoken).to be_present
     end
 
-    scenario 'user clicks on confirmation link to navigate to dashboard' do
+    scenario 'user clicks on confirmation link to navigate to portal' do
       ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
       visit "/users/confirmation?#{ctoken}"

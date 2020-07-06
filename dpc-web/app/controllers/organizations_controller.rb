@@ -11,7 +11,7 @@ class OrganizationsController < ApplicationController
     @organization = current_user.organizations.find(id_param)
     if @organization.update organization_params
       flash[:notice] = 'Organization updated.'
-      redirect_to dashboard_path
+      redirect_to portal_path
     else
       flash[:alert] = 'Organization could not be updated.'
       render :edit
