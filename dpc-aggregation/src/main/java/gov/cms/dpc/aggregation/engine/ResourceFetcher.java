@@ -111,7 +111,7 @@ class ResourceFetcher {
         }
 
         // Other errors should be turned into OperationOutcome and just recorded.
-        logger.error("Turning error into OperationOutcome. Error is: " + error);
+        logger.error("Turning error into OperationOutcome.", error);
         final var operationOutcome = formOperationOutcome(mbi, error);
         return Flowable.just(List.of(operationOutcome));
     }

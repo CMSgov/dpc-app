@@ -6,6 +6,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.typesafe.config.Config;
+import gov.cms.dpc.aggregation.dao.OrganizationDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
@@ -35,6 +36,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
         binder.bind(RosterDAO.class);
+        binder.bind(OrganizationDAO.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -91,13 +93,13 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, RosterDAO rosterDAO, OperationsConfig operationsConfig) {
+    LookBackService provideLookBackService(DPCManagedSessionFactory sessionFactory, RosterDAO rosterDAO, OrganizationDAO organizationDAO, OperationsConfig operationsConfig) {
         //Configuring to skip look back when look back months is less than 0
         if (operationsConfig.getLookBackMonths() < 0) {
             return new EveryoneGetsDataLookBackServiceImpl();
         }
         return new UnitOfWorkAwareProxyFactory("roster", sessionFactory.getSessionFactory()).create(LookBackServiceImpl.class,
-                new Class<?>[]{RosterDAO.class, OperationsConfig.class},
-                new Object[]{rosterDAO, operationsConfig});
+                new Class<?>[]{RosterDAO.class, OrganizationDAO.class, OperationsConfig.class},
+                new Object[]{rosterDAO, organizationDAO, operationsConfig});
     }
 }
