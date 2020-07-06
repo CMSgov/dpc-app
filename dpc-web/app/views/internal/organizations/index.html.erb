@@ -38,11 +38,11 @@
           <h2 class="module-container__heading"><%= link_to org.name, internal_organization_path(org) %></h2>
         </div>
         <div class="module-container__secondary ds-u-padding--2">
-          <% org.registered_api_envs.each do |api_env| %>
+          <% if org.reg_org %>
             <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <use xlink:href="/assets/solid.svg#database"></use>
             </svg>
-            <%= api_env.titleize %>
+            Enabled in API
           <% end %>
         </div>
 

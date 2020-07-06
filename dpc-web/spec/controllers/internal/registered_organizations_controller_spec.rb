@@ -32,7 +32,7 @@ RSpec.describe Internal::RegisteredOrganizationsController, type: :controller do
           }
         }
 
-        expect(controller.flash[:notice]).to eq("Access to sandbox enabled.")
+        expect(controller.flash[:notice]).to eq("Organization has been enabled.")
       end
     end
 
@@ -51,9 +51,9 @@ RSpec.describe Internal::RegisteredOrganizationsController, type: :controller do
         expect(response).to render_template(:new)
         # Separating to ignore whitespace discrepancy
         expect(controller.flash[:alert])
-          .to include('Access to sandbox could not be enabled:')
+          .to include('Organization could not be enabled:')
         expect(controller.flash[:alert])
-          .to include('couldn\'t be registered with sandbox API: {"issues"=>["Bad request"]}.')
+          .to include('couldn\'t be registered with API: {"issues"=>["Bad request"]}.')
       end
     end
   end

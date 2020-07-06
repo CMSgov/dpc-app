@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.ConfigFactory;
+import gov.cms.dpc.aggregation.dao.OrganizationDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
@@ -66,7 +67,7 @@ public class AggregationEngineHealthCheckTest {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
         var operationalConfig = new OperationsConfig(1000, exportPath, 500,new SimpleDateFormat("dd/MM/yyyy").parse("03/01/2015"));
-        lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(RosterDAO.class), operationalConfig));
+        lookBackService = Mockito.spy(new LookBackServiceImpl(Mockito.mock(RosterDAO.class), Mockito.mock(OrganizationDAO.class), operationalConfig));
         jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, lookBackService, jobBatchProcessor));
         AggregationEngine.setGlobalErrorHandler();
