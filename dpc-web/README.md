@@ -79,20 +79,30 @@ rails db:create db:migrate db:seed
 rails server
 ```
 
+### Add a .env file
+
+Create a `.env` file in the root directory. This is where you will put your environment variables.
+
 Note: If you need to change the database configuration, it can be overridden using the `DB_USER`, `DB_PASS`, and `DATABASE_URL` environment variables. Example:
 
 ```
-export DB_USER=postgres
-export DB_PASS=password
-export DATABASE_URL=postgresql://localhost/dpc-website_development
+DB_USER=postgres
+DB_PASS=password
+DATABASE_URL=postgresql://localhost/dpc-website_development
 ```
 
 You also need to set the Github ENV variables to enable Github OAuth login for internal users:
 
 ```
-export GITHUB_APP_ID=xxx
-export GITHUB_APP_SECRET=yyy
-export GITHUB_ORG_TEAM_ID=123
+GITHUB_APP_ID=xxx
+GITHUB_APP_SECRET=yyy
+GITHUB_ORG_TEAM_ID=123
+```
+
+If you want to switch to the sandbox environment, add the `ENV` variable:
+
+```
+ENV=prod-sbx
 ```
 
 
