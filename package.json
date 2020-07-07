@@ -7,7 +7,7 @@
     "node": ">=0.12"
   },
   "dependencies": {
-    "newman": "^4.6.1",
+    "newman": "^5.1.0",
     "minimist": "1.2.3"
   },
   "devDependencies": {},
