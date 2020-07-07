@@ -154,6 +154,14 @@
     },
     {
       "reference" : {
+        "reference" : "OperationDefinition/dpc-patient-everything",
+        "display" : "dpc-patient-everything.json"
+      },
+      "exampleBoolean" : false,
+      "groupingId" : "p1"
+    },
+    {
+      "reference" : {
         "reference" : "OperationDefinition/dpc-group-add",
         "display" : "dpc-group-add.json"
       },
