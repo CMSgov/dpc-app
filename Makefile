@@ -58,6 +58,11 @@ smoke/remote: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; bzt src/test/remote.smoke_test.yml
 
+.PHONY: smoke/prod
+smoke/prod: venv smoke
+	@echo "Running Smoke Tests against ${HOST_URL}"
+	. venv/bin/activate; bzt src/test/prod.smoke_test.yml
+
 .PHONY: docker-base
 docker-base:
 	@docker-compose -f ./docker-compose.base.yml build base
