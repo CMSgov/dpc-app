@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
+import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
@@ -44,12 +45,11 @@ import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
-@Api(value = "Group", authorizations = @Authorization(value = "apiKey"))
+@Api(value = "Group", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Group")
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
-    static final String SYNTHETIC_BENE_ID = "-19990000000001";
 
     // The delimiter for the '_types' list query param.
     static final String LIST_DELIMITER = ",";
@@ -71,17 +71,16 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Create Attribution Roster", notes = "FHIR endpoint to create an Attribution roster (Group resource) associated to the provider listed in the in the Group characteristics.")
+    @ApiOperation(value = "Create Attribution Group", notes = "FHIR endpoint to create an Attribution Group resource) associated to the provider listed in the in the Group characteristics.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string",dataTypeClass = Provenance.class))
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
             @ApiResponse(code = 200, message = "Roster already exists")
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                 @Valid @Profiled(profile = AttestationProfile.PROFILE_URI)
-                                 @ProvenanceHeader Provenance rosterAttestation,
+                                 @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
         logAttestation(rosterAttestation, null, attributionRoster);
@@ -101,7 +100,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Search for Attribution Rosters", notes = "FHIR endpoint for searching for Attribution rosters." +
+    @ApiOperation(value = "Search for Attribution Groups", notes = "FHIR endpoint for searching for Attribution Groups." +
             "<p> If Provider NPI is given, all attribution groups for that provider will be returned. " +
             "If a Patient ID is given, all attribution groups for which that patient is a member will be returned.")
     @Override
@@ -158,15 +157,17 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Update Attribution Roster", notes = "Update specific Attribution roster." +
-            "<p>Updates allow for adding or removing patients from the roster.")
+    @ApiOperation(value = "Update Attribution Group", notes = "Update specific Attribution Group." +
+            "<p>Updates allow for adding or removing patients as members of an Attribution Group.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
+            @ApiImplicitParam(name = "X-Provenance", value = "Provenance Resource attesting to Group attribution",  required = true, paramType = "header", type="string", dataTypeClass = Provenance.class)
+     )
+
+
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group updateRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
-                              @Valid @Profiled(profile = AttestationProfile.PROFILE_URI)
-                              @ProvenanceHeader Provenance rosterAttestation,
+    public Group updateRoster(@ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
+                              @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
         logAttestation(rosterAttestation, rosterID, rosterUpdate);
         final MethodOutcome outcome = this.client
@@ -185,12 +186,13 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Add roster members", notes = "Update specific Attribution roster by adding members given in the provided resource.")
+    @ApiOperation(value = "Add Group Members (Patients)", notes = "Update specific Attribution Group by adding Patient members given in the provided resource.")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", dataTypeClass = Provenance.class))
+            @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, Group groupUpdate) {
+    public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
+                                  @ApiParam(hidden=true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, @ApiParam Group groupUpdate) {
         logAttestation(rosterAttestation, rosterID, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
@@ -201,10 +203,11 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Remove roster members", notes = "Update specific Attribution roster by removing members given in the provided resource.")
+    @ApiOperation(value = "Remove Group members (Patients)", notes = "Update specific Attribution Group by removing members (Patients) given in the provided resource.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
-    public Group removeRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID, Group groupUpdate) {
+    public Group removeRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
+                                     @ApiParam Group groupUpdate) {
         return this.executeGroupOperation(rosterID, groupUpdate, "remove");
     }
 
@@ -214,7 +217,7 @@ public class GroupResource extends AbstractGroupResource {
     @PathAuthorizer(type = ResourceType.Group, pathParam = "rosterID")
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Delete Attribution Roster", notes = "Remove specific Attribution roster")
+    @ApiOperation(value = "Delete Attribution Group", notes = "Remove specific Attribution Group")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
     public Response deleteRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
@@ -245,10 +248,10 @@ public class GroupResource extends AbstractGroupResource {
     @Timed
     @ExceptionMetered
     @FHIRAsync
-    @ApiOperation(value = "Begin export request", tags = {"Group", "Bulk Data"},
+    @ApiOperation(value = "Begin Group export request", tags = {"Group", "Bulk Data"},
             notes = "FHIR export operation which initiates a bulk data export for the given Provider")
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", value = "respond-async", dataTypeClass = String.class))
+            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", type="string", value = "respond-async", dataTypeClass = String.class))
     @ApiResponses(
             @ApiResponse(code = 202, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
     )
@@ -276,7 +279,7 @@ public class GroupResource extends AbstractGroupResource {
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
         final var sinceDate = handleSinceQueryParam(since);
-        final var transactionTime = fetchTransactionTime();
+        final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, sinceDate, transactionTime);
 
         return Response.status(Response.Status.ACCEPTED)
@@ -338,18 +341,6 @@ public class GroupResource extends AbstractGroupResource {
         } catch (DataFormatException ex) {
             throw new BadRequestException("'_since' query parameter must be a valid date time value");
         }
-    }
-
-    /**
-     * Fetch the BFD database last update time. Use it as the transactionTime for a job.
-     * @return transactionTime from the BFD service
-     */
-    private OffsetDateTime fetchTransactionTime() {
-        // Every bundle has transaction time after the Since RFC has beneficiary
-        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta();
-        return Optional.ofNullable(meta.getLastUpdated())
-                .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
-                .orElse(OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     /**

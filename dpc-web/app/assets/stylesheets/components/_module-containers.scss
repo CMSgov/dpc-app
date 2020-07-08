@@ -31,6 +31,15 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+
+  @media (min-width: $width-sm) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.module-container__button {
+  padding: $spacer-1 $spacer-2;
 }
 
 .module-container__heading {
@@ -86,4 +95,16 @@
   background-color: $color-success-alt-lightest;
   color: $color-success;
   font-weight: $font-bold;
+}
+
+.module-list-container {
+  list-style: none;
+  max-width: 850px;
+  max-height: 850px;
+  overflow: auto;
+  padding: 0;
+
+  ul {
+    padding: 0;
+  }
 }

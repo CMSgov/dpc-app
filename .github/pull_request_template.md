@@ -1,28 +1,65 @@
-**Why**
+<!--
 
-Explain the motivation for this PR.
+--- PR Hygiene Checklist ---
 
-**What Changed**
+1. Make sure your branch is named with this format: `user-initials/description-ABC-123`. For example, `jj/add-awesomeness-bcda-99999`
+2. Update the PR title: `dpc-99999 Feature: Add Awesomeness`
+3. Edit the text below - do not leave placeholders in the text.
+4. Add any other details that will be helpful for the reviewers: details description, screenshots, etc
+5. Request a review from someone/multiple someones
+-->
 
-Describe the changes made to the code base including new features, refactoring of existing services and user visible API changes.
+<!-- Replace xxx with the JIRA ticket number: -->
 
-**Choices Made**
+### Fixes [DPC-xxx](https://jira.cms.gov/browse/DPC-xxx)
 
-Justify changes made and any reasons for why a given path was taken, as opposed to an alternative option.
+<!-- Describe the problem being solved here: -->
 
-**Tickets closed**:
+### Proposed Changes
 
-Give a list of tickets closed in this PR.
+<!-- List of changes with bullet points here: -->
 
-**Future Work**
+### Change Details
 
-List any additional tickets that have either been created due to work in this PR, or existing tickets that expand upon the feature or provide additional fixes.
+<!-- Add detailed discussion of changes here: -->
 
-**Checklist**
+### Security Implications
 
-- [ ] All tests are passing via `make ci-app` (app change) and `make ci-web` (website change)
-- [ ] Swagger documentation has been updated
-- [ ] FHIR documentation has been updated
-- [ ] Any required dpc-ops changes have a PR submitted and mentioned in this ticket
-- [ ] Any manual migration steps are documented, scripts written (where applicable), and tested
-- [ ] Before merging, any required dpc-ops changes have been approved and merged into master of the dpc-ops repo
+<!-- Does the change deal with PII/PHI at all? What should reviewers look for in
+terms of security concerns? -->
+
+- [ ] new software dependencies
+
+<!-- If yes, list the new dependencies and briefly note any relevant security impacts -->
+
+- [ ] security controls or supporting software altered
+
+<!-- If yes, what security controls or supporting software are affected? -->
+
+- [ ] new data stored or transmitted
+
+<!-- If yes, what new data are we storing or transmitting? Is the data considered PII/PHI? -->
+
+- [ ] security checklist is completed for this change
+
+<!-- If yes, provide a link to the security checklist in Confluence here. -->
+
+- [ ] requires more information or team discussion to evaluate security implications
+
+<!-- Use this to indicate you're unsure how this change may impact system security
+and would like to solicit the team's feedback. Optionally, provide background
+information regarding your questions and concerns. -->
+
+- [ ] no PHI/PII is affected by this change
+
+<!-- If yes, provide what PHI/PII is affected by this change -->
+
+### Acceptance Validation
+
+<!-- Were you able to fully test the acceptance criteria on the related ticket? if not, why not? -->
+
+<!-- Insert screenshots if applicable (drag images here) -->
+
+### Feedback Requested
+
+<!-- What type of feedback you want from your reviewers? -->

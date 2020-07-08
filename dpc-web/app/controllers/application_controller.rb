@@ -37,4 +37,15 @@ class ApplicationController < ActionController::Base
                         'ERROR'
                       end
   end
+
+  private
+
+  def id_param
+    params.require(:id)
+  end
+
+  def prod_sbx?
+    ENV['ENV'] == 'prod-sbx'
+  end
+  helper_method :prod_sbx?
 end

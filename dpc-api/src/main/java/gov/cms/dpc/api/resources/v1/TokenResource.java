@@ -49,7 +49,7 @@ import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
 
-@Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "apiKey"))
+@Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Token")
 public class TokenResource extends AbstractTokenResource {
 
@@ -179,7 +179,7 @@ public class TokenResource extends AbstractTokenResource {
     @UnitOfWork
     @Timed
     @ExceptionMetered
-    @ApiOperation(value = "Request API access token", notes = "Request access token for API access", authorizations = @Authorization(value = ""))
+    @ApiOperation(value = "Request API access token", notes = "Request access token for API access")
     @ApiResponses(
             value = {@ApiResponse(code = 400, message = "Token request is invalid"),
                     @ApiResponse(code = 401, message = "Client is not authorized to request access token")})

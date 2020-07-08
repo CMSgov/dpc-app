@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "apiKey"))
+@Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Key")
 public class KeyResource extends AbstractKeyResource {
 
@@ -55,7 +55,7 @@ public class KeyResource extends AbstractKeyResource {
     @ApiOperation(value = "Fetch public keys for Organization",
             notes = "This endpoint returns all the public keys currently associated with the organization." +
                     "<p>The returned keys are serialized using PEM encoding.",
-            authorizations = @Authorization(value = "apiKey"))
+            authorizations = @Authorization(value = "access_token"))
     @Override
     public CollectionResponse<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
         return new CollectionResponse<>(this.dao.fetchPublicKeys(organizationPrincipal.getID()));
