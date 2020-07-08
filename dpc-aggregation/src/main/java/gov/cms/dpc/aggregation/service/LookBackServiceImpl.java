@@ -11,6 +11,8 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.time.YearMonth;
@@ -19,6 +21,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class LookBackServiceImpl implements LookBackService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LookBackService.class);
 
     private final RosterDAO rosterDAO;
     private final OrganizationDAO organizationDAO;
@@ -57,12 +61,24 @@ public class LookBackServiceImpl implements LookBackService {
 
         Set<String> eobProviderNPIs = extractPractionerNPIs(explanationOfBenefit);
 
-        return billingPeriod.isPresent()
-                && providerID.isPresent()
-                && organizationID.isPresent() && eobOrganizationID.isPresent()
-                && getMonthsDifference(billingPeriod.get(), operationsConfig.getLookBackDate()) < withinMonth
-                && eobProviderNPIs.contains(providerID.get())
-                && organizationID.get().equals(eobOrganizationID.get());
+        if (billingPeriod.isEmpty() || providerID.isEmpty() || organizationID.isEmpty() || eobOrganizationID.isEmpty()) {
+            LOGGER.info("eob BillingPeriod or job providerID or job organizationID or eob OrganizationID are null");
+            return false;
+        }
+
+        long lookBackMonthsDifference = getMonthsDifference(billingPeriod.get(), operationsConfig.getLookBackDate());
+        boolean eobContainsProvider = eobProviderNPIs.contains(providerID.get());
+        boolean eobRelatedToOrganization = organizationID.get().equals(eobOrganizationID.get());
+        boolean eobWithinLookBackLimit = lookBackMonthsDifference < withinMonth;
+
+        boolean hasClaim = eobWithinLookBackLimit
+                && eobContainsProvider
+                && eobRelatedToOrganization;
+
+        LOGGER.info("LookBack stats eobWithinLookBackLimit {}, eobContainsProvider {}, eobRelatedToOrganization {}, eobMonthsDifference {}, hasClaim {}",
+                eobWithinLookBackLimit, eobContainsProvider, eobRelatedToOrganization, lookBackMonthsDifference, hasClaim);
+
+        return hasClaim;
     }
 
     private Set<String> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
