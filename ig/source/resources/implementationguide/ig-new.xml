@@ -149,6 +149,14 @@
     </resource>
     <resource>
       <reference>
+        <reference value="OperationDefinition/dpc-patient-everything"/>
+        <display value="dpc-patient-everything.json"/>
+      </reference>
+      <exampleBoolean value="false"/>
+      <groupingId value="p1"/>
+    </resource>
+    <resource>
+      <reference>
         <reference value="OperationDefinition/dpc-group-add"/>
         <display value="dpc-group-add.json"/>
       </reference>

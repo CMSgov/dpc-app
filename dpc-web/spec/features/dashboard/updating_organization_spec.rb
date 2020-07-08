@@ -10,7 +10,7 @@ RSpec.feature 'updating my organization' do
   end
 
   scenario 'updating the NPI of the org' do
-    visit dashboard_path
+    visit portal_path
     find('[data-test="edit-link"]').click
     fill_in 'organization_npi', with: '23423ddasa'
     fill_in 'organization_vendor', with: 'Cool EMR Vendor Name'

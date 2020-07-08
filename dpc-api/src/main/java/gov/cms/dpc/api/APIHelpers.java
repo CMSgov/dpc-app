@@ -2,14 +2,20 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.*;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class APIHelpers {
+
+    static final String SYNTHETIC_BENE_ID = "-19990000000001";
 
     private APIHelpers() {
         // Not used
@@ -57,5 +63,17 @@ public class APIHelpers {
         } else {
             meta.addTag(orgTag);
         }
+    }
+
+    /**
+     * Fetch the BFD database last update time. Use it as the transactionTime for a job.
+     * @return transactionTime from the BFD service
+     */
+    public static OffsetDateTime fetchTransactionTime(BlueButtonClient bfdClient) {
+        // Every bundle has transaction time after the Since RFC has beneficiary
+        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta();
+        return Optional.ofNullable(meta.getLastUpdated())
+                .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
+                .orElse(OffsetDateTime.now(ZoneOffset.UTC));
     }
 }
