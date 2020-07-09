@@ -4,7 +4,7 @@ class APIClient
   attr_reader :base_url, :response_body, :response_status
 
   def initialize
-    @base_url = ENV.fetch('API_METADATA_URL_SANDBOX')
+    @base_url = ENV.fetch('API_METADATA_URL')
   end
 
   def create_organization(org, fhir_endpoint: {})
