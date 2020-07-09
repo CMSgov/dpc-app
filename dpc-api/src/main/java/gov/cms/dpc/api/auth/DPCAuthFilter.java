@@ -48,6 +48,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
     public void filter(final ContainerRequestContext requestContext) {
         final UriInfo uriInfo = requestContext.getUriInfo();
         final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
 
         final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
@@ -83,6 +84,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
             logger.error("Macaroon verification failed", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
+
         return buildCredentials(macaroon, orgID, uriInfo);
     }
 
