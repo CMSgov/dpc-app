@@ -47,12 +47,6 @@ class Organization < ApplicationRecord
     self.npi = generate_npi
   end
 
-  def external_identifier
-    return sandbox_id if prod_sbx?
-
-    npi
-  end
-
   def notify_users_of_sandbox_access
     organization_user_assignments.each(&:send_organization_sandbox_email)
   end
