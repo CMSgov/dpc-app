@@ -13,7 +13,8 @@ RSpec.describe Organization, type: :model do
 
       describe '#fake_npi' do
         it 'creates fake npi' do
-          org = create(:organization)
+          org = create(:organization, npi: nil)
+          org.assign_id
           expect(org.npi).to be_present
           expect(org.npi).to start_with('3')
         end
@@ -25,10 +26,10 @@ RSpec.describe Organization, type: :model do
           expect(org.npi).to start_with('3')
         end
 
-        it 'does not set sandbox_id if present' do
-          org = create(:organization, sandbox_id: '111111')
+        it 'does not set npi if present' do
+          org = create(:organization, npi: '111111')
           org.assign_id
-          expect(org.sandbox_id).to eq('111111')
+          expect(org.npi).to eq('111111')
         end
       end
     end
