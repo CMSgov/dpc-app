@@ -11,16 +11,18 @@ RSpec.describe Organization, type: :model do
         allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
       end
 
-      describe '#assign_sandbox_id' do
-        it 'sets sandbox_id' do
+      describe '#fake_npi' do
+        it 'creates fake npi' do
           org = create(:organization)
-          expect(org.sandbox_id).to be_present
+          expect(org.npi).to be_present
+          expect(org.npi).to start_with('3')
         end
 
-        it 'does sets sandbox_id if nil' do
-          org = create(:organization, sandbox_id: nil)
+        it 'does sets npi if nil' do
+          org = create(:organization, npi: nil)
           org.assign_id
-          expect(org.sandbox_id).to be_present
+          expect(org.npi).to be_present
+          expect(org.npi).to start_with('3')
         end
 
         it 'does not set sandbox_id if present' do
