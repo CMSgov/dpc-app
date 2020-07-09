@@ -75,6 +75,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         // Now that we have the organization_id, set it in the logging context
         MDC.clear();
         MDC.put("organization_id", orgID.toString());
+        MDC.put("token_id", m1.get(0).identifier);
 
         try {
             this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
