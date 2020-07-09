@@ -7,9 +7,7 @@ import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.apache.http.HttpHeaders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.slf4j.*;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -50,13 +48,13 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
     public void filter(final ContainerRequestContext requestContext) {
         final UriInfo uriInfo = requestContext.getUriInfo();
         final String macaroon = MacaroonHelpers.extractMacaroonFromRequest(requestContext, unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
-
         final DPCAuthCredentials dpcAuthCredentials = validateMacaroon(macaroon, uriInfo);
 
         final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
         if (!authenticated) {
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
+        logger.info("Resource Requested: {}, Method: {}",uriInfo.getPath(),requestContext.getMethod(),requestContext.getMethod());
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
@@ -84,7 +82,6 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
             logger.error("Macaroon verification failed", e);
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
-
         return buildCredentials(macaroon, orgID, uriInfo);
     }
 
