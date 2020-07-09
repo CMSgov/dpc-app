@@ -42,9 +42,9 @@ class Organization < ApplicationRecord
   end
 
   def assign_id
-    return true if sandbox_id.present?
+    return true if npi.present?
 
-    self.sandbox_id = generate_sandbox_id
+    self.npi = generate_npi
   end
 
   def external_identifier
@@ -62,7 +62,7 @@ class Organization < ApplicationRecord
   end
 
   def update_registered_organization
-    return unless npi.present? || sandbox_id.present?
+    return unless npi.present?
 
     return registered_organization.update_api_organization if registered_organization.present?
   end
@@ -78,9 +78,9 @@ end
 
 private
 
-def generate_sandbox_id
+def generate_npi
   loop do
-    sandbox_id = Luhnacy.generate(15, prefix: '808403')[-10..-1]
-    break sandbox_id unless Organization.where(sandbox_id: sandbox_id).exists?
+    npi = Luhnacy.generate(15, prefix: '808403')[-10..-1]
+    break npi unless Organization.where(npi: npi).exists?
   end
 end
