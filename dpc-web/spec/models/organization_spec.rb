@@ -44,25 +44,6 @@ RSpec.describe Organization, type: :model do
     end
   end
 
-  describe '#external_identifier' do
-    it 'returns npi if not in prod-sbx' do
-      org = create(:organization)
-      npi = org.npi
-
-      expect(org.external_identifier).to eq(npi)
-    end
-
-    describe '#ENV=prod-sbx' do
-      it 'returns sandbox_id' do
-        allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
-        org = create(:organization)
-        sandbox_id = org.sandbox_id
-
-        expect(org.external_identifier).to eq(sandbox_id)
-      end
-    end
-  end
-
   describe '#registered_organization?' do
     context 'when organization is a provider' do
       it 'returns true if org has a registered org and an npi' do

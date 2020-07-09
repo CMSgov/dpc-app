@@ -46,7 +46,7 @@ RSpec.describe APIClient do
                         postalCode: org.address_zip,
                         state: org.address_state
                       }],
-                      identifier: [{ system: 'http://hl7.org/fhir/sid/us-npi', value: org.external_identifier }],
+                      identifier: [{ system: 'http://hl7.org/fhir/sid/us-npi', value: org.npi }],
                       name: org.name,
                       resourceType: 'Organization',
                       type: [{
