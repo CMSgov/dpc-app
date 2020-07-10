@@ -37,6 +37,9 @@ public class MockBlueButtonClient implements BlueButtonClient {
             TEST_PATIENT_MBIS.get(2), "-19990000002208",
             TEST_PATIENT_MBIS.get(3), "-19990000002209",
             TEST_PATIENT_MBIS.get(4), "-19990000002210"
+
+
+
     );
     public static final Map<String, String> MBI_HASH_MAP = Map.of(
             TEST_PATIENT_MBIS.get(0), "abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6",
@@ -44,7 +47,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
             TEST_PATIENT_MBIS.get(2), "e411277fd31da392eaa9a45df53b0c429e365626182f50d9f35810d77f0e2756",
             TEST_PATIENT_MBIS.get(3), "41af07535e0a66226cf2f0e6c551c0a15bd49192fc055aa5cd2e63f31f90a419",
             TEST_PATIENT_MBIS.get(4), "d35350fce12f555089f938c0323a13122622123038e8af057a4191fd450c2b90"
-    );
+
+            );
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
     public static final String MULTIPLE_RESULTS_MBI = "0SW4N00AA00";
     public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
