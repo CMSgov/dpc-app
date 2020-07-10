@@ -1424,54 +1424,6 @@
 						"description": "While the export request is being processed, the job url will return a 202 status. When it is completed, a 200 status will be returned, along with JSON containing Job status."
 					},
 					"response": []
-				},
-				{
-					"name": "All data for a patient",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "6d63251b-ecb1-4925-b36a-33662ad20961",
-								"exec": [
-									"pm.test(\"Status code should be 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response should be a Bundle\", function() {",
-									"    var response = pm.response.json();",
-									"    pm.expect(response.resourceType).to.equal(\"Bundle\")",
-									"",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-Provenance",
-								"value": "{{attestationHeader}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient/728b270d-d7de-4143-82fe-d3ccd92cebe4/$everything",
-							"protocol": "http",
-							"host": [
-								"{{hostname}}"
-							],
-							"port": "{{api_port}}",
-							"path": [
-								"v1",
-								"Patient",
-								"728b270d-d7de-4143-82fe-d3ccd92cebe4",
-								"$everything"
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
