@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
@@ -53,7 +54,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerReadWrite() {
 
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2453425227");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final ICreateTyped creation = client
                 .create()
@@ -119,7 +120,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerSearch() {
 
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2222222228");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final MethodOutcome outcome = client
                 .create()
@@ -160,7 +161,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPractitionerUpdate() {
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("1234322224");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final MethodOutcome outcome = client
                 .create()
@@ -208,7 +209,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPractitionerRemoval() {
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2322222227");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final MethodOutcome outcome = client
                 .create()
@@ -252,7 +253,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         //Currently 4 providers are created in the seed for the test
         APPLICATION.getConfiguration().setProviderLimit(5);
 
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2189749122");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final ICreateTyped creation = client
                 .create()
@@ -268,5 +269,39 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         // Try again, should fail
         assertThrows(UnprocessableEntityException.class, creation::execute, "Should not modify");
+    }
+
+    @Test
+    void testPractitionerSubmitWhenLimitIsSetToNegativeOne() {
+
+        //Currently 4 providers are created in the seed for the test
+        APPLICATION.getConfiguration().setProviderLimit(-1);
+
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+
+        final ICreateTyped creation = client
+                .create()
+                .resource(practitioner)
+                .encodedJson();
+        final MethodOutcome mo1 = creation
+                .execute();
+
+        final Practitioner result1 = (Practitioner) mo1.getResource();
+        practitionersToCleanUp.add(result1);
+
+        assertNotNull(result1, "Should be created");
+
+        final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+
+        final ICreateTyped creation2 = client
+                .create()
+                .resource(practitioner2)
+                .encodedJson();
+
+        MethodOutcome mo2 = creation2.execute();
+        final Practitioner result2 = (Practitioner) mo2.getResource();
+        practitionersToCleanUp.add(result2);
+
+        assertNotNull(result2, "Should be created");
     }
 }
