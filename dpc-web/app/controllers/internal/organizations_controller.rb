@@ -34,9 +34,11 @@ module Internal
 
       if @organization.save
         flash[:notice] = 'Organization created.'
+
+        add_user(from_user_params[:from_user]) if from_user_params[:from_user].present?
+
         if prod_sbx?
-          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id,
-                                                                             api_env: 'sandbox')
+          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id)
         elsif from_user_params[:from_user].present?
           redirect_to edit_internal_user_path(from_user_params[:from_user], user_organization_ids: @organization.id)
         else
@@ -49,15 +51,17 @@ module Internal
     end
 
     def show
-      @organization = Organization.find org_account_params
+      @organization = Organization.find id_param
+
+      @users = user_filter
     end
 
     def edit
-      @organization = Organization.find org_account_params
+      @organization = Organization.find id_param
     end
 
     def update
-      @organization = Organization.find org_account_params
+      @organization = Organization.find id_param
 
       if @organization.update organization_params
         flash[:notice] = 'Organization updated.'
@@ -69,7 +73,7 @@ module Internal
     end
 
     def destroy
-      @organization = Organization.find org_account_params
+      @organization = Organization.find id_param
       if @organization.destroy
         flash[:notice] = 'Organization deleted.'
         redirect_to internal_organizations_path
@@ -79,18 +83,31 @@ module Internal
       end
     end
 
+    def add_or_delete
+      @organization = Organization.find(params[:organization_id])
+      @user = User.find(params[:organization][:id])
+
+      if params[:_method] == 'add'
+        add_user = add_user(params[:organization][:id])
+        action = 'added to'
+      elsif params[:_method] == 'delete'
+        delete_user = @organization.users.delete(@user)
+        action = 'deleted from the organization'
+      end
+
+      if delete_user || add_user
+        flash[:notice] = "User has been successfully #{action} the organization."
+        redirect_to internal_organization_path(@organization)
+      else
+        flash[:alert] = "User could not be #{action}."
+      end
+    end
+
     private
 
-    def prod_sbx?
-      ENV['ENV'] == 'prod-sbx'
-    end
-
-    def keyword_param
-      params.permit(:keyword)
-    end
-
-    def org_account_params
-      params.require(:id)
+    def add_user(user_id)
+      @user = User.find(user_id)
+      @organization.users << @user
     end
 
     def org_page_params(results)
@@ -99,6 +116,11 @@ module Internal
 
     def from_user_params
       params.permit(:from_user)
+    end
+
+    def user_filter
+      User.left_joins(:organization_user_assignments)
+          .where('organization_user_assignments.id IS NULL')
     end
 
     def organization_params

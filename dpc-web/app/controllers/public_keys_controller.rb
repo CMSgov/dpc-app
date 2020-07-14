@@ -13,8 +13,8 @@ class PublicKeysController < ApplicationController
     @organization = current_user.organizations.find(params[:organization_id])
     return render_error('Required values missing.') if missing_params
 
-    reg_org = @organization.registered_organizations.find_by(api_env: params[:api_environment])
-    manager = PublicKeyManager.new(api_env: params[:api_environment], registered_organization: reg_org)
+    reg_org = @organization.registered_organization
+    manager = PublicKeyManager.new(registered_organization: reg_org)
 
     new_public_key = manager.create_public_key(
       public_key: params[:public_key],
@@ -23,7 +23,7 @@ class PublicKeysController < ApplicationController
     )
 
     if new_public_key[:response]
-      redirect_to dashboard_path
+      redirect_to portal_path
     else
       render_error new_public_key[:message]
     end
@@ -41,11 +41,11 @@ class PublicKeysController < ApplicationController
   end
 
   def missing_params
-    params[:api_environment].blank? || params[:public_key].blank?
+    params[:public_key].blank?
   end
 
   def unauthorized
     flash[:error] = 'Unauthorized'
-    redirect_to dashboard_path
+    redirect_to portal_path
   end
 end

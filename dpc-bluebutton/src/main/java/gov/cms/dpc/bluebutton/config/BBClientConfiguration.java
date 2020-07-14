@@ -36,6 +36,7 @@ public class BBClientConfiguration {
 
     private int bfdHashIter;
 
+    private boolean useBfdMock = false;
 
     public TimeoutConfiguration getTimeouts() {
         return timeouts;
@@ -70,6 +71,10 @@ public class BBClientConfiguration {
     public String getBfdHashPepper() { return bfdHashPepper; }
 
     public int getBfdHashIter() { return bfdHashIter; }
+
+    public boolean isUseBfdMock() {
+        return useBfdMock;
+    }
 
     public static class TimeoutConfiguration {
 

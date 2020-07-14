@@ -53,6 +53,7 @@
         <pitest.version>1.5.1</pitest.version>
         <newrelic.agent.version>5.11.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
+        <h2.version>1.4.200</h2.version>
     </properties>
 
     <developers>
@@ -108,6 +109,18 @@
             <id>silvio</id>
             <name>Silvio Luthi</name>
             <email>silvio@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
+        </developer>
+        <developer>
+            <id>rich</id>
+            <name>Richard Braman</name>
+            <email>richard.braman@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
+        </developer>
+        <developer>
+            <id>sal</id>
+            <name>Salvador Gutierrez</name>
+            <email>sal.gutierrez@adhocteam.us</email>
             <organization>Ad Hoc LLC</organization>
         </developer>
     </developers>
@@ -262,6 +275,12 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.5.12</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -422,6 +441,7 @@
     <build>
         <pluginManagement>
             <plugins>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>

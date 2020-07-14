@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.reactivex.Flowable;
@@ -12,6 +13,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.security.GeneralSecurityException;
 import java.time.OffsetDateTime;
@@ -111,7 +113,7 @@ class ResourceFetcher {
         }
 
         // Other errors should be turned into OperationOutcome and just recorded.
-        logger.error("Turning error into OperationOutcome. Error is: " + error);
+        logger.error("Turning error into OperationOutcome.", error);
         final var operationOutcome = formOperationOutcome(mbi, error);
         return Flowable.just(List.of(operationOutcome));
     }
@@ -124,6 +126,11 @@ class ResourceFetcher {
      */
     private Bundle fetchFirst(String mbi) {
         Patient patient = fetchPatient(mbi);
+        patient.getIdentifier().stream()
+                .filter(i -> i.getSystem().equals(DPCIdentifierSystem.MBI_HASH.getSystem()))
+                .findFirst()
+                .ifPresent(i -> MDC.put(MDCConstants.PATIENT_ID, i.getValue()));
+
         var beneId = getBeneIdFromPatient(patient);
         final var lastUpdated = formLastUpdatedParam();
         switch (resourceType) {
@@ -143,7 +150,7 @@ class ResourceFetcher {
         try {
             patients = blueButtonClient.requestPatientFromServerByMbi(mbi);
         } catch (GeneralSecurityException e) {
-            logger.error("Job {}, batch {}: Failed to retrieve Patient", jobID, batchID, e);
+            logger.error("Failed to retrieve Patient", e);
             throw new ResourceNotFoundException("Failed to retrieve Patient");
         }
 
@@ -151,7 +158,7 @@ class ResourceFetcher {
             return (Patient) patients.getEntryFirstRep().getResource();
         }
 
-        logger.error("Job {}, batch {}: Expected 1 Patient to match MBI but found {}", jobID, batchID, patients.getTotal());
+        logger.error("Expected 1 Patient to match MBI but found {}", patients.getTotal());
         throw new ResourceNotFoundException(String.format("Expected 1 Patient to match MBI but found %d", patients.getTotal()));
     }
 
@@ -161,7 +168,7 @@ class ResourceFetcher {
                 .findFirst()
                 .map(Identifier::getValue)
                 .orElseThrow(() -> {
-                    logger.error("Job {}, batch {}: No bene_id found in Patient resource", jobID, batchID);
+                    logger.error("No bene_id found in Patient resource");
                     return new ResourceNotFoundException("No bene_id found in Patient resource");
                 });
     }
