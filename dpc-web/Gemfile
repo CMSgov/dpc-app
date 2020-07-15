@@ -39,7 +39,6 @@ group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
   gem 'pry-nav'
-
   gem 'rspec-rails'
   gem 'database_cleaner'
   gem 'capybara'
@@ -48,8 +47,9 @@ group :development, :test do
   gem 'simplecov', require: false
   gem 'vcr'
   gem 'webmock'
-
   gem 'bundler-audit'
+  gem 'brakeman'
+  gem 'dotenv-rails'
 end
 
 group :test do
@@ -69,9 +69,4 @@ group :development do
   gem 'rubocop-performance', require: false
 
   gem 'letter_opener'
-end
-
-group :development, :test do
-  gem 'brakeman'
-  gem 'dotenv-rails'
 end
