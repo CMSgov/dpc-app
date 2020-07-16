@@ -34,7 +34,6 @@ import gov.cms.dpc.macaroons.annotations.PublicURL;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
-import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.hibernate.SessionFactory;
@@ -81,8 +80,6 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(FileManager.class);
         binder.bind(HttpRangeHeaderParamConverterProvider.class);
         binder.bind(ChecksumConverterProvider.class);
-
-        binder.bind(DataService.class);
 
         // Healthchecks
         // Additional health-checks can be added here

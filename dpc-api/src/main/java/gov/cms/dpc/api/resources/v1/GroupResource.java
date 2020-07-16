@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
-import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
@@ -50,6 +49,7 @@ import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
+    static final String SYNTHETIC_BENE_ID = "-19990000000001";
 
     // The delimiter for the '_types' list query param.
     static final String LIST_DELIMITER = ",";
@@ -265,7 +265,7 @@ public class GroupResource extends AbstractGroupResource {
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
                            @QueryParam("_since") @NoHtml String since) {
-        logger.debug("Exporting data for provider: {}", rosterID);
+        logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Check the parameters
         checkExportRequest(outputFormat);
@@ -279,7 +279,7 @@ public class GroupResource extends AbstractGroupResource {
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
         final var sinceDate = handleSinceQueryParam(since);
-        final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
+        final var transactionTime = fetchTransactionTime();
         final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, sinceDate, transactionTime);
 
         return Response.status(Response.Status.ACCEPTED)
@@ -341,6 +341,18 @@ public class GroupResource extends AbstractGroupResource {
         } catch (DataFormatException ex) {
             throw new BadRequestException("'_since' query parameter must be a valid date time value");
         }
+    }
+
+    /**
+     * Fetch the BFD database last update time. Use it as the transactionTime for a job.
+     * @return transactionTime from the BFD service
+     */
+    private OffsetDateTime fetchTransactionTime() {
+        // Every bundle has transaction time after the Since RFC has beneficiary
+        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta();
+        return Optional.ofNullable(meta.getLastUpdated())
+                .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
+                .orElse(OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     /**

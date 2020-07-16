@@ -4,7 +4,7 @@ class APIClient
   attr_reader :base_url, :response_body, :response_status
 
   def initialize
-    @base_url = ENV.fetch('API_METADATA_URL_SANDBOX')
+    @base_url = ENV.fetch('API_METADATA_URL')
   end
 
   def create_organization(org, fhir_endpoint: {})
@@ -103,7 +103,7 @@ class APIClient
   end
 
   def golden_macaroon
-    @golden_macaroon ||= ENV.fetch('GOLDEN_MACAROON_SANDBOX')
+    @golden_macaroon ||= ENV.fetch('GOLDEN_MACAROON')
   end
 
   def parsed_response(response)
