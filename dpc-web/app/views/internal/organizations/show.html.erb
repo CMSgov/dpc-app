@@ -98,7 +98,7 @@
 
 <section class="box">
     <div class="box__content">
-      <% if @organization.reg_org %>
+      <% if @organization.reg_org.enabled == true %>
         <h2 class="box__heading">API ID: <%= @organization.registered_organization.api_id %></h2>
         <h4>FHIR Endpoint</h4>
         <div class="ds-u-margin-bottom--1">
@@ -118,16 +118,23 @@
           organization_id: @organization.id,
           id: @organization.registered_organization.id
           ) %>
-        <%= link_to "Disable Organization", internal_organization_registered_organization_path(
-          organization_id: @organization.id,
-          id: @organization.registered_organization.id,
-          ), method: :delete, data: { confirm: 'Disabling the organization will permanently delete all data connected to this organization in the API. Are you sure you would like to disable this organization?', test: 'disable-org' } %>
+        <%= link_to "Disable Organization", internal_organization_registered_organization_enable_or_disable_url(
+          registered_organization_id: @organization.registered_organization.id,
+          organization_id: @organization.id), data: { test: 'disable-org' } %>
       <% else %>
         <h2 class="box__heading"><%= @organization.name %> is not enabled in the API</h2>
         <p class="ds-text--lead ds-u-measure--wide ds-u-margin-top--2">Users cannot create client tokens or add public keys until the organization is enabled in the API.</p>
-        <%= link_to 'Enable Organization',
-                    new_internal_organization_registered_organization_path(organization_id: @organization.id),
-                    data: { test: 'enable-org' } %>
+        <% if @organization.reg_org.enabled.nil? %>
+          <%= link_to 'Enable Organization',
+                      new_internal_organization_registered_organization_path(organization_id: @organization.id),
+                      data: { test: 'enable-org' } %>
+        <% else %>
+          <%= link_to 'Enable Organization',
+                      internal_organization_registered_organization_enable_or_disable_url(
+                        registered_organization_id: @organization.registered_organization.id,
+                        organization_id: @organization.id),
+                      data: { test: 'enable-org' } %>
+        <% end %>
       <% end %>
 
       <div>

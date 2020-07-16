@@ -60,6 +60,23 @@ module Internal
       redirect_to internal_organization_path(@organization)
     end
 
+    def enable_or_disable
+      @organization = Organization.find(org_id_param)
+      @reg_org = @organization.registered_organization
+
+      if @reg_org.enabled == true
+        @reg_org.enabled = false
+        @reg_org.save
+
+        redirect_to internal_organization_path(@organization)
+      else @reg_org.enabled == false
+        @reg_org.enabled = true
+        @reg_org.save
+
+        redirect_to internal_organization_path(@organization)
+      end
+    end
+
     private
 
     def org_id_param

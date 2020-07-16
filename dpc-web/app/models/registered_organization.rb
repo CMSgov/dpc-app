@@ -6,9 +6,9 @@ class RegisteredOrganization < ApplicationRecord
 
   before_create :create_api_organization
   after_create :notify_users_of_sandbox_access, if: -> { prod_sbx? }
+  after_create :enable_reg_org
   before_update :update_api_organization
   before_update :update_api_endpoint
-  before_destroy :delete_api_organization
   # TODO: do we need to delete api endpoint too?
 
   delegate :name, :status, :uri, to: :fhir_endpoint, allow_nil: true, prefix: true
@@ -105,6 +105,13 @@ class RegisteredOrganization < ApplicationRecord
 
   def prod_sbx?
     ENV['ENV'] == 'prod-sbx'
+  end
+
+  def enable_reg_org
+    @reg_org = organization.reg_org
+
+    @reg_org.enabled = true
+    @reg_org.save
   end
 
   private
