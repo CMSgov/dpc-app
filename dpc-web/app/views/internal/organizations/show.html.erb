@@ -21,7 +21,7 @@
 
   <section>
     <div class="ds-u-color--success">
-      <% if @organization.reg_org %>
+      <% if @organization.reg_org.present? && @organization.reg_org.enabled == true %>
         <svg class="icon ds-u-margin-right--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <use xlink:href="/assets/solid.svg#database"></use>
         </svg>
@@ -98,7 +98,7 @@
 
 <section class="box">
     <div class="box__content">
-      <% if @organization.reg_org.enabled == true %>
+      <% if  @organization.reg_org.present? && @organization.reg_org.enabled == true %>
         <h2 class="box__heading">API ID: <%= @organization.registered_organization.api_id %></h2>
         <h4>FHIR Endpoint</h4>
         <div class="ds-u-margin-bottom--1">
@@ -124,7 +124,7 @@
       <% else %>
         <h2 class="box__heading"><%= @organization.name %> is not enabled in the API</h2>
         <p class="ds-text--lead ds-u-measure--wide ds-u-margin-top--2">Users cannot create client tokens or add public keys until the organization is enabled in the API.</p>
-        <% if @organization.reg_org.enabled.nil? %>
+        <% if  @organization.reg_org.nil? %>
           <%= link_to 'Enable Organization',
                       new_internal_organization_registered_organization_path(organization_id: @organization.id),
                       data: { test: 'enable-org' } %>

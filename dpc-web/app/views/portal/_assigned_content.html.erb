@@ -24,7 +24,7 @@
       <%end %>
     </div>
 
-    <% if organization.reg_org.present? %>
+    <% if organization.reg_org.present? && organization.reg_org.enabled == true %>
       <section class="box">
         <div class="box__content">
           <div class="box__header">
