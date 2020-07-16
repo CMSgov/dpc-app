@@ -17,6 +17,7 @@ module Internal
     def create
       @organization = Organization.find(org_id_param)
       @registered_organization = @organization.build_registered_organization(registered_organization_params)
+      @registered_organization.enabled = true
 
       if @registered_organization.save
         flash[:notice] = 'API has been enabled.'
