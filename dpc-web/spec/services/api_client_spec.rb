@@ -250,48 +250,6 @@ RSpec.describe APIClient do
     end
   end
 
-  describe '#delete_organization' do
-    context 'successful request' do
-      it 'uses fhir_client to delete registered org from API' do
-        reg_org = build(:registered_organization, api_endpoint_ref: 'Endpoint/12345')
-
-        stub_request(:delete, "http://dpc.example.com/Organization/#{reg_org.api_id}")
-          .with(
-            headers: {
-              'Accept' => 'application/fhir+json',
-              'Authorization' => /.*/
-            }
-          ).to_return(status: 200, body: '', headers: {})
-
-        client = APIClient.new
-        client.delete_organization(reg_org)
-        expect(client.response_successful?).to eq(true)
-        expect(client.response_status).to eq(200)
-        expect(client.response_body).to eq('')
-      end
-    end
-
-    context 'unsucessful request' do
-      it 'uses fhir_client to delete registered org from API' do
-        reg_org = build(:registered_organization, api_endpoint_ref: 'Endpoint/12345')
-
-        stub_request(:delete, "http://dpc.example.com/Organization/#{reg_org.api_id}")
-          .with(
-            headers: {
-              'Accept' => 'application/fhir+json',
-              'Authorization' => /.*/
-            }
-          ).to_return(status: 404, body: '', headers: {})
-
-        client = APIClient.new
-        client.delete_organization(reg_org)
-        expect(client.response_successful?).to eq(false)
-        expect(client.response_status).to eq(404)
-        expect(client.response_body).to eq('')
-      end
-    end
-  end
-
   describe '#update_endpoint' do
     context 'successful request' do
       it 'uses fhir_client to send endpoint data to API' do

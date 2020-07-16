@@ -13,7 +13,7 @@ FactoryBot.define do
 
     trait :api_enabled do
       after(:create) do |org|
-        create(:registered_organization, organization: org)
+        create(:registered_organization, organization: org, enabled: true)
       end
     end
   end
