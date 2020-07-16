@@ -74,23 +74,6 @@ class RegisteredOrganization < ApplicationRecord
     throw(:abort)
   end
 
-  def delete_api_organization
-    api_request = api_service.delete_organization(self)
-    api_response = api_request.response_body
-
-    return if api_request.response_successful?
-
-    if api_response.include? 'Cannot find organization'
-      Rails.logger.warn "Cannot delete API organization with id #{api_id}: Organization not found."
-      return
-    end
-
-    action = 'deleted'
-    msg = api_response
-    api_error(action, msg)
-    throw(:abort)
-  end
-
   def build_default_fhir_endpoint
     build_fhir_endpoint(
       status: 'test',
