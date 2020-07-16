@@ -10,7 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 2020_07_15_203040) do
+=======
+ActiveRecord::Schema.define(version: 2020_07_09_181216) do
+>>>>>>> nicole/dpc-505-sandbox-id
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -72,8 +76,11 @@ ActiveRecord::Schema.define(version: 2020_07_15_203040) do
     t.datetime "updated_at", null: false
     t.string "npi"
     t.string "vendor"
+<<<<<<< HEAD
     t.string "api_id"
     t.string "api_reference"
+=======
+>>>>>>> nicole/dpc-505-sandbox-id
   end
 
   create_table "registered_organizations", force: :cascade do |t|

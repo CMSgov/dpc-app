@@ -9,7 +9,7 @@ class FhirResourceBuilder
       identifier: [
         {
           system: 'http://hl7.org/fhir/sid/us-npi',
-          value: org.external_identifier
+          value: org.npi
         }
       ]
     )
