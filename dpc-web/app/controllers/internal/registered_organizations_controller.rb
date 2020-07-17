@@ -70,14 +70,15 @@ module Internal
         @reg_org.save
 
         flash[:notice] = 'API access disabled.'
-        redirect_to internal_organization_path(@organization)
-      else @reg_org.enabled == false
-          @reg_org.enabled = true
-          @reg_org.save
+      elsif @reg_org.enabled == false
+        @reg_org.enabled = true
+        @reg_org.save
 
-          flash[:notice] = 'API access enabled.'
-          redirect_to internal_organization_path(@organization)
+        flash[:notice] = 'API access enabled.'
+      else
+        flash[:alert] = 'Unable to complete API request.'
       end
+      redirect_to internal_organization_path(@organization)
     end
 
     private
