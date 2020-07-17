@@ -25,9 +25,13 @@ class Organization < ApplicationRecord
 
   scope :provider, -> { where.not(organization_type: ORGANIZATION_TYPES['health_it_vendor']) }
 
-  scope :is_registered, -> { where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations WHERE enabled IS true)') }
+  scope :is_registered, -> {
+    where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations WHERE enabled IS true)')
+  }
 
-  scope :is_not_registered, -> { where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations WHERE enabled IS NOT true)') }
+  scope :is_not_registered, -> {
+    where('id IN(SELECT DISTINCT(organization_id) FROM registered_organizations WHERE enabled IS NOT true)')
+  }
 
   def address_type
     address&.address_type
