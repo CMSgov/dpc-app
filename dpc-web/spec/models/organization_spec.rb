@@ -11,22 +11,25 @@ RSpec.describe Organization, type: :model do
         allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
       end
 
-      describe '#assign_sandbox_id' do
-        it 'sets sandbox_id' do
-          org = create(:organization)
-          expect(org.sandbox_id).to be_present
+      describe '#fake_npi' do
+        it 'creates fake npi' do
+          org = create(:organization, npi: nil)
+          org.assign_id
+          expect(org.npi).to be_present
+          expect(org.npi).to start_with('3')
         end
 
-        it 'does sets sandbox_id if nil' do
-          org = create(:organization, sandbox_id: nil)
+        it 'does sets npi if nil' do
+          org = create(:organization, npi: nil)
           org.assign_id
-          expect(org.sandbox_id).to be_present
+          expect(org.npi).to be_present
+          expect(org.npi).to start_with('3')
         end
 
-        it 'does not set sandbox_id if present' do
-          org = create(:organization, sandbox_id: '111111')
+        it 'does not set npi if present' do
+          org = create(:organization, npi: '111111')
           org.assign_id
-          expect(org.sandbox_id).to eq('111111')
+          expect(org.npi).to eq('111111')
         end
       end
     end
@@ -41,25 +44,6 @@ RSpec.describe Organization, type: :model do
     it 'does not replace non-blank values' do
       org = create(:organization, npi: '1234567890')
       expect(org.npi).to eq('1234567890')
-    end
-  end
-
-  describe '#external_identifier' do
-    it 'returns npi if not in prod-sbx' do
-      org = create(:organization)
-      npi = org.npi
-
-      expect(org.external_identifier).to eq(npi)
-    end
-
-    describe '#ENV=prod-sbx' do
-      it 'returns sandbox_id' do
-        allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
-        org = create(:organization)
-        sandbox_id = org.sandbox_id
-
-        expect(org.external_identifier).to eq(sandbox_id)
-      end
     end
   end
 
