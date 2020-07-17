@@ -71,7 +71,7 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     private String keyPairLocation;
 
     @Min(0)
-    private int jobTimeoutInSeconds = 5;
+    private int jobTimeoutInSeconds;
 
     public TokenPolicy getTokenPolicy() {
         return tokenPolicy;
@@ -147,7 +147,6 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     public String getPublicURL() {
         return publicURL;
     }
-
     public void setPublicURL(String publicURL) {
         this.publicURL = publicURL;
     }
