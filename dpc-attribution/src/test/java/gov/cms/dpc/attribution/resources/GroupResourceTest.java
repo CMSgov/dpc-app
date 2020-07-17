@@ -149,6 +149,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
         final Practitioner practitioner1 = AttributionTestHelpers.createPractitionerResource("1111111112");
         final Group group1 = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner1), DEFAULT_ORG_ID);
 
+        assertFalse(GroupResource.rosterSizeTooBig(-1, group1));
         assertFalse(GroupResource.rosterSizeTooBig(null, group1));
         assertFalse(GroupResource.rosterSizeTooBig(1, (Group) null));
         assertFalse(GroupResource.rosterSizeTooBig(1, group1, null));

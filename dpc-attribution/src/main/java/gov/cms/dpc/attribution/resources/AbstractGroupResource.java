@@ -52,7 +52,7 @@ public abstract class AbstractGroupResource {
     public abstract Response deleteRoster(UUID rosterID);
 
     public static boolean rosterSizeTooBig(Integer limit, Group... groups) {
-        if (groups == null || groups.length == 0 || limit == null) {
+        if (groups == null || groups.length == 0 || limit == null || limit == -1) {
             return false;
         }
         long totalMembers = Arrays.stream(groups)
