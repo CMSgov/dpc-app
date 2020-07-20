@@ -44,10 +44,10 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @JsonProperty("swagger")
     private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
-    @Min(0)
+    @Min(-1)
     private Integer providerLimit;
 
-    @Min(0)
+    @Min(-1)
     private Integer patientLimit;
 
     @Override
