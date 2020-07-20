@@ -17,7 +17,6 @@ module Internal
     def create
       @organization = Organization.find(org_id_param)
       @registered_organization = @organization.build_registered_organization(registered_organization_params)
-      @registered_organization.enabled = true
 
       if @registered_organization.save
         flash[:notice] = 'API has been enabled.'
@@ -71,7 +70,7 @@ module Internal
 
         flash[:notice] = 'API access disabled.'
         redirect_to internal_organization_path(@organization)
-      elsif @reg_org.enabled == false
+      elsif @reg_org.enabled == false || @reg_org.enabled.nil?
         @reg_org.enabled = true
         @reg_org.save
 

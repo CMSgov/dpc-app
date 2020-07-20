@@ -123,7 +123,7 @@
       <% else %>
         <h2 class="box__heading"><%= @organization.name %> is not enabled in the API</h2>
         <p class="ds-text--lead ds-u-measure--wide ds-u-margin-top--2">Users cannot create client tokens or add public keys until the organization is enabled in the API.</p>
-        <% if  @organization.reg_org.nil? %>
+        <% if @organization.reg_org.nil? %>
           <%= link_to 'Enable Organization',
                       new_internal_organization_registered_organization_path(organization_id: @organization.id),
                       data: { test: 'enable-org' } %>
