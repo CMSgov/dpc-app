@@ -80,7 +80,7 @@ ActiveRecord::Schema.define(version: 2020_07_15_203040) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "api_endpoint_ref"
-    t.boolean "enabled", default: true
+    t.boolean "enabled", default: true, null: false
     t.index ["organization_id"], name: "index_registered_organizations_on_organization_id"
   end
 
