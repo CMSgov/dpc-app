@@ -32,7 +32,7 @@ RSpec.describe Internal::RegisteredOrganizationsController, type: :controller do
           }
         }
 
-        expect(controller.flash[:notice]).to eq("Organization has been enabled.")
+        expect(controller.flash[:notice]).to eq("API has been enabled.")
       end
     end
 
@@ -51,7 +51,7 @@ RSpec.describe Internal::RegisteredOrganizationsController, type: :controller do
         expect(response).to render_template(:new)
         # Separating to ignore whitespace discrepancy
         expect(controller.flash[:alert])
-          .to include('Organization could not be enabled:')
+          .to include('API could not be enabled:')
         expect(controller.flash[:alert])
           .to include('couldn\'t be registered with API: {"issues"=>["Bad request"]}.')
       end

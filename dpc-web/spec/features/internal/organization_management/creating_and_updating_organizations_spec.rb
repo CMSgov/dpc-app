@@ -94,7 +94,7 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'registered_organization_fhir_endpoint_attributes_uri', with: 'https://example.com'
     find('[data-test="form-submit"]').click
 
-    expect(page).to have_content('API Information')
+    expect(page).to have_content('API ID')
   end
 
   scenario 'updating an API enabled organization' do
@@ -147,7 +147,7 @@ RSpec.feature 'creating and updating organizations' do
 
     find('[data-test="disable-org"]').click
 
-    expect(page).to have_content('Organization access disabled')
+    expect(page).to have_content('API access disabled')
   end
 
   def stub_sandbox_notification_mailer(org, users=[])
