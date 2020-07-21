@@ -17,7 +17,11 @@ Rails.application.routes.draw do
     resources :taggings, only: [:create, :destroy]
     resources :tags, only: [:index, :create, :destroy]
     resources :organizations do
-      resources :registered_organizations, only: [:new, :create, :edit, :update, :destroy]
+
+      resources :registered_organizations, only: [:new, :create, :edit, :update, :destroy] do
+        match :enable_or_disable, via: [:get, :post, :update]
+      end
+
       match :add_or_delete, via: [:get, :post, :delete]
     end
   end
