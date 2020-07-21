@@ -41,6 +41,8 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.APPLICATION_NDJSON;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.NDJSON;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
@@ -362,9 +364,9 @@ public class GroupResource extends AbstractGroupResource {
      * @param outputFormat param to check
      */
     private static void checkExportRequest(String outputFormat) {
-        // _outputFormat only supports FHIR_NDJSON
-        if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
-            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
+        // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJON, or NDJSON
+        if (StringUtils.isNotEmpty(outputFormat) && (!FHIR_NDJSON.equals(outputFormat) && !APPLICATION_NDJSON.equals(outputFormat) && !NDJSON.equals(outputFormat) )) {
+            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson','application/ndjson', or 'ndjson' ");
         }
     }
 
