@@ -264,11 +264,12 @@ public class GroupResource extends AbstractGroupResource {
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
-                           @QueryParam("_since") @NoHtml String since) {
+                           @QueryParam("_since") @NoHtml String since,
+                           @ApiParam(hidden=true)  @Valid String Prefer) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Check the parameters
-        checkExportRequest(outputFormat);
+        checkExportRequest(outputFormat, Prefer);
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
@@ -361,11 +362,15 @@ public class GroupResource extends AbstractGroupResource {
      *
      * @param outputFormat param to check
      */
-    private static void checkExportRequest(String outputFormat) {
+    private static void checkExportRequest(String outputFormat, String headerPrefer) {
         // _outputFormat only supports FHIR_NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
         }
+        if (!headerPrefer.equals("respond-async")) {
+            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+        }
+
     }
 
     private List<String> fetchPatientMBIs(String groupID) {
