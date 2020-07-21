@@ -34,8 +34,10 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.chrono.ChronoLocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -337,6 +339,10 @@ public class GroupResource extends AbstractGroupResource {
         try {
             var dt = new DateTimeDt();
             dt.setValueAsString(since);
+            LocalDate today = LocalDate.now( ZoneOffset.UTC );
+            if (today.isBefore((ChronoLocalDate) dt)){
+                throw new BadRequestException("'_since' query parameter cannot be a future date");
+            }
             return dt.getValue().toInstant().atOffset(ZoneOffset.UTC);
         } catch (DataFormatException ex) {
             throw new BadRequestException("'_since' query parameter must be a valid date time value");
