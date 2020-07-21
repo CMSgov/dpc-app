@@ -2,6 +2,7 @@
 
 class ClientTokensController < ApplicationController
   before_action :authenticate_user!
+  before_action :organization_enabled?
   rescue_from ActiveRecord::RecordNotFound, with: :unauthorized
 
   def new
@@ -20,6 +21,15 @@ class ClientTokensController < ApplicationController
     else
       render_error 'Client token could not be created.'
     end
+  end
+
+  def organization_enabled?
+    @organization = current_user.organizations.find(params[:organization_id])
+    @reg_org = @organization.reg_org
+
+    return if @reg_org.present? && @reg_org.enabled == true
+
+    redirect_to root_path
   end
 
   private
