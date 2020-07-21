@@ -83,7 +83,7 @@ public class GroupResource extends AbstractGroupResource {
                                  @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
-        logAttestation(rosterAttestation, null, attributionRoster);
+        logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
         addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
         final MethodOutcome outcome = this
@@ -169,7 +169,7 @@ public class GroupResource extends AbstractGroupResource {
     public Group updateRoster(@ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
                               @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
-        logAttestation(rosterAttestation, rosterID, rosterUpdate);
+        logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
@@ -193,7 +193,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
                                   @ApiParam(hidden=true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, @ApiParam Group groupUpdate) {
-        logAttestation(rosterAttestation, rosterID, groupUpdate);
+        logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
@@ -413,7 +413,7 @@ public class GroupResource extends AbstractGroupResource {
      * @param rosterID          - {@link UUID} of roster being updated
      * @param attributionRoster - {@link Group} roster being attested
      */
-    private void logAttestation(Provenance provenance, UUID rosterID, Group attributionRoster) {
+    private void logAndVerifyAttestation(Provenance provenance, UUID rosterID, Group attributionRoster) {
 
         final String groupIDLog;
         if (rosterID == null) {
@@ -425,6 +425,7 @@ public class GroupResource extends AbstractGroupResource {
         final Coding reason = provenance.getReasonFirstRep();
 
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
+        final String practitionerUUID = performer.getOnBehalfOfReference().getReference();
         final List<String> attributedPatients = attributionRoster
                 .getMember()
                 .stream()
@@ -434,7 +435,24 @@ public class GroupResource extends AbstractGroupResource {
 
         logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}{}", performer.getWhoReference().getReference(),
                 reason.getCode(),
-                performer.getOnBehalfOfReference().getReference(), attributedPatients, groupIDLog);
+                practitionerUUID, attributedPatients, groupIDLog);
+
+        verifyHeader(practitionerUUID, attributionRoster);
+    }
+
+    private void verifyHeader(String practitionerUUID, Group attributionRoster) {
+        Practitioner practitioner = client.read()
+                .resource(Practitioner.class)
+                .withId(FHIRExtractors.getEntityUUID(practitionerUUID).toString())
+                .encodedJson()
+                .execute();
+
+        Identifier provenencePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
+        String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
+
+        if (!provenencePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
+            throw new WebApplicationException("Provenence header's provider does not match group provider");
+        }
     }
 
     /**
