@@ -3,6 +3,7 @@
 class PublicKeysController < ApplicationController
   layout 'public-key-new'
   before_action :authenticate_user!
+  before_action :organization_enabled?
   rescue_from ActiveRecord::RecordNotFound, with: :unauthorized
 
   def new
@@ -31,6 +32,15 @@ class PublicKeysController < ApplicationController
 
   def download_snippet
     send_file 'public/snippet.txt', type: 'application/zip', status: 202
+  end
+
+  def organization_enabled?
+    @organization = current_user.organizations.find(params[:organization_id])
+    @reg_org = @organization.reg_org
+
+    return if @reg_org.present? && @reg_org.enabled == true
+
+    redirect_to root_path
   end
 
   private
