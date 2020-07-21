@@ -46,7 +46,7 @@ RSpec.feature 'managing api credentials' do
         success: true,
         response: default_org_creation_response
       )
-      create(:registered_organization, organization: org, api_id: '923a4f7b-eade-494a-8ca4-7a685edacfad')
+      create(:registered_organization, organization: org, api_id: '923a4f7b-eade-494a-8ca4-7a685edacfad', enabled: true)
 
       sign_in user, scope: :user
     end
