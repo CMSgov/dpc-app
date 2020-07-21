@@ -216,69 +216,6 @@ RSpec.describe RegisteredOrganization, type: :model do
         end
       end
     end
-
-    describe '#delete_api_organization' do
-      context 'successful API request' do
-        it 'makes update API request before destroy and destroys object' do
-          api_client = stub_api_client(
-            message: :create_organization,
-            success: true,
-            response: default_org_creation_response
-          )
-          reg_org = create(:registered_organization)
-
-          api_client = stub_api_client(
-            api_client: api_client,
-            message: :delete_organization,
-            success: true, response: ''
-          )
-
-          reg_org.destroy
-
-          expect(api_client).to have_received(:delete_organization).with(reg_org)
-          expect { reg_org.reload }.to raise_error(ActiveRecord::RecordNotFound)
-        end
-      end
-
-      context 'failed API request' do
-        before(:each) do
-          @api_client = stub_api_client(
-            message: :create_organization,
-            success: true,
-            response: default_org_creation_response
-          )
-          @reg_org = create(:registered_organization)
-        end
-
-        it 'cannot find organization in API and destroys object' do
-          api_client = stub_api_client(
-            api_client: @api_client,
-            message: :delete_organization,
-            success: false, response: 'Cannot find organization.'
-          )
-
-          @reg_org.destroy
-
-          expect(api_client).to have_received(:delete_organization).with(@reg_org)
-          expect { @reg_org.reload }.to raise_error(ActiveRecord::RecordNotFound)
-        end
-
-        it 'adds to errors and does not destroy object' do
-          api_client = stub_api_client(
-            api_client: @api_client,
-            message: :delete_organization,
-            success: false, response: ''
-          )
-          expect(
-            @reg_org.destroy
-          ).to eq(false)
-
-          expect(api_client).to have_received(:delete_organization).with(@reg_org)
-          expect(@reg_org.errors.count).to eq(1)
-          expect(@reg_org.reload).to eq(@reg_org)
-        end
-      end
-    end
   end
 
   describe '#build_default_fhir_endpoint' do

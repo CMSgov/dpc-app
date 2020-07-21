@@ -8,7 +8,6 @@ class RegisteredOrganization < ApplicationRecord
   after_create :notify_users_of_sandbox_access, if: -> { prod_sbx? }
   before_update :update_api_organization
   before_update :update_api_endpoint
-  before_destroy :delete_api_organization
   # TODO: do we need to delete api endpoint too?
 
   delegate :name, :status, :uri, to: :fhir_endpoint, allow_nil: true, prefix: true
@@ -69,23 +68,6 @@ class RegisteredOrganization < ApplicationRecord
     return if api_request.response_successful?
 
     action = 'updated (endpoint)'
-    msg = api_response
-    api_error(action, msg)
-    throw(:abort)
-  end
-
-  def delete_api_organization
-    api_request = api_service.delete_organization(self)
-    api_response = api_request.response_body
-
-    return if api_request.response_successful?
-
-    if api_response.include? 'Cannot find organization'
-      Rails.logger.warn "Cannot delete API organization with id #{api_id}: Organization not found."
-      return
-    end
-
-    action = 'deleted'
     msg = api_response
     api_error(action, msg)
     throw(:abort)
