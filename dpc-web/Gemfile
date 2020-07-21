@@ -22,6 +22,7 @@ gem 'luhnacy', '~> 0.2.1'
 
 gem 'jquery-rails'
 gem 'devise'
+gem 'devise_security_extension'
 gem 'truemail'
 gem 'brakeman'
 gem 'health_check'
