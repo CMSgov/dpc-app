@@ -26,16 +26,6 @@ class APIClient
     self
   end
 
-  def delete_organization(reg_org)
-    fhir_client.additional_headers = auth_header(golden_macaroon)
-
-    response = fhir_client.destroy(FHIR::Organization, reg_org.api_id)
-
-    @response_status = response.response[:code].to_i
-    @response_body = response.response[:body].body
-    self
-  end
-
   def update_endpoint(reg_org)
     fhir_endpoint = FhirResourceBuilder.new.fhir_endpoint(reg_org)
     fhir_client_update_request(reg_org.api_id, fhir_endpoint, fhir_endpoint.id)

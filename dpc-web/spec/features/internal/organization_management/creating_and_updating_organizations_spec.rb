@@ -137,16 +137,20 @@ RSpec.feature 'creating and updating organizations' do
     allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     org = create(:organization, :api_enabled)
+    reg_org = org.reg_org
     visit internal_organization_path(org)
 
     api_client = stub_api_client(
-      message: :delete_organization,
+      message: :update_organization,
       success: true,
-      response: ''
+      response: default_org_creation_response
     )
-
+    allow(api_client).to receive(:get_public_keys).and_return(api_client)
+    allow(api_client).to receive(:update_endpoint).and_return(api_client)
+    allow(api_client).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
     find('[data-test="disable-org"]').click
-
+    reg_org = Organization.find(org.id).reg_org
+    expect(reg_org.enabled).to eq(false)
     expect(page).to have_content('API access disabled')
   end
 

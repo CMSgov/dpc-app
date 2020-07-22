@@ -60,6 +60,27 @@ module Internal
       redirect_to internal_organization_path(@organization)
     end
 
+    def enable_or_disable
+      @organization = Organization.find(org_id_param)
+      @reg_org = @organization.registered_organization
+
+      if @reg_org.enabled == true
+        @reg_org.enabled = false
+        @reg_org.save
+
+        flash[:notice] = 'API access disabled.'
+        redirect_to internal_organization_path(@organization)
+      elsif @reg_org.enabled == false || @reg_org.enabled.nil?
+        @reg_org.enabled = true
+        @reg_org.save
+
+        flash[:notice] = 'API access enabled.'
+        redirect_to internal_organization_path(@organization)
+      else
+        flash[:alert] = 'Unable to complete API request.'
+      end
+    end
+
     private
 
     def org_id_param
