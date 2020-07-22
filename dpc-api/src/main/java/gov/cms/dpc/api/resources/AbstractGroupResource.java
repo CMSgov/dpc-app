@@ -56,5 +56,5 @@ public abstract class AbstractGroupResource {
                                     @QueryParam("_type") @NoHtml String resourceTypes,
                                     @QueryParam("_outputFormat") @NoHtml String outputFormat,
                                     @QueryParam("_since") @NoHtml String since,
-                                    @Valid String Prefer);
+                                    @HeaderParam("Prefer") @Valid String Prefer);
 }
