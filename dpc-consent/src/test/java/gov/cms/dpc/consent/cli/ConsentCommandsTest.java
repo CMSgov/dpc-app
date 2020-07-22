@@ -2,6 +2,7 @@ package gov.cms.dpc.consent.cli;
 
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
+import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@IntegrationTest
 class ConsentCommandsTest {
 
     private final PrintStream originalOut = System.out;
