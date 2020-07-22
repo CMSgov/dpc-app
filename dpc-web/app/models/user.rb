@@ -4,6 +4,7 @@ require 'csv'
 
 class User < ApplicationRecord
   include OrganizationTypable
+
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
   has_many :organization_user_assignments, dependent: :destroy
@@ -118,8 +119,10 @@ class User < ApplicationRecord
   private
 
   def password_complexity
-    if password.present? and not password.match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$&*])/)
-      errors.add :password, "must include at least one lowercase letter, one uppercase letter, one digit, and one symbol"
+    if password.present?
+      unless password.match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$&*])/)
+        errors.add :password, "must include at least one lowercase letter, one uppercase letter, one digit, and one symbol"
+      end
     end
   end
 
