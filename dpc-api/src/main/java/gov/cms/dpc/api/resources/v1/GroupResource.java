@@ -4,6 +4,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
@@ -441,18 +442,23 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     private void verifyHeader(String practitionerUUID, Group attributionRoster) {
-        Practitioner practitioner = client.read()
-                .resource(Practitioner.class)
-                .withId(FHIRExtractors.getEntityUUID(practitionerUUID).toString())
-                .encodedJson()
-                .execute();
+        try {
+            Practitioner practitioner = client.read()
+                    .resource(Practitioner.class)
+                    .withId(FHIRExtractors.getEntityUUID(practitionerUUID).toString())
+                    .encodedJson()
+                    .execute();
 
-        Identifier provenencePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
-        String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
+            Identifier provenancePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
+            String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
-        if (!provenencePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
-            throw new WebApplicationException("Provenence header's provider does not match group provider");
+            if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
+                throw new WebApplicationException("Provenance header's provider does not match group provider");
+            }
+        } catch(ResourceNotFoundException e) {
+            throw new WebApplicationException("Could not find provider defined in provenance header");
         }
+
     }
 
     /**
