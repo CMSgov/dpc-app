@@ -6,6 +6,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.UnauthorizedHandler;
 import org.apache.http.HttpHeaders;
 import org.slf4j.*;
 
@@ -36,10 +37,11 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
     private final MacaroonBakery bakery;
 
 
-    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao) {
+    protected DPCAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, UnauthorizedHandler dpc401handler ) {
         this.authenticator = auth;
         this.bakery = bakery;
         this.dao = dao;
+        this.unauthorizedHandler = dpc401handler;
     }
 
     protected abstract DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo);
