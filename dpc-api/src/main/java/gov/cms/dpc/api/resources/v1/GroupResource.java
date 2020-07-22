@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
+import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_NDJSON;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
@@ -250,8 +251,10 @@ public class GroupResource extends AbstractGroupResource {
     @FHIRAsync
     @ApiOperation(value = "Begin Group export request", tags = {"Group", "Bulk Data"},
             notes = "FHIR export operation which initiates a bulk data export for the given Provider")
-    @ApiImplicitParams(
-            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", type="string", value = "respond-async", dataTypeClass = String.class))
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Prefer", required = true, paramType = "header", type = "string", value = "respond-async", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "Accept", required = true, paramType = "header", type = "string", value = FHIR_JSON, dataTypeClass = String.class)
+    })
     @ApiResponses(
             @ApiResponse(code = 202, message = "Export request has started", responseHeaders = @ResponseHeader(name = "Content-Location", description = "URL to query job status", response = UUID.class))
     )
@@ -264,11 +267,12 @@ public class GroupResource extends AbstractGroupResource {
                            @ApiParam(value = "Output format of requested data", allowableValues = FHIR_NDJSON, defaultValue = FHIR_NDJSON)
                            @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
-                           @QueryParam("_since") @NoHtml String since) {
+                           @QueryParam("_since") @NoHtml String since,
+                           @HeaderParam("Accept") @Valid String Accept) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, since);
 
         // Check the parameters
-        checkExportRequest(outputFormat);
+        checkExportRequest(outputFormat,Accept);
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(rosterID);
@@ -361,10 +365,18 @@ public class GroupResource extends AbstractGroupResource {
      *
      * @param outputFormat param to check
      */
-    private static void checkExportRequest(String outputFormat) {
+    private static void checkExportRequest(String outputFormat, String headerAccept) {
         // _outputFormat only supports FHIR_NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
+        }
+
+        if (headerAccept==null || StringUtils.isEmpty(headerAccept)){
+            throw new BadRequestException("'Accept' header must be 'application/fhir+json'");
+        }
+
+        if (StringUtils.isNotEmpty(headerAccept) && !FHIR_JSON.equals(headerAccept)) {
+            throw new BadRequestException("'Accept' header must be 'application/fhir+json'");
         }
     }
 
