@@ -16,7 +16,6 @@ passwordInput.onkeyup = function () {
 
   // Validates character count
   if (inputValue.length >= 15) {
-    console.log("length")
     passCharCount.classList.remove("invalid");
     passCharCount.classList.add("valid");
   } else {
