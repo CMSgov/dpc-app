@@ -1479,7 +1479,7 @@
 								"$everything"
 							]
 						},
-						"description": "The patient data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one patient."
+						"description": "Synchronously retrieves all Coverage, EoB, and Patient resources for the requested patient."
 					},
 					"response": []
 				}
