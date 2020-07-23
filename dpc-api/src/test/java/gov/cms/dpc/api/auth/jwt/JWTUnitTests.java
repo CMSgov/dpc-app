@@ -21,7 +21,6 @@ import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.KeyType;
-import io.dropwizard.auth.UnauthorizedHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import io.jsonwebtoken.Jwts;
@@ -756,7 +755,7 @@ class JWTUnitTests {
         final MacaroonBakery bakery = buildBakery();
         final TokenDAO tokenDAO = mock(TokenDAO.class);
         final PublicKeyDAO publicKeyDAO = mockKeyDAO();
-        final UnauthorizedHandler dpc401handler = mock(DPCUnauthorizedHandler.class);
+        final DPCUnauthorizedHandler dpc401handler = mock(DPCUnauthorizedHandler.class);
         Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
         final JwtKeyResolver resolver = spy(new JwtKeyResolver(publicKeyDAO));

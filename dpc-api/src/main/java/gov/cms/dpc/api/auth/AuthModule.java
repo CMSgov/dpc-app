@@ -42,9 +42,10 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
             binder.bind(authenticatorTypeLiteral).to(StaticAuthenticator.class);
 
         } else {
+            binder.bind(DPCUnauthorizedHandler.class);
+            binder.bind(UnauthorizedHandler.class).to(DPCUnauthorizedHandler.class);
             binder.bind(AuthFactory.class).to(DPCAuthFactory.class);
             binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
-            binder.bind(UnauthorizedHandler.class).to(DPCUnauthorizedHandler.class);
         }
         binder.bind(DPCAuthDynamicFeature.class);
         binder.bind(SigningKeyResolverAdapter.class).to(JwtKeyResolver.class);

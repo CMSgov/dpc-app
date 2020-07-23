@@ -6,7 +6,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.UnauthorizedHandler;
+import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 
@@ -22,7 +22,7 @@ import java.util.UUID;
 @Priority(Priorities.AUTHENTICATION)
 public class PrincipalInjectionAuthFilter extends DPCAuthFilter {
 
-    public PrincipalInjectionAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, UnauthorizedHandler dpc401handler) {
+    public PrincipalInjectionAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, DPCUnauthorizedHandler dpc401handler) {
         super(bakery, auth, dao, dpc401handler);
     }
 

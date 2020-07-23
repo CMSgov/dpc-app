@@ -7,7 +7,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.UnauthorizedHandler;
+import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
     private static final Logger logger = LoggerFactory.getLogger(PathAuthorizationFilter.class);
     private final PathAuthorizer pa;
 
-    public PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, PathAuthorizer pa, UnauthorizedHandler dpc401handler) {
+    public PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, PathAuthorizer pa, DPCUnauthorizedHandler dpc401handler) {
         super(bakery, auth, dao, dpc401handler);
         this.pa = pa;
     }

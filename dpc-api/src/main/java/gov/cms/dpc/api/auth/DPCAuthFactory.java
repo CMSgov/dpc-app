@@ -8,7 +8,6 @@ import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.UnauthorizedHandler;
 
 import javax.inject.Inject;
 
@@ -17,10 +16,10 @@ public class DPCAuthFactory implements AuthFactory {
     private final MacaroonBakery bakery;
     private final TokenDAO dao;
     private final Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator;
-    private final UnauthorizedHandler dpc401handler;
+    private final DPCUnauthorizedHandler dpc401handler;
 
     @Inject
-    public DPCAuthFactory(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator, TokenDAO dao, UnauthorizedHandler dpc401handler) {
+    public DPCAuthFactory(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator, TokenDAO dao, DPCUnauthorizedHandler dpc401handler) {
         this.bakery = bakery;
         this.authenticator = authenticator;
         this.dao = dao;

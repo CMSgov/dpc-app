@@ -15,7 +15,6 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
-import io.dropwizard.auth.UnauthorizedHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
@@ -89,7 +88,7 @@ class AuthHandlerTest {
         final IGenericClient client = mockGenericClient();
         final MacaroonBakery bakery = buildBakery();
         final TokenDAO sessionFactory = mock(TokenDAO.class);
-        final UnauthorizedHandler dpc401handler = mock(DPCUnauthorizedHandler.class);
+        final DPCUnauthorizedHandler dpc401handler = mock(DPCUnauthorizedHandler.class);
         Mockito.when(sessionFactory.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
 
