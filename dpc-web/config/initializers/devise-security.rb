@@ -10,14 +10,14 @@ Devise.setup do |config|
   # Need 1 char of A-Z, a-z and 0-9
   config.password_complexity = { digit: 1, lower: 1, symbol: 1, upper: 1 }
 
-  # How many passwords to keep in archive
-  # config.password_archiving_count = 12
+  # How many passwords to keep in archives
+  config.password_archiving_count = 12
 
   # Deny old passwords (true, false, number_of_old_passwords_to_check)
   # Examples:
   # config.deny_old_passwords = false # allow old passwords
   # config.deny_old_passwords = true # will deny all the old passwords
-  # config.deny_old_passwords = 12 # will deny new passwords that matches with the last 3 passwords
+  config.deny_old_passwords = 12 # will deny new passwords that matches with the last 12 passwords
   # config.deny_old_passwords = true
 
   # enable email validation for :secure_validatable. (true, false, validation_options)

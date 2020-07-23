@@ -18,7 +18,7 @@ class User < ApplicationRecord
   devise :database_authenticatable,
          :validatable, :trackable, :registerable,
          :timeoutable, :recoverable, :confirmable,
-         :password_expirable
+         :password_expirable, :password_archivable
 
   enum requested_organization_type: ORGANIZATION_TYPES
 
