@@ -4,8 +4,6 @@ import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
-import gov.cms.dpc.macaroons.config.TokenPolicy;
-import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
@@ -18,6 +16,7 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
@@ -71,7 +70,8 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @NotEmpty
     private String keyPairLocation;
 
-    private int jobTimeoutInSeconds = 5;
+    @Min(0)
+    private int jobTimeoutInSeconds;
 
     public TokenPolicy getTokenPolicy() {
         return tokenPolicy;
@@ -147,7 +147,6 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     public String getPublicURL() {
         return publicURL;
     }
-
     public void setPublicURL(String publicURL) {
         this.publicURL = publicURL;
     }
