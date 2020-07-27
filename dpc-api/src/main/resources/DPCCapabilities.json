@@ -7,10 +7,6 @@
   "date": "2019",
   "publisher": "Centers for Medicare and Medicaid Services",
   "kind": "instance",
-  "implementation": {
-    "description": "As patients move throughout the healthcare system, providers often struggle to gain and maintain a complete picture of their medical history. Data at the Point of Care fills in the gaps with claims data to inform providers with secure, structured patient history, past procedures, medication adherence, and more.",
-    "url": ""
-  }, 
   "instantiates": [
     "http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data"
   ],
