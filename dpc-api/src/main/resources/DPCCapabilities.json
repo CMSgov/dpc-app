@@ -176,6 +176,12 @@
           }
         },
         {
+        "name": "patient-everything",
+        "definition":{ 
+            "reference": "http://hl7.org/fhir/OperationDefinition/Patient-everything" 
+          }
+        },
+        {
           "name": "validate",
           "definition": {
             "reference": "https://dpc.cms.gov/api/v1/OperationDefinition/dpc-operation-practitioner-validate"
