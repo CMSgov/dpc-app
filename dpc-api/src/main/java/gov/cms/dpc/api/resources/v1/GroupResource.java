@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
+import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
@@ -280,7 +281,7 @@ public class GroupResource extends AbstractGroupResource {
         // Handle the _type query parameter
         final var resources = handleTypeQueryParam(resourceTypes);
         final var sinceDate = handleSinceQueryParam(since);
-        final var transactionTime = fetchTransactionTime();
+        final var transactionTime = APIHelpers.fetchTransactionTime(bfdClient);
         final UUID jobID = this.queue.createJob(orgID, rosterID, attributedPatients, resources, sinceDate, transactionTime);
 
         return Response.status(Response.Status.ACCEPTED)
@@ -342,18 +343,6 @@ public class GroupResource extends AbstractGroupResource {
         } catch (DataFormatException ex) {
             throw new BadRequestException("'_since' query parameter must be a valid date time value");
         }
-    }
-
-    /**
-     * Fetch the BFD database last update time. Use it as the transactionTime for a job.
-     * @return transactionTime from the BFD service
-     */
-    private OffsetDateTime fetchTransactionTime() {
-        // Every bundle has transaction time after the Since RFC has beneficiary
-        final Meta meta = bfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null).getMeta();
-        return Optional.ofNullable(meta.getLastUpdated())
-                .map(u -> u.toInstant().atOffset(ZoneOffset.UTC))
-                .orElse(OffsetDateTime.now(ZoneOffset.UTC));
     }
 
     /**
