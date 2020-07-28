@@ -1,9 +1,9 @@
-function orgUserSearch() {
+function orgSearch() {
   var input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById('orgUserSearch');
+  input = document.getElementById('orgSearch');
   filter = input.value;
   filter = filter.toUpperCase();
-  ul = document.getElementById("orgUserList");
+  ul = document.getElementById("orgSearchList");
   li = ul.getElementsByTagName('li');
 
   var liDisplayCount = 0;

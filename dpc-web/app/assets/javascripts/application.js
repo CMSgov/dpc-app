@@ -11,9 +11,9 @@
 // about supported directives.
 //
 //= require svg4everybody
-//= require add-user-search
 //= require accordions
 //= require copy-text
+//= require dynamic-search
 //= require rails-ujs
 //= require activestorage
 //= require_tree ./utils
