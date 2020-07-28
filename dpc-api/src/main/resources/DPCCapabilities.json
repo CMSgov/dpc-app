@@ -177,7 +177,7 @@
         },
         {
         "name": "patient-everything",
-        "definition":{ 
+        "definition": { 
             "reference": "http://hl7.org/fhir/OperationDefinition/Patient-everything" 
           }
         },
