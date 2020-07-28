@@ -24,6 +24,8 @@ class ClientTokensController < ApplicationController
     end
   end
 
+  private
+
   def organization_enabled?
     @organization = current_user.organizations.find(params[:organization_id])
     @reg_org = @organization.reg_org
@@ -32,8 +34,6 @@ class ClientTokensController < ApplicationController
 
     redirect_to root_path
   end
-
-  private
 
   def render_error(msg)
     flash[:alert] = msg
