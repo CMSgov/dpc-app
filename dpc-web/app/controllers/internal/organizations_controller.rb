@@ -84,11 +84,17 @@ module Internal
     end
 
     def add_or_delete
+      # binding.pry
       @organization = Organization.find(params[:organization_id])
-      @user = User.find(params[:organization][:id]) || User.find(params[:user_id])
+
+      if params[:user_id].present?
+        @user = User.find(params[:user_id])
+      else
+        @user = User.find(params[:organization][:id])
+      end
 
       if params[:_method] == 'add'
-        add_user = add_user(params[:organization][:id])
+        add_user = @organization.users << @user
         action = 'added to'
       elsif params[:_method] == 'delete'
         delete_user = @organization.users.delete(@user)
@@ -104,11 +110,6 @@ module Internal
     end
 
     private
-
-    def add_user(user_id)
-      @user = User.find(user_id)
-      @organization.users << @user
-    end
 
     def org_page_params(results)
       results.page params[:page]
