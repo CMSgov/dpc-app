@@ -26,9 +26,11 @@
             <div id="password-num-set" class="invalid">
               1 number
             </div>
-            <div id="password-special-set" class="invalid">
-              1 special character
-            </div>
+            <% unless prod_sbx? %>
+              <div id="password-special-set" class="invalid">
+                1 special character
+              </div>
+            <% end %>
           </div>
           <%= f.password_field :password, class: "ds-c-field" %>
         </div>
