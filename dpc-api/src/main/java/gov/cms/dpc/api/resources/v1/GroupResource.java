@@ -354,9 +354,9 @@ public class GroupResource extends AbstractGroupResource {
      * @param outputFormat param to check
      */
     private static void checkExportRequest(String outputFormat String headerPrefer) {
-        // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJON, or NDJSON
+        // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, or NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && (!FHIR_NDJSON.equals(outputFormat) && !APPLICATION_NDJSON.equals(outputFormat) && !NDJSON.equals(outputFormat) )) {
-            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson','application/ndjson', or 'ndjson' ");
+            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson' ");
         }
         if (headerPrefer==null || StringUtils.isEmpty(headerPrefer)){
             throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
