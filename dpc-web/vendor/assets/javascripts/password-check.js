@@ -7,6 +7,8 @@ var passNumCount = document.getElementById("password-num-set");
 var passSpecialCount = document.getElementById("password-special-set");
 var passConfirmCheck = document.getElementById("password-confirm-set");
 
+var charCount = passCharCount.textContent
+
 var inputValue = passwordInput.value;
 var confirmInput = passwordConfirm.value;
 
@@ -15,13 +17,23 @@ passwordInput.onkeyup = function () {
   confirmInput = passwordConfirm.value;
 
   // Validates character count
-  if (inputValue.length >= 15) {
-    passCharCount.classList.remove("invalid");
-    passCharCount.classList.add("valid");
-  } else {
-    passCharCount.classList.remove("valid");
-    passCharCount.classList.add("invalid");
-  }
+    if (charCount.includes('8')) {
+      if (inputValue.length >= 8) {
+        passCharCount.classList.remove("invalid");
+        passCharCount.classList.add("valid");
+      } else {
+        passCharCount.classList.remove("valid");
+        passCharCount.classList.add("invalid");
+      }
+    } else {
+      if (inputValue.length >= 15) {
+        passCharCount.classList.remove("invalid");
+        passCharCount.classList.add("valid");
+      } else {
+        passCharCount.classList.remove("valid");
+        passCharCount.classList.add("invalid");
+      }
+    }
   
   // Validates lowercase letters
   var lowerCase = /[a-z]/g;
@@ -57,14 +69,16 @@ passwordInput.onkeyup = function () {
   }
 
   // Validates special characters
-  var specialChar = /[!@#$&*]/g;
-
-  if (inputValue.match(specialChar)) {
-    passSpecialCount.classList.remove("invalid");
-    passSpecialCount.classList.add("valid");
-  } else {
-    passSpecialCount.classList.remove("valid");
-    passSpecialCount.classList.add("invalid");
+  if (charCount.includes('15')) {
+    var specialChar = /[!@#$&*]/g;
+  
+    if (inputValue.match(specialChar)) {
+      passSpecialCount.classList.remove("invalid");
+      passSpecialCount.classList.add("valid");
+    } else {
+      passSpecialCount.classList.remove("valid");
+      passSpecialCount.classList.add("invalid");
+    }
   }
 
   // Validate match
