@@ -14,17 +14,19 @@
             <div id="searchMessage"></div>
             <% @organizations.each do |org| %>
               <li>
-                <div class="module-container">
-                  <div class="module-container__id">
-                    <%= org.id %>
-                  </div>
+                <%= link_to %>
+                  <div class="module-container">
+                    <div class="module-container__id">
+                      <%= org.id %>
+                    </div>
 
-                  <div class="module-container__primary">
-                    <div class="module-container__heading">
-                      <%= org.name %>
+                    <div class="module-container__primary">
+                      <div class="module-container__heading">
+                        <%= org.name %>
+                      </div>
                     </div>
                   </div>
-                </div>
+                <% end %>
               </li>
             <% end %>
           </ul>
