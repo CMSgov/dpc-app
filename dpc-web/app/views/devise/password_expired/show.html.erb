@@ -12,9 +12,16 @@
         <p><%= f.label :password, t('.new_password'), class: "ds-c-label" %>
         <div class="password-check-list">
           Password must contain at least:
-          <div id="password-char-set" class="invalid">
-            <%= @minimum_password_length %> characters minimum
-          </div>
+          <% if prod_sbx? %>
+            <div id="password-char-set" class="invalid">
+              8 characters minimum
+            </div>
+          <% else %>
+            <div id="password-char-set" class="invalid">
+              15 characters minimum
+            </div>
+          <% end %>
+
           <div id="password-lower-set" class="invalid">
             1 lowercase letter
           </div>
