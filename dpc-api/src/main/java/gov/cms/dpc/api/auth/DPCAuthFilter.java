@@ -55,7 +55,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         if (!authenticated) {
             throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
-        logger.info("Resource Requested: {}, Method: {}",uriInfo.getPath(),requestContext.getMethod());
+        logger.info("resource_requested={}, method={}",uriInfo.getPath(),requestContext.getMethod());
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
