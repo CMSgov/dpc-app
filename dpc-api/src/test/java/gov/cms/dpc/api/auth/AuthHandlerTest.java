@@ -88,10 +88,11 @@ class AuthHandlerTest {
         final IGenericClient client = mockGenericClient();
         final MacaroonBakery bakery = buildBakery();
         final TokenDAO sessionFactory = mock(TokenDAO.class);
+        final DPCUnauthorizedHandler dpc401handler = mock(DPCUnauthorizedHandler.class);
         Mockito.when(sessionFactory.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
 
-        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), sessionFactory);
+        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), sessionFactory, dpc401handler);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
         final FhirContext ctx = FhirContext.forDstu3();
