@@ -14,7 +14,7 @@
             <div id="searchMessage"></div>
             <% @organizations.each do |org| %>
               <li>
-                <%= link_to %>
+                <%= link_to new_internal_organization_registered_organization_path(organization_id: org.id, user_id: @user.id), html: { method: :add } do %>
                   <div class="module-container">
                     <div class="module-container__id">
                       <%= org.id %>
@@ -26,7 +26,6 @@
                       </div>
                     </div>
                   </div>
-                <% end %>
               </li>
             <% end %>
           </ul>

@@ -85,7 +85,7 @@ module Internal
 
     def add_or_delete
       @organization = Organization.find(params[:organization_id])
-      @user = User.find(params[:organization][:id])
+      @user = User.find(params[:organization][:id]) || User.find(params[:user_id])
 
       if params[:_method] == 'add'
         add_user = add_user(params[:organization][:id])
