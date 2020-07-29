@@ -1,39 +1,41 @@
-function orgUserSearch() {
-  var input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById('orgUserSearch');
-  filter = input.value;
-  filter = filter.toUpperCase();
-  ul = document.getElementById("orgUserList");
-  li = ul.getElementsByTagName('li');
+(function() {
+  document.getElementById('orgSearch').onkeyup = function orgUserSearch() {
+    var input, filter, ul, li, a, i, txtValue;
+    input = document.getElementById('orgSearch');
+    filter = input.value;
+    filter = filter.toUpperCase();
+    ul = document.getElementById("searchList");
+    li = ul.getElementsByTagName('li');
 
-  var liDisplayCount = 0;
+    var liDisplayCount = 0;
 
-  for (i = 0; i < li.length; i++) {
-    div = li[i].getElementsByTagName("div")[0];
+    for (i = 0; i < li.length; i++) {
+      div = li[i].getElementsByTagName("div")[0];
 
-    txtValue = div.textContent || div.innerText;
+      txtValue = div.textContent || div.innerText;
 
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
-      liDisplayCount++;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        li[i].style.display = "";
+        liDisplayCount++;
+      } else {
+        li[i].style.display = "none";
+      }
+    }
+
+    var sendMessage = document.getElementById('searchMessage');
+
+    if (liDisplayCount == 0) {
+      sendMessage.innerHTML = "There are no results that match your search query."
+    } else if (liDisplayCount > 1) {
+      sendMessage.innerHTML = "There are " + liDisplayCount + " results that match your search query."
     } else {
-      li[i].style.display = "none";
+      sendMessage.innerHTML = "There is " + liDisplayCount + " result that matches your search query."
+    }
+
+    if (filter.length > 0) {
+      ul.style.display = "";
+    } else {
+      ul.style.display = "none";
     }
   }
-
-  var sendMessage = document.getElementById('orgUserSearchMessage');
-
-  if (liDisplayCount == 0) {
-    sendMessage.innerHTML = "There are no users or ids that match your search query."
-  } else if (liDisplayCount > 1) {
-    sendMessage.innerHTML = "There are " + liDisplayCount + " users that match your search query."
-  } else {
-    sendMessage.innerHTML = "There is " + liDisplayCount + " user that matches your search query."
-  }
-
-  if (filter.length > 0) {
-    ul.style.display = "";
-  } else {
-    ul.style.display = "none";
-  }
-}
+})()
