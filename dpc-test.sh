@@ -60,7 +60,7 @@ docker-compose up start_core_dependencies
 docker-compose up start_api_dependencies
 
 # Run the integration tests
-docker-compose up tests
+docker-compose up --exit-code-from tests tests
 
 # Start the API server
 AUTH_DISABLED=true docker-compose up start_api start_consent
