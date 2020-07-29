@@ -227,10 +227,15 @@ public class MacaroonBakery {
         byte[] decodedString;
         // For a JSON macaroon, either '{' or '[' will be the starting value, for V1 binary it's 'T', so we check for the base64 encoded value
         final char indexChar = serializedString.charAt(0);
-        if (indexChar == 'e' || indexChar == 'W' || indexChar == 'T') {
-            decodedString = decoder.decode(serializedString.getBytes(CAVEAT_CHARSET));
-        } else {
-            decodedString = serializedString.getBytes(CAVEAT_CHARSET);
+        try{
+            if (indexChar == 'e' || indexChar == 'W' || indexChar == 'T') {
+                decodedString = decoder.decode(serializedString.getBytes(CAVEAT_CHARSET));
+            } else {
+                decodedString = serializedString.getBytes(CAVEAT_CHARSET);
+            }
+        }
+        catch (Exception e) {
+            throw new BakeryException("Cannot deserialize Macaroon", e);
         }
         try {
             return MacaroonsBuilder.deserialize(new String(decodedString, StandardCharsets.UTF_8));
