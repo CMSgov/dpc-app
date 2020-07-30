@@ -84,14 +84,9 @@ module Internal
     end
 
     def add_or_delete
-      # binding.pry
       @organization = Organization.find(params[:organization_id])
 
-      if params[:user_id].present?
-        @user = User.find(params[:user_id])
-      else
-        @user = User.find(params[:organization][:id])
-      end
+      @user = user_identify
 
       if params[:_method] == 'add'
         add_user = @organization.users << @user
@@ -122,6 +117,12 @@ module Internal
     def user_filter
       User.left_joins(:organization_user_assignments)
           .where('organization_user_assignments.id IS NULL')
+    end
+
+    def user_identify
+      return User.find(params[:user_id]) if params[:user_id].present?
+
+      User.find(params[:organization][:id])
     end
 
     def organization_params
