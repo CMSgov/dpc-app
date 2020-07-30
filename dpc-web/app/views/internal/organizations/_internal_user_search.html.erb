@@ -1,11 +1,10 @@
 <div class="box__content">
   <h2 class="box__heading">Add User</h2>
 
-  <input type="text" class="ds-c-field" id="orgUserSearch" onkeyup="orgUserSearch()" placeholder="Search for user by name or user id.">
+  <input type="text" class="ds-c-field" id="orgSearchInput" onkeyup="orgSearch()" placeholder="Search for user by name or user id.">
 
-  <ul class="module-list-container" id="orgUserList" style="display: none;">
-    <div id="orgUserUnassignedCount"></div>
-    <div id="orgUserSearchMessage"></div>
+  <ul class="module-list-container" id="searchList" style="display: none;">
+    <div id="searchMessage"></div>
     <% @users.each do |user| %>
       <li>
         <div class="module-container">
