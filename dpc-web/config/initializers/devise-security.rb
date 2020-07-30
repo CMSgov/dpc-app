@@ -8,24 +8,16 @@ Devise.setup do |config|
   config.expire_password_after = 2.months
 
   # Need 1 char of A-Z, a-z and 0-9
-  if ENV['ENV'] == 'prod-sbx'
-    config.password_complexity = { digit: 1, lower: 1, upper: 1 }
-    config.password_archiving_count = 6
-    config.deny_old_passwords = 6
-  else
-    config.password_complexity = { digit: 1, lower: 1, symbol: 1, upper: 1 }
-    config.password_archiving_count = 12
-    config.deny_old_passwords = 12
-  end
-
+  config.password_complexity = { digit: 1, lower: 1, symbol: 1, upper: 1 }
+  
   # How many passwords to keep in archives
-  # config.password_archiving_count = 12
-
+  config.password_archiving_count = 12
+  
   # Deny old passwords (true, false, number_of_old_passwords_to_check)
   # Examples:
   # config.deny_old_passwords = false # allow old passwords
   # config.deny_old_passwords = true # will deny all the old passwords
-  # config.deny_old_passwords = 12 # will deny new passwords that matches with the last 12 passwords
+  config.deny_old_passwords = 12 # will deny new passwords that matches with the last 12 passwords
   # config.deny_old_passwords = true
 
   # enable email validation for :secure_validatable. (true, false, validation_options)

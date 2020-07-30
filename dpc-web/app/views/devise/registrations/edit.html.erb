@@ -102,11 +102,9 @@
               <div id="password-num-set" class="invalid">
                 1 number
               </div>
-              <% unless prod_sbx? %>
-                <div id="password-special-set" class="invalid">
-                  1 special character
-                </div>
-              <% end %>
+              <div id="password-special-set" class="invalid">
+                1 special character
+              </div>
             </div>
             <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field" %>
           </div>

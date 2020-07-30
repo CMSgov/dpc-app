@@ -11,17 +11,12 @@
 
         <p><%= f.label :password, t('.new_password'), class: "ds-c-label" %>
         <div class="password-check-list">
-          Password must contain at least:
-          <% if prod_sbx? %>
-            <div id="password-char-set" class="invalid">
-              8 characters minimum
-            </div>
-          <% else %>
-            <div id="password-char-set" class="invalid">
-              15 characters minimum
-            </div>
-          <% end %>
-
+          <div id="password-char-set" class="invalid">
+            8 characters minimum
+          </div>
+          <div id="password-char-set" class="invalid">
+            15 characters minimum
+          </div>
           <div id="password-lower-set" class="invalid">
             1 lowercase letter
           </div>
@@ -31,11 +26,9 @@
           <div id="password-num-set" class="invalid">
             1 number
           </div>
-          <% unless prod_sbx? %>
-            <div id="password-special-set" class="invalid">
-              1 special character
-            </div>
-          <% end %>
+          <div id="password-special-set" class="invalid">
+            1 special character
+          </div>
         </div>
         <%= f.password_field :password, class: "ds-c-field" %></p>
 
