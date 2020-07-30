@@ -85,7 +85,6 @@ module Internal
 
     def add_or_delete
       @organization = Organization.find(params[:organization_id])
-
       @user = user_identify
 
       if params[:_method] == 'add'
@@ -99,7 +98,7 @@ module Internal
 
       if delete_user || add_user
         flash[:notice] = "User has been successfully #{action} the organization."
-        redirect_to internal_organization_path(@organization)
+        page_redirect
       else
         flash[:alert] = "User could not be #{action}."
       end
@@ -109,6 +108,12 @@ module Internal
 
     def org_page_params(results)
       results.page params[:page]
+    end
+
+    def page_redirect
+      return redirect_to internal_user_url(@user) if params[:user_id].present?
+
+      redirect_to internal_organization_path(@organization)
     end
 
     def from_user_params
