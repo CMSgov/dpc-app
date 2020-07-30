@@ -89,6 +89,7 @@ module Internal
       @user = user_identify
 
       if params[:_method] == 'add'
+        @user.organizations.clear
         add_user = @organization.users << @user
         action = 'added to'
       elsif params[:_method] == 'delete'

@@ -11,12 +11,12 @@
 
           <input type="text" class="ds-c-field" id="orgSearchInput" onkeyup="orgSearch()" placeholder="Search for org by name or user id.">
 
-          <ul class="module-list-container" id="searchList">
+          <ul class="module-list-container" id="searchList" style="display: none;">
             <div id='searchMessage'></div>
 
             <% @organizations.each do |org| %>
               <li>
-                <%= link_to internal_organization_add_or_delete_url(organization_id: org.id, user_id: @user.id, _method: :add) do %>
+                <%= link_to internal_organization_add_or_delete_url(organization_id: org.id, user_id: @user.id, _method: :add), class: "module-container__link" do %>
                   <div class="module-container">
                     <div class="module-container__id">
                       <%= org.id %>
