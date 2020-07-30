@@ -19,7 +19,6 @@ module Internal
 
     def edit
       @user = User.find(id_param)
-      @organizations = Organization.all
     end
 
     def update
