@@ -16,22 +16,24 @@ public class DPCAuthFactory implements AuthFactory {
     private final MacaroonBakery bakery;
     private final TokenDAO dao;
     private final Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator;
+    private final DPCUnauthorizedHandler dpc401handler;
 
     @Inject
-    public DPCAuthFactory(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator, TokenDAO dao) {
+    public DPCAuthFactory(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator, TokenDAO dao, DPCUnauthorizedHandler dpc401handler) {
         this.bakery = bakery;
         this.authenticator = authenticator;
         this.dao = dao;
+        this.dpc401handler = dpc401handler;
     }
 
     @Override
     public DPCAuthFilter createPathAuthorizer(PathAuthorizer pa) {
-        return new PathAuthorizationFilter(bakery, authenticator, dao, pa);
+        return new PathAuthorizationFilter(bakery, authenticator, dao, pa, dpc401handler);
     }
 
     @Override
     public DPCAuthFilter createStandardAuthorizer() {
-        return new PrincipalInjectionAuthFilter(bakery, authenticator, dao);
+        return new PrincipalInjectionAuthFilter(bakery, authenticator, dao, dpc401handler);
     }
 
     @Override
