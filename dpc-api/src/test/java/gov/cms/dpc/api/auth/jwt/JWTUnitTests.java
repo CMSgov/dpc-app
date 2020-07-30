@@ -7,6 +7,7 @@ import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.DPCAuthDynamicFeature;
 import gov.cms.dpc.api.auth.DPCAuthFactory;
+import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
@@ -754,6 +755,7 @@ class JWTUnitTests {
         final MacaroonBakery bakery = buildBakery();
         final TokenDAO tokenDAO = mock(TokenDAO.class);
         final PublicKeyDAO publicKeyDAO = mockKeyDAO();
+        final DPCUnauthorizedHandler dpc401handler = mock(DPCUnauthorizedHandler.class);
         Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
         final JwtKeyResolver resolver = spy(new JwtKeyResolver(publicKeyDAO));
@@ -764,7 +766,7 @@ class JWTUnitTests {
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
 
-        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), tokenDAO);
+        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), tokenDAO, dpc401handler);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
         final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, resolver, jtiCache, "localhost:3002/v1");

@@ -112,6 +112,12 @@
             <organization>Ad Hoc LLC</organization>
         </developer>
         <developer>
+            <id>john</id>
+            <name>John Addy</name>
+            <email>jaddy@fearsol.com</email>
+            <organization>Fearless</organization>
+        </developer>
+        <developer>
             <id>rich</id>
             <name>Richard Braman</name>
             <email>richard.braman@adhocteam.us</email>
