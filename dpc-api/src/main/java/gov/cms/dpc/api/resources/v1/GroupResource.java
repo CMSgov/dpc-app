@@ -361,10 +361,7 @@ public class GroupResource extends AbstractGroupResource {
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
             throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson'");
         }
-        if (headerAccept==null || StringUtils.isEmpty(headerAccept)){
-            throw new BadRequestException("'Accept' header must be 'application/fhir+json'");
-        }
-        if (StringUtils.isNotEmpty(headerAccept) && !FHIR_JSON.equals(headerAccept)) {
+        if (StringUtils.isEmpty(headerAccept) || !FHIR_JSON.equals(headerAccept)){
             throw new BadRequestException("'Accept' header must be 'application/fhir+json'");
         }
         if (headerPrefer==null || StringUtils.isEmpty(headerPrefer)){
