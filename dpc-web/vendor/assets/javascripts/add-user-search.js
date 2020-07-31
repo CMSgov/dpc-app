@@ -31,7 +31,7 @@ function orgSearch() {
     sendMessage.innerHTML = "There is " + liDisplayCount + " result that matches your search query."
   }
 
-  if (filter.length > 0) {
+  if (filter.length > 0){
     ul.style.display = "";
   } else {
     ul.style.display = "none";
