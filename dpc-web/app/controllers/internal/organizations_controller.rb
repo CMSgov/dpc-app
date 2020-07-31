@@ -89,14 +89,14 @@ module Internal
 
       if params[:_method] == 'add'
         @user.organizations.clear
-        add_user = @organization.users << @user
+        add_action = @organization.users << @user
         action = 'added to'
       elsif params[:_method] == 'delete'
-        delete_user = @organization.users.delete(@user)
+        delete_action = @organization.users.delete(@user)
         action = 'deleted from the organization'
       end
 
-      if delete_user || add_user
+      if add_action || delete_action
         flash[:notice] = "User has been successfully #{action} the organization."
         page_redirect
       else

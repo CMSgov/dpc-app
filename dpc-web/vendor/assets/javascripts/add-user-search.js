@@ -35,5 +35,6 @@ function orgSearch() {
     ul.style.display = "";
   } else {
     ul.style.display = "none";
+    sendMessage.innerHTML = "";
   }
 }
