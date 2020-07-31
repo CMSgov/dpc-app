@@ -93,7 +93,7 @@ module Internal
         action = 'added to'
       elsif params[:_method] == 'delete'
         delete_action = @organization.users.delete(@user)
-        action = 'deleted from the organization'
+        action = 'deleted from'
       end
 
       if add_action || delete_action
