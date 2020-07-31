@@ -355,7 +355,7 @@ public class GroupResource extends AbstractGroupResource {
      *
      * @param outputFormat param to check
      */
-    private static void checkExportRequest(String outputFormat, String, Prefer String headerAccept) {
+    private static void checkExportRequest(String outputFormat, String headerPrefer, String headerAccept) {
 
       // _outputFormat only supports FHIR_NDJSON
         if (StringUtils.isNotEmpty(outputFormat) && !FHIR_NDJSON.equals(outputFormat)) {
