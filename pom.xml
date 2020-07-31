@@ -112,6 +112,12 @@
             <organization>Ad Hoc LLC</organization>
         </developer>
         <developer>
+            <id>john</id>
+            <name>John Addy</name>
+            <email>jaddy@fearsol.com</email>
+            <organization>Fearless</organization>
+        </developer>
+        <developer>
             <id>rich</id>
             <name>Richard Braman</name>
             <email>richard.braman@adhocteam.us</email>
@@ -521,7 +527,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -677,7 +683,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <configuration>
                     <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                 </configuration>
