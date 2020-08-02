@@ -4,7 +4,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
@@ -337,7 +336,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testProvenanceHeaderAndGroupProviderMatch() throws IOException {
+    public void testProvenanceHeaderAndGroupProviderMatch() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(),ORGANIZATION_ID);
 
@@ -377,7 +376,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .encodedJson()
                 .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance));
 
-        Assertions.assertThrows(InternalErrorException.class, createGroup::execute);
+        Assertions.assertThrows(UnprocessableEntityException.class, createGroup::execute);
 
         group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(createdPractitioner), ORGANIZATION_ID);
         //set provenance practitioner to unknown practitioner;
@@ -389,7 +388,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .encodedJson()
                 .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance));
 
-        Assertions.assertThrows(InternalErrorException.class, createGroup::execute);
+        Assertions.assertThrows(UnprocessableEntityException.class, createGroup::execute);
 
         client.delete()
                 .resource(createdPractitioner)

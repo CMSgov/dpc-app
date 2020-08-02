@@ -77,7 +77,8 @@ public class GroupResource extends AbstractGroupResource {
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string",dataTypeClass = Provenance.class))
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
-            @ApiResponse(code = 200, message = "Roster already exists")
+            @ApiResponse(code = 200, message = "Roster already exists"),
+            @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
@@ -165,7 +166,10 @@ public class GroupResource extends AbstractGroupResource {
      )
 
 
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Cannot find Roster with given ID"),
+            @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
+    })
     @Override
     public Group updateRoster(@ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
                               @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
@@ -453,10 +457,10 @@ public class GroupResource extends AbstractGroupResource {
             String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
             if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
-                throw new WebApplicationException("Provenance header's provider does not match group provider");
+                throw new WebApplicationException("Provenance header's provider does not match group provider", Response.status(422).build());
             }
         } catch(ResourceNotFoundException e) {
-            throw new WebApplicationException("Could not find provider defined in provenance header");
+            throw new WebApplicationException("Could not find provider defined in provenance header", Response.status(422).build());
         }
 
     }
