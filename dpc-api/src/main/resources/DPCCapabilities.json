@@ -8,7 +8,7 @@
   "publisher": "Centers for Medicare and Medicaid Services",
   "kind": "capability",
   "instantiates": [
-    "http://build.fhir.org/ig/HL7/bulk-data/CapabilityStatement-bulk-data"
+    "http://hl7.org/fhir/uv/bulkdata/CapabilityStatement/bulk-data"
   ],
   "software": {
     "name": "Data @ Point of Care API",
@@ -170,9 +170,15 @@
       ],
       "operation": [
         {
-          "name": "export",
+          "name": "group-export",
           "definition": {
-            "reference": "http://build.fhir.org/ig/HL7/bulk-data/OperationDefinition-group-export"
+            "reference": "http://hl7.org/fhir/uv/bulkdata/OperationDefinition/group-export"
+          }
+        },
+        {
+        "name": "patient-everything",
+        "definition": { 
+            "reference": "http://hl7.org/fhir/OperationDefinition/Patient-everything" 
           }
         },
         {
