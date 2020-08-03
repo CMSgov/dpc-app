@@ -27,6 +27,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -454,10 +455,10 @@ public class GroupResource extends AbstractGroupResource {
             String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
             if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
-                throw new WebApplicationException("Provenance header's provider does not match group provider", Response.status(422).build());
+                throw new WebApplicationException("Provenance header's provider does not match group provider", HttpStatus.SC_UNPROCESSABLE_ENTITY);
             }
         } catch(ResourceNotFoundException e) {
-            throw new WebApplicationException("Could not find provider defined in provenance header", Response.status(422).build());
+            throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_ENTITY);
         }
 
     }
