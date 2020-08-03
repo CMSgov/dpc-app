@@ -6,11 +6,11 @@ class ClientTokensController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :unauthorized
 
   def new
-    @organization = current_user.organizations.find(params[:organization_id])
+    @organization = current_user.organizations.find(org_id)
   end
 
   def create
-    @organization = current_user.organizations.find(params[:organization_id])
+    @organization = current_user.organizations.find(org_id)
     return render_error('Must have a label.') if missing_params
 
     reg_org = @organization.registered_organization
@@ -23,8 +23,21 @@ class ClientTokensController < ApplicationController
     end
   end
 
+  def destroy
+    @organization = current_user.organizations.find(org_id)
+    reg_org = @organization.registered_organization
+    token_id = params[:id]
+
+    manager = ClientTokenManager.new(registered_organization: reg_org)
+    if manager.delete_client_token(id: token_id)
+      redirect_to root_path
+    else
+      render_error 'Client token could not be deleted.'
+    end
+  end
+
   def organization_enabled?
-    @organization = current_user.organizations.find(params[:organization_id])
+    @organization = current_user.organizations.find(org_id)
     @reg_org = @organization.reg_org
 
     return if @reg_org.present? && @reg_org.enabled == true
@@ -33,6 +46,10 @@ class ClientTokensController < ApplicationController
   end
 
   private
+
+  def org_id
+    params[:organization_id]
+  end
 
   def render_error(msg)
     flash[:error] = msg

@@ -8,12 +8,18 @@ class ClientTokenManager
   end
 
   def create_client_token(label: nil)
+    binding.pry
     api_client = APIClient.new
     api_client.create_client_token(registered_organization.api_id, params: { label: label })
 
     @client_token = api_client.response_body
 
     api_client.response_successful?
+  end
+
+  def delete_client_token(params)
+    api_client = APIClient.new
+    api_client.delete_client_token(registered_organization.api_id, params[:id])
   end
 
   def client_tokens
