@@ -26,10 +26,10 @@ class ClientTokensController < ApplicationController
   def destroy
     @organization = current_user.organizations.find(org_id)
     reg_org = @organization.registered_organization
-    token_id = params[:id]
 
     manager = ClientTokenManager.new(registered_organization: reg_org)
-    if manager.delete_client_token(id: token_id)
+    if manager.delete_client_token(id: params[:id])
+      flash[:notice] = 'Client token successfully deleted.'
       redirect_to root_path
     else
       render_error 'Client token could not be deleted.'

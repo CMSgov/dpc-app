@@ -36,7 +36,6 @@ class APIClient
     uri_string = base_url + '/Token'
 
     json = params.to_json
-    binding.pry
     macaroon = delegated_macaroon(reg_org_api_id)
     post_request(uri_string, json, headers(macaroon))
 
@@ -104,7 +103,11 @@ class APIClient
   end
 
   def parsed_response(response)
-    JSON.parse response.body
+    if response.body == ''
+      self
+    else
+      JSON.parse response.body
+    end
   end
 
   def delete_request(uri_string, token)

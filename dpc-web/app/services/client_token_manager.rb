@@ -8,7 +8,6 @@ class ClientTokenManager
   end
 
   def create_client_token(label: nil)
-    binding.pry
     api_client = APIClient.new
     api_client.create_client_token(registered_organization.api_id, params: { label: label })
 
