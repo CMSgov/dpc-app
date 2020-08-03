@@ -226,6 +226,11 @@
 
 .topnav__dropdown__link:visited {
   color: $color-white;
+
+  @media (max-width: $width-nav) {
+    color: $color-primary-darker;
+    text-decoration: underline;
+  }
 }
 
 // Overrides for accorion functionality
