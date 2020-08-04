@@ -15,7 +15,18 @@ RSpec.describe ClientTokensController, type: :controller do
       end
 
       it 'returns http success' do
-        get :new, params: { organization_id: organization.id }
+        stub = stub_api_client(
+          message: :create_organization,
+          success: true,
+          response: default_org_creation_response
+        )
+        allow(stub).to receive(:get_public_keys).and_return(stub)
+        allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+
+        org = create(:organization, :api_enabled)
+        user.organizations << org
+
+        get :new, params: { organization_id: org.id }
         expect(response).to have_http_status(:success)
       end
 
@@ -40,7 +51,18 @@ RSpec.describe ClientTokensController, type: :controller do
 
       context 'with invalid params' do
         it 'renders new if no label' do
-          post :create, params: { organization_id: organization.id, label: '' }
+          stub = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
+          allow(stub).to receive(:get_public_keys).and_return(stub)
+          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+
+          org = create(:organization, :api_enabled)
+          user.organizations << org
+
+          post :create, params: { organization_id: org.id, label: '' }
           expect(response).to render_template(:new)
         end
 
@@ -52,6 +74,9 @@ RSpec.describe ClientTokensController, type: :controller do
       end
 
       context 'with valid params' do
+        let!(:user) { create(:user, :assigned) }
+        let!(:organization) { user.organizations.first }
+
         context 'successful API request' do
           before(:each) do
             stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
@@ -93,6 +118,13 @@ RSpec.describe ClientTokensController, type: :controller do
             expect(response).to render_template(:new)
           end
         end
+      end
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    context 'authenticated user and create client token' do
+      it 'successfully deletes client token' do
       end
     end
   end

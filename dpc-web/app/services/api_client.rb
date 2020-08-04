@@ -103,11 +103,8 @@ class APIClient
   end
 
   def parsed_response(response)
-    if response.body == ''
-      self
-    else
-      JSON.parse response.body
-    end
+    return self if response.body.empty?
+    JSON.parse response.body
   end
 
   def delete_request(uri_string, token)

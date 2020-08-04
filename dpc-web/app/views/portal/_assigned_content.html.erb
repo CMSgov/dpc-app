@@ -56,7 +56,7 @@
                           </div>
                         </div>
                         <div class="credential__actions">
-                          <%= button_to "x", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
+                          <%= button_to "x", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right", data: { test: 'client-token-delete' } %>
                         </div>
                       </li>
                     </ul>
