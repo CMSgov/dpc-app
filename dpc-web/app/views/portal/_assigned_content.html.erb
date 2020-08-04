@@ -55,8 +55,8 @@
                             <p>Expires: <%= formatted_datestr(token['expiresAt']) %></p>
                           </div>
                         </div>
-                        <div class="topnav__item usa-accordion">
-                          <button class="topnav__link usa-accordion__button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
+                        <div class="credential__delete usa-accordion">
+                          <button class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
                             Delete Client Token
                           </button>
                           <div id="collapse<%= index +1 %>" class="credential__actions usa-accordion__content">
