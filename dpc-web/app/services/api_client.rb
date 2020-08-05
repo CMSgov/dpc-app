@@ -104,6 +104,7 @@ class APIClient
 
   def parsed_response(response)
     return self if response.body.empty?
+
     JSON.parse response.body
   end
 
