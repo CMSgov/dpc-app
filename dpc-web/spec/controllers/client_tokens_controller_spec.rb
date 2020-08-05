@@ -121,11 +121,4 @@ RSpec.describe ClientTokensController, type: :controller do
       end
     end
   end
-
-  describe 'DELETE #destroy' do
-    context 'authenticated user and create client token' do
-      it 'successfully deletes client token' do
-      end
-    end
-  end
 end
