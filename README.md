@@ -43,21 +43,43 @@ dpc.attribution {
 This can create an issue when running tests with IntelliJ which by default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to done manually.
 
+Decrypting encrypted files
+---
+
+See [Secrets Management](#secrets-management) for details on how to encrypt and decrypt required secrets.
+
+Before building the app or running any tests, the decrypted secrets must be available as environment variables.
+
+In order to encrypt and decrypt configuration variables, you must create a `.vault_password` file in this repository root directory. 
+Contact another team member to gain access to the vault password.
+
+Included in the cloned project you will find a couple of encrypted files located at  `dpc-app/ops/config/encrypted` that will need to be decrypted before proceeding. 
+
+Run `make secure-envs` to decrypt the encrypted files.
+If decrypted successfully, you will see the decrypted data in new files under `/ops/config/decrypted` with the same names as the corresponding encrypted files.
+
+This command also creates a git pre-commit hook in order to avoid accidentally committing a decrypted file.
+
 Building DPC
 ---
 
-There are two ways to build DPC.
+> Note: Before building DPC, you must first ensure that [the required secrets are decrypted](#decrypting-encrypted-files). 
+
+### There are two ways to build DPC:
 
 > Note: DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions.
 In addition, some of upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date. 
 
-### Option 1: Full Integration Test
+#### Option 1: Full Integration Test
 
 Run `make ci-app`. This will start the dependencies, build all components, run integration tests, and run a full end to end test. You will be left with compiled JARs for each component, as well as compiled Docker containers.
 
-### Option 2: Manually
+#### Option 2: Manually
 
 Run `make docker-base` to build the common, baseline Docker image (i.e., `dpc-base:latest`) used across DPC services.
+
+Next, in order to make the decrypted environment variables accessible to Maven, run `make maven-config`.
+This command will convert the contents of `ops/config/decrypted/local.env` to Maven flags which can be viewed in `.mvn/maven.config` if successful.
 
 Then, run `mvn clean install` to build and test the application. Dependencies will need to be up and running for this option to succeed.
 
@@ -213,6 +235,8 @@ Building the FHIR implementation guide is detailed [here](ig/README.md).
 
 Secrets management
 ---
+
+> Note: You can use `make secure-envs` to decrypt files and create the pre-commit hook at the same time.
 
 ### Sensitive Docker configuration files
 
