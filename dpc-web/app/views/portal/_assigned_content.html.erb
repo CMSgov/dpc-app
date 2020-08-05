@@ -57,10 +57,18 @@
                         </div>
                         <div class="credential__delete usa-accordion">
                           <button class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
-                            Delete Client Token
+                            X
                           </button>
                           <div id="collapse<%= index +1 %>" class="credential__actions usa-accordion__content ds-u-text-align--center">
-                            <%= button_to "x", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger" %>
+                            <div>
+                              Delete Client Token?
+                            </div>
+                            <div class="credential__delete_btn_container">
+                              <button>
+                                Cancel
+                              </button>
+                              <%= button_to "Delete Token", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger" %>
+                            </div>
                           </div>
                         </div>
                       </li>
