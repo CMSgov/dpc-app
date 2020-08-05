@@ -38,8 +38,6 @@ class ClientTokensController < ApplicationController
     end
   end
 
-  private
-
   def organization_enabled?
     @organization = current_user.organizations.find(org_id)
     @reg_org = @organization.reg_org
@@ -49,6 +47,7 @@ class ClientTokensController < ApplicationController
     redirect_to root_path
   end
 
+  private
 
   def org_id
     params[:organization_id]
