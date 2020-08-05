@@ -7,7 +7,6 @@ RSpec.describe ClientTokensController, type: :controller do
 
   describe 'GET #new' do
     let!(:user) { create(:user, :assigned) }
-    let!(:organization) { user.organizations.first }
 
     context 'authenticated user' do
       before(:each) do
