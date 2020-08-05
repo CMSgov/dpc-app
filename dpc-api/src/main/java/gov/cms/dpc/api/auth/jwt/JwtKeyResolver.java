@@ -50,7 +50,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
         final PublicKeyEntity keyEntity;
         try {
             keyEntity = this.dao.fetchPublicKey(organizationID, UUID.fromString(keyId))
-                    .orElseThrow(() -> new WebApplicationException(String.format("Cannot find public key with id: %s", keyId), Response.Status.UNAUTHORIZED));
+                    .orElseThrow(() -> new WebApplicationException(String.format("Cannot find public key with id: %s, org id: %s", keyId,organizationID.toString()), Response.Status.UNAUTHORIZED));
         } catch (IllegalArgumentException e) {
             logger.error("Cannot convert '{}' to UUID", keyId, e);
             throw new WebApplicationException("Invalid Public Key ID", Response.Status.UNAUTHORIZED);
