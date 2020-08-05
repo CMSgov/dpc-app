@@ -85,33 +85,39 @@ module Internal
 
     def add_or_delete
       @organization = Organization.find(params[:organization_id])
-      @user = User.find(params[:organization][:id])
+      @user = user_identify
 
-      if params[:_method] == 'add'
-        add_user = add_user(params[:organization][:id])
-        action = 'added to'
-      elsif params[:_method] == 'delete'
-        delete_user = @organization.users.delete(@user)
-        action = 'deleted from the organization'
-      end
-
-      if delete_user || add_user
-        flash[:notice] = "User has been successfully #{action} the organization."
-        redirect_to internal_organization_path(@organization)
-      else
-        flash[:alert] = "User could not be #{action}."
-      end
+      add_delete(params)
     end
 
     private
 
-    def add_user(user_id)
-      @user = User.find(user_id)
-      @organization.users << @user
+    def add_delete(params)
+      if params[:_method] == 'add'
+        @user.organizations.clear
+        add_action = @organization.users << @user
+        action = 'added to'
+      elsif params[:_method] == 'delete'
+        delete_action = @organization.users.delete(@user)
+        action = 'deleted from'
+      end
+
+      if add_action || delete_action
+        flash[:notice] = "User has been successfully #{action} the organization."
+        page_redirect
+      else
+        flash[:alert] = "User could not be #{action} the organization ."
+      end
     end
 
     def org_page_params(results)
       results.page params[:page]
+    end
+
+    def page_redirect
+      return redirect_to internal_user_url(@user) if params[:user_id].present?
+
+      redirect_to internal_organization_path(@organization)
     end
 
     def from_user_params
@@ -121,6 +127,12 @@ module Internal
     def user_filter
       User.left_joins(:organization_user_assignments)
           .where('organization_user_assignments.id IS NULL')
+    end
+
+    def user_identify
+      return User.find(params[:user_id]) if params[:user_id].present?
+
+      User.find(params[:organization][:id])
     end
 
     def organization_params

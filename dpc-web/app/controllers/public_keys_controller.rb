@@ -3,7 +3,7 @@
 class PublicKeysController < ApplicationController
   layout 'public-key-new'
   before_action :authenticate_user!
-  before_action :organization_enabled?
+  before_action :organization_enabled?, except: :download_snippet
   rescue_from ActiveRecord::RecordNotFound, with: :unauthorized
 
   def new
