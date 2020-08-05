@@ -56,11 +56,19 @@
                           </div>
                         </div>
                         <div class="credential__delete usa-accordion">
-                          <button class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
+                          <button id="button<%= index +1 %>" class="usa-accordion__button credential__delete_button" aria-expanded="false" aria-controls="collapse<%= index +1 %>">
                             X
                           </button>
-                          <div id="collapse<%= index +1 %>" class="credential__actions usa-accordion__content">
-                            <%= button_to "x", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
+                          <div id="collapse<%= index +1 %>" class="usa-accordion__content">
+                            <div>
+                              Delete Client Token?
+                            </div>
+                            <div class="credential__actions">
+                              <button class="credential__cancel_btn" onclick="collapseButtons('button<%= index +1 %>', 'collapse<%= index +1 %>')">
+                                Cancel
+                              </button>
+                              <%= button_to "x", organization_client_token_path(id: token['id'], organization_id: organization.id), method: :delete, class: "ds-c-button ds-c-button--danger ds-u-float--right" %>
+                            </div>
                           </div>
                         </div>
                       </li>
