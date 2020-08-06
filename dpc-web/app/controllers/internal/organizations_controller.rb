@@ -35,7 +35,11 @@ module Internal
       if @organization.save
         flash[:notice] = 'Organization created.'
 
-        add_user(from_user_params[:from_user]) if from_user_params[:from_user].present?
+        if from_user_params[:from_user].present?
+          @user = User.find from_user_params[:from_user]
+          add_delete(params)
+          return
+        end
 
         if prod_sbx?
           redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id)
@@ -115,7 +119,7 @@ module Internal
     end
 
     def page_redirect
-      return redirect_to internal_user_url(@user) if params[:user_id].present?
+      return redirect_to internal_user_url(@user) if current_user.present?
 
       redirect_to internal_organization_path(@organization)
     end
@@ -140,6 +144,13 @@ module Internal
         :name, :organization_type, :num_providers, :npi, :vendor,
         address_attributes: %i[id street street_2 city state zip address_use address_type]
       )
+    end
+
+    def current_user
+      return params[:user_id] if params[:user_id].present?
+      return params[:from_user] if params[:from_user].present?
+
+      nil
     end
   end
 end
