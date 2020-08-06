@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import gov.cms.dpc.testing.factories.OrganizationFactory;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@IntegrationTest
 public class EndpointResourceTest extends AbstractAttributionTest {
 
     final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
