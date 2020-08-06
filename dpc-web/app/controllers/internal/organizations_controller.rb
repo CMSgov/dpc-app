@@ -34,9 +34,6 @@ module Internal
 
       if @organization.save
         flash[:notice] = 'Organization created.'
-
-        add_user(from_user_params[:from_user]) if from_user_params[:from_user].present?
-
         if prod_sbx?
           redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id)
         elsif from_user_params[:from_user].present?
@@ -94,8 +91,7 @@ module Internal
 
     def add_delete(params)
       if params[:_method] == 'add'
-        @user.organizations.clear
-        add_action = @organization.users << @user
+        add_user = @organization.users << @user
         action = 'added to'
       elsif params[:_method] == 'delete'
         delete_action = @organization.users.delete(@user)
@@ -109,6 +105,8 @@ module Internal
         flash[:alert] = "User could not be #{action} the organization ."
       end
     end
+
+    private
 
     def org_page_params(results)
       results.page params[:page]
