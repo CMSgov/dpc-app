@@ -129,6 +129,12 @@
             <email>sal.gutierrez@adhocteam.us</email>
             <organization>Ad Hoc LLC</organization>
         </developer>
+        <developer>
+            <id>jon</id>
+            <name>Jonathan Fulk</name>
+            <email>jon.fulk@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
+        </developer>
     </developers>
 
     <dependencyManagement>
