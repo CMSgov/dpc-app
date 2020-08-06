@@ -28,6 +28,7 @@ module Internal
         flash[:notice] = 'User successfully updated.'
         redirect_to internal_user_url(@user)
       else
+        @organizations = Organization.all
         flash[:alert] = "Please correct errors: #{model_error_string(@user)}"
         render :edit
       end
