@@ -37,6 +37,7 @@ module Internal
 
         if from_user_params[:from_user].present?
           @user = User.find from_user_params[:from_user]
+          params[:_method] = :add
           add_delete(params)
           return
         end
