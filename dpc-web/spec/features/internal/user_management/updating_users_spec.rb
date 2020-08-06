@@ -12,7 +12,7 @@ RSpec.feature 'updating users' do
 
   scenario 'successfully updating a user\'s attributes' do
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
-    org = create(:organization)
+    create(:organization)
 
     visit edit_internal_user_path(crabby)
 
