@@ -16,8 +16,8 @@ FactoryBot.define do
     zip { '12345' }
     agree_to_terms { true }
 
-    password { '123456' }
-    password_confirmation { '123456' }
+    password { '12345ABCDEfghi!' }
+    password_confirmation { '12345ABCDEfghi!' }
 
     confirmed_at { DateTime.now }
 

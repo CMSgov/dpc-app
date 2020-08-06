@@ -10,7 +10,7 @@ RSpec.feature 'user deletes account' do
 
   context 'when successful' do
     scenario 'user inputs correct password' do
-      fill_in 'user_password_to_delete', with: '123456'
+      fill_in 'user_password_to_delete', with: '12345ABCDEfghi!'
 
       find('[data-test="delete-user-account"]').click
 

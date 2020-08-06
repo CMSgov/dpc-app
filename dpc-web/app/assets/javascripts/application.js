@@ -15,6 +15,7 @@
 //= require accordions
 //= require copy-text
 //= require rails-ujs
+//= require password-check
 //= require activestorage
 //= require_tree ./utils
 //= require_tree .
