@@ -147,9 +147,9 @@ RSpec.feature 'updating users' do
 
     expect(page.body).to have_content('Crab Olsen')
 
-    select org.name, from: 'user_organization_ids'
+    org.users << crabby
 
-    find('[data-test="user-form-submit"]').click
+    visit internal_user_path(crabby)
 
     expect(page).not_to have_css('[data-test="user-form-submit"]')
     expect(mailer).to have_received(:organization_sandbox_email).once
