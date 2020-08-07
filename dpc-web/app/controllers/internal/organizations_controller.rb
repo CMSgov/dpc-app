@@ -104,19 +104,19 @@ module Internal
     def add_user_to_org
       @user.organizations.clear
       if @organization.users << @user
-        flash[:notice] = "User has been successfully added to the organization."
+        flash[:notice] = 'User has been successfully added to the organization.'
         page_redirect
       else
-        flash[:alert] = "User could not be added to the organization ."
+        flash[:alert] = 'User could not be added to the organization.'
       end
     end
 
     def delete_user_from_org
       if @organization.users.delete(@user)
-        flash[:notice] = "User has been successfully deleted from the organization."
+        flash[:notice] = 'User has been successfully deleted from the organization.'
         page_redirect
       else
-        flash[:alert] = "User could not be deleted from the organization ."
+        flash[:alert] = 'User could not be deleted from the organization.'
       end
     end
 
