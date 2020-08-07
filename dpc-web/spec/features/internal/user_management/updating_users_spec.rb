@@ -127,6 +127,21 @@ RSpec.feature 'updating users' do
     expect(page).to have_content('Crab Olsen')
   end
 
+  scenario 'add user to org' do
+    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
+    org = create(:organization)
+
+    visit edit_internal_user_path(crabby)
+
+    expect(page.body).to have_content('Crab Olsen')
+
+    fill_in 'orgSearchInput', with: org.name
+    find('[data-test="org-select"]', visible: false).click
+
+    expect(page).to have_content(org.name)
+    expect(page).to have_content('User has been successfully added to the organization.')
+  end
+
   scenario 'sending sandbox email to user added to a sandbox org' do
     allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
 
@@ -147,9 +162,8 @@ RSpec.feature 'updating users' do
 
     expect(page.body).to have_content('Crab Olsen')
 
-    org.users << crabby
-
-    visit internal_user_path(crabby)
+    find('[data-test="org-select"]', visible: false).click
+    # binding.pry
 
     expect(page).not_to have_css('[data-test="user-form-submit"]')
     expect(mailer).to have_received(:organization_sandbox_email).once
