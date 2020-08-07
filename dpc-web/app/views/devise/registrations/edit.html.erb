@@ -35,7 +35,7 @@
             organization_types_for_select,
             { include_blank: 'Please select a practice type' },
             class: "ds-c-field drop-down",
-            :data => {:hide_follow_up => 'health_it_vendor'},
+            data: { hide_follow_up: 'health_it_vendor' },
             value: @user.requested_organization_type
           %>
 
