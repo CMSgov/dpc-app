@@ -162,7 +162,6 @@ RSpec.feature 'updating users' do
 
     expect(page.body).to have_content('Crab Olsen')
 
-    fill_in 'orgSearchInput', with: org.name
     find('[data-test="org-select"]', visible: false).click
     # binding.pry
 
