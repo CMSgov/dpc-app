@@ -4,6 +4,7 @@ require 'csv'
 
 class User < ApplicationRecord
   include OrganizationTypable
+
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
   has_many :organization_user_assignments, dependent: :destroy
@@ -16,7 +17,8 @@ class User < ApplicationRecord
   # :trackable, and :omniauthable, :recoverable,
   devise :database_authenticatable,
          :validatable, :trackable, :registerable,
-         :timeoutable, :recoverable, :confirmable
+         :timeoutable, :recoverable, :confirmable,
+         :password_expirable, :password_archivable
 
   enum requested_organization_type: ORGANIZATION_TYPES
 
@@ -122,7 +124,7 @@ class User < ApplicationRecord
     return if password =~ /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@\#\$\&*])/
 
     errors.add :password, 'must include at least one number, one lowercase letter,
-                           one uppercase letter, and one special character (!@#$&*)'
+                             one uppercase letter, and one special character (!@#$&*)'
   end
 
   def requested_num_providers_to_zero_if_blank

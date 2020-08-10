@@ -7,7 +7,6 @@ RSpec.describe ClientTokensController, type: :controller do
 
   describe 'GET #new' do
     let!(:user) { create(:user, :assigned) }
-    let!(:organization) { user.organizations.first }
 
     context 'authenticated user' do
       before(:each) do
@@ -22,7 +21,7 @@ RSpec.describe ClientTokensController, type: :controller do
         )
         allow(stub).to receive(:get_public_keys).and_return(stub)
         allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-
+    
         org = create(:organization, :api_enabled)
         user.organizations << org
 
@@ -58,7 +57,11 @@ RSpec.describe ClientTokensController, type: :controller do
           )
           allow(stub).to receive(:get_public_keys).and_return(stub)
           allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> parent of fb24703f... Revert "DPC-109: Signup Password Policy for DPC (#926)"
           org = create(:organization, :api_enabled)
           user.organizations << org
 
