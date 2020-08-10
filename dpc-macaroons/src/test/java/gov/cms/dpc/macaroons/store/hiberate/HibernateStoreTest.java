@@ -2,6 +2,7 @@ package gov.cms.dpc.macaroons.store.hiberate;
 
 import gov.cms.dpc.macaroons.store.AbstractStoreTest;
 import gov.cms.dpc.macaroons.store.hibernate.HibernateKeyStore;
+import gov.cms.dpc.testing.IntegrationTest;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -9,6 +10,7 @@ import org.hibernate.cfg.Configuration;
 
 import java.security.SecureRandom;
 
+@IntegrationTest
 class HibernateStoreTest extends AbstractStoreTest {
 
     HibernateStoreTest() {

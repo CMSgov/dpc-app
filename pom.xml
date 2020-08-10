@@ -51,7 +51,7 @@
         <jooq.version>3.13.1</jooq.version>
         <bouncey.version>1.65</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
-        <newrelic.agent.version>5.11.0</newrelic.agent.version>
+        <newrelic.agent.version>5.13.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>1.4.200</h2.version>
     </properties>
@@ -112,6 +112,12 @@
             <organization>Ad Hoc LLC</organization>
         </developer>
         <developer>
+            <id>john</id>
+            <name>John Addy</name>
+            <email>jaddy@fearsol.com</email>
+            <organization>Fearless</organization>
+        </developer>
+        <developer>
             <id>rich</id>
             <name>Richard Braman</name>
             <email>richard.braman@adhocteam.us</email>
@@ -121,6 +127,12 @@
             <id>sal</id>
             <name>Salvador Gutierrez</name>
             <email>sal.gutierrez@adhocteam.us</email>
+            <organization>Ad Hoc LLC</organization>
+        </developer>
+        <developer>
+            <id>jon</id>
+            <name>Jonathan Fulk</name>
+            <email>jon.fulk@adhocteam.us</email>
             <organization>Ad Hoc LLC</organization>
         </developer>
     </developers>
@@ -327,7 +339,20 @@
                             <groups>Integration</groups>
                         </configuration>
                     </plugin>
-
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>unit-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <excludedGroups>Integration</excludedGroups>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -521,7 +546,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -677,7 +702,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <configuration>
                     <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                 </configuration>

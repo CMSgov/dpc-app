@@ -55,5 +55,6 @@ public abstract class AbstractGroupResource {
                                     @PathParam("rosterID") @NoHtml String rosterID,
                                     @QueryParam("_type") @NoHtml String resourceTypes,
                                     @QueryParam("_outputFormat") @NoHtml String outputFormat,
-                                    @QueryParam("_since") @NoHtml String since);
+                                    @QueryParam("_since") @NoHtml String since,
+                                    @HeaderParam("Prefer") @Valid String Prefer);
 }

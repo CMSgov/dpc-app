@@ -6,6 +6,7 @@ import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
 import gov.cms.dpc.consent.DPCConsentService;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
+import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.JobTestUtils;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
+@IntegrationTest
 public class SuppressionFileImportTest {
 
     private static final DropwizardTestSupport<DPCConsentConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCConsentService.class, "ci.application.conf",
