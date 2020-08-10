@@ -105,7 +105,7 @@
                 1 special character
               </div>
             </div>
-            <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field" %>
+            <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field", onkeyup: "passwordCheck('user_password')" %>
           </div>
 
           <div class="field">
@@ -115,7 +115,7 @@
                 Confirm password above
               </div>
             </div>
-            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field" %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field", onkeyup: "passwordCheck('user_password_confirmation')" %>
           </div>
 
           <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
