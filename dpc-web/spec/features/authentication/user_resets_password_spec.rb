@@ -20,8 +20,8 @@ RSpec.feature 'user resets password' do
 
       visit reset_link
 
-      fill_in 'user_password', with: 'CrabW0rd$_5ever'
-      fill_in 'user_password_confirmation', with: 'CrabW0rd$_5ever'
+      fill_in 'user_password', with: 'CrabW0rd$'
+      fill_in 'user_password_confirmation', with: 'CrabW0rd$'
       find('input[data-test="submit"]').click
 
       expect(page.body).to include('Your password has been changed successfully')
@@ -43,7 +43,7 @@ RSpec.feature 'user resets password' do
 
       visit reset_link
 
-      fill_in 'user_password', with: 'CrabW0rd$_5ever'
+      fill_in 'user_password', with: 'CrabW0rd$'
       fill_in 'user_password_confirmation', with: "Idon'tMatch"
       find('input[data-test="submit"]').click
 
@@ -57,8 +57,8 @@ RSpec.feature 'user resets password' do
       expect(page.body).to include('1 error prohibited this user from being saved:')
       expect(page.body).to include('Password is too short')
 
-      fill_in 'user_password', with: 'CrabW0rd$_4ever'
-      fill_in 'user_password_confirmation', with: 'CrabW0rd$_4ever'
+      fill_in 'user_password', with: 'CrabW0rd$'
+      fill_in 'user_password_confirmation', with: 'CrabW0rd$'
       find('input[data-test="submit"]').click
 
       expect(page.body).to include('Your password has been changed successfully')
