@@ -7,6 +7,7 @@ RSpec.describe ClientTokensController, type: :controller do
 
   describe 'GET #new' do
     let!(:user) { create(:user, :assigned) }
+    let!(:organization) { user.organizations.first }
 
     context 'authenticated user' do
       before(:each) do
@@ -14,18 +15,7 @@ RSpec.describe ClientTokensController, type: :controller do
       end
 
       it 'returns http success' do
-        stub = stub_api_client(
-          message: :create_organization,
-          success: true,
-          response: default_org_creation_response
-        )
-        allow(stub).to receive(:get_public_keys).and_return(stub)
-        allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-    
-        org = create(:organization, :api_enabled)
-        user.organizations << org
-
-        get :new, params: { organization_id: org.id }
+        get :new, params: { organization_id: organization.id }
         expect(response).to have_http_status(:success)
       end
 
@@ -50,18 +40,7 @@ RSpec.describe ClientTokensController, type: :controller do
 
       context 'with invalid params' do
         it 'renders new if no label' do
-          stub = stub_api_client(
-            message: :create_organization,
-            success: true,
-            response: default_org_creation_response
-          )
-          allow(stub).to receive(:get_public_keys).and_return(stub)
-          allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-      
-          org = create(:organization, :api_enabled)
-          user.organizations << org
-
-          post :create, params: { organization_id: org.id, label: '' }
+          post :create, params: { organization_id: organization.id, label: '' }
           expect(response).to render_template(:new)
         end
 

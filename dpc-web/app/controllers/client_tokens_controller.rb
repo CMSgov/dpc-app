@@ -11,20 +11,17 @@ class ClientTokensController < ApplicationController
 
   def create
     @organization = current_user.organizations.find(params[:organization_id])
+    return render_error('Must have a label.') if missing_params
 
     reg_org = @organization.registered_organization
     manager = ClientTokenManager.new(registered_organization: reg_org)
-    if missing_params
-      render_error 'Label required.'
-    elsif manager.create_client_token(label: params[:label])
+    if manager.create_client_token(label: params[:label])
       @client_token = manager.client_token
       render :show
     else
       render_error 'Client token could not be created.'
     end
   end
-
-  private
 
   def organization_enabled?
     @organization = current_user.organizations.find(params[:organization_id])
@@ -35,8 +32,10 @@ class ClientTokensController < ApplicationController
     redirect_to root_path
   end
 
+  private
+
   def render_error(msg)
-    flash[:alert] = msg
+    flash[:error] = msg
     render :new
   end
 
