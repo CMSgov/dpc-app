@@ -140,6 +140,15 @@ public class JobResource extends AbstractJobResource {
      * @return the response builder
      */
     private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches) {
+        OffsetDateTime lastCompleteTime = batches.stream()
+                .filter(b -> b.getCompleteTime().isPresent())
+                .map(b -> b.getCompleteTime().get())
+                .max(OffsetDateTime::compareTo).get();
+
+        if (lastCompleteTime.isBefore(OffsetDateTime.now().minusHours(24))) {
+            return builder.status(HttpStatus.GONE_410);
+        }
+
         JobQueueBatch firstBatch = batches.get(0);
 
         final String resourceQueryParam = firstBatch.getResourceTypes().stream()

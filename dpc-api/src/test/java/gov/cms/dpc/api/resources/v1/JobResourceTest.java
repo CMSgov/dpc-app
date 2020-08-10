@@ -204,6 +204,35 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus()));
     }
 
+    @Test
+    public void testExpiredJob() {
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
+        final var queue = new MemoryBatchQueue(1);
+
+        final UUID jobId = queue.createJob(orgID,
+                TEST_PROVIDER_ID,
+                List.of(TEST_PATIENT_ID, "2", "3"),
+                JobQueueBatch.validResourceTypes,
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC));
+
+        List<JobQueueBatch> batches = queue.getJobBatches(jobId);
+        OffsetDateTime timeAgo = OffsetDateTime.now().minusHours(24);
+        for (JobQueueBatch batch : batches) {
+            queue.claimBatch(AGGREGATOR_ID);
+            batch.fetchNextPatient(AGGREGATOR_ID);
+            batch.addJobQueueFile(ResourceType.OperationOutcome, 0, 1);
+            queue.completeBatch(batch, AGGREGATOR_ID);
+            timeAgo = timeAgo.minusMinutes(5);
+            batch.setCompleteTime(timeAgo);
+        }
+
+        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
+        assertEquals(HttpStatus.GONE_410, response.getStatus());
+    }
+
     /**
      * Test accessing a job with the wrong organization
      */
