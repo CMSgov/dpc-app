@@ -26,12 +26,13 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,9 @@ import java.util.stream.Collectors;
 public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
+
+    public static final DateTimeFormatter HTTP_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.US).withZone(ZoneId.of("GMT"));
 
     private final IJobQueue queue;
     private final String baseURL;
@@ -145,9 +149,11 @@ public class JobResource extends AbstractJobResource {
                 .map(b -> b.getCompleteTime().get())
                 .max(OffsetDateTime::compareTo).get();
 
-        if (lastCompleteTime.isBefore(OffsetDateTime.now().minusHours(24))) {
+        if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(24))) {
             return builder.status(HttpStatus.GONE_410);
         }
+
+        builder.header(HttpHeaders.EXPIRES, lastCompleteTime.plusDays(1).format(HTTP_DATE_FORMAT));
 
         JobQueueBatch firstBatch = batches.get(0);
 

@@ -7,6 +7,7 @@ import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import org.assertj.core.data.Offset;
 import org.bouncycastle.util.encoders.Hex;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -15,7 +16,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -129,6 +132,10 @@ public class JobResourceTest {
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
+        var expires = ZonedDateTime.parse(response.getHeaderString("Expires"), JobResource.HTTP_DATE_FORMAT);
+        assertAll(() -> expires.isAfter(ZonedDateTime.now().plusHours(23)),
+                () -> expires.isAfter(ZonedDateTime.now().plusHours(25)));
+
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
         assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
@@ -229,8 +236,15 @@ public class JobResourceTest {
         }
 
         final var resource = new JobResource(queue, TEST_BASEURL);
-        final var response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
+        var response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
         assertEquals(HttpStatus.GONE_410, response.getStatus());
+
+        for (JobQueueBatch batch : batches) {
+            batch.setCompleteTime(OffsetDateTime.now().minusHours(23));
+        }
+
+        response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
+        assertEquals(HttpStatus.OK_200, response.getStatus());
     }
 
     /**
