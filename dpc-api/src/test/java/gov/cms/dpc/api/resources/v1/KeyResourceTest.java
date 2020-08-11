@@ -190,7 +190,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
-    private KeyResource.KeySignature generateKeyAndSignature() throws GeneralSecurityException {
+    protected static KeyResource.KeySignature generateKeyAndSignature() throws GeneralSecurityException {
         final KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
         final String publicKey = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
         final String signature = APIAuthHelpers.signString(keyPair.getPrivate(), KeyResource.SNIPPET);
