@@ -178,6 +178,8 @@ GEM
       domain_name (~> 0.5)
     i18n (1.8.4)
       concurrent-ruby (~> 1.0)
+    json (2.3.1)
+    json (2.3.1-java)
     jsonapi-renderer (0.2.2)
     jwt (2.2.1)
     kaminari (1.2.1)
@@ -423,10 +425,11 @@ GEM
     sidekiq_alive (2.0.2)
       sidekiq
       sinatra
-    simplecov (0.18.5)
+    simplecov (0.17.1)
       docile (~> 1.1)
-      simplecov-html (~> 0.11)
-    simplecov-html (0.12.2)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.2)
     simpleidn (0.1.1)
       unf (~> 0.1.4)
     sinatra (2.0.8.1)
@@ -539,7 +542,7 @@ DEPENDENCIES
   selenium-webdriver
   sidekiq (~> 6.0)
   sidekiq_alive
-  simplecov
+  simplecov (< 0.18)
   spring
   spring-watcher-listen (~> 2.0.0)
   truemail
