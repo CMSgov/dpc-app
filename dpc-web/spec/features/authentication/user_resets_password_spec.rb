@@ -13,6 +13,7 @@ RSpec.feature 'user resets password' do
 
       expect do
         find('input[data-test="submit"]').click
+        Sidekiq::Worker.drain_all
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
@@ -36,6 +37,7 @@ RSpec.feature 'user resets password' do
 
       expect do
         find('input[data-test="submit"]').click
+        Sidekiq::Worker.drain_all
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
