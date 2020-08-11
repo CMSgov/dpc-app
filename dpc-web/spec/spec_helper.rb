@@ -2,9 +2,18 @@
 
 require 'simplecov'
 SimpleCov.start 'rails' do
+  track_files '**/{app,lib}/**/*.rb'
+
+  add_group 'Serializers', 'app/serializers'
+  add_group 'Services', 'app/services'
+  add_group 'Validators', 'app/validators'
+
   add_filter 'app/jobs/application_job.rb'
   add_filter 'app/channels/application_cable/channel.rb'
   add_filter 'app/channels/application_cable/connection.rb'
+
+  SimpleCov.minimum_coverage 90
+  SimpleCov.minimum_coverage_by_file 80
 end
 
 RSpec.configure do |config|
