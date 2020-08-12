@@ -17,7 +17,7 @@ Devise.setup do |config|
   # Examples:
   # config.deny_old_passwords = false # allow old passwords
   # config.deny_old_passwords = true # will deny all the old passwords
-  config.deny_old_passwords = 12 # will deny new passwords that matches with the last 3 passwords
+  config.deny_old_passwords = 12 # will deny new passwords that matches with the last 12 passwords
   # config.deny_old_passwords = true
 
   # enable email validation for :secure_validatable. (true, false, validation_options)

@@ -94,7 +94,7 @@ module Internal
       elsif params[:_method] == 'delete'
         delete_user_from_org
       else
-        return redirect_to internal_organization_path(@organization)
+        redirect_to internal_organization_path(@organization)
       end
     end
 

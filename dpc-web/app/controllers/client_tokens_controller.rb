@@ -16,12 +16,12 @@ class ClientTokensController < ApplicationController
     reg_org = @organization.registered_organization
     manager = ClientTokenManager.new(registered_organization: reg_org)
 
-    if missing_params
-      render_error 'Label required.'
-    elsif manager.create_client_token(label: params[:label])
+    if manager.create_client_token(label: params[:label])
       @client_token = manager.client_token
       render :show
     else
+      return render_error 'Label required' if missing_params
+
       render_error 'Client token could not be created.'
     end
   end
