@@ -67,8 +67,8 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_last_name, with: 'Dalloway'
       fill_in :user_email, with: 'clarissa@example.com'
-      fill_in :user_password, with: '1234567890'
-      fill_in :user_password_confirmation, with: '1234567890'
+      fill_in :user_password, with: '3veryDay#P0tato'
+      fill_in :user_password_confirmation, with: '3veryDay#P0tato'
       fill_in :user_requested_organization, with: 'London Health System'
       select 'Primary Care Clinic', from: :user_requested_organization_type
       fill_in :user_requested_num_providers, visible: false, with: '777'
@@ -92,8 +92,8 @@ RSpec.feature 'new user signs up for account' do
     scenario 'returns to the sign in page with error message' do
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_email, with: 'clarissa@example.com'
-      fill_in :user_password, with: '1234567890'
-      fill_in :user_password_confirmation, with: '1234567890'
+      fill_in :user_password, with: '3veryDay#P0tato'
+      fill_in :user_password_confirmation, with: '3veryDay#P0tato'
       fill_in :user_requested_organization, with: 'London Health System'
       select 'Primary Care Clinic', from: :user_requested_organization_type
       fill_in :user_requested_num_providers, visible: false, with: '777'
@@ -118,8 +118,8 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_last_name, with: 'Dalloway'
       fill_in :user_email, with: 'clarissa@example.com'
-      fill_in :user_password, with: '1234567890'
-      fill_in :user_password_confirmation, with: '1234567890'
+      fill_in :user_password, with: '3veryDay#P0tato'
+      fill_in :user_password_confirmation, with: '3veryDay#P0tato'
       fill_in :user_requested_organization, with: 'London Health System'
       select 'Primary Care Clinic', from: :user_requested_organization_type
       fill_in :user_requested_num_providers, visible: false, with: '777'
@@ -163,7 +163,7 @@ RSpec.feature 'new user signs up for account' do
       last_user = User.last
 
       fill_in 'user_email', with: last_user.email
-      fill_in 'user_password', with: '1234567890'
+      fill_in 'user_password', with: '3veryDay#P0tato'
       find('[data-test="submit"]').click
 
       expect(last_user.confirmed_at).to be_nil
