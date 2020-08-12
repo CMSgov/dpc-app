@@ -1,7 +1,7 @@
 en:
   errors:
     messages:
-      taken_in_past: 'was used previously.'
+      taken_in_past: 'cannot be a password you have used in the past.'
       equal_to_current_password: 'must be different than the current password.'
       password_complexity:
         digit:
@@ -16,8 +16,6 @@ en:
         upper:
           one: must contain at least one upper-case letter
           other: must contain at least %{count} upper-case letters
-      deny_old_passwords:
-        
   devise:
     invalid_captcha: 'The captcha input was invalid.'
     invalid_security_question: 'The security question answer was invalid.'
