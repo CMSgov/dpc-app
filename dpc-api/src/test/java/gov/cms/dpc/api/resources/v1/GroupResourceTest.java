@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -18,7 +17,6 @@ import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -35,7 +33,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -331,67 +328,6 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
         client.delete()
                 .resource(foundGroup)
-                .encodedJson()
-                .execute();
-    }
-
-    @Test
-    public void testProvenanceHeaderAndGroupProviderMatch() {
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
-        Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(),ORGANIZATION_ID);
-
-        MethodOutcome methodOutcome = client.create()
-                .resource(practitioner)
-                .encodedJson()
-                .execute();
-
-        Practitioner createdPractitioner = (Practitioner) methodOutcome.getResource();
-
-        //Group will have non-matching practitioner NPI
-        Group group = SeedProcessor.createBaseAttributionGroup(NPIUtil.generateNPI(), ORGANIZATION_ID);
-
-        final Provenance provenance = new Provenance();
-        provenance.setRecorded(Date.valueOf(Instant.now().atZone(ZoneOffset.UTC).toLocalDate()));
-        final Coding coding = new Coding();
-        coding.setSystem("http://hl7.org/fhir/v3/ActReason");
-        coding.setCode("TREAT");
-        provenance.setReason(Collections.singletonList(coding));
-        final Provenance.ProvenanceAgentComponent component = new Provenance.ProvenanceAgentComponent();
-
-        final Coding roleCode = new Coding();
-        roleCode.setSystem(V3RoleClass.AGNT.getSystem());
-        roleCode.setCode(V3RoleClass.AGNT.toCode());
-
-        final CodeableConcept roleConcept = new CodeableConcept();
-        roleConcept.addCoding(roleCode);
-        component.setRole(Collections.singletonList(roleConcept));
-        component.setWho(new Reference(new IdType("Organization", ORGANIZATION_ID)));
-        component.setOnBehalfOf(new Reference(createdPractitioner.getIdElement()));
-
-        provenance.addAgent(component);
-
-        ICreateTyped createGroup = client
-                .create()
-                .resource(group)
-                .encodedJson()
-                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance));
-
-        Assertions.assertThrows(UnprocessableEntityException.class, createGroup::execute);
-
-        group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(createdPractitioner), ORGANIZATION_ID);
-        //set provenance practitioner to unknown practitioner;
-        component.setOnBehalfOf(new Reference(new IdType("Practitioner", UUID.randomUUID().toString())));
-
-        createGroup = client
-                .create()
-                .resource(group)
-                .encodedJson()
-                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance));
-
-        Assertions.assertThrows(UnprocessableEntityException.class, createGroup::execute);
-
-        client.delete()
-                .resource(createdPractitioner)
                 .encodedJson()
                 .execute();
     }
