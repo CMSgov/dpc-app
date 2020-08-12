@@ -116,7 +116,6 @@ public class ClientUtils {
                     // Create the attestation
                     final Provenance provenance = createAttestation(organizationID, providerNPIUUIDMap.get(providerRoster.getKey()));
 
-                    System.out.println("provenenace header :" + ctx.newJsonParser().encodeResourceToString(provenance));
                     // Now, submit the bundle
                     client
                             .create()
