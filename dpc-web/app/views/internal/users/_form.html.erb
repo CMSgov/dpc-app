@@ -80,7 +80,7 @@
                 <%= @user.city %>, <%= @user.state %> <%= @user.zip %>
               </div>
 
-              <p><%= link_to new_internal_organization_path(from_user: @user.id),
+              <p><%= link_to new_internal_organization_path(user_id: @user.id),
                   data: { test: 'convert-org-link' }, class: "ds-c-button ds-u-fill--white" do %>
                     Create an organization from this info
                     <svg class="icon ds-u-margin-left--1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
