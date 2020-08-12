@@ -45,6 +45,7 @@ public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
 
+    public static final int JOB_EXPIRATION_HOURS = 24;
     public static final DateTimeFormatter HTTP_DATE_FORMAT =
             DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.US).withZone(ZoneId.of("GMT"));
 
@@ -144,12 +145,9 @@ public class JobResource extends AbstractJobResource {
      * @return the response builder
      */
     private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches) {
-        OffsetDateTime lastCompleteTime = batches.stream()
-                .filter(b -> b.getCompleteTime().isPresent())
-                .map(b -> b.getCompleteTime().get())
-                .max(OffsetDateTime::compareTo).get();
+        OffsetDateTime lastCompleteTime = getLatestBatchCompleteTime(batches);
 
-        if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(24))) {
+        if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(JOB_EXPIRATION_HOURS))) {
             return builder.status(HttpStatus.GONE_410);
         }
 
@@ -231,5 +229,12 @@ public class JobResource extends AbstractJobResource {
         return List.of(
                 new JobCompletionModel.FhirExtension(JobCompletionModel.SUBMIT_TIME_URL, submitTime),
                 new JobCompletionModel.FhirExtension(JobCompletionModel.COMPLETE_TIME_URL, completeTime));
+    }
+
+    public static OffsetDateTime getLatestBatchCompleteTime(List<JobQueueBatch> batches) {
+        return batches.stream()
+                .filter(b -> b.getCompleteTime().isPresent())
+                .map(b -> b.getCompleteTime().get())
+                .max(OffsetDateTime::compareTo).get();
     }
 }
