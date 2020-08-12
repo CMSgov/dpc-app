@@ -9,10 +9,10 @@ Devise.setup do |config|
 
   # Need 1 char of A-Z, a-z and 0-9
   config.password_complexity = { digit: 1, lower: 1, symbol: 1, upper: 1 }
-  
-  # How many passwords to keep in archives
+
+  # How many passwords to keep in archive
   config.password_archiving_count = 12
-  
+
   # Deny old passwords (true, false, number_of_old_passwords_to_check)
   # Examples:
   # config.deny_old_passwords = false # allow old passwords
