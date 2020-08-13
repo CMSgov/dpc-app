@@ -103,7 +103,7 @@ class APIClient
   end
 
   def parsed_response(response)
-    return self if response.body.nil? && @response_status == 204
+    return self if response.body.blank?
 
     JSON.parse response.body
   end
