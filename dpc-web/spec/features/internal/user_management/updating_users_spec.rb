@@ -10,14 +10,15 @@ RSpec.feature 'updating users' do
     sign_in internal_user, scope: :internal_user
   end
 
-  scenario 'successfully updating a user\'s attributes' do
+  scenario 'successfully updating a user\'s attributes ' do
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
-    create(:organization)
+    org = create(:organization)
 
     visit edit_internal_user_path(crabby)
 
     expect(page.body).to have_content('Crab Olsen')
 
+    select org.name, from: 'user_organization_ids'
     fill_in 'user_first_name', with: 'Crabby'
     fill_in 'user_last_name', with: 'Graham'
     fill_in 'user_email', with: 'newemail@example.com'
@@ -28,9 +29,10 @@ RSpec.feature 'updating users' do
     expect(page).not_to have_css('[data-test="user-form-submit"]')
     expect(page.body).to have_content('Crabby Graham')
     expect(page.body).to have_content('newemail@example.com')
+    expect(page.body).to have_content(org.name)
   end
 
-  scenario 'trying to update a user with invalid attributes' do
+  scenario 'trying to update a user with invalid attributes ' do
     crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
 
     visit edit_internal_user_path(crabby)
@@ -127,21 +129,6 @@ RSpec.feature 'updating users' do
     expect(page).to have_content('Crab Olsen')
   end
 
-  scenario 'add user to org' do
-    crabby = create(:user, first_name: 'Crab', last_name: 'Olsen', email: 'co@beach.com')
-    org = create(:organization)
-
-    visit edit_internal_user_path(crabby)
-
-    expect(page.body).to have_content('Crab Olsen')
-
-    fill_in 'orgSearchInput', with: org.name
-    find('[data-test="org-select"]', visible: false).click
-
-    expect(page).to have_content(org.name)
-    expect(page).to have_content('User has been successfully added to the organization.')
-  end
-
   scenario 'sending sandbox email to user added to a sandbox org' do
     allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
 
@@ -162,7 +149,9 @@ RSpec.feature 'updating users' do
 
     expect(page.body).to have_content('Crab Olsen')
 
-    find('[data-test="org-select"]', visible: false).click
+    select org.name, from: 'user_organization_ids'
+
+    find('[data-test="user-form-submit"]').click
 
     expect(page).not_to have_css('[data-test="user-form-submit"]')
     expect(mailer).to have_received(:organization_sandbox_email).once

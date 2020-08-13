@@ -73,7 +73,7 @@
               1 special character
             </div>
           </div>
-          <%= f.password_field :password, class: "ds-c-field", onkeyup: "passwordCheck('user_password')" %>
+          <%= f.password_field :password, class: "ds-c-field" %>
         </div>
 
         <div class="field">
@@ -83,14 +83,14 @@
             </div>
             <div>
               <%= f.label :password_confirmation, class: "ds-c-label" %>
-              <div class="password-check-list">
-                <div id="password-confirm-set" class="invalid">
-                  Confirm password above
-                </div>
-              </div>
             </div>
           </div>
-          <%= f.password_field :password_confirmation, class: "ds-c-field", onkeyup: "passwordCheck('user_password_confirmation')" %>
+          <div class="password-check-list">
+            <div id="password-confirm-set" class="invalid">
+              Confirm password above
+            </div>
+          </div>
+          <%= f.password_field :password_confirmation, class: "ds-c-field" %>
         </div>
 
         <h2>Your organization</h2>

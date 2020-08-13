@@ -12,8 +12,8 @@ module Internal
     end
 
     def new
-      if user_id_params[:user_id].present?
-        user = User.find user_id_params[:user_id]
+      if from_user_params[:from_user].present?
+        user = User.find from_user_params[:from_user]
         @organization = Organization.new name: user.requested_organization,
                                          organization_type: user.requested_organization_type,
                                          num_providers: user.requested_num_providers
@@ -35,14 +35,12 @@ module Internal
       if @organization.save
         flash[:notice] = 'Organization created.'
 
-        if user_id_params[:user_id].present?
-          @user = User.find user_id_params[:user_id]
-          add_user_to_org
-          return
-        end
+        add_user(from_user_params[:from_user]) if from_user_params[:from_user].present?
 
         if prod_sbx?
           redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id)
+        elsif from_user_params[:from_user].present?
+          redirect_to edit_internal_user_path(from_user_params[:from_user], user_organization_ids: @organization.id)
         else
           redirect_to internal_organization_path(@organization)
         end
@@ -89,33 +87,26 @@ module Internal
       @organization = Organization.find(params[:organization_id])
       @user = user_identify
 
-      if params[:_method] == 'add'
-        add_user_to_org
-      elsif params[:_method] == 'delete'
-        delete_user_from_org
-      else
-        redirect_to internal_organization_path(@organization)
-      end
+      add_delete(params)
     end
 
     private
 
-    def add_user_to_org
-      @user.organizations.clear
-      if @organization.users << @user
-        flash[:notice] = 'User has been successfully added to the organization.'
-        page_redirect
-      else
-        flash[:alert] = 'User could not be added to the organization.'
+    def add_delete(params)
+      if params[:_method] == 'add'
+        @user.organizations.clear
+        add_action = @organization.users << @user
+        action = 'added to'
+      elsif params[:_method] == 'delete'
+        delete_action = @organization.users.delete(@user)
+        action = 'deleted from'
       end
-    end
 
-    def delete_user_from_org
-      if @organization.users.delete(@user)
-        flash[:notice] = 'User has been successfully deleted from the organization.'
+      if add_action || delete_action
+        flash[:notice] = "User has been successfully #{action} the organization."
         page_redirect
       else
-        flash[:alert] = 'User could not be deleted from the organization.'
+        flash[:alert] = "User could not be #{action} the organization ."
       end
     end
 
@@ -129,8 +120,8 @@ module Internal
       redirect_to internal_organization_path(@organization)
     end
 
-    def user_id_params
-      params.permit(:user_id)
+    def from_user_params
+      params.permit(:from_user)
     end
 
     def user_filter

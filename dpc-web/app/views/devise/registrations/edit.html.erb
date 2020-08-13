@@ -87,6 +87,7 @@
 
           <div class="field">
             <%= f.label :password, class: "ds-c-label" %> <i>(leave blank if you don't want to change it)</i><br />
+
             <div class="password-check-list">
               Password must contain at least:
               <div id="password-char-set" class="invalid">
@@ -105,7 +106,7 @@
                 1 special character
               </div>
             </div>
-            <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field", onkeyup: "passwordCheck('user_password')" %>
+            <%= f.password_field :password, autocomplete: "new-password", class: "ds-c-field" %>
           </div>
 
           <div class="field">
@@ -115,7 +116,7 @@
                 Confirm password above
               </div>
             </div>
-            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field", onkeyup: "passwordCheck('user_password_confirmation')" %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "ds-c-field" %>
           </div>
 
           <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
