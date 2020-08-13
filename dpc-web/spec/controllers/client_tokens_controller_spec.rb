@@ -120,35 +120,4 @@ RSpec.describe ClientTokensController, type: :controller do
       end
     end
   end
-
-  describe 'DELETE #destroy' do
-    let!(:user) { create(:user, :assigned) }
-    let!(:organization) { user.organizations.first }
-
-    context 'authenticated user' do
-      before(:each) do
-        sign_in user, scope: :user
-      end
-
-      context 'successful API request' do
-        it 'deletes client token' do
-          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-          reg_org = create(:registered_organization, organization: organization)
-  
-          manager = instance_double(ClientTokenManager)
-          allow(ClientTokenManager).to receive(:new)
-            .with(registered_organization: reg_org)
-            .and_return(manager)
-
-          allow(manager).to receive(:create_client_token).with(label: 'Token')
-                                                         .and_return(true)
-          allow(manager).to receive(:client_token).and_return('1234567890')
-
-          post :create, params: { organization_id: organization.id, label: 'Token', api_environment: 'sandbox' }
-
-          binding.pry
-        end
-      end
-    end
-  end
 end
