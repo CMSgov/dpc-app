@@ -12,20 +12,7 @@
 
         <div class="field">
           <%= f.label :password, "New password", class: "ds-c-label" %>
-              <%= @minimum_password_length %> characters minimum
-            <div id="password-lower-set" class="invalid">
-              1 lowercase letter
-            </div>
-            <div id="password-upper-set" class="invalid">
-              1 uppercase letter
-            </div>
-            <div id="password-num-set" class="invalid">
-              1 number
-            </div
-            <div id="password-special-set" class="invalid">
-              1 special character
-            </div>
-          </div>
+          <%= @minimum_password_length %> characters minimum
           <%= f.password_field :password, class: "ds-c-field" %>
 
         <div class="field">
