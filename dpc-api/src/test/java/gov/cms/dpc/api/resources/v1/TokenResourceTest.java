@@ -152,7 +152,8 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             final HttpDelete httpDelete = new HttpDelete(getBaseURL() + String.format("/Token/%s", token.getId()));
             httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpDelete)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.NO_CONTENT_204, response.getStatusLine().getStatusCode(), "Should have succeeded with a 204 (No Content)");
+                assertNull(response.getEntity() , "Response should not have an entity (empty body)");
             }
 
 
