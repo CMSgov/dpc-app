@@ -30,7 +30,14 @@ RSpec.feature 'new user signs up for account' do
       click_on('Sign up')
     end
 
+    scenario 'the email entered in to our job queue' do
+      assert_equal 1, Sidekiq::Worker.jobs.size
+      Sidekiq::Worker.drain_all
+      assert_equal 0, Sidekiq::Worker.jobs.size
+    end
+
     scenario 'user sent a confirmation email with confirmation token' do
+      Sidekiq::Worker.drain_all
       expect(:confirmation_token).to be_present
 
       ctoken = last_email.body.match(/confirmation_token=[^"]*/)
@@ -39,6 +46,7 @@ RSpec.feature 'new user signs up for account' do
     end
 
     scenario 'user clicks on confirmation link to navigate to portal' do
+      Sidekiq::Worker.drain_all
       ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
       visit "/users/confirmation?#{ctoken}"
@@ -147,6 +155,8 @@ RSpec.feature 'new user signs up for account' do
       check :user_agree_to_terms
 
       click_on('Sign up')
+
+      Sidekiq::Worker.drain_all
 
       visit new_user_session_path
 
