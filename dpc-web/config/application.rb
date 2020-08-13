@@ -49,6 +49,9 @@ module DpcWebsite
 
     config.active_job.queue_adapter = :sidekiq
 
+    # Sending mail with`DeliveryJob` has been deprecated. Work has been moved to `MailDeliveryJob`
+    config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
+
     config.to_prepare { Devise::Mailer.layout "mailer" }
   end
 end
