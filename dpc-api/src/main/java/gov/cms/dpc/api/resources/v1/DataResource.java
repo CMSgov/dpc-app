@@ -71,6 +71,7 @@ public class DataResource extends AbstractDataResource {
             }),
             @ApiResponse(code = HttpStatus.NOT_MODIFIED_304, message = "No newer files available"),
             @ApiResponse(code = HttpStatus.UNAUTHORIZED_401, message = "Not authorized to download file"),
+            @ApiResponse(code = HttpStatus.GONE_410, message = "File has expired"),
             @ApiResponse(code = HttpStatus.INTERNAL_SERVER_ERROR_500, message = "An error occurred", response = OperationOutcome.class)
     })
     @Override

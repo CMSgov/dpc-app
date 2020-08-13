@@ -68,10 +68,11 @@ public class JobResource extends AbstractJobResource {
                     "When the job is in progress, the API returns a 202 status." +
                     "When completed, an output response is returned, which contains the necessary metadata for retrieving any output files.")
     @ApiResponses({
+            @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class),
             @ApiResponse(code = 202, message = "Export job is in progress. X-Progress header is present with the format \"<STATUS>: <50.00%>\""),
             @ApiResponse(code = 404, message = "Export job cannot be found"),
-            @ApiResponse(code = 500, message = "Export job has failed with no results"),
-            @ApiResponse(code = 200, message = "Export job has completed. Any failures are listed in the response body", response = JobCompletionModel.class)
+            @ApiResponse(code = 410, message = "Job has expired"),
+            @ApiResponse(code = 500, message = "Export job has failed with no results")
     })
     public Response checkJobStatus(@Auth OrganizationPrincipal organizationPrincipal, @PathParam("jobID") @NoHtml String jobID) {
         final UUID jobUUID = UUID.fromString(jobID);
