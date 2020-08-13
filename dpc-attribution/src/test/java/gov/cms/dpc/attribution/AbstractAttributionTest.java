@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@IntegrationTest
 public abstract class AbstractAttributionTest {
     private static final String KEY_PREFIX = "dpc.attribution";
     private static final ObjectMapper mapper = new ObjectMapper();
