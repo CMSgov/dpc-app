@@ -77,7 +77,7 @@ class APIClient
   end
 
   def response_successful?
-    @response_status == 200
+    @response_status == 200 || 204
   end
 
   def fhir_client
@@ -103,7 +103,7 @@ class APIClient
   end
 
   def parsed_response(response)
-    return self if response.body.empty?
+    return self if response.body.nil? && @response_status == 204
 
     JSON.parse response.body
   end
