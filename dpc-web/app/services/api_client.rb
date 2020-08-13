@@ -77,7 +77,7 @@ class APIClient
   end
 
   def response_successful?
-    @response_status == 200 || 204
+    [200, 204].include? @response_status
   end
 
   def fhir_client
