@@ -1,6 +1,5 @@
 class CreateOldPasswords < ActiveRecord::Migration[6.0]
   def change
-    drop_table :old_passwords
     create_table :old_passwords do |t|
       t.string :encrypted_password, null: false
       t.string :password_archivable_type, null: false
