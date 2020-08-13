@@ -12,11 +12,7 @@
 
         <div class="field">
           <%= f.label :password, "New password", class: "ds-c-label" %>
-          <div class="password-check-list">
-            Password must contain at least:
-            <div id="password-char-set" class="invalid">
               <%= @minimum_password_length %> characters minimum
-            </div>
             <div id="password-lower-set" class="invalid">
               1 lowercase letter
             </div>
@@ -33,12 +29,7 @@
           <%= f.password_field :password, class: "ds-c-field" %>
 
         <div class="field">
-          <%= f.label :password_confirmation, "Confirm new password", class: "ds-c-label" %>
-          <div class="password-check-list">
-            <div id="password-confirm-set" class="invalid">
-              Confirm password above
-            </div>
-          </div>
+          <%= f.label :password_confirmation, "Confirm new password", class: "ds-c-label" %>\
           <%= f.password_field :password_confirmation, class: "ds-c-field" %>
         </div>
 
