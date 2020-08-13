@@ -162,7 +162,7 @@ public class TokenResource extends AbstractTokenResource {
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Delete authentication token", notes = "Delete the specified authentication token for the given Organization (identified by Resource ID)")
-    @ApiResponses(@ApiResponse(code = 404, message = "Unable to find token with given id"))
+    @ApiResponses({@ApiResponse(code = 204, message = "Successfully deleted token"), @ApiResponse(code = 404, message = "Unable to find token with given id")})
     public Response deleteOrganizationToken(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
@@ -171,7 +171,7 @@ public class TokenResource extends AbstractTokenResource {
 
         this.dao.deleteToken(matchedToken.get(0));
 
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
     @POST
