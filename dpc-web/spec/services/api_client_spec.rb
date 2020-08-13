@@ -333,7 +333,7 @@ RSpec.describe APIClient do
         api_client.create_client_token(registered_org.api_id, params: { label: 'Sandbox Token 1' })
 
         expect(api_client.response_status).to eq(500)
-        expect(api_client.response_body).to eq('{}')
+        expect(api_client.response_body).to eq({})
       end
     end
   end
@@ -462,7 +462,7 @@ RSpec.describe APIClient do
         )
 
         expect(api_client.response_status).to eq(500)
-        expect(api_client.response_body).to eq('{}')
+        expect(api_client.response_body).to eq({})
       end
     end
   end
@@ -507,7 +507,7 @@ RSpec.describe APIClient do
         api_client.get_public_keys(registered_org.api_id)
 
         expect(api_client.response_status).to eq(500)
-        expect(api_client.response_body).to eq('{}')
+        expect(api_client.response_body).to eq({})
       end
     end
   end
