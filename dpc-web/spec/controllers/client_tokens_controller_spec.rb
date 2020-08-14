@@ -73,6 +73,9 @@ RSpec.describe ClientTokensController, type: :controller do
       end
 
       context 'with valid params' do
+        let!(:user) { create(:user, :assigned) }
+        let!(:organization) { user.organizations.first }
+
         context 'successful API request' do
           before(:each) do
             stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)

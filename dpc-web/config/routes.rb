@@ -37,7 +37,7 @@ Rails.application.routes.draw do
   match '/portal', to: 'portal#show', via: :get
 
   resources :organizations, only: [:edit, :update] do
-    resources :client_tokens, only: [:new, :create]
+    resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create]
   end
 
