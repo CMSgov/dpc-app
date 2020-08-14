@@ -4,6 +4,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
@@ -26,6 +27,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,14 +79,15 @@ public class GroupResource extends AbstractGroupResource {
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type="string",dataTypeClass = Provenance.class))
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successfully created Roster"),
-            @ApiResponse(code = 200, message = "Roster already exists")
+            @ApiResponse(code = 200, message = "Roster already exists"),
+            @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                  @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
-        logAttestation(rosterAttestation, null, attributionRoster);
+        logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
         addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
         final MethodOutcome outcome = this
@@ -165,12 +168,15 @@ public class GroupResource extends AbstractGroupResource {
      )
 
 
-    @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
+    @ApiResponses({
+            @ApiResponse(code = 404, message = "Cannot find Roster with given ID"),
+            @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
+    })
     @Override
     public Group updateRoster(@ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
                               @ApiParam(hidden=true)  @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation,
                               Group rosterUpdate) {
-        logAttestation(rosterAttestation, rosterID, rosterUpdate);
+        logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
@@ -194,7 +200,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group addRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
                                   @ApiParam(hidden=true) @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) @ProvenanceHeader Provenance rosterAttestation, @ApiParam Group groupUpdate) {
-        logAttestation(rosterAttestation, rosterID, groupUpdate);
+        logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
@@ -410,7 +416,7 @@ public class GroupResource extends AbstractGroupResource {
      * @param rosterID          - {@link UUID} of roster being updated
      * @param attributionRoster - {@link Group} roster being attested
      */
-    private void logAttestation(Provenance provenance, UUID rosterID, Group attributionRoster) {
+    private void logAndVerifyAttestation(Provenance provenance, UUID rosterID, Group attributionRoster) {
 
         final String groupIDLog;
         if (rosterID == null) {
@@ -422,6 +428,7 @@ public class GroupResource extends AbstractGroupResource {
         final Coding reason = provenance.getReasonFirstRep();
 
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
+        final String practitionerUUID = performer.getOnBehalfOfReference().getReference();
         final List<String> attributedPatients = attributionRoster
                 .getMember()
                 .stream()
@@ -431,7 +438,29 @@ public class GroupResource extends AbstractGroupResource {
 
         logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}{}", performer.getWhoReference().getReference(),
                 reason.getCode(),
-                performer.getOnBehalfOfReference().getReference(), attributedPatients, groupIDLog);
+                practitionerUUID, attributedPatients, groupIDLog);
+
+        verifyHeader(practitionerUUID, attributionRoster);
+    }
+
+    private void verifyHeader(String practitionerUUID, Group attributionRoster) {
+        try {
+            Practitioner practitioner = client.read()
+                    .resource(Practitioner.class)
+                    .withId(FHIRExtractors.getEntityUUID(practitionerUUID).toString())
+                    .encodedJson()
+                    .execute();
+
+            Identifier provenancePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
+            String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
+
+            if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
+                throw new WebApplicationException("Provenance header's provider does not match group provider", HttpStatus.SC_UNPROCESSABLE_ENTITY);
+            }
+        } catch(ResourceNotFoundException e) {
+            throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_ENTITY);
+        }
+
     }
 
     /**
