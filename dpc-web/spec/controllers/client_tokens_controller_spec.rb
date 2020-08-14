@@ -21,7 +21,7 @@ RSpec.describe ClientTokensController, type: :controller do
         )
         allow(stub).to receive(:get_public_keys).and_return(stub)
         allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-
+    
         org = create(:organization, :api_enabled)
         user.organizations << org
 
@@ -57,7 +57,7 @@ RSpec.describe ClientTokensController, type: :controller do
           )
           allow(stub).to receive(:get_public_keys).and_return(stub)
           allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
-
+      
           org = create(:organization, :api_enabled)
           user.organizations << org
 
