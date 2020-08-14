@@ -5,6 +5,10 @@
   justify-content: space-between;
   margin: $spacer-5 0 $spacer-2;
   padding-bottom: $spacer-1;
+
+  @media (max-width: $width-nav) {
+    flex-direction: column;
+  }
 }
 
 .portal-section-heading {

@@ -16,6 +16,11 @@ class ClientTokenManager
     api_client.response_successful?
   end
 
+  def delete_client_token(params)
+    api_client = APIClient.new
+    api_client.delete_client_token(registered_organization.api_id, params[:id])
+  end
+
   def client_tokens
     api_client = APIClient.new
     api_client.get_client_tokens(registered_organization.api_id)
