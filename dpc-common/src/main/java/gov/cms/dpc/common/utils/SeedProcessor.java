@@ -126,6 +126,7 @@ public class SeedProcessor {
         final Group rosterGroup = new Group();
         rosterGroup.setType(Group.GroupType.PERSON);
         rosterGroup.setActive(true);
+        rosterGroup.setActual(true);
         rosterGroup.addCharacteristic()
                 .setExclude(false)
                 .setCode(attributionConcept)

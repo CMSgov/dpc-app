@@ -6,6 +6,7 @@ import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.AttestationProfile;
+import gov.cms.dpc.fhir.validations.profiles.AttributionRosterProfile;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Provenance;
@@ -24,7 +25,7 @@ public abstract class AbstractGroupResource {
     }
 
     @POST
-    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group attributionRoster);
+    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, @Valid @Profiled(profile = AttributionRosterProfile.PROFILE_URI) Group attributionRoster);
 
     @GET
     public abstract Bundle rosterSearch(OrganizationPrincipal organizationPrincipal, @NoHtml String providerNPI, @NoHtml String patientID);
@@ -35,15 +36,15 @@ public abstract class AbstractGroupResource {
 
     @PUT
     @Path("/{rosterID}")
-    public abstract Group updateRoster(UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group rosterUpdate);
+    public abstract Group updateRoster(UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, @Valid @Profiled(profile = AttributionRosterProfile.PROFILE_URI) Group rosterUpdate);
 
     @POST
     @Path("/{rosterID}/$add")
-    public abstract Group addRosterMembers(UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, Group groupUpdate);
+    public abstract Group addRosterMembers(UUID rosterID, @Valid @Profiled(profile = AttestationProfile.PROFILE_URI) Provenance rosterAttestation, @Valid @Profiled(profile = AttributionRosterProfile.PROFILE_URI) Group groupUpdate);
 
     @POST
     @Path("/{rosterID}/$remove")
-    public abstract Group removeRosterMembers(UUID rosterID, Group groupUpdate);
+    public abstract Group removeRosterMembers(UUID rosterID, @Valid @Profiled(profile = AttributionRosterProfile.PROFILE_URI) Group groupUpdate);
 
     @DELETE
     @Path("/{rosterID}")
