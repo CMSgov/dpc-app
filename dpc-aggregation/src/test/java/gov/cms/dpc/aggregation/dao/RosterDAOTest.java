@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @IntegrationTest
@@ -77,14 +78,16 @@ public class RosterDAOTest {
 
     @Test
     public void testGettingProviderNPI() {
-        String npi = rosterDAO.retrieveProviderNPIFromRoster(organizationEntity.getId(), providerEntity.getID(), patientEntity.getBeneficiaryID());
-        Assertions.assertEquals(providerEntity.getProviderNPI(), npi);
+        Optional<String> npi = rosterDAO.retrieveProviderNPIFromRoster(organizationEntity.getId(), providerEntity.getID(), patientEntity.getBeneficiaryID());
+        Assertions.assertTrue(npi.isPresent());
+        Assertions.assertEquals(providerEntity.getProviderNPI(), npi.get());
 
         npi = rosterDAO.retrieveProviderNPIFromRoster(organizationEntity.getId(), rosterEntity.getId(), patientEntity.getBeneficiaryID());
-        Assertions.assertEquals(providerEntity.getProviderNPI(), npi);
+        Assertions.assertTrue(npi.isPresent());
+        Assertions.assertEquals(providerEntity.getProviderNPI(), npi.get());
 
         npi = rosterDAO.retrieveProviderNPIFromRoster(organizationEntity.getId(), UUID.randomUUID(), patientEntity.getBeneficiaryID());
-        Assertions.assertNull(npi);
+        Assertions.assertTrue(npi.isEmpty());
     }
 
     private OrganizationEntity organizationEntity(Session session) {
