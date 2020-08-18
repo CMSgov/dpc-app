@@ -5,7 +5,6 @@ import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.vavr.control.Try;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -19,6 +18,7 @@ import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LookBackServiceImpl implements LookBackService {
 
@@ -39,7 +39,9 @@ public class LookBackServiceImpl implements LookBackService {
     @UnitOfWork(readOnly = true)
     public String getProviderNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
         //Expect only one roster for the parameters, otherwise return null
-        return Try.of(() -> rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI)).getOrNull();
+        String npi = rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
+        LOGGER.info("jobProviderNPI={}", npi);
+        return npi;
     }
 
     @Override
@@ -61,6 +63,10 @@ public class LookBackServiceImpl implements LookBackService {
 
         Set<String> eobProviderNPIs = extractPractionerNPIs(explanationOfBenefit);
 
+        LOGGER.info("billingPeriod={}", billingPeriod.orElse(null));
+        LOGGER.info("eobOrganizationID={}", eobOrganizationID.orElse(null));
+        LOGGER.info("jobOrganizationID={}", organizationID.orElse(null));
+
         if (billingPeriod.isEmpty() || providerID.isEmpty() || organizationID.isEmpty() || eobOrganizationID.isEmpty()) {
             LOGGER.info("eob BillingPeriod or job providerID or job organizationID or eob OrganizationID are null");
             return false;
@@ -75,7 +81,7 @@ public class LookBackServiceImpl implements LookBackService {
                 && eobContainsProvider
                 && eobRelatedToOrganization;
 
-        LOGGER.info("LookBack stats eobWithinLookBackLimit {}, eobContainsProvider {}, eobRelatedToOrganization {}, eobMonthsDifference {}, hasClaim {}",
+        LOGGER.info("LookBack stats eobWithinLookBackLimit={}, eobContainsProvider={}, eobRelatedToOrganization={}, eobMonthsDifference={}, hasClaim={}",
                 eobWithinLookBackLimit, eobContainsProvider, eobRelatedToOrganization, lookBackMonthsDifference, hasClaim);
 
         return hasClaim;
@@ -83,26 +89,38 @@ public class LookBackServiceImpl implements LookBackService {
 
     private Set<String> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
         Set<String> eobProviderNPIs = new HashSet<>();
-        Optional.ofNullable(explanationOfBenefit)
+        Optional<String> providerNPI = Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getProvider)
                 .map(Reference::getIdentifier)
                 .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
                 .map(Identifier::getValue)
-                .filter(StringUtils::isNotBlank)
-                .ifPresent(eobProviderNPIs::add);
+                .filter(StringUtils::isNotBlank);
 
-        Optional.ofNullable(explanationOfBenefit)
-                .map(ExplanationOfBenefit::getCareTeam)
+        LOGGER.info("eobProviderNPI={}", providerNPI.orElse(null));
+        providerNPI.ifPresent(eobProviderNPIs::add);
+
+        Optional<List<ExplanationOfBenefit.CareTeamComponent>> careTeam = Optional.ofNullable(explanationOfBenefit)
+                .map(ExplanationOfBenefit::getCareTeam);
+
+        if (careTeam.isEmpty()) {
+            LOGGER.info("careTeam=empty");
+        }
+
+        careTeam
                 .ifPresent(careTeamComponents -> {
-                    careTeamComponents.stream()
+                    List<String> npisInCareTeam = careTeamComponents.stream()
                             .filter(ExplanationOfBenefit.CareTeamComponent::hasProvider)
                             .map(ExplanationOfBenefit.CareTeamComponent::getProvider)
                             .map(Reference::getIdentifier)
                             .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
                             .map(Identifier::getValue)
                             .filter(StringUtils::isNotBlank)
-                            .forEach(eobProviderNPIs::add);
+                            .collect(Collectors.toList());
+
+                    LOGGER.info("careTeamNPIs={}", npisInCareTeam);
+                    eobProviderNPIs.addAll(npisInCareTeam);
                 });
+
         return eobProviderNPIs;
     }
 
