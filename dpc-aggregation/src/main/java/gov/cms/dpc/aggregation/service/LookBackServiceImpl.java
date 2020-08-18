@@ -113,7 +113,7 @@ public class LookBackServiceImpl implements LookBackService {
         Optional<List<ExplanationOfBenefit.CareTeamComponent>> careTeam = Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getCareTeam);
 
-        if (providerNPI.isEmpty()) {
+        if (careTeam.isEmpty()) {
             LOGGER.info("careTeam=empty");
         }
 
