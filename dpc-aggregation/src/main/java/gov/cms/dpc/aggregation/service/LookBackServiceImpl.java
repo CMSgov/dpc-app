@@ -5,7 +5,6 @@ import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.hibernate.UnitOfWork;
-import io.vavr.control.Try;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -40,7 +39,9 @@ public class LookBackServiceImpl implements LookBackService {
     @UnitOfWork(readOnly = true)
     public String getProviderNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
         //Expect only one roster for the parameters, otherwise return null
-        return Try.of(() -> rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI)).getOrNull();
+        String npi = rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
+        LOGGER.info("jobProviderNPI={}", npi);
+        return npi;
     }
 
     @Override
@@ -64,7 +65,7 @@ public class LookBackServiceImpl implements LookBackService {
 
         LOGGER.info("billingPeriod={}", billingPeriod.orElse(null));
         LOGGER.info("eobOrganizationID={}", eobOrganizationID.orElse(null));
-
+        LOGGER.info("jobOrganizationID={}", organizationID.orElse(null));
 
         if (billingPeriod.isEmpty() || providerID.isEmpty() || organizationID.isEmpty() || eobOrganizationID.isEmpty()) {
             LOGGER.info("eob BillingPeriod or job providerID or job organizationID or eob OrganizationID are null");
@@ -95,7 +96,7 @@ public class LookBackServiceImpl implements LookBackService {
                 .map(Identifier::getValue)
                 .filter(StringUtils::isNotBlank);
 
-        LOGGER.info("providerNPI={}", providerNPI.orElse(null));
+        LOGGER.info("eobProviderNPI={}", providerNPI.orElse(null));
         providerNPI.ifPresent(eobProviderNPIs::add);
 
         Optional<List<ExplanationOfBenefit.CareTeamComponent>> careTeam = Optional.ofNullable(explanationOfBenefit)
