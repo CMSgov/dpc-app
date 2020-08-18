@@ -62,17 +62,9 @@ public class LookBackServiceImpl implements LookBackService {
 
         Set<String> eobProviderNPIs = extractPractionerNPIs(explanationOfBenefit);
 
-        if (billingPeriod.isEmpty()) {
-            LOGGER.info("billingPeriod=empty");
-        } else {
-            LOGGER.info("billingPeriod={}", billingPeriod.get());
-        }
+        LOGGER.info("billingPeriod={}", billingPeriod.orElse(null));
+        LOGGER.info("eobOrganizationID={}", eobOrganizationID.orElse(null));
 
-        if (eobOrganizationID.isEmpty()) {
-            LOGGER.info("eobOrganizationID=empty");
-        } else {
-            LOGGER.info("eobOrganizationID={}", eobOrganizationID.get());
-        }
 
         if (billingPeriod.isEmpty() || providerID.isEmpty() || organizationID.isEmpty() || eobOrganizationID.isEmpty()) {
             LOGGER.info("eob BillingPeriod or job providerID or job organizationID or eob OrganizationID are null");
@@ -103,12 +95,8 @@ public class LookBackServiceImpl implements LookBackService {
                 .map(Identifier::getValue)
                 .filter(StringUtils::isNotBlank);
 
-        if (providerNPI.isEmpty()) {
-            LOGGER.info("providerNPI=empty");
-        } else {
-            LOGGER.info("providerNPI={}", providerNPI.get());
-            eobProviderNPIs.add(providerNPI.get());
-        }
+        LOGGER.info("providerNPI={}", providerNPI.orElse(null));
+        providerNPI.ifPresent(eobProviderNPIs::add);
 
         Optional<List<ExplanationOfBenefit.CareTeamComponent>> careTeam = Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getCareTeam);
