@@ -19,6 +19,7 @@ import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LookBackServiceImpl implements LookBackService {
 
@@ -61,6 +62,18 @@ public class LookBackServiceImpl implements LookBackService {
 
         Set<String> eobProviderNPIs = extractPractionerNPIs(explanationOfBenefit);
 
+        if (billingPeriod.isEmpty()) {
+            LOGGER.info("billingPeriod=empty");
+        } else {
+            LOGGER.info("billingPeriod={}", billingPeriod.get());
+        }
+
+        if (eobOrganizationID.isEmpty()) {
+            LOGGER.info("eobOrganizationID=empty");
+        } else {
+            LOGGER.info("eobOrganizationID={}", eobOrganizationID.get());
+        }
+
         if (billingPeriod.isEmpty() || providerID.isEmpty() || organizationID.isEmpty() || eobOrganizationID.isEmpty()) {
             LOGGER.info("eob BillingPeriod or job providerID or job organizationID or eob OrganizationID are null");
             return false;
@@ -75,7 +88,7 @@ public class LookBackServiceImpl implements LookBackService {
                 && eobContainsProvider
                 && eobRelatedToOrganization;
 
-        LOGGER.info("LookBack stats eobWithinLookBackLimit {}, eobContainsProvider {}, eobRelatedToOrganization {}, eobMonthsDifference {}, hasClaim {}",
+        LOGGER.info("LookBack stats eobWithinLookBackLimit={}, eobContainsProvider={}, eobRelatedToOrganization={}, eobMonthsDifference={}, hasClaim={}",
                 eobWithinLookBackLimit, eobContainsProvider, eobRelatedToOrganization, lookBackMonthsDifference, hasClaim);
 
         return hasClaim;
@@ -83,26 +96,42 @@ public class LookBackServiceImpl implements LookBackService {
 
     private Set<String> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
         Set<String> eobProviderNPIs = new HashSet<>();
-        Optional.ofNullable(explanationOfBenefit)
+        Optional<String> providerNPI = Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getProvider)
                 .map(Reference::getIdentifier)
                 .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
                 .map(Identifier::getValue)
-                .filter(StringUtils::isNotBlank)
-                .ifPresent(eobProviderNPIs::add);
+                .filter(StringUtils::isNotBlank);
 
-        Optional.ofNullable(explanationOfBenefit)
-                .map(ExplanationOfBenefit::getCareTeam)
+        if (providerNPI.isEmpty()) {
+            LOGGER.info("providerNPI=empty");
+        } else {
+            LOGGER.info("providerNPI={}", providerNPI.get());
+            eobProviderNPIs.add(providerNPI.get());
+        }
+
+        Optional<List<ExplanationOfBenefit.CareTeamComponent>> careTeam = Optional.ofNullable(explanationOfBenefit)
+                .map(ExplanationOfBenefit::getCareTeam);
+
+        if (providerNPI.isEmpty()) {
+            LOGGER.info("careTeam=empty");
+        }
+
+        careTeam
                 .ifPresent(careTeamComponents -> {
-                    careTeamComponents.stream()
+                    List<String> npisInCareTeam = careTeamComponents.stream()
                             .filter(ExplanationOfBenefit.CareTeamComponent::hasProvider)
                             .map(ExplanationOfBenefit.CareTeamComponent::getProvider)
                             .map(Reference::getIdentifier)
                             .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
                             .map(Identifier::getValue)
                             .filter(StringUtils::isNotBlank)
-                            .forEach(eobProviderNPIs::add);
+                            .collect(Collectors.toList());
+
+                    LOGGER.info("careTeamNPIs={}", npisInCareTeam);
+                    eobProviderNPIs.addAll(npisInCareTeam);
                 });
+
         return eobProviderNPIs;
     }
 
