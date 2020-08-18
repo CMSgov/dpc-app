@@ -103,7 +103,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      */
     @Override
     public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
-        logger.debug("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
+        logger.info("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
         return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
                 .search()
                 .forResource(Patient.class)
