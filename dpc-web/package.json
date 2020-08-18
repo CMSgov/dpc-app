@@ -4,6 +4,7 @@
   "dependencies": {
     "@cmsgov/design-system-core": "^3.7.0",
     "@cmsgov/design-system-layout": "^3.7.0",
+    "jsonwebtoken": "^8.5.1",
     "normalize.css": "^8.0.1",
     "svg4everybody": "^2.1.9"
   },

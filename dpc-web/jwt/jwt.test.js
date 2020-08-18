@@ -1,4 +1,5 @@
 const generateJWT = require('./jwt');
+var jwt = require('jsonwebtoken');
 
 beforeEach(() => {
   document.body.innerHTML = `
@@ -11,7 +12,6 @@ beforeEach(() => {
   <p>Unsigned JWT:<br><textarea id="unsignedJWT" rows="20" cols="100"></textarea></p>
   <p>Your JWT:<br><textarea id="JWT" rows="20" cols="100"></textarea></p>
   `;
-
 
   document.getElementById('JwtButton').addEventListener('click', generateJWT);
 })
@@ -79,17 +79,16 @@ test('generates an unsigned JWT and JWT with user input', () => {
   p/8iTKuIcOf1Lp50uRKIopPA5Z5c+I9MtTWl2SXWp6ds5uI8TEipI0E4MuwLMjq0
   pKotjHF17eGLM2QYUGn4nGe1OUdvrKeKF5LZhRDsVPfGQshbLG5JUoUaoP7xF0om
   qaflITvrJYXIzNRKbzdbq3haFZPosH9dbHav31gRPv8id6PR31mQWIQcvhOI
-  -----END RSA PRIVATE KEY-----
-  `;
+  -----END RSA PRIVATE KEY-----`;
   keyId.value = 'a0991262-d368-4cd5-8695-350d6b94f970';
 
   button.click();
 
   unsignedJwt = JSON.parse(unsignedJwtOutput.value);
-  jwt = jwtOutput.value
+  jwtFill = jwtOutput.value;
 
   expect(unsignedJwt.aud).toMatch(env.value);
   expect(unsignedJwt.iss).toEqual(clientToken.value);
   expect(unsignedJwt.sub).toEqual(clientToken.value);
-  expect(jwt).not.toBe('');
+  expect(jwtFill).not.toBe('');
 });
