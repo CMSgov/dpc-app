@@ -428,11 +428,6 @@
                                     </compilerArgs>
                                     <annotationProcessorPaths>
                                         <path>
-                                            <groupId>com.google.guava</groupId>
-                                            <artifactId>guava</artifactId>
-                                            <version>28.2-jre</version>
-                                        </path>
-                                        <path>
                                             <groupId>com.google.errorprone</groupId>
                                             <artifactId>error_prone_core</artifactId>
                                             <version>2.3.3</version>
