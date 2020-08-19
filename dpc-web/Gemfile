@@ -59,6 +59,7 @@ group :test do
   gem 'climate_control'
   gem 'rails-controller-testing'
   gem 'fakefs', require: 'fakefs/safe'
+  gem 'fakeredis'
 end
 
 group :development do

@@ -133,6 +133,8 @@ GEM
     fakefs (1.2.2)
     faker (2.13.0)
       i18n (>= 1.6, < 2)
+    fakeredis (0.7.0)
+      redis (>= 3.2, < 5.0)
     faraday (1.0.1)
       multipart-post (>= 1.2, < 3)
     ffi (1.13.1)
@@ -512,6 +514,7 @@ DEPENDENCIES
   factory_bot_rails
   fakefs
   faker
+  fakeredis
   fhir_client
   health_check
   hiredis
