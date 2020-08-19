@@ -72,6 +72,10 @@ RSpec.feature 'user resets password' do
       Rails.configuration.x.mail_throttle.limit = 1
     end
 
+    after do
+      Rails.configuration.x.mail_throttle.limit = 10
+    end
+
     scenario 'it does not send an email' do
       visit new_user_password_path
 

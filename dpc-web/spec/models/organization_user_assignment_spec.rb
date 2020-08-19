@@ -43,6 +43,10 @@ RSpec.describe OrganizationUserAssignment, type: :model do
           Rails.configuration.x.mail_throttle.limit = 0
         end
 
+        after do
+          Rails.configuration.x.mail_throttle.limit = 10
+        end
+
         it 'does not send an email' do
           allow(ENV).to receive(:[]).and_call_original
           allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')

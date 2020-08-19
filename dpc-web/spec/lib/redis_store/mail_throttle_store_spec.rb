@@ -13,6 +13,11 @@ describe RedisStore::MailThrottleStore do
     Rails.configuration.x.mail_throttle.expiration = expiration
   end
 
+  after do
+    Rails.configuration.x.mail_throttle.limit = 10
+    Rails.configuration.x.mail_throttle.expiration = 300
+  end
+
   describe '.can_email?' do
     context 'when under the throttle limit' do
       it 'returns true' do
