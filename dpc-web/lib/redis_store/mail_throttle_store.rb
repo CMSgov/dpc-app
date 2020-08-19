@@ -17,6 +17,7 @@ module RedisStore
 
     def can_email?(key)
       return false if get_value(key) >= @limit
+
       increment(key)
     end
 

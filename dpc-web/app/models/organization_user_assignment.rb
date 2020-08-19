@@ -16,9 +16,11 @@ class OrganizationUserAssignment < ApplicationRecord
 
     mail_throttle_store = RedisStore::MailThrottleStore.new
 
-    UserMailer
-      .with(user: user, vendor: organization.health_it_vendor?)
-      .organization_sandbox_email
-      .deliver_later if mail_throttle_store.can_email? user.email
+    if mail_throttle_store.can_email? user.email
+      UserMailer
+        .with(user: user, vendor: organization.health_it_vendor?)
+        .organization_sandbox_email
+        .deliver_later
+    end
   end
 end
