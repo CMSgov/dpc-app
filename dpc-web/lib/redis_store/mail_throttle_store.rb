@@ -4,16 +4,19 @@ require 'redis-namespace'
 
 module RedisStore
   class MailThrottleStore
+    # Redis interface for rate limiting user mail
+
     NAMESPACE = 'mail_throttle'
-    LIMIT = 10 # Limit to 10 emails before hard stop
-    EXPIRATION = 300 # In seconds
 
     def initialize
+      # Retrieve redis instance with a provided namespace
+      @limit = Rails.configuration.x.mail_throttle.limit
+      @expiration = Rails.configuration.x.mail_throttle.expiration
       @redis = Redis::Namespace.new(NAMESPACE, redis: Redis.current)
     end
 
     def can_email?(key)
-      return false if get_value(key) >= LIMIT
+      return false if get_value(key) >= @limit
       increment(key)
     end
 
@@ -21,7 +24,7 @@ module RedisStore
 
     def increment(key)
       @redis.incr(key)
-      @redis.expire(key, EXPIRATION)
+      @redis.expire(key, @expiration)
     end
 
     def get_value(key)
