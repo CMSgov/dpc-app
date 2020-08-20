@@ -69,9 +69,9 @@ GEM
     bcrypt (3.1.13)
     bcrypt (3.1.13-java)
     bindex (0.8.1)
-    bootsnap (1.4.6)
+    bootsnap (1.4.8)
       msgpack (~> 1.0)
-    bootsnap (1.4.6-java)
+    bootsnap (1.4.8-java)
       msgpack (~> 1.0)
     brakeman (4.9.0)
     builder (3.2.4)
@@ -423,7 +423,7 @@ GEM
     sidekiq_alive (2.0.2)
       sidekiq
       sinatra
-    simplecov (0.18.5)
+    simplecov (0.19.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
     simplecov-html (0.12.2)
