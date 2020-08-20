@@ -6,6 +6,7 @@ import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.hibernate.UnitOfWork;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Period;
@@ -19,7 +20,6 @@ import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.common.MDCConstants.EOB_ID;
 
@@ -63,60 +63,61 @@ public class LookBackServiceImpl implements LookBackService {
                 .map(Identifier::getValue)
                 .orElse(null);
 
-        Set<String> eobProviderNPIs = extractPractionerNPIs(explanationOfBenefit);
+        Pair<String, Set<String>> npis = extractPractionerNPIs(explanationOfBenefit);
+        Set<String> allNPIs = new HashSet<>(npis.getRight());
+        allNPIs.add(npis.getLeft());
 
-        boolean passLookBack = passLookBack(billingPeriod, providerNPI, organizationID, eobOrganizationID, eobProviderNPIs, withinMonth);
-        LOGGER.info("billingPeriodDate={}, lookBackDate={}, eobProviders={}, jobProvider={}, eobOrganization={} jobOrganization={}, passLookBack={}",
-                billingPeriod, operationsConfig.getLookBackDate(), eobProviderNPIs, providerNPI, eobOrganizationID, organizationID, passLookBack);
+        LookBackAnswer lookBackAnswer = passLookBack(billingPeriod, providerNPI, organizationID, eobOrganizationID, allNPIs, withinMonth);
+        LOGGER.info("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={} jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
+                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.getBillingDateMonthsFromNow(), npis.getLeft(), npis.getRight(), providerNPI, eobOrganizationID,
+                organizationID, lookBackAnswer.isMatchLookBackLimitCriteria(), lookBackAnswer.isMatchProvidersCriteria(), lookBackAnswer.isMatchOrganizationCriteria());
 
         MDC.remove(EOB_ID);
-        return passLookBack;
+        return lookBackAnswer.answer();
     }
 
-    private boolean passLookBack(Date billingPeriod, String providerID, String organizationID, String eobOrganizationID, Set<String> eobProviderNPIs, long withinMonth) {
+    private LookBackAnswer passLookBack(Date billingPeriod, String providerID, String organizationID, String eobOrganizationID, Set<String> eobProviderNPIs, long withinMonth) {
         Optional<Date> optionalBillingPeriod = Optional.ofNullable(billingPeriod);
         Optional<String> optionalProviderID = Optional.ofNullable(providerID);
         Optional<String> optionalOrganizationID = Optional.ofNullable(organizationID);
         Optional<String> optionalEobOrganizationID = Optional.ofNullable(eobOrganizationID);
 
-        boolean result = false;
+        LookBackAnswer result = new LookBackAnswer();
         if (optionalBillingPeriod.isPresent() && optionalProviderID.isPresent() && optionalOrganizationID.isPresent() && optionalEobOrganizationID.isPresent()) {
             long lookBackMonthsDifference = getMonthsDifference(optionalBillingPeriod.get(), operationsConfig.getLookBackDate());
             boolean eobContainsProvider = eobProviderNPIs.contains(optionalProviderID.get());
             boolean eobRelatedToOrganization = optionalOrganizationID.get().equals(optionalEobOrganizationID.get());
             boolean eobWithinLookBackLimit = lookBackMonthsDifference < withinMonth;
-            result = eobWithinLookBackLimit
-                    && eobContainsProvider
-                    && eobRelatedToOrganization;
+            result.setMatchLookBackLimitCriteria(eobWithinLookBackLimit);
+            result.setMatchOrganizationCriteria(eobRelatedToOrganization);
+            result.setMatchProvidersCriteria(eobContainsProvider);
+            result.setBillingDateMonthsFromNow(lookBackMonthsDifference);
         }
         return result;
     }
 
-    private Set<String> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
-        Set<String> eobProviderNPIs = new HashSet<>();
-        Optional.ofNullable(explanationOfBenefit)
+    private Pair<String, Set<String>> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
+        String providerNPI = Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getProvider)
                 .map(Reference::getIdentifier)
                 .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
                 .map(Identifier::getValue)
                 .filter(StringUtils::isNotBlank)
-                .ifPresent(eobProviderNPIs::add);
+                .orElse(null);
 
+        Set<String> careTeamProviders = new HashSet<>();
         Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getCareTeam)
-                .ifPresent(careTeamComponents -> {
-                    List<String> npisInCareTeam = careTeamComponents.stream()
-                            .filter(ExplanationOfBenefit.CareTeamComponent::hasProvider)
-                            .map(ExplanationOfBenefit.CareTeamComponent::getProvider)
-                            .map(Reference::getIdentifier)
-                            .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
-                            .map(Identifier::getValue)
-                            .filter(StringUtils::isNotBlank)
-                            .collect(Collectors.toList());
-                    eobProviderNPIs.addAll(npisInCareTeam);
-                });
+                .ifPresent(careTeamComponents -> careTeamComponents.stream()
+                        .filter(ExplanationOfBenefit.CareTeamComponent::hasProvider)
+                        .map(ExplanationOfBenefit.CareTeamComponent::getProvider)
+                        .map(Reference::getIdentifier)
+                        .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
+                        .map(Identifier::getValue)
+                        .filter(StringUtils::isNotBlank)
+                        .forEach(careTeamProviders::add));
 
-        return eobProviderNPIs;
+        return Pair.of(providerNPI, careTeamProviders);
     }
 
     private long getMonthsDifference(Date date1, Date date2) {
