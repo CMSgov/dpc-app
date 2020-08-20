@@ -65,9 +65,8 @@ public class LookBackServiceImpl implements LookBackService {
 
         Set<String> eobProviderNPIs = extractPractionerNPIs(explanationOfBenefit);
 
-
         boolean passLookBack = passLookBack(billingPeriod, providerNPI, organizationID, eobOrganizationID, eobProviderNPIs, withinMonth);
-        LOGGER.info("lookBackDateCompare={}-{}, providerCompare={}-{}, organizationCompare={}-{}, passLookBack={}",
+        LOGGER.info("billingPeriodDate={}, lookBackDate={}, eobProviders={}, jobProvider={}, eobOrganization={} jobOrganization={}, passLookBack={}",
                 billingPeriod, operationsConfig.getLookBackDate(), eobProviderNPIs, providerNPI, eobOrganizationID, organizationID, passLookBack);
 
         MDC.remove(EOB_ID);
@@ -80,19 +79,17 @@ public class LookBackServiceImpl implements LookBackService {
         Optional<String> optionalOrganizationID = Optional.ofNullable(organizationID);
         Optional<String> optionalEobOrganizationID = Optional.ofNullable(eobOrganizationID);
 
-        if (optionalBillingPeriod.isEmpty() || optionalProviderID.isEmpty() || optionalOrganizationID.isEmpty() || optionalEobOrganizationID.isEmpty()) {
-            LOGGER.info("eob BillingPeriod or job providerID or job organizationID or eob OrganizationID are null");
-            return false;
+        boolean result = false;
+        if (optionalBillingPeriod.isPresent() && optionalProviderID.isPresent() && optionalOrganizationID.isPresent() && optionalEobOrganizationID.isPresent()) {
+            long lookBackMonthsDifference = getMonthsDifference(optionalBillingPeriod.get(), operationsConfig.getLookBackDate());
+            boolean eobContainsProvider = eobProviderNPIs.contains(optionalProviderID.get());
+            boolean eobRelatedToOrganization = optionalOrganizationID.get().equals(optionalEobOrganizationID.get());
+            boolean eobWithinLookBackLimit = lookBackMonthsDifference < withinMonth;
+            result = eobWithinLookBackLimit
+                    && eobContainsProvider
+                    && eobRelatedToOrganization;
         }
-
-        long lookBackMonthsDifference = getMonthsDifference(optionalBillingPeriod.get(), operationsConfig.getLookBackDate());
-        boolean eobContainsProvider = eobProviderNPIs.contains(optionalProviderID.get());
-        boolean eobRelatedToOrganization = optionalOrganizationID.get().equals(optionalEobOrganizationID.get());
-        boolean eobWithinLookBackLimit = lookBackMonthsDifference < withinMonth;
-
-        return eobWithinLookBackLimit
-                && eobContainsProvider
-                && eobRelatedToOrganization;
+        return result;
     }
 
     private Set<String> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
@@ -116,7 +113,6 @@ public class LookBackServiceImpl implements LookBackService {
                             .map(Identifier::getValue)
                             .filter(StringUtils::isNotBlank)
                             .collect(Collectors.toList());
-
                     eobProviderNPIs.addAll(npisInCareTeam);
                 });
 
