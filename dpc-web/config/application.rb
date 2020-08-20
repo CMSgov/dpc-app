@@ -55,7 +55,8 @@ module DpcWebsite
     config.to_prepare { Devise::Mailer.layout "mailer" }
 
     # Mail throttling
-    config.x.mail_throttle.limit = 10 # Limit to 10 emails before hard stop
+    # Default limit to 5 emails before hard stop
+    config.x.mail_throttle.limit = ENV.fetch('MAIL_THROTTLE_LIMIT', 5)
     config.x.mail_throttle.expiration = 300 # In seconds
   end
 end
