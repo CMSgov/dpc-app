@@ -8,14 +8,14 @@ describe RedisStore::MailThrottleStore do
   let(:limit) { 2 }
   let(:expiration) { 5 }
 
-  before do
+  around(:each) do |spec|
+    default_limit = Rails.configuration.x.mail_throttle.limit
+    default_expiration = Rails.configuration.x.mail_throttle.expiration
     Rails.configuration.x.mail_throttle.limit = limit
     Rails.configuration.x.mail_throttle.expiration = expiration
-  end
-
-  after do
-    Rails.configuration.x.mail_throttle.limit = 10
-    Rails.configuration.x.mail_throttle.expiration = 300
+    spec.run
+    Rails.configuration.x.mail_throttle.limit = default_limit
+    Rails.configuration.x.mail_throttle.expiration = default_expiration
   end
 
   describe '.can_email?' do

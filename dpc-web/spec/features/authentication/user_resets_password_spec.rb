@@ -68,12 +68,11 @@ RSpec.feature 'user resets password' do
   end
 
   context 'with too many emails' do
-    before do
+    around(:each) do |spec|
+      default_limit = Rails.configuration.x.mail_throttle.limit
       Rails.configuration.x.mail_throttle.limit = 1
-    end
-
-    after do
-      Rails.configuration.x.mail_throttle.limit = 10
+      spec.run
+      Rails.configuration.x.mail_throttle.limit = default_limit
     end
 
     scenario 'it does not send an email' do

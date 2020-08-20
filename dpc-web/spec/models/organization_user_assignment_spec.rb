@@ -39,12 +39,11 @@ RSpec.describe OrganizationUserAssignment, type: :model do
       end
 
       context 'when mail rate limit has been reached' do
-        before do
+        around(:each) do |spec|
+          default_limit = Rails.configuration.x.mail_throttle.limit
           Rails.configuration.x.mail_throttle.limit = 0
-        end
-
-        after do
-          Rails.configuration.x.mail_throttle.limit = 10
+          spec.run
+          Rails.configuration.x.mail_throttle.limit = default_limit
         end
 
         it 'does not send an email' do
