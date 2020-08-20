@@ -68,7 +68,7 @@ public class LookBackServiceImpl implements LookBackService {
         allNPIs.add(npis.getLeft());
 
         LookBackAnswer lookBackAnswer = passLookBack(billingPeriod, providerNPI, organizationID, eobOrganizationID, allNPIs, withinMonth);
-        LOGGER.info("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={} jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
+        LOGGER.info("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={}, jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
                 billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.getBillingDateMonthsFromNow(), npis.getLeft(), npis.getRight(), providerNPI, eobOrganizationID,
                 organizationID, lookBackAnswer.isMatchLookBackLimitCriteria(), lookBackAnswer.isMatchProvidersCriteria(), lookBackAnswer.isMatchOrganizationCriteria());
 
