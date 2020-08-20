@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.inject.Inject;
 import java.time.YearMonth;
@@ -19,6 +20,8 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static gov.cms.dpc.common.MDCConstants.EOB_ID;
 
 public class LookBackServiceImpl implements LookBackService {
 
@@ -39,74 +42,71 @@ public class LookBackServiceImpl implements LookBackService {
     @UnitOfWork(readOnly = true)
     public String getProviderNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
         //Expect only one roster for the parameters, otherwise return null
-        String npi = rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
-        LOGGER.info("jobProviderNPI={}", npi);
-        return npi;
+        return rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
     }
 
     @Override
     @UnitOfWork(readOnly = true)
-    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String providerUUID, long withinMonth) {
-        Optional<Date> billingPeriod = Optional.ofNullable(explanationOfBenefit)
+    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String providerNPI, long withinMonth) {
+        MDC.put(EOB_ID, explanationOfBenefit.getId());
+        Date billingPeriod = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)
-                .map(Period::getEnd);
+                .map(Period::getEnd)
+                .orElse(null);
 
-        Optional<String> providerID = Optional.ofNullable(providerUUID);
+        String organizationID = organizationDAO.fetchOrganizationNPI(organizationUUID).orElse(null);
 
-        Optional<String> organizationID = organizationDAO.fetchOrganizationNPI(organizationUUID);
-
-        Optional<String> eobOrganizationID = Optional.ofNullable(explanationOfBenefit)
+        String eobOrganizationID = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getOrganization)
                 .map(Reference::getIdentifier)
                 .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
-                .map(Identifier::getValue);
+                .map(Identifier::getValue)
+                .orElse(null);
 
         Set<String> eobProviderNPIs = extractPractionerNPIs(explanationOfBenefit);
 
-        LOGGER.info("billingPeriod={}", billingPeriod.orElse(null));
-        LOGGER.info("eobOrganizationID={}", eobOrganizationID.orElse(null));
-        LOGGER.info("jobOrganizationID={}", organizationID.orElse(null));
 
-        if (billingPeriod.isEmpty() || providerID.isEmpty() || organizationID.isEmpty() || eobOrganizationID.isEmpty()) {
+        boolean passLookBack = passLookBack(billingPeriod, providerNPI, organizationID, eobOrganizationID, eobProviderNPIs, withinMonth);
+        LOGGER.info("lookBackDateCompare={}-{}, providerCompare={}-{}, organizationCompare={}-{}, passLookBack={}",
+                billingPeriod, operationsConfig.getLookBackDate(), eobProviderNPIs, providerNPI, eobOrganizationID, organizationID, passLookBack);
+
+        MDC.remove(EOB_ID);
+        return passLookBack;
+    }
+
+    private boolean passLookBack(Date billingPeriod, String providerID, String organizationID, String eobOrganizationID, Set<String> eobProviderNPIs, long withinMonth) {
+        Optional<Date> optionalBillingPeriod = Optional.ofNullable(billingPeriod);
+        Optional<String> optionalProviderID = Optional.ofNullable(providerID);
+        Optional<String> optionalOrganizationID = Optional.ofNullable(organizationID);
+        Optional<String> optionalEobOrganizationID = Optional.ofNullable(eobOrganizationID);
+
+        if (optionalBillingPeriod.isEmpty() || optionalProviderID.isEmpty() || optionalOrganizationID.isEmpty() || optionalEobOrganizationID.isEmpty()) {
             LOGGER.info("eob BillingPeriod or job providerID or job organizationID or eob OrganizationID are null");
             return false;
         }
 
-        long lookBackMonthsDifference = getMonthsDifference(billingPeriod.get(), operationsConfig.getLookBackDate());
-        boolean eobContainsProvider = eobProviderNPIs.contains(providerID.get());
-        boolean eobRelatedToOrganization = organizationID.get().equals(eobOrganizationID.get());
+        long lookBackMonthsDifference = getMonthsDifference(optionalBillingPeriod.get(), operationsConfig.getLookBackDate());
+        boolean eobContainsProvider = eobProviderNPIs.contains(optionalProviderID.get());
+        boolean eobRelatedToOrganization = optionalOrganizationID.get().equals(optionalEobOrganizationID.get());
         boolean eobWithinLookBackLimit = lookBackMonthsDifference < withinMonth;
 
-        boolean hasClaim = eobWithinLookBackLimit
+        return eobWithinLookBackLimit
                 && eobContainsProvider
                 && eobRelatedToOrganization;
-
-        LOGGER.info("LookBack stats eobWithinLookBackLimit={}, eobContainsProvider={}, eobRelatedToOrganization={}, eobMonthsDifference={}, hasClaim={}",
-                eobWithinLookBackLimit, eobContainsProvider, eobRelatedToOrganization, lookBackMonthsDifference, hasClaim);
-
-        return hasClaim;
     }
 
     private Set<String> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
         Set<String> eobProviderNPIs = new HashSet<>();
-        Optional<String> providerNPI = Optional.ofNullable(explanationOfBenefit)
+        Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getProvider)
                 .map(Reference::getIdentifier)
                 .filter(i -> DPCIdentifierSystem.NPPES.getSystem().equals(i.getSystem()))
                 .map(Identifier::getValue)
-                .filter(StringUtils::isNotBlank);
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(eobProviderNPIs::add);
 
-        LOGGER.info("eobProviderNPI={}", providerNPI.orElse(null));
-        providerNPI.ifPresent(eobProviderNPIs::add);
-
-        Optional<List<ExplanationOfBenefit.CareTeamComponent>> careTeam = Optional.ofNullable(explanationOfBenefit)
-                .map(ExplanationOfBenefit::getCareTeam);
-
-        if (careTeam.isEmpty()) {
-            LOGGER.info("careTeam=empty");
-        }
-
-        careTeam
+        Optional.ofNullable(explanationOfBenefit)
+                .map(ExplanationOfBenefit::getCareTeam)
                 .ifPresent(careTeamComponents -> {
                     List<String> npisInCareTeam = careTeamComponents.stream()
                             .filter(ExplanationOfBenefit.CareTeamComponent::hasProvider)
@@ -117,7 +117,6 @@ public class LookBackServiceImpl implements LookBackService {
                             .filter(StringUtils::isNotBlank)
                             .collect(Collectors.toList());
 
-                    LOGGER.info("careTeamNPIs={}", npisInCareTeam);
                     eobProviderNPIs.addAll(npisInCareTeam);
                 });
 
