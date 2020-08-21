@@ -66,4 +66,33 @@ RSpec.feature 'user resets password' do
       expect(page.body).to include('Your password has been changed successfully')
     end
   end
+
+  context 'with too many emails' do
+    around(:each) do |spec|
+      default_limit = Rails.configuration.x.mail_throttle.limit
+      Rails.configuration.x.mail_throttle.limit = 1
+      spec.run
+      Rails.configuration.x.mail_throttle.limit = default_limit
+    end
+
+    scenario 'it does not send an email' do
+      visit new_user_password_path
+
+      fill_in 'user_email', with: user.email
+
+      expect do
+        find('input[data-test="submit"]').click
+        Sidekiq::Worker.drain_all
+      end.to change(ActionMailer::Base.deliveries, :count).by(1)
+
+      visit new_user_password_path
+
+      fill_in 'user_email', with: user.email
+
+      expect do
+        find('input[data-test="submit"]').click
+        Sidekiq::Worker.drain_all
+      end.to change(ActionMailer::Base.deliveries, :count).by(0)
+    end
+  end
 end
