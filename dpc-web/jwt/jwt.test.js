@@ -11,7 +11,7 @@ var env = 'https://sandbox.dpc.cms.gov';
 
 test('generates an unsigned JWT and JWT with user input', () => {
   var clientToken = 'W3sidiI6MiwibCI6Imh0dHA6LyMiIsImkiOiIxZWIxZGM5OS0zYTlmLTQwNTYtYjA5Y2MiLCJjIjpbeyJpNjQiOiJaSEJqWDIxaFkyRnliMjl1WDNabGNuTnBiMjRnUFNBeSJ9LHsiaTY0IjoiWlhod2FYSmxjeUE5SURJd01qRXRNRGd0TVRoVU1qTTZNVFE2TWpVdU5qQXpNemt3V2cifSx7Imk2NCI6ImIzSm5jlqOXdQY2NOMlRBdHIxb2kyeG5McGk2RUZMSDZuNjZ3IiwidjY0IjoiMUkwTFlrZVRyU21yMHhHV3dSckM1TEZteU9GNThDUi1zbjcxUEQwMW5sWktCZjNZUXRSVnUxWUp6Q2ZQNFJlbGNlbVJRUU9ucUZOOC1zWmJCNEFKYm9ReGRycG5IalNWIn1dLCJzNjQiOiJveXdLVmZVMkt6YmtjbXlNSE9Cb1lvUWUwc1NhZEZYdzFNc1E2dHd1a0lrIn1d';
-  var privateKey = `-----BEGIN RSA PRIVATE KEY-----\nMIIJKQIBAAKCAH2lQMtMGbJ1dDwEo3q7S+L9yVBEEFYxTXcrhb2NaM6w4\nrvrerxFIj+RXoWTx4KDYJuzyWjvD46errz2WuAK7pzej0Ni0U/jX2y+rA+b9/SKb\nORyZQcgvY7RVmduyc1txGwZW7UHLSm9d+Ukm6zYqXXiL5wGgnB2/y8JaUXrZrM6h\nqTNrtsusQDXb2ssVTKfIZh/jGGF6wotDc9VH+hXslE/CQUYic26hRTEZLbKepLAq\nFfRnHK1vRKC/EinFNZ7ctz4SSL7qsSf0l4wgmnDGimZIXupvhRV4+c2DsqPJZs/n\nf214qCJrjudNSECp18jQOle8w0zgAAuzrGdgAKxs0T6j7YOqfM/Zjrh0cRWzKKRM\n+QG2AmK7s2ODfdm8hlux8VqTtIZrPbtG4vrYCdorl8FLuWIbwfFUPCA9gJwsHIX+\ni+yFlBXm+ENXnQB/xTVADUa94lceYTi8Le8Y1b6BXe6obPpmN2VJOj+ej95pwk6U\nH6rYIPO6ehHKPzyze6dIYtBGE5JTTzfExO6Q9cufgXnZIAfxAkvT782E21d2az3l\nc9KAbSTC6lpEn6+4DW5Es+buu4o+GB0lrwTzUGyG4yrLrUJS6DlN2e0GjtepcgMgA2/1cb5FnbRTOANREy/3FH\n0LwW940XkUvyYUtU3i3I+S8T0+S4Bm+Nd0m0w5FJszoMc45OpXz9p6HkipF+tpyP\njPgQQ08MucwyRl7SiOmEFKnGYH9mGLufr9KmhQz1s3Jf1z4iEMqvGlpXJFI0Glc7\ntSvzgcp4MnvYiUtpo6PIMFvDQQcJCLjBhwlwXxLmxvnAyA+UtNCxqtwUEQMh\n-----END RSA PRIVATE KEY-----`;
+  var privateKey = `Zjrh0cRWzKKRM\n+QG2AmK7s2ODfdm8hlux8VqTtIZrPbtG4vrYCdorl8FLuWIbwfFUPCA9gJwsHIX+\ni+yFlBXm+ENXnQB/xTVADUa94lceYTi8Le8Y1b6BXe6obPpmN2VJOj+ej95pwk6U\nH6rYIPO6ehHKPzyze6dIYtBGE5JTTzfExO6Q9cufgXnZIAfxAkvT782E21d2az3l\nc9KAbSTC6lpEn6+4DW5Es+buu4o+GB0lrwTzUGyG4yrLrUJS6DlN2e0GjtepcgMgA2/1cb5FnbRTOANREy/3FH\n0LwW940XkUvyYUtU3i3I+S8T0+S4Bm+Nd0m0w5FJszoMc45OpXz9p6HkipF+tpyP\njPgQQ08MucwyRl7SiOmEFKnGYH9mGLufr9KmhQz1s3Jf1z4iEMqvGlpXJFI0Glc7\ntSvzgcp4MnvYiUtpo6PIMFvDQQcJCLjBhwlwXxLmxvnAyA+UtNCxqtwUEQMh`;
   var keyId = 'fd38276d-786a-49ec-9987-5e7b258e77cf';
 
   const result = generateJwtTest(env, clientToken, privateKey, keyId);
@@ -27,7 +27,7 @@ test('generates an unsigned JWT and JWT with user input', () => {
 
 test('decoded JWT matches user input', () => {
   var clientToken = 'W3sidiI6MiwibCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMiIsImkiOiIxYtYjA5OC03NGFkMzNCJjIjpbeyJpNjQiOiJaSEJqWDIxaFkyRnliMjl1WDNaNOMlRBdHIxb2kyeG5McGk2RUZMSDZuNjZ3IiwidjY0IjoiMUkwTFlrZVRyU21yMHhHV3dSckM1TEZteU9GNThDUi1zbjcxUEQwMW5sWktCZjNZUXRSVnUxWUp6Q2ZQNFJlbGNlbVJRUU9ucUZOOC1zWmJCNEFKYm9ReGRycG5IalNWIn1dLCJzNjQiOiJveXdLVmZVMkt6YmtjbXlNSE9Cb1lvUWUwc1NhZEZYdzFNc1E2dHd1a0lrIn1d';
-  var privateKey = `-----BEGIN RSA PRIVATE KEY-----\nMIIJKQIBAAKCAgEAtVT4NBbthWNNwcQDlmX1dQBiwFq0uUtx4NaremA\ntSvzgcp4MnvYiUtpo6PIMFvDQQcJCLjBhwlwXxLmxvnAyA+UtNCxqtwUEQMh\n-----END RSA PRIVATE KEY-----`;
+  var privateKey = `\nMIIJKQIBAAKCAgEAtVT4NBbthWNNwcQDlmX1dQBiwFq0uUtx4NaremA\ntSvzgcp4MnvYiUtpo6PIMFvDQQcJCLjBhwlwXxLmxvnAyA+UtNCxqtwUEQMh`;
   var keyId = 'fd38276d-786a-49ec-9987-5e7b258e77cf';
 
   const result = generateJwtTest(env, clientToken, privateKey, keyId);
