@@ -16,9 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.inject.Inject;
-import java.time.YearMonth;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static gov.cms.dpc.common.MDCConstants.EOB_ID;
@@ -67,33 +64,16 @@ public class LookBackServiceImpl implements LookBackService {
         Set<String> allNPIs = new HashSet<>(npis.getRight());
         allNPIs.add(npis.getLeft());
 
-        LookBackAnswer lookBackAnswer = passLookBack(billingPeriod, providerNPI, organizationID, eobOrganizationID, allNPIs, withinMonth);
+        LookBackAnswer lookBackAnswer = new LookBackAnswer(providerNPI, organizationID, withinMonth, operationsConfig.getLookBackDate())
+                .addEobBillingPeriod(billingPeriod)
+                .addEobOrganization(eobOrganizationID)
+                .addEobProviders(allNPIs);
         LOGGER.info("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={}, jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
-                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.getBillingDateMonthsFromNow(), npis.getLeft(), npis.getRight(), providerNPI, eobOrganizationID,
-                organizationID, lookBackAnswer.isMatchLookBackLimitCriteria(), lookBackAnswer.isMatchProvidersCriteria(), lookBackAnswer.isMatchOrganizationCriteria());
+                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), npis.getRight(), providerNPI, eobOrganizationID,
+                organizationID, lookBackAnswer.matchDateCriteria(), lookBackAnswer.providerMatchEob(), lookBackAnswer.orgMatchEob());
 
         MDC.remove(EOB_ID);
-        return lookBackAnswer.answer();
-    }
-
-    private LookBackAnswer passLookBack(Date billingPeriod, String providerID, String organizationID, String eobOrganizationID, Set<String> eobProviderNPIs, long withinMonth) {
-        Optional<Date> optionalBillingPeriod = Optional.ofNullable(billingPeriod);
-        Optional<String> optionalProviderID = Optional.ofNullable(providerID);
-        Optional<String> optionalOrganizationID = Optional.ofNullable(organizationID);
-        Optional<String> optionalEobOrganizationID = Optional.ofNullable(eobOrganizationID);
-
-        LookBackAnswer result = new LookBackAnswer();
-        if (optionalBillingPeriod.isPresent() && optionalProviderID.isPresent() && optionalOrganizationID.isPresent() && optionalEobOrganizationID.isPresent()) {
-            long lookBackMonthsDifference = getMonthsDifference(optionalBillingPeriod.get(), operationsConfig.getLookBackDate());
-            boolean eobContainsProvider = eobProviderNPIs.contains(optionalProviderID.get());
-            boolean eobRelatedToOrganization = optionalOrganizationID.get().equals(optionalEobOrganizationID.get());
-            boolean eobWithinLookBackLimit = lookBackMonthsDifference < withinMonth;
-            result.setMatchLookBackLimitCriteria(eobWithinLookBackLimit);
-            result.setMatchOrganizationCriteria(eobRelatedToOrganization);
-            result.setMatchProvidersCriteria(eobContainsProvider);
-            result.setBillingDateMonthsFromNow(lookBackMonthsDifference);
-        }
-        return result;
+        return lookBackAnswer.matchDateCriteria() && (lookBackAnswer.orgNPIMatchAnyEobNPIs() || lookBackAnswer.providerNPIMatchAnyEobNPIs());
     }
 
     private Pair<String, Set<String>> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
@@ -118,11 +98,5 @@ public class LookBackServiceImpl implements LookBackService {
                         .forEach(careTeamProviders::add));
 
         return Pair.of(providerNPI, careTeamProviders);
-    }
-
-    private long getMonthsDifference(Date date1, Date date2) {
-        YearMonth m1 = YearMonth.from(date1.toInstant().atZone(ZoneOffset.UTC));
-        YearMonth m2 = YearMonth.from(date2.toInstant().atZone(ZoneOffset.UTC));
-        return ChronoUnit.MONTHS.between(m1, m2);
     }
 }

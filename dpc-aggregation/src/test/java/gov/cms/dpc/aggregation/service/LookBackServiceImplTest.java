@@ -87,39 +87,26 @@ public class LookBackServiceImplTest {
     }
 
     @Test
-    public void testNonMatchingOrgID() {
-        OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
-        eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
-
-        boolean result = lookBackService.hasClaimWithin(eob, UUID.randomUUID(), providerNPI, 1);
-        Assertions.assertFalse(result);
-    }
-
-    @Test
-    public void testNonMatchingProviderID() {
+    public void testJobOrgMatchAnyEobNPIs() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
         boolean result = lookBackService.hasClaimWithin(eob, orgID, NPIUtil.generateNPI(), 1);
+        Assertions.assertTrue(result);
+
+        result = lookBackService.hasClaimWithin(eob, UUID.randomUUID(), NPIUtil.generateNPI(), 1);
         Assertions.assertFalse(result);
     }
 
     @Test
-    public void testMissingProviderID() {
-        eob.setProvider(null);
-
+    public void testJobProviderMatchAnyEobNPIs() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        boolean result = lookBackService.hasClaimWithin(eob, orgID, providerNPI, 1);
-        Assertions.assertFalse(result);
-
-        result = lookBackService.hasClaimWithin(eob, orgID, careTeamNPI, 1);
+        boolean result = lookBackService.hasClaimWithin(eob, UUID.randomUUID(), providerNPI, 1);
         Assertions.assertTrue(result);
 
-        eob.setCareTeam(null);
-
-        result = lookBackService.hasClaimWithin(eob, orgID, careTeamNPI, 1);
+        result = lookBackService.hasClaimWithin(eob, UUID.randomUUID(), NPIUtil.generateNPI(), 1);
         Assertions.assertFalse(result);
     }
 }

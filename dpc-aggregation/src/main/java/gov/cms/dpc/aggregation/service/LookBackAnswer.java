@@ -1,45 +1,84 @@
 package gov.cms.dpc.aggregation.service;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.time.YearMonth;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
 public class LookBackAnswer {
 
-    private boolean matchLookBackLimitCriteria;
-    private boolean matchProvidersCriteria;
-    private boolean matchOrganizationCriteria;
-    private long billingDateMonthsFromNow;
+    private final String providerNPI;
+    private final String organizationNPI;
+    private final long withinMonths;
+    private final Date lookBackMonth;
 
-    public boolean isMatchLookBackLimitCriteria() {
-        return matchLookBackLimitCriteria;
+    private final Set<String> eobProviderNPIs = new HashSet<>();
+    private String eobOrganizationNPI;
+    private Date billingPeriodEndDate;
+
+    public LookBackAnswer(String providerNPI, String organizationNPI, long withinMonths, Date lookBackMonth) {
+        this.providerNPI = providerNPI;
+        this.organizationNPI = organizationNPI;
+        this.withinMonths = withinMonths;
+        this.lookBackMonth = lookBackMonth;
     }
 
-    public void setMatchLookBackLimitCriteria(boolean matchLookBackLimitCriteria) {
-        this.matchLookBackLimitCriteria = matchLookBackLimitCriteria;
+    public LookBackAnswer addEobOrganization(String eobOrganization) {
+        eobOrganizationNPI = eobOrganization;
+        return this;
     }
 
-    public boolean isMatchProvidersCriteria() {
-        return matchProvidersCriteria;
+    public LookBackAnswer addEobProviders(Collection<String> eobProviders) {
+        eobProviderNPIs.addAll(eobProviders);
+        return this;
     }
 
-    public void setMatchProvidersCriteria(boolean matchProvidersCriteria) {
-        this.matchProvidersCriteria = matchProvidersCriteria;
+    public LookBackAnswer addEobBillingPeriod(Date billingPeriod) {
+        billingPeriodEndDate = billingPeriod;
+        return this;
     }
 
-    public boolean isMatchOrganizationCriteria() {
-        return matchOrganizationCriteria;
+    public Long calculatedMonthDifference() {
+        Long result = null;
+        if (billingPeriodEndDate != null && lookBackMonth != null) {
+            result = getMonthsDifference(billingPeriodEndDate, lookBackMonth);
+        }
+        return result;
     }
 
-    public void setMatchOrganizationCriteria(boolean matchOrganizationCriteria) {
-        this.matchOrganizationCriteria = matchOrganizationCriteria;
+    public boolean matchDateCriteria() {
+        boolean result = false;
+        Long monthDifference = calculatedMonthDifference();
+        if (monthDifference != null) {
+            result = monthDifference < withinMonths;
+        }
+        return result;
     }
 
-    public long getBillingDateMonthsFromNow() {
-        return billingDateMonthsFromNow;
+    public boolean orgNPIMatchAnyEobNPIs() {
+        return orgMatchEob() || eobProviderNPIs.contains(organizationNPI);
     }
 
-    public void setBillingDateMonthsFromNow(long billingDateMonthsFromNow) {
-        this.billingDateMonthsFromNow = billingDateMonthsFromNow;
+    public boolean orgMatchEob() {
+        return StringUtils.isNotBlank(organizationNPI) && StringUtils.equals(organizationNPI,eobOrganizationNPI);
     }
 
-    public boolean answer() {
-        return matchLookBackLimitCriteria && matchOrganizationCriteria && matchProvidersCriteria;
+    public boolean providerNPIMatchAnyEobNPIs() {
+        return providerMatchEob() || (StringUtils.isNotBlank(providerNPI) && StringUtils.equals(providerNPI,eobOrganizationNPI));
+    }
+
+    public boolean providerMatchEob() {
+        return eobProviderNPIs.contains(providerNPI);
+    }
+
+    private long getMonthsDifference(Date date1, Date date2) {
+        YearMonth m1 = YearMonth.from(date1.toInstant().atZone(ZoneOffset.UTC));
+        YearMonth m2 = YearMonth.from(date2.toInstant().atZone(ZoneOffset.UTC));
+        return ChronoUnit.MONTHS.between(m1, m2);
     }
 }
