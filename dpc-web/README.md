@@ -145,6 +145,11 @@ When you're done, shut down the server with the following command (this also des
 docker-compose down
 ```
 
+# Testing
+To test the rails app, run `rspec spec` in the terminal.
+
+To test the JWT generator, run `npm test` in the terminal.
+
 # Production
 
 When running in production, the Docker Compose database should not be used. RDS should be used instead. Additionally, the following environment variable should be used to set production mode: `RAILS_ENV=production`.
