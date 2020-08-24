@@ -71,7 +71,7 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
-        return this.dao.patientSearch(resourceID, idValue, organizationID)
+        return this.dao.patientSearch(resourceID, idValue.toUpperCase(), organizationID)
                 .stream()
                 .map(p -> this.converter.toFHIR(Patient.class, p))
                 .collect(Collectors.toList());
@@ -110,15 +110,13 @@ public class PatientResource extends AbstractPatientResource {
             final Response.Status status;
             final PatientEntity entity;
             // Check to see if Patient already exists, if so, ignore it.
-            final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
+            final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI.toUpperCase(), organizationID);
             if (!patientEntities.isEmpty()) {
                 status = Response.Status.OK;
                 entity = patientEntities.get(0);
             } else {
                 status = Response.Status.CREATED;
-                final PatientEntity patientEntity = this.converter.fromFHIR(PatientEntity.class, patient);
-                patientEntity.setBeneficiaryID(patientEntity.getBeneficiaryID().toUpperCase());
-                entity = this.dao.persistPatient(patientEntity);
+                entity = this.dao.persistPatient(this.converter.fromFHIR(PatientEntity.class, patient));
             }
 
             return Response.status(status)
@@ -170,9 +168,7 @@ public class PatientResource extends AbstractPatientResource {
     @Override
     public Response updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
         try {
-            PatientEntity patientEntity  = this.converter.fromFHIR(PatientEntity.class, patient);
-            patientEntity.setBeneficiaryID(patientEntity.getBeneficiaryID().toUpperCase());
-            patientEntity = this.dao.updatePatient(patientID,patientEntity );
+            final PatientEntity patientEntity = this.dao.updatePatient(patientID, this.converter.fromFHIR(PatientEntity.class, patient));
 
             return Response.ok()
                     .entity(this.converter.toFHIR(Patient.class, patientEntity))

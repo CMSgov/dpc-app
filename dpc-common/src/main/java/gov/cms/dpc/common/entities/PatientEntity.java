@@ -6,13 +6,11 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +29,6 @@ public class PatientEntity extends PersonEntity {
     @NoHtml
     @NotEmpty
     @Column(name = "beneficiary_id", unique = true)
-    @ColumnTransformer(write = "UPPER(?)")
     @Pattern(regexp = MBI_FORMAT, message = "Must be a Medicare Beneficiary Identifier (MBI)")
     private String beneficiaryID;
 
@@ -118,6 +115,14 @@ public class PatientEntity extends PersonEntity {
         this.setDob(updated.getDob());
         this.setGender(updated.getGender());
         return this;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void upperCaseBeneficiaryId() {
+        if(this.getBeneficiaryID()!=null){
+            this.setBeneficiaryID(this.getBeneficiaryID().toUpperCase());
+        }
     }
 
     @Override
