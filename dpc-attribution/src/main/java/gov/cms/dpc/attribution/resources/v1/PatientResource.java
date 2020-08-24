@@ -65,13 +65,13 @@ public class PatientResource extends AbstractPatientResource {
             if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
                 throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
             }
-            idValue = patientIdentifier.getValue();
+            idValue = patientIdentifier.getValue() !=null ? patientIdentifier.getValue() : null;
         } else {
             idValue = null;
         }
 
         final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
-        return this.dao.patientSearch(resourceID, idValue.toUpperCase(), organizationID)
+        return this.dao.patientSearch(resourceID, idValue, organizationID)
                 .stream()
                 .map(p -> this.converter.toFHIR(Patient.class, p))
                 .collect(Collectors.toList());
@@ -110,7 +110,7 @@ public class PatientResource extends AbstractPatientResource {
             final Response.Status status;
             final PatientEntity entity;
             // Check to see if Patient already exists, if so, ignore it.
-            final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI.toUpperCase(), organizationID);
+            final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
             if (!patientEntities.isEmpty()) {
                 status = Response.Status.OK;
                 entity = patientEntities.get(0);
