@@ -63,6 +63,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         removeAttributionRelationships(patientEntity);
 
         this.currentSession().delete(patientEntity);
+
         return true;
     }
 
