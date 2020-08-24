@@ -1,97 +1,213 @@
 <html>
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/8.0.20/jsrsasign-all-min.js"></script>
-<script>
-  function generateJWT() {
+  <title>JWT Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/8.0.20/jsrsasign-all-min.js"></script>
+  <script>
+    function generateJWT() {
 
-    var clientToken = document.getElementById("clientToken").value.trim();
-    var env = document.getElementById("environment").value.trim();
-    var privateKey = document.getElementById("privateKey").value.trim();
-    var keyId = document.getElementById("keyId").value.trim();
+      var clientToken = document.getElementById("clientToken").value.trim();
+      var privateKey = document.getElementById("privateKey").value.trim();
+      var keyId = document.getElementById("keyId").value.trim();
 
 
-    var dt = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = (dt + Math.random() * 16) % 16 | 0;
-      dt = Math.floor(dt / 16);
-      return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
+      var dt = new Date().getTime();
+      var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (dt + Math.random() * 16) % 16 | 0;
+        dt = Math.floor(dt / 16);
+        return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
 
-    var data = {
-      "iss": clientToken,
-      "sub": clientToken,
-      "aud": "https://" + env + "/v1/Token/auth",
-      "exp": Math.round(new Date().getTime() / 1000) + 300,
-      "iat": Math.round(Date.now()),
-      "jti": uuid,
-    };
+      var data = {
+        "iss": clientToken,
+        "sub": clientToken,
+        "exp": Math.round(new Date().getTime() / 1000) + 300,
+        "iat": Math.round(Date.now()),
+        "jti": uuid,
+      };
 
-    var secret = privateKey;
+      var secret = privateKey;
 
-    const header = {
-      'alg': 'RS384',
-      'kid': keyId,
+      const header = {
+        'alg': 'RS384',
+        'kid': keyId,
+      }
+
+      var sPayload = JSON.stringify(data);
+      var sJWT = KJUR.jws.JWS.sign("RS384", header, sPayload, secret);
+
+      document.getElementById("JWT").innerHTML = sJWT;
+    }
+  </script>
+
+  <style type="text/css" media="screen">
+    body {
+      margin: 0 auto;
+
+      /* Fonts */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-family: "Roboto", sans-serif;
+      font-size: 21px;
     }
 
-    var sPayload = JSON.stringify(data);
-    document.getElementById("unsignedJWT").innerHTML = JSON.stringify(data, null, 2);
-
-    var sJWT = KJUR.jws.JWS.sign("RS384", header, sPayload, secret);
-
-    document.getElementById("JWT").innerHTML = sJWT;
-
-  }
-</script>
-
-<style type="text/css" media="screen">
     h1 {
-        margin: 30px 0;
-        font-size: 4em;
-        line-height: 1;
-        letter-spacing: -1px;
+      margin: 30px 0;
+      font-size: 4em;
+      line-height: 1;
+      letter-spacing: -1px;
     }
-</style>
+
+    #banner {
+      /* Border */
+      border-bottom: 16px solid #112e51;
+
+      /* Spacing */
+      padding: 32px;
+
+      color: #112e51;
+      display: flex;
+      flex-direction: row;
+      font-weight: 700;
+    }
+
+    #banner_img {
+      margin: 0 8px 0 0;
+      width: 32px;
+    }
+
+    .container {
+      font-size: 16px;
+      margin: auto 128px;
+    }
+
+    .container-instructions {
+      margin: 25px 0;
+      line-height: 200%;
+    }
+
+    #container-list {
+      margin: 15px 0 30px 10px;
+    }
+
+    .container-list-item {
+      display: flex;
+      flex-direction: row;
+      font-size: 18px;
+      margin: 10px 0 0 10px;
+    }
+
+    #container-list-label {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .list-check {
+      color: #2E8540;
+      margin: 0 15px;
+    }
+
+    #title {
+      background-color: #FFF1D2;
+      margin: 15px 0;
+      padding: 15px 30px;
+      max-width: 600px;
+
+      font-size: 36px;
+      font-weight: 700;
+    }
+  </style>
 </head>
 <title>CMS DPC Java Web Token (JWT)</title>
 <body>
 
-    <h1>Create a JWT</h1>
-    <p>
-        Environment:<br>
-        <input type="text" id="environment" style="width:100%;">
+  <div id="banner">
+    <div id="banner_img">
+      <img src="https://dpc.cms.gov/assets/top-nav-heart-9a5f99e88ba96df9abe063da9cbb327e1bf3fde310476fdad1ef3ed75484a64e.svg">
+    </div>
+    <div>
+      Data at the Point of Care
+    </div>
+  </div>
 
-    </p>
+  <div id="title">
+    Create a JSON Web Token (JWT)
+  </div>
 
-    <p>
-        Private Key:<br>
+  
+  <div class="container">
+    <div class="container-instructions">
+      A JSON Web Token (JWT) authenticates your organization with DPC. If you have not already generated your client token and public/private key pair through the DPC Portal, please obtain these three prerequisites before proceeding.
+    </div>
+    <div class="container-instructions">
+      Once completed, you may generate your JWT using the instructions below.
+    </div>
+    <div>
+      <div id="container-list-label">
+        You will need:
+      </div>
+      <div id="container-list">
+        <div class="container-list-item">
+          <div class="list-check">
+            ✔
+          </div>
+          <div>
+            A registered client token
+          </div>
+        </div>
+        <div class="container-list-item">
+          <div class="list-check">
+            ✔
+          </div>
+          <div>
+            Your private key
+          </div>
+        </div>
+        <div class="container-list-item">
+          <div class="list-check">
+            ✔
+          </div>
+          <div>
+            Your public key ID
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="form">  
+      <div>
+        <div class="form-label">
+          Please input your Private Key:
+        </div>
         <textarea id="privateKey" rows="20" cols="100"></textarea>
+      </div>
 
-    </p>
-
-    <p>
-        Client Token:<br>
+      <div>
+        <div class="form-label">
+          Please input your Client Token:
+        </div>
         <textarea id="clientToken" rows="10" cols="100"></textarea>
+      </div>
 
-    </p>
-
-    <p>
-        Public Key ID:<br>
+      <div>
+        <div class="form-label">
+          Please input your Public Key ID:
+        </div>
         <input type="text" id="keyId" placeholder="xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="width:100%;">
+      </div>
 
-    </p>
+      <div>
+        <input id="form-button" type="button" value="Generate JWT" onclick="generateJWT()">
+      </div>
+    </div>
 
-   
-
-    <p> <input type="button" value="Generate JWT" onclick="generateJWT()">
-    </p>
-
-    <p>
-        Unsigned JWT:<br>
-        <textarea id="unsignedJWT" rows="20" cols="100"></textarea>
-    </p>
-    <p>
-    Your JWT:<br>
+    <div id="results">
+      <div>
+        Your JWT:<br>
         <textarea id="JWT" rows="20" cols="100"></textarea>
-    </p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
