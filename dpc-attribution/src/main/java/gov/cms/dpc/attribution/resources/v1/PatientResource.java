@@ -116,7 +116,9 @@ public class PatientResource extends AbstractPatientResource {
                 entity = patientEntities.get(0);
             } else {
                 status = Response.Status.CREATED;
-                entity = this.dao.persistPatient(this.converter.fromFHIR(PatientEntity.class, patient));
+                final PatientEntity patientEntity = this.converter.fromFHIR(PatientEntity.class, patient);
+                patientEntity.setBeneficiaryID(patientEntity.getBeneficiaryID().toUpperCase());
+                entity = this.dao.persistPatient(patientEntity);
             }
 
             return Response.status(status)
@@ -168,7 +170,9 @@ public class PatientResource extends AbstractPatientResource {
     @Override
     public Response updatePatient(@ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientID, Patient patient) {
         try {
-            final PatientEntity patientEntity = this.dao.updatePatient(patientID, this.converter.fromFHIR(PatientEntity.class, patient));
+            PatientEntity patientEntity  = this.converter.fromFHIR(PatientEntity.class, patient);
+            patientEntity.setBeneficiaryID(patientEntity.getBeneficiaryID().toUpperCase());
+            patientEntity = this.dao.updatePatient(patientID,patientEntity );
 
             return Response.ok()
                     .entity(this.converter.toFHIR(Patient.class, patientEntity))

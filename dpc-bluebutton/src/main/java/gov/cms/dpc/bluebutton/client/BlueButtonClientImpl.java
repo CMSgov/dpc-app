@@ -91,7 +91,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      */
     @Override
     public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException, GeneralSecurityException {
-        String mbiHash = hashMbi(mbi);
+        String mbiHash = hashMbi(mbi.toUpperCase());
         return requestPatientFromServerByMbiHash(mbiHash);
     }
 

@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.common.annotations.NoHtml;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -30,6 +31,7 @@ public class PatientEntity extends PersonEntity {
     @NoHtml
     @NotEmpty
     @Column(name = "beneficiary_id", unique = true)
+    @ColumnTransformer(write = "UPPER(?)")
     @Pattern(regexp = MBI_FORMAT, message = "Must be a Medicare Beneficiary Identifier (MBI)")
     private String beneficiaryID;
 
