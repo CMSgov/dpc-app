@@ -153,7 +153,7 @@ class PatientResourceTest extends AbstractAttributionTest {
     void testPatientSearchWithLowerCaseMbi() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
-        final Bundle secondSearch = client
+        final Bundle searchResult = client
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI.toLowerCase()))
@@ -162,7 +162,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(0, secondSearch.getTotal(), "Should not have any patients");
+        assertEquals(0, searchResult.getTotal(), "Should not have any patients");
     }
 
     @Test

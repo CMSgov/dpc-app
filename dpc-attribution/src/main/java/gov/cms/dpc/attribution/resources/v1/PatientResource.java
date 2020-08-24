@@ -65,7 +65,7 @@ public class PatientResource extends AbstractPatientResource {
             if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
                 throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
             }
-            idValue = patientIdentifier.getValue() !=null ? patientIdentifier.getValue() : null;
+            idValue = patientIdentifier.getValue();
         } else {
             idValue = null;
         }
