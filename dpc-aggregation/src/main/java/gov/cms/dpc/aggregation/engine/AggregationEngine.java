@@ -207,6 +207,8 @@ public class AggregationEngine implements Runnable {
                     .onErrorReturn((error) -> false)
                     .blockingGet();
             result = Boolean.TRUE.equals(hasClaims);
+        } else {
+            logger.error("couldn't get providerNPI from roster");
         }
         return result;
     }
