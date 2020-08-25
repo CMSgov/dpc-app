@@ -86,6 +86,7 @@ RSpec.describe Organization, type: :model do
     let!(:mailer) { double(UserMailer) }
 
     before(:each) do
+      allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
       allow(UserMailer).to receive(:with).and_return(mailer)
       allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
