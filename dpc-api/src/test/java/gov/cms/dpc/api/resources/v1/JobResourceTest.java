@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 public class JobResourceTest {
@@ -133,8 +132,8 @@ public class JobResourceTest {
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
         var expires = ZonedDateTime.parse(response.getHeaderString("Expires"), JobResource.HTTP_DATE_FORMAT);
-        assertAll(() -> expires.isAfter(ZonedDateTime.now().plusHours(23)),
-                () -> expires.isAfter(ZonedDateTime.now().plusHours(25)));
+        assertAll(() -> assertTrue(expires.isAfter(ZonedDateTime.now().plusHours(23))),
+                () -> assertTrue(expires.isBefore(ZonedDateTime.now().plusHours(25))));
 
         // Test the completion model
         final var completion = (JobCompletionModel) response.getEntity();
