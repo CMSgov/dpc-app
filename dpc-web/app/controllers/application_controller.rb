@@ -39,7 +39,7 @@ class ApplicationController < ActionController::Base
   end
 
   def download_jwt_tool
-    send_file 'public/jwt.html', type: 'application/zip', status: 202
+    send_file 'public/jwt/jwt.html', type: 'application/zip', status: 202
   end
 
   private
