@@ -47,7 +47,11 @@ Rails.application.routes.draw do
   match '/home', to: 'public#home', via: :get
 
   match '/docs', to: 'pages#reference', via: :get
+
+  # downloadable files
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
+  match '/download_jwt_tool', to: 'application#download_jwt_tool', as: 'download_jwt_tool', via: :post
+
   # match '/docs/guide', to: 'pages#guide', via: :get
   match '/faq', to: 'pages#faq', via: :get
   match '/support', to: 'pages#support', via: :get

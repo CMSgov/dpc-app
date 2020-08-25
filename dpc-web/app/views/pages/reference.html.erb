@@ -19,22 +19,10 @@
       <li class="sidenav__item">
         <a href="#environment" class="sidenav__link">Environment</a>
       </li>
-      <li class="sidenav__item">
-        <a href="#dpc-metadata" class="sidenav__link">DPC Metadata</a>
-      </li>
-      <li class="sidenav__item">
-          <a href="#attributing-patients-to-providers" class="sidenav__link">Attributing Patients to Providers</a>
-      </li>
-      <li class="sidenav__item">
-        <a href="#exporting-data" class="sidenav__link">Exporting data</a>
-      </li>
-      <li class="sidenav__item">
-        <a href="#dpc-implementation-guide" class="sidenav__link">Implementation Guide</a>
-      </li>
-      <li class="sidenav__item">
-        <a href="#openapi-documentation" class="sidenav__link">OpenAPI Documentation</a>
-      </li>
     </ul>
+    <div>
+      <%= button_to 'DOWNLOAD JWT TOOL', download_jwt_tool_path, class: "ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
+    </div>
   </div>
   <main class="ds-l-col--12 ds-l-md-col--8 ds-u-margin-bottom--7">
     <%= raw(@html_content) %>
