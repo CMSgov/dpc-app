@@ -1,7 +1,12 @@
-#guide-content {
-  em {
-    background-color: $color-warn-lightest;
-    color: $focus-border-inverse;
-    padding: 2.5px;
-  }
+pre {
+  background-color: $color-gray-lightest;
+  border-radius: 6px;
+
+  padding: 3px 5px;
+
+  white-space: pre-wrap;       /* css-3 */
+  white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
