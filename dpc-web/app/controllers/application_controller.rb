@@ -42,6 +42,14 @@ class ApplicationController < ActionController::Base
     send_file 'public/jwt/jwt.html', type: 'application/zip', status: 202
   end
 
+  def download_prac_json
+    send_file 'public/practitioner_bundle.json', type: 'application/zip', status: 202
+  end
+
+  def download_pt_json
+    send_file 'public/patient_bundle.json', type: 'application/zip', status: 202
+  end
+
   private
 
   def id_param

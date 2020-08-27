@@ -338,6 +338,7 @@ The following instructions are to be completed via the JWT Tool downloaded onto 
 2. Please input your Client Token.
 3. Please input your Public Key ID
     * This ID can be found under the "Public
+![Public Key Id](/assets/guide_public_key_id.svg)
 4. Click "Generate JWT"
 5. Copy "Your JWT" to begin validation for DPC
 
@@ -501,7 +502,7 @@ _Users can provide their own sample FHIR resources that fulfill the required FHI
 ### Find Organization ID
 You will need your organization ID to create an Attribution Group for Attestation.To find your Organization ID, sign-in to your account in the DPC Portal and locate your Organization ID within your token.
 
-PLACEHOLDER FOR DPC DASHBOARD IMAGE
+![Dashboard Org Id](/assets/guide_org_id.svg)
 
 The Organization endpoint supports a GET /Organization operation, which allows the user to retrieve their Organization ID.
 
@@ -801,8 +802,6 @@ POST /api/v1/Patient
 The Patient endpoint supports a $submit operation, which allows you to upload a Bundle of resources for registration in a single batch operation.
  
 Each Patient Resource in your Bundle may include additional attributes detailed in the FHIR Implementation Guide within the [DPC Patient Profile](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html), but at a minimum must satisfy the requirements on how to add a [Patient Resource](#add-a-patient), otherwise a 422 - Unprocessable Entity error will be returned.
-
-<!-- PLACEHOLDER FOR PATIENT BUNDLE DOWNLOAD -->
 
 #### Request:
 

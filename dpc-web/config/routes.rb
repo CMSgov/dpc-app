@@ -51,6 +51,8 @@ Rails.application.routes.draw do
   # downloadable files
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
   match '/download_jwt_tool', to: 'application#download_jwt_tool', as: 'download_jwt_tool', via: :post
+  match '/download_prac_json', to: 'application#download_prac_json', as: 'download_prac_json', via: :post
+  match '/download_pt_json', to: 'application#download_pt_json', as: 'download_pt_json', via: :post
 
   # match '/docs/guide', to: 'pages#guide', via: :get
   match '/faq', to: 'pages#faq', via: :get
