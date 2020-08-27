@@ -42,6 +42,12 @@ class APIClient
     self
   end
 
+  def delete_client_token(reg_org_api_id, token_id)
+    uri_string = base_url + '/Token/' + token_id
+
+    delete_request(uri_string, delegated_macaroon(reg_org_api_id))
+  end
+
   def get_client_tokens(reg_org_api_id)
     uri_string = base_url + '/Token'
     get_request(uri_string, delegated_macaroon(reg_org_api_id))
@@ -71,7 +77,7 @@ class APIClient
   end
 
   def response_successful?
-    @response_status == 200
+    (200...299).cover? @response_status
   end
 
   def fhir_client
@@ -97,7 +103,16 @@ class APIClient
   end
 
   def parsed_response(response)
+    return self if response.body.blank?
+
     JSON.parse response.body
+  end
+
+  def delete_request(uri_string, token)
+    uri = URI.parse uri_string
+    request = Net::HTTP::Delete.new(uri.request_uri, headers(token))
+
+    http_request(request, uri)
   end
 
   def get_request(uri_string, token)

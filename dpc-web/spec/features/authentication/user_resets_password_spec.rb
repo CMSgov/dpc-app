@@ -13,6 +13,7 @@ RSpec.feature 'user resets password' do
 
       expect do
         find('input[data-test="submit"]').click
+        Sidekiq::Worker.drain_all
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
@@ -36,6 +37,7 @@ RSpec.feature 'user resets password' do
 
       expect do
         find('input[data-test="submit"]').click
+        Sidekiq::Worker.drain_all
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
@@ -44,24 +46,53 @@ RSpec.feature 'user resets password' do
       visit reset_link
 
       fill_in 'user_password', with: 'CrabW0rd$_B00m#'
-      fill_in 'user_password_confirmation', with: "Idon'tMatch"
+      fill_in 'user_password_confirmation', with: "CrabW0rd$_B00m!"
       find('input[data-test="submit"]').click
 
       expect(page.body).to include('1 error prohibited this user from being saved:')
       expect(page.body).to include('Password confirmation doesn&#39;t match Password')
 
-      fill_in 'user_password', with: '#1Crab'
-      fill_in 'user_password_confirmation', with: '#1Crab'
+      fill_in 'user_password', with: '1Crab'
+      fill_in 'user_password_confirmation', with: '1Crab'
       find('input[data-test="submit"]').click
 
       expect(page.body).to include('1 error prohibited this user from being saved:')
-      expect(page.body).to include('Password is too short')
+      expect(page.body).to include('Password is too short (minimum is 6 characters)')
 
       fill_in 'user_password', with: 'CrabW0rd$_B00m#'
       fill_in 'user_password_confirmation', with: 'CrabW0rd$_B00m#'
       find('input[data-test="submit"]').click
 
       expect(page.body).to include('Your password has been changed successfully')
+    end
+  end
+
+  context 'with too many emails' do
+    around(:each) do |spec|
+      default_limit = Rails.configuration.x.mail_throttle.limit
+      Rails.configuration.x.mail_throttle.limit = 1
+      spec.run
+      Rails.configuration.x.mail_throttle.limit = default_limit
+    end
+
+    scenario 'it does not send an email' do
+      visit new_user_password_path
+
+      fill_in 'user_email', with: user.email
+
+      expect do
+        find('input[data-test="submit"]').click
+        Sidekiq::Worker.drain_all
+      end.to change(ActionMailer::Base.deliveries, :count).by(1)
+
+      visit new_user_password_path
+
+      fill_in 'user_email', with: user.email
+
+      expect do
+        find('input[data-test="submit"]').click
+        Sidekiq::Worker.drain_all
+      end.to change(ActionMailer::Base.deliveries, :count).by(0)
     end
   end
 end

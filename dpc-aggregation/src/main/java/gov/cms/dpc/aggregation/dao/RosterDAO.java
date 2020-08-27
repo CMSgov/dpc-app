@@ -10,6 +10,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class RosterDAO extends AbstractDAO<RosterEntity> {
@@ -26,7 +27,7 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
      * @param patientMBI            The patient MBI
      * @return the provider ID for that roster
      */
-    public String retrieveProviderNPIFromRoster(UUID organizationID, UUID providerOrRosterID, String patientMBI) {
+    public Optional<String> retrieveProviderNPIFromRoster(UUID organizationID, UUID providerOrRosterID, String patientMBI) {
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<String> query = builder.createQuery(String.class);
@@ -46,9 +47,9 @@ public class RosterDAO extends AbstractDAO<RosterEntity> {
 
         Query<String> q = currentSession().createQuery(query);
         try {
-            return q.getSingleResult();
+            return Optional.ofNullable(q.getSingleResult());
         } catch(NoResultException e) {
-            return null;
+            return Optional.empty();
         }
     }
 

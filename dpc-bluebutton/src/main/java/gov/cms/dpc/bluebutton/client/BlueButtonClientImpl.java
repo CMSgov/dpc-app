@@ -91,7 +91,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      */
     @Override
     public Bundle requestPatientFromServerByMbi(String mbi) throws ResourceNotFoundException, GeneralSecurityException {
-        String mbiHash = hashMbi(mbi);
+        String mbiHash = hashMbi(mbi.toUpperCase());
         return requestPatientFromServerByMbiHash(mbiHash);
     }
 
@@ -103,7 +103,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      */
     @Override
     public Bundle requestPatientFromServerByMbiHash(String mbiHash) throws ResourceNotFoundException {
-        logger.debug("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
+        logger.info("Attempting to fetch patient with MBI hash {} from baseURL: {}", mbiHash, client.getServerBase());
         return instrumentCall(REQUEST_PATIENT_METRIC, () -> client
                 .search()
                 .forResource(Patient.class)
