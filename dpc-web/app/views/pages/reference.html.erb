@@ -4,24 +4,166 @@
 <div class="ds-l-row">
   <div class="ds-l-col--12 ds-l-md-col--4">
     <ul class="sidenav">
-      <li class="sidenav__item">
-        <a href="#information-on-accessing-and-working-with-the-api" class="sidenav__link">Accessing and working with the API</a>
+      <li>
+        <a href="#authorization" class="guide-header1 sidenav__link">Top</a>
       </li>
-      <li class="sidenav__item">
-        <a href="#bulk-data" class="sidenav__link">Bulk Data</a>
+      <li class="sidenav__item usa-accordion">
+        <a href="#" id="button1" class="sidenav__link usa-accordion__button" aria-expanded="false" aria-controls="collapse1">Authorization</a>
+          <ul id="collapse1" class="sidenav usa-accordion__content">
+            <li class="sidenav__item">
+              <a href="#dpc-account" class="guide-header2 sidenav__link">1. DPC Sandbox Account</a>
+            </li>
+            <li class="sidenav__item">
+              <a href="#client-tokens" class="guide-header2 sidenav__link">2. Client Tokens</a>
+              <ul class="sidenav">
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#create-your-first-client-token" class="guide-header3 sidenav__link">Create your first client token</a>
+                </li>
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#create-multiple-client-tokens" class="guide-header3 sidenav__link">Create multiple client tokens</a>
+                </li>
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#list-all-client-tokens" class="guide-header3 sidenav__link">List all client tokens</a>
+                </li>
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#delete-client-tokens" class="guide-header3 sidenav__link">Delete client tokens</a>
+                </li>
+              </ul>
+            </li>
+            <li class="sidenav__item">
+              <a href="#public-keys" class="guide-header2 sidenav__link">3. Public Keys</a>
+              <ul class="sidenav">
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#upload-your-first-public-key" class="guide-header3 sidenav__link">Upload your first public key</a>
+                </li>
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#create-a-public-key-signature" class="guide-header3 sidenav__link">Create a public key signature</a>
+                </li>
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#list-all-public-keys" class="guide-header3 sidenav__link">List all public keys</a>
+                </li>
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#list-a-specific-public-key" class="guide-header3 sidenav__link">List a specific public key</a>
+                </li>
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#list-a-specific-public-key" class="guide-header3 sidenav__link">Delete public keys</a>
+                </li>
+              </ul>
+            </li>
+            <li class="sidenav__item">
+              <a href="#json-web-tokens" class="guide-header2 sidenav__link">4. JSON Web Tokens</a>
+              <ul class="sidenav">
+                <li class="button_item ßsidenav__item">
+                  <div>
+                    <%= button_to 'DOWNLOAD JWT TOOL', download_jwt_tool_path, class: "ds-u-margin-top--1 ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
+                  </div>
+                </li>
+                <li class="guide-nav__item sidenav__item">
+                  <a href="#validate-a-json-web-token-for-dpc" class="guide-header3 sidenav__link">Validate a JSON Web Token for DPC</a>
+                </li>
+              </ul>
+            </li>
+            <li class="guide-header2 sidenav__item">
+              <a href="#accessbearer-token" class="sidenav__link">5. Access/Bearer Token</a>
+            </li>
+          </ul>
       </li>
-      <li class="sidenav__item">
-        <a href="#attribution" class="sidenav__link">Attribution</a>
+      <li class="sidenav__item usa-accordion">
+        <a href="#" id="button2" class="sidenav__link usa-accordion__button" aria-expanded="false" aria-controls="collapse2">Attestation & Attribution</a>
+        <ul id="collapse2" class="sidenav usa-accordion__content">
+          <li>
+            <a href="#attestation--attribution" class="guide-header2 sidenav__link">Intro</a>
+          </li>
+          <li>
+            <a href="#load-sample-data" class="guide-header2 sidenav__link">Load Sample Data</a>
+          </li>
+          <li>
+            <a href="#practioners" class="guide-header2 sidenav__link">Practitioners</a>
+            <ul class="sidenav">
+              <li class="guide-nav__item sidenav__item">
+                <a href="#add-a-practitioner" class="guide-header3 sidenav__link">Add a Practitioner</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#add-multiple-practitioners" class="guide-header3 sidenav__link">Add Multiple Practioners</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#list-all-practitioners" class="guide-header3 sidenav__link">List all Practioners</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#list-a-specific-practitioner" class="guide-header3 sidenav__link">List a specific Practioner</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#patients" class="guide-header2 sidenav__link">Patients</a>
+            <ul class="sidenav">
+              <li class="guide-nav__item sidenav__item">
+                <a href="#add-a-patient" class="guide-header3 sidenav__link">Add a Patient</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#add-multiple-patients" class="guide-header3 sidenav__link">Add Multiple Patients</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#list-all-patients" class="guide-header3 sidenav__link">List all Patients</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#list-a-specific-patient" class="guide-header3 sidenav__link">List a specific Patient</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#attestation" class="guide-header2 sidenav__link">Attestation</a>
+            <ul class="sidenav">
+              <li class="guide-nav__item sidenav__item">
+                <a href="#create-an-attestation" class="guide-header3 sidenav__link">Create an Attestation</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="#groups-attribution" class="guide-header2 sidenav__link">Groups (Attribution)</a>
+            <ul class="sidenav">
+              <li class="guide-nav__item sidenav__item">
+                <a href="#create-a-group" class="guide-header3 sidenav__link">Create a Group</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#update-a-group" class="guide-header3 sidenav__link">Update a Group</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#add-patients-to-group" class="guide-header3 sidenav__link">Add Patients to Group</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#removing-patients-from-a-group" class="guide-header3 sidenav__link">Removing Patient from Group</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#overwrite-a-group-membership" class="guide-header3 sidenav__link">Overwrite a Group Membership</a>
+              </li>
+              <li class="guide-nav__item sidenav__item">
+                <a href="#locate-your-groupid" class="guide-header3 sidenav__link">Locate your Group.id</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </li>
-      <li class="sidenav__item">
-        <a href="#authentication-and-authorization" class="sidenav__link">Authentication and Authorization</a>
+      <li class="sidenav__item usa-accordion">
+        <a href="#export-data" id="button3" class="sidenav__link usa-accordion__button" aria-expanded="false" aria-controls="collapse3">Export Data</a>
+        <ul id="collapse3" class="sidenav usa-accordion__content">
+          <li>
+            <a href="#export-data" class="guide-header2 sidenav__link">Intro</a>
+          </li>
+          <li>
+            <a href="#initiate-an-export-job" class="guide-header2 sidenav__link">Initiate an Export Job</a>
+          </li>
+          <li>
+            <a href="#specify-which-resources-to-download" class="guide-header2 sidenav__link">Specify Resources</a>
+          </li>
+          <li>
+            <a href="#patients" class="guide-header2 sidenav__link">Check status of the export job</a>
+          </li>
+          <li>
+            <a href="#attestation" class="guide-header2 sidenav__link">Retrieve the NDJSON output</a>
+          </li>
+        </ul>
       </li>
-      <li class="sidenav__item">
-        <a href="#environment" class="sidenav__link">Environment</a>
-      </li>
-      <div>
-        <%= button_to 'DOWNLOAD JWT TOOL', download_jwt_tool_path, class: "ds-u-padding--1 ds-c-button--primary ds-u-font-weight--bold download_btn" %>
-      </div>
     </ul>
   </div>
   <main class="ds-l-col--12 ds-l-md-col--8 ds-u-margin-bottom--7" id="guide-content">
