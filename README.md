@@ -261,6 +261,7 @@ cp ops/scripts/pre-commit .git/hooks
 * While files are decrypted, copy the files from `ops/config/encrypted` to the sibling directory `ops/config/decrypted`.
 
 * Encrypt changed files with:
+
 ```
 ./ops/scripts/secrets --encrypt <filename>
 ```
