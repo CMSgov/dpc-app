@@ -1,5 +1,6 @@
 package gov.cms.dpc.aggregation.service;
 
+import com.google.common.base.Joiner;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
@@ -69,7 +70,7 @@ public class LookBackServiceImpl implements LookBackService {
 
         LookBackAnswer lookBackAnswer = passLookBack(billingPeriod, providerNPI, organizationID, eobOrganizationID, allNPIs, withinMonth);
         LOGGER.info("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={}, jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
-                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.getBillingDateMonthsFromNow(), npis.getLeft(), npis.getRight(), providerNPI, eobOrganizationID,
+                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.getBillingDateMonthsFromNow(), npis.getLeft(), Joiner.on(";").join(npis.getRight()), providerNPI, eobOrganizationID,
                 organizationID, lookBackAnswer.isMatchLookBackLimitCriteria(), lookBackAnswer.isMatchProvidersCriteria(), lookBackAnswer.isMatchOrganizationCriteria());
 
         MDC.remove(EOB_ID);
