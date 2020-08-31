@@ -1,5 +1,6 @@
 package gov.cms.dpc.aggregation.service;
 
+import com.google.common.base.Joiner;
 import gov.cms.dpc.aggregation.dao.OrganizationDAO;
 import gov.cms.dpc.aggregation.dao.RosterDAO;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
@@ -37,14 +38,14 @@ public class LookBackServiceImpl implements LookBackService {
 
     @Override
     @UnitOfWork(readOnly = true)
-    public String getProviderNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
+    public String getPractitionerNPIFromRoster(UUID orgUUID, String providerOrRosterID, String patientMBI) {
         //Expect only one roster for the parameters, otherwise return null
         return rosterDAO.retrieveProviderNPIFromRoster(orgUUID, UUID.fromString(providerOrRosterID), patientMBI).orElse(null);
     }
 
     @Override
     @UnitOfWork(readOnly = true)
-    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String providerNPI, long withinMonth) {
+    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationUUID, String practitionerNPI, long withinMonth) {
         MDC.put(EOB_ID, explanationOfBenefit.getId());
         Date billingPeriod = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)
@@ -60,23 +61,23 @@ public class LookBackServiceImpl implements LookBackService {
                 .map(Identifier::getValue)
                 .orElse(null);
 
-        Pair<String, Set<String>> npis = extractPractionerNPIs(explanationOfBenefit);
+        Pair<String, Set<String>> npis = extractProviderNPIs(explanationOfBenefit);
         Set<String> allNPIs = new HashSet<>(npis.getRight());
         allNPIs.add(npis.getLeft());
 
-        LookBackAnswer lookBackAnswer = new LookBackAnswer(providerNPI, organizationID, withinMonth, operationsConfig.getLookBackDate())
+        LookBackAnswer lookBackAnswer = new LookBackAnswer(practitionerNPI, organizationID, withinMonth, operationsConfig.getLookBackDate())
                 .addEobBillingPeriod(billingPeriod)
                 .addEobOrganization(eobOrganizationID)
                 .addEobProviders(allNPIs);
         LOGGER.info("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={}, jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
-                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), npis.getRight(), providerNPI, eobOrganizationID,
-                organizationID, lookBackAnswer.matchDateCriteria(), lookBackAnswer.providerMatchEob(), lookBackAnswer.orgMatchEob());
+                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), Joiner.on(";").join(npis.getRight()), practitionerNPI, eobOrganizationID,
+                organizationID, lookBackAnswer.matchDateCriteria(), lookBackAnswer.practitionerMatchEob(), lookBackAnswer.orgMatchEob());
 
         MDC.remove(EOB_ID);
-        return lookBackAnswer.matchDateCriteria() && (lookBackAnswer.orgNPIMatchAnyEobNPIs() || lookBackAnswer.providerNPIMatchAnyEobNPIs());
+        return lookBackAnswer.matchDateCriteria() && (lookBackAnswer.orgNPIMatchAnyEobNPIs() || lookBackAnswer.practitionerNPIMatchAnyEobNPIs());
     }
 
-    private Pair<String, Set<String>> extractPractionerNPIs(ExplanationOfBenefit explanationOfBenefit) {
+    private Pair<String, Set<String>> extractProviderNPIs(ExplanationOfBenefit explanationOfBenefit) {
         String providerNPI = Optional.ofNullable(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getProvider)
                 .map(Reference::getIdentifier)

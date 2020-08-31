@@ -51,8 +51,8 @@ public class LookBackAnswerTest {
         Assertions.assertFalse(lookBackAnswer.matchDateCriteria());
         Assertions.assertFalse(lookBackAnswer.orgMatchEob());
         Assertions.assertFalse(lookBackAnswer.orgNPIMatchAnyEobNPIs());
-        Assertions.assertFalse(lookBackAnswer.providerMatchEob());
-        Assertions.assertFalse(lookBackAnswer.providerNPIMatchAnyEobNPIs());
+        Assertions.assertFalse(lookBackAnswer.practitionerMatchEob());
+        Assertions.assertFalse(lookBackAnswer.practitionerNPIMatchAnyEobNPIs());
 
         lookBackAnswer = new LookBackAnswer(providerNPI, organizationNPI, 0, null)
                 .addEobProviders(List.of(NPIUtil.generateNPI()))
@@ -60,36 +60,36 @@ public class LookBackAnswerTest {
         Assertions.assertFalse(lookBackAnswer.matchDateCriteria());
         Assertions.assertFalse(lookBackAnswer.orgMatchEob());
         Assertions.assertFalse(lookBackAnswer.orgNPIMatchAnyEobNPIs());
-        Assertions.assertFalse(lookBackAnswer.providerMatchEob());
-        Assertions.assertFalse(lookBackAnswer.providerNPIMatchAnyEobNPIs());
+        Assertions.assertFalse(lookBackAnswer.practitionerMatchEob());
+        Assertions.assertFalse(lookBackAnswer.practitionerNPIMatchAnyEobNPIs());
 
         lookBackAnswer = new LookBackAnswer(providerNPI, organizationNPI, 0, null)
                 .addEobOrganization(providerNPI);
         Assertions.assertFalse(lookBackAnswer.orgMatchEob());
         Assertions.assertFalse(lookBackAnswer.orgNPIMatchAnyEobNPIs());
-        Assertions.assertFalse(lookBackAnswer.providerMatchEob());
-        Assertions.assertTrue(lookBackAnswer.providerNPIMatchAnyEobNPIs());
+        Assertions.assertFalse(lookBackAnswer.practitionerMatchEob());
+        Assertions.assertTrue(lookBackAnswer.practitionerNPIMatchAnyEobNPIs());
 
         lookBackAnswer = new LookBackAnswer(providerNPI, organizationNPI, 0, null)
                 .addEobProviders(List.of(providerNPI));
         Assertions.assertFalse(lookBackAnswer.orgMatchEob());
         Assertions.assertFalse(lookBackAnswer.orgNPIMatchAnyEobNPIs());
-        Assertions.assertTrue(lookBackAnswer.providerMatchEob());
-        Assertions.assertTrue(lookBackAnswer.providerNPIMatchAnyEobNPIs());
+        Assertions.assertTrue(lookBackAnswer.practitionerMatchEob());
+        Assertions.assertTrue(lookBackAnswer.practitionerNPIMatchAnyEobNPIs());
 
         lookBackAnswer = new LookBackAnswer(providerNPI, organizationNPI, 0, null)
                 .addEobOrganization(organizationNPI);
         Assertions.assertTrue(lookBackAnswer.orgMatchEob());
         Assertions.assertTrue(lookBackAnswer.orgNPIMatchAnyEobNPIs());
-        Assertions.assertFalse(lookBackAnswer.providerMatchEob());
-        Assertions.assertFalse(lookBackAnswer.providerNPIMatchAnyEobNPIs());
+        Assertions.assertFalse(lookBackAnswer.practitionerMatchEob());
+        Assertions.assertFalse(lookBackAnswer.practitionerNPIMatchAnyEobNPIs());
 
         lookBackAnswer = new LookBackAnswer(providerNPI, organizationNPI, 0, null)
                 .addEobProviders(List.of(organizationNPI));
         Assertions.assertFalse(lookBackAnswer.orgMatchEob());
         Assertions.assertTrue(lookBackAnswer.orgNPIMatchAnyEobNPIs());
-        Assertions.assertFalse(lookBackAnswer.providerMatchEob());
-        Assertions.assertFalse(lookBackAnswer.providerNPIMatchAnyEobNPIs());
+        Assertions.assertFalse(lookBackAnswer.practitionerMatchEob());
+        Assertions.assertFalse(lookBackAnswer.practitionerNPIMatchAnyEobNPIs());
     }
 
 }

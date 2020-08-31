@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class LookBackAnswer {
 
-    private final String providerNPI;
+    private final String practitionerNPI;
     private final String organizationNPI;
     private final long withinMonths;
     private final Date lookBackMonth;
@@ -21,8 +21,8 @@ public class LookBackAnswer {
     private String eobOrganizationNPI;
     private Date billingPeriodEndDate;
 
-    public LookBackAnswer(String providerNPI, String organizationNPI, long withinMonths, Date lookBackMonth) {
-        this.providerNPI = providerNPI;
+    public LookBackAnswer(String practitionerNPI, String organizationNPI, long withinMonths, Date lookBackMonth) {
+        this.practitionerNPI = practitionerNPI;
         this.organizationNPI = organizationNPI;
         this.withinMonths = withinMonths;
         this.lookBackMonth = lookBackMonth;
@@ -68,12 +68,12 @@ public class LookBackAnswer {
         return StringUtils.isNotBlank(organizationNPI) && StringUtils.equals(organizationNPI,eobOrganizationNPI);
     }
 
-    public boolean providerNPIMatchAnyEobNPIs() {
-        return providerMatchEob() || (StringUtils.isNotBlank(providerNPI) && StringUtils.equals(providerNPI,eobOrganizationNPI));
+    public boolean practitionerNPIMatchAnyEobNPIs() {
+        return practitionerMatchEob() || (StringUtils.isNotBlank(practitionerNPI) && StringUtils.equals(practitionerNPI,eobOrganizationNPI));
     }
 
-    public boolean providerMatchEob() {
-        return eobProviderNPIs.contains(providerNPI);
+    public boolean practitionerMatchEob() {
+        return eobProviderNPIs.contains(practitionerNPI);
     }
 
     private long getMonthsDifference(Date date1, Date date2) {
