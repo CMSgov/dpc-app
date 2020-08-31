@@ -440,7 +440,7 @@ GEM
       tilt (~> 2.0)
     spoon (0.0.6)
       ffi
-    spring (2.1.0)
+    spring (2.1.1)
     spring-watcher-listen (2.0.1)
       listen (>= 2.7, < 4.0)
       spring (>= 1.2, < 3.0)
