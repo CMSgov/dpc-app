@@ -555,7 +555,12 @@
 									"    pm.expect(response.total).to.equal(1);",
 									"",
 									"    pm.globals.set(\"single_patient_id\", \"Patient/\" + response.entry[0].resource.id);",
-									"})"
+									"})",
+                                    "pm.test(\"Result should have MBI as uppercase\", function() {",
+                                    "    var response = pm.response.json();",
+                                    "    var mbiIdentifier = response.entry[0].resource.identifier.filter(identifier => identifier.system == \"http://hl7.org/fhir/sid/us-mbi\")[0]",
+                                    "    pm.expect(mbiIdentifier.value).to.equal(\"1SQ3F00AA00\");",
+                                    "})"
 								],
 								"type": "text/javascript"
 							}
@@ -565,7 +570,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient?identifier=1SQ3F00AA00",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient?identifier=1sQ3f00aa00",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -578,7 +583,7 @@
 							"query": [
 								{
 									"key": "identifier",
-									"value": "1SQ3F00AA00"
+									"value": "1sQ3f00Aa00"
 								}
 							]
 						},

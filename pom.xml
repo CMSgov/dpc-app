@@ -351,6 +351,8 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <excludedGroups>Integration</excludedGroups>
+                            <parallel>all</parallel>
+                            <threadCount>10</threadCount>
                         </configuration>
                     </plugin>
                 </plugins>

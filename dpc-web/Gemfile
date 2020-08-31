@@ -35,6 +35,7 @@ gem 'kaminari'
 gem 'active_model_serializers'
 gem 'macaroons'
 gem 'lograge'
+gem 'redis-namespace'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
@@ -58,6 +59,7 @@ group :test do
   gem 'climate_control'
   gem 'rails-controller-testing'
   gem 'fakefs', require: 'fakefs/safe'
+  gem 'fakeredis'
 end
 
 group :development do

@@ -72,6 +72,36 @@ class PatientResourceTest extends AbstractAttributionTest {
     }
 
     @Test
+    void testPatientMBIPersistedAsUppercase() {
+        final Reference orgReference = new Reference(new IdType("Organization", DEFAULT_ORG_ID));
+        final String patientMbi = "3aa0C00aA00";
+        final Patient patient = createPatientResource(patientMbi, DEFAULT_ORG_ID);
+        patient.setManagingOrganization(orgReference);
+
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+        final MethodOutcome actualOutcome = client
+                .create()
+                .resource(patient)
+                .encodedJson()
+                .execute();
+
+        assertNotNull(actualOutcome.getCreated(), "getCreate field should not have been missing.");
+        assertTrue(actualOutcome.getCreated(), "New resource should have been created.");
+
+        final Patient patientReturned = (Patient)actualOutcome.getResource();
+        assertEquals(patientMbi.toUpperCase(), FHIRExtractors.getPatientMBI(patientReturned), "Expected to receive MBI as uppercase");
+
+        final Patient fetchedPatient = client
+                .read()
+                .resource(Patient.class)
+                .withId(patientReturned.getId())
+                .encodedJson()
+                .execute();
+
+        assertEquals(patientMbi.toUpperCase(),FHIRExtractors.getPatientMBI(fetchedPatient),"Fetched patient should have had uppercase MBI");
+    }
+
+    @Test
     void testCreatePatientWithInvalidMbi() {
         final Patient patient = createPatientResource("not-an-mbi", DEFAULT_ORG_ID);
 
@@ -88,24 +118,26 @@ class PatientResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    void testPatientSearch() {
+    void testPatientSearchWithValidOrgAndMbi() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
-        final IQuery<Bundle> firstQuery = client
+        final Bundle searchResults = client
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
                 .and(Patient.ORGANIZATION.hasId("Organization/" + DEFAULT_ORG_ID))
                 .returnBundle(Bundle.class)
-                .encodedJson();
+                .encodedJson()
+                .execute();
 
-        final Bundle firstSearch = firstQuery.execute();
+        assertEquals(1, searchResults.getTotal(), "Should have a single patient");
+    }
 
-        assertEquals(1, firstSearch.getTotal(), "Should have a single patient");
+    @Test
+    void testPatientSearchWithInvalidOrg() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
-        // Try for wrong org
-
-        final Bundle secondSearch = client
+        final Bundle searchResults = client
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
@@ -114,7 +146,23 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(0, secondSearch.getTotal(), "Should not have any patients");
+        assertEquals(0, searchResults.getTotal(), "Should not have any patients");
+    }
+
+    @Test
+    void testPatientSearchWithLowerCaseMbi() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        final Bundle searchResult = client
+                .search()
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI.toLowerCase()))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(0, searchResult.getTotal(), "Should not have any patients");
     }
 
     @Test

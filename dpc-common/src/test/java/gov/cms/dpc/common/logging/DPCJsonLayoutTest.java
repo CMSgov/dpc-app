@@ -74,4 +74,14 @@ public class DPCJsonLayoutTest {
         Assert.assertEquals("value1", map.get("key1"));
         Assert.assertEquals("value2", map.get("key2"));
     }
+
+    @Test
+    public void testLookBackLogJsonParsing() {
+        String message = "billingPeriodDate=Thu Jul 01 00:00:00 UTC 1999, lookBackDate=Thu Aug 27 00:43:30 UTC 2020, monthsDifference=253, eobProvider=null, eobCareTeamProviders=999999999999;9999999999, jobProvider=1232125215, eobOrganization=9999999999, jobOrganization=5808156785, withinLimit=false, eobProviderMatch=false, eobOrganizationMatch=false";
+        when(loggingEvent.getFormattedMessage()).thenReturn(message);
+        Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
+        Assert.assertFalse(map.containsKey("message"));
+        Assert.assertEquals("999999999999;9999999999", map.get("eobCareTeamProviders"));
+
+    }
 }
