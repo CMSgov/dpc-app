@@ -197,18 +197,18 @@ public class AggregationEngine implements Runnable {
         boolean result = false;
         //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
         //patientId here is the patient MBI
-        final String providerNPI = lookBackService.getProviderNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
-        if (providerNPI != null) {
+        final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
+        if (practitionerNPI != null) {
             Pair<Flowable<List<Resource>>, ResourceType> pair = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
             Boolean hasClaims = pair.getLeft()
                     .flatMap(Flowable::fromIterable)
                     .filter(resource -> pair.getRight() == resource.getResourceType())
-                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), providerNPI, operationsConfig.getLookBackMonths()))
+                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
                     .onErrorReturn((error) -> false)
                     .blockingGet();
             result = Boolean.TRUE.equals(hasClaims);
         } else {
-            logger.error("couldn't get providerNPI from roster");
+            logger.error("couldn't get practitionerNPI from roster");
         }
         return result;
     }
