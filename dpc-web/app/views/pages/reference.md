@@ -12,6 +12,14 @@ Any Fee-for-Service provider or Health IT vendor may request access to the sandb
 4. Log in to the DPC Portal at [https://dpc.cms.gov](https://dpc.cms.gov) to manage your client tokens and public keys.
 
 ## 2. Client Tokens
+[Create your first client token](#create-your-first-client-token)
+
+Create multiple client tokens
+
+List all client tokens
+
+Delete client tokens
+
 Client tokens help monitor who is accessing the API through your account. A client token is required to create an access token, which is needed with every request made to the API. This ensures every interaction with the API can be traced back to the person who created the client token.
 
 ### Prerequisites:
@@ -29,7 +37,7 @@ Client tokens help monitor who is accessing the API through your account. A clie
 
 Your first client token must be created through the DPC Portal. After successfully accessing the API, you may choose to add client tokens through the API or continue using the DPC Portal.
 
-1. **Log in to your account in the DPC Portal** and select [+ New Token](https://dpc.cms.gov/users/sign_in)
+1. **Log in to your account in the [DPC Portal](https://dpc.cms.gov/users/sign_in)** and select <span class="button-ex">+ New Token</span>
 2. **Add a Label:** Title your token with a recognizable name that includes the environment for which you are requesting access
 3. Click "Create Token" to generate your client token
 
@@ -49,7 +57,7 @@ You may create as many tokens as you like via your account in the DPC Portal usi
 
 This endpoint accepts two (optional) query parameters:
 
-![Client Token](/assets/guide_multi_token_table.svg)
+![Client Token - ](/assets/guide_multi_token_table.svg)
 
 #### Request:
 
@@ -139,7 +147,7 @@ GET /api/v1/Token
 ### Delete client tokens
 You may want to delete a client token from your organization if a vendor or group no longer exists or needs access to the API. This can be done by clicking the “x” on the right side of each client token listed in the DPC Portal or by sending a DELETE request to the /Token endpoint using the unique ID of the client_token. 
 
-Client_token IDs can be found either at creation or as the result of listing client_tokens. PLACE HOLDER LINK TO LIST ALL CLIENT TOKENS
+Client_token IDs can be found either at creation or as the result of [listing client_tokens](#list-all-client-tokens).
 
 #### Request:
 <pre><code>DELETE /api/v1/Token/<span style="color: #046B99;">{client_token id}</span></code></pre>
@@ -196,7 +204,7 @@ Public keys verify that client token requests are coming from an authorized appl
 
 **3. Paste the contents** of your public key (public.pem file) into the ‘Public Key’ field in the DPC Portal. You must include the “BEGIN PUBLIC KEY” and “END PUBLIC KEY” tags before and after your key.
 
-![Client Token](/assets/guide_public_key_ex.svg)
+![Public Key Example - Shows public key with the BEGIN PUBLIC KEY and END PUBLIC KEY tags.](/assets/guide_public_key_ex.svg)
 
 **4. Add a Label:** Title your public key with a descriptive name that can be easily recognized for future purposes.
 
@@ -330,7 +338,7 @@ A JSON Web Token (JWT) authenticates your organization with DPC. If you have not
 - Your private key
 - Your public key ID
 
-Once completed, please download the DPC Tool (link in the navigation bar) to generate your JWT.
+Once completed, please download the JWT Tool (link in the navigation bar) to generate your JWT.
 
 The following instructions are to be completed via the JWT Tool downloaded onto your personal computer. You must have internet access in order for this tool to use its cryptography library.  Your information is not sent over the network, in order to ensure your private key and JWT remain confidential.
 
@@ -338,7 +346,7 @@ The following instructions are to be completed via the JWT Tool downloaded onto 
 2. Please input your Client Token.
 3. Please input your Public Key ID
     * This ID can be found under the "Public
-![Public Key Id](/assets/guide_public_key_id.svg)
+![Public Key Id - The public key id is found underneath the key's label.](/assets/guide_public_key_id.svg)
 4. Click "Generate JWT"
 5. Copy "Your JWT" to begin validation for DPC
 
@@ -476,6 +484,8 @@ fetch('https://sandbox.dpc.cms.gov/api/v1/Token/auth', {
 });
 </code></pre>
 
+<a class="guide_top_link" href="#navbar">Back to Top</a>
+
 # Attestation & Attribution
 ------------------
 Before accessing Patient data, DPC must establish that you have a valid Patient-Practitioner relationship with CMS Medicare and Medicaid Beneficiaries.  This process is referred to as Attestation/Attribution in the DPC API.
@@ -500,7 +510,7 @@ The DPC team has created a collection of sample Practitioner, Patient, and Group
 _Users can provide their own sample FHIR resources that fulfill the required FHIR profiles to DPC, but will need to ensure that all Patient resources have a Medicare Beneficiary Identifier (MBI) that matches a record in the Beneficiary FHIR Data Server (BFD)._
 
 ### Find Organization ID
-You will need your organization ID to create an Attribution Group for Attestation.To find your Organization ID, sign-in to your account in the DPC Portal and locate your Organization ID within your token.
+You will need your organization ID to create an Attribution Group for Attestation. To find your Organization ID, sign-in to your account in the DPC Portal and locate your Organization ID within your token.
 
 ![Dashboard Org Id](/assets/guide_org_id.svg)
 
@@ -590,7 +600,7 @@ POST /api/v1/Practitioner
 ### Add Multiple Practitioners
 The Practitioner endpoint supports a $submit operation, which allows you to upload a Bundle of resources for registration in a single batch operation.
  
-Each individual Practitioner Resource in your Bundle must satisfy the requirements on how to add a [Practitioner Resource](#add-a-practitioner), otherwise a 422-Unprocessed Entity error will be returned.
+Each individual Practitioner Resource in your Bundle must satisfy the requirements on how to add a [Practitioner Resource](#add-a-practitioner), otherwise a 422-Unprocessable Entity error will be returned.
 
 <!-- PLACEHOLDER ASK ABOUT DOWNLOAD PRACTITIONER BUNDLE -->
 
@@ -700,7 +710,7 @@ To register a Patient at your Organization, you must create a [Patient](https://
 To create the Patient Resource, the JSON file may include additional attributes detailed in the FHIR Implementation Guide within the [DPC Practitioner Profile](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-patient.html), but at a minimum must include the Patient’s:
 
 - First and last name
-- Birth date in YY-MM-DD
+- Birth date in YYYY-MM-DD
 - Medicare Beneficiary Identifier (MBI)
   - identifier: 
 
@@ -1341,6 +1351,8 @@ The response will return a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) r
      }
    }
 ~~~
+
+<a class="guide_top_link" href="#navbar">Back to Top</a>
 
 # Export Data
 ------------
