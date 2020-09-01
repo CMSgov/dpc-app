@@ -3,7 +3,7 @@
 
 Welcome to Data at the Point of Care pilot API program!
 
-## 1. DPC Account
+## Step One: Request Access
 Any Fee-for-Service provider or Health IT vendor may request access to the sandbox environment and synthetic data by creating an account in the DPC Portal. Follow the steps below:
 
 1. [Request access to the sandbox environment.](https://dpc.cms.gov/users/sign_up)
@@ -11,12 +11,12 @@ Any Fee-for-Service provider or Health IT vendor may request access to the sandb
 3. CMS 2nd email: DPC will assign your account to an organization and notify you with the next steps and a link to the DPC Portal.
 4. Log in to the DPC Portal at [https://dpc.cms.gov](https://dpc.cms.gov) to manage your client tokens and public keys.
 
-## 2. Client Tokens
-<a href="#create-your-first-client-token" class="ds-u-padding-left--3">Create your first client token</a><br />
-<span class="ds-u-padding-left--3">Create multiple client tokens</span><br />
-<span class="ds-u-padding-left--3">List all client tokens</>
+## Step Two: Client Tokens
 
-Delete client tokens
+<a href="#create-your-first-client-token" class="ds-u-padding-left--3 guide_sub-link">Create your first client token</a><br />
+<a href="#create-multiple-client-tokens" class="ds-u-padding-left--3 guide_sub-link">Create multiple client tokens</a><br />
+<a href="#list-all-client-tokens" class="ds-u-padding-left--3 guide_sub-link">List all client tokens</a><br />
+<a href="#delete-client-tokens" class="ds-u-padding-left--3 guide_sub-link">Delete client tokens</a>
 
 Client tokens help monitor who is accessing the API through your account. A client token is required to create an access token, which is needed with every request made to the API. This ensures every interaction with the API can be traced back to the person who created the client token.
 
@@ -184,7 +184,14 @@ Client_token IDs can be found either at creation or as the result of [listing cl
 200 - Token was removed
 ~~~
 
-## 3. Public Keys
+## Step Three: Public Keys
+
+<a href="#upload-your-first-public-key" class="ds-u-padding-left--3 guide_sub-link">Upload your first public key</a><br />
+<a href="#create-a-public-key-signature" class="ds-u-padding-left--3 guide_sub-link">Create a public key signature</a><br />
+<a href="#list-all-public-keys" class="ds-u-padding-left--3 guide_sub-link">List all public keys</a><br />
+<a href="#list-a-specific-public-key" class="ds-u-padding-left--3 guide_sub-link">List a specific public key</a><br />
+<a href="#delete-public-keys" class="ds-u-padding-left--3 guide_sub-link">Delete public keys</a>
+
 Public keys verify that client token requests are coming from an authorized application. This is by verifying that the private key used to sign your JSON Web Token (JWT) also matches a public key previously uploaded to DPC. Please complete the upload of your public key + signature through the DPC Portal.
 
 **ALL files in this section must be stored in ONE folder.**
@@ -349,7 +356,10 @@ The response from the API will include the client_token in the token field.
 200 - Key was removed
 ~~~
 
-## 4. JSON Web Tokens
+## Step Four: JSON Web Tokens
+
+<a href="#validate-a-json-web-token-for-dpc" class="ds-u-padding-left--3 guide_sub-link">Validate a JSON Web Token for DPC</a>
+
 A JSON Web Token (JWT) authenticates your organization with DPC. If you have not generated your client token and public/private key pair through the DPC Portal, please obtain the following prerequisites before proceeding.
 
 ### Prerequisites:
@@ -358,7 +368,7 @@ A JSON Web Token (JWT) authenticates your organization with DPC. If you have not
 - Your private key
 - Your public key ID
 
-Once completed, please download the DPC JWT Tool (link in the navigation bar) to generate your JWT.
+Once completed, please download the DPC JWT Tool (found in the navigation bar) to generate your JWT for DPC.
 
 The following instructions are to be completed via the JWT Tool downloaded onto your personal computer. You must have internet access in order for this tool to use its cryptography library.  Your information is not sent over the network, in order to ensure your private key and JWT remain confidential.
 
@@ -398,7 +408,11 @@ POST /api/v1/Token/validate
 #### Response:
 The response from the API will return with a HTTP 200 if the JWT is valid, otherwise an error message will be returned.
 
-## 5. Access/Bearer Token
+## Step Five: Access/Bearer Token
+
+<a href="#obtain-an-accesstoken" class="ds-u-padding-left--3 guide_sub-link">Obtain an access_token</a><br />
+<a href="#obtain-a-bearertoken" class="ds-u-padding-left--3 guide_sub-link">Obtain a bearer_token</a>
+
 Obtaining an access_token and setting it as your bearer_token are the final steps in connecting to the DPC API. **The access_token must be set as the bearer_token in EVERY API request and has a maximum expiration time of FIVE MINUTES.**
 
 ### Prerequisites:
@@ -504,7 +518,8 @@ fetch('https://sandbox.dpc.cms.gov/api/v1/Token/auth', {
 });
 </code></pre>
 
-<a class="guide_top_link" href="#navbar">Back to Top</a>
+<a class="guide_top_link" href="#authorization">Back to Start of Section</a><br />
+<a class="guide_top_link" href="#">Back to Top of Page</a>
 
 # Attestation & Attribution
 ------------------
@@ -585,6 +600,13 @@ GET /api/v1/Organization
 ~~~
 
 ## Practioners
+
+
+<a href="#add-a-practitioner" class="ds-u-padding-left--3 guide_sub-link">Add a Practitioner</a><br />
+<a href="#add-multiple-practitioners" class="ds-u-padding-left--3 guide_sub-link">Add Multiple Practitioners</a><br />
+<a href="#list-all-practitioners" class="ds-u-padding-left--3 guide_sub-link">List all Practitioners</a><br />
+<a href="#list-a-specific-practitioner" class="ds-u-padding-left--3 guide_sub-link">List a specific Practitioner</a>
+
 Every organization is required to keep a list of [Practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) Resources who are authorized to have access to DPC data. The DPC Team has included four Practitioner Resources that represent fictitious Practitioners that can be added to your Organization.
 
 ### Prerequisites:
@@ -710,6 +732,12 @@ The Practitioner endpoint also supports a GET /Practitioner operation where you 
 ~~~
 
 ## Patients
+
+<a href="#add-a-patient" class="ds-u-padding-left--3 guide_sub-link">Add a Patient</a><br />
+<a href="#add-multiple-patients" class="ds-u-padding-left--3 guide_sub-link">Add Multiple Patients</a><br />
+<a href="#list-all-patients" class="ds-u-padding-left--3 guide_sub-link">List all Patients</a><br />
+<a href="#list-a-specific-patient" class="ds-u-padding-left--3 guide_sub-link">List a specific Patient</a>
+
 Every organization is required to maintain a list of patients which represent the patient population currently being treated at your facilities. 
 
 Since there is not any preloaded data in DPC’s sandbox, The Beneficiary FHIR Data Server (BFD) maintains a list of 101 Patients, along with their MBIs, that can be used for matching existing synthetic data in the sandbox environment. More details and the corresponding data files can be found on the Blue Button 2.0 API’s documentation under [Sample Beneficiaries](https://bluebutton.cms.gov/developers/#sample-beneficiaries).
@@ -922,6 +950,9 @@ The Patient endpoint also supports a GET /Patient operation where you can supply
 ~~~
 
 ## Attestation
+
+<a href="#create-an-attestation" class="ds-u-padding-left--3 guide_sub-link">Create an Attestation</a>
+
 CMS requires Practitioners to attest that they have a treatment related purpose for adding a patient to their Group each time they make a Group addition. This is accomplished by submitting an attestation with every request. Attestations are posted as a [Provenance](https://www.hl7.org/fhir/provenance.html) Resource via the X-Provenance header, as outlined in the [FHIR specification](https://www.hl7.org/fhir/implementationguide.html).
 
 ### Prerequisites:
@@ -982,6 +1013,13 @@ The attestation is then included in the X-Provenance header as part of any opera
 ~~~
 
 ## Groups (Attribution)
+
+<a href="#create-a-group" class="ds-u-padding-left--3 guide_sub-link">Create a Group</a><br />
+<a href="#update-a-group" class="ds-u-padding-left--3 guide_sub-link">Update a Group</a><br />
+<a href="#add-patients-to-group" class="ds-u-padding-left--3 guide_sub-link">Add Patients to Group</a><br />
+<a href="#overwrite-a-group-membership" class="ds-u-padding-left--3 guide_sub-link">Overwrite a Group Membership</a><br />
+<a href="#locate-your-groupid" class="ds-u-padding-left--3 guide_sub-link">Locate your Group.id</a>
+
 Once the Practitioner, Patient, and Provenance (Attestation) resources have been created, the final step is to link a list of registered Patients to a registered Practitioner in what is called an Attribution Roster. This is done by creating a Group resource.
 
 ### Prerequisites:
@@ -1370,7 +1408,8 @@ The response will return a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) r
    }
 ~~~
 
-<a class="guide_top_link" href="#navbar">Back to Top</a>
+<a class="guide_top_link" href="#attestation--attribution">Back to Start of Section</a><br />
+<a class="guide_top_link" href="#">Back to Top of Page</a>
 
 # Export Data
 ------------
@@ -1747,3 +1786,6 @@ To obtain the exported explanation of benefit data, a GET request is made to the
  ]
 }
 ~~~
+
+<a class="guide_top_link" href="#export-data">Back to Start of Section</a><br />
+<a class="guide_top_link" href="#">Back to Top of Page</a>

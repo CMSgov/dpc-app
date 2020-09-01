@@ -21,6 +21,14 @@
   }
 }
 
+.guide_sub-link {
+  text-decoration: none;
+}
+
+.guide_sub-link:visited {
+  color: $color-primary;
+}
+
 .guide__table {
   border: 0.5px solid $color-gray-dark;
 
