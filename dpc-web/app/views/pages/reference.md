@@ -12,11 +12,9 @@ Any Fee-for-Service provider or Health IT vendor may request access to the sandb
 4. Log in to the DPC Portal at [https://dpc.cms.gov](https://dpc.cms.gov) to manage your client tokens and public keys.
 
 ## 2. Client Tokens
-[Create your first client token](#create-your-first-client-token)
-
-Create multiple client tokens
-
-List all client tokens
+<a href="#create-your-first-client-token" class="ds-u-padding-left--3">Create your first client token</a><br />
+<span class="ds-u-padding-left--3">Create multiple client tokens</span><br />
+<span class="ds-u-padding-left--3">List all client tokens</>
 
 Delete client tokens
 
@@ -57,7 +55,29 @@ You may create as many tokens as you like via your account in the DPC Portal usi
 
 This endpoint accepts two (optional) query parameters:
 
-![Client Token - ](/assets/guide_multi_token_table.svg)
+<table cellspacing="0" class="guide__table">
+  <tr>
+    <th cellspacing="0">Parameter</th>
+    <th cellspacing="0">Parameter Values</th>
+    <th cellspacing="0">Fixed/Dynamic</th>
+    <th cellspacing="0">Description</th>
+    <th cellspacing="0">Notes</th>
+  </tr>
+  <tr>
+    <td cellspacing="0">label</td>
+    <td cellspacing="0">{ insert name for the client token }</td>
+    <td cellspacing="0">Dynamic</td>
+    <td cellspacing="0">Sets a human-readable label for the token</td>
+    <td cellspacing="0">Token labels are not required to be unique.</td>
+  </tr>
+  <tr>
+    <td cellspacing="0">expiration</td>
+    <td cellspacing="0">ISO formatted string</td>
+    <td cellspacing="0">Dynamic</td>
+    <td cellspacing="0">Sets a custom expiration for the <code>client_token</code></td>
+    <td cellspacing="0">The user cannot set an expiration time longer than five minutes.</td>
+  </tr>
+</table>
 
 #### Request:
 
@@ -338,14 +358,14 @@ A JSON Web Token (JWT) authenticates your organization with DPC. If you have not
 - Your private key
 - Your public key ID
 
-Once completed, please download the JWT Tool (link in the navigation bar) to generate your JWT.
+Once completed, please download the DPC JWT Tool (link in the navigation bar) to generate your JWT.
 
 The following instructions are to be completed via the JWT Tool downloaded onto your personal computer. You must have internet access in order for this tool to use its cryptography library.  Your information is not sent over the network, in order to ensure your private key and JWT remain confidential.
 
 1. Please input your Private Key.
 2. Please input your Client Token.
 3. Please input your Public Key ID
-    * This ID can be found under the "Public
+    * This ID can be found under the "Public Keys” section in your DPC Portal.
 ![Public Key Id - The public key id is found underneath the key's label.](/assets/guide_public_key_id.svg)
 4. Click "Generate JWT"
 5. Copy "Your JWT" to begin validation for DPC
@@ -528,7 +548,7 @@ GET /api/v1/Organization
      -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
      -H 'Accept: application/fhir+json' \
      -H 'Content-Type: application/fhir+json' \
-     -X GET \</code></pre>
+     -X GET</code></pre>
 
 #### Response:
 
@@ -575,7 +595,7 @@ Every organization is required to keep a list of [Practitioner](https://dpc.cms.
     - Type 1 National Provider Identifier (NPI)
 
 ### Add a Practitioner
-To register a Practitioner at your Organization, you must create a [Practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) Resource as a JSON file in FHIR format. The JSON file must be included in the BODY of your request with no encoding (raw) when uploading  via a POST request to the /Practitioner endpoint.
+To register a Practitioner at your Organization, you must send a FHIR-formatted [Practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) Resource as the BODY of your request. The JSON file must be included in the BODY of your request with no encoding (raw) when uploading  via a POST request to the /Practitioner endpoint.
 
 To create the Practitioner Resource, the JSON file may include additional attributes detailed in the FHIR Implementation Guide within the [DPC Practitioner Profile](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html), but at a minimum must include the Practitioner’s:
 
@@ -634,7 +654,7 @@ GET /api/v1/Practitioner
      -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
      -H 'Accept: application/fhir+json' \
      -H 'Content-Type: application/fhir+json' \
-     -X GET \</code></pre>
+     -X GET</code></pre>
 
 ### List a specific Practitioner
 The Practitioner endpoint also supports a GET /Practitioner operation where you can supply an NPI number and receive the Practitioner resource. You will use this to identify a Practitioners’ system ID based off of an NPI when adding a Patient and/or creating a Group.
@@ -649,7 +669,7 @@ The Practitioner endpoint also supports a GET /Practitioner operation where you 
      -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
      -H 'Accept: application/fhir+json'</span> \
      -H 'Content-Type: application/fhir+json'</span> \
-     -X GET \</code></pre>
+     -X GET</code></pre>
 
 #### Response:
 
@@ -843,7 +863,7 @@ GET /api/v1/Patient
      -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
      -H 'Accept: application/fhir+json' \
      -H 'Content-Type: application/fhir+json' \
-     -X GET \</code></pre>
+     -X GET</code></pre>
 
 ### List a specific Patient
 The Patient endpoint also supports a GET /Patient operation where you can supply the Patient MBI and receive the Patient Resource. You may use this to identify a Patient’s system ID based off of an MBI.
@@ -856,7 +876,7 @@ The Patient endpoint also supports a GET /Patient operation where you can supply
      -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
      -H 'Accept: application/fhir+json' \
      -H 'Content-Type: application/fhir+json' \
-     -X GET \</code></pre>
+     -X GET</code></pre>
 
 #### Response:
 
@@ -962,7 +982,7 @@ The attestation is then included in the X-Provenance header as part of any opera
 ~~~
 
 ## Groups (Attribution)
-Once the Practitioner, Patient, and Provenance (Attestation) resources have been created, the final step is to link a list of registered Patients to a registered Practitioner. This is done by creating a Group resource.
+Once the Practitioner, Patient, and Provenance (Attestation) resources have been created, the final step is to link a list of registered Patients to a registered Practitioner in what is called an Attribution Roster. This is done by creating a Group resource.
 
 ### Prerequisites:
 - A registered account in the DPC Portal
@@ -1072,7 +1092,7 @@ After 90 days, patient attributions expire and must be renewed. You can identify
 
 <pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Group?characteristic-value=attributed-to$<span style="color: #046B99;">{Group ID}</span>
      -H 'Authorization: Bearer {access_token}' \
-     -H 'Accept: application/fhir+json' \</code></pre>
+     -H 'Accept: application/fhir+json'</code></pre>
 
 #### Response:
 
@@ -1272,7 +1292,7 @@ Users can also submit a Group resource which completely overwrites the existing 
 ~~~
 
 ### Locate your Group.id
-You may only pull data for one group of practitioners and patients at a time.
+You may only pull data for one practitioner’s roster at a time.
 
 You can do this by sending a GET request to the Group endpoint to retrieve the [Attribution Group](https://hl7.org/fhir/STU3/group.html) of the Practitioner. Use the Practitioners’ [National Provider Identity (NPI)](https://www.cms.gov/Regulations-and-Guidance/Administrative-Simplification/NationalProvIdentStand/) number as a parameter in this request.
 
@@ -1281,8 +1301,6 @@ You can do this by sending a GET request to the Group endpoint to retrieve the [
     <p class="ds-c-alert__text">DPC supports the standard <a href="https://www.hl7.org/fhir/search.html">FHIR search protocol</a>. Searching for Patients associated with a given Practitioner makes use of <a href="https://www.hl7.org/fhir/search.html#combining">composite search parameters</a>.</p>
   </div>
 </div>
-
-The response will return a Bundle resource which contains the attribution groups for the given Practitioner. You can use the Group.id value of the returned resources to initiate an export job. Your Group ID can be found by referencing the {id} variable in the resource object of your Group.
 
 The response will return a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) resource which contains the attribution groups for the given Practitioner. **You can use the Group.id value of the returned resources to initiate an export job.** Your Group ID can be found by referencing the {id} variable in the resource object of your Group.
 
@@ -1303,7 +1321,7 @@ The response will return a [Bundle](https://www.hl7.org/fhir/STU3/bundle.html) r
 <pre><code>curl -v https://sandbox.dpc.cms.gov/api/v1/Group/<span style="color: #046B99;">{Group.id}</span>
      -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
      -H 'Accept: application/fhir+json' \
-     -H 'X-Provenance: <span style="color: #046B99;">{FHIR provenance resource}</span> \</code></pre>
+     -H 'X-Provenance: <span style="color: #046B99;">{FHIR provenance resource}</span></code></pre>
 
 #### Response:
 
@@ -1361,6 +1379,7 @@ The primary interaction with the DPC pilot API is via the FHIR /Group/$export op
 ## Prerequisites:
 - Completion of the Authorization section
 - Access to the API: active Bearer <span style="color: #046B99;">{access_token}</span>
+- Completion of the Attestation & Attribution section
 
 ## Initiate an export job
 In order to start a Patient data export job, you will need to locate your Group.id. Locate your Group.id by referencing the {id} variable in the resource object of your Group.
@@ -1385,9 +1404,9 @@ The dollar sign (‘$’) before the word “export” in the URL indicates that
 ### cURL command:
 
 <pre><code>curl -v https://sandbox.DPC.cms.gov/api/v1/Group/<span style="color: #046B99;">{attribution Group.id}</span>/\$export \
--H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
--H 'Accept: application/fhir+json' \
--H 'Prefer: respond-async'</code></pre>
+     -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>' \
+     -H 'Accept: application/fhir+json' \
+     -H 'Prefer: respond-async'</code></pre>
 
 ### Response:
 If the request was successful, a 202 Accepted response code will be returned with a Content-Location header. The value of this header indicates the location to monitor your job status and outcomes. The value of the header also contains the Export Job ID of the Job. There is no BODY to the Response, only headers.
@@ -1450,7 +1469,7 @@ Claims data can be found at the URLs within the output field.
 
 The output includes file integrity information in an extension array. It contains https://dpc.cms.gov/checksum (a checksum in the format algorithm:checksum) and https://dpc.cms.gov/file_length (the file length in bytes).
 
-The number 42 in the data file URLs is the same job ID from the Content-Location header URL when you initiate an export job. If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field. The errors are provided in [NDJSON](http://ndjson.org/) files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
+The number 42 in the example data file URLs is the same job ID from the Content-Location header URL when you initiate an export job. If some of the data cannot be exported due to errors, details of the errors can be found at the URLs in the error field. The errors are provided in [NDJSON](http://ndjson.org/) files as FHIR [OperationOutcome](http://hl7.org/fhir/STU3/operationoutcome.html) resources.
 
 ## Retrieve the NDJSON output file(s)
 To obtain the exported explanation of benefit data, a GET request is made to the output URLs in the job status response when the job reaches the Completed state. The data will be presented as an [NDJSON](http://ndjson.org/) file of ExplanationOfBenefit resources.
@@ -1465,13 +1484,11 @@ To obtain the exported explanation of benefit data, a GET request is made to the
 
 ### Request:
 
-~~~
-GET https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson
-~~~
+<pre><code>GET https://sandbox.dpc.cms.gov/api/v1/data/<span style="color: #046B99;">{job_id}</span>/<span style="color: #046B99;">{file_name}</span></code></pre>
 
 ### cURL command:
 
-<pre><code>curl https://sandbox.dpc.cms.gov/api/v1/data/42/DBBD1CE1-AE24-435C-807D-ED45953077D3.ndjson \
+<pre><code>curl https://sandbox.dpc.cms.gov/api/v1/data/<span style="color: #046B99;">{job_id}</span>/<span style="color: #046B99;">{file_name}</span> \
      -H 'Authorization: Bearer <span style="color: #046B99;">{access_token}</span>'</code></pre>
 
 **Example:** Explanation of Benefit Resource

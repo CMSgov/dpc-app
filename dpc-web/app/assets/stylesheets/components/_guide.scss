@@ -21,6 +21,22 @@
   }
 }
 
+.guide__table {
+  border: 0.5px solid $color-gray-dark;
+
+  th {
+    border: 0.5px solid $color-gray-dark;
+    background-color: $color-gray-lighter;
+    padding: 0 $spacer-2;
+  }
+
+  td {
+    border: 0.5px solid $color-gray-dark;
+    padding: $spacer-1;
+    text-align: center;
+  }
+}
+
 .guide_top_link {
   color: $color-gray-dark;
   font-size: 18px;
