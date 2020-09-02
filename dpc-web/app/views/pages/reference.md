@@ -1,15 +1,12 @@
 # Authorization
 ------------------
 
-Welcome to Data at the Point of Care pilot API program!
+Welcome to the Data at the Point of Care pilot API program!
 
 ## Step One: Request Access
-Any Fee-for-Service provider or Health IT vendor may request access to the sandbox environment and synthetic data by creating an account in the DPC Portal. Follow the steps below:
+Any Fee-for-Service provider or Health IT vendor may [request access](https://dpc.cms.gov/users/sign_up) to the sandbox environment and obtain synthetic data by signing-up for an account in the DPC Portal. You will receive a confirmation email from CMS upon account creation. 
 
-1. [Request access to the sandbox environment.](https://dpc.cms.gov/users/sign_up)
-2. CMS 1st email: Welcome, confirmation link.
-3. CMS 2nd email: DPC will assign your account to an organization and notify you with the next steps and a link to the DPC Portal.
-4. Log in to the DPC Portal at [https://dpc.cms.gov](https://dpc.cms.gov) to manage your client tokens and public keys.
+Once your account has been assigned to an organization, you will be notified with a second email, which will include next steps and an invite to join our [Google Group](https://groups.google.com/g/dpc-api) community. At this time, you may log in to the DPC Portal at [https://dpc.cms.gov](https://dpc.cms.gov) to create your first client token and start your journey with the Data at the Point of Care pilot API!
 
 ## Step Two: Client Tokens
 
