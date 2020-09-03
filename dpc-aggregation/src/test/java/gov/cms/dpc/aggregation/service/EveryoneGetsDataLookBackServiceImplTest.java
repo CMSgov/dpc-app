@@ -11,7 +11,7 @@ public class EveryoneGetsDataLookBackServiceImplTest {
 
     @Test
     public void alwaysReturnUUIDFromGetProviderIDFromRosterTest() {
-        String npi = lookBackService.getProviderNPIFromRoster(UUID.randomUUID(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        String npi = lookBackService.getPractitionerNPIFromRoster(UUID.randomUUID(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
         Assertions.assertNotNull(npi);
     }
 
