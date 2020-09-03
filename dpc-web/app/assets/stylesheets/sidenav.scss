@@ -14,6 +14,12 @@
     position: sticky;
     top: $spacer-5;
   }
+
+  .button_item {
+    list-style: none;
+    margin: 0 0 10px 0 !important;
+    padding: 0 0 0 25px;
+  }
 }
 
 .sidenav__item {
@@ -31,4 +37,50 @@
   color: #000;
   border-left: 3px solid blue;
   padding-left: $spacer-1;
+}
+/* Guide Nav Collapsable */
+
+.sidenav__link.usa-accordion__button {
+  background-image: none;
+  background-color: transparent;
+  color: #666;
+  font-weight: bold;
+  padding: 0;
+  text-decoration: none;
+  width: 100%;
+}
+
+.sidenav__link.usa-accordion__button:visited {
+  color: #666;
+}
+
+.sidenav__link.usa-accordion__button:hover {
+  background-color: transparent;
+  color: #000;
+  border-left: 3px solid blue;
+  padding-left: $spacer-1;
+}
+
+.sidenav__link.usa-accordion__button[aria-expanded=false] {
+  background-image: none;
+}
+
+.sidenav__link.usa-accordion__button[aria-expanded=false]:before {
+  content: "↓"
+}
+
+.sidenav__link.usa-accordion__button[aria-expanded=true]:before {
+  content: "↑"
+}
+
+.guide-header1 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.guide-nav__item {
+  display: block;
+  list-style: none;
+  margin: 0 !important;
+  padding: 0 0 0 25px;
 }
