@@ -301,7 +301,7 @@ The response from the API will include the client_token in the token field.
 ~~~
 
 ### List a specific public key
-If you have created multiple public keys, you may want to list them to reference ID’s, expiration dates, or delete specific public keys from your account in the DPC Portal.
+If you have created multiple public keys, you may want to confirm the expiration date or content of a single public key from your account in the DPC portal.
 
 Specific public keys can be listed by making a GET request to the /Key endpoint using the unique id of the public key.
 
@@ -422,7 +422,38 @@ In order to receive an access_token, the valid JWT must be submitted to the /Tok
 
 **2. Add the remaining fields below:**
 
-![Access Token Table](/assets/guide_access_token_table.svg)
+<table cellspacing="0" class="guide__table">
+  <tr>
+    <th cellspacing="0">Parameters</th>
+    <th cellspacing="0">Parameter Values</th>
+    <th cellspacing="0">Fixed/Dynamic</th>
+    <th cellspacing="0" style="width: 33%">Notes</th>
+  </tr>
+  <tr>
+    <td cellspacing="0">"scope":</td>
+    <td cellspacing="0">"system/*.*"</td>
+    <td cellspacing="0">Fixed</td>
+    <td cellspacing="0">The requested scope MUST be equal to or less than a the scope originally granted to the authorized accessor.</td>
+  </tr>
+  <tr>
+    <td cellspacing="0">"grant_type":</td>
+    <td cellspacing="0">"client_credentials"</td>
+    <td cellspacing="0">Dynamic</td>
+    <td cellspacing="0">The format of the assertion as defined by the authorization server.</td>
+  </tr>
+  <tr>
+    <td cellspacing="0">"client_assertion_type":</td>
+    <td cellspacing="0">"urn:ietf:params:oauth:client-assertion-type:jwt-bearer"</td>
+    <td cellspacing="0">Fixed</td>
+    <td cellspacing="0">The format of the assertion as defined by the authorization server.</td>
+  </tr>
+  <tr>
+    <td cellspacing="0">"client_assertion":</td>
+    <td cellspacing="0">"<span style="color: #046B99;">{Signed authentication JWT value}</span>"</td>
+    <td cellspacing="0">Dynamic</td>
+    <td cellspacing="0">The assertion being used to authenticate the client.</td>
+  </tr>
+</table>
 
 The endpoint response will be a JSON object, which contains:
 
@@ -614,9 +645,9 @@ Every organization is required to keep a list of [Practitioner](https://dpc.cms.
     - Type 1 National Provider Identifier (NPI)
 
 ### Add a Practitioner
-To register a Practitioner at your Organization, you must send a FHIR-formatted [Practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) Resource as the BODY of your request. The JSON file must be included in the BODY of your request with no encoding (raw) when uploading  via a POST request to the /Practitioner endpoint.
+To register a Practitioner at your Organization, you must send a FHIR-formatted [Practitioner](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html) Resource as the BODY of your request. Please use no encoding (raw) when uploading via a POST request to the /Practitioner endpoint.
 
-To create the Practitioner Resource, the JSON file may include additional attributes detailed in the FHIR Implementation Guide within the [DPC Practitioner Profile](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html), but at a minimum must include the Practitioner’s:
+The Practitioner Resource may include additional attributes detailed in the FHIR Implementation Guide within [DPC Practitioner Profile](https://dpc.cms.gov/ig/StructureDefinition-dpc-profile-practitioner.html), but at a minimum must include the Practitioner’s:
 
   - First and Last Name
   - Type 1 National Provider Identifier (NPI)
@@ -640,8 +671,6 @@ POST /api/v1/Practitioner
 The Practitioner endpoint supports a $submit operation, which allows you to upload a Bundle of resources for registration in a single batch operation.
  
 Each individual Practitioner Resource in your Bundle must satisfy the requirements on how to add a [Practitioner Resource](#add-a-practitioner), otherwise a 422-Unprocessable Entity error will be returned.
-
-<!-- PLACEHOLDER ASK ABOUT DOWNLOAD PRACTITIONER BUNDLE -->
 
 #### Request:
 
