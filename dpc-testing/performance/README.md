@@ -10,7 +10,7 @@ ENV=docker ./dpc-perf-load-test.sh
 ```
 
 ### With k6
-After installing k6, you can run the tests directly. Specify the environment with the flag `-e env={environment}`, and the test script file.
+After installing k6, you can run the tests directly. Specify the environment with the flag `-e env={environment}`, and the test script file. The environment options are `local`, `dev`, `test`, `sandbox`, and `prod`.
 ```
 k6 run -e env=local scripts/get_metadata-perf.js
 ```
