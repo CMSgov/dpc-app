@@ -124,7 +124,7 @@ class User < ApplicationRecord
     return if password =~ /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@\#\$\&*])/
 
     errors.add :password, 'must include at least one number, one lowercase letter,
-                             one uppercase letter, and one special character (!@#$&*)'
+                           one uppercase letter, and one special character (!@#$&*)'
   end
 
   def requested_num_providers_to_zero_if_blank
