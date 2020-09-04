@@ -1,10 +1,10 @@
 const envUrl = new Map([
   ['local', 'http://localhost:3002'],
   ['docker', 'http://host.docker.internal:3002'],
-  ['dev', 'https://dev.dpc.cms.gov'],
-  ['test', 'https://test.dpc.cms.gov'],
-  ['sandbox', 'https://sandbox.dpc.cms.gov'],
-  ['prod', 'https://prod.dpc.cms.gov']
+  ['dev', 'https://dev.dpc.cms.gov/api'],
+  ['test', 'https://test.dpc.cms.gov/api'],
+  ['sandbox', 'https://sandbox.dpc.cms.gov/api'],
+  ['prod', 'https://prod.dpc.cms.gov/api']
 ]);
 
 export function getBaseUrl() {
