@@ -5,8 +5,8 @@ import { check, fail, sleep } from 'k6';
 let baseUrl = getBaseUrl();
 
 export let options = {
-  vus: 10,
-  duration: '10s',
+  vus: 100,
+  duration: '30s',
 };
 
 export default function() {

@@ -6,7 +6,7 @@ let baseUrl = getBaseUrl();
 
 export let options = {
   thresholds: {
-    http_req_duration: ['p(95)<400'],
+    http_req_duration: ['p(95)<500'],
   },
 };
 
