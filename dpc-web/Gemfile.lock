@@ -455,7 +455,7 @@ GEM
     thread_safe (0.3.6)
     thread_safe (0.3.6-java)
     tilt (2.0.10)
-    truemail (1.8.0)
+    truemail (1.9.0)
       simpleidn (~> 0.1.1)
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
