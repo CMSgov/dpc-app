@@ -30,3 +30,6 @@ dump.rdb
 /public/ig/**/*
 
 .env
+
+# Ignore SimpleCov Coverage result files.
+/coverage/*
