@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_23_152327) do
+ActiveRecord::Schema.define(version: 2020_09_09_131201) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -56,14 +56,6 @@ ActiveRecord::Schema.define(version: 2020_07_23_152327) do
     t.index ["uid", "provider"], name: "index_internal_users_on_uid_and_provider", unique: true
   end
 
-  create_table "old_passwords", force: :cascade do |t|
-    t.string "encrypted_password", null: false
-    t.string "password_archivable_type", null: false
-    t.integer "password_archivable_id", null: false
-    t.string "password_salt"
-    t.datetime "created_at"
-  end
-
   create_table "organization_user_assignments", force: :cascade do |t|
     t.integer "organization_id", null: false
     t.integer "user_id", null: false
@@ -107,6 +99,11 @@ ActiveRecord::Schema.define(version: 2020_07_23_152327) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "the_resources", force: :cascade do |t|
+    t.datetime "password_changed_at"
+    t.index ["password_changed_at"], name: "index_the_resources_on_password_changed_at"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "first_name", null: false
     t.string "last_name", null: false
@@ -133,7 +130,6 @@ ActiveRecord::Schema.define(version: 2020_07_23_152327) do
     t.string "confirmation_token"
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
-    t.datetime "password_changed_at"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["created_at"], name: "index_users_on_created_at"
     t.index ["email"], name: "index_users_on_email", unique: true
