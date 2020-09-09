@@ -23,7 +23,9 @@ public class NoHtmlValidator implements ConstraintValidator<NoHtml, String> {
         if (StringUtils.isBlank(s)) {
             return true;
         }
-        String safe = Jsoup.clean(s, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
-        return safe.equals(s);
+        // Ignore `&` in names and addresses
+        String s1 = s.replaceAll("(\\s&\\s)", "   ");
+        String safe = Jsoup.clean(s1, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
+        return safe.equals(s1);
     }
 }
