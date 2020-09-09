@@ -22,6 +22,7 @@ class User < ApplicationRecord
 
   enum requested_organization_type: ORGANIZATION_TYPES
 
+  validate :password_complexity
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :email, presence: true, domain_exists: true
   validates :last_name, :first_name, presence: true
@@ -123,7 +124,7 @@ class User < ApplicationRecord
     return if password =~ /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@\#\$\&*])/
 
     errors.add :password, 'must include at least one number, one lowercase letter,
-                             one uppercase letter, and one special character (!@#$&*)'
+                           one uppercase letter, and one special character (!@#$&*)'
   end
 
   def requested_num_providers_to_zero_if_blank
