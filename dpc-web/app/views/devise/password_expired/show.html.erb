@@ -10,10 +10,33 @@
         <%= f.password_field :current_password, class: "ds-c-field" %></p>
 
         <p><%= f.label :password, t('.new_password'), class: "ds-c-label" %>
-        <%= f.password_field :password, class: "ds-c-field" %></p>
+          <div class="password-check-list">
+            Password must contain at least:<br />
+            <div id="password-char-set" class="invalid">
+              <%= @minimum_password_length %> characters minimum
+            </div>
+            <div id="password-lower-set" class="invalid">
+              1 lowercase letter
+            </div>
+            <div id="password-upper-set" class="invalid">
+              1 uppercase letter
+            </div>
+            <div id="password-num-set" class="invalid">
+              1 number
+            </div>
+            <div id="password-special-set" class="invalid">
+              1 special character
+            </div>
+          </div>
+        <%= f.password_field :password, class: "ds-c-field", onkeyup: "passwordCheck('user_password')" %></p>
 
         <p><%= f.label :password_confirmation, t('.new_password_confirmation'), class: "ds-c-label" %>
-        <%= f.password_field :password_confirmation, class: "ds-c-field" %></p>
+          <div class="password-check-list">
+            <div id="password-confirm-set" class="invalid">
+              Confirm password
+            </div>
+          </div>
+        <%= f.password_field :password_confirmation, class: "ds-c-field", onkeyup: "passwordCheck('user_password_confirmation')" %></p>
 
         <p><%= f.submit 'Change my password', class: "ds-c-button ds-c-button--primary" %></p>
       <% end %>
