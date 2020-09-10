@@ -4,6 +4,7 @@ module Internal
   class RegisteredOrganizationsController < ApplicationController
     before_action :authenticate_internal_user!
 
+    # :nocov:
     def new
       @organization = Organization.find(org_id_param)
       @registered_organization = @organization.build_registered_organization
@@ -13,6 +14,7 @@ module Internal
         @registered_organization.build_fhir_endpoint
       end
     end
+    # :nocov:
 
     def create
       @organization = Organization.find(org_id_param)
@@ -28,6 +30,7 @@ module Internal
       end
     end
 
+    # :nocov:
     def edit
       @organization = Organization.find(org_id_param)
       @registered_organization = @organization.registered_organization
@@ -80,6 +83,7 @@ module Internal
         flash[:alert] = 'Unable to complete API request.'
       end
     end
+    # :nocov:
 
     private
 
