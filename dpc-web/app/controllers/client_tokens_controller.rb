@@ -10,7 +10,7 @@ class ClientTokensController < ApplicationController
   end
 
   def create
-    @organization = current_user.organizations.find(params[:organization_id])
+    @organization = current_user.organizations.find(org_id)
 
     reg_org = @organization.registered_organization
     manager = ClientTokenManager.new(registered_organization: reg_org)

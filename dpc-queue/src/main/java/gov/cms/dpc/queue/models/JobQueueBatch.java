@@ -264,6 +264,10 @@ public class JobQueueBatch implements Serializable {
         return Optional.ofNullable(completeTime);
     }
 
+    public void setCompleteTime(OffsetDateTime time) {
+        this.completeTime = time;
+    }
+
     public List<JobQueueBatchFile> getJobQueueBatchFiles() {
         return jobQueueBatchFiles;
     }
