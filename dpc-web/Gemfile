@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.6.5'
+ruby '2.7.1'
 
 # Anchored versions, do not bump without testing
 gem 'rails', '~> 6.0.3'
@@ -13,7 +13,7 @@ gem 'coffee-rails', '~> 5.0'
 gem 'kramdown', '~> 2.1'
 gem 'luhnacy', '~> 0.2.1'
 gem 'omniauth-rails_csrf_protection', '~> 0.1'
-gem 'sidekiq', '~> 6.0'
+gem 'sidekiq', '~> 6.1'
 gem 'newrelic_rpm', '~> 6.10'
 
 gem 'bootsnap', '>= 1.1.0', require: false
