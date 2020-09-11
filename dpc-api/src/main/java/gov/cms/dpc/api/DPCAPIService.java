@@ -111,7 +111,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         final PropertiesProvider propertiesProvider = new PropertiesProvider();
-        bootstrap.addBundle(new SwaggerBundle<>() {
+        bootstrap.addBundle(new SwaggerBundle<DPCAPIConfiguration>() {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCAPIConfiguration dpcapiConfiguration) {
                 final SwaggerBundleConfiguration swaggerBundleConfiguration = dpcapiConfiguration.getSwaggerBundleConfiguration();
