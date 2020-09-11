@@ -20,7 +20,11 @@ module Internal
       @organization = Organization.find(org_id_param)
       @registered_organization = @organization.build_registered_organization(registered_organization_params)
 
-      if @registered_organization.save
+      if @organization.npi.nil?
+        flash[:alert] = 'NPI missing. NPI required to register in API.'
+
+        render :new
+      elsif @registered_organization.save
         flash[:notice] = 'API has been enabled.'
         redirect_to internal_organization_path(@organization)
       else
