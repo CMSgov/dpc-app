@@ -4,7 +4,7 @@
       <h2><%= t('.renew_your_password') %></h2>
 
       <%= form_for(resource, as: resource_name, url: [resource_name, :password_expired], html: { method: :put }) do |f| %>
-        <%= render partial: 'devise/shared/error_messages' %>
+        <%= render "devise/shared/error_messages", resource: resource %>
 
         <p><%= f.label :current_password, t('.current_password'), class: "ds-c-label" %><br />
         <%= f.password_field :current_password, class: "ds-c-field" %></p>
@@ -38,7 +38,7 @@
           </div>
         <%= f.password_field :password_confirmation, class: "ds-c-field", onkeyup: "passwordCheck('user_password_confirmation')" %></p>
 
-        <p><%= f.submit 'Change my password', class: "ds-c-button ds-c-button--primary" %></p>
+        <p><%= f.submit 'Change my password', class: "ds-c-button ds-c-button--primary", data: {test: "submit"} %></p>
       <% end %>
     </div>
   </div>
