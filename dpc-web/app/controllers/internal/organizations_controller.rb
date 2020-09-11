@@ -65,7 +65,10 @@ module Internal
     def update
       @organization = Organization.find id_param
 
-      if @organization.update organization_params
+      if organization_enabled?(@organization) && npi_blank?
+        flash[:alert] = 'Enabled organization require an NPI.'
+        render :edit
+      elsif @organization.update organization_params
         flash[:notice] = 'Organization updated.'
         redirect_to internal_organization_path(@organization)
       else
@@ -117,6 +120,16 @@ module Internal
       else
         flash[:alert] = 'User could not be deleted from the organization.'
       end
+    end
+
+    def npi_blank?
+      organization_params[:npi].blank?
+    end
+
+    def organization_enabled?(org)
+      @reg_org = org.reg_org
+
+      return true if @reg_org.present? && @reg_org.enabled == true
     end
 
     def org_page_params(results)
