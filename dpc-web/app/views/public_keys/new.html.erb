@@ -170,7 +170,8 @@
         <div class="pk-grid-cell pk-form-field" id="label-form">
           <div class="field ds-u-margin-y--5">
             <%= label_tag :label, "Label", class: "ds-c-label" %>
-            <%= text_field_tag :label, params[:label], class: "ds-c-field" %>
+            <%= text_field_tag :label, params[:label], class: "ds-c-field", onkeyup: "characterCount('label',25,'pubkey-char-count')" %>
+            <span class="char-count ds-u-color--gray ds-u-font-weight--normal" id="pubkey-char-count">(0/25)</span>
           </div>
         </div>
         <div class="pk-grid-cell pk-instruction" id="key-inst">
