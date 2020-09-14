@@ -16,4 +16,8 @@
   font-weight: $font-normal;
   margin: 0;
   padding: 0;
+
+  @media (max-width: $width-nav) {
+    text-align: center;
+  }
 }
