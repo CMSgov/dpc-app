@@ -14,6 +14,7 @@
 //= require add-user-search
 //= require accordions
 //= require copy-text
+//= require password-check
 //= require rails-ujs
 //= require activestorage
 //= require_tree ./utils

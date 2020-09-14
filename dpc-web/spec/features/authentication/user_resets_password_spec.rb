@@ -52,12 +52,20 @@ RSpec.feature 'user resets password' do
       expect(page.body).to include('1 error prohibited this user from being saved:')
       expect(page.body).to include('Password confirmation doesn&#39;t match Password')
 
-      fill_in 'user_password', with: '1Crab'
-      fill_in 'user_password_confirmation', with: '1Crab'
+      fill_in 'user_password', with: '#1Crab'
+      fill_in 'user_password_confirmation', with: '#1Crab'
       find('input[data-test="submit"]').click
 
       expect(page.body).to include('1 error prohibited this user from being saved:')
-      expect(page.body).to include('Password is too short (minimum is 6 characters)')
+      expect(page.body).to include('Password is too short (minimum is 15 characters)')
+
+      fill_in 'user_password', with: 'CrabwardTentacles'
+      fill_in 'user_password_confirmation', with: 'CrabwardTentacles'
+      find('input[data-test="submit"]').click
+
+      expect(page.body).to include('1 error prohibited this user from being saved:')
+      expect(page.body).to include('Password must include at least one number, one lowercase letter')
+      expect(page.body).to include('one uppercase letter, and one special character (!@#$&amp;*)')
 
       fill_in 'user_password', with: 'CrabW0rd$_B00m#'
       fill_in 'user_password_confirmation', with: 'CrabW0rd$_B00m#'
