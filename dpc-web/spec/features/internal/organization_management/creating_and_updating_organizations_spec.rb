@@ -127,7 +127,7 @@ RSpec.feature 'creating and updating organizations' do
     expect(api_client).to have_received(:update_organization).with(reg_org)
   end
 
-  scenario 'disabling sandbox access successfully' do
+  scenario 'disabling API access successfully' do
     stub = stub_api_client(
       message: :create_organization,
       success: true,
