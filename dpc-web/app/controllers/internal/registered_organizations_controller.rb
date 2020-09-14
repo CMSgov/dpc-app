@@ -94,14 +94,13 @@ module Internal
     def enable_org
       if @organization.npi.nil?
         flash[:alert] = 'NPI required to enable API.'
-        page_redirect
       else
         @reg_org.enabled = true
         @reg_org.save
 
         flash[:notice] = 'API access enabled.'
-        page_redirect
       end
+      page_redirect
     end
 
     def org_id_param
