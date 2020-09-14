@@ -20,7 +20,6 @@ module Internal
       @organization = Organization.find(org_id_param)
       @registered_organization = @organization.build_registered_organization(registered_organization_params)
 
-      
       if @registered_organization.save
         flash[:notice] = 'API has been enabled.'
         redirect_to internal_organization_path(@organization)
@@ -89,24 +88,28 @@ module Internal
       @reg_org.save
 
       flash[:notice] = 'API access disabled.'
-      redirect_to internal_organization_path(@organization)
+      page_redirect
     end
 
     def enable_org
       if @organization.npi.nil?
         flash[:alert] = 'NPI required to enable API.'
-        redirect_to internal_organization_path(@organization)
+        page_redirect
       else
         @reg_org.enabled = true
         @reg_org.save
 
         flash[:notice] = 'API access enabled.'
-        redirect_to internal_organization_path(@organization)
+        page_redirect
       end
     end
 
     def org_id_param
       params.require(:organization_id)
+    end
+
+    def page_redirect
+      redirect_to internal_organization_path(@organization)
     end
 
     def registered_organization_params
