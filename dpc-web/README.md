@@ -1,5 +1,5 @@
 # README
-This is the *draft* version of the Data Point of Care (DPC) website. The website has functioning public static content as well as a sign-up section allowing providers to volunteer for beta-testing the DPC application. The sign-up section, and whatever functionality and specialized contentthat we provide signed up beta participants will require authentication to view. In addition, there is an administrator dashboard to manage the registration and communications with the participants.
+This is the *draft* version of the Data Point of Care (DPC) website. The website has functioning public static content as well as a sign-up section allowing providers to volunteer for beta-testing the DPC application. The sign-up section, and whatever functionality and specialized content that we provide signed up beta participants will require authentication to view. In addition, there is an administrator portal to manage the registration and communications with the participants.
 
 ## Installation of Ruby
 This is a Ruby on Rails driven website, so you'll need Ruby and a few "gems" to get up and running. Installing Ruby and Rails, as well as PostGresql - the database on a Windows environment is difficult, and beyond the scope of this document - sorry, but you'll need a third party package to install Ruby, such as [Ruby Installer](https://rubyinstaller.org/). **Disclaimer**: the previous sentence was not an endorsement.
@@ -79,35 +79,43 @@ rails db:create db:migrate db:seed
 rails server
 ```
 
+### Add a .env file
+
+Create a `.env` file in the root directory. This is where you will put your environment variables.
+
 Note: If you need to change the database configuration, it can be overridden using the `DB_USER`, `DB_PASS`, and `DATABASE_URL` environment variables. Example:
 
 ```
-export DB_USER=postgres
-export DB_PASS=password
-export DATABASE_URL=postgresql://localhost/dpc-website_development
+DB_USER=postgres
+DB_PASS=password
+DATABASE_URL=postgresql://localhost/dpc-website_development
 ```
 
 You also need to set the Github ENV variables to enable Github OAuth login for internal users:
 
 ```
-export GITHUB_APP_ID=xxx
-export GITHUB_APP_SECRET=yyy
-export GITHUB_ORG_TEAM_ID=123
+GITHUB_APP_ID=xxx
+GITHUB_APP_SECRET=yyy
+GITHUB_ORG_TEAM_ID=123
+```
+
+If you want to switch to the sandbox environment, add the `ENV` variable:
+
+```
+ENV=prod-sbx
 ```
 
 
 #### Background job processing
-In order to process background jobs such as sending email, you need to make sure [DelayedJob](https://github.com/collectiveidea/delayed_job) is running:
+In order to process background jobs such as sending email, you need to make sure [Sidekiq](https://github.com/mperham/sidekiq) is running:
+
+Open a new terminal window and execute the following in the root `/dpc-web` folder.
 
 ```
-bin/delayed_job start
+bundle exec sidekiq
 ```
 
-This command starts DelayedJob in the background. To stop DelayedJob:
-
-```
-bin/delayed_job stop
-```
+This command starts Sidekiq in the current terminal. To stop Sidekiq: `ctrl-c`, and it will shutdown the worker.
 
 # Running via Docker
 
@@ -136,6 +144,11 @@ When you're done, shut down the server with the following command (this also des
 ```Bash
 docker-compose down
 ```
+
+# Testing
+To test the rails app, run `rspec spec` in the terminal.
+
+To test the JWT generator, run `npm test` in the terminal.
 
 # Production
 

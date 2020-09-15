@@ -19,16 +19,20 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 
 public class FHIRHelpers {
 
+    private static final Logger log = LoggerFactory.getLogger(FHIRHelpers.class);
 
     /**
      * Register an organization with the Attribution Service
@@ -41,7 +45,7 @@ public class FHIRHelpers {
      * @return - {@link String} Access token generated for the {@link Organization}
      * @throws IOException - Throws if HTTP client fails
      */
-    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String adminURL) throws IOException {
+    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String organizationNPI, String adminURL) throws IOException {
         // Random number generator for Org NPI
         // Register an organization, and a token
         // Read in the test file
@@ -54,7 +58,7 @@ public class FHIRHelpers {
             // Update the Organization resource and set a random NPI
             final Organization origOrg = (Organization) orgBundle
                     .getEntryFirstRep().getResource();
-            origOrg.getIdentifierFirstRep().setValue(organizationID);
+            origOrg.getIdentifierFirstRep().setValue(organizationNPI);
             origOrg.setId(organizationID);
 
             final Parameters parameters = new Parameters();
@@ -102,7 +106,16 @@ public class FHIRHelpers {
             throw new WebApplicationException("Unable to get resource.", Response.Status.INTERNAL_SERVER_ERROR);
         }
         final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
-        return Response.status(status).entity(resource).build();
+        Response.ResponseBuilder builder = Response.status(status).entity(resource);
+        if (outcome.getCreated() != null) {
+            try {
+                builder.location(new URI("v1/" + outcome.getResource().getIdElement().toString()));
+            } catch (URISyntaxException e) {
+                log.warn("Failed to add location header to resource {}", outcome.getResource().fhirType());
+            }
+            builder.lastModified(resource.getMeta().getLastUpdated());
+        }
+        return builder.build();
     }
 
     // TODO: Refactor this as part of DPC-511

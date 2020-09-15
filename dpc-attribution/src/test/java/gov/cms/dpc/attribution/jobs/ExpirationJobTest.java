@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.DPCAttributionService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.JobTestUtils;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.testing.ConfigOverride;
@@ -32,11 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * In the future, we might consider using something like ByteBuddy to intercept all system time calls and see if the job still gets run.
  */
 @ExtendWith(BufferedLoggerHandler.class)
+@IntegrationTest
 class ExpirationJobTest {
     private static final String KEY_PREFIX = "dpc.attribution";
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION = new DropwizardTestSupport<>(DPCAttributionService.class, "ci.application.conf", ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
             ConfigOverride.config(KEY_PREFIX, "logging.level", "ERROR"));
-    private static final String PROVIDER_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
+    private static final String PROVIDER_ID = "2322222227";
     private static final FhirContext ctx = FhirContext.forDstu3();
     private Client client;
 

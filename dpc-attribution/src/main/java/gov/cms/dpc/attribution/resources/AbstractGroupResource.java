@@ -4,11 +4,14 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Path("/Group")
@@ -47,4 +50,19 @@ public abstract class AbstractGroupResource {
     @DELETE
     @Path("/{rosterID}")
     public abstract Response deleteRoster(UUID rosterID);
+
+    public static boolean rosterSizeTooBig(Integer limit, Group... groups) {
+        if (groups == null || groups.length == 0 || limit == null || limit == -1) {
+            return false;
+        }
+        long totalMembers = Arrays.stream(groups)
+                .filter(Objects::nonNull)
+                .map(Group::getMember)
+                .flatMap(List::stream)
+                .map(Group.GroupMemberComponent::getEntity)
+                .map(Reference::getReference)
+                .distinct()
+                .count();
+        return totalMembers > limit;
+    }
 }

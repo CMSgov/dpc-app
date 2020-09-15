@@ -15,8 +15,8 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_last_name, with: 'Dalloway'
       fill_in :user_email, with: 'clarissa@example.com'
-      fill_in :user_password, with: '1234567890'
-      fill_in :user_password_confirmation, with: '1234567890'
+      fill_in :user_password, with: '3veryDay#P0tato'
+      fill_in :user_password_confirmation, with: '3veryDay#P0tato'
       fill_in :user_requested_organization, with: 'London Health System'
       select 'Primary Care Clinic', from: :user_requested_organization_type
       fill_in :user_requested_num_providers, visible: false, with: '777'
@@ -30,7 +30,14 @@ RSpec.feature 'new user signs up for account' do
       click_on('Sign up')
     end
 
+    scenario 'the email entered in to our job queue' do
+      assert_equal 1, Sidekiq::Worker.jobs.size
+      Sidekiq::Worker.drain_all
+      assert_equal 0, Sidekiq::Worker.jobs.size
+    end
+
     scenario 'user sent a confirmation email with confirmation token' do
+      Sidekiq::Worker.drain_all
       expect(:confirmation_token).to be_present
 
       ctoken = last_email.body.match(/confirmation_token=[^"]*/)
@@ -38,7 +45,8 @@ RSpec.feature 'new user signs up for account' do
       expect(ctoken).to be_present
     end
 
-    scenario 'user clicks on confirmation link to navigate to dashboard' do
+    scenario 'user clicks on confirmation link to navigate to portal' do
+      Sidekiq::Worker.drain_all
       ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
       visit "/users/confirmation?#{ctoken}"
@@ -134,8 +142,8 @@ RSpec.feature 'new user signs up for account' do
       fill_in :user_first_name, with: 'Clarissa'
       fill_in :user_last_name, with: 'Dalloway'
       fill_in :user_email, with: 'clarissa@example.com'
-      fill_in :user_password, with: '1234567890'
-      fill_in :user_password_confirmation, with: '1234567890'
+      fill_in :user_password, with: '3veryDay#P0tato'
+      fill_in :user_password_confirmation, with: '3veryDay#P0tato'
       fill_in :user_requested_organization, with: 'London Health System'
       select 'Primary Care Clinic', from: :user_requested_organization_type
       fill_in :user_requested_num_providers, visible: false, with: '777'
@@ -147,6 +155,8 @@ RSpec.feature 'new user signs up for account' do
       check :user_agree_to_terms
 
       click_on('Sign up')
+
+      Sidekiq::Worker.drain_all
 
       visit new_user_session_path
 

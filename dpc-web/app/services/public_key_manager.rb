@@ -1,23 +1,27 @@
 # frozen_string_literal: true
 
 class PublicKeyManager
-  attr_reader :api_env, :registered_organization, :errors
+  attr_reader :registered_organization, :errors
 
-  def initialize(api_env:, registered_organization:)
-    @api_env = api_env
+  def initialize(registered_organization:)
     @registered_organization = registered_organization
     @errors = []
   end
 
-  def create_public_key(public_key:, label:)
+  def create_public_key(public_key:, label:,
+                        snippet_signature:)
     public_key = strip_carriage_returns(public_key)
+    snippet_signature = strip_carriage_returns(snippet_signature)
+
     if invalid_encoding?(public_key)
       return { response: false,
                message: @errors[0] }
     end
 
-    api_client = APIClient.new(api_env)
-    api_client.create_public_key(registered_organization.api_id, params: { label: label, public_key: public_key })
+    api_client = APIClient.new
+    api_client.create_public_key(registered_organization.api_id,
+                                 params: { label: label, public_key: public_key,
+                                           snippet_signature: snippet_signature })
 
     { response: api_client.response_successful?,
       message: api_client.response_body }
@@ -37,7 +41,7 @@ class PublicKeyManager
   end
 
   def public_keys
-    api_client = APIClient.new(api_env)
+    api_client = APIClient.new
     api_client.get_public_keys(registered_organization.api_id)
 
     if api_client.response_successful?

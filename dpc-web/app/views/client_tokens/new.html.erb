@@ -16,12 +16,7 @@
         <div class="field">
           <%= label_tag :label, "Label", class: "ds-c-label" %>
           <%= text_field_tag :label, params[:label], class: "ds-c-field", maxlength: "25"  %>
-          <p class="ds-c-field__hint">Choose a descriptive name that includes environment, such as “EMR synthetic sandbox”</p>
-        </div>
-
-        <div class="field ds-u-margin-y--5">
-          <%= label_tag :api_environment, "In what environment will this token be used?", class: "ds-c-label" %>
-          <%= select_tag :api_environment, options_for_select(@organization.registered_api_envs, params[:api_environment]), include_blank: true, class: "ds-c-field drop-down" %>
+          <p class="ds-c-field__hint">Choose a descriptive name to make your token easily identifiable to you.</p>
         </div>
 
         <%= submit_tag "Create token", class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>

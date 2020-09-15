@@ -11,13 +11,13 @@ public class EveryoneGetsDataLookBackServiceImplTest {
 
     @Test
     public void alwaysReturnUUIDFromGetProviderIDFromRosterTest() {
-        UUID uuid = lookBackService.getProviderIDFromRoster(UUID.randomUUID(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
-        Assertions.assertNotNull(uuid);
+        String npi = lookBackService.getPractitionerNPIFromRoster(UUID.randomUUID(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        Assertions.assertNotNull(npi);
     }
 
     @Test
     public void alwaysReturnTrueFromHasClaimWithin() {
-        boolean result = lookBackService.hasClaimWithin(null, UUID.randomUUID(), UUID.randomUUID(), 0L);
+        boolean result = lookBackService.hasClaimWithin(null, UUID.randomUUID(), UUID.randomUUID().toString(), 0L);
         Assertions.assertTrue(result);
     }
 }

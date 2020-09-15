@@ -13,6 +13,8 @@
 !/log/.keep
 !/tmp/.keep
 
+dump.rdb
+
 # Ignore uploaded files in development
 /storage/*
 !/storage/.keep
@@ -28,3 +30,6 @@
 /public/ig/**/*
 
 .env
+
+# Ignore SimpleCov Coverage result files.
+/coverage/*

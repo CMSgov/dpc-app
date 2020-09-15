@@ -3,6 +3,7 @@ package gov.cms.dpc.aggregation.engine;
 import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -17,6 +18,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -91,7 +93,9 @@ public class AggregationEngine implements Runnable {
     public void stop() {
         logger.info("Shutting down aggregation engine");
         queueRunning.set(false);
-        this.subscribe.dispose();
+        if (this.subscribe != null) {
+            this.subscribe.dispose();
+        }
     }
 
     public Boolean isRunning() {
@@ -148,7 +152,9 @@ public class AggregationEngine implements Runnable {
     @Trace
     protected void processJobBatch(JobQueueBatch job) {
         try {
-            logger.info("Processing job {} batch {}, exporting to: {}.", job.getJobID(), job.getBatchID(), this.operationsConfig.getExportPath());
+            MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
+            MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
+            logger.info("Processing job, exporting to: {}.", this.operationsConfig.getExportPath());
             logger.debug("Has {} attributed beneficiaries", job.getPatients().size());
 
             Optional<String> nextPatientID = job.fetchNextPatient(aggregatorID);
@@ -157,19 +163,21 @@ public class AggregationEngine implements Runnable {
                 nextPatientID = processPatient(job, patientId);
             }
 
+            //Clear last patient seen from MDC
+            MDC.remove(MDCConstants.PATIENT_ID);
             // Finish processing the batch
             if (this.isRunning()) {
-                logger.info("COMPLETED job {} batch {}", job.getJobID(), job.getBatchID());
+                logger.info("COMPLETED job");
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
                 this.queue.completeBatch(job, aggregatorID);
             } else {
-                logger.info("PAUSED job {} batch {}", job.getJobID(), job.getBatchID());
+                logger.info("PAUSED job");
                 this.queue.pauseBatch(job, aggregatorID);
             }
         } catch (Exception error) {
             try {
-                logger.error("FAILED job {} batch {}", job.getJobID(), job.getBatchID(), error);
+                logger.error("FAILED job", error);
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
@@ -189,16 +197,18 @@ public class AggregationEngine implements Runnable {
         boolean result = false;
         //job.getProviderID is really not providerID, it is the rosterID, see createJob in GroupResource export for confirmation
         //patientId here is the patient MBI
-        final UUID providerID = lookBackService.getProviderIDFromRoster(job.getOrgID(), job.getProviderID(), patientId);
-        if (providerID != null) {
+        final String practitionerNPI = lookBackService.getPractitionerNPIFromRoster(job.getOrgID(), job.getProviderID(), patientId);
+        if (practitionerNPI != null) {
             Pair<Flowable<List<Resource>>, ResourceType> pair = jobBatchProcessor.fetchResource(job, patientId, ResourceType.ExplanationOfBenefit, null);
             Boolean hasClaims = pair.getLeft()
                     .flatMap(Flowable::fromIterable)
                     .filter(resource -> pair.getRight() == resource.getResourceType())
-                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), providerID, operationsConfig.getLookBackMonths()))
+                    .any(resource -> lookBackService.hasClaimWithin((ExplanationOfBenefit) resource, job.getOrgID(), practitionerNPI, operationsConfig.getLookBackMonths()))
                     .onErrorReturn((error) -> false)
                     .blockingGet();
             result = Boolean.TRUE.equals(hasClaims);
+        } else {
+            logger.error("couldn't get practitionerNPI from roster");
         }
         return result;
     }

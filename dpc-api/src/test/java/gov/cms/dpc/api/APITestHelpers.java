@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
@@ -36,6 +38,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -46,6 +49,7 @@ public class APITestHelpers {
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
+    public static String ORGANIZATION_NPI = "1111111112";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -80,16 +84,13 @@ public class APITestHelpers {
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
         try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("provider_bundle.json")) {
-            final Bundle providerBundle = (Bundle) parser.parseResource(inputStream);
-
-            final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(providerBundle).setName("resource");
+            final Parameters providerParameters = (Parameters) parser.parseResource(inputStream);
 
             client
                     .operation()
                     .onType(Practitioner.class)
                     .named("submit")
-                    .withParameters(parameters)
+                    .withParameters(providerParameters)
                     .encodedJson()
                     .execute();
         }
@@ -97,16 +98,13 @@ public class APITestHelpers {
 
     public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
         try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
-            final Bundle patientBundle = (Bundle) parser.parseResource(inputStream);
-
-            final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(patientBundle).setName("resource");
+            final Parameters patientParameters = (Parameters) parser.parseResource(inputStream);
 
             client
                     .operation()
                     .onType(Patient.class)
                     .named("submit")
-                    .withParameters(parameters)
+                    .withParameters(patientParameters)
                     .encodedJson()
                     .execute();
         }
@@ -134,7 +132,8 @@ public class APITestHelpers {
                 .addProvider(JerseyExceptionHandler.class)
                 .addProvider(PersistenceExceptionHandler.class)
                 .addProvider(HAPIExceptionHandler.class)
-                .addProvider(DefaultFHIRExceptionHandler.class);
+                .addProvider(DefaultFHIRExceptionHandler.class)
+                .addProvider(JsonParseExceptionMapper.class);
 
         // Optionally enable validation
         if (validation) {
@@ -199,4 +198,33 @@ public class APITestHelpers {
                 .configure().constraintValidatorFactory(factory)
                 .buildValidatorFactory().getValidator();
     }
+
+    public static Practitioner createPractitionerResource(String npi, String orgID) {
+        final Practitioner practitioner = new Practitioner();
+        practitioner.addIdentifier().setValue(npi).setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        practitioner.addName()
+                .setFamily("Practitioner").addGiven("Test");
+
+        // Meta data which includes the Org we're using
+        final Meta meta = new Meta();
+        meta.addTag(DPCIdentifierSystem.DPC.getSystem(), orgID, "OrganizationID");
+        practitioner.setMeta(meta);
+
+        return practitioner;
+    }
+
+    public static Patient createPatientResource(String mbi, String organizationID) {
+        final Patient patient = new Patient();
+        patient.addIdentifier()
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setValue(mbi);
+
+        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.setBirthDate(Date.valueOf("1990-01-01"));
+        patient.setGender(Enumerations.AdministrativeGender.OTHER);
+        patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
+
+        return patient;
+    }
+
 }

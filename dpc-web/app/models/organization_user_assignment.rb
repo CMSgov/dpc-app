@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './lib/redis_store/mail_throttle_store'
+
 class OrganizationUserAssignment < ApplicationRecord
   belongs_to :organization
   belongs_to :user
@@ -10,11 +12,15 @@ class OrganizationUserAssignment < ApplicationRecord
   after_create :send_organization_sandbox_email
 
   def send_organization_sandbox_email
-    return unless organization.sandbox_enabled?
+    return unless organization.prod_sbx? && organization.registered_organization.present?
 
-    UserMailer
-      .with(user: user, vendor: organization.health_it_vendor?)
-      .organization_sandbox_email
-      .deliver_later
+    mail_throttle_store = RedisStore::MailThrottleStore.new
+
+    if mail_throttle_store.can_email? user.email
+      UserMailer
+        .with(user: user, vendor: organization.health_it_vendor?)
+        .organization_sandbox_email
+        .deliver_later
+    end
   end
 end

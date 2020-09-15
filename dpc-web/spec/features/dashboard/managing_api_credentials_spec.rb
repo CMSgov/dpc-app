@@ -12,7 +12,7 @@ RSpec.feature 'managing api credentials' do
     end
 
     it 'cannot manage api credentials' do
-      visit dashboard_path
+      visit portal_path
       expect(page).not_to have_css('[data-test="new-client-token"]')
       expect(page).not_to have_css('[data-test="new-public-key"]')
     end
@@ -29,7 +29,7 @@ RSpec.feature 'managing api credentials' do
     end
 
     it 'cannot manage api credentials' do
-      visit dashboard_path
+      visit portal_path
       expect(page).not_to have_css('[data-test="new-client-token"]')
       expect(page).not_to have_css('[data-test="new-public-key"]')
     end
@@ -46,7 +46,7 @@ RSpec.feature 'managing api credentials' do
         success: true,
         response: default_org_creation_response
       )
-      create(:registered_organization, organization: org, api_env: 'sandbox', api_id: '923a4f7b-eade-494a-8ca4-7a685edacfad')
+      create(:registered_organization, organization: org, api_id: '923a4f7b-eade-494a-8ca4-7a685edacfad', enabled: true)
 
       sign_in user, scope: :user
     end
@@ -55,11 +55,10 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_empty_key_request
       api_client = stub_empty_token_request(api_client)
 
-      visit dashboard_path
+      visit portal_path
 
       api_client = stub_token_creation_request(api_client)
       find('[data-test="new-client-token"]').click
-      select 'sandbox', from: 'api_environment'
       fill_in 'label', with: 'Sandbox Token 1'
       find('[data-test="form-submit"]').click
 
@@ -70,7 +69,7 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_key_get_request(api_client)
       stub_token_get_request(api_client)
 
-      find('[data-test="dashboard-link"]').click
+      find('[data-test="portal-link"]').click
 
       expect(page).to have_content('Sandbox Token 1')
       expect(page).to have_content('11/07/2019 at 5:15PM UTC')
@@ -81,10 +80,9 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_empty_key_request
       api_client = stub_empty_token_request(api_client)
 
-      visit dashboard_path
+      visit portal_path
       find('[data-test="new-public-key"]').click
 
-      select 'sandbox', from: 'api_environment'
       fill_in 'label', with: 'Sandbox Key 1'
       fill_in 'public_key', with: stubbed_key
 

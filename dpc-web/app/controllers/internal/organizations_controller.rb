@@ -5,29 +5,15 @@ module Internal
     before_action :authenticate_internal_user!
 
     def index
-      scope = if params[:org_type] == 'vendor'
-                Organization.vendor
-              elsif params[:org_type] == 'provider'
-                Organization.provider
-              else
-                Organization.all
-              end
+      results = BaseSearch.new(params: params, scope: params[:org_type]).results
 
-      if params[:keyword].present?
-        keyword = "%#{params[:keyword].downcase}%"
-        scope = scope.where(
-          'LOWER(name) LIKE :keyword', keyword: keyword
-        )
-      end
-
-      @organizations = scope.page params[:page]
+      @organizations = org_page_params(results)
       render layout: 'table_index'
     end
 
     def new
-      user_id = params.fetch(:from_user, nil)
-      if user_id
-        user = User.find user_id
+      if user_id_params[:user_id].present?
+        user = User.find user_id_params[:user_id]
         @organization = Organization.new name: user.requested_organization,
                                          organization_type: user.requested_organization_type,
                                          num_providers: user.requested_num_providers
@@ -48,11 +34,15 @@ module Internal
 
       if @organization.save
         flash[:notice] = 'Organization created.'
+
+        if user_id_params[:user_id].present?
+          @user = User.find user_id_params[:user_id]
+          add_user_to_org
+          return
+        end
+
         if prod_sbx?
-          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id,
-                                                                             api_env: 'sandbox')
-        elsif params[:from_user].present?
-          redirect_to edit_internal_user_path(params[:from_user], user_organization_ids: @organization.id)
+          redirect_to new_internal_organization_registered_organization_path(organization_id: @organization.id)
         else
           redirect_to internal_organization_path(@organization)
         end
@@ -63,15 +53,17 @@ module Internal
     end
 
     def show
-      @organization = Organization.find params[:id]
+      @organization = Organization.find id_param
+
+      @users = user_filter
     end
 
     def edit
-      @organization = Organization.find params[:id]
+      @organization = Organization.find id_param
     end
 
     def update
-      @organization = Organization.find params[:id]
+      @organization = Organization.find id_param
 
       if @organization.update organization_params
         flash[:notice] = 'Organization updated.'
@@ -83,7 +75,7 @@ module Internal
     end
 
     def destroy
-      @organization = Organization.find params[:id]
+      @organization = Organization.find id_param
       if @organization.destroy
         flash[:notice] = 'Organization deleted.'
         redirect_to internal_organizations_path
@@ -93,14 +85,67 @@ module Internal
       end
     end
 
+    def add_or_delete
+      @organization = Organization.find(params[:organization_id])
+      @user = user_identify
+
+      if params[:_method] == 'add'
+        add_user_to_org
+      elsif params[:_method] == 'delete'
+        delete_user_from_org
+      else
+        redirect_to internal_organization_path(@organization)
+      end
+    end
+
     private
 
-    def prod_sbx?
-      ENV['ENV'] == 'prod-sbx'
+    def add_user_to_org
+      @user.organizations.clear
+      if @organization.users << @user
+        flash[:notice] = 'User has been successfully added to the organization.'
+        page_redirect
+      else
+        flash[:alert] = 'User could not be added to the organization.'
+      end
+    end
+
+    def delete_user_from_org
+      if @organization.users.delete(@user)
+        flash[:notice] = 'User has been successfully deleted from the organization.'
+        page_redirect
+      else
+        flash[:alert] = 'User could not be deleted from the organization.'
+      end
+    end
+
+    def org_page_params(results)
+      results.page params[:page]
+    end
+
+    def page_redirect
+      return redirect_to internal_user_url(@user) if params[:user_id].present?
+
+      redirect_to internal_organization_path(@organization)
+    end
+
+    def user_id_params
+      params.permit(:user_id)
+    end
+
+    def user_filter
+      User.left_joins(:organization_user_assignments)
+          .where('organization_user_assignments.id IS NULL')
+    end
+
+    def user_identify
+      return User.find(params[:user_id]) if params[:user_id].present?
+
+      User.find(params[:organization][:id])
     end
 
     def organization_params
-      params.fetch(:organization).permit(
+      params.require(:organization).permit(
         :name, :organization_type, :num_providers, :npi, :vendor,
         address_attributes: %i[id street street_2 city state zip address_use address_type]
       )

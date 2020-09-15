@@ -60,10 +60,10 @@ docker-compose up start_core_dependencies
 docker-compose up start_api_dependencies
 
 # Run the integration tests
-mvn test -Pintegration-tests -pl dpc-api -am
+docker-compose up --exit-code-from tests tests
 
 # Start the API server
-AUTH_DISABLED=true docker-compose up start_api
+AUTH_DISABLED=true docker-compose up start_api start_consent
 
 # Run the Postman tests
 npm install

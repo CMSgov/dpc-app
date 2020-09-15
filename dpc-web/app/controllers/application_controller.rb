@@ -37,4 +37,27 @@ class ApplicationController < ActionController::Base
                         'ERROR'
                       end
   end
+
+  def download_jwt_tool
+    send_file 'public/jwt/jwt.html', type: 'application/zip', status: 202
+  end
+
+  def download_prac_json
+    send_file 'public/practitioner_bundle.json', type: 'application/zip', status: 202
+  end
+
+  def download_pt_json
+    send_file 'public/patient_bundle.json', type: 'application/zip', status: 202
+  end
+
+  private
+
+  def id_param
+    params.require(:id)
+  end
+
+  def prod_sbx?
+    ENV['ENV'] == 'prod-sbx'
+  end
+  helper_method :prod_sbx?
 end

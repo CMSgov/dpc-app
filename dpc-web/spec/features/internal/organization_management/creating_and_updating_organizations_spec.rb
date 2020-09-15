@@ -67,7 +67,7 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_css('[data-test="form-submit"]')
   end
 
-  scenario 'enabling sandbox access successfully' do
+  scenario 'enabling API access successfully' do
     stub = stub_api_client(
       message: :create_organization,
       success: true,
@@ -86,16 +86,15 @@ RSpec.feature 'creating and updating organizations' do
     mailer = stub_sandbox_notification_mailer(org, [crabby, fishy])
 
     visit internal_organization_path(org)
-    find('[data-test="enable-sandbox"]').click
+    find('[data-test="enable-org"]').click
 
-    expect(page).to have_css('[data-test="new-reg-org-sandbox"]')
+    expect(page).to have_css('[data-test="new-reg-org"]')
     fill_in 'registered_organization_fhir_endpoint_attributes_name', with: 'Test Sandbox Endpoint'
     select 'Test', from: 'registered_organization_fhir_endpoint_attributes_status'
     fill_in 'registered_organization_fhir_endpoint_attributes_uri', with: 'https://example.com'
     find('[data-test="form-submit"]').click
 
-    expect(page).to have_content('Access to sandbox enabled.')
-    expect(mailer).to have_received(:organization_sandbox_email).twice
+    expect(page).to have_content('API ID')
   end
 
   scenario 'updating an API enabled organization' do
@@ -107,8 +106,8 @@ RSpec.feature 'creating and updating organizations' do
     allow(stub).to receive(:get_public_keys).and_return(stub)
     allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
-    org = create(:organization, :sandbox_enabled)
-    reg_org = org.sandbox_registered_organization
+    org = create(:organization, :api_enabled)
+    reg_org = org.registered_organization
 
     visit internal_organization_path(org)
     find('[data-test="edit-link"]').click
@@ -137,18 +136,22 @@ RSpec.feature 'creating and updating organizations' do
     allow(stub).to receive(:get_public_keys).and_return(stub)
     allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
-    org = create(:organization, :sandbox_enabled)
+    org = create(:organization, :api_enabled)
+    reg_org = org.reg_org
     visit internal_organization_path(org)
 
     api_client = stub_api_client(
-      message: :delete_organization,
+      message: :update_organization,
       success: true,
-      response: ''
+      response: default_org_creation_response
     )
-
-    find('[data-test="disable-sandbox"]').click
-
-    expect(page).to have_content('Sandbox access disabled')
+    allow(api_client).to receive(:get_public_keys).and_return(api_client)
+    allow(api_client).to receive(:update_endpoint).and_return(api_client)
+    allow(api_client).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
+    find('[data-test="disable-org"]').click
+    reg_org = Organization.find(org.id).reg_org
+    expect(reg_org.enabled).to eq(false)
+    expect(page).to have_content('API access disabled')
   end
 
   def stub_sandbox_notification_mailer(org, users=[])

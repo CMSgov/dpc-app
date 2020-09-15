@@ -18,7 +18,6 @@
  @import 'normalize.css/normalize';
  @import '@cmsgov/design-system-core/src/index';
  @import '@cmsgov/design-system-layout/src/index';
- @import "rouge";
  @import "sidenav";
  @import "settings/font-faces";
  @import "settings/variables";
@@ -35,6 +34,7 @@
  @import "components/fields";
  @import "components/field-groups";
  @import "components/footer";
+ @import "components/guide";
  @import "components/hero";
  @import "components/icons";
  @import "components/imgs";
@@ -44,8 +44,10 @@
  @import "components/navbar";
  @import "components/page-headers";
  @import "components/pagination";
+ @import "components/password-check";
  @import "components/pills";
  @import "components/process-list";
+ @import "components/public_keys";
+ @import "components/radio_buttons";
  @import "components/site-blocks";
  @import "utilities/add-ons";
- 

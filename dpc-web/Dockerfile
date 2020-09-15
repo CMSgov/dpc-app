@@ -10,7 +10,7 @@ COPY / /dpc-app
 RUN make ig/publish
 
 
-FROM ruby:2.6.5-alpine AS ruby_builder
+FROM ruby:2.7.1-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk add --no-cache postgresql-dev && \
@@ -41,7 +41,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.o" -delete
 
 
-FROM ruby:2.6.5-alpine
+FROM ruby:2.7.1-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata
@@ -54,5 +54,8 @@ WORKDIR /dpc-web
 COPY --from=ruby_builder /usr/local/bundle/ /usr/local/bundle/
 COPY --from=ruby_builder /dpc-web /dpc-web
 
-# Start the rails server
-CMD ["./docker/entrypoint.sh"]
+# Declare the entrypoint shell script
+ENTRYPOINT ["./docker/entrypoint.sh"]
+
+# Default to running the rails server
+CMD ["web"]

@@ -10,12 +10,12 @@ import java.util.UUID;
 public class EveryoneGetsDataLookBackServiceImpl implements LookBackService {
 
     @Override
-    public UUID getProviderIDFromRoster(UUID orgID, String providerOrRosterID, String patientMBI) {
-        return UUID.randomUUID();
+    public String getPractitionerNPIFromRoster(UUID orgID, String providerOrRosterID, String patientMBI) {
+        return UUID.randomUUID().toString();
     }
 
     @Override
-    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationID, UUID providerID, long withinMonth) {
+    public boolean hasClaimWithin(ExplanationOfBenefit explanationOfBenefit, UUID organizationID, String practitionerNPI, long withinMonth) {
         return true;
     }
 }

@@ -14,7 +14,7 @@
       <%= f.select :organization_type,
         organization_types_for_select,
         { include_blank: 'Please select an organization type' },
-        class: "ds-c-field",
+        class: "ds-c-field drop-down",
         data: { hide_follow_up: 'health_it_vendor' }
       %>
 
@@ -51,10 +51,10 @@
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields">
     <%= f.fields_for :address do |ff| %>
       <%= ff.label :address_use, class: "ds-c-label ds-u-margin-top--0" %>
-      <%= ff.select :address_use, address_uses_for_select, { include_blank: 'Please select address use' },  class: "ds-c-field" %>
+      <%= ff.select :address_use, address_uses_for_select, { include_blank: 'Please select address use' },  class: "ds-c-field drop-down" %>
 
       <%= ff.label :address_type, class: "ds-c-label" %>
-      <%= ff.select :address_type, address_types_for_select, { include_blank: 'Please select address type' }, class: "ds-c-field" %>
+      <%= ff.select :address_type, address_types_for_select, { include_blank: 'Please select address type' }, class: "ds-c-field drop-down" %>
 
       <%= ff.label :street, class: "ds-c-label" %>
       <%= ff.text_field :street, class: "ds-c-field" %>
@@ -67,7 +67,7 @@
       <%= ff.text_field :city, class: "ds-c-field" %>
 
       <%= ff.label :state, class: "ds-c-label" %>
-      <%= ff.select :state, states_for_select, { include_blank: 'Please select' }, class: "ds-c-field" %>
+      <%= ff.select :state, states_for_select, { include_blank: 'Please select' }, class: "ds-c-field drop-down" %>
 
       <%= ff.label :zip, class: "ds-c-label" %>
       <%= ff.text_field :zip, class: "ds-c-field ds-c-field--medium" %>
@@ -81,7 +81,7 @@
   </div>
 
   <div class="ds-l-col--12 ds-l-md-col--9 field-group__fields ds-u-border--0">
-    <%= hidden_field_tag :from_user, params[:from_user] %>
+    <%= hidden_field_tag :user_id, params[:user_id] %>
     <%= f.submit locals[:button_label], class: "ds-c-button ds-c-button--primary", data: { test: "form-submit" } %>
     <%= link_to "Cancel", internal_organizations_path, class: "ds-c-button ds-c-button--transparent" %>
   </div>

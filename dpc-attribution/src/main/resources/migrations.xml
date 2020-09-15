@@ -428,4 +428,10 @@
             <column name="mbi_hash" type="VARCHAR(64)"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="uppercase-mbi" author="sal">
+        <update tableName="PATIENTS">
+            <column name="beneficiary_id" valueComputed="UPPER(beneficiary_id)"/>
+        </update>
+    </changeSet>
 </databaseChangeLog>

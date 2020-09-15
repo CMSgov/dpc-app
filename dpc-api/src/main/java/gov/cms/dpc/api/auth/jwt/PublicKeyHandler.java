@@ -13,18 +13,17 @@ import org.bouncycastle.util.io.pem.PemWriter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class PublicKeyHandler {
 
     // ECC Curve names are defined here: https://tools.ietf.org/search/rfc4492#section-5.1.1
     // They're in two separate namespaces, certicom and ansi-x962
-    static final ASN1ObjectIdentifier RSA_PARENT = new ASN1ObjectIdentifier("1.2.840.113549");
-    static final ASN1ObjectIdentifier ECC_KEY = new ASN1ObjectIdentifier("1.2.840.10045.2.1");
+    public static final ASN1ObjectIdentifier RSA_PARENT = new ASN1ObjectIdentifier("1.2.840.113549");
+    public static final ASN1ObjectIdentifier ECC_KEY = new ASN1ObjectIdentifier("1.2.840.10045.2.1");
 
     private PublicKeyHandler() {
         // Not used
@@ -89,6 +88,32 @@ public class PublicKeyHandler {
             throw new PublicKeyException(String.format("Unsupported key type `%s`.", algorithmID.getId()));
         }
 
+    }
+
+    public static void verifySignature(String publicKeyPem, String snippet, String sigStr) {
+        String keyStr = publicKeyPem
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("[\n\r]+", "");
+        sigStr = sigStr.replaceAll("[\n\r]+", "");
+
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(keyStr);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initVerify(publicKey);
+            signature.update(snippet.getBytes(StandardCharsets.UTF_8));
+            if (!signature.verify(Base64.getDecoder().decode(sigStr))) {
+                throw new PublicKeyException("Key and signature do not match");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new PublicKeyException("Invalid algorithm", e);
+        } catch (GeneralSecurityException e) {
+            throw new PublicKeyException("Signature could not be verified.", e);
+        }
     }
 
     private static void validateRSAKey(SubjectPublicKeyInfo value) {

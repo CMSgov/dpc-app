@@ -4,6 +4,7 @@ require 'csv'
 
 class User < ApplicationRecord
   include OrganizationTypable
+
   has_many :taggings, as: :taggable
   has_many :tags, through: :taggings
   has_many :organization_user_assignments, dependent: :destroy
@@ -14,12 +15,14 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable,
   # :trackable, and :omniauthable, :recoverable,
-  devise :database_authenticatable,
+  devise :database_authenticatable, :async,
          :validatable, :trackable, :registerable,
-         :timeoutable, :recoverable, :confirmable
+         :timeoutable, :recoverable, :confirmable,
+         :password_expirable, :password_archivable
 
   enum requested_organization_type: ORGANIZATION_TYPES
 
+  validate :password_complexity
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :email, presence: true, domain_exists: true
   validates :last_name, :first_name, presence: true
@@ -78,14 +81,25 @@ class User < ApplicationRecord
     )
   end
 
-  def self.to_csv
-    attrs = %w[id first_name last_name email requested_organization requested_organization_type
-               address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at]
+  ATTRS = %w[id first_name last_name email requested_organization requested_organization_type
+             address_1 address_2 city state zip agree_to_terms requested_num_providers created_at updated_at].freeze
 
+  # html escape these fields for XSS protection
+  ESCAPED_ATTRS = %w[first_name last_name requested_organization address_1 address_2 city].freeze
+
+  def self.to_csv
     CSV.generate(headers: true) do |csv|
-      csv << attrs
+      csv << ATTRS
       all.each do |user|
-        csv << user.attributes.values_at(*attrs)
+        attributes = user.attributes
+        escaped_attributes = attributes.map do |k, v|
+          if ESCAPED_ATTRS.include? k
+            v = ERB::Util.html_escape(v)
+          end
+
+          [k, v]
+        end.to_h
+        csv << escaped_attributes.values_at(*ATTRS)
       end
     end
   end
@@ -103,6 +117,17 @@ class User < ApplicationRecord
   end
 
   private
+
+  def password_complexity
+    return if password.nil?
+
+    password_regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@\#\$\&*])/
+
+    return if password.match? password_regex
+
+    errors.add :password, 'must include at least one number, one lowercase letter,
+                           one uppercase letter, and one special character (!@#$&*)'
+  end
 
   def requested_num_providers_to_zero_if_blank
     self.requested_num_providers = 0 if requested_num_providers.blank?

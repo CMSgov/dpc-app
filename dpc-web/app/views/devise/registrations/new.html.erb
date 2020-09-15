@@ -55,10 +55,25 @@
               <%= f.label :password, class: "ds-c-label" %>
             </div>
           </div>
-          <% if @minimum_password_length %>
-          <em>(<%= @minimum_password_length %> characters minimum)</em>
-          <% end %><br />
-          <%= f.password_field :password, class: "ds-c-field" %>
+          <div class="password-check-list">
+            Password must contain at least:<br />
+            <div id="password-char-set" class="invalid">
+              <%= @minimum_password_length %> characters minimum
+            </div>
+            <div id="password-lower-set" class="invalid">
+              1 lowercase letter
+            </div>
+            <div id="password-upper-set" class="invalid">
+              1 uppercase letter
+            </div>
+            <div id="password-num-set" class="invalid">
+              1 number
+            </div>
+            <div id="password-special-set" class="invalid">
+              1 special character (!@#$&*)
+            </div>
+          </div>
+          <%= f.password_field :password, class: "ds-c-field", onkeyup: "passwordCheck('user_password')" %>
         </div>
 
         <div class="field">
@@ -68,9 +83,14 @@
             </div>
             <div>
               <%= f.label :password_confirmation, class: "ds-c-label" %>
+              <div class="password-check-list">
+                <div id="password-confirm-set" class="invalid">
+                  Confirm password
+                </div>
+              </div>
             </div>
           </div>
-          <%= f.password_field :password_confirmation, class: "ds-c-field" %>
+          <%= f.password_field :password_confirmation, class: "ds-c-field", onkeyup: "passwordCheck('user_password_confirmation')" %>
         </div>
 
         <h2>Your organization</h2>
@@ -206,4 +226,4 @@
       <%= render "devise/shared/links" %>
     </div>
   </div>
-</div>
+  </div>

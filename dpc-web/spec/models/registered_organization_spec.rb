@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe RegisteredOrganization, type: :model do
@@ -6,11 +8,11 @@ RSpec.describe RegisteredOrganization, type: :model do
   describe '#client_tokens' do
     it 'gets array from ClientTokenManager' do
       org = create(:organization)
-      registered_org = build(:registered_organization, organization: org, api_env: 0)
+      registered_org = build(:registered_organization, organization: org)
       tokens = [{ 'token' => 'abcdef' }, { 'token' => 'ftguiol' }]
 
       manager = instance_double(ClientTokenManager)
-      allow(ClientTokenManager).to receive(:new).with(api_env: 'sandbox', registered_organization: registered_org)
+      allow(ClientTokenManager).to receive(:new).with(registered_organization: registered_org)
                                                 .and_return(manager)
       allow(manager).to receive(:client_tokens).and_return(tokens)
 
@@ -21,12 +23,12 @@ RSpec.describe RegisteredOrganization, type: :model do
   describe '#public_keys' do
     it 'gets array from PublicKeyManager' do
       org = create(:organization)
-      registered_org = build(:registered_organization, organization: org, api_env: 0)
-      keys = [{'id' => 'abcdef'}, {'id' => 'ftguiol'}]
+      registered_org = build(:registered_organization, organization: org)
+      keys = [{ 'id' => 'abcdef' }, { 'id' => 'ftguiol' }]
 
       manager = instance_double(PublicKeyManager)
-      allow(PublicKeyManager).to receive(:new).with(api_env: 'sandbox', registered_organization: registered_org)
-                                                .and_return(manager)
+      allow(PublicKeyManager).to receive(:new).with(registered_organization: registered_org)
+                                              .and_return(manager)
       allow(manager).to receive(:public_keys).and_return(keys)
 
       expect(registered_org.public_keys).to eq(keys)
@@ -36,7 +38,11 @@ RSpec.describe RegisteredOrganization, type: :model do
   describe 'callbacks' do
     describe '#create_api_organization' do
       it 'invokes APIClient and returns the response body' do
-        api_client = stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+        api_client = stub_api_client(
+          message: :create_organization,
+          success: true,
+          response: default_org_creation_response
+        )
 
         reg_org = create(:registered_organization)
 
@@ -48,6 +54,8 @@ RSpec.describe RegisteredOrganization, type: :model do
 
       context 'successful API response' do
         it 'updates attributes and notifies users' do
+          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+
           stub_api_client(
             message: :create_organization,
             success: true,
@@ -68,11 +76,13 @@ RSpec.describe RegisteredOrganization, type: :model do
         end
       end
 
-      context 'unsuccessful API response'do
+      context 'unsuccessful API response' do
         it 'does not notify users and adds to errors' do
           stub_api_client(message: :create_organization, success: false, response: { 'issues' => ['Bad Request'] })
 
-          reg_org = build(:registered_organization, api_endpoint_ref: nil, api_id: nil)
+          org = create(:organization)
+
+          reg_org = build(:registered_organization, api_endpoint_ref: nil, api_id: nil, organization: org)
           reg_org.build_default_fhir_endpoint
           reg_org.save
 
@@ -87,19 +97,22 @@ RSpec.describe RegisteredOrganization, type: :model do
     describe '#notify_users_of_sandbox_access' do
       context 'when sandbox' do
         it 'tells organization to notify users' do
+          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+
           stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
           expect_any_instance_of(Organization).to receive(:notify_users_of_sandbox_access)
 
-          reg_org = create(:registered_organization, api_env: 'sandbox')
+          create(:registered_organization)
         end
       end
 
       context 'when production' do
         it 'does not tell organization to notify users' do
+          allow(ENV).to receive(:[]).with('ENV').and_return('production')
           stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
           expect_any_instance_of(Organization).not_to receive(:notify_users_of_sandbox_access)
 
-          reg_org = create(:registered_organization, api_env: 'production')
+          create(:registered_organization)
         end
       end
     end
@@ -107,10 +120,19 @@ RSpec.describe RegisteredOrganization, type: :model do
     describe '#update_api_organization' do
       context 'successful API request' do
         it 'makes update API request and does not add to errors' do
-          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          api_client = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
           reg_org = create(:registered_organization)
 
-          api_client = stub_api_client(message: :update_organization, success: true, response: default_org_creation_response)
+          api_client = stub_api_client(
+            api_client: api_client,
+            message: :update_organization,
+            success: true,
+            response: default_org_creation_response
+          )
           allow(reg_org).to receive(:update_api_endpoint)
           reg_org.update(updated_at: Time.now)
 
@@ -120,10 +142,19 @@ RSpec.describe RegisteredOrganization, type: :model do
 
       context 'failed API request' do
         it 'adds to errors' do
-          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          api_client = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
           reg_org = create(:registered_organization)
 
-          api_client = stub_api_client(message: :update_organization, success: false, response: 'Bad error')
+          api_client = stub_api_client(
+            api_client: api_client,
+            message: :update_organization,
+            success: false,
+            response: 'Bad error'
+          )
           allow(reg_org).to receive(:update_api_endpoint)
           reg_org.update(updated_at: Time.now)
 
@@ -136,12 +167,21 @@ RSpec.describe RegisteredOrganization, type: :model do
     describe '#update_api_endpoint' do
       context 'successful API request' do
         it 'makes update API request before update and updates object' do
-          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          api_client = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
           old_attr = 2.days.ago
           new_attr = 1.day.ago
           reg_org = create(:registered_organization, created_at: old_attr)
 
-          api_client = stub_api_client(message: :update_endpoint, success: true, response: default_org_creation_response)
+          api_client = stub_api_client(
+            api_client: api_client,
+            message: :update_endpoint,
+            success: true, response:
+            default_org_creation_response
+          )
           allow(reg_org).to receive(:update_api_organization)
           reg_org.update(created_at: new_attr)
 
@@ -152,61 +192,27 @@ RSpec.describe RegisteredOrganization, type: :model do
 
       context 'failed API request' do
         it 'adds to errors and does not update object' do
-          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          api_client = stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: default_org_creation_response
+          )
           old_attr = 2.days.ago
           new_attr = 1.day.ago
           reg_org = create(:registered_organization, created_at: old_attr)
 
-          api_client = stub_api_client(message: :update_endpoint, success: false, response: { issues: ['Bad request'] })
+          api_client = stub_api_client(
+            api_client: api_client,
+            message: :update_endpoint,
+            success: false,
+            response: { issues: ['Bad request'] }
+          )
           allow(reg_org).to receive(:update_api_organization)
           reg_org.update(created_at: new_attr)
 
           expect(api_client).to have_received(:update_endpoint).with(reg_org)
           expect(reg_org.errors.count).to eq(1)
           expect(reg_org.reload.created_at.to_i).to eq(old_attr.to_i)
-        end
-      end
-    end
-
-    describe '#delete_api_organization' do
-      context 'successful API request' do
-        it 'makes update API request before destroy and destroys object' do
-          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-          reg_org = create(:registered_organization)
-
-          api_client = stub_api_client(message: :delete_organization, success: true, response: '')
-
-          reg_org.destroy
-
-          expect(api_client).to have_received(:delete_organization).with(reg_org)
-          expect{ reg_org.reload }.to raise_error(ActiveRecord::RecordNotFound)
-        end
-      end
-
-      context 'failed API request' do
-        before(:each) do
-          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-          @reg_org = create(:registered_organization)
-        end
-
-        it 'cannot find organization in API and destroys object' do
-          api_client = stub_api_client(message: :delete_organization, success: false, response:'Cannot find organization.')
-
-          @reg_org.destroy
-
-          expect(api_client).to have_received(:delete_organization).with(@reg_org)
-          expect{ @reg_org.reload }.to raise_error(ActiveRecord::RecordNotFound)
-        end
-
-        it 'adds to errors and does not destroy object' do
-          api_client = stub_api_client(message: :delete_organization, success: false, response: '')
-          expect(
-            @reg_org.destroy
-          ).to eq(false)
-
-          expect(api_client).to have_received(:delete_organization).with(@reg_org)
-          expect(@reg_org.errors.count).to eq(1)
-          expect(@reg_org.reload).to eq(@reg_org)
         end
       end
     end

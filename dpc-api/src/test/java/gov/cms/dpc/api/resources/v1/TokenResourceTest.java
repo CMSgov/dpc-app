@@ -152,7 +152,8 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             final HttpDelete httpDelete = new HttpDelete(getBaseURL() + String.format("/Token/%s", token.getId()));
             httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpDelete)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.NO_CONTENT_204, response.getStatusLine().getStatusCode(), "Should have succeeded with a 204 (No Content)");
+                assertNull(response.getEntity() , "Response should not have an entity (empty body)");
             }
 
 
@@ -171,7 +172,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, getAdminURL());
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
 
         // Create a new JWT
         final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);

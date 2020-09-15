@@ -11,17 +11,19 @@ module Internal
       else
         flash[:alert] = "Tag could not be added. Errors:#{model_error_string(@tagging)}"
       end
-      redirect_back(fallback_location: taggable_path)
+
+      redirect_to taggable_path
     end
 
     def destroy
-      @tagging = Tagging.find(params[:id])
+      @tagging = Tagging.find(id_param)
       if @tagging.destroy
         flash[:notice] = 'Tag removed.'
       else
         flash[:alert] = "Tag could not be removed. Errors:#{model_error_string(@tagging)}"
       end
-      redirect_back(fallback_location: taggable_path)
+
+      redirect_to taggable_path
     end
 
     private

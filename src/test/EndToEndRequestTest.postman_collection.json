@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b12a7f7e-020f-47a2-b38d-203dedaa00d3",
+		"_postman_id": "5f37b58d-b843-4110-a54d-ed39f9d52460",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -15,7 +15,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "74669933-b1a9-4350-891f-6ecb026d47e9",
+								"id": "d8fdc0a8-8995-49fb-99ef-ede01a59a9bb",
 								"exec": [
 									"// Status should be 201",
 									"pm.test(\"Status is 201\", function () {",
@@ -49,7 +49,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"resource\": {\n        \"resourceType\": \"Bundle\",\n        \"type\": \"collection\",\n        \"entry\": [\n          {\n            \"resource\": {\n              \"address\": [\n                {\n                  \"use\": \"work\",\n                  \"type\": \"both\",\n                  \"city\": \"PLYMOUTH\",\n                  \"country\": \"US\",\n                  \"line\": [\n                    \"275 SANDWICH STREET\"\n                  ],\n                  \"postalCode\": \"02360\",\n                  \"state\": \"MA\"\n                }\n              ],\n              \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n              \"identifier\": [\n                {\n                  \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n                  \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n                },\n                {\n                  \"system\": \"https://github.com/synthetichealth/synthea\",\n                  \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n                }\n              ],\n              \"meta\": {\n                \"lastUpdated\": \"2019-04-09T12:25:36.450512+00:00\",\n                \"versionId\": \"MTU1NDgxMjczNjQ1MDUxMjAwMA\"\n              },\n              \"name\": \"BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH\",\n              \"resourceType\": \"Organization\",\n              \"telecom\": [\n                {\n                  \"system\": \"phone\",\n                  \"value\": \"5087462000\"\n                }\n              ],\n              \"type\": [\n                {\n                  \"coding\": [\n                    {\n                      \"code\": \"prov\",\n                      \"display\": \"Healthcare Provider\",\n                      \"system\": \"http://hl7.org/fhir/organization-type\"\n                    }\n                  ],\n                  \"text\": \"Healthcare Provider\"\n                }\n              ],\n              \"endpoint\": [\n                {\n                  \"reference\": \"Endpoint/3e0f5519-c2e4-456a-b888-c4341594426f\"\n                }\n              ]\n            }\n          },\n          {\n            \"resource\": {\n              \"id\": \" \",\n              \"resourceType\": \"Endpoint\",\n              \"status\": \"test\",\n              \"connectionType\": {\n                \"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n                \"code\": \"hl7-fhir-rest\"\n              },\n              \"name\": \"BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH FHIR endpoint\",\n              \"address\": \"http://test-address.first-org/fhir\",\n              \"managingOrganization\": {\n                \"reference\": \"Organization/46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}"
+							"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"resource\": {\n        \"resourceType\": \"Bundle\",\n        \"type\": \"collection\",\n        \"entry\": [\n          {\n            \"resource\": {\n              \"address\": [\n                {\n                  \"use\": \"work\",\n                  \"type\": \"both\",\n                  \"city\": \"PLYMOUTH\",\n                  \"country\": \"US\",\n                  \"line\": [\n                    \"275 SANDWICH STREET\"\n                  ],\n                  \"postalCode\": \"02360\",\n                  \"state\": \"MA\"\n                }\n              ],\n              \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n              \"identifier\": [\n                {\n                  \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n                  \"value\": \"2111111110\"\n                },\n                {\n                  \"system\": \"https://github.com/synthetichealth/synthea\",\n                  \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n                }\n              ],\n              \"meta\": {\n                \"lastUpdated\": \"2019-04-09T12:25:36.450512+00:00\",\n                \"versionId\": \"MTU1NDgxMjczNjQ1MDUxMjAwMA\"\n              },\n              \"name\": \"BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH\",\n              \"resourceType\": \"Organization\",\n              \"telecom\": [\n                {\n                  \"system\": \"phone\",\n                  \"value\": \"5087462000\"\n                }\n              ],\n              \"type\": [\n                {\n                  \"coding\": [\n                    {\n                      \"code\": \"prov\",\n                      \"display\": \"Healthcare Provider\",\n                      \"system\": \"http://hl7.org/fhir/organization-type\"\n                    }\n                  ],\n                  \"text\": \"Healthcare Provider\"\n                }\n              ],\n              \"endpoint\": [\n                {\n                  \"reference\": \"Endpoint/3e0f5519-c2e4-456a-b888-c4341594426f\"\n                }\n              ]\n            }\n          },\n          {\n            \"resource\": {\n              \"id\": \" \",\n              \"resourceType\": \"Endpoint\",\n              \"status\": \"test\",\n              \"connectionType\": {\n                \"system\": \"http://terminology.hl7.org/CodeSystem/endpoint-connection-type\",\n                \"code\": \"hl7-fhir-rest\"\n              },\n              \"name\": \"BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH FHIR endpoint\",\n              \"address\": \"http://test-address.first-org/fhir\",\n              \"managingOrganization\": {\n                \"reference\": \"Organization/46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n              }\n            }\n          }\n        ]\n      }\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "http://{{hostname}}:{{attribution_port}}/v1/Organization/$submit",
@@ -81,7 +81,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b30d587b-5747-4b41-9325-0a868e56210a",
+								"id": "babe61be-8f50-4537-b89b-ce1264e6116a",
 								"exec": [
 									"pm.test(\"Status is 201 Created\", function () {",
 									"    pm.expect(pm.response.code).equals(201);",
@@ -128,7 +128,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "50437cf8-aaf6-4f9b-9e40-4ea50c788820",
+								"id": "9c0ae7d2-9bda-4fb0-941e-eb7672f29527",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -165,6 +165,69 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Create consent record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8da99989-edf5-454a-b652-41190250e54a",
+								"exec": [
+									"pm.test(\"Status is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response should contain submitted values\", function() {",
+									"    var respJson = pm.response.json();",
+									"    pm.expect(respJson.resourceType).to.equal(\"Consent\")",
+									"    pm.expect(respJson.text.div).contains(\"OPTOUT\");",
+									"    pm.expect(respJson.policyRule).to.equal(\"http://hl7.org/fhir/ConsentPolicy/opt-out\");",
+									"})",
+									"",
+									"pm.globals.set(\"consent_id\", pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"resourceType\": \"Consent\",\n\t\"status\": \"active\",\n\t\"category\": [{\n\t\t\"coding\": [{\n\t\t\t\"system\": \"http://loinc.org\",\n\t\t\t\"code\": \"64292-6\"\n\t\t}]\n\t}],\n\t\"patient\": {\n\t\t\"reference\": \"http://api.url/Patient?identity=|0OO0OO0OO00\"\n\t},\n\t\"organization\": {\n\t\t\"reference\": \"{{organization_id}}\"\n\t},\n\t\"policyRule\": \"http://hl7.org/fhir/ConsentPolicy/opt-out\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:{{consent_port}}/v1/Consent",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{consent_port}}",
+							"path": [
+								"v1",
+								"Consent"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -178,7 +241,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "fd74b43f-2194-42ac-8ea1-f7168e034cb9",
+								"id": "af3eadcb-8d41-42f4-8c35-5085f5f36107",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -220,7 +283,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"name\": \"resource\",\n      \"resource\": {\n        \"resourceType\": \"Bundle\",\n        \"id\": \"12345\",\n        \"type\": \"collection\",\n        \"entry\": [\n          {\n            \"resource\": {\n              \"active\": true,\n              \"address\": [\n                {\n                  \"city\": \"PLYMOUTH\",\n                  \"country\": \"US\",\n                  \"line\": [\n                    \"275 SANDWICH STREET\"\n                  ],\n                  \"postalCode\": \"02360\",\n                  \"state\": \"MA\"\n                }\n              ],\n              \"gender\": \"male\",\n              \"id\": \"0c527d2e-2e8a-4808-b11d-0fa06baf8254\",\n              \"identifier\": [\n                {\n                  \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n                  \"value\": \"3116145044854423862\"\n                }\n              ],\n              \"meta\": {\n                \"profile\": [\n                  \"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner\"\n                ],\n                \"lastUpdated\": \"2019-04-09T12:25:36.450182+00:00\",\n                \"versionId\": \"MTU1NDgxMjczNjQ1MDE4MjAwMA\"\n              },\n              \"name\": [\n                {\n                  \"family\": \"Klocko335\",\n                  \"given\": [\n                    \"Leonard963\"\n                  ],\n                  \"prefix\": [\n                    \"Dr.\"\n                  ]\n                }\n              ],\n              \"resourceType\": \"Practitioner\"\n            }\n          }\n        ]\n      }\n    }\n  ]\n}"
+							"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"name\": \"resource\",\n      \"resource\": {\n        \"resourceType\": \"Bundle\",\n        \"id\": \"12345\",\n        \"type\": \"collection\",\n        \"entry\": [\n          {\n            \"resource\": {\n              \"active\": true,\n              \"address\": [\n                {\n                  \"city\": \"PLYMOUTH\",\n                  \"country\": \"US\",\n                  \"line\": [\n                    \"275 SANDWICH STREET\"\n                  ],\n                  \"postalCode\": \"02360\",\n                  \"state\": \"MA\"\n                }\n              ],\n              \"gender\": \"male\",\n              \"id\": \"0c527d2e-2e8a-4808-b11d-0fa06baf8254\",\n              \"identifier\": [\n                {\n                  \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n                  \"value\": \"2459425221\"\n                }\n              ],\n              \"meta\": {\n                \"profile\": [\n                  \"https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-practitioner\"\n                ],\n                \"lastUpdated\": \"2019-04-09T12:25:36.450182+00:00\",\n                \"versionId\": \"MTU1NDgxMjczNjQ1MDE4MjAwMA\"\n              },\n              \"name\": [\n                {\n                  \"family\": \"Klocko335\",\n                  \"given\": [\n                    \"Leonard963\"\n                  ],\n                  \"prefix\": [\n                    \"Dr.\"\n                  ]\n                }\n              ],\n              \"resourceType\": \"Practitioner\"\n            }\n          }\n        ]\n      }\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "http://{{hostname}}:{{api_port}}/v1/Practitioner/$submit",
@@ -245,7 +308,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "fd74b43f-2194-42ac-8ea1-f7168e034cb9",
+								"id": "2ba5d71e-9d01-49ad-a8da-b025559876ee",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -314,7 +377,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "72634c6f-4d6b-49b9-b4db-b172af0f04f1",
+								"id": "dbf32e16-501c-403b-9f10-20279261ec7e",
 								"exec": [
 									"// Status should be 201",
 									"pm.test(\"Status is 201\", function () {",
@@ -349,7 +412,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "b6f1696a-ac0b-472e-af63-2215ba3231a1",
+								"id": "6bd6440e-6358-4cc0-be87-7b4efdde1229",
 								"exec": [
 									"var group = {",
 									"  \"resourceType\": \"Group\",",
@@ -369,7 +432,7 @@
 									"          \"coding\": [",
 									"            {",
 									"              \"system\": \"http://hl7.org/fhir/sid/us-npi\",",
-									"              \"code\": \"3116145044854423862\"",
+									"              \"code\": \"2459425221\"",
 									"            }",
 									"          ]",
 									"      }",
@@ -472,7 +535,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8fe0ae12-2d35-44bc-a180-d22af323a989",
+								"id": "6e41af2f-41ae-4ab4-b9e4-f427ac77e138",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -492,7 +555,12 @@
 									"    pm.expect(response.total).to.equal(1);",
 									"",
 									"    pm.globals.set(\"single_patient_id\", \"Patient/\" + response.entry[0].resource.id);",
-									"})"
+									"})",
+                                    "pm.test(\"Result should have MBI as uppercase\", function() {",
+                                    "    var response = pm.response.json();",
+                                    "    var mbiIdentifier = response.entry[0].resource.identifier.filter(identifier => identifier.system == \"http://hl7.org/fhir/sid/us-mbi\")[0]",
+                                    "    pm.expect(mbiIdentifier.value).to.equal(\"1SQ3F00AA00\");",
+                                    "})"
 								],
 								"type": "text/javascript"
 							}
@@ -502,7 +570,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient?identifier=1SQ3F00AA00",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient?identifier=1sQ3f00aa00",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -515,7 +583,7 @@
 							"query": [
 								{
 									"key": "identifier",
-									"value": "1SQ3F00AA00"
+									"value": "1sQ3f00Aa00"
 								}
 							]
 						},
@@ -529,7 +597,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8fe0ae12-2d35-44bc-a180-d22af323a989",
+								"id": "23bda94f-2589-4dcf-a8b3-044166cbaf7d",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -561,7 +629,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group?characteristic-value=attributed-to$3116145044854423862",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group?characteristic-value=attributed-to$2459425221",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -574,7 +642,7 @@
 							"query": [
 								{
 									"key": "characteristic-value",
-									"value": "attributed-to$3116145044854423862"
+									"value": "attributed-to$2459425221"
 								}
 							]
 						},
@@ -588,7 +656,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "f6abd191-547c-476b-b6f9-778097f05b8e",
+								"id": "523fe412-b2e8-42c0-9313-cc273c0f2d78",
 								"exec": [
 									"var group = JSON.parse(pm.globals.get(\"attribution_group\"));",
 									"var patientID = pm.globals.get(\"single_patient_id\");",
@@ -611,7 +679,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b4c73864-2ec4-4bae-82cd-383a965c9eac",
+								"id": "6e8e1f2e-1d04-4a0f-a22d-5fd6927f418d",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -678,7 +746,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "f6abd191-547c-476b-b6f9-778097f05b8e",
+								"id": "4699b19e-dca5-4d57-8a69-6b584fefd5e6",
 								"exec": [
 									"// Build the attestation header",
 									"var attestation = {",
@@ -719,7 +787,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b4c73864-2ec4-4bae-82cd-383a965c9eac",
+								"id": "d4682837-eefc-4626-a39f-45c7cc077e70",
 								"exec": [
 									"// Status should be 400",
 									"pm.test(\"Status is 400\", function () {",
@@ -764,7 +832,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"resourceType\": \"Group\",\n  \"actual\": true,\n  \"active\": true,\n  \"type\": \"person\",\n  \"characteristic\": [\n    {\n      \"code\": {\n        \"coding\": [\n          {\n            \"code\": \"attributed-to\"\n          }\n        ]\n      },\n      \"valueCodeableConcept\": {\n          \"coding\": [\n            {\n              \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n              \"code\": \"3116145044854423862\"\n            }\n          ]\n      }\n    }\n  ],\n  \"member\": [{\n  \"entity\": {\n        \"reference\": \"Patient/c22044f0-3b8e-488c-bcd4-fcbc630d9c19\"\n      }\n  }]\n}"
+							"raw": "{\n  \"resourceType\": \"Group\",\n  \"actual\": true,\n  \"active\": true,\n  \"type\": \"person\",\n  \"characteristic\": [\n    {\n      \"code\": {\n        \"coding\": [\n          {\n            \"code\": \"attributed-to\"\n          }\n        ]\n      },\n      \"valueCodeableConcept\": {\n          \"coding\": [\n            {\n              \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n              \"code\": \"2459425221\"\n            }\n          ]\n      }\n    }\n  ],\n  \"member\": [{\n  \"entity\": {\n        \"reference\": \"Patient/c22044f0-3b8e-488c-bcd4-fcbc630d9c19\"\n      }\n  }]\n}"
 						},
 						"url": {
 							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}/$add",
@@ -796,7 +864,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5497fa12-aefd-44c2-9254-2beb51c52e31",
+								"id": "61dbf88e-b949-4874-9d7f-05bd0e3e6b8b",
 								"exec": [
 									"// Status should be 202",
 									"pm.test(\"Status is 202\", function () {",
@@ -821,7 +889,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "8b8d6363-b490-428a-bfee-663b184ae05d",
+								"id": "279ee4c2-d9ff-41c8-b268-ef16ca3f013f",
 								"exec": [
 									"console.log(\"Group:\", pm.environment.get(\"attribution_group\"));"
 								],
@@ -867,7 +935,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "28fe7a36-50ab-4e7d-bf21-312b5f5777f3",
+								"id": "24d1aaf5-f6a5-489e-91e7-421d2f3fc168",
 								"exec": [
 									"// Wait between pings",
 									"setTimeout(function() {}, 1000);"
@@ -878,7 +946,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "70688a82-d0cf-4802-b1e5-b6ad7357c926",
+								"id": "e4840a33-8d36-4d7a-9af4-bb562b62f451",
 								"exec": [
 									"if (pm.response.code == 200) {",
 									"    // Response should have FHIR Content-Type",
@@ -889,8 +957,54 @@
 									"    // If response code is 200, check the response and load the urls.",
 									"    pm.test(\"Patient, EOB, and Coverage resources; one error file\", function() {",
 									"        pm.expect(pm.response.json().error).to.have.lengthOf(0);",
-									"        pm.expect(pm.response.json().output).to.have.lengthOf(0);",
+									"        pm.expect(pm.response.json().output).to.have.lengthOf(3);",
 									"        ",
+									"        // Order of the output types is not guaranteed",
+									"        var outputTypes = pm.response.json().output.map((elem) => elem.type);",
+									"        pm.expect(outputTypes).to.include(\"Patient\");",
+									"        pm.expect(outputTypes).to.include(\"Coverage\");",
+									"        pm.expect(outputTypes).to.include(\"ExplanationOfBenefit\"); ",
+									"        ",
+									"        // Patient",
+									"        var patient = pm.response.json().output.filter((elem) => elem.type == \"Patient\")[0]; ",
+									"        console.log(\"patient: \", patient);",
+									"        pm.expect(patient.count).to.equal(3);",
+									"        pm.expect(Object.keys(patient.extension[0]).length).to.equal(2);",
+									"        pm.expect(patient.extension[0].url).to.equal(\"https://dpc.cms.gov/checksum\");",
+									"        pm.expect(patient.extension[0].valueString).to.exist;",
+									"        pm.expect(Object.keys(patient.extension[1]).length).to.equal(2);",
+									"        pm.expect(patient.extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
+									"        pm.expect(patient.extension[1].valueDecimal).to.exist;",
+									"        pm.environment.set(\"patient\", patient);",
+									"        ",
+									"        // EOB",
+									"        var eob = pm.response.json().output.filter((elem) => elem.type == \"ExplanationOfBenefit\")[0]; ",
+									"        console.log(\"eob: \", eob);",
+									"        pm.expect(eob.count).to.be.above(100);",
+									"        pm.expect(Object.keys(eob.extension[0]).length).to.equal(2);",
+									"        pm.expect(eob.extension[0].url).to.equal(\"https://dpc.cms.gov/checksum\");",
+									"        pm.expect(eob.extension[0].valueString).to.exist;",
+									"        pm.expect(Object.keys(eob.extension[1]).length).to.equal(2);",
+									"        pm.expect(eob.extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
+									"        pm.expect(eob.extension[1].valueDecimal).to.exist;",
+									"        pm.environment.set(\"eob\", eob);",
+									"        ",
+									"        // Coverage",
+									"        var coverage = pm.response.json().output.filter((elem) => elem.type == \"Coverage\")[0]; ",
+									"        pm.expect(coverage.count).to.equal(12);",
+									"        pm.expect(Object.keys(coverage.extension[0]).length).to.equal(2);",
+									"        pm.expect(coverage.extension[0].url).to.equal(\"https://dpc.cms.gov/checksum\");",
+									"        pm.expect(coverage.extension[0].valueString).to.exist;",
+									"        pm.expect(Object.keys(coverage.extension[1]).length).to.equal(2);",
+									"        pm.expect(coverage.extension[1].url).to.equal(\"https://dpc.cms.gov/file_length\");",
+									"        pm.expect(coverage.extension[1].valueDecimal).to.exist;",
+									"        pm.environment.set(\"coverage\", coverage);",
+									"",
+									"        var expiresHeader = pm.response.headers.get(\"Expires\");",
+									"        pm.expect(expiresHeader).to.exist;",
+									"        var expiresInHrs = (Date.parse(expiresHeader) - Date.now())/3600000;",
+									"        pm.expect(expiresInHrs).to.be.above(23);",
+									"        pm.expect(expiresInHrs).to.be.below(24);",
 									"    });",
 									"} else {",
 									"    // If response code is not 200, it should be 202. Assert that, and retry.",
@@ -916,6 +1030,469 @@
 						"description": "While the export request is being processed, the job url will return a 202 status. When it is completed, a 200 status will be returned, along with JSON containing the patient, explanation of benefits, and coverage data."
 					},
 					"response": []
+				},
+				{
+					"name": "Patient data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3a2dbd63-1fc3-4880-81f0-5f218fad957e",
+								"exec": [
+									"require('crypto-js')",
+									"",
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"});",
+									"",
+									"// There should be 2 patients.",
+									"pm.test(\"Patient data correct\", function() {",
+									"    var responseOutput = pm.response.text();",
+									"    var responseLines = responseOutput.trim().split('\\n');",
+									"    pm.expect(responseLines).to.have.lengthOf(3);",
+									"    for (var line of responseLines) {",
+									"        var lineData = JSON.parse(line);",
+									"        pm.expect(lineData.resourceType).to.equal(\"Patient\");",
+									"        var mbi = lineData.identifier.find(i => i.system === \"http://hl7.org/fhir/sid/us-mbi\");",
+									"        pm.expect(mbi).not.eq(undefined);",
+									"    }",
+									"});",
+									"",
+									"// Verify sha256 checksums",
+									"pm.test(\"Checksums should match\", function() {",
+									"    var output = pm.environment.get(\"patient\")",
+									"    var responseOutput = pm.response.text();",
+									"    ",
+									"    var checksum  = CryptoJS.SHA256(responseOutput);",
+									"    pm.expect(\"sha256:\" + checksum).to.equal(output.extension[0].valueString)",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "58cd062d-719d-4a54-964a-4c971f464baf",
+								"exec": [
+									"pm.environment.set(\"patient_url\", pm.environment.get(\"patient\").url)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{patient_url}}",
+							"host": [
+								"{{patient_url}}"
+							]
+						},
+						"description": "The patient data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one patient."
+					},
+					"response": []
+				},
+				{
+					"name": "Explanation of Benefit data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1ff19a39-1917-4d23-9fc0-1e80b624a267",
+								"exec": [
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"   pm.environment.set(\"file_timestamp\", pm.response.headers.get(\"Last-Modified\"))",
+									"});",
+									"",
+									"// There should be 86 Explanations of Benefits.",
+									"pm.test(\"Explanation of Benefits data correct\", function() {",
+									"    var responseOutput = pm.response.text();",
+									"    var responseLines = responseOutput.trim().split('\\n');",
+									"    pm.expect(responseLines.length).to.be.above(100);",
+									"    for (var line of responseLines) {",
+									"        var lineData = JSON.parse(line);",
+									"        pm.expect(lineData.resourceType).to.equal(\"ExplanationOfBenefit\");",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "28686923-a654-4d56-a3a1-e4e1830eec70",
+								"exec": [
+									"pm.environment.set(\"eob_url\", pm.environment.get(\"eob\").url)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{eob_url}}",
+							"host": [
+								"{{eob_url}}"
+							]
+						},
+						"description": "The explanation of benefits data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one explanation of benefits."
+					},
+					"response": []
+				},
+				{
+					"name": "Coverage data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7a7b2436-1612-405a-98ba-592d6c125da6",
+								"exec": [
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Type\", \"application/fhir+ndjson\"); ",
+									"});",
+									"",
+									"// There should be 8 coverage.",
+									"pm.test(\"Coverage data correct\", function() {",
+									"    var responseOutput = pm.response.text();",
+									"    var responseLines = responseOutput.trim().split('\\n');",
+									"    pm.expect(responseLines).to.have.lengthOf(12);",
+									"    for (var line of responseLines) {",
+									"        var lineData = JSON.parse(line);",
+									"        pm.expect(lineData.resourceType).to.equal(\"Coverage\");",
+									"    }",
+									"});",
+									"",
+									"// Verify sha256 checksum",
+									"pm.test(\"Checksum should match\", function() {",
+									"    var output = pm.environment.get(\"coverage\")",
+									"    var responseOutput = pm.response.text();",
+									"    ",
+									"    var checksum  = CryptoJS.SHA256(responseOutput);",
+									"    pm.expect(\"sha256:\" + checksum).to.equal(output.extension[0].valueString)",
+									"    ",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "82a59df8-453e-4b12-9c53-e550917f7cfd",
+								"exec": [
+									"pm.environment.set(\"coverage_url\", pm.environment.get(\"coverage\").url)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{coverage_url}}",
+							"host": [
+								"{{coverage_url}}"
+							]
+						},
+						"description": "The coverage data url comes from the response to the job in the previous request. It is in ndjson, which is a set of JSON responses, one per line. Each line contains the JSON data for one coverage."
+					},
+					"response": []
+				},
+				{
+					"name": "Request Partial Range",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b66bb3d3-b465-40f1-a0fa-507816ff7619",
+								"exec": [
+									"// Response should have FHIR Content-Type",
+									"pm.test(\"Content-type is application/fhir+ndjson\", function() {",
+									"   pm.response.to.have.header(\"Content-Range\");",
+									"});",
+									"",
+									"// Should be 10kb total",
+									"pm.test('Should have 10kb of data', function() {",
+									"    pm.expect(pm.response.text().length).to.be.above(10000);",
+									"})",
+									"",
+									"pm.test('Content should be gzipped', function() {",
+									"    pm.response.to.have.header(\"Content-Encoding\", \"gzip\");",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Range",
+								"value": "bytes=0-10240",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{eob_url}}",
+							"host": [
+								"{{eob_url}}"
+							]
+						},
+						"description": "Request a subset of the EOB data to ensure range requests work correctly."
+					},
+					"response": []
+				},
+				{
+					"name": "Request Modified Since",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "595d8c8f-6ae2-408d-a1eb-0001ac956230",
+								"exec": [
+									"// Response should be 304",
+									"pm.test('Response should be not-modified', function() {",
+									"    pm.response.to.have.status(304);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "If-Modified-Since",
+								"type": "text",
+								"value": "{{file_timestamp}}"
+							}
+						],
+						"url": {
+							"raw": "{{eob_url}}",
+							"host": [
+								"{{eob_url}}"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Request a subset of the EOB data to ensure range requests work correctly."
+					},
+					"response": []
+				},
+				{
+					"name": "Try export with _since",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a3294ca5-5c4b-4fa3-ab92-d41efa02544a",
+								"exec": [
+									"// Status should be 202",
+									"pm.test(\"Status is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"// Url for job response should be in content-location header.",
+									"pm.test(\"Content-Location header is present\", function () {",
+									"    pm.response.to.have.header(\"Content-Location\");",
+									"});",
+									"",
+									"if (pm.response.headers.get(\"Content-Location\")) {",
+									"  pm.environment.set(\"since_content_location\", pm.response.headers.get(\"Content-Location\"));",
+									"} else {",
+									"  // Fail the test, no content location.",
+									"  postman.setNextRequest(null);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5257c1e2-c5e5-4d41-8515-7d10fcc620a1",
+								"exec": [
+									"console.log(\"Group:\", pm.environment.get(\"attribution_group\"));",
+									"pm.environment.set(\"since_timestamp\", new Date().toISOString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/fhir+json"
+							},
+							{
+								"key": "Prefer",
+								"type": "text",
+								"value": "respond-async"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group/{{attribution_group_id}}/$export?_since={{since_timestamp}}",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Group",
+								"{{attribution_group_id}}",
+								"$export"
+							],
+							"query": [
+								{
+									"key": "_since",
+									"value": "{{since_timestamp}}"
+								}
+							]
+						},
+						"description": "Try the export request again with the _since parameter of the current time. The resultant job should be empty. The request should succeed with a 202 status and the location for the job response in the `content-location` header."
+					},
+					"response": []
+				},
+				{
+					"name": "_since job response",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "fe048bde-8074-4ea0-9342-a4070239da67",
+								"exec": [
+									"// Wait between pings",
+									"setTimeout(function() {}, 1000);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "5535235a-e239-48c2-b3b6-7339ef0662de",
+								"exec": [
+									"if (pm.response.code == 200) {",
+									"    // Response should have FHIR Content-Type",
+									"    pm.test(\"Content-type is application/json\", function() {",
+									"       pm.response.to.have.header(\"Content-Type\", \"application/json\"); ",
+									"    });",
+									"    ",
+									"    // If response code is 200, check the response and load the urls.",
+									"    pm.test(\"Empty output and no errors\", function() {",
+									"        pm.expect(pm.response.json().error).to.have.lengthOf(0);",
+									"        pm.expect(pm.response.json().output).to.have.lengthOf(0);",
+									"    });",
+									"} else {",
+									"    // If response code is not 200, it should be 202. Assert that, and retry.",
+									"    pm.test(\"Status code is 202\", function () {",
+									"        pm.response.to.have.status(202);",
+									"    });",
+									"    postman.setNextRequest(\"_since job response\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{since_content_location}}",
+							"host": [
+								"{{since_content_location}}"
+							]
+						},
+						"description": "While the export request is being processed, the job url will return a 202 status. When it is completed, a 200 status will be returned, along with JSON containing Job status."
+					},
+					"response": []
+				},
+				{
+					"name": "All data about a patient ($everything)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "99ef66da-7460-4665-8ea2-8b9a1aa37a37",
+								"exec": [
+									"pm.test(\"Status code should be 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should be a Bundle\", function() {",
+									"    var response = pm.response.json();",
+									"    pm.expect(response.resourceType).to.equal(\"Bundle\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "c08deedf-8b27-48b4-bc92-af78e031ccac",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Provenance",
+								"value": "{{attestationHeader}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient/728b270d-d7de-4143-82fe-d3ccd92cebe4/$everything",
+							"protocol": "http",
+							"host": [
+								"{{hostname}}"
+							],
+							"port": "{{api_port}}",
+							"path": [
+								"v1",
+								"Patient",
+								"728b270d-d7de-4143-82fe-d3ccd92cebe4",
+								"$everything"
+							]
+						},
+						"description": "Synchronously retrieves all Coverage, EoB, and Patient resources for the requested patient."
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -929,7 +1506,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "96f38c80-8b9d-4761-b66c-a02bd1de7408",
+								"id": "b7dde0db-98b3-439e-91a7-e571952e2bd8",
 								"exec": [
 									"pm.test(\"Status is 415\", function () {",
 									"    pm.response.to.have.status(415);",
@@ -982,7 +1559,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "96f38c80-8b9d-4761-b66c-a02bd1de7408",
+								"id": "3ae43670-a11e-4cac-9ebc-a8f1b39d3c04",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -1015,7 +1592,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"resourceType\": \"Organization\",\n    \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n    \"identifier\": [\n        {\n            \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n            \"value\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\"\n        }\n    ],\n    \"name\": \"Beth Israel Deaconess HealthCare - Chestnut Hill\",\n    \"address\": [\n        {\n            \"use\": \"work\",\n            \"type\": \"both\",\n            \"line\": [\n                \"200 Boylston Street, 4th Floor\"\n            ],\n            \"city\": \"Chestnut Hill\",\n            \"state\": \"MA\",\n            \"postalCode\": \"02467\",\n            \"country\": \"US\"\n        }\n    ],\n    \"endpoint\": [\n        {\n            \"reference\": \"Endpoint/0a60c95c-48b4-4f39-8bf4-09f7dfe2e3cc\"\n        }\n    ]\n}"
+							"raw": "{\n    \"resourceType\": \"Organization\",\n    \"id\": \"46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0\",\n    \"identifier\": [\n        {\n            \"system\": \"http://hl7.org/fhir/sid/us-npi\",\n            \"value\": \"1121111110\"\n        }\n    ],\n    \"name\": \"Beth Israel Deaconess HealthCare - Chestnut Hill\",\n    \"address\": [\n        {\n            \"use\": \"work\",\n            \"type\": \"both\",\n            \"line\": [\n                \"200 Boylston Street, 4th Floor\"\n            ],\n            \"city\": \"Chestnut Hill\",\n            \"state\": \"MA\",\n            \"postalCode\": \"02467\",\n            \"country\": \"US\"\n        }\n    ],\n    \"endpoint\": [\n        {\n            \"reference\": \"Endpoint/0a60c95c-48b4-4f39-8bf4-09f7dfe2e3cc\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "http://{{hostname}}:{{api_port}}/v1/Organization/{{organization_id}}",
@@ -1039,7 +1616,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b30d587b-5747-4b41-9325-0a868e56210a",
+								"id": "2f4e8c5f-db7b-4525-b138-bd1ffa23e83a",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -1094,7 +1671,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b30d587b-5747-4b41-9325-0a868e56210a",
+								"id": "4f043b01-671d-4778-9867-42cd5f0ac1c8",
 								"exec": [
 									"pm.test(\"Status is 422\", function () {",
 									"    pm.response.to.have.status(422);",
@@ -1138,6 +1715,68 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Update consent record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e3bf1f3c-1426-4e9b-9d1e-c26ba2c54951",
+								"exec": [
+									"pm.test(\"Status is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should contain submitted values\", function() {",
+									"    var respJson = pm.response.json();",
+									"    pm.expect(respJson.resourceType).to.equal(\"Consent\")",
+									"    pm.expect(respJson.text.div).contains(\"OPTIN\");",
+									"    pm.expect(respJson.policyRule).to.equal(\"http://hl7.org/fhir/ConsentPolicy/opt-in\");",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"resourceType\": \"Consent\",\n\t\"status\": \"active\",\n\t\"category\": [{\n\t\t\"coding\": [{\n\t\t\t\"system\": \"http://loinc.org\",\n\t\t\t\"code\": \"64292-6\"\n\t\t}]\n\t}],\n\t\"patient\": {\n\t\t\"reference\": \"http://api.url/Patient?identity=|0OO0OO0OO00\"\n\t},\n\t\"organization\": {\n\t\t\"reference\": \"{{organization_id}}\"\n\t},\n\t\"policyRule\": \"http://hl7.org/fhir/ConsentPolicy/opt-in\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:{{consent_port}}/v1/Consent/{{consent_id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{consent_port}}",
+							"path": [
+								"v1",
+								"Consent",
+								"{{consent_id}}"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -1151,7 +1790,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "788bc2c3-ccf4-44cc-bd6b-1874ecfb26dc",
+								"id": "51fbe1c8-6368-4756-9426-338d5054412f",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -1181,7 +1820,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Practitioner?identifier=3116145044854423862",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Practitioner?identifier=2459425221",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -1194,7 +1833,7 @@
 							"query": [
 								{
 									"key": "identifier",
-									"value": "3116145044854423862"
+									"value": "2459425221"
 								}
 							]
 						}
@@ -1228,7 +1867,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "9c5751fb-9adb-49fb-9c24-a094f48c4396",
+								"id": "0f1c1e51-dd2f-4132-bb79-78be81153ccc",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -1288,7 +1927,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a9c75e9e-6c5d-4566-b2ee-cd7a3ab08b1c",
+								"id": "4abbb99c-f712-46cd-bbc6-2fb7cf35d0db",
 								"exec": [
 									"// Status should be 200",
 									"pm.test(\"Status is 200\", function () {",
@@ -1324,7 +1963,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "cea56747-f597-4f44-a387-d097e2a3e396",
+								"id": "64d427a6-f028-49de-a753-6c4de2a643e9",
 								"exec": [
 									"pm.test(\"Bundle should be empty\", function() {",
 									"    var response = pm.response.json();",
@@ -1342,7 +1981,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Group?characteristic-value=attributed-to$3116145044854423862",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/Group?characteristic-value=attributed-to$2459425221",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -1355,7 +1994,7 @@
 							"query": [
 								{
 									"key": "characteristic-value",
-									"value": "attributed-to$3116145044854423862"
+									"value": "attributed-to$2459425221"
 								}
 							]
 						},
@@ -1369,7 +2008,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b30d587b-5747-4b41-9325-0a868e56210a",
+								"id": "723d3de9-12ef-49a0-8036-b31184d227b6",
 								"exec": [
 									"pm.test(\"Status is OK\", function () {",
 									"    pm.response.to.be.ok;",
@@ -1414,7 +2053,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "cbabc0f8-0317-4c30-b807-e833cdf27b5a",
+				"id": "bc44ce8b-485d-4072-9691-e17ad5417f7b",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1424,7 +2063,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "01e9364c-b13b-4771-802b-6d88a89c1895",
+				"id": "60ad4542-25e7-4f05-95da-0ecbcde8a1aa",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1455,6 +2094,12 @@
 			"id": "770b174b-c2c4-439b-babf-d9ec7155dbdb",
 			"key": "attribution_port",
 			"value": "3500",
+			"type": "string"
+		},
+		{
+			"id": "6ef027ab-07ee-4c2a-8c8a-45d4ff6540d3",
+			"key": "consent_port",
+			"value": "3600",
 			"type": "string"
 		}
 	],

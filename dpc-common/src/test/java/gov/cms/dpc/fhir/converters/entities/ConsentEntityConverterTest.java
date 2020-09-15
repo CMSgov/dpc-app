@@ -22,7 +22,7 @@ public class ConsentEntityConverterTest {
     @Test
     final void convert_correctlyConverts_fromDefaultEntity() {
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
-        final Consent result = ConsentEntityConverter.convert(ce, TEST_DPC_URL, TEST_FHIR_URL);
+        final Consent result = ConsentEntityConverter.toFhir(ce, TEST_DPC_URL, TEST_FHIR_URL);
 
         assertNotNull(result);
         assertEquals(Consent.ConsentState.ACTIVE, result.getStatus());
@@ -39,7 +39,7 @@ public class ConsentEntityConverterTest {
     final void convert_correctlyConverts_fromOptOutEntity() {
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
         ce.setPolicyCode(ConsentEntity.OPT_OUT);
-        final Consent result = ConsentEntityConverter.convert(ce, TEST_DPC_URL, TEST_FHIR_URL);
+        final Consent result = ConsentEntityConverter.toFhir(ce, TEST_DPC_URL, TEST_FHIR_URL);
 
         assertEquals(ConsentEntityConverter.OPT_OUT_MAGIC, result.getPolicyRule());
         assertDoesNotThrow(() -> {
@@ -52,7 +52,7 @@ public class ConsentEntityConverterTest {
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
         UUID uuid = UUID.randomUUID();
         ce.setCustodian(uuid);
-        final Consent result = ConsentEntityConverter.convert(ce, TEST_DPC_URL, TEST_FHIR_URL);
+        final Consent result = ConsentEntityConverter.toFhir(ce, TEST_DPC_URL, TEST_FHIR_URL);
 
         assertEquals("Organization/" + uuid.toString(), result.getOrganizationFirstRep().getReference());
         assertDoesNotThrow(() -> {
@@ -65,7 +65,7 @@ public class ConsentEntityConverterTest {
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
         ce.setMbi(null);
 
-        assertThrows(IllegalArgumentException.class, () -> ConsentEntityConverter.convert(ce, TEST_DPC_URL, TEST_FHIR_URL), "should throw an error with invalid data");
+        assertThrows(IllegalArgumentException.class, () -> ConsentEntityConverter.toFhir(ce, TEST_DPC_URL, TEST_FHIR_URL), "should throw an error with invalid data");
     }
 
     @Test
@@ -73,6 +73,6 @@ public class ConsentEntityConverterTest {
         ConsentEntity ce = ConsentEntity.defaultConsentEntity(Optional.empty(), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
         ce.setPolicyCode("BANANA");
 
-        assertThrows(IllegalArgumentException.class, () -> ConsentEntityConverter.convert(ce, TEST_DPC_URL, TEST_FHIR_URL), "should throw an error with invalid data");
+        assertThrows(IllegalArgumentException.class, () -> ConsentEntityConverter.toFhir(ce, TEST_DPC_URL, TEST_FHIR_URL), "should throw an error with invalid data");
     }
 }
