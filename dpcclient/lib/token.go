@@ -1,4 +1,4 @@
-package internal
+package lib
 
 import (
 	"crypto/rsa"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gbrlsnchs/jwt"
+	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/google/uuid"
 )
 

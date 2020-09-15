@@ -6,14 +6,13 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/CMSgov/dpc-app/dpcclient/lib"
 	"github.com/spf13/cobra"
-
-	"dpcclient/internal"
 )
 
 var (
-	kid string
-	keyName string
+	kid      string
+	keyName  string
 	macaroon string
 )
 
@@ -37,19 +36,19 @@ directory.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		tokenPath := filepath.Join(tokenDir, fmt.Sprintf("%s-%d", args[0], time.Now().Unix()))
 
-		pk, err := internal.ReadSmallFile(filepath.Join(keyDir, fmt.Sprintf("%s-private.pem", keyName)))
+		pk, err := lib.ReadSmallFile(filepath.Join(keyDir, fmt.Sprintf("%s-private.pem", keyName)))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
 
-		privateKey, _, err := internal.KeyFromPEM(pk)
+		privateKey, _, err := lib.KeyFromPEM(pk)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
 
-		m, err := internal.ReadSmallFile(filepath.Join(keyDir, macaroon))
+		m, err := lib.ReadSmallFile(filepath.Join(keyDir, macaroon))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
@@ -59,13 +58,13 @@ directory.`,
 			m = m[:ml]
 		}
 
-		token, err := internal.GenerateAuthToken(privateKey, kid, []byte(m), domain)
+		token, err := lib.GenerateAuthToken(privateKey, kid, []byte(m), domain)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
 		fmt.Printf("\nAuth Token:\n%s\n", string(token))
-		if err := internal.WriteSmallFile(tokenPath, []byte(token)); err != nil {
+		if err := lib.WriteSmallFile(tokenPath, []byte(token)); err != nil {
 			fmt.Printf("could not save auth token to file at %s; %s", tokenPath, err.Error())
 		}
 	},

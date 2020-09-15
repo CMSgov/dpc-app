@@ -6,9 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/CMSgov/dpc-app/dpcclient/lib"
 	"github.com/spf13/cobra"
-
-	"dpcclient/internal"
 )
 
 var authTokenPath string
@@ -33,20 +32,20 @@ directory. (The timestamp portion of the name will be different with each invoca
 	Run: func(cmd *cobra.Command, args []string) {
 		tokenPath := filepath.Join(tokenDir, fmt.Sprintf("%s-%d", args[0], time.Now().Unix()))
 
-		authTokenBytes, err := internal.ReadSmallFile(filepath.Join(tokenDir, authTokenPath))
+		authTokenBytes, err := lib.ReadSmallFile(filepath.Join(tokenDir, authTokenPath))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
 
-		token, err := internal.GetAccessToken(authTokenBytes, domain)
+		token, err := lib.GetAccessToken(authTokenBytes, domain)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
 
 		fmt.Printf("\nAccess Token:\n%s\n", token)
-		if err = internal.WriteSmallFile(tokenPath, []byte(token)); err != nil {
+		if err = lib.WriteSmallFile(tokenPath, []byte(token)); err != nil {
 			fmt.Printf("could not save access token to file at %s; %s", tokenPath, err.Error())
 			os.Exit(-1)
 		}

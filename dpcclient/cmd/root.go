@@ -20,7 +20,7 @@ var (
 
 // rootCmd represents the base dpcclient
 var rootCmd = &cobra.Command{
-	Use:   "dpcclient",
+	Use: "dpcclient",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if keyDir == "" {
 			keyDir = viper.GetString("keydir")

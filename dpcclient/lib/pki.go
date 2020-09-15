@@ -1,4 +1,4 @@
-package internal
+package lib
 
 import (
 	"crypto/rand"
@@ -104,4 +104,3 @@ func ValidateDPCKey(key *rsa.PrivateKey) error {
 	}
 	return nil
 }
-
