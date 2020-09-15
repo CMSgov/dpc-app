@@ -1,9 +1,9 @@
 package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
+import gov.cms.dpc.api.models.TokenDto;
 import gov.cms.dpc.common.annotations.NoHtml;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -34,24 +34,25 @@ public abstract class AbstractTokenResource {
      * @return - {@link List} {@link String} base64 (URL) encoded token
      */
     @GET
-    public abstract CollectionResponse<TokenEntity> getOrganizationTokens(OrganizationPrincipal organizationPrincipal);
+    public abstract CollectionResponse<TokenDto> getOrganizationTokens(OrganizationPrincipal organizationPrincipal);
 
     /**
      * Create authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
      * This token is designed to be long-lived and delegatable.
      *
      * @param principal  - {@link OrganizationPrincipal} supplied by auth handler
-     * @param label      - {@link Optional} {@link String} to use as token label
+     * @param  label      - {@link Optional} {@link String} to use as token label
      * @param expiration - {@link Optional} {@link OffsetDateTime} to use for token expiration
+     * @param  token - {@link TokenDto} model representing token resource. Token fields take precedence over query parameters.
      * @return - {@link String} base64 (URL) encoded token
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    public abstract TokenEntity createOrganizationToken(OrganizationPrincipal principal, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
+    public abstract TokenDto createOrganizationToken(OrganizationPrincipal principal,TokenDto token, @NoHtml String label, Optional<OffsetDateTimeParam> expiration);
 
     @GET
     @Path("/{tokenID}")
-    public abstract TokenEntity getOrganizationToken(OrganizationPrincipal principal, @PathParam("tokenID") @NotNull UUID tokenID);
+    public abstract TokenDto getOrganizationToken(OrganizationPrincipal principal, @PathParam("tokenID") @NotNull UUID tokenID);
 
     @POST
     @Path("/auth")

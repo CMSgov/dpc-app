@@ -5,7 +5,7 @@ import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.models.TokenDto;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.servlets.tasks.Task;
@@ -50,9 +50,9 @@ public class GenerateClientTokens extends Task {
             final String organization = organizationCollection.asList().get(0);
             final Organization orgResource = new Organization();
             orgResource.setId(organization);
-            final TokenEntity tokenResponse = this.resource
+            final TokenDto tokenResponse = this.resource
                     .createOrganizationToken(
-                            new OrganizationPrincipal(orgResource),
+                            new OrganizationPrincipal(orgResource),null,
                             null,
                             Optional.empty());
 

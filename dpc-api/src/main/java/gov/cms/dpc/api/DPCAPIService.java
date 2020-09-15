@@ -31,7 +31,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-
 import java.util.List;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {

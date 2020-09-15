@@ -6,8 +6,8 @@ import com.google.common.collect.ImmutableMultimap;
 import edu.emory.mathcs.backport.java.util.Collections;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
-import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.TokenDto;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
@@ -70,9 +70,9 @@ public class ClientTokenTests {
     @Test
     void testTokenCreation() throws IOException {
 
-        final TokenEntity response = Mockito.mock(TokenEntity.class);
+        final TokenDto response = Mockito.mock(TokenDto.class);
         Mockito.when(response.getToken()).thenReturn("test token");
-        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
+        Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
 
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();
@@ -82,7 +82,7 @@ public class ClientTokenTests {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
             Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
-            Mockito.verify(tokenResource, times(1)).createOrganizationToken(principalCaptor.capture(), Mockito.isNull(), eq(Optional.empty()));
+            Mockito.verify(tokenResource, times(1)).createOrganizationToken(principalCaptor.capture(), Mockito.isNull(),Mockito.isNull(), eq(Optional.empty()));
             assertEquals(id, principalCaptor.getValue().getID(), "Should have correct ID");
         }
     }
