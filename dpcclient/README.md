@@ -2,7 +2,7 @@
 
 dpcclient is an executable Go command line program that helps you explore the Data at the Point of Care API before writing your own code. It follows the guidelines described in the [DPC Documentation](https://dpc.cms.gov/docs). 
 
-This project contains executable files for Macs and Windows 10 machines. If you have go 1.11 or better installed, you can also build the code yourself with the following commands:
+This project contains executable files for Macs and Windows 10 machines. If you have go 1.11 or better installed, you can also build the code yourself with the following commands. *Note*: In Go 1.11 and 1.12, first ensure that the environment variable `GO111MODULE` is set to `on`. You can do this by running `go env -w GO111MODULE=on`.
 
 ```
 go get -u github.com/gbrlsnchs/jwt/v3
