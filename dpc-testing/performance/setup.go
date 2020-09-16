@@ -100,9 +100,9 @@ func getKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 	return pubKeyStr, privKey, sigEnc
 }
 
-func uploadKey(key, sig string) string {
+func uploadKey(key, sig, orgID string) string {
 	keySigReader := strings.NewReader(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\" }", key, sig))
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/upload-key?organization=%s", adminURL, "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0"), keySigReader)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/upload-key?organization=%s", adminURL, orgID), keySigReader)
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

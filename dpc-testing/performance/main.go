@@ -25,7 +25,7 @@ func main() {
 	orgID := createOrg()
 
 	// pubKeyStr, privateKey, signature := getKeyPairAndSignature()
-	// keyID := uploadKey(pubKeyStr, signature)
+	// keyID := uploadKey(pubKeyStr, signature, orgID)
 	// clientToken := getClientToken(orgID)
 	// accessToken := refreshAccessToken(privateKey, keyID, clientToken)
 
