@@ -2,6 +2,7 @@ package gov.cms.dpc.api;
 
 import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
@@ -137,5 +138,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         final Hibernate5Module h5M = new Hibernate5Module();
         h5M.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
         bootstrap.getObjectMapper().registerModule(h5M);
+        bootstrap.getObjectMapper().disable(DeserializationFeature.WRAP_EXCEPTIONS);
     }
 }

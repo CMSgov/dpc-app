@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.converters.jackson.MultiFormatOffsetDateTimeDeserializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
-
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -37,7 +37,7 @@ public class TokenDto implements Serializable {
     private OffsetDateTime createdAt;
 
     @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
-    @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
+    @JsonDeserialize(converter = MultiFormatOffsetDateTimeDeserializer.class)
     private OffsetDateTime expiresAt;
 
     public TokenDto() {
