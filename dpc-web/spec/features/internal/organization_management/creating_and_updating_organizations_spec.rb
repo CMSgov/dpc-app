@@ -97,7 +97,7 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_content('API ID')
   end
 
-  scenario 'updating an API enabled organization' do
+  scenario 'updating an API enabled organization successfully' do
     stub = stub_api_client(
       message: :create_organization,
       success: true,
@@ -127,7 +127,26 @@ RSpec.feature 'creating and updating organizations' do
     expect(api_client).to have_received(:update_organization).with(reg_org)
   end
 
-  scenario 'disabling sandbox access successfully' do
+  scenario 'updating an API enabled organization without npi unsuccessfully' do
+    stub_api_client(message: :create_organization, success: false, response: { 'issues' => ['Bad Request'] })
+
+    org = create(:organization, name: 'Good Health', npi: nil)
+
+    visit internal_organization_path(org)
+    find('[data-test="enable-org"]').click
+
+
+    expect(page).to have_css('[data-test="new-reg-org"]')
+    fill_in 'registered_organization_fhir_endpoint_attributes_name', with: 'Test Sandbox Endpoint'
+    select 'Test', from: 'registered_organization_fhir_endpoint_attributes_status'
+    fill_in 'registered_organization_fhir_endpoint_attributes_uri', with: 'https://example.com'
+    find('[data-test="form-submit"]').click
+
+    expect(page).to have_css('[data-test="new-reg-org"]')
+    expect(page).to have_content('Organization NPI missing. NPI required to register in API.')
+  end
+
+  scenario 'disabling API access successfully' do
     stub = stub_api_client(
       message: :create_organization,
       success: true,
