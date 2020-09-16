@@ -14,7 +14,7 @@ var (
 	keyDir      string
 	tokenDir    string
 	environment string
-	domain      string
+	baseURL     string
 	cfgFile     string
 )
 
@@ -43,7 +43,7 @@ var rootCmd = &cobra.Command{
 			environment = "sandbox"
 		}
 		validateEnvironment()
-		domain = fmt.Sprintf("%s.dpc.cms.gov", environment)
+		baseURL = fmt.Sprintf("https://%s.dpc.cms.gov/api/v1", environment)
 	},
 	Short: "A command line tool to explore CMS's DPC API",
 	Long: `

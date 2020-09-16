@@ -58,7 +58,7 @@ directory.`,
 			m = m[:ml]
 		}
 
-		token, err := lib.GenerateAuthToken(privateKey, kid, []byte(m), domain)
+		token, err := lib.GenerateAuthToken(privateKey, kid, []byte(m), baseURL)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
