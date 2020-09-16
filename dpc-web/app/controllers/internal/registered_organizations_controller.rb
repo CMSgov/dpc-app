@@ -21,6 +21,10 @@ module Internal
       if @registered_organization.save
         flash[:notice] = 'API has been enabled.'
         redirect_to internal_organization_path(@organization)
+      elsif @organization.npi.nil?
+        flash[:alert] = 'Organization NPI missing. NPI required to register in API.'
+
+        render :new
       else
         flash[:alert] = "API could not be enabled:
                         #{model_error_string(@registered_organization)}."
@@ -65,17 +69,9 @@ module Internal
       @reg_org = @organization.registered_organization
 
       if @reg_org.enabled == true
-        @reg_org.enabled = false
-        @reg_org.save
-
-        flash[:notice] = 'API access disabled.'
-        redirect_to internal_organization_path(@organization)
+        disable_org
       elsif @reg_org.enabled == false || @reg_org.enabled.nil?
-        @reg_org.enabled = true
-        @reg_org.save
-
-        flash[:notice] = 'API access enabled.'
-        redirect_to internal_organization_path(@organization)
+        enable_org
       else
         flash[:alert] = 'Unable to complete API request.'
       end
@@ -83,8 +79,32 @@ module Internal
 
     private
 
+    def disable_org
+      @reg_org.enabled = false
+      @reg_org.save
+
+      flash[:notice] = 'API access disabled.'
+      page_redirect
+    end
+
+    def enable_org
+      if @organization.npi.nil?
+        flash[:alert] = 'NPI required to enable API.'
+      else
+        @reg_org.enabled = true
+        @reg_org.save
+
+        flash[:notice] = 'API access enabled.'
+      end
+      page_redirect
+    end
+
     def org_id_param
       params.require(:organization_id)
+    end
+
+    def page_redirect
+      redirect_to internal_organization_path(@organization)
     end
 
     def registered_organization_params
