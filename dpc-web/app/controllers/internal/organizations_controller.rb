@@ -66,7 +66,7 @@ module Internal
       @organization = Organization.find id_param
 
       if organization_enabled?(@organization) && npi_blank?
-        flash[:alert] = 'Enabled organization require an NPI.'
+        flash[:alert] = 'Enabled organizations require an NPI.'
         render :edit
       elsif @organization.update organization_params
         flash[:notice] = 'Organization updated.'
