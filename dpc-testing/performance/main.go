@@ -10,8 +10,6 @@ import (
 	vegeta "github.com/tsenart/vegeta/lib"
 )
 
-const orgID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0"
-
 var (
 	apiURL, adminURL string
 	goldenMacaroon   []byte
@@ -23,8 +21,10 @@ func init() {
 	createDirs()
 
 	goldenMacaroon = getClientToken("")
+}
 
-	createOrg()
+func main() {
+	orgID := createOrg()
 
 	// pubKeyStr, privateKey, signature := getKeyPairAndSignature()
 
@@ -33,12 +33,10 @@ func init() {
 	// clientToken := getClientToken(orgID)
 
 	// accessToken := refreshAccessToken(privateKey, keyID, clientToken)
-}
 
-func main() {
 	testMetadata()
 
-	cleanUp()
+	cleanUp(orgID)
 }
 
 func testMetadata() {

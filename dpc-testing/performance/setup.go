@@ -18,6 +18,10 @@ import (
 	dpcclient "github.com/CMSgov/dpc-app/dpcclient/lib"
 )
 
+type Resource struct {
+	ID string `json:"id"`
+}
+
 func initFlags() {
 	flag.StringVar(&apiURL, "api_url", "http://localhost:3002/v1", "Base URL of API")
 	flag.StringVar(&adminURL, "admin_url", "http://localhost:9903/tasks", "Base URL of admin tasks")
@@ -53,17 +57,22 @@ func getClientToken(orgID string) []byte {
 	return clientToken
 }
 
-func createOrg() {
+func createOrg() string {
 	orgBundleFile, _ := os.Open("../../src/main/resources/organization_bundle_parameters.json")
 	defer orgBundleFile.Close()
 	orgBundleReader := bufio.NewReader(orgBundleFile)
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/Organization/$submit", apiURL), orgBundleReader)
 	req.Header.Add("Content-Type", "application/fhir+json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", goldenMacaroon))
-	_, err = http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		cleanAndPanic(err)
 	}
+	defer resp.Body.Close()
+	orgResp, _ := ioutil.ReadAll(resp.Body)
+	var result Resource
+	json.Unmarshal(orgResp, &result)
+	return result.ID
 }
 
 func getKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
@@ -92,9 +101,6 @@ func getKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 }
 
 func uploadKey(key, sig string) string {
-	type Key struct {
-		ID string `json:"id"`
-	}
 	keySigReader := strings.NewReader(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\" }", key, sig))
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/upload-key?organization=%s", adminURL, "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0"), keySigReader)
 	req.Header.Add("Content-Type", "application/json")
@@ -104,17 +110,19 @@ func uploadKey(key, sig string) string {
 	}
 	defer resp.Body.Close()
 	keyResp, _ := ioutil.ReadAll(resp.Body)
-	var result Key
+	var result Resource
 	json.Unmarshal(keyResp, &result)
 	return result.ID
 }
 
-func cleanUp() {
-	deleteOrg()
+func cleanUp(orgIDs ...string) {
+	for _, orgID := range orgIDs {
+		deleteOrg(orgID)
+	}
 	deleteDirs()
 }
 
-func deleteOrg() {
+func deleteOrg(orgID string) {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/Organization/%s", apiURL, orgID), nil)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", goldenMacaroon))
 	if err != nil {
