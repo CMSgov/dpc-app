@@ -17,9 +17,7 @@ var (
 
 func init() {
 	initFlags()
-
 	createDirs()
-
 	goldenMacaroon = getClientToken("")
 }
 
@@ -27,11 +25,8 @@ func main() {
 	orgID := createOrg()
 
 	// pubKeyStr, privateKey, signature := getKeyPairAndSignature()
-
 	// keyID := uploadKey(pubKeyStr, signature)
-
 	// clientToken := getClientToken(orgID)
-
 	// accessToken := refreshAccessToken(privateKey, keyID, clientToken)
 
 	testMetadata()

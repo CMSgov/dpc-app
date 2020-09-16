@@ -124,7 +124,11 @@ func cleanUp(orgIDs ...string) {
 
 func deleteOrg(orgID string) {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/Organization/%s", apiURL, orgID), nil)
+	if err != nil {
+		fmt.Println("Organization could not be deleted", err)
+	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", goldenMacaroon))
+	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("Organization could not be deleted", err)
 	}
