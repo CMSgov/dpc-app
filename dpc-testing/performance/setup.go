@@ -103,13 +103,19 @@ func getKeyPairAndSignature() (string, *rsa.PrivateKey, string) {
 func uploadKey(key, sig, orgID string) string {
 	keySigReader := strings.NewReader(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\" }", key, sig))
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/upload-key?organization=%s", adminURL, orgID), keySigReader)
+	if err != nil {
+		cleanAndPanic(err)
+	}
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		cleanAndPanic(err)
 	}
 	defer resp.Body.Close()
-	keyResp, _ := ioutil.ReadAll(resp.Body)
+	keyResp, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		cleanAndPanic(err)
+	}
 	var result Resource
 	json.Unmarshal(keyResp, &result)
 	return result.ID
