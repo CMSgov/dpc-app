@@ -13,9 +13,8 @@ import (
 const orgID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0"
 
 var (
-	apiURL, adminURL, resultsPath, pubKeyStr, signature, keyID, accessToken string
-	goldenMacaroon, clientToken                                             []byte
-	privateKey                                                              *rsa.PrivateKey
+	apiURL, adminURL string
+	goldenMacaroon   []byte
 )
 
 func init() {
@@ -27,18 +26,17 @@ func init() {
 
 	createOrg()
 
-	pubKeyStr, privateKey, signature = getKeyPairAndSignature()
+	// pubKeyStr, privateKey, signature := getKeyPairAndSignature()
 
-	keyID = uploadKey(pubKeyStr, signature)
+	// keyID := uploadKey(pubKeyStr, signature)
 
-	clientToken = getClientToken(orgID)
+	// clientToken := getClientToken(orgID)
+
+	// accessToken := refreshAccessToken(privateKey, keyID, clientToken)
 }
 
 func main() {
-
 	testMetadata()
-	testKeyEndpoints()
-	testTokenEndpoints()
 
 	cleanUp()
 }
@@ -55,120 +53,18 @@ func testMetadata() {
 	runTest(getMetadataTarget, 5, 5)
 }
 
-func testKeyEndpoints() {
-	refreshAccessToken()
-
-	postKeyTarget := vegeta.Target{
-		Method: "POST",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Key"),
-		Header: map[string][]string{
-			"Content-Type":  {"application/json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-		Body: []byte(fmt.Sprintf("{ \"key\": \"%s\", \"signature\": \"%s\" }", pubKeyStr, signature)),
-	}
-
-	runTest(postKeyTarget, 5, 5)
-
-	getKeysTarget := vegeta.Target{
-		Method: "GET",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Key"),
-		Header: map[string][]string{
-			"Accept":        {"application/json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-	}
-	runTest(getKeysTarget, 5, 5)
-
-	getKeyTarget := vegeta.Target{
-		Method: "GET",
-		URL:    fmt.Sprintf("%s%s%s", apiURL, "/Key/", keyID),
-		Header: map[string][]string{
-			"Accept":        {"application/json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-	}
-	runTest(getKeyTarget, 5, 5)
-
-	deleteKeyTarget := vegeta.Target{
-		Method: "DELETE",
-		URL:    fmt.Sprintf("%s%s%s", apiURL, "/Key/", keyID),
-		Header: map[string][]string{
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-	}
-	runTest(deleteKeyTarget, 5, 5)
-}
-
-func testTokenEndpoints() {
-	refreshAccessToken()
-
-	postTokenTarget := vegeta.Target{
-		Method: "POST",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Token"),
-		Header: map[string][]string{
-			"Content-Type":  {"application/json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-	}
-
-	runTest(postTokenTarget, 5, 5)
-
-	postTokenAuthTarget := vegeta.Target{
-		Method: "POST",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Token/auth"),
-		Header: map[string][]string{
-			"Content-Type":  {"application/json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-	}
-
-	runTest(postTokenAuthTarget, 5, 5)
-
-	getTokensTarget := vegeta.Target{
-		Method: "GET",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Token"),
-		Header: map[string][]string{
-			"Accept":        {"application/json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-	}
-
-	runTest(getTokensTarget, 5, 5)
-
-	getTokenTarget := vegeta.Target{
-		Method: "GET",
-		URL:    fmt.Sprintf("%s%s%s", apiURL, "/Token/", "tokenID"),
-		Header: map[string][]string{
-			"Accept":        {"application/json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-	}
-
-	runTest(getTokenTarget, 5, 5)
-
-	validateTokenTarget := vegeta.Target{
-		Method: "POST",
-		URL:    fmt.Sprintf("%s%s", apiURL, "/Token/validate"),
-		Header: map[string][]string{
-			"Content-Type":  {"application/json"},
-			"Authorization": {fmt.Sprintf("Bearer %s", accessToken)},
-		},
-	}
-
-	runTest(validateTokenTarget, 5, 5)
-}
-
-func refreshAccessToken() {
+func refreshAccessToken(privateKey *rsa.PrivateKey, keyID string, clientToken []byte) string {
 	authToken, err := dpcclient.GenerateAuthToken(privateKey, keyID, clientToken, apiURL)
 	if err != nil {
 		cleanAndPanic(err)
 	}
 
-	accessToken, err = dpcclient.GetAccessToken(authToken, apiURL)
+	accessToken, err := dpcclient.GetAccessToken(authToken, apiURL)
 	if err != nil {
 		cleanAndPanic(err)
 	}
+
+	return accessToken
 }
 
 func runTest(target vegeta.Target, duration, frequency int) {
