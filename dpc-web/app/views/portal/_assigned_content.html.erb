@@ -6,7 +6,16 @@
 
   <% @user.organizations.each do |organization| %>
     <div class="portal-section-header">
-      <h2 class="portal-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
+      <div>
+        <div>
+          <h2 class="portal-section-heading ds-u-font-size--h1"><%= organization.name %></h2>
+        </div>
+        <div>
+          <% if  organization.reg_org.present? && organization.reg_org.enabled == true %>
+            <b>ID:</b> <%= organization.registered_organization.api_id %>
+          <% end %>
+        </div>
+      </div>
 
       <% if organization.prod_sbx? %>
         <div>
