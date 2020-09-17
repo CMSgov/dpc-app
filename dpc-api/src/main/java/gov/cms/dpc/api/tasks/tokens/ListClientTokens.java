@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMultimap;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.api.models.TokenDto;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import io.dropwizard.servlets.tasks.Task;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -38,7 +37,7 @@ public class ListClientTokens extends Task {
     public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) throws Exception {
         final Organization organization = extractOrganization(parameters);
 
-        final CollectionResponse<TokenDto> organizationTokens = this.resource.getOrganizationTokens(
+        final CollectionResponse<TokenEntity> organizationTokens = this.resource.getOrganizationTokens(
                 new OrganizationPrincipal(organization));
         this.mapper.writeValue(output, organizationTokens);
     }

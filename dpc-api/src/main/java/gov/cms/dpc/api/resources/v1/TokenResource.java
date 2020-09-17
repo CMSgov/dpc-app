@@ -2,8 +2,6 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Public;
@@ -13,7 +11,7 @@ import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.JWTAuthResponse;
-import gov.cms.dpc.api.models.TokenDto;
+import gov.cms.dpc.api.models.TokenRequest;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
@@ -37,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -70,7 +69,6 @@ public class TokenResource extends AbstractTokenResource {
     private final SigningKeyResolverAdapter resolver;
     private final IJTICache cache;
     private final String authURL;
-    private final ObjectMapper mapper;
 
     @Inject
     public TokenResource(TokenDAO dao,
@@ -85,7 +83,6 @@ public class TokenResource extends AbstractTokenResource {
         this.resolver = resolver;
         this.cache = cache;
         this.authURL = String.format("%s/Token/auth", publicURL);
-        this.mapper = new ObjectMapper();
     }
 
     @Override
@@ -95,12 +92,11 @@ public class TokenResource extends AbstractTokenResource {
     @ExceptionMetered
     @ApiOperation(value = "Fetch client tokens", notes = "Method to retrieve the client tokens associated to the given Organization.")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Organization"))
-    public CollectionResponse<TokenDto> getOrganizationTokens(
+    public CollectionResponse<TokenEntity> getOrganizationTokens(
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
         List<TokenEntity> tokenEntities = this.dao.fetchTokens(organizationPrincipal.getID());
-        List<TokenDto> tokenDtos = mapper.convertValue(tokenEntities, new TypeReference<List<TokenDto>>(){});
 
-        return new CollectionResponse<>(tokenDtos);
+        return new CollectionResponse<>(tokenEntities);
     }
 
     @GET
@@ -111,15 +107,15 @@ public class TokenResource extends AbstractTokenResource {
     @ApiOperation(value = "Fetch client token", notes = "Method to retrieve metadata for a specific access token")
     @ApiResponses(value = @ApiResponse(code = 404, message = "Could not find Token", response = OperationOutcome.class))
     @Override
-    public TokenDto getOrganizationToken(@ApiParam(hidden = true) @Auth OrganizationPrincipal principal,
-                                            @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
+    public TokenEntity getOrganizationToken(@ApiParam(hidden = true) @Auth OrganizationPrincipal principal,
+                                             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
         final List<TokenEntity> tokens = this.dao.findTokenByOrgAndID(principal.getID(), tokenID);
         if (tokens.isEmpty()) {
             throw new WebApplicationException("Cannot find token with matching ID", Response.Status.NOT_FOUND);
         }
 
         // Return the first token, since we know that IDs are unique
-        return mapper.convertValue(tokens.get(0), TokenDto.class);
+        return tokens.get(0);
     }
 
     @POST
@@ -135,13 +131,14 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public TokenDto createOrganizationToken(
-            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,TokenDto token,
+    public TokenEntity createOrganizationToken(
+            @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @Valid TokenRequest body,
             @ApiParam(value = "Optional label for token") @QueryParam("label") @NoHtml String tokenLabel, @QueryParam("expiration") Optional<OffsetDateTimeParam> expiration) {
 
         final UUID organizationID = organizationPrincipal.getID();
 
         final Macaroon macaroon = generateMacaroon(this.policy, organizationID);
+        final Optional<TokenRequest> optionalBody = Optional.ofNullable(body);
 
         // Ensure that each generated Macaroon has an associated Organization ID
         // This way we check to make sure we never generate a Golden Macaroon
@@ -150,11 +147,11 @@ public class TokenResource extends AbstractTokenResource {
         final TokenEntity tokenEntity = new TokenEntity(macaroon.identifier, organizationID, TokenEntity.TokenType.MACAROON);
 
         // Set the expiration time
-        tokenEntity.setExpiresAt(handleExpirationTime(expiration, token));
+        tokenEntity.setExpiresAt(handleExpirationTime(expiration, optionalBody));
 
         //Set the label, if provided, otherwise, generate a default one
-        if(token != null && StringUtils.isNotEmpty(token.getLabel())){
-            tokenEntity.setLabel(token.getLabel());
+        if(optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())){
+            tokenEntity.setLabel(optionalBody.get().getLabel());
         }else{
             tokenEntity.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
         }
@@ -168,7 +165,7 @@ public class TokenResource extends AbstractTokenResource {
 
         persisted.setToken(new String(this.bakery.serializeMacaroon(macaroon, true), StandardCharsets.UTF_8));
 
-        return mapper.convertValue(persisted, TokenDto.class);
+        return persisted;
     }
 
     @Override
@@ -322,11 +319,11 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private OffsetDateTime handleExpirationTime(Optional<OffsetDateTimeParam> expiresQueryParam, TokenDto token) {
+    private OffsetDateTime handleExpirationTime(Optional<OffsetDateTimeParam> expiresQueryParam, Optional<TokenRequest> token) {
         // Compute default expiration
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final OffsetDateTime defaultExpiration = now.plus(this.policy.getExpirationPolicy().getExpirationOffset(), this.policy.getExpirationPolicy().getExpirationUnit());
-        final OffsetDateTime expiresBodyParam = token!=null ? token.getExpiresAt() : null;
+        final OffsetDateTime expiresBodyParam = token.isPresent() ? token.get().getExpiresAt() : null;
 
         // If a custom expiration is supplied use it, unless it violates our default policy
         if (expiresQueryParam.isPresent() || expiresBodyParam!=null) {

@@ -6,8 +6,8 @@ import com.google.common.collect.ImmutableMultimap;
 import edu.emory.mathcs.backport.java.util.Collections;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
+import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.api.models.TokenDto;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
@@ -70,7 +70,7 @@ public class ClientTokenTests {
     @Test
     void testTokenCreation() throws IOException {
 
-        final TokenDto response = Mockito.mock(TokenDto.class);
+        final TokenEntity response = Mockito.mock(TokenEntity.class);
         Mockito.when(response.getToken()).thenReturn("test token");
         Mockito.when(tokenResource.createOrganizationToken(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(response);
 

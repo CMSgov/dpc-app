@@ -6,10 +6,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -40,6 +41,7 @@ public class TokenEntity implements Serializable {
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
     @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
+    @CreationTimestamp
     private OffsetDateTime createdAt;
 
     @Column(name = "expires_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
@@ -116,11 +118,6 @@ public class TokenEntity implements Serializable {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    @PrePersist
-    public void prePersist(){
-        this.setCreatedAt(OffsetDateTime.now(ZoneId.systemDefault()));
     }
 
     @Override

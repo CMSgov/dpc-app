@@ -22,7 +22,9 @@ public class MultiFormatOffsetDateTimeDeserializer extends StdConverter<String, 
         for(DateTimeFormatter formatter:supportedFormats){
             try {
                 return OffsetDateTime.parse(s, formatter);
-            }catch (DateTimeParseException e){}
+            }catch (DateTimeParseException e){
+                //Ignore exception and try next format
+            }
         }
         throw new WebApplicationException(String.format("Could not parse date: %s",s), Response.Status.BAD_REQUEST);
     }
